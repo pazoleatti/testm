@@ -1,0 +1,73 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style type="com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree.Style">
+            /* для заголовка */
+        .msiHeader {
+            padding-left: 25px;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            background-color: #949494;
+            color: #ffffff;
+            height: 25px;
+        }
+
+            /* для узла дерева */
+        .msiTreeItem {
+            font-weight: normal;
+            font-style: normal;
+            /*line-height: 1em;*/
+        }
+
+            /*для узла дерева при фокусе/выборе */
+        .msiTreeItem:focus {
+            background-color: #FFDB7F;
+        }
+
+        .msiTreeItem:hover {
+            background-color: #FFDB7F;
+        }
+
+            /* для дерева */
+        .msiTree {
+
+        }
+
+            /* для общей панели. */
+        .msiMainPanel {
+            float: left;
+            border-color: #949494;
+            border-width: 1px;
+            border-style: solid;
+            width: 100% !important;
+        }
+
+            /* для панели с деревом */
+        .msiTreePanel {
+            background-color: #FFFFFF;
+        }
+
+        .msiTableTag {
+            width: 100%;
+        }
+
+        .msiImg {
+            width: 16px;
+        }
+    </ui:style>
+
+    <g:VerticalPanel styleName="{style.msiMainPanel}">
+        <g:cell verticalAlignment="top">
+            <g:VerticalPanel ui:field="labelPanel" width="100%" styleName="{style.msiHeader}">
+                <g:Label ui:field="label"/>
+            </g:VerticalPanel>
+        </g:cell>
+        <g:cell verticalAlignment="middle">
+            <g:ScrollPanel ui:field="scrollPanel" styleName="{style.msiTreePanel}">
+                <g:Tree ui:field="tree" styleName="{style.msiTree}"/>
+            </g:ScrollPanel>
+        </g:cell>
+
+    </g:VerticalPanel>
+
+</ui:UiBinder>

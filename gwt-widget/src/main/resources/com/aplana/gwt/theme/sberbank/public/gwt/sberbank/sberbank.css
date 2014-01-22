@@ -27,9 +27,13 @@ a, a:visited, a:hover {
     text-decoration: none;
     font-size: small;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 6px;
     border: solid 1px #00940C;
     margin-left: 0;
+    height: 22px;
+    text-align: center;
+    line-height: 16px!important;
+    white-space: nowrap;
 
     background-color: #00940C;
     background-image: url("images/button/button-background.png");
@@ -98,6 +102,15 @@ a, a:visited, a:hover {
 }
 
 .gwt-CheckBox {
+}
+
+.gwt-CheckBox input[type="checkbox"]{
+    vertical-align: middle;
+}
+
+
+.gwt-CheckBox label{
+    vertical-align: middle;
 }
 
 .gwt-CheckBox-disabled {
@@ -289,25 +302,26 @@ a, a:visited, a:hover {
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
-    padding: 0 10px;
+    padding: 0 5px;
     vertical-align: bottom;
     color: #666666;
     font-weight: bold;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItemSeparator {
-    width: 1px;
     padding: 0;
-    margin: 0;
     border: 0;
-    border-left: 1px solid #888888;
-    background: white;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItemSeparator .menuSeparatorInner {
-    width: 1px;
-    height: 1px;
-    background: white;
+    height: 32px;
+    border-left: 1px solid #e4e4e4;
+}
+
+.gwt-MenuBar-horizontal .gwt-MenuItem-selected {
+    background-color: white;
+    border-top: 1px solid #e4e4e4;
+    border-bottom: 1px solid #e4e4e4;
 }
 
 .gwt-MenuBar-vertical {
@@ -320,8 +334,8 @@ a, a:visited, a:hover {
     border-collapse: collapse;
 }
 
-.gwt-MenuBar-vertical .gwt-MenuItem {
-    padding: 4px 14px 4px 1px;
+.gwt-MenuBar-vertical .gwt-MenuItem div {
+    padding: 3px 5px 3px 14px;
 }
 
 .gwt-MenuBar-vertical .gwt-MenuItemSeparator {
@@ -1292,3 +1306,55 @@ td.datePickerMonth {
     padding-left: 10px;
 }
 
+/* Spinner */
+.aplana-Spinner-textBox, .aplana-Spinner-button {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.aplana-Spinner-textBox {
+	border: none;
+	text-align: right;
+	vertical-align: middle;
+}
+
+.aplana-Spinner {
+	border: 1px solid #bbbbbb;
+	margin-left: -1px;
+	margin-right: -1px;
+}
+
+.aplana-Spinner-button {
+	background: url(images/spinner.png) no-repeat;
+}
+
+.aplana-Spinner-incButton {
+	border-top: none;
+	border-right: none;
+	border-bottom: 1px solid #bbbbbb;
+	border-left: 1px solid #bbbbbb;
+	background-position: 0 0;
+}
+
+.aplana-Spinner-decButton {
+	border-top: 1px solid #bbbbbb;
+	border-right: none;
+	border-bottom: none;
+	border-left: 1px solid #bbbbbb;
+	background-position: 0 -9px;
+}
+
+.aplana-Spinner-incButton.disabled {
+	background-position: -9px 0 !important;
+}
+
+.aplana-Spinner-decButton.disabled {
+	background-position: -9px -9px !important;
+}
+
+/* DatePicker */
+.aplana-SimpleDatePicker-date, .aplana-SimpleDatePicker-month {
+	margin-right: 5px;
+}

@@ -17,7 +17,9 @@ import java.util.List;
 /**
  * User: avanteev
  * Date: 2013
+ * @see com.aplana.sbrf.taxaccounting.web.module.members.client.MembersView
  */
+@Deprecated
 public class UserListView extends ViewWithUiHandlers<UserListUiHandlers> implements UserListPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, UserListView> {

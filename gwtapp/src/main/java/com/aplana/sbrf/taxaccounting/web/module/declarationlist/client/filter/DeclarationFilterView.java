@@ -126,11 +126,4 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 			getUiHandlers().onApplyFilter();
 		}
 	}
-
-	@UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event){
-		if (getUiHandlers() != null) {
-			getUiHandlers().onCreateClicked();
-		}
-	}
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
@@ -12,7 +13,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -32,7 +32,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
         implements DeadlineDialogPresenter.MyView {
 
     @UiField
-    DialogBox deadlineDialog;
+    ModalWindow deadlineDialog;
 
     @UiField
     DepartmentTreeWidget departmentPicker;

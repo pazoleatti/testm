@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.widget.pager;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.resources.client.ClientBundle;
@@ -11,6 +13,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.client.Event;
@@ -144,6 +147,8 @@ public class FlexiblePager extends AbstractPager {
 
         String pageNumber();
 
+        String rowsCountOnPage();
+
         String panel();
 
         String buttonLastPage();
@@ -229,10 +234,15 @@ public class FlexiblePager extends AbstractPager {
 	private final HTML middleLeftLabel = new HTML();
 	private final HTML middleRightLabel = new HTML();
 	private final IntegerBox pageNumber = new IntegerBox();
+    private final HTML rightLabel = new HTML();
+    private final IntegerBox rowsCountOnPage = new IntegerBox();
 
 	private final ImageButton lastPage;
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
+
+    private final int MAX_ROWS_COUNT_ON_PAGE = 100;
+    private final int DEFAULT_PAGE_SIZE = 20;
 
 	/**
 	 * The {@link Resources} used by this widget.
@@ -435,6 +445,28 @@ public class FlexiblePager extends AbstractPager {
 			}
 		});
 
+        rightLabel.setText("Строк на странице:");
+        layout.add(rightLabel);
+        layout.add(rowsCountOnPage);
+
+        rightLabel.getElement().getParentElement().addClassName(style.pageDetails());
+        rowsCountOnPage.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
+        rowsCountOnPage.getElement().getParentElement().addClassName(style.rowsCountOnPage());
+        rowsCountOnPage.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                setPageSize(rowsCountOnPage.getValue());
+            }
+        });
+        rowsCountOnPage.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == 13 && rowsCountOnPage.getValue() != null) {
+                    setPageSize(rowsCountOnPage.getValue());
+                }
+            }
+        });
+
 		// Disable the buttons by default.
 		setDisplay(null);
 	}
@@ -537,8 +569,26 @@ public class FlexiblePager extends AbstractPager {
 		super.setPage(index);
 	}
 
-	@Override
+    @Override
+    public int getPageSize() {
+        Storage storage = Storage.getLocalStorageIfSupported();
+        if (storage != null) {
+            String value = storage.getItem("tax-rowsCountOnPage");
+            if (value != null && !"".equals(value)) {
+                return Integer.valueOf(value);
+            }
+        }
+        return DEFAULT_PAGE_SIZE;
+    }
+
+    @Override
 	public void setPageSize(int pageSize) {
+        if (pageSize < 1) {
+            pageSize = getPageSize();
+        } else if (pageSize > MAX_ROWS_COUNT_ON_PAGE) {
+            pageSize = MAX_ROWS_COUNT_ON_PAGE;
+        }
+        setRowsCountOnPage(pageSize);
 		super.setPageSize(pageSize);
 	}
 
@@ -553,6 +603,7 @@ public class FlexiblePager extends AbstractPager {
 		pageNumber.setValue(1);
 		middleRightLabel.setHTML("");
 		leftLabel.setHTML("");
+        rowsCountOnPage.setValue(getPageSize());
 	}
 
 	@Override
@@ -571,6 +622,8 @@ public class FlexiblePager extends AbstractPager {
 		middleLeftLabel.setText("Страница ");
 		pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
+        setPageSize(getPageSize());
+        rowsCountOnPage.setValue(getPageSize());
 
 		// Update the prev and first buttons.
 		setPrevPageButtonsDisabled(!hasPreviousPage());
@@ -647,4 +700,12 @@ public class FlexiblePager extends AbstractPager {
 		firstPage.setDisabled(disabled);
 		prevPage.setDisabled(disabled);
 	}
+
+    /**  Задать количество строк на странице в локальном хранилище браузера. */
+    private void setRowsCountOnPage(int value) {
+        Storage storage = Storage.getLocalStorageIfSupported();
+        if (storage != null) {
+            storage.setItem("tax-rowsCountOnPage", String.valueOf(value));
+        }
+    }
 }

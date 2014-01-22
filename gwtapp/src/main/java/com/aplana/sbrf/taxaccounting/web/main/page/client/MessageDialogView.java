@@ -16,13 +16,13 @@
 
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,7 +44,7 @@ public class MessageDialogView extends PopupViewImpl implements
 	}
 	
 	@UiField
-	DialogBox dialogBox;
+    ModalWindow dialogBox;
 
 	@UiField
 	HasText message;

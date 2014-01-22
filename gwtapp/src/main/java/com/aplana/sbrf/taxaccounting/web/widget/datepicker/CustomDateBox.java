@@ -42,8 +42,9 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		initWidget(ourUiBinder.createAndBindUi(this));
         VerticalPanel vPanel = new VerticalPanel();
 
-		datePickerPanel.setWidth("200");
-		datePickerPanel.setHeight("200");
+//      (aivanov) 8.1.14. Убрал потому как в ие размеры не уменьшались, если что то не то сделал - сообщите
+//		datePickerPanel.setWidth("200");
+//		datePickerPanel.setHeight("200");
         vPanel.add(datePicker);
 
         clearButton.setText("Очистить");

@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:aplana="urn:import:com.aplana.gwt.client"
+		>
+	<g:HTMLPanel>
+		<g:Label text="Hello GWT!"/>
+		<g:HorizontalPanel>
+			<g:cell><aplana:Spinner/></g:cell>
+			<g:cell><aplana:Spinner enabled="false"/></g:cell>
+		</g:HorizontalPanel>
+		<g:VerticalPanel>
+			<g:cell><aplana:SimpleDatePicker precision="DATE" ui:field="currentDate"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="MONTH"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="YEAR"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="DATE" enabled="false"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="MONTH" enabled="false"/></g:cell>
+			<g:cell><aplana:SimpleDatePicker precision="YEAR" enabled="false"/></g:cell>
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder>

@@ -26,11 +26,6 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         DeclarationFilterApplyEvent.fire(this);
     }
 
-    @Override
-    public void onCreateClicked() {
-        DeclarationFilterCreateEvent.fire(this);
-    }
-
     public interface MyView extends View, HasUiHandlers<DeclarationFilterUIHandlers> {
 		void setDataFilter(DeclarationDataFilter formDataFilter);
 

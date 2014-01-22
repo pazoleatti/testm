@@ -1,9 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:my="urn:import:com.aplana.gwt.client"
-             xmlns:f="urn:import:com.aplana.gwt.client.form"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:my="urn:import:com.aplana.gwt.client"
+			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
+			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
+		>
     <ui:style>
         .RefbookTextBox {
             padding-left: 10px;
@@ -15,11 +16,11 @@
     </ui:style>
 
 
-    <f:MainContainer>
-        <f:header>
-            <f:HeaderContainer>
-                <f:right>
-                    <f:Right>
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:right>
+                    <fm:Right>
                         <g:Label text="Режим редактирования"/>
                         <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
                                             text="my button hyperlink"/>
@@ -27,27 +28,27 @@
                                             text="my button hyperlink"/>
                         <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
                                             text="my button hyperlink"/>
-                    </f:Right>
-                </f:right>
-                <f:resizable>
-                    <f:Resizable>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
                         <g:Label
                                 text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"/>
-                    </f:Resizable>
-                </f:resizable>
-                <f:left>
-                    <f:Left>
+                    </fm:Resizable>
+                </fm:resizable>
+                <fm:left>
+                    <fm:Left>
                         <g:Label text="Список налоговых форм"/>
                         <g:Label text="-"/>
-                    </f:Left>
-                </f:left>
+                    </fm:Left>
+                </fm:left>
 
 
 
-            </f:HeaderContainer>
-        </f:header>
-        <f:body>
-            <f:BodyContainer>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
                 <my:LabelSeparator text="test" ui:field="sep"/>
                 <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
                 <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
@@ -55,15 +56,41 @@
                                     text="my button hyperlink" ui:field="ibl"/>
                 <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#"
                               ui:field="ian"/>
-                <my:SpinEdit labelText="Период, с:"/>
-                <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
+                <g:HorizontalPanel addStyleNames="{style.ms}" width="100px">
                     <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
                     <my:MultiListBox ui:field="mlistbox"/>
 
                 </g:HorizontalPanel>
                 <g:Label ui:field="showResult"/>
+                <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
+                    <g:HorizontalPanel>
+                        <g:CheckBox ui:field="chk"/>
+                        <g:Label ui:field="lbl">
+                            TheLabelasfasdfasdfasdfkjaskfdjsadkfjasldfjalskdjflasdjflasdjfalsfjlsakdjflskjdflaskdjflksadjflk
+                        </g:Label>
+                    </g:HorizontalPanel>
+                </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
-            </f:BodyContainer>
-        </f:body>
-    </f:MainContainer>
+                <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
+                    <g:HorizontalPanel spacing="2">
+                        <mask:DateMaskBox ui:field="boxDate"/>
+                        <g:Label ui:field="boxDateLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:MonthYearMaskBox ui:field="boxMy"/>
+                        <g:Label ui:field="boxMyLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:YearMaskBox ui:field="boxY"/>
+                        <g:Label ui:field="boxYLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:TextMaskBox mask="XXXXXXX" ui:field="boxText"/>
+                        <g:Label ui:field="boxTextLb" width="100%"/>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>
