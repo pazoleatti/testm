@@ -459,24 +459,31 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setDereferenceValue(Map<Long, String> rbTextValues) {
-        System.out.println("setDereferenceValue");
         this.dereferenceValues = rbTextValues;
         if (dereferenceValues != null) {
+            Pair<Date, Date> period = periodPickerPopup.getPeriodDates(periodPickerPopup.getValue().get(0));
             // Заполнение текстовых значений справочников
             dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
+            dictRegionId.setPeriodDates(period.first, period.second);
             reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
+            reorgFormCode.setPeriodDates(period.first, period.second);
             signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
+            signatoryId.setPeriodDates(period.first, period.second);
             taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
+            taxPlaceTypeCode.setPeriodDates(period.first, period.second);
             obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
+            obligation.setPeriodDates(period.first, period.second);
             okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
+            okato.setPeriodDates(period.first, period.second);
             okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
+            okvedCode.setPeriodDates(period.first, period.second);
             type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
+            type.setPeriodDates(period.first, period.second);
         }
     }
 
     @Override
     public void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
-        System.out.println("resetRefBookWidgetsDatePeriod");
         Date startDate = null;
         Date endDate = null;
         Pair<Date, Date> dates = periodPickerPopup.getPeriodDates(reportPeriodId);

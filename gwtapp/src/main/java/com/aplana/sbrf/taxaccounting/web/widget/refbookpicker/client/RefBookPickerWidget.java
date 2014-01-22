@@ -247,21 +247,24 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 
 	@Override
 	public void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate) {
-        System.out.println("setAcceptableValues1: "+startDate+"; "+endDate);
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.refBookAttrId = refBookAttrId;
+        setInitValues(refBookAttrId, null, startDate, endDate);
 	}
 
 	@Override
 	public void setAcceptableValues(long refBookAttrId, String filter,
 			Date startDate, Date endDate) {
-        System.out.println("setAcceptableValues2: "+startDate+"; "+endDate);
+        setInitValues(refBookAttrId, filter, startDate, endDate);
+	}
+
+    private void setInitValues(long refBookAttrId, String filter,
+                          Date startDate, Date endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.refBookAttrId = refBookAttrId;
         this.filter = filter;
-	}
+        this.version.setValue(endDate != null ? endDate : startDate);
+        uiHandlers.init(refBookAttrId, filter, version.getValue());
+    }
 
 	@Override
 	public void setHeaders(List<String> headers) {

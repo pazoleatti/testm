@@ -68,7 +68,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
-        System.out.println("RefBookPickerPopupWidget init");
         refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.startDate, this.endDate);
 	    popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 		    public void setPosition(int offsetWidth, int offsetHeight) {
@@ -185,7 +184,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 	}
 
     public void setPeriodDates(Date startDate, Date endDate){
-        System.out.println("setPeriodDates: "+startDate+"; "+endDate);
         this.startDate = startDate;
         this.endDate = endDate;
     }
