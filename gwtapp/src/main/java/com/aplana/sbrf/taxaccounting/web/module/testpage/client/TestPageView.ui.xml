@@ -4,6 +4,7 @@
 			 xmlns:my="urn:import:com.aplana.gwt.client"
 			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
 			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
 		>
     <ui:style>
         .RefbookTextBox {
@@ -87,6 +88,11 @@
                     <g:HorizontalPanel  spacing="2">
                         <mask:TextMaskBox mask="XXXXXXX" ui:field="boxText"/>
                         <g:Label ui:field="boxTextLb" width="100%"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel  spacing="2">
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px"/>
+                        <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
 
