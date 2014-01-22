@@ -88,7 +88,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             return;
         }
         if (!getView().getSelectedRow().isSubHeader()) {
-            if (((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) && !getView().getSelectedRow().isOpen()) {
+            if (!getView().getSelectedRow().isOpen()) {
                 Window.alert("Период уже закрыт.");
                 return;
             } else {

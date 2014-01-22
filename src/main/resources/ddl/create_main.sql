@@ -241,7 +241,6 @@ create table report_period (
   dict_tax_period_id number(18) not null,
   start_date date not null,
   end_date date not null,
-  months number(2) not null,
   calendar_start_date date not null
 );
 comment on table report_period is 'Отчетные периоды';
@@ -252,7 +251,6 @@ comment on column report_period.ord is 'Номер отчетного перио
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 comment on column report_period.start_date is 'Дата начала отчетного периода';
 comment on column report_period.end_date is 'Дата окончания отчетного периода';
-comment on column report_period.months is 'Количество месяцев в периоде';
 comment on column report_period.calendar_start_date is 'Дата фактического начала периода';
 
 create sequence seq_report_period start with 100;

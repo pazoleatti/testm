@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.ReportPeriodDaoImpl;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -32,8 +34,6 @@ import java.util.*;
 @Repository
 public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncome102Dao {
 
-	private static final String TABLE_NAME = "INCOME_102";
-
     @Autowired
     private RefBookDao refBookDao;
 
@@ -42,6 +42,9 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
 	@Autowired
 	private RefBookUtils refBookUtils;
+
+	@Autowired
+	private RefBookIncome101Dao income101Dao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams,
@@ -61,20 +64,14 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return getJdbcTemplate().queryForObject("select * from income_102 where id = ?",
+        return getJdbcTemplate().queryForObject(String.format("select * from %s where id = ?", TABLE_NAME),
                 new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
                 recordId);
     }
 
     @Override
-    public List<ReportPeriod> gerReportPeriods() {
-        String sql = "select distinct report_period_id from income_102";
-        return getJdbcTemplate().query(sql, new RowMapper<ReportPeriod>() {
-            @Override
-            public ReportPeriod mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return reportPeriodDao.get(rs.getInt(1));
-            }
-        });
+    public List<Date> getVersions(Date startDate, Date endDate) {
+		return income101Dao.getVersions(TABLE_NAME, startDate, endDate);
     }
 
     @Override
@@ -105,21 +102,21 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
             delObjs.add(new Object[]{pair.getFirst(), pair.getSecond()});
         }
 
-        getJdbcTemplate().batchUpdate("delete from income_102 where report_period_id = ? and department_id = ?", delObjs,
+        getJdbcTemplate().batchUpdate(String.format("delete from %s where report_period_id = ? and department_id = ?", TABLE_NAME), delObjs,
                 new int[]{Types.NUMERIC, Types.NUMERIC});
 
 
 
         // Добавление записей
         getJdbcTemplate().batchUpdate(
-                "insert into income_102 (" +
+                String.format("insert into %s (" +
                         " ID," +
                         " REPORT_PERIOD_ID," +
                         " OPU_CODE," +
                         " TOTAL_SUM," +
                         " ITEM_NAME," +
                         " DEPARTMENT_ID)" +
-                        " values (seq_income_102.nextval,?,?,?,?,?)",
+                        " values (seq_income_102.nextval,?,?,?,?,?)", TABLE_NAME),
                 new BatchPreparedStatementSetter() {
 
                     private Iterator<Map<String, RefBookValue>> iterator = records.iterator();

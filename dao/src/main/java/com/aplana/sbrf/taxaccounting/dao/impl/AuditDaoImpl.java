@@ -67,7 +67,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 		sql.append(" order by ls.id desc,");
 		sql.append(" tp.start_date desc,");
-		sql.append(" rp.months desc,");
+		sql.append(" rp.ord desc,");
 		sql.append(" dep.name asc,");
 		sql.append(" dt.name asc,");
 		sql.append(" ft.name asc,");

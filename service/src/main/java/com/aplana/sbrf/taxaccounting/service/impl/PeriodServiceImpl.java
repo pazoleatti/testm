@@ -126,8 +126,7 @@ public class PeriodServiceImpl implements PeriodService{
 			String name = record.get("NAME").getStringValue();
 			Number ord = record.get("ORD").getNumberValue();
 
-			Number months = record.get("MONTHS").getNumberValue();
-			if (name == null || name.isEmpty() || ord == null || months == null
+			if (name == null || name.isEmpty() || ord == null
 					|| record.get("START_DATE").getDateValue() == null || record.get("END_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
@@ -145,7 +144,10 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod.setOrder(ord.intValue());
 			newReportPeriod.setStartDate(startDate);
 			newReportPeriod.setEndDate(endDate);
-			newReportPeriod.setMonths(months.intValue());
+
+			// TODO: установить правильный calendar_start_date http://conf.aplana.com/pages/viewpage.action?pageId=9570811 (Marat Fayzullin 2014-01-22)
+			newReportPeriod.setCalendarStartDate(startDate);
+
 			reportPeriodDao.save(newReportPeriod);
 		} else {
 			newReportPeriod = reportPeriods.get(0);
@@ -156,6 +158,8 @@ public class PeriodServiceImpl implements PeriodService{
 			depRP.setDepartmentId(Long.valueOf(dep.getId()));
 			depRP.setActive(true);
 			depRP.setBalance(isBalance);
+			depRP.setHasCorrectPeriod(isCorrection);
+			depRP.setCorrectPeriod(correctionDate);
 			saveOrUpdate(depRP, logs);
 		}
 	}
@@ -244,87 +248,25 @@ public class PeriodServiceImpl implements PeriodService{
 		return taxPeriodDao.get(taxPeriodId);
 	}
 
-    /**
-     * Возвращает дату начала отчетного периода
-     * @param reportPeriodId
-     * @return
-     */
     @Override
     public Calendar getStartDate(int reportPeriodId){
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-        // календарь
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(taxPeriod.getStartDate());
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(reportPeriodDao.get(reportPeriodId).getStartDate());
+		return cal;
+	}
 
-        // для налога на прибыль, периоды вложены в друг дгруга, и начало всегда совпадает
-        // В МУКС только один период
-        if (taxPeriod.getTaxType() != TaxType.INCOME && taxPeriod.getTaxType() != TaxType.DEAL &&
-                taxPeriod.getTaxType() != TaxType.TRANSPORT){
-            // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
-            // смещение относительно налогового периода
-            int months = 0;
-            for (ReportPeriod cReportPeriod: reportPeriodList){
-                // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId().equals(reportPeriod.getId())){
-                    break;
-                }
-                // смещение в месяцах
-                months += cReportPeriod.getMonths();
-            }
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + months);
-        }
-
-        return cal;
-    }
-
-    /**
-     * Возвращает дату конца отчетного периода
-     * @param reportPeriodId
-     * @return
-     */
     @Override
     public Calendar getEndDate(int reportPeriodId){
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-        TaxPeriod taxPeriod = taxPeriodDao.get(reportPeriod .getTaxPeriod().getId());
-        // календарь
-        Calendar cal = new GregorianCalendar();
-        cal.clear();
-        cal.set(Calendar.YEAR, reportPeriod.getYear());
-
-        // для налога на прибыль, периоды вложены в друг дгруга
-        if (taxPeriod.getTaxType() == TaxType.INCOME || taxPeriod.getTaxType() == TaxType.DEAL){
-            // Calendar.MONTH = 0 это январь
-            cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + reportPeriod.getMonths() - 1);
-        }
-        else{
-            // получим отчетные периоды для данного налогового периода
-            List<ReportPeriod> reportPeriodList = reportPeriodDao.listByTaxPeriod(reportPeriod.getTaxPeriod().getId());
-            // смещение относительно налогового периода
-            int months = 0;
-            for (int i = 0; i < reportPeriodList.size(); i++) {
-                ReportPeriod cReportPeriod = reportPeriodList.get(i);
-                // если достигли текущего то выходим из цикла
-                if (cReportPeriod.getId().equals(reportPeriod.getId())){
-                    months += cReportPeriod.getMonths();
-                    break;
-                }
-                // смещение в месяцах
-                months += cReportPeriod.getMonths();
-            }
-            // Calendar.MONTH = 0 это январь
-            cal.set(Calendar.MONTH, months - 1);
-        }
-
-        cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        return cal;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(reportPeriodDao.get(reportPeriodId).getEndDate());
+		return cal;
     }
 
     @Override
     public Calendar getReportDate(int reportPeriodId) {
         Calendar cal = getEndDate(reportPeriodId);
-        cal.set(Calendar.DATE, cal.get(Calendar.DATE) + 1);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + 1);
+        cal.set(Calendar.DATE, 1);
         return cal;
     }
 
@@ -354,26 +296,81 @@ public class PeriodServiceImpl implements PeriodService{
 
     @Override
     public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder - 1);
-        return dateStart;
+		Date date = getReportPeriod(reportPeriodId).getStartDate();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + periodOrder - 1);
+        return cal;
     }
 
     @Override
     public Calendar getMonthEndDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder);
-        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH) - 1);
-        return dateStart;
+		Date date = getReportPeriod(reportPeriodId).getStartDate();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + periodOrder - 1);
+		cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));
+		return cal;
     }
 
     @Override
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder);
-        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
-        return dateStart;
+        Calendar cal = getMonthStartDate(reportPeriodId, periodOrder);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + 1);
+		cal.set(Calendar.DATE, 1);
+        return cal;
     }
+
+
+	@Override
+	public boolean existForDepartment(Integer departmentId, long reportPeriodId) {
+		return departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId);
+	}
+
+	@Override
+	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId) {
+		List<TaxPeriod> taxPeriods = taxPeriodDao.listByTaxTypeAndYear(taxType, year);
+		TaxPeriod taxPeriod;
+		if (taxPeriods.size() > 1) {
+			// Что-то пошло не так
+			throw new ServiceException("На " + year + " год найдено несколько налоговых периодов");
+		} else if (taxPeriods.isEmpty()) {
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		} else {
+			taxPeriod = taxPeriods.get(0);
+		}
+
+		List<ReportPeriod> reportPeriods = listByTaxPeriod(taxPeriod.getId());
+		if (!reportPeriods.isEmpty()) {
+			Iterator<ReportPeriod> it = reportPeriods.iterator();
+			while (it.hasNext()) {
+				if (it.next().getDictTaxPeriodId() != dictionaryTaxPeriodId) {
+					it.remove();
+				}
+			}
+		}
+
+		if (reportPeriods.isEmpty()) {
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		} else if (reportPeriods.size() > 1) {
+			throw new ServiceException("На " + year + " год найдено несколько отчетных периодов");
+		}
+		else {
+			if (existForDepartment((int) departmentId, reportPeriods.get(0).getId())) {
+				DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriods.get(0).getId(), departmentId);
+				if (drp.isBalance() == balancePeriod) {
+					if (drp.isActive()) {
+						return PeriodStatusBeforeOpen.OPEN;
+					} else {
+						return PeriodStatusBeforeOpen.CLOSE;
+					}
+				} else {
+					return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+				}
+			}
+			return PeriodStatusBeforeOpen.NOT_EXIST;
+		}
+	}
 
 	@Override
 	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
@@ -434,7 +431,7 @@ public class PeriodServiceImpl implements PeriodService{
 
 		boolean canRemoveReportPeriod = true;
 		for (Department dep : departmentService.listAll()) {
-			if (departmentReportPeriodDao.existForDepartment(dep.getId(), reportPeriodId)) {
+			if (existForDepartment(dep.getId(), reportPeriodId)) {
 				System.out.println("Exist for " + dep.getId());
 				canRemoveReportPeriod = false;
 				break;

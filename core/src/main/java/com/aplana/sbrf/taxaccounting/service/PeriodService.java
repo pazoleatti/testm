@@ -113,32 +113,29 @@ public interface PeriodService {
 	
     /**
      * Возвращает дату начала отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
-     * @param reportPeriodId
+	 *
+	 * <p>Информация о периодах в конфлюенсе
+	 * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
+     * @param reportPeriodId код отчетного периода
      * @return
      */
+	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getStartDate()}  (Marat Fayzullin 20.01.2014)
+	@Deprecated
     public Calendar getStartDate(int reportPeriodId);
 
     /**
+	 *
+	 *
      * Возвращает дату конца отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
      *
      * <p>Информация о периодах в конфлюенсе
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
      *
-     * @param reportPeriodId
+     * @param reportPeriodId код отчетного периода
      * @return
      */
+	//TODO: избавиться от этого метода. Использовать {@link com.aplana.sbrf.taxaccounting.model.ReportPeriod#getEndDate()}  (Marat Fayzullin 20.01.2014)
+	@Deprecated
     public Calendar getEndDate(int reportPeriodId);
 
     /**
@@ -147,6 +144,7 @@ public interface PeriodService {
      * @param reportPeriodId
      * @return
      */
+	// TODO: возможно имеется в виду дата сдачи отчетности (Marat Fayzullin 22.01.2014)
     public Calendar getReportDate(int reportPeriodId);
 
     /**
@@ -176,7 +174,7 @@ public interface PeriodService {
     public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
-     * Получить отчетную дату месяцы месяца.
+     * Получить отчетную дату месяца.
      *
      * @param reportPeriodId идентификатор отчетного период
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
@@ -202,4 +200,23 @@ public interface PeriodService {
      * @return Список отчетных периодов
      */
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+
+
+	/**
+	 * Проверяет существование периода для подразделения
+	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
+	 * @return true - существует, false - не существует
+	 */
+	public boolean existForDepartment(Integer departmentId, long reportPeriodId);
+
+	/**
+	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
+	 * @param taxType
+	 * @param year
+	 * @param balancePeriod
+	 * @param departmentId
+	 * @param dictionaryTaxPeriodId
+	 * @return
+	 */
+	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
 }

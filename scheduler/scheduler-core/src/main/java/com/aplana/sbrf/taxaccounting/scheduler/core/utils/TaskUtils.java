@@ -88,7 +88,7 @@ public class TaskUtils {
         return gson.fromJson(contextJson, TaskContext.class);
     }
 
-    private static class CustomParamsComparator implements Comparator<String>, Serializable {
+    private static final class CustomParamsComparator implements Comparator<String>, Serializable {
         private static final long serialVersionUID = -3791674119101960757L;
         private Map<String, TaskParam> base;
 

@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * Класс работает как синглтон, единожды при инициализаци определяет тип БД и выставляет признак supportOver.
  */
 @Repository
-public class DBInfo {
+public final class DBInfo {
     private static final String HSQLDB_NAME_ENGINE = "HSQL Database Engine";
 
     /**
