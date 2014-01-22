@@ -67,9 +67,15 @@ public class RefBookUniversal implements RefBookDataProvider {
 
 	@Override
 	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute) {
-		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute);
+			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute, isSortAscending);
 	}
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+                                                              String filter, RefBookAttribute sortAttribute) {
+        return getRecords(version, pagingParams, filter, sortAttribute, true);
+    }
 
 	@Override
 	public Map<String, RefBookValue> getRecordData(Long recordId) {

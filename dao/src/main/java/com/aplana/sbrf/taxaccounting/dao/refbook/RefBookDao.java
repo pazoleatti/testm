@@ -68,6 +68,18 @@ public interface RefBookDao {
 	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute);
 
+    /**
+	 * Перегруженный вариант метода, для сохранения обратной совместимости
+	 * @param refBookId код справочника
+	 * @param version дата актуальности
+	 * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+	 * @param filter условие фильтрации строк. Может быть не задано
+	 * @param sortAttribute сортируемый столбец. Может быть не задан
+	 * @return
+	 */
+	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
+		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *

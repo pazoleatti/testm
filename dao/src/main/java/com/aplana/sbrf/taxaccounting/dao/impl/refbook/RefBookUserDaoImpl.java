@@ -31,8 +31,13 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     private RefBookUtils refBookUtils;
 
     @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute);
+        return getRecords(pagingParams, filter, sortAttribute, true);
     }
 
     @Override
