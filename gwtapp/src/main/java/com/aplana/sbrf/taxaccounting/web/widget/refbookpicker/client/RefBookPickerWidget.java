@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidgetPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
@@ -10,9 +11,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ShowRangeEvent;
+import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -21,6 +25,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.view.client.*;
 
 import java.util.Date;
@@ -46,11 +51,17 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	@UiField
 	TextBox txtFind;
 
-	@UiField(provided=true)
-	ValueListBox<Date> version;
+	@UiField
+    CustomDateBox version;
 
 	@UiField
 	FlexiblePager pager;
+
+    /** Параметры инициализации */
+    private Date startDate;
+    private Date endDate;
+    private long refBookAttrId;
+    private String filter;
 
     private HashMap<RefBookItemTextColumn, Integer> sortableColumns;
 	
@@ -64,9 +75,33 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	
 	public RefBookPickerWidget() {
         sortableColumns= new HashMap<RefBookItemTextColumn, Integer>();
-		version = new ValueListBox<Date>(new DateTimeFormatRenderer());
 		initWidget(binder.createAndBindUi(this));
 		new RefBookPickerWidgetPresenter(this);
+
+        version.addValueChangeHandler(new ValueChangeHandler<Date>()
+        {
+            @Override
+            public void onValueChange(final ValueChangeEvent<Date> dateValueChangeEvent)
+            {
+                Date selectedDate = dateValueChangeEvent.getValue();
+                if ((startDate != null && selectedDate.before(startDate)) || (endDate != null && selectedDate.after(endDate))) {
+                    version.setValue(startDate, false);
+                }
+                uiHandlers.init(refBookAttrId, filter, version.getValue());
+            }
+        });
+        version.getDatePicker().addShowRangeHandler(new ShowRangeHandler<Date>() {
+            @Override
+            public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
+                Date d = new Date(dateShowRangeEvent.getStart().getTime());
+                while (d.before(dateShowRangeEvent.getEnd())) {
+                    if ((startDate != null && d.before(startDate)) || (endDate != null && d.after(endDate))) {
+                        version.getDatePicker().setTransientEnabledOnDates(false, d);
+                    }
+                    CalendarUtil.addDaysToDate(d, 1);
+                }
+            }
+        });
 		
 		cellTable.setSelectionModel(selectionModel);
 		
@@ -188,13 +223,8 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	}
 
 	@Override
-	public Date getVersion() {
-		return version.getValue();
-	}
-
-	@Override
 	public void setRowData(int start, List<RefBookItem> values, int size) {
-		dataProvider.updateRowData(start, values);
+        dataProvider.updateRowData(start, values);
 		dataProvider.updateRowCount(size, true);
 	}
 
@@ -216,30 +246,21 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	}
 
 	@Override
-	public void setAcceptableValues(long refBookAttrId) {
-		uiHandlers.init(refBookAttrId, null, null, null);
-	}
-
-	@Override
-	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2) {
-		uiHandlers.init(refBookAttrId, null, date1, date2);
-	}
-	
-	@Override
-	public void setAcceptableValues(long refBookAttrId, String filter) {
-		uiHandlers.init(refBookAttrId, filter, null, null);
+	public void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate) {
+        System.out.println("setAcceptableValues1: "+startDate+"; "+endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.refBookAttrId = refBookAttrId;
 	}
 
 	@Override
 	public void setAcceptableValues(long refBookAttrId, String filter,
-			Date date1, Date date2) {
-		uiHandlers.init(refBookAttrId, filter, date1, date2);
-	}
-
-	@Override
-	public void setVersions(List<Date> versions, Date defaultValue) {
-		version.setValue(defaultValue);
-		version.setAcceptableValues(versions);	
+			Date startDate, Date endDate) {
+        System.out.println("setAcceptableValues2: "+startDate+"; "+endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.refBookAttrId = refBookAttrId;
+        this.filter = filter;
 	}
 
 	@Override

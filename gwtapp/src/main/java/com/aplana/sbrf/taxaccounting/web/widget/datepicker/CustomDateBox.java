@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
@@ -68,6 +69,10 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
 		datePickerPanel.show();
 	}
+
+    public DatePicker getDatePicker() {
+        return datePicker;
+    }
 
 	private void addDatePickerHandlers() {
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {

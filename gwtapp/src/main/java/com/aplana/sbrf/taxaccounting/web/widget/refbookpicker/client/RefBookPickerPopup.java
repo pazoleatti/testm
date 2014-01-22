@@ -27,13 +27,13 @@ public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled
     
     public void setAttributeId(long attributeId);
 
-	public Date getDate1();
+	public Date getStartDate();
 
-	public void setDate1(Date date1);
+	public void setStartDate(Date date1);
 
-	public Date getDate2();
+	public Date getEndDate();
 
-	public void setDate2(Date date2);
+	public void setEndDate(Date date2);
 
 	public String getFilter();
 

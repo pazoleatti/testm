@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -30,30 +28,26 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 
     private Long refBookAttrId;
 	private String filter;
+    private Date relevanceDate;
     private int sortColumnIndex;
     private boolean isSortAscending;
 	
 
 	@Override
-	public void init(final long refBookAttrId, final String filter, Date date1, Date date2) {
+	public void init(final long refBookAttrId, final String filter, Date relevanceDate) {
+        this.refBookAttrId = refBookAttrId;
+        this.relevanceDate = relevanceDate;
+        this.filter = filter;
+
 		InitRefBookAction initRefBookAction = new InitRefBookAction();
 		initRefBookAction.setRefBookAttrId(refBookAttrId);
-		initRefBookAction.setDate1(date1);
-		initRefBookAction.setDate2(date2);
 		
 		dispatcher.execute(initRefBookAction, CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookResult>() {
-
 			@Override
 			public void onSuccess(InitRefBookResult result) {
-				RefBookPickerWidgetPresenter.this.refBookAttrId = refBookAttrId;
 				getView().setHeaders(result.getHeaders());
-				if (!result.getVersions().isEmpty()){
-					getView().setVersions(result.getVersions(), result.getDefaultValue());
-				}
-				RefBookPickerWidgetPresenter.this.filter = filter;
 				getView().refreshDataAndGoToFirstPage();
 			}
-			
 		}, this));
 		isSortAscending = true;
 	}
@@ -66,11 +60,9 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	}
 
 	interface MyView extends View, HasValue<Long>, HasUiHandlers<RefBookPickerWidgetUiHandlers>{
-		void setVersions(List<Date> versions, Date defaultValue);
 		void setHeaders(List<String> headers);
 		
 		void setVersion(Date version);
-		Date getVersion();
 		
 		String getSearchPattern();
 		
@@ -88,8 +80,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 		if (refBookAttrId == null){
 			return;
 		}
-		Date version = getView().getVersion();
-		if (version == null){
+		if (relevanceDate == null){
             getView().setRowData(0, new ArrayList<RefBookItem>(), 0);
             return;
 		}
@@ -103,7 +94,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
         action.setSortAttributeIndex(sortColumnIndex);
 		action.setPagingParams(new PagingParams(offset + 1, max));
 		action.setRefBookAttrId(refBookAttrId);
-		action.setVersion(version);
+		action.setVersion(relevanceDate);
 
 		dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
 				new AbstractCallback<GetRefBookValuesResult>() {

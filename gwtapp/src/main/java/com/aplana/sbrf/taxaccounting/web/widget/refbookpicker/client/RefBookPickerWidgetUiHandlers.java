@@ -7,7 +7,7 @@ import java.util.Date;
 
 public interface RefBookPickerWidgetUiHandlers extends UiHandlers, HasValue<Long>{
 	
-	void init(long refBookAttrId, String filter, Date date1, Date date2);
+	void init(long refBookAttrId, String filter, Date relevanceDate);
 	
 	void rangeChanged(int startIndex, int max);
     void onSort(Integer columnIndex, boolean isSortAscending);

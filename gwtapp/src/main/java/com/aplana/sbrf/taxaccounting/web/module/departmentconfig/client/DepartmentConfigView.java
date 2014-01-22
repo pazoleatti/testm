@@ -459,6 +459,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void setDereferenceValue(Map<Long, String> rbTextValues) {
+        System.out.println("setDereferenceValue");
         this.dereferenceValues = rbTextValues;
         if (dereferenceValues != null) {
             // Заполнение текстовых значений справочников
@@ -475,6 +476,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @Override
     public void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
+        System.out.println("resetRefBookWidgetsDatePeriod");
         Date startDate = null;
         Date endDate = null;
         Pair<Date, Date> dates = periodPickerPopup.getPeriodDates(reportPeriodId);

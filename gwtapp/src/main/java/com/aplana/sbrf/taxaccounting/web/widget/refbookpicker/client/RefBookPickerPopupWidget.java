@@ -26,8 +26,8 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
 	private Long attributeId;
 
-	private Date date1;
-    private Date date2;
+	private Date startDate;
+    private Date endDate;
     private String filter;
 
     private static Binder binder = GWT.create(Binder.class);
@@ -68,7 +68,8 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event){
-        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.date1, this.date2);
+        System.out.println("RefBookPickerPopupWidget init");
+        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.startDate, this.endDate);
 	    popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
 		    public void setPosition(int offsetWidth, int offsetHeight) {
 			    int windowHeight = Window.getClientHeight();
@@ -149,7 +150,22 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
     public void setAttributeId(long attributeId) {
 		this.attributeId = attributeId;
 	}
-    
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
     /**
      * Для совместимости с UiBinder
@@ -158,22 +174,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
      */
     public void setAttributeIdInt(int attributeId) {
 		this.attributeId = Long.valueOf(attributeId);
-	}
-
-	public Date getDate1() {
-		return date1;
-	}
-
-	public void setDate1(Date date1) {
-		this.date1 = date1;
-	}
-
-	public Date getDate2() {
-		return date2;
-	}
-
-	public void setDate2(Date date2) {
-		this.date2 = date2;
 	}
 
 	public String getFilter() {
@@ -185,8 +185,9 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 	}
 
     public void setPeriodDates(Date startDate, Date endDate){
-        this.date1 = startDate;
-        this.date2 = endDate;
+        System.out.println("setPeriodDates: "+startDate+"; "+endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     @Override
