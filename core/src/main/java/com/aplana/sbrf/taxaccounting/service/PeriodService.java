@@ -202,4 +202,23 @@ public interface PeriodService {
      * @return Список отчетных периодов
      */
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+
+
+	/**
+	 * Проверяет существование периода для подразделения
+	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
+	 * @return true - существует, false - не существует
+	 */
+	public boolean existForDepartment(Integer departmentId, long reportPeriodId);
+
+	/**
+	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
+	 * @param taxType
+	 * @param year
+	 * @param balancePeriod
+	 * @param departmentId
+	 * @param dictionaryTaxPeriodId
+	 * @return
+	 */
+	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
 }
