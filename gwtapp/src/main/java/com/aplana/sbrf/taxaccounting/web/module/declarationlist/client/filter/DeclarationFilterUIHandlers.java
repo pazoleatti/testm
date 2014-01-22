@@ -4,5 +4,4 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface DeclarationFilterUIHandlers extends UiHandlers {
     void onApplyFilter();
-    void onCreateClicked();
 }

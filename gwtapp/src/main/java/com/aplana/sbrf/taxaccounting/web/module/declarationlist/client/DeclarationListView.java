@@ -5,11 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -48,6 +51,8 @@ public class DeclarationListView extends
 
 	@UiField
 	Label titleDesc;
+    @UiField
+    LinkButton create;
 
     private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
         @Override
@@ -186,6 +191,13 @@ public class DeclarationListView extends
 	public void updateTitle(String title){
 		titleDesc.setText(title);
 	}
+
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
 
 	private Header<String> getHeader(final String columnName){
 		Header<String> columnHeader = new Header<String>(new SortingHeaderCell()) {

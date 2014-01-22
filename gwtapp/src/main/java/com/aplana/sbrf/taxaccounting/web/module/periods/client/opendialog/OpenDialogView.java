@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.incrementbutton.IncrementButton;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -40,7 +40,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	Button cancelButton;
 
 	@UiField
-	IncrementButton yearBox;
+	Spinner yearBox;
 
 	@UiField
 	CheckBox balancePeriod;
@@ -93,15 +93,10 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
         departmentPicker.setValue(depId);
     }
 
-	@Override
-	public boolean isYearEmpty() {
-		return yearBox.isEmpty();
-	}
-
-    @UiHandler("continueButton")
+	@UiHandler("continueButton")
 	public void onContinue(ClickEvent event) {
 		OpenFilterData openFilterData = new OpenFilterData();
-		openFilterData.setYear(yearBox.isEmpty() ? null : yearBox.getValue());
+		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
 		openFilterData.setDepartmentId(Long.valueOf(departmentPicker.getValue().iterator().next()));
 	    openFilterData.setDictionaryTaxPeriodId(period.getValue());
