@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -71,7 +72,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
         if (openFilterData.getDictionaryTaxPeriod() == null) {
-			Window.alert("Не заданы все обязательные параметры!");
+            Dialog.warningMessage("Не заданы все обязательные параметры!");
 			return;
 		}
 
@@ -82,31 +83,31 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		checkPeriodStatusAction.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
 		checkPeriodStatusAction.setBalancePeriod(openFilterData.isBalancePeriod());
 		dispatcher.execute(checkPeriodStatusAction, CallbackUtils
-				.defaultCallback(new AbstractCallback<CheckPeriodStatusResult>() {
-					@Override
-					public void onSuccess(CheckPeriodStatusResult result) {
-						switch (result.getStatus()) {
-							case OPEN:
-								Window.alert("Периорд уже открыт!");
-								break;
-							case NOT_EXIST:
-								open(openFilterData);
-								break;
-							case CLOSE:
-								if (Window.confirm("Период закрыт, выполнить его переоткрытие?")) {
-									open(openFilterData);
-								}
-								break;
-							case BALANCE_STATUS_CHANGED:
-								Window.alert("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
-								break;
-							default:
-								getView().hide();
-								break;
-						}
-					}
-				}, OpenDialogPresenter.this)
-		);
+                .defaultCallback(new AbstractCallback<CheckPeriodStatusResult>() {
+                    @Override
+                    public void onSuccess(CheckPeriodStatusResult result) {
+                        switch (result.getStatus()) {
+                            case OPEN:
+                                Window.alert("Периорд уже открыт!");
+                                break;
+                            case NOT_EXIST:
+                                open(openFilterData);
+                                break;
+                            case CLOSE:
+                                if (Window.confirm("Период закрыт, выполнить его переоткрытие?")) {
+                                    open(openFilterData);
+                                }
+                                break;
+                            case BALANCE_STATUS_CHANGED:
+                                Window.alert("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                break;
+                            default:
+                                getView().hide();
+                                break;
+                        }
+                    }
+                }, OpenDialogPresenter.this)
+        );
 	}
 
 	private void open(final OpenFilterData openFilterData) {

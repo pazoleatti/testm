@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -134,7 +136,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onOriginalVersionClicked() {
-		Window.alert("В разработке");
+        Dialog.warningMessage("В разработке");
 	}
 
 	@Override
@@ -245,23 +247,37 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onDeleteFormClicked() {
-		boolean isOK = Window.confirm("Вы уверены, что хотите удалить налоговую форму?");
-		if (isOK) {
-			DeleteFormDataAction action = new DeleteFormDataAction();
-			action.setFormDataId(formData.getId());
-			dispatcher
-					.execute(
-							action,
-							CallbackUtils
-									.defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
-										@Override
-										public void onSuccess(
-												DeleteFormDataResult result) {
-											revealFormDataList();
-										}
+        final FormDataPresenter t = this;
+        Dialog.confirmMessage("Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
+            @Override
+            public void yes() {
+                DeleteFormDataAction action = new DeleteFormDataAction();
+                action.setFormDataId(formData.getId());
+                dispatcher
+                        .execute(
+                                action,
+                                CallbackUtils
+                                        .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
+                                            @Override
+                                            public void onSuccess(
+                                                    DeleteFormDataResult result) {
+                                                revealFormDataList();
+                                            }
 
-									}, this));
-		}
+                                        }, t));
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                Dialog.hideMessage();
+            }
+        });
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 import java.util.Arrays;
 import java.util.List;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -89,7 +90,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         if (!getView().getSelectedRow().isSubHeader()) {
             if (!getView().getSelectedRow().isOpen()) {
-                Window.alert("Период уже закрыт.");
+                Dialog.warningMessage("Период уже закрыт.");
                 return;
             } else {
                 ClosePeriodAction requestData = new ClosePeriodAction();
@@ -124,11 +125,11 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void onFindButton() {
         if (getView().getDepartmentId() == null) {
-            Window.alert("Не выбрано подразделение!");
+            Dialog.warningMessage("Не выбрано подразделение!");
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Window.alert("Интервал периода поиска указан неверно!");
+			Dialog.warningMessage("Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}

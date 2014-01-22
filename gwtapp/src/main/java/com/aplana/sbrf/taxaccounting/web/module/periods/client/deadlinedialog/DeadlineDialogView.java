@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog;
 
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
@@ -11,7 +13,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
@@ -78,13 +79,29 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                         lastSelectedDepartment = departmentValue;
                     } else {
                         if (!lastSelectedDepartment.equals(departmentValue)) {
-                            if (Window.confirm("Вы уверены, что хотите прекратить редактирование? Все несохраненные изменения будут потеряны.")) {
-                                getUiHandlers().setDepartmentDeadline(departmentValue.getDepartmentId(), departmentValue.getParentDepartmentId());
-                                lastSelectedDepartment = departmentValue;
-                            } else {
-                                departmentPicker.setValue(Arrays.asList(departmentValue));
-                                deadline.setValue(lastSelectedDeadline);
-                            }
+                            final DepartmentPair dv = departmentValue;
+                            Dialog.confirmMessage("Вы уверены, что хотите прекратить редактирование? Все несохраненные изменения будут потеряны.", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    getUiHandlers().setDepartmentDeadline(dv.getDepartmentId(), dv.getParentDepartmentId());
+                                    lastSelectedDepartment = dv;
+                                    Dialog.hideMessage();
+                                }
+
+                                @Override
+                                public void no() {
+                                    departmentPicker.setValue(Arrays.asList(dv));
+                                    deadline.setValue(lastSelectedDeadline);
+                                    Dialog.hideMessage();
+                                }
+
+                                @Override
+                                public void close() {
+                                    departmentPicker.setValue(Arrays.asList(dv));
+                                    deadline.setValue(lastSelectedDeadline);
+                                    Dialog.hideMessage();
+                                }
+                            });
                         }
                     }
                 }
@@ -118,11 +135,24 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
         if (departmentPicker.isSelectedItemHasChildren()) {
-            if (Window.confirm("Назначить нижестоящим подразделениям?")) {
-                getUiHandlers().updateDepartmentDeadline(departmentPicker.getSelectedChildren(), deadline.getValue(), true);
-            } else {
-                getUiHandlers().updateDepartmentDeadline(departmentPicker.getValue(), deadline.getValue(), false);
-            }
+            Dialog.confirmMessage("Назначить нижестоящим подразделениям?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().updateDepartmentDeadline(departmentPicker.getSelectedChildren(), deadline.getValue(), true);
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void no() {
+                    getUiHandlers().updateDepartmentDeadline(departmentPicker.getValue(), deadline.getValue(), false);
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
         } else {
             getUiHandlers().updateDepartmentDeadline(departmentPicker.getValue(), deadline.getValue(), false);
         }
@@ -130,7 +160,27 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        if (!saveButton.isVisible() || Window.confirm("Вы уверены, что хотите отменить изменения?")) {
+        final DeadlineDialogView t = this;
+        if (saveButton.isVisible()) {
+            Dialog.confirmMessage("Вы уверены, что хотите отменить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    t.hide();
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void close() {
+                    Dialog.hideMessage();
+                }
+            });
+        }
+        else{
             hide();
         }
     }

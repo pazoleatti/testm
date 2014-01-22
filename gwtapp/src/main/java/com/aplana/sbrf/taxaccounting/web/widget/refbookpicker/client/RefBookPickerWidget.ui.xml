@@ -5,47 +5,119 @@
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager">
 
-    <g:DockLayoutPanel unit='PX' height="400px" width="800px">
-        <g:north size="80">
-            <g:VerticalPanel width="100%" height="100%">
-                <g:cell height="50%">
-                    <g:HorizontalPanel width="100%" spacing="10">
-                        <g:cell width="100%">
-                            <g:TextBox width="100%" ui:field="txtFind" text=""/>
+    <ui:style>
+
+        .mainPanel {
+            background-color: #E8E1CF;
+            height: 500px;
+            width: 800px;
+        }
+
+        .mainPanel td {
+            border-spacing: 0;
+            padding: 0 !important;
+        }
+
+        .table {
+            border-left: 1px solid #000000;
+            border-right: 1px solid #000000;
+            border-top: 1px solid #000000;
+            border-bottom: 0;
+
+            margin: 0 10px;
+            background-color: #ffffff;
+            position: absolute !important;
+            top: 100px;
+            bottom: 72px;
+            right: 0;
+            left: 0;
+        }
+
+        .pagerPanel {
+            margin: 0 10px;
+            position: absolute !important;
+            bottom: 42px;
+            right: 0;
+            left: 0;
+
+            border-left: 1px solid #000000;
+            border-right: 1px solid #000000;
+            border-bottom: 1px solid #000000;
+            border-top: 0;
+
+            height: 30px;
+        }
+
+        .pager {
+            white-space: nowrap;
+            width: 550px;
+        }
+
+        .footerPanel {
+            text-align: right;
+            float: right;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .forMargin0 {
+            margin: 0;
+            width: 100%;
+        }
+
+        .forVervionPanel {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .forVersion {
+            margin-right: 10px;
+        }
+
+        .forButtons {
+            width: 70px;
+        }
+
+    </ui:style>
+
+	<g:VerticalPanel addStyleNames="{style.mainPanel}">
+        <g:HorizontalPanel spacing="10" width="100%">
+            <g:cell width="99%">
+                <g:VerticalPanel width="100%">
+                    <g:TextBox ui:field="txtFind" addStyleNames="{style.forMargin0}"/>
+                    <g:HorizontalPanel addStyleNames="{style.forVervionPanel}" verticalAlignment="middle">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{style.forVersion}"/>
                         </g:cell>
-                        <g:cell>
-                            <g:Button text="Найти" ui:field="searchButton"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                </g:cell>
-                <g:cell height="50%" horizontalAlignment="ALIGN_CENTER">
-                    <g:HorizontalPanel spacing="10">
-                        <g:cell>
-                            <g:Label text="Дата актуальности:" wordWrap="false"/>
-                        </g:cell>
-                        <g:cell>
+                        <g:cell horizontalAlignment="left" >
                             <d:CustomDateBox ui:field="version"/>
                         </g:cell>
                     </g:HorizontalPanel>
-                </g:cell>
-            </g:VerticalPanel>
-        </g:north>
-        <g:center>
-            <g:ResizeLayoutPanel width="100%">
-                <style:GenericDataGrid ui:field="cellTable"/>
-            </g:ResizeLayoutPanel>
-        </g:center>
-        <g:south size="50">
-            <g:HorizontalPanel spacing="10" width="100%">
-                <g:cell>
-                    <pager:FlexiblePager ui:field='pager' location='CENTER'
-                                         showFastForwardButton="false" fastForwardRows="0"
-                                         showLastPageButton="true"/>
-                </g:cell>
-                <g:cell>
-                    <g:Button ui:field="clearButton" text="Очистить"/>
-                </g:cell>
-            </g:HorizontalPanel>
-        </g:south>
-    </g:DockLayoutPanel>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell width="1%">
+                <g:Button ui:field="searchButton" text="Найти" addStyleNames="{style.forButtons}"/>
+            </g:cell>
+        </g:HorizontalPanel>
+
+        <style:GenericDataGrid ui:field="cellTable" addStyleNames="{style.table}"/>
+
+        <g:HorizontalPanel addStyleNames="{style.pagerPanel}">
+            <g:cell horizontalAlignment="left" width="100%" verticalAlignment="middle">
+                <g:Label />
+            </g:cell>
+            <g:cell width="1%" horizontalAlignment="right" verticalAlignment="middle">
+                <pager:FlexiblePager ui:field='pager' location='CENTER'
+                    showFastForwardButton="false" fastForwardRows="0"
+                    showLastPageButton="true" addStyleNames="{style.pager}"/>
+            </g:cell>
+        </g:HorizontalPanel>
+
+        <g:HorizontalPanel addStyleNames="{style.footerPanel}" spacing="10">
+            <g:Button ui:field="clearButton" text="Очистить" addStyleNames="{style.forButtons}"/>
+            <g:Button ui:field="ok" text="Выбрать" addStyleNames="{style.forButtons}"/>
+            <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forButtons}"/>
+        </g:HorizontalPanel>
+	</g:VerticalPanel>
 </ui:UiBinder>

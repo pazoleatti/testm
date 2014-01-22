@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -7,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -49,9 +49,9 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	public void onConfirm() {
 		String reasonForReturn = getView().getComment();
 		if("".equals(reasonForReturn.trim())){
-			Window.alert("Необходимо указать причину возврата");
+            Dialog.warningMessage("Необходимо указать причину возврата");
 		} else if (reasonForReturn.length() > MAX_LENGTH) {
-            Window.alert("Необходимо уменьшить длину причины возврата до " + MAX_LENGTH + " символов");
+            Dialog.warningMessage("Необходимо уменьшить длину причины возврата до " + MAX_LENGTH + " символов");
         } else {
 			getView().hide();
 			GoMoveAction action = new GoMoveAction();

@@ -220,39 +220,42 @@ h3{
 }
 
 .AplanaModalWindow {
-    border: 1px solid #808080 !important;
+    border: 1px solid #646464 !important;
+    border-spacing: 0px !important;
 }
 
 .AplanaModalWindow .caption {
 
-    height: 23px;
+    height: 29px;
     vertical-align: middle;
     background-color: #808080;
     color: #FFFFFF;
+    cursor: move;
 }
 
 .AplanaModalWindow .closeButton {
     float: right;
-    margin: 3px;
+    margin: 5px;
     height: 17px;
     width: 17px;
+    cursor: pointer;
 }
 
 .AplanaModalWindow .OverrideCenter {
+    border-spacing: 0px !important;
     padding: 0px !important;
     background-color: #FFFFFF;
 }
 
 .AplanaModalWindow .icon {
-    margin: 3px;
+    margin: 5px 6px;
     height: 17px;
     width: 17px;
     float: left;
 }
 
 .AplanaModalWindow .captionTitle{
-    margin-top: 3px;
-    margin-left: 3px;
+    margin-top: 6px;
     float: right;
 }
 
@@ -260,6 +263,9 @@ h3{
     float: left;
 }
 
+.footerButton {
+    margin:  8px 10px 8px 0px !important;
+}
 
 .AplanaScrollPanel {
     padding-bottom: 17px;

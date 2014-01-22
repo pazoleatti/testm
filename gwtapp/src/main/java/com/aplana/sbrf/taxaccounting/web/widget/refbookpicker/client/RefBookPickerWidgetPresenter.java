@@ -152,7 +152,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	public void onSelectionChange() {
 		this.selectedItem = getView().getSelectionValue();
 		dereferenceValue = selectedItem.getDereferenceValue();
-        setValue(selectedItem.getId(), true);
+        setValue(selectedItem.getId(), false);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -14,10 +16,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -174,12 +178,25 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
-		if (confirm) {
-			if (getUiHandlers() != null) {
-				getUiHandlers().onDeleteRowClicked();
-			}
-		}
+        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onDeleteRowClicked();
+                }
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                no();
+            }
+        });
 	}
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
