@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -9,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreat
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -63,7 +63,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 	@Override
 	public void onContinue(final OpenFilterData openFilterData) {
         if (openFilterData.getDictionaryTaxPeriod() == null) {
-			Window.alert("Не заданы все обязательные параметры!");
+            Dialog.warningMessage("Не заданы все обязательные параметры!");
 			return;
 		}
 		OpenPeriodAction action = new OpenPeriodAction();

@@ -1,6 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -9,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -94,22 +98,34 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 						@Override
 						public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
 							if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_CREATED) {
-								if (Window.confirm("Декларация с указанными параметрами уже существует. Переформировать?")) {
-									RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
-									refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
-									dispatcher.execute(refreshDeclarationCommand, CallbackUtils
-											.defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
-												@Override
-												public void onSuccess(RefreshDeclarationResult result) {
-                                                    onHide();
-                                                    placeManager
-                                                            .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                                                    .with(DeclarationDataTokens.declarationId,
-                                                                            String.valueOf(checkResult.getDeclarationDataId())).build());
-                                                    LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-												}
-											}, DeclarationCreationPresenter.this));
-								}
+                                Dialog.confirmMessage("Переформировать?","Декларация с указанными параметрами уже существует. Переформировать?", new DialogHandler() {
+                                    @Override
+                                    public void yes() {
+                                        RefreshDeclaration refreshDeclarationCommand = new RefreshDeclaration();
+                                        refreshDeclarationCommand.setDeclarationDataId(checkResult.getDeclarationDataId());
+                                        dispatcher.execute(refreshDeclarationCommand, CallbackUtils
+                                                .defaultCallback(new AbstractCallback<RefreshDeclarationResult>() {
+                                                    @Override
+                                                    public void onSuccess(RefreshDeclarationResult result) {
+                                                        onHide();
+                                                        placeManager
+                                                                .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                                                        .with(DeclarationDataTokens.declarationId,
+                                                                                String.valueOf(checkResult.getDeclarationDataId())).build());
+                                                        LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                                                    }
+                                                }, DeclarationCreationPresenter.this));
+                                    }
+                                    @Override
+                                    public void no() {
+                                        Dialog.hideMessage();
+                                    }
+
+                                    @Override
+                                    public void close() {
+                                        Dialog.hideMessage();
+                                    }
+                                });
 							} else if (checkResult.getStatus() == CheckExistenceDeclarationResult.DeclarationStatus.EXIST_ACCEPTED) {
 								MessageEvent.fire(DeclarationCreationPresenter.this, "Переформирование невозможно, так как декларация уже принята.");
 							} else {

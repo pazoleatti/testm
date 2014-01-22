@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -18,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.De
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -31,6 +27,9 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler {
@@ -87,7 +86,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         }
         if (!getView().getSelectedRow().isSubHeader()) {
             if (((taxType == TaxType.INCOME) || (taxType == TaxType.VAT)) && !getView().getSelectedRow().isOpen()) {
-                Window.alert("Период уже закрыт.");
+                Dialog.warningMessage("Период уже закрыт.");
                 return;
             } else {
                 ClosePeriodAction requestData = new ClosePeriodAction();
@@ -118,7 +117,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Window.alert("Интервал периода поиска указан неверно!");
+            Dialog.warningMessage("Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}

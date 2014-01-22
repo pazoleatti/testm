@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -12,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exce
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -100,13 +101,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		if (isFormModified) {
-			boolean confirmed = Window.confirm(DIALOG_MESSAGE);
-			if (confirmed) {
-				isFormModified = false;
-				showRecord(refBookRecordId);
-			} else {
-				RollbackTableRowSelection.fire(this, currentRecordId);
-			}
+            final Long cr = currentRecordId;
+            final EditFormPresenter t = this;
+            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void no() {
+                    RollbackTableRowSelection.fire(t, cr);
+                }
+
+                @Override
+                public void yes() {
+                    isFormModified = false;
+                    showRecord(refBookRecordId);
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
 			showRecord(refBookRecordId);
 		}
@@ -141,11 +154,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Window.alert("Не указана дата начала актуальности");
+                Dialog.warningMessage("Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Window.alert("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
 			if (currentRecordId == null) {

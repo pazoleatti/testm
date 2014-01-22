@@ -2,17 +2,17 @@ package com.aplana.gwt.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 
 
 /**
@@ -25,17 +25,11 @@ public class ModalWindow extends DialogBox {
     Image close;
     HTML title;
 
-    private PopupPanel popup;
-    private Image icon = new Image();
-    private VerticalPanel rootPanel = new VerticalPanel();
-    private SimplePanel mainPanel = new SimplePanel();
+    private ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
+    private Image icon = new Image(mwRes.iconImage());
     private FlowPanel captionPanel = new FlowPanel();
     private FlowPanel captionTitlePanel = new FlowPanel();
-    private HorizontalPanel footerPanel = new HorizontalPanel();
-    private FlowPanel defaultButtonsPanel = new FlowPanel();
-    private FlowPanel additionalButtonsPanel = new FlowPanel();
-    private Button saveButton;
-    private Button cancelButton;
+
 
     /**
      * @param title - заголовок окна
@@ -49,15 +43,11 @@ public class ModalWindow extends DialogBox {
         this.addStyleName("AplanaModalWindow");
 
 
-        ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
+
         close = new Image(mwRes.closeImage());
 
         if (!iconUrl.equals("")){
             icon.setUrl(iconUrl);
-            icon.setVisible(true);
-        }
-        else {
-            icon.setVisible(false);
         }
 
         // Переделываем стиль DialogBox
@@ -78,19 +68,20 @@ public class ModalWindow extends DialogBox {
         DOM.removeChild(((Element)r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
 
         Element td1 = getCellElement(1, 1);
+        Element td2 = getCellElement(2, 1);
 
         // Убираем паддинги у DialigBox
         td.getParentElement().addClassName("OverrideCenter");
         td1.getParentElement().addClassName("OverrideCenter");
+        td2.getParentElement().addClassName("OverrideCenter");
 
         this.title = new HTML();
         this.title.setText(title);
         this.title.addStyleName("captionTitle");
 
-        if (icon.isVisible())
-            captionTitlePanel.add(icon);
-
         icon.addStyleName("icon");
+        captionTitlePanel.add(icon);
+
         close.addStyleName("closeButton");
         captionTitlePanel.addStyleName("captionTitlePanel");
 
@@ -101,8 +92,6 @@ public class ModalWindow extends DialogBox {
 
         DOM.removeChild(td, (Element) td.getFirstChildElement());
         DOM.appendChild(td, captionPanel.getElement());
-
-        super.setAnimationEnabled(true);
     }
 
     /**
@@ -118,6 +107,16 @@ public class ModalWindow extends DialogBox {
         this("");
     }
 
+
+    @Override
+    public void setTitle(String title){
+        this.title.setText(title);
+    }
+
+    @Override
+    public String getTitle(){
+        return this.title.getText();
+    }
 
     @Override
     public String getHTML()
@@ -167,6 +166,11 @@ public class ModalWindow extends DialogBox {
         @Source("close.png")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource closeImage();
+
+        @Source("icon.png")
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        ImageResource iconImage();
+
     }
 
 }

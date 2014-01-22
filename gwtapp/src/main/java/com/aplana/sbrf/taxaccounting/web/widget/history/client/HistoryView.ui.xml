@@ -20,7 +20,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="" title="Информация по форме/декларации" glassEnabled="true" animationEnabled="true">
+    <dw:ModalWindow iconUrl="resources/img/exclamation_mark.png" title="Информация по форме/декларации" glassEnabled="true" animationEnabled="true">
         <g:VerticalPanel>
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
