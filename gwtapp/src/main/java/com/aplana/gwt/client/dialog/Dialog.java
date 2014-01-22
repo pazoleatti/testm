@@ -95,6 +95,7 @@ public class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void warningMessage(String title, String text, DialogHandler handler){
+        INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(predefinedButton.CLOSE);
         dialogPanel.setImage(warningImage);
         dialogPanel.setImageVisible(true);
@@ -140,6 +141,7 @@ public class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void errorMessage(String title, String text, DialogHandler handler){
+        INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(predefinedButton.CLOSE);
         dialogPanel.setImage(errorImage);
         dialogPanel.setImageVisible(true);
@@ -185,6 +187,7 @@ public class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void infoMessage(String title, String text, DialogHandler handler){
+        INSTANCE.setGlassEnabled(false);
         dialogPanel.setPredefinedButtons(predefinedButton.OK);
         dialogPanel.setImage(infoImage);
         dialogPanel.setImageVisible(true);
@@ -242,6 +245,7 @@ public class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void confirmMessage(String title, String text, DialogHandler handler){
+        INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(predefinedButton.YES, predefinedButton.NO, predefinedButton.CLOSE);
         dialogPanel.setImage(questionImage);
         dialogPanel.setImageVisible(true);
