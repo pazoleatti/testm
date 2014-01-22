@@ -1,7 +1,7 @@
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
 	
 -- Для проверки FormDataDao.find
-insert into tax_period(id, tax_type, year, start_date, end_date) values (10, 'T', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (10, 'T', 2013);
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (11, 'Transport report period 11', 10, 6, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (11, 1, 1, 1, 3, 11, 0);
 
@@ -12,7 +12,7 @@ insert into form_data(id, form_template_id, department_id, state, kind, report_p
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (13, 'Transport report period 13', 10, 3, 23, date '2013-07-01', date '2013-09-30', date '2013-07-01');
 
 -- Ежемесячные формы
-insert into tax_period(id, tax_type, year, start_date, end_date) values (12, 'I', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (12, 'I', 2013);
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (14, 'Deal report period 14', 12, 1, 22, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (15, 'Deal report period 15', 12, 2, 23, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign, period_order) values (14, 2, 1, 1, 1, 14, 0, 1);

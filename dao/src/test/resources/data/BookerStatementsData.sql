@@ -40,7 +40,7 @@ insert into ref_book_attribute(ID, ref_book_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 ( 525, 52,'Код подразделения','DEPARTMENT_ID', 4, 6, 30, 162,1, null, 10);
 
 -- tax period
-insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'I', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (1, 'I', 2013);
 insert into ref_book(id, NAME) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
 insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES (21, 1, 8, to_date('01.01.2013', 'DD.MM.YYYY'), 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES (22, 2, 8, to_date('01.01.2013', 'DD.MM.YYYY'), 0);

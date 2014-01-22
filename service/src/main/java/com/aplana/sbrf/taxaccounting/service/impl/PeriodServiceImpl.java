@@ -45,9 +45,6 @@ public class PeriodServiceImpl implements PeriodService{
 	private RefBookFactory rbFactory;
 
 	@Autowired
-	private SourceService departmentFormTypeService;
-
-	@Autowired
 	private DepartmentService departmentService;
 
 	@Autowired
@@ -204,7 +201,7 @@ public class PeriodServiceImpl implements PeriodService{
 		if (period != null && period.isActive()) {
 			departmentReportPeriodDao.updateActive(reportPeriodId, departmentId, false);
 			ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-			int year = period.getReportPeriod().getYear();
+			int year = period.getReportPeriod().getTaxPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO, "Период" + " \"" + reportPeriod.getName() + "\" " +
 					"за " + year + " год " +
 					"закрыт для подразделения \"" +
@@ -225,7 +222,7 @@ public class PeriodServiceImpl implements PeriodService{
 			return;
 		}
 		if (logs != null) {
-			int year = departmentReportPeriod.getReportPeriod().getYear();
+			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
 			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
 					" за " + year + " год "
 					+ "для подразделения \" " +
@@ -250,14 +247,14 @@ public class PeriodServiceImpl implements PeriodService{
 
     @Override
     public Calendar getStartDate(int reportPeriodId){
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = new GregorianCalendar();
 		cal.setTime(reportPeriodDao.get(reportPeriodId).getStartDate());
 		return cal;
 	}
 
     @Override
     public Calendar getEndDate(int reportPeriodId){
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = new GregorianCalendar();
 		cal.setTime(reportPeriodDao.get(reportPeriodId).getEndDate());
 		return cal;
     }
@@ -426,7 +423,7 @@ public class PeriodServiceImpl implements PeriodService{
 			departmentReportPeriodDao.delete(reportPeriodId, id);
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
 			logs.add(new LogEntry(LogLevel.INFO,
-					rp.getName() + " " + rp.getYear() + " удалён для подразделения " + departmentService.getDepartment(id).getName()));
+					rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для подразделения " + departmentService.getDepartment(id).getName()));
 		}
 
 		boolean canRemoveReportPeriod = true;

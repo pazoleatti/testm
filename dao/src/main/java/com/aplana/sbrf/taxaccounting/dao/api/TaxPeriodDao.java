@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public interface TaxPeriodDao {
 	 * Получить объект налогового периода по идентификатору периода
 	 * @param taxPeriodId идентификатор налогового периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DAOException если периода с заданным идентификатором не существует 
+	 * @throws DaoException если периода с заданным идентификатором не существует
 	 */
 	TaxPeriod get(int taxPeriodId);
 	
@@ -26,16 +28,6 @@ public interface TaxPeriodDao {
 	 * @return список налоговых периодов по данному виду налога, отсортированный по убыванию даты начала периодоа
 	 */
 	List<TaxPeriod> listByTaxType(TaxType taxType);
-
-	/**
-	 * Получить список всех налоговых периодов по заданному виду налога за период. Алгоритм: ищет все налоговые периоды,
-	 * которые пересекаются с указанным временным интервалом
-	 * @param taxType вид налога
-	 * @param from дата начала
-	 * @param to дата конца
-	 * @return  список налогововых периодов по данному виду налога за определенный период
-	 */
-	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
 
 	/**
 	 * Получить налоговые периоды

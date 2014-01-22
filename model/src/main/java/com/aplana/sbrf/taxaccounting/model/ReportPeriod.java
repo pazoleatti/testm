@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.model;
 import java.io.Serializable;
 import java.util.Date;
 
-
 /**
  * Отчётный период.
  * В нормальной ситуации может быть только один активный отчётный период по каждому виду налога
@@ -12,11 +11,14 @@ import java.util.Date;
  */
 public class ReportPeriod implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	private Integer id;
-	private String name;
 
+	/** Уникальный идентификатор отчетного периода */
+	private Integer id;
+	/** Текстовое обозначение отчетного периода */
+	private String name;
+	/** Порядок следования отчетного периода в рамках налового */
 	private int order;
+	/** Ссылка на налоговый период */
 	private TaxPeriod taxPeriod;
 	/** Дата начала отчетного периода */
 	private Date startDate;
@@ -24,7 +26,7 @@ public class ReportPeriod implements Serializable {
 	private Date endDate;
 	/** Календарная дата начала отчетного периода (квартала) */
 	private Date calendarStartDate;
-	
+	/** Ссылка на федеральный справочника для классификации отчетных периодов */
 	private int dictTaxPeriodId;
 
 	/**
@@ -82,16 +84,6 @@ public class ReportPeriod implements Serializable {
 	}
 	public void setTaxPeriod(TaxPeriod taxPeriod) {
 		this.taxPeriod = taxPeriod;
-	}
-
-	@SuppressWarnings("deprecation")
-	public int getYear(){
-		return getTaxPeriod().getYear();
-	}
-	
-	@SuppressWarnings("deprecation")
-	public TaxType getTaxType(){
-		return getTaxPeriod().getTaxType();
 	}
 
 	/**

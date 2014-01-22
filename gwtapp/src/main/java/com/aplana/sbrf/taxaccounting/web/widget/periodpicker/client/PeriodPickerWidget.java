@@ -34,9 +34,9 @@ public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
 
         for(ReportPeriod reportPeriod : periods){
 
-            if (!periodYearsMap.containsKey(reportPeriod.getYear())){
-                MultiSelectTreeItem taxPeriodItem = new MultiSelectTreeItem(String.valueOf(reportPeriod.getYear()), null);
-                periodYearsMap.put(reportPeriod.getYear(), taxPeriodItem);
+            if (!periodYearsMap.containsKey(reportPeriod.getTaxPeriod().getYear())){
+                MultiSelectTreeItem taxPeriodItem = new MultiSelectTreeItem(String.valueOf(reportPeriod.getTaxPeriod().getYear()), null);
+                periodYearsMap.put(reportPeriod.getTaxPeriod().getYear(), taxPeriodItem);
             }
 
             MultiSelectTreeItem reportPeriodItem = new MultiSelectTreeItem(reportPeriod.getId(), reportPeriod.getName(), isMultiSelection());
@@ -47,7 +47,7 @@ public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
                 }
 
             });
-            periodYearsMap.get(reportPeriod.getYear()).addItem(reportPeriodItem);
+            periodYearsMap.get(reportPeriod.getTaxPeriod().getYear()).addItem(reportPeriodItem);
         }
 
         for (MultiSelectTreeItem taxPeriodTreeItem : periodYearsMap.values()) {

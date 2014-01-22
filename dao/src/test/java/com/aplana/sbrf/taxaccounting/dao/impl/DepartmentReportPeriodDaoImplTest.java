@@ -48,8 +48,6 @@ public class DepartmentReportPeriodDaoImplTest {
 	public void init() {
 
 		taxPeriod = new TaxPeriod();
-		taxPeriod.setStartDate(new Date());
-		taxPeriod.setEndDate(new Date());
 		taxPeriod.setTaxType(TaxType.TRANSPORT);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);

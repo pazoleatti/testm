@@ -76,7 +76,7 @@ insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_cod
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
 
 -- TaxPeriod
-insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'T', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 
 -- dict_tax_period_id
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');

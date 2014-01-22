@@ -246,9 +246,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         //Fill period
         if (!refBookValue.getStringValue().equals("34"))
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getYear())));
+            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
         else
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, "", String.valueOf(reportPeriod.getYear())));
+            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, "", String.valueOf(reportPeriod.getTaxPeriod().getYear())));
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2 - 1);
     }
 

@@ -33,9 +33,6 @@ public class ReportPeriodServiceTest {
         taxPeriod1.setId(1);
         taxPeriod1.setTaxType(TaxType.TRANSPORT);
         // set time
-        Calendar cl = Calendar.getInstance();
-        cl.set(2012, 1, 1);
-        taxPeriod1.setStartDate(cl.getTime());
 		taxPeriod1.setYear(2012);
 
         // 2 налоговый период
@@ -48,7 +45,6 @@ public class ReportPeriodServiceTest {
         taxPeriod3.setId(3);
         taxPeriod3.setTaxType(TaxType.INCOME);
         // set time
-        taxPeriod3.setStartDate(cl.getTime());
 		taxPeriod3.setYear(2012);
 
 		// Mock для reportPeriodDao

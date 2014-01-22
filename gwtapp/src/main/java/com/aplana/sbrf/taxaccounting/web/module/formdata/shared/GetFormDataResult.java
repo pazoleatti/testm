@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.Date;
@@ -53,9 +52,9 @@ public class GetFormDataResult implements Result {
 	
 	private boolean fixedRows;
 
-	private Date TaxPeriodStartDate;
+	private Date reportPeriodStartDate;
 
-	private Date TaxPeriodEndDate;
+	private Date reportPeriodEndDate;
 
     private Integer reportPeriodYear;
 
@@ -155,20 +154,20 @@ public class GetFormDataResult implements Result {
 		this.fixedRows = fixedRows;
 	}
 
-	public Date getTaxPeriodStartDate() {
-		return TaxPeriodStartDate;
+	public Date getReportPeriodStartDate() {
+		return reportPeriodStartDate;
 	}
 
-	public void setTaxPeriodStartDate(Date taxPeriodStartDate) {
-		TaxPeriodStartDate = taxPeriodStartDate;
+	public void setReportPeriodStartDate(Date reportPeriodStartDate) {
+		this.reportPeriodStartDate = reportPeriodStartDate;
 	}
 
-	public Date getTaxPeriodEndDate() {
-		return TaxPeriodEndDate;
+	public Date getReportPeriodEndDate() {
+		return reportPeriodEndDate;
 	}
 
-	public void setTaxPeriodEndDate(Date taxPeriodEndDate) {
-		TaxPeriodEndDate = taxPeriodEndDate;
+	public void setReportPeriodEndDate(Date reportPeriodEndDate) {
+		this.reportPeriodEndDate = reportPeriodEndDate;
 	}
 
 	public boolean isBalancePeriod() {
@@ -203,8 +202,8 @@ public class GetFormDataResult implements Result {
                 ", lockedByUser='" + lockedByUser + '\'' +
                 ", formMode=" + formMode +
                 ", fixedRows=" + fixedRows +
-                ", TaxPeriodStartDate=" + TaxPeriodStartDate +
-                ", TaxPeriodEndDate=" + TaxPeriodEndDate +
+                ", reportPeriodStartDate=" + reportPeriodStartDate +
+                ", reportPeriodEndDate=" + reportPeriodEndDate +
                 ", reportPeriodYear=" + reportPeriodYear +
                 '}';
     }

@@ -41,15 +41,11 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
     }
 
     @Override
-    public Integer getTaxPeriodByDate(Date start) {
-        StringBuilder sql = new StringBuilder("select id from tax_period where ");
-        sql.append("tax_type = 'I' and ");
-        sql.append("start_date = to_date('");
-        sql.append(formatter.format(start)).append("', '").append("dd.mm.yyyy").append("')");
+    public Integer getTaxPeriodByDate(String year) {
         try {
-            return getJdbcTemplate().queryForInt(sql.toString());
+            return getJdbcTemplate().queryForInt("select id from tax_period where tax_type = 'I' and year = " + year);
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Не существует периода типа I для даты " + start);
+            throw new DaoException("Не существует налогового периода типа I для года " + year);
         }
     }
 }
