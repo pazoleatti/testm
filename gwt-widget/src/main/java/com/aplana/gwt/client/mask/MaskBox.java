@@ -3,8 +3,8 @@ package com.aplana.gwt.client.mask;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.text.shared.Parser;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Event;
@@ -51,9 +51,9 @@ public class MaskBox<T> extends ValueBox<T> {
 
     private String mask;
     private MaskListener maskListener;
+    private Parser<T> parser;
 
     // то что показывается в элементе ввода
-    // yfghbth
     private String textPicture;
 
     private MaskBox source = this;
@@ -61,25 +61,13 @@ public class MaskBox<T> extends ValueBox<T> {
     protected MaskBox(Renderer<T> renderer, final Parser<T> parser) {
         super(Document.get().createTextInputElement(), renderer, parser);
         setStyleName("gwt-TextBox");
-
-        getSource().addValueChangeHandler(new ValueChangeHandler() {
+        this.parser = parser;
+        addFocusHandler(new FocusHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent event) {
-                Object eventValue = event.getValue();
-                try {
-                    setValue(parser.parse((CharSequence) eventValue));
-                } catch (ParseException e) {
-                    if (textPicture == null || !textPicture.equals(eventValue)) {
-                        addExceptionStyle();
-                    }
-                }
+            public void onFocus(FocusEvent event) {
+                selectAll();
             }
         });
-    }
-
-    @Override
-    public String getText() {
-        return isEqualsTextPicture(super.getText()) ? "" : super.getText();
     }
 
     /**
@@ -91,7 +79,13 @@ public class MaskBox<T> extends ValueBox<T> {
             maskListener = new MaskListener(this, mask);
             addBlurHandler(new BlurHandler() {
                 public void onBlur(BlurEvent event) {
-                    ValueChangeEvent.fire(source, getText());
+                    try {
+                        setValue(parser.parse(getText()), true);
+                    } catch (ParseException e) {
+                        if (textPicture == null || !textPicture.equals(getText())) {
+                            addExceptionStyle();
+                        }
+                    }
                 }
             });
         } else
@@ -140,7 +134,6 @@ public class MaskBox<T> extends ValueBox<T> {
     }
 
     protected boolean isEqualsTextPicture(String value) {
-
         return getTextPicture() != null && getTextPicture().equals(value);
     }
 

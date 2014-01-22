@@ -5,10 +5,9 @@ import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -71,6 +70,10 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     Label boxYLb;
     @UiField
     Label boxTextLb;
+    @UiField
+    DateMaskBoxPicker boxDatePicker;
+    @UiField
+    Label boxDatePickerLb;
 
 
     @Inject
@@ -186,7 +189,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         boxMy.setValue(date);
         boxY.setValue(date);
 
-        boxText.setText("fdfsdfsdf");
+        boxText.setText("fdfsdff");
 
         boxDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
@@ -213,6 +216,13 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 boxTextLb.setText(getTestMaskValues(event.getValue(), boxText.getValue()));
+            }
+        });
+
+        boxDatePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                boxDatePickerLb.setText(getTestMaskValues(event.getValue(), boxDatePicker.getValue()));
             }
         });
     }
