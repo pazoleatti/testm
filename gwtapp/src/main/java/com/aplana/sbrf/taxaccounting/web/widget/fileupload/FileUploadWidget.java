@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -12,6 +13,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -32,10 +35,14 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FormPanel uploadFormDataXls;
 
     @UiField
-    Label label;
+    LinkButton uploadButton;
+
+    public static interface IconResource extends ClientBundle{
+        @Source("importIcon.png")
+        ImageResource icon();
+    }
 
     private String value;
-    private static String actionUrlTemp = "upload/uploadController/patterntemp/";
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
@@ -69,9 +76,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private static Binder uiBinder = GWT.create(Binder.class);
 
     @UiConstructor
-    public FileUploadWidget(boolean uploadAsTemporal) {
+    public FileUploadWidget() {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadFormDataXls.setAction(uploadAsTemporal ? actionUrlTemp : actionUrl);
+        uploadFormDataXls.setAction(actionUrl);
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
@@ -86,24 +93,27 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             }
         });
         uploader.getElement().setId("uploaderWidget");
-        label.getElement().setId("fakeInput");
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
-                String filename = uploader.getFilename().replaceAll(uploadPatternIE, "");
-                label.setWidth("200px");
-                label.setText(filename);
-                label.setTitle(filename);
                 uploadFormDataXls.submit();
             }
         });
-
     }
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
         uploader.getElement().<InputElement>cast().click();
+
+    }
+
+    /**
+     * Метод для совместимости с прошлой версией.
+     * Сейчас используется всегда uploadAsTemporal = false
+     * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
+     */
+    public void setUploadAsTemporal(boolean asTemporal){
+        // ignore
     }
 
 }

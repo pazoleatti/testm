@@ -10,6 +10,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.entry.MainEntry" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage" />
+    <inherits name="com.aplana.gwt.GwtWidgetLocal" />
     <inherits name="com.aplana.gwt.GwtWidget" />
 
 	<!-- Control -->

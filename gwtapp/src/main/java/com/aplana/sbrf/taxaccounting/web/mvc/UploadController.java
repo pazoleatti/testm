@@ -35,6 +35,7 @@ public class UploadController {
     @Autowired
     private SignService signService;
 
+    //TODO aivanov (20.01.14) нам нужен еще этот способ загрузики? Если нет то убрать
     @RequestMapping(value = "/patterntemp", method = RequestMethod.POST)
     public void processUploadXlsTemp(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {

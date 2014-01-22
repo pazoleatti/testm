@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -15,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +38,11 @@ public class RefBookUtils extends AbstractDao {
 	 * Формирует простой sql-запрос по принципу: один справочник - одна таблица
 	 */
 	public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
-			String filter, PagingParams pagingParams) {
+			String filter, PagingParams pagingParams, boolean isSortAscending) {
 		PreparedStatementData ps = new PreparedStatementData();
 		ps.appendQuery("SELECT ");
 		ps.appendQuery("id ");
-		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+		ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
 		for (RefBookAttribute attribute : refBook.getAttributes()) {
 			ps.appendQuery(", ");
 			ps.appendQuery(attribute.getAlias());
@@ -52,7 +50,8 @@ public class RefBookUtils extends AbstractDao {
 		ps.appendQuery(" FROM (SELECT ");
 		if (isSupportOver()) {
 			String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
-			ps.appendQuery("row_number() over (order by '" + sortColumn + "') as row_number_over");
+            String sortDirection = isSortAscending ? "ASC" : "DESC";
+			ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
 		} else {
 			ps.appendQuery("rownum row_number_over");
 		}
@@ -82,6 +81,10 @@ public class RefBookUtils extends AbstractDao {
 		return ps;
 	}
 
+    public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams) {
+        return getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, true);
+    }
+
 	/**
 	 * Возвращает элементы справочника в формате для пейджинга. Является реализацией метода {@link RefBookDataProvider#getRecords}
 	 * @param refBookId
@@ -92,17 +95,31 @@ public class RefBookUtils extends AbstractDao {
 	 * @return
 	 */
 	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute) {
+			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
 		RefBook refBook = refBookDao.get(refBookId);
 		// получаем страницу с данными
-		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams);
+		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending);
 		List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
 		// получаем информацию о количестве всех записей с текущим фильтром
-		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null);
+		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending);
 		result.setTotalCount(getRecordsCount(ps));
 		return result;
 	}
+
+    /**
+     * Перегруженная функция с восходящей сортировкой по умолчанию
+     *
+     * @param refBookId
+     * @param tableName
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return getRecords(refBookId, tableName, pagingParams, filter, sortAttribute, true);
+    }
 
 	/**
 	 * Возвращает элементы справочника

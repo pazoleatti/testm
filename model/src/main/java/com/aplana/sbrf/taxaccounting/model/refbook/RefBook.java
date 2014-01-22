@@ -15,7 +15,8 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-	public final static String RECORD_ID_ALIAS = "record_id";
+	public final static String RECORD_UNIQUE_ID_ALIAS = "id";
+    public final static String RECORD_ID_ALIAS = "record_id";
 
 	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
 
@@ -160,7 +161,7 @@ public class RefBook implements Serializable {
 	 */
 	public Map<String, RefBookValue> createRecord() {
 		Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-		result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		result.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
 		result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
 		for (RefBookAttribute attribute : getAttributes()) {
 			result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), null));

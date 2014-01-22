@@ -6,7 +6,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -39,15 +41,16 @@ public class ModalWindow extends DialogBox {
      * @param title - заголовок окна
      * @param iconUrl - url ссылка на иконку в заголовке окна
      */
+    @UiConstructor
     public ModalWindow(String title, String iconUrl) {
 
         super(false, true);
-        popup = this;
+//        popup = this;
         this.addStyleName("AplanaModalWindow");
 
 
-        ModalWindowResources closeImgRes = GWT.create(ModalWindowResources.class);
-        close = new Image(closeImgRes.closeImage());
+        ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
+        close = new Image(mwRes.closeImage());
 
         if (!iconUrl.equals("")){
             icon.setUrl(iconUrl);
@@ -83,6 +86,7 @@ public class ModalWindow extends DialogBox {
         this.title = new HTML();
         this.title.setText(title);
         this.title.addStyleName("captionTitle");
+
         if (icon.isVisible())
             captionTitlePanel.add(icon);
 
@@ -95,43 +99,10 @@ public class ModalWindow extends DialogBox {
         captionPanel.add(close);
         captionPanel.addStyleName("caption");
 
-        saveButton = new Button("Сохранить");
-        saveButton.addStyleName("footerButton");
-        cancelButton = new Button("Отмена");
-        cancelButton.addStyleName("footerButton");
-
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                popup.hide();
-            }
-        });
-
-        additionalButtonsPanel.addStyleName("additionalButtonsPanel");
-
-        defaultButtonsPanel.add(saveButton);
-        defaultButtonsPanel.add(cancelButton);
-        defaultButtonsPanel.addStyleName("defaultButtonPanel");
-
-        footerPanel.add(additionalButtonsPanel);
-        footerPanel.add(defaultButtonsPanel);
-        footerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        footerPanel.addStyleName("footerPanel");
-
-        mainPanel.addStyleName("mainPanel");
-
-        rootPanel.addStyleName("rootPanel");
-        rootPanel.add(mainPanel);
-        rootPanel.add(footerPanel);
-
         DOM.removeChild(td, (Element) td.getFirstChildElement());
         DOM.appendChild(td, captionPanel.getElement());
 
-        super.add(rootPanel);
-
-        //super.setGlassEnabled(true);
         super.setAnimationEnabled(true);
-        //super.center();
     }
 
     /**
@@ -147,46 +118,6 @@ public class ModalWindow extends DialogBox {
         this("");
     }
 
-    /**
-     * Добавляет дополнительные кнопки в нижнюю панель слева
-     * @param w - добовляемая кнопка
-     */
-    public  void addAdditionalButton(Widget w){
-        additionalButtonsPanel.add(w);
-    }
-
-    /**
-     * Очищает дополнительные кнопки
-     */
-    public void clearAdditionalButton(){
-        additionalButtonsPanel.clear();
-    }
-
-    /**
-     * Добавляет handler к кнопке "сохранить"
-     * @param handler - хендлер
-     */
-    public void addSaveButtonClickHandler (ClickHandler handler){
-        saveButton.addClickHandler(handler);
-    }
-
-    /**
-     * Добавляет handler к кнопке "отменить"
-     * @param handler - хендлер
-     */
-    public void addСancelButtonClickHandler(ClickHandler handler){
-        cancelButton.addClickHandler(handler);
-    }
-
-    @Override
-    public void add(Widget w){
-        this.mainPanel.add(w);
-    }
-
-    @Override
-    public void clear(){
-        this.mainPanel.clear();
-    }
 
     @Override
     public String getHTML()
@@ -224,9 +155,6 @@ public class ModalWindow extends DialogBox {
         {
             this.hide();
         }
-        if (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER){
-            saveButton.fireEvent(new ClickEvent(){});
-        }
         super.onPreviewNativeEvent(event);
     }
 
@@ -240,4 +168,5 @@ public class ModalWindow extends DialogBox {
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource closeImage();
     }
+
 }

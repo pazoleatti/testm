@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 public enum Formats {
-	NONE       (0, ""),
-	DD_MM_YYYY (1, "dd.MM.yyyy"),
-	MM_YYYY    (2, "MM.yyyy"),
-	MMM_YYYY   (3, "MMMM yyyy"),
-	YYYY       (4, "yyyy");
+	NONE       (0, "", ""),
+	DD_MM_YYYY (1, "dd.MM.yyyy", "99.99.9999"),
+	MM_YYYY    (2, "MM.yyyy", "99.9999"),
+	MMM_YYYY   (3, "MMMM yyyy", "99.9999"),
+	YYYY       (4, "yyyy", "9999");
 
 	public static String[] months = new String[]{
 			"Январь",
@@ -22,12 +22,14 @@ public enum Formats {
 			"Декабрь"
 	};
 
-	private Formats(int id, String format) {
+	private Formats(int id, String format, String mask) {
 		this.id = id;
 		this.format = format;
+		this.mask = mask;
 	}
 	private final int id;
 	private final String format;
+	private final String mask;
 
 	public int getId() {
 		return id;
@@ -37,7 +39,11 @@ public enum Formats {
 		return format;
 	}
 
-	public static Formats getById(int id) {
+    public String getMask() {
+        return mask;
+    }
+
+    public static Formats getById(int id) {
 		for (Formats f: values()) {
 			if (f.id == id) {
 				return f;

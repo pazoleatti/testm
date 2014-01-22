@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Интерфейс виджета для выбора ребра графа подразделений
@@ -18,11 +19,21 @@ public interface PairDepartmentPicker extends HasConstrainedValue<List<Departmen
      */
     void setHeader(String header);
 
+    List<Integer> getAvalibleValues();
+
     /**
      * Устанавливает список подразделений отображаемых в дереве
      * @param departments список подразделений
      */
     void setAvailableValues(List<Department> departments);
+
+    /**
+     * Устанавливает список подразделений отображаемых в дереве.
+     *
+     * @param departments список подразделений
+     * @param availableDepartments список доступных подразделений
+     */
+    void setAvailableValues(List<Department> departments, Set<Integer> availableDepartments);
 
     /**
      * Проверяет есть ли у выбранного элемента дочерние подразделения
@@ -31,7 +42,7 @@ public interface PairDepartmentPicker extends HasConstrainedValue<List<Departmen
     boolean isSelectedItemHasChildren();
 
     /**
-     * Возвращает все дочерние подразделения + выбранное подразделение
+     * Возвращает выбранное подразделение + все дочерние подразделения
      * @return список подразделений
      */
     List<DepartmentPair> getSelectedChildren();

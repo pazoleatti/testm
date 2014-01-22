@@ -2,6 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
+
+        .dock{
+            border-top: 1px solid #aeaeac;
+        }
         .panel {
             background-color: lightgray;
             text-align: center;
@@ -13,7 +17,8 @@
         }
 
         .pages {
-            background-color: #f4f2eb;
+            background-color: #fff;
+            border-left: 1px solid #aeaeac;
         }
 
         .toolPanel {
@@ -39,9 +44,13 @@
             margin-right: auto;
         }
 
+        .buttonsPanel td {
+            vertical-align: middle!important;
+        }
+
     </ui:style>
 
-    <g:DockLayoutPanel unit="PX" height="100%" width="100%">
+    <g:DockLayoutPanel addStyleNames="{style.dock}">
         <g:east size="240">
                 <g:ScrollPanel width="100%" addStyleNames="{style.pages}">
                     <g:Tree ui:field="pages"/>
@@ -51,9 +60,9 @@
             <g:SimplePanel addStyleNames="{style.toolPanel}">
                 <g:HorizontalPanel addStyleNames="{style.buttonsPanel}">
                     <g:Label>Масштаб: </g:Label>
+                    <g:Button styleName="{style.button}" ui:field="minusButton" title="Уменьшить масштаб">-</g:Button>
                     <g:ListBox ui:field="scale" title="Масштаб"/>
                     <g:Button styleName="{style.button}" ui:field="plusButton" title="Увеличить масштаб">+</g:Button>
-                    <g:Button styleName="{style.button}" ui:field="minusButton" title="Уменьшить масштаб">-</g:Button>
                     <g:Button styleName="{style.button}" ui:field="fitToWidthButton" title="По ширине">&lt;&gt;</g:Button>
                 </g:HorizontalPanel>
             </g:SimplePanel>

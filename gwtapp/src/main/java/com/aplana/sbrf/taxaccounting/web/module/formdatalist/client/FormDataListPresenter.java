@@ -170,6 +170,10 @@ public class FormDataListPresenter extends
 					}
 				}, FormDataListPresenter.this));
 	}
-	
+
+    @Override
+    public void onCreateClicked() {
+        FormDataListCreateEvent.fire(this);
+    }
 
 }
