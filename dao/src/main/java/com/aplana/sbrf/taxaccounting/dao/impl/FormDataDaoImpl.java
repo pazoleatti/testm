@@ -53,9 +53,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Autowired
     private TaxPeriodDao taxPeriodDao;
 
-    private static final String[] months = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август",
-            "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
-
     private static class RowMapperResult {
 		FormData formData;
 	}
@@ -276,7 +273,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     kind.getName(),
                     departmentDao.getDepartment(departmentId).getName(),
                     cal.get(Calendar.YEAR),
-                    periodOrder <= 12 && periodOrder >= 1 ? months[periodOrder] : periodOrder
+                    periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder
             );
         }
     }

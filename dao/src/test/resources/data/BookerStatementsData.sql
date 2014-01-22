@@ -40,7 +40,7 @@ insert into ref_book_attribute(ID, ref_book_ID, NAME, ALIAS, TYPE, ORD, REFERENC
 ( 525, 52,'Код подразделения','DEPARTMENT_ID', 4, 6, 30, 162,1, null, 10);
 
 -- tax period
-insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'T', 2013, date '2013-01-01', date '2013-12-31');
+insert into tax_period(id, tax_type, year, start_date, end_date) values (1, 'I', 2013, date '2013-01-01', date '2013-12-31');
 insert into ref_book(id, NAME) VALUES (8, 'Коды, определяющие налоговый (отчётный) период');
 insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES (21, 1, 8, to_date('01.01.2013', 'DD.MM.YYYY'), 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) VALUES (22, 2, 8, to_date('01.01.2013', 'DD.MM.YYYY'), 0);
@@ -50,8 +50,8 @@ insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_cod
 insert into department (id, NAME, parent_id, TYPE, shortname, tb_index, sbrf_code) VALUES (2, 'банк2', 1, 2, NULL, NULL, NULL);
 
 -- report period
-insert into report_period (id, NAME, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) VALUES (1, '2002 - 1 квартал', 3, 1, 1, 21, date '2013-01-01', date '2013-03-31');
-insert into report_period (id, NAME, months, tax_period_id, ord, dict_tax_period_id, start_date, end_date) VALUES (2, '2002 - 2 квартал', 3, 1, 2, 22, date '2013-04-01', date '2013-06-30');
+insert into report_period (id, NAME, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (1, '2002 - 1 квартал', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
+insert into report_period (id, NAME, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) VALUES (2, '2002 - 2 квартал', 1, 2, 22, date '2013-01-01', date '2013-06-30', date '2013-04-01');
 
 -- income101 data
 insert into income_101 (id, report_period_id, account, income_debet_remains, income_credit_remains, debet_rate, credit_rate,

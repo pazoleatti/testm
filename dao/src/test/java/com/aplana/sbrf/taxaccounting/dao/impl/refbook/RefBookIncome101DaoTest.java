@@ -14,7 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +58,9 @@ public class RefBookIncome101DaoTest {
     }
 
     @Test
-    public void gerReportPeriodsTest() {
-        List<ReportPeriod> list = dao.gerReportPeriods();
+    public void getReportPeriodsTest() throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        List<Date> list = dao.getVersions(sdf.parse("01.01.2013"), sdf.parse("31.12.2013"));
         Assert.assertEquals(list.size(), 2);
     }
 

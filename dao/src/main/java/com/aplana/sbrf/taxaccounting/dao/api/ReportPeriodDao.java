@@ -22,6 +22,11 @@ public interface ReportPeriodDao {
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
+
+	/** Получить список отчетных периодов по идентификаторам
+	 * @param reportPeriodIds список идентификаторов
+	 */
+	List<ReportPeriod> get(List<Integer> reportPeriodIds);
 	
     /**
      * Отчетный период по налоговому периоду и периоду в справочнике "Коды, определяющие налоговый (отчётный) период"
@@ -62,11 +67,10 @@ public interface ReportPeriodDao {
 
 	/**
 	 * Получить список всех отчетных периодов по заданному виду налога за период. Алгоритм: ищет все отчетные периоды,
-	 * которые пересекаются с указанным временным интервалом. Сравнение идет по
+	 * которые пересекаются с указанной датой. В случае, если период не найден возвращается ошибка
 	 * @param taxType вид налога
-	 * @param from дата начала
-	 * @param to дата конца
-	 * @return  список отчетных периодов по данному виду налога за определенный период
+	 * @param date дата, на которую ищется период
+	 * @return  список отчетных периодов
 	 */
-	List<ReportPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
+	ReportPeriod getReportPeriodByDate(TaxType taxType, Date date);
 }

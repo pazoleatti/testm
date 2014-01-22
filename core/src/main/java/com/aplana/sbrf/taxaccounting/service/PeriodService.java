@@ -144,6 +144,7 @@ public interface PeriodService {
      * @param reportPeriodId
      * @return
      */
+	// TODO: возможно имеется в виду дата сдачи отчетности (Marat Fayzullin 22.01.2014)
     public Calendar getReportDate(int reportPeriodId);
 
     /**
@@ -173,7 +174,7 @@ public interface PeriodService {
     public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
-     * Получить отчетную дату месяцы месяца.
+     * Получить отчетную дату месяца.
      *
      * @param reportPeriodId идентификатор отчетного период
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)

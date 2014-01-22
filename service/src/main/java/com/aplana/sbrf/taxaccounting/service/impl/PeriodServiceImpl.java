@@ -126,8 +126,7 @@ public class PeriodServiceImpl implements PeriodService{
 			String name = record.get("NAME").getStringValue();
 			Number ord = record.get("ORD").getNumberValue();
 
-			Number months = record.get("MONTHS").getNumberValue();
-			if (name == null || name.isEmpty() || ord == null || months == null
+			if (name == null || name.isEmpty() || ord == null
 					|| record.get("START_DATE").getDateValue() == null || record.get("END_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
@@ -145,7 +144,7 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod.setOrder(ord.intValue());
 			newReportPeriod.setStartDate(startDate);
 			newReportPeriod.setEndDate(endDate);
-			newReportPeriod.setMonths(months.intValue());
+			// TODO: добавить calendar_start_date (Marat Fayzullin 2014-01-22)
 			reportPeriodDao.save(newReportPeriod);
 		} else {
 			newReportPeriod = reportPeriods.get(0);
@@ -261,7 +260,8 @@ public class PeriodServiceImpl implements PeriodService{
     @Override
     public Calendar getReportDate(int reportPeriodId) {
         Calendar cal = getEndDate(reportPeriodId);
-        cal.set(Calendar.DATE, cal.get(Calendar.DATE) + 1);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + 1);
+        cal.set(Calendar.DATE, 1);
         return cal;
     }
 
@@ -291,25 +291,29 @@ public class PeriodServiceImpl implements PeriodService{
 
     @Override
     public Calendar getMonthStartDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder - 1);
-        return dateStart;
+		Date date = getReportPeriod(reportPeriodId).getStartDate();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + periodOrder - 1);
+        return cal;
     }
 
     @Override
     public Calendar getMonthEndDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder);
-        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH) - 1);
-        return dateStart;
+		Date date = getReportPeriod(reportPeriodId).getStartDate();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + periodOrder - 1);
+		cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));
+		return cal;
     }
 
     @Override
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
-        Calendar dateStart = getStartDate(reportPeriodId);
-        dateStart.set(Calendar.MONTH, periodOrder);
-        dateStart.set(Calendar.DAY_OF_MONTH, dateStart.get(Calendar.DAY_OF_MONTH));
-        return dateStart;
+        Calendar cal = getMonthStartDate(reportPeriodId, periodOrder);
+		cal.set(Calendar.MONTH, cal.get(Calendar.MONTH) + 1);
+		cal.set(Calendar.DATE, 1);
+        return cal;
     }
 
 	@Override
