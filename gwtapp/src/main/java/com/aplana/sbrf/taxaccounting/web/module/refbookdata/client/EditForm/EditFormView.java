@@ -322,13 +322,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.setValue(value);
     }
 
-    @Override
-    public boolean isRelevancePeriodChanged() {
-        return !getVersionFrom().equals(savedVersionFrom) ||
-                (getVersionTo() != null && !getVersionTo().equals(savedVersionTo)) ||
-                (savedVersionTo != null && !savedVersionTo.equals(getVersionTo()));
-    }
-
     @UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {

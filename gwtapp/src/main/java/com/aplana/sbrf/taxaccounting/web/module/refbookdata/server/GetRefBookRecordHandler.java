@@ -42,7 +42,7 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
         RefBookRecordVersion recordVersion;
 
         //Получаем версию выбранной записи
-        recordVersion = refBookDataProvider.getActiveRecordVersion(action.getRefBookRecordId());
+        recordVersion = refBookDataProvider.getRecordVersionInfo(action.getRefBookRecordId());
         int versionCount = refBookDataProvider.getRecordVersionsCount(action.getRefBookRecordId());
 
         RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
