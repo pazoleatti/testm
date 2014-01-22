@@ -144,7 +144,10 @@ public class PeriodServiceImpl implements PeriodService{
 			newReportPeriod.setOrder(ord.intValue());
 			newReportPeriod.setStartDate(startDate);
 			newReportPeriod.setEndDate(endDate);
-			// TODO: добавить calendar_start_date (Marat Fayzullin 2014-01-22)
+
+			// TODO: установить правильный calendar_start_date http://conf.aplana.com/pages/viewpage.action?pageId=9570811 (Marat Fayzullin 2014-01-22)
+			newReportPeriod.setCalendarStartDate(startDate);
+
 			reportPeriodDao.save(newReportPeriod);
 		} else {
 			newReportPeriod = reportPeriods.get(0);
