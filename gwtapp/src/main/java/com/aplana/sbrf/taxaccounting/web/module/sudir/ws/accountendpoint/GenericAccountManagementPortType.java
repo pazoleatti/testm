@@ -22,8 +22,6 @@ import java.util.List;
 			wsdlLocation="META-INF/wsdl/GenericAccountManagement.wsdl")
 public class GenericAccountManagementPortType extends SpringBeanAutowiringSupport{
 
-    private String LOGIN_FOR_ACTION = "controlUnp";
-	
 	@Autowired
 	private TAUserService userService;
 
@@ -205,10 +203,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	}
 
     private TAUserInfo getUserInfo(){
-        TAUser user = userService.getUser(LOGIN_FOR_ACTION);
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setIp("");
-        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
         return userInfo;
     }
 
