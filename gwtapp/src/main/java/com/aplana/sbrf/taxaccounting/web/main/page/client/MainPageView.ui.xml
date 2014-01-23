@@ -84,7 +84,8 @@
                 <g:HTMLPanel>
                     <div class="topNavigation">
                         <!--Сначала выроненные по леву-->
-                        <div class="topLeftLogo"/>
+                        <div style="cursor:pointer" class="topLeftLogo" onclick="location.href='#!homePage';"/>
+
                         <g:HTMLPanel ui:field="mainMenuContentPanel" addStyleNames="{style.menuLeftElements}"/>
 
                         <!--Потом по праву (отображаться будет в обратном порядке)-->
