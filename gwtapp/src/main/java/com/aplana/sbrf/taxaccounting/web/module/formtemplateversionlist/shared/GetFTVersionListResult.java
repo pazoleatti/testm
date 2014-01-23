@@ -10,6 +10,15 @@ import java.util.List;
  */
 public class GetFTVersionListResult implements Result {
     private List<FormTemplateVersion> formTemplateVersions;
+    private String formTypeName;
+
+    public String getFormTypeName() {
+        return formTypeName;
+    }
+
+    public void setFormTypeName(String formTypeName) {
+        this.formTypeName = formTypeName;
+    }
 
     public List<FormTemplateVersion> getFormTemplateVersions() {
         return formTemplateVersions;

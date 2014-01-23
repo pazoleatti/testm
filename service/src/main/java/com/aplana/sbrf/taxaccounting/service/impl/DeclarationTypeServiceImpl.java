@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * User: avanteev
  */
@@ -31,5 +33,10 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     @Override
     public void delete(int typeId) {
         declarationTypeDao.delete(typeId);
+    }
+
+    @Override
+    public List<DeclarationType> listAll() {
+        return declarationTypeDao.listAll();
     }
 }

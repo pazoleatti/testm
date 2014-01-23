@@ -6,13 +6,13 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  * User: avanteev
  */
 public class GetDTVersionListAction extends UnsecuredActionImpl<GetDTVersionListResult> {
-    private int declarationFormType;
+    private int declarationFormTypeId;
 
-    public int getDeclarationFormType() {
-        return declarationFormType;
+    public int getDeclarationFormTypeId() {
+        return declarationFormTypeId;
     }
 
-    public void setDeclarationFormType(int declarationFormType) {
-        this.declarationFormType = declarationFormType;
+    public void setDeclarationFormTypeId(int declarationFormTypeId) {
+        this.declarationFormTypeId = declarationFormTypeId;
     }
 }

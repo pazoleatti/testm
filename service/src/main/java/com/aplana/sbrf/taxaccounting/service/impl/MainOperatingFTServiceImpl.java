@@ -100,9 +100,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 formTemplateService.save(formTemplate);
             }
         }
-        FormType formType = formTypeService.get(typeId);
-        formType.setStatus(VersionedObjectStatus.DELETED);
-        formTypeService.save(formType);
+        formTypeService.delete(typeId);
     }
 
     @Override

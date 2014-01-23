@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
@@ -53,7 +54,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 
 	@Override
     public List<FormType> getAll(){
-        return getJdbcTemplate().query("select * from form_type", new FormTypeMapper());
+        return getJdbcTemplate().query("select * from form_type where status = 0", new FormTypeMapper());
     }
 
     @Override
@@ -65,6 +66,13 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			new FormTypeMapper()
 		);
 	}
+
+    @Override
+    public List<FormType> getByFilter(TemplateFilter filter) {
+        return getJdbcTemplate().query("select * from form_type where tax_type = ? and status = ?",
+                new Object[]{filter.getTaxType().getCode(), filter.isActive()?0:1},
+                new FormTypeMapper());
+    }
 
     @Override
     @Transactional(readOnly = false)
@@ -88,9 +96,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
     public void delete(int formTypeId) {
         try {
-            getJdbcTemplate().update("update form_type set status = ? where id = ?",
-                    new Object[]{VersionedObjectStatus.DELETED.getId(), formTypeId},
-                    new int[]{Types.INTEGER,Types.INTEGER});
+            getJdbcTemplate().update("update form_type set status = -1 where id = ?",
+                    new Object[]{formTypeId},
+                    new int[]{Types.INTEGER});
         } catch (DataAccessException e){
             logger.error("Ошибка при удалении макета", e);
             throw new DaoException("Ошибка при удалении макета", e);

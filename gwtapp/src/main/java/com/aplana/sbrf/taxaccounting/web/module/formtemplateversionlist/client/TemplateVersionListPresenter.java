@@ -97,16 +97,13 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
         GetFTVersionListAction action = new GetFTVersionListAction();
-        action.setFormTemplateId(Integer.parseInt(request.getParameter("formTypeId", "")));
+        action.setFormTypeId(Integer.parseInt(request.getParameter("formTypeId", "")));
         dispatcher.execute(action, CallbackUtils.defaultCallback(
         new AbstractCallback<GetFTVersionListResult>() {
                     @Override
                     public void onSuccess(GetFTVersionListResult result) {
                         getView().setFTVersionTable(result.getFormTemplateVersions());
-                        if (!result.getFormTemplateVersions().isEmpty())
-                            getView().setLabelName(result.getFormTemplateVersions().get(0).getTypeName());
-                        else
-                            getView().setLabelName("Нераспознаный шаблон. Нет связанных версий макетов.");
+                        getView().setLabelName(result.getFormTypeName());
                     }
                 }, this)
         );

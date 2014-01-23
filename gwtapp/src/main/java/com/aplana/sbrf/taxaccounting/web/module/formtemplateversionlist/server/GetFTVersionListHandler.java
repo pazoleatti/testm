@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.GetFTVersionListAction;
@@ -31,6 +32,9 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
     @Autowired
     private FormTemplateService formTemplateService;
 
+    @Autowired
+    private FormTypeService formTypeService;
+
     public GetFTVersionListHandler() {
         super(GetFTVersionListAction.class);
     }
@@ -40,7 +44,9 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
     @Override
     public GetFTVersionListResult execute(GetFTVersionListAction action, ExecutionContext context) throws ActionException {
         GetFTVersionListResult result = new GetFTVersionListResult();
-        List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(action.getFormTemplateId());
+        result.setFormTypeName(formTypeService.get(action.getFormTypeId()).getName());
+
+        List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(action.getFormTypeId());
         List<FormTemplateVersion> formTemplateVersions = new LinkedList<FormTemplateVersion>();
         for (int i = 0; i < formTemplates.size() - 1; i++){
             FormTemplateVersion formTemplateVersion = new FormTemplateVersion();

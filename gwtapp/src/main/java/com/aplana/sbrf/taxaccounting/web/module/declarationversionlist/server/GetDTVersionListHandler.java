@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeclarationTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTVersionListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTVersionListResult;
@@ -28,6 +29,9 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
+    @Autowired
+    private DeclarationTypeService declarationTypeService;
+
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
 
     public GetDTVersionListHandler() {
@@ -37,7 +41,10 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
     @Override
     public GetDTVersionListResult execute(GetDTVersionListAction action, ExecutionContext context) throws ActionException {
         GetDTVersionListResult result = new GetDTVersionListResult();
-        List<DeclarationTemplate> declarationTemplateList = declarationTemplateService.getDecTemplateVersionsByStatus(action.getDeclarationFormType());
+        result.setDtTypeName(declarationTypeService.get(action.getDeclarationFormTypeId()).getName());
+
+
+        List<DeclarationTemplate> declarationTemplateList = declarationTemplateService.getDecTemplateVersionsByStatus(action.getDeclarationFormTypeId());
         List<DeclarationTemplateVersion> declarationTemplateVersions = new LinkedList<DeclarationTemplateVersion>();
         for (int i = 0; i < declarationTemplateList.size() - 1; i++){
             DeclarationTemplateVersion decTemplateVersion = new DeclarationTemplateVersion();
