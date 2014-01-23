@@ -30,8 +30,6 @@ public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
 		FormDataListUiHandlers, FilterFormDataReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
 		FormDataListApplyEvent.FormDataApplyHandler {
-	
-	
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
@@ -53,9 +51,6 @@ public class FormDataListPresenter extends
 	 * Используется при заполнении начальных значений фильтра поиска
 	 */
 	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
-
-	
-
 
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -88,7 +83,6 @@ public class FormDataListPresenter extends
 		// При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
 		// Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
 		dialogPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
-		
 	}
 
 	@Override
@@ -127,8 +121,7 @@ public class FormDataListPresenter extends
 	public void onSortingChanged(){
 		getView().updateData();
 	}
-	
-	
+
 	private void saveFilterSatet(TaxType taxType, FormDataFilter filter){
 		// Это ворк эраунд.
 		// Нужно клонировать состояние т.к. в FilterFormDataPresenter 
@@ -175,5 +168,4 @@ public class FormDataListPresenter extends
     public void onCreateClicked() {
         FormDataListCreateEvent.fire(this);
     }
-
 }
