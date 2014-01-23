@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
