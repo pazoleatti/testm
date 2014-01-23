@@ -45,10 +45,10 @@ public class MigrationBean implements MessageService {
 //    private static long[] rnus = {25L, 26L, 27L, 31L, 51L, 53L, 54L, 59L, 60L, 64L};
 
     // Формат РНУ
-    private static Set<Integer> RNU_SET = new HashSet<Integer>(Arrays.asList(25, 26, 27, 31));
+    private static final Set<Integer> RNU_SET = new HashSet<Integer>(Arrays.asList(25, 26, 27, 31));
 
     // Формат XML
-    private static Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
+    private static final Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
 
     @Autowired
     private MigrationDao migrationDao;

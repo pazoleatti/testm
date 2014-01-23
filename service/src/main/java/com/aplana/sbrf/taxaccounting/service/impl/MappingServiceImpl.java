@@ -49,13 +49,13 @@ public class MappingServiceImpl implements MappingService {
     @Autowired
     private LogEntryService logEntryService;
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
-    private static String charSet = "cp866";
-    private static String RNU_EXT = ".rnu";
-    private static String XML_EXT = ".xml";
-    private static String DATE_APPENDER_XML = "01.01.20";
-    private static String DATE_APPENDER_RNU = "01.01.";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
+    private static final String CHARSET = "cp866";
+    private static final String RNU_EXT = ".rnu";
+    private static final String XML_EXT = ".xml";
+    private static final String DATE_APPENDER_XML = "01.01.20";
+    private static final String DATE_APPENDER_RNU = "01.01.";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
@@ -189,7 +189,7 @@ public class MappingServiceImpl implements MappingService {
 
         String firstRow;
         try {
-            String str = new String(fileContent, charSet);
+            String str = new String(fileContent, CHARSET);
             firstRow = str.substring(0, str.indexOf('\r'));
             log.debug("firstRow: " + firstRow);
         } catch (UnsupportedEncodingException e) {
@@ -199,8 +199,8 @@ public class MappingServiceImpl implements MappingService {
         String[] params = firstRow.split("\\|");
         try {
 
-            exemplar.setBeginDate(dateFormat.parse(params[2]));
-            exemplar.setEndDate(dateFormat.parse(params[3]));
+            exemplar.setBeginDate(DATE_FORMAT.parse(params[2]));
+            exemplar.setEndDate(DATE_FORMAT.parse(params[3]));
 
             // по коду NNN в назавании файла тип налоговой формы
             exemplar.setFormTemplateId(NalogFormType.getNewCodeByNNN(rnuFilename.substring(0, 3)));
@@ -217,7 +217,7 @@ public class MappingServiceImpl implements MappingService {
             }
 
             //по году определяем TAX_PERIOD
-            String year = yearFormat.format(exemplar.getBeginDate());
+            String year = YEAR_FORMAT.format(exemplar.getBeginDate());
             year = DATE_APPENDER_RNU + year;
             exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(year));
 

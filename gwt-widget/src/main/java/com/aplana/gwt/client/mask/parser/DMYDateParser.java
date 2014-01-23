@@ -13,15 +13,15 @@ import java.util.Date;
  */
 public class DMYDateParser implements Parser<Date> {
 
-    private static DMYDateParser INSTANCE;
+    private static DMYDateParser instance;
 
     public static final DateTimeFormat formatDMY = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     public static Parser<Date> instanceDMY() {
-        if (INSTANCE == null) {
-            INSTANCE = new DMYDateParser();
+        if (instance == null) {
+            instance = new DMYDateParser();
         }
-        return INSTANCE;
+        return instance;
     }
 
     protected DMYDateParser() {
