@@ -95,13 +95,6 @@
                         <div style="float: right">
                             <g:MenuBar ui:field="helpMenu" addStyleNames="{style.helpMenu}">
                                 <g:MenuItem>
-                                    <a href="mailto:sbrf_tax_test@aplana.com?subject=Сообщить о проблеме"
-                                       title="Сообщить о проблеме">
-                                        <img src="resources/img/email.png" style="border: none" alt="email"/>
-                                    </a>
-                                </g:MenuItem>
-
-                                <g:MenuItem>
                                     <a href="#!about" target="_blank" title="О программе">
                                         <img src="resources/img/exclamation_mark.png" style="border: none" alt="!"/>
                                     </a>
