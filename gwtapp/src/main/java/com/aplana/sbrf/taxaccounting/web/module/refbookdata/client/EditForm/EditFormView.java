@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
@@ -28,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
+
+	/** Маскимальная длина для строковых значений у справочников */
+	private static final int MAX_STRING_VALUE_LENGTH = 2000;
 
     interface Binder extends UiBinder<Widget, EditFormView> { }
 
@@ -200,14 +204,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
 								null : (String)field.getValue().getValue();
 						checkRequired(field.getKey(), string);
-						if (string!= null && string.length() > 2000) {
+						if (string!= null && string.length() > MAX_STRING_VALUE_LENGTH) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение более 2000 символов");
+							badValueException.setDescription("Значение более " + MAX_STRING_VALUE_LENGTH + " символов");
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
-						value.setStringValue(cleanString(string));
+						value.setStringValue(StringUtils.cleanString(string));
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
@@ -247,15 +251,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			throw badValueException;
 		}
 	}
-
-    private String cleanString(String uncleanString) {
-        String cleanString = uncleanString.replaceAll("\\s+ {2,}", " ");
-        cleanString = cleanString.replaceAll("['`]", "\"");
-        cleanString = cleanString.replaceAll("^\\s+|\\s+$", "");
-        cleanString = cleanString.replaceAll("\"\\s+|\\s+\"", "\"");
-
-        return cleanString;
-    }
 
 	@Override
 	public void setSaveButtonEnabled(boolean enabled) {
