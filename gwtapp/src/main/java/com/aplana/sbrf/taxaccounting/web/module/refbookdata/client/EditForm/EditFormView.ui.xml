@@ -23,15 +23,15 @@
         </g:cell>
         <g:cell height="5%" horizontalAlignment="ALIGN_CENTER">
             <g:HorizontalPanel>
-                <style:LinkAnchor ui:field="allVersion" visible="false" img="null" />
+                <style:LinkAnchor ui:field="allVersion" visible="false"/>
             </g:HorizontalPanel>
         </g:cell>
-        <g:cell height="85%">
+        <g:cell height="80%">
             <g:ScrollPanel height="100%">
                 <g:VerticalPanel spacing="10" ui:field="editPanel" styleName="formPanel" verticalAlignment="ALIGN_TOP"/>
             </g:ScrollPanel>
         </g:cell>
-        <g:cell>
+        <g:cell height="10%">
             <g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_CENTER" verticalAlignment="ALIGN_BOTTOM">
                 <g:HorizontalPanel spacing="5">
                     <g:Button ui:field="save" enabled="false">Сохранить</g:Button>
