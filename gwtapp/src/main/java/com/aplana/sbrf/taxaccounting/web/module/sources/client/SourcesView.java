@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
@@ -95,8 +96,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	Anchor cancelButton;
 	@UiField
 	Label declarationLabel, titleLabel, formLabel;
+    @UiField
+    LinkAnchor clickEdit;
 
-	@Inject
+    @Inject
 	@UiConstructor
 	public SourcesView(final Binder uiBinder) {
 		taxTypePicker = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
@@ -417,6 +420,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		}
 
 	}
+
+    @UiHandler("clickEdit")
+    public void clickk(ClickEvent event) {
+        if(getUiHandlers() != null){
+            getUiHandlers().onClickOpenEditDestination();
+        }
+
+    }
 
 	private void enableButtonLink(Anchor anchor, boolean enabled) {
         anchor.setStyleName(enabled ? css.enabled() : css.disabled());
