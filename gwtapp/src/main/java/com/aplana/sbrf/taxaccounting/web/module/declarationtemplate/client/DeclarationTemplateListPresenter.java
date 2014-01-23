@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.DeclarationTemplateApplyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.google.inject.Inject;
@@ -21,8 +20,15 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.Title;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Presenter для страницы администрирования деклараций. Выполняет следующие действия:
@@ -33,9 +39,36 @@ import com.gwtplatform.mvp.client.proxy.*;
  */
 public class DeclarationTemplateListPresenter
         extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy>
-        implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler{
+        implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler, DeclarationTemplateCreateEvent.DTCreateHandler,
+        DeclarationTemplateDeleteEvent.MyHandler{
 
-	@Title("Шаблоны деклараций")
+    private final PlaceManager placeManager;
+
+    @Override
+    @ProxyEvent
+    public void onClickCreate(DeclarationTemplateCreateEvent event) {
+        DTCreateNewTypeEvent.fire(this, filterPresenter.getFilterData().getTaxType());
+    }
+
+    @Override
+    @ProxyEvent
+    public void onDelete(DeclarationTemplateDeleteEvent event) {
+        DeclarationTemplate declarationTemplate = getView().getSelectedElement();
+        if (declarationTemplate == null)
+            return;
+        DTDeleteAction action = new DTDeleteAction();
+        action.setDtTypeId(declarationTemplate.getType().getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DTDeleteResult>() {
+            @Override
+            public void onSuccess(DTDeleteResult result) {
+                if (result.getLogEntriesUuid() != null)
+                    LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
+            }
+        }, this));
+    }
+
+    @Title("Шаблоны деклараций")
 	@ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplateList)
 	public interface MyProxy extends ProxyPlace<DeclarationTemplateListPresenter> {
@@ -46,6 +79,7 @@ public class DeclarationTemplateListPresenter
 	 */
 	public interface MyView extends View {
 		void setDeclarationTemplateRows(List<DeclarationTemplate> result);
+        DeclarationTemplate getSelectedElement();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -54,9 +88,10 @@ public class DeclarationTemplateListPresenter
     List<HandlerRegistration> handlers = new ArrayList<HandlerRegistration>();
 
 	@Inject
-	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter) {
+	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
-		this.dispatcher = dispatcher;
+        this.placeManager = placeManager;
+        this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
 	}
 

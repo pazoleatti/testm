@@ -116,10 +116,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		// работать с декларациями данного вида
 		DeclarationTemplate declarationTemplate = declarationTemplateDao
 				.get(declarationTemplateId);
-		int declarationTypeId = declarationTemplate.getDeclarationType()
+		int declarationTypeId = declarationTemplate.getType()
 				.getId();
 
-		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getDeclarationType().getTaxType());
+		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {

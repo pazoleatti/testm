@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+
+    <g:DialogBox glassEnabled="true" animationEnabled="true"
+                 text="Информация по форме/декларации">
+        <g:FlowPanel>
+            <style:GenericCellTable ui:field="versionHistoryCellTable" width="100%" />
+            <style:Bar>
+                <style:RightBar>
+                    <g:Button text="Закрыть" ui:field="hideButton"/>
+                </style:RightBar>
+            </style:Bar>
+        </g:FlowPanel>
+    </g:DialogBox>
+
+</ui:UiBinder>

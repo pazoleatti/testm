@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:datepicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
 
 	<ui:style>
 		.formStyle {
@@ -16,8 +17,11 @@
 		<g:FlowPanel styleName="{style.formStyle}">
 
 			<g:HorizontalPanel>
-				<g:Label width="300px">Версия</g:Label>
-				<g:TextBox width="100px" ui:field="versionBox" />
+				<g:Label width="300px">Период актульности с</g:Label>
+				<!--<g:TextBox width="100px" ui:field="versionBox" />-->
+                <datepicker:CustomDateBox ui:field="versionDateBegin"/>
+                <g:Label width="300px">по</g:Label>
+                <datepicker:CustomDateBox ui:field="versionDateEnd"/>
 			</g:HorizontalPanel>
 
 			<g:HorizontalPanel>

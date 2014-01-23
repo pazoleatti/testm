@@ -32,4 +32,8 @@ public interface DeclarationTypeDao {
 	 * @return список видов деклараций
 	 */
 	List<DeclarationType> listAllByTaxType(TaxType taxType);
+
+    int save(DeclarationType type);
+
+    void delete(int typeId);
 }

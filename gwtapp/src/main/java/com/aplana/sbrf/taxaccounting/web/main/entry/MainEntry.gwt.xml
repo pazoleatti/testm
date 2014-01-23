@@ -10,12 +10,12 @@
 	<inherits name='com.gwtplatform.mvp.MvpWithEntryPoint'/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.Module"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.DeclarationTemplate"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.userlist.UserList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>

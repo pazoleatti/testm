@@ -1,16 +1,12 @@
 package com.aplana.gwt.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
-
 
 /**
  *  Компонент "Картинка-кнопка-ссылка"
@@ -21,7 +17,6 @@ public class ImageButtonLink extends Composite {
 
     interface Binder extends UiBinder<Widget, ImageButtonLink> {
     }
-
 
     @UiField
     Label lbl;
@@ -54,6 +49,5 @@ public class ImageButtonLink extends Composite {
         lbl.addClickHandler(clickHandler);
         img.addClickHandler(clickHandler);
     }
-
 
 }

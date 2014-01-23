@@ -1,17 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import java.sql.Types;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 @ScriptExposed
 public interface ReportPeriodService {

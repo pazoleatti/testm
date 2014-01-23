@@ -23,10 +23,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGetFilterData, PeriodsGetFilterDataResult> {
 
-	public static final long DICT_ID = 8L;
-	
-	@Autowired
-	private FormDataSearchService formDataSearchService;
 	@Autowired
 	private SecurityService securityService;
 	@Autowired

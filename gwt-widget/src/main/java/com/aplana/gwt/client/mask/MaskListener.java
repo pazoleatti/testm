@@ -10,8 +10,8 @@ import com.google.gwt.event.dom.client.*;
  */
 public class MaskListener {
 
-    public static int F1 = 112;
-    public static int F12 = 124;
+    public static final int F1 = 112;
+    public static final int F12 = 124;
 
     private String mask;
     /**

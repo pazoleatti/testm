@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.Fo
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,6 +48,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@UiField
 	Button cancelButton;
+
+    @UiField
+    Button activateVersion;
 
 	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
@@ -114,6 +116,13 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 		getUiHandlers().close();
 	}
 
+    @UiHandler("activateVersion")
+    void onActiveClick(ClickEvent event){
+        if(getUiHandlers()!=null){
+            getUiHandlers().activate();
+        }
+    }
+
 	@Override
 	public void setFormId(int formId) {
 		List<BaseTab> tabList = tabPanel.getTabList();
@@ -151,4 +160,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public void setTitle(String title) {
 		this.title.setText(title);
 	}
+
+    @Override
+    public void activateVersionName(String s) {
+        activateVersion.setText(s);
+    }
 }

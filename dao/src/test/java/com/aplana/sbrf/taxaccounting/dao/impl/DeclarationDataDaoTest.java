@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -230,6 +231,11 @@ public class DeclarationDataDaoTest {
         assertNotEquals(declarationDataOld.getPdfDataUuid(), declarationDataNew.getPdfDataUuid());
         assertNotEquals(declarationDataOld.getXlsxDataUuid(), declarationDataNew.getXlsxDataUuid());
         assertEquals(blobData.getUuid(), declarationDataDao.get(1).getXlsxDataUuid());
+    }
+
+    @Test
+    public void testFindDeclarationDataByFormTemplate(){
+        Assert.assertEquals(6, declarationDataDao.findDeclarationDataByFormTemplate(1).size());
     }
 
 	private void assertIdsEquals(long[] expected, List<DeclarationDataSearchResultItem> items) {

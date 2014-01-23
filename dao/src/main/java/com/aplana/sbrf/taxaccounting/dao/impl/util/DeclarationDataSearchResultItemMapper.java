@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 
 public class DeclarationDataSearchResultItemMapper implements RowMapper<DeclarationDataSearchResultItem> {
 
-    private static final SimpleDateFormat YEAR_FORMATTER = new SimpleDateFormat(Formats.YYYY.getFormat());
 	@Override
 	public DeclarationDataSearchResultItem mapRow(ResultSet rs, int i) throws SQLException {
 		DeclarationDataSearchResultItem result = new DeclarationDataSearchResultItem();

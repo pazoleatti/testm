@@ -16,8 +16,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	private FormType type;
 	private Date version;
-	private boolean active;
-	private Integer edition;
+	private int edition;
 	private boolean numberedColumns;
     private boolean fixedRows;
     
@@ -25,17 +24,17 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String fullName;
     private String code;
 
-    private TemplateStatus status;
+    private VersionedObjectStatus status;
 
     /**
      * Признак статуса шаблона
      * @return статус шаблона
      */
-    public TemplateStatus getStatus() {
+    public VersionedObjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TemplateStatus status) {
+    public void setStatus(VersionedObjectStatus status) {
         this.status = status;
     }
 
@@ -198,22 +197,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	/**
-	 * Признак активности шаблона формы
-	 * @return true - шаблон активен, false - шаблон неактивен
-	 */
-	public boolean isActive() {
-		return active;
-	}
-
-	/**
-	 * Задать признак активности формы
-	 * @param active true - шаблон активен, false - шаблон неактивен
-	 */
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-
-	/**
 	 * Возвращает номер редакции данной записи (используется для предотвращения
 	 * одновременного редактирования записи несколькими пользователями)
 	 * 
@@ -236,7 +219,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	 * @param edition - номер редакции
 	 */
 	public void setEdition(int edition) {
-		if (this.edition != null) {
+		if (this.edition != 0) {
 			throw new IllegalStateException(
 					"Edition property already initialized");
 		} else {

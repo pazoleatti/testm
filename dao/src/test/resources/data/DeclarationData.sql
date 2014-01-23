@@ -1,4 +1,4 @@
-insert into declaration_template(id, edition, version, is_active, declaration_type_id) values (1, 1, '0.01', 1, 1);
+insert into declaration_template(id, edition, version, is_active, declaration_type_id) values (1, 1, date '2014-01-01', 1, 1);
 insert into department (id, name, parent_id, type) values (1, 'Department name 1', null, 1);
 insert into department (id, name, parent_id, type) values (2, 'Department name 5', 1, 2);
 insert into department (id, name, parent_id, type) values (3, 'Department name 2', 1, 2);

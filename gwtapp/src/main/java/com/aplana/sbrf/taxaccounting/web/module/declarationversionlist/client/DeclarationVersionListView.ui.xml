@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+
+    <g:ScrollPanel>
+        <g:FlowPanel>
+            <g:HorizontalPanel height="35px">
+                <g:cell>
+                    <style:LinkAnchor title="Перейти к списку налоговых форм" ui:field="returnAnchor" img="resources/img/arrow-left-24.png"/>
+                </g:cell>
+                <g:cell>
+                    <g:Label ui:field="versionLabel"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+
+            <g:VerticalPanel width="100%">
+                <style:LinkButton text="Создать версию" ui:field="createVersion" />
+                <style:LinkButton text="Удалить версию" ui:field="deleteVersion"/>
+                <style:LinkButton text="История изменений" ui:field="historyVersion" />
+                <style:GenericCellTable ui:field="dtVersionCellTable" width="100%" />
+            </g:VerticalPanel>
+        </g:FlowPanel>
+    </g:ScrollPanel>
+</ui:UiBinder>

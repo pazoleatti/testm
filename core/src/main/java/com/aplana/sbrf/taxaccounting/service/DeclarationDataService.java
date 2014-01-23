@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.Date;
-
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Сервис для работы с {@link DeclarationData налоговыми декларациями }
@@ -124,4 +125,6 @@ public interface DeclarationDataService {
 	 * @throws DaoException если будет найдено несколько записей, удовлетворяющих условию поиска
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    List<Long> getDeclarationDataLisByVersionTemplate(int declarationTemplateId);
 }

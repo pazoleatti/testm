@@ -45,8 +45,8 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
-		getView().setFormId(formTemplate.getId());
+		formTemplate = event.getFormTemplateExt().getFormTemplate();
+		getView().setFormId(formTemplate.getId() != null?formTemplate.getId():0);
 	}
 
 	@Override
