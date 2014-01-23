@@ -19,9 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPeriodMappingDao {
 
-    private static final String dateFormat = "dd.MM.yyyy";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-
     @Override
     public Integer getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         StringBuilder sql = new StringBuilder("select rp.id ");

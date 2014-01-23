@@ -213,7 +213,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private static String getFileExtention(String filename){
-        int dotPos = filename.lastIndexOf(".") + 1;
+        int dotPos = filename.lastIndexOf('.') + 1;
         return filename.substring(dotPos);
     }
 

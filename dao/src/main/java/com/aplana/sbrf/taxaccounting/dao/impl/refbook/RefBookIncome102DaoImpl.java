@@ -37,9 +37,6 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
     @Autowired
     private RefBookDao refBookDao;
 
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
-
 	@Autowired
 	private RefBookUtils refBookUtils;
 
