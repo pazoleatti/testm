@@ -168,6 +168,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
+        selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}

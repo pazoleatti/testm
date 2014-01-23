@@ -136,10 +136,12 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
-        setValueById(value);
-        selected.setText(joinListToString(valueDereference));
         this.value.clear();
-        this.value.addAll(value);
+        if(value != null){
+            this.value.addAll(value);
+        }
+        setValueById(this.value);
+        selected.setText(joinListToString(valueDereference));
         if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
