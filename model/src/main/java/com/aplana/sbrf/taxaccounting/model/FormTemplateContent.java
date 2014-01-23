@@ -13,8 +13,6 @@ public class FormTemplateContent {
 	@XmlElement
 	private Date version;
 	@XmlElement
-	private boolean active;
-	@XmlElement
 	private boolean numberedColumns;
 	@XmlElement
 	private boolean fixedRows;
@@ -32,7 +30,6 @@ public class FormTemplateContent {
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
 		this.type = formTemplate.getType();
 		this.version = formTemplate.getVersion();
-		this.active = formTemplate.isActive();
 		this.numberedColumns = formTemplate.isNumberedColumns();
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
@@ -45,7 +42,6 @@ public class FormTemplateContent {
 	public void fillFormTemplate(FormTemplate formTemplate) {
 		formTemplate.setType(type);
 		formTemplate.setVersion(version);
-		formTemplate.setActive(active);
 		formTemplate.setNumberedColumns(numberedColumns);
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);

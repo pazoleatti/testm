@@ -6,4 +6,5 @@ public interface FormTemplateMainUiHandlers extends UiHandlers {
 	void save();
 	void reset();
 	void close();
+    void activate();
 }

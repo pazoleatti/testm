@@ -13,7 +13,7 @@ public interface TemplateChangesDao {
      *
      * @param templateChanges изменение версии макета
      */
-    void add(TemplateChanges templateChanges);
+    int add(TemplateChanges templateChanges);
 
     /**
      * Получает список изменений версии НФ макета

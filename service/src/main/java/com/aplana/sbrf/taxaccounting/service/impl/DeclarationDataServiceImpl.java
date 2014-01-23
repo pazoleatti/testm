@@ -103,7 +103,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
 				newDeclaration.getReportPeriodId(),
-				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getDeclarationType().getId(),
+				declarationTemplateDao.get(newDeclaration.getDeclarationTemplateId()).getType().getId(),
 				null, null, null);
 		return id;
 	}
@@ -141,7 +141,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE , userInfo, declarationData.getDepartmentId(),
 				declarationData.getReportPeriodId(),
-				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+				declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId(),
 				null, null, null);
 	}
 
@@ -175,7 +175,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 			auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(),
-					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId(),
+					declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId(),
 					null, null, null);
 
 	}
@@ -196,7 +196,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             Map<String, Object> exchangeParams = new HashMap<String, Object>();
             declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-            Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+            Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
             auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED , userInfo, declarationData.getDepartmentId(),
                     declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
@@ -209,7 +209,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 			Map<String, Object> exchangeParams = new HashMap<String, Object>();
 			declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 
-			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getDeclarationType().getId();
+			Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId();
 			logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
 			auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED , userInfo, declarationData.getDepartmentId(),
 					declarationData.getReportPeriodId(), declarationTypeId, null, null, null);
@@ -465,6 +465,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId) {
 		return declarationDataDao.find(declarationTypeId, departmentId, reportPeriodId);
 	}
+
+    @Override
+    public List<Long> getDeclarationDataLisByVersionTemplate(int declarationTemplateId) {
+        return declarationDataDao.findDeclarationDataByFormTemplate(declarationTemplateId);
+    }
 
     private byte[] getBytesFromInputstream(String blobId){
         BlobData blobPdfData = blobDataService.get(blobId);

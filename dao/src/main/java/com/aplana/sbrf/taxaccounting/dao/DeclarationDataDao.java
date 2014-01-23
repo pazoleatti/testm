@@ -86,4 +86,6 @@ public interface DeclarationDataDao {
      * @param declarationData
      */
     void update(DeclarationData declarationData);
+
+    List<Long> findDeclarationDataByFormTemplate(int templateId);
 }

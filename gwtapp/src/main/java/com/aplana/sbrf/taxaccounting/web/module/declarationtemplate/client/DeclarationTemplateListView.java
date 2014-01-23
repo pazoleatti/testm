@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -12,6 +13,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -34,9 +36,13 @@ public class DeclarationTemplateListView extends ViewImpl
     @UiField
     Panel filterContentPanel;
 
+    private NoSelectionModel<DeclarationTemplate> selectionModel;
+
     @Inject
 	public DeclarationTemplateListView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
+
+        selectionModel = new NoSelectionModel<DeclarationTemplate>();
 
 		// колонка Наименование декларации
 		Column<DeclarationTemplate, DeclarationTemplate> linkColumn = new Column<DeclarationTemplate, DeclarationTemplate>(
@@ -49,10 +55,10 @@ public class DeclarationTemplateListView extends ViewImpl
 							return;
 						}
 						sb.appendHtmlConstant("<a href=\"#"
-								+ DeclarationTemplateTokens.declarationTemplate + ";"
-								+ DeclarationTemplateTokens.declarationTemplateId + "="
-								+ declaration.getId() + "\">"
-								+ declaration.getDeclarationType().getName() + "</a>");
+								+ DeclarationTemplateTokens.declarationVersionList + ";"
+								+ DeclarationTemplateTokens.declarationType + "="
+								+ declaration.getType().getId() + "\">"
+								+ declaration.getType().getName() + "</a>");
 					}
 				}) {
 			@Override
@@ -73,15 +79,21 @@ public class DeclarationTemplateListView extends ViewImpl
 		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
 			@Override
 			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getVersion();
+				return DateTimeFormat.getFormat("dd.MM.yyyy").format(declarationTemplate.getVersion());
 			}
 		}, "Версия");
+        declarationTemplateTable.setSelectionModel(selectionModel);
 	}
 
 	@Override
 	public void setDeclarationTemplateRows(List<DeclarationTemplate> templates) {
 		declarationTemplateTable.setRowData(templates);
 	}
+
+    @Override
+    public DeclarationTemplate getSelectedElement() {
+        return selectionModel.getLastSelectedObject();
+    }
 
     @Override
     public void setInSlot(Object slot, IsWidget content) {

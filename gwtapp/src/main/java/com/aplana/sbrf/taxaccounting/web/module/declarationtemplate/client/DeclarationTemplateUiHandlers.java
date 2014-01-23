@@ -6,6 +6,7 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void save();
 	void reset();
 	void close();
+    void activate();
 	void downloadJrxml();
 	void downloadDect();
 	void uploadJrxmlFail(String msg);

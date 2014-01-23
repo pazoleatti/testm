@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import java.util.List;
 
 /**
  * Интерфейс DAO для работы с видами налоговых форм
@@ -31,5 +31,9 @@ public interface FormTypeDao {
      * @return список всех существующих видов налоговых форм по виду налога
      */
 	List<FormType> getByTaxType(TaxType taxType);
+
+    int save(FormType formType);
+
+    void delete(int formTypeId);
 	
 }

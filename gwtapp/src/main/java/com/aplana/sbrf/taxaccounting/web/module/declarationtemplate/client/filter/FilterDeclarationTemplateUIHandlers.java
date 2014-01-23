@@ -5,6 +5,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface FilterDeclarationTemplateUIHandlers extends UiHandlers {
 
 	void onCreateClicked();
-
 	void onApplyClicked();
+    void onDeleteClicked();
 }

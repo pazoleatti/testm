@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface FormTemplateDao {
 	/**
-	 * Получить полный список всех описаний налоговых форм
+	 * Получить полный список всех действующих версий шаблонов налоговых форм
 	 * (Внимание, объекты в результирующей коллекции могут быть только частично инициализированы,
 	 * в них может остаться незаполненной информация по столбцам, скрипта и т.д.) 
 	 * @return список шаблонов
@@ -76,4 +77,38 @@ public interface FormTemplateDao {
      * @return список всех идентификаторов
      */
     List<Integer> listAllId();
+
+    /**
+     * Получает список id версий макета по типу шаблона и статусу версии.
+     * @param formTypeId вид шаблона
+     * @param formTemplateId идентификатор шаблона, котрый исключить из поиска, если нет такого то 0
+     * @param statusList статус формы
+     * @return список версий
+     */
+    List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
+
+    int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
+    int getNearestFTVersionIdLeft(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Удаляет версию шаблона. По идее удалять полностью только фейковые версии шаблонов.
+     * @param formTemplateId
+     * @return
+     */
+    int delete(int formTemplateId);
+
+    /**
+     * Сохраняем новый шаблон
+     * @param formTemplate шаблон
+     * @return идентификатор нового шаблона
+     */
+    int saveNew(FormTemplate formTemplate);
+
+    /**
+     * Количество весий для вида шаблона
+     * @param formTypeId вид шаблона
+     * @param statusList статусы
+     * @return количество
+     */
+    int versionTemplateCount(int formTypeId, List<Integer> statusList);
 }

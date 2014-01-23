@@ -13,7 +13,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Vitalii Samolovskikh
@@ -33,7 +36,6 @@ public class FormTemplateDaoTest {
 		FormTemplate ft1 = formTemplateDao.get(1);
 		Assert.assertEquals(1, ft1.getId().intValue());
 		Assert.assertEquals(1, ft1.getType().getId());
-		Assert.assertEquals(true, ft1.isActive());
 		Assert.assertFalse(ft1.isNumberedColumns());
 		Assert.assertTrue(ft1.isFixedRows());
 		Assert.assertEquals("name_1", ft1.getName());
@@ -43,7 +45,6 @@ public class FormTemplateDaoTest {
 		FormTemplate ft2 = formTemplateDao.get(2);
 		Assert.assertEquals(2, ft2.getId().intValue());
 		Assert.assertEquals(2, ft2.getType().getId());
-		Assert.assertEquals(false, ft2.isActive());
 		Assert.assertTrue(ft2.isNumberedColumns());
 		Assert.assertFalse(ft2.isFixedRows());
 		Assert.assertEquals("name_2", ft2.getName());
@@ -62,7 +63,6 @@ public class FormTemplateDaoTest {
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
 		formTemplate.setVersion(new Date());
-		formTemplate.setActive(true);
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
 		formTemplate.setCode("code_3");
@@ -72,7 +72,6 @@ public class FormTemplateDaoTest {
 		Assert.assertTrue(formTemplate.isNumberedColumns());
 		Assert.assertFalse(formTemplate.isFixedRows());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
-		Assert.assertEquals(true, formTemplate.isActive());
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
@@ -94,7 +93,7 @@ public class FormTemplateDaoTest {
 		
 		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
-		formTemplate.setActive(true);
+		formTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
 		formTemplate.setCode("code_3");
@@ -104,7 +103,6 @@ public class FormTemplateDaoTest {
 		Assert.assertTrue(formTemplate.isNumberedColumns());
 		Assert.assertFalse(formTemplate.isFixedRows());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
-		Assert.assertEquals(true, formTemplate.isActive());
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("code_3", formTemplate.getCode());
@@ -119,7 +117,6 @@ public class FormTemplateDaoTest {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
-        formTemplate.setActive(true);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
         formTemplate.setCode("code_3");
@@ -134,7 +131,7 @@ public class FormTemplateDaoTest {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
-        formTemplate.setActive(true);
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
         formTemplate.setCode("code_3");
@@ -150,7 +147,7 @@ public class FormTemplateDaoTest {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
-        formTemplate.setActive(true);
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
         formTemplate.setCode("code_3");
@@ -173,4 +170,83 @@ public class FormTemplateDaoTest {
         Assert.assertEquals(1, formTemplateDao.getByFilter(filter).size());
     }
 
+    @Test
+    public void testListAll(){
+        Assert.assertEquals(2, formTemplateDao.listAll().size());
+    }
+
+    @Test
+    public void testGetFormTemplateVersions(){
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2012, Calendar.JANUARY, 1);
+        Date actualStartVersion = calendar.getTime();
+        calendar.clear();
+
+        Assert.assertEquals(2, formTemplateDao.getFormTemplateVersions(2, 0, list, null, null).size());
+    }
+
+    @Test
+    public void testGetNearestFTVersionIdRight(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2013, Calendar.JANUARY, 1);
+        Date actualStartVersion = calendar.getTime();
+
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+        Assert.assertEquals(3, formTemplateDao.getNearestFTVersionIdRight(2, list, actualStartVersion));
+    }
+
+    @Test
+    public void testGetNearestFTVersionIdLeft(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2013, Calendar.JANUARY, 1);
+        Date actualStartVersion = calendar.getTime();
+
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+        Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdLeft(2, list, actualStartVersion));
+    }
+
+    @Test
+    public void testDelete(){
+        Assert.assertEquals(1, formTemplateDao.delete(2));
+    }
+
+    @Test
+    public void testSaveNew(){
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setEdition(1);
+        formTemplate.setNumberedColumns(true);
+        formTemplate.setFixedRows(false);
+        formTemplate.setVersion(new Date());
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
+        formTemplate.setName("name_4");
+        formTemplate.setFullName("fullname_4");
+        formTemplate.setCode("code_4");
+        formTemplate.setScript("test_script");
+        formTemplate.setStatus(VersionedObjectStatus.FAKE);
+        FormType type = new FormType();
+        type.setId(1);
+        formTemplate.setType(type);
+        formTemplate.getStyles().addAll(formTemplateDao.get(1).getStyles());
+        int id = formTemplateDao.saveNew(formTemplate);
+        formTemplate = formTemplateDao.get(id);
+        Assert.assertEquals("name_4", formTemplate.getName());
+        Assert.assertEquals("fullname_4", formTemplate.getFullName());
+        Assert.assertEquals("code_4", formTemplate.getCode());
+    }
+
+    @Test
+    public void testVersionTemplateCount(){
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+        Assert.assertEquals(1, formTemplateDao.versionTemplateCount(1, list));
+    }
 }

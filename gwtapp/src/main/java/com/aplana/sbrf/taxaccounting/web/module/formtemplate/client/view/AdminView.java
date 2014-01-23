@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
 import com.google.gwt.cell.client.AbstractCell;
@@ -14,6 +15,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -35,9 +37,13 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	@UiField
 	CellTable<FormTemplate> formTemplateTable;
 
+    private NoSelectionModel<FormTemplate> selectionModel;
+
 	@Inject
 	public AdminView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
+
+        selectionModel = new NoSelectionModel<FormTemplate>();
 
 		// колонка Наименование декларации
 		Column<FormTemplate, FormTemplate> linkColumn = new Column<FormTemplate, FormTemplate>(
@@ -50,9 +56,9 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 							return;
 						}
 						sb.appendHtmlConstant("<a href=\"#"
-								+ AdminConstants.NameTokens.formTemplateInfoPage + ";"
-								+ AdminConstants.NameTokens.formTemplateId + "="
-								+ formTemplate.getId() + "\">"
+								+ AdminConstants.NameTokens.formTemplateVersionList + ";"
+								+ AdminConstants.NameTokens.formTypeId + "="
+								+ formTemplate.getType().getId() + "\">"
 								+ formTemplate.getType().getName() + "</a>");
 					}
 				}) {
@@ -61,13 +67,14 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 				return object;
 			}
 		};
+        formTemplateTable.setSelectionModel(selectionModel);
 		formTemplateTable.addColumn(linkColumn, "Наименование");
 
 		formTemplateTable.addColumn(new Column<FormTemplate, Boolean>(
 				new CheckboxCell()) {
 			@Override
 			public Boolean getValue(FormTemplate formTemplate) {
-				return formTemplate.isActive();
+				return formTemplate.getStatus() == VersionedObjectStatus.NORMAL;
 			}
 		}, "Активен");
 
@@ -95,5 +102,10 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
 	public void setFormTemplateTable(List<FormTemplate> formTemplates) {
 		formTemplateTable.setRowData(formTemplates);
 	}
+
+    @Override
+    public FormTemplate getSelectedElement() {
+        return selectionModel.getLastSelectedObject();
+    }
 
 }

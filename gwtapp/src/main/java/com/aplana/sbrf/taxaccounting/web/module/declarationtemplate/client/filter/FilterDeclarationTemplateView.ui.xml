@@ -24,8 +24,9 @@
 				<g:cell verticalAlignment="bottom">
 					<style:Bar>
 						<style:LeftBar>
-							<g:Button ui:field="create" enabled="false">Создать</g:Button>
+							<g:Button ui:field="create">Создать</g:Button>
 							<g:Button ui:field="apply">Поиск</g:Button>
+                            <g:Button ui:field="delete">Удалить</g:Button>
 						</style:LeftBar>
 					</style:Bar>
 				</g:cell>

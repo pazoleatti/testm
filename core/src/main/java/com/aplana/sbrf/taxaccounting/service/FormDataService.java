@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
@@ -186,4 +187,11 @@ public interface FormDataService {
      * @param formDataId
      */
     void checkDestinations(long formDataId);
+
+    /**
+     * Ищет налоговые формы, которые использует данную версию макета
+     * @param formTemplateId идентификатор версии
+     * @return список НФ
+     */
+    List<Long> getFormDataLisByVersionTemplate(int formTemplateId);
 }
