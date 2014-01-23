@@ -22,9 +22,9 @@ import java.util.Map;
 @Transactional
 public class RefBookOkatoDaoImpl extends AbstractDao implements RefBookOkatoDao {
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
-    private static String CLEAR_PARENT_QUERY = "delete from ref_book_value where attribute_id = 6 " +
+    private static final String CLEAR_PARENT_QUERY = "delete from ref_book_value where attribute_id = 6 " +
             "and record_id in (select id from ref_book_record where version = trunc(?, 'DD') and ref_book_id = 3)";
 
     @Override
@@ -67,7 +67,7 @@ public class RefBookOkatoDaoImpl extends AbstractDao implements RefBookOkatoDao 
                 new int[]{Types.TIMESTAMP, Types.TIMESTAMP});
     }
 
-    private static String UPDATE_VALUES_QUERY = "update ref_book_value " +
+    private static final String UPDATE_VALUES_QUERY = "update ref_book_value " +
             "set string_value = ? " +
             "where attribute_id = 8 and record_id = (select r.id " +
             "from ref_book_record r, " +
@@ -85,7 +85,7 @@ public class RefBookOkatoDaoImpl extends AbstractDao implements RefBookOkatoDao 
             list.add(new Object[]{rec.get("NAME").getStringValue(), rec.get("OKATO").getStringValue()});
         }
 
-        int[] result = getJdbcTemplate().batchUpdate(String.format(UPDATE_VALUES_QUERY, sdf.format(version)), list,
+        int[] result = getJdbcTemplate().batchUpdate(String.format(UPDATE_VALUES_QUERY, SDF.format(version)), list,
                 new int[]{Types.VARCHAR, Types.VARCHAR});
 
         List<Map<String, RefBookValue>> retList = new LinkedList<Map<String, RefBookValue>>();

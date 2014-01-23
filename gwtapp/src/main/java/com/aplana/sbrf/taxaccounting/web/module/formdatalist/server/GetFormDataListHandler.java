@@ -27,17 +27,17 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 	}
 
 	@Override
-	public GetFormDataListResult execute(GetFormDataList action, ExecutionContext context) throws ActionException {
-		if(action == null || action.getFormDataFilter() == null){
-			return null;
-		}
-		GetFormDataListResult res = new GetFormDataListResult();
-		PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
-				.findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
-		res.setTotalCountOfRecords(resultPage.getTotalCount());
-		res.setRecords(resultPage);
-		return res;
-	}
+    public GetFormDataListResult execute(GetFormDataList action, ExecutionContext context) throws ActionException {
+        if (action == null || action.getFormDataFilter() == null) {
+            return null;
+        }
+        GetFormDataListResult res = new GetFormDataListResult();
+        PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
+                .findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
+        res.setTotalCountOfRecords(resultPage.getTotalCount());
+        res.setRecords(resultPage);
+        return res;
+    }
 
 	@Override
 	public void undo(GetFormDataList action, GetFormDataListResult result, ExecutionContext context) throws ActionException {

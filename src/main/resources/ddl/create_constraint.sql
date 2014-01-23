@@ -155,6 +155,7 @@ alter table date_value add constraint date_value_fk_column_id foreign key (colum
 alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
+alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);

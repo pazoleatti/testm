@@ -39,9 +39,9 @@ import java.util.Map;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-    private static String XLSX_EXT = "xlsx";
-    private static String XLS_EXT = "xls";
-    private static String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не отрыт.";
+    private static final String XLSX_EXT = "xlsx";
+    private static final String XLS_EXT = "xls";
+    private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не открыт.";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -213,7 +213,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private static String getFileExtention(String filename){
-        int dotPos = filename.lastIndexOf(".") + 1;
+        int dotPos = filename.lastIndexOf('.') + 1;
         return filename.substring(dotPos);
     }
 

@@ -119,7 +119,7 @@ public interface PeriodService {
      * @param reportPeriodId код отчетного периода
      * @return
      */
-    public Calendar getStartDate(int reportPeriodId);
+    Calendar getStartDate(int reportPeriodId);
 
     /**
      * Возвращает дату конца отчетного периода
@@ -130,7 +130,7 @@ public interface PeriodService {
      * @param reportPeriodId код отчетного периода
      * @return
      */
-    public Calendar getEndDate(int reportPeriodId);
+    Calendar getEndDate(int reportPeriodId);
 
     /**
      * Возвращает "отчетную дату" если требуется в чтз
@@ -139,7 +139,7 @@ public interface PeriodService {
      * @return
      */
 	// TODO: возможно имеется в виду дата сдачи отчетности. Надо проверить (Marat Fayzullin 22.01.2014)
-    public Calendar getReportDate(int reportPeriodId);
+    Calendar getReportDate(int reportPeriodId);
 
     /**
      * Получает все отчетные периоды в отсортированном порядке.
@@ -147,7 +147,7 @@ public interface PeriodService {
      * @param taxType
      * @return
      */
-    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
+    List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
 
     /**
      * Получить дату начала месяца.
@@ -156,7 +156,7 @@ public interface PeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить дату окончания месяца.
@@ -165,7 +165,7 @@ public interface PeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить отчетную дату месяца.
@@ -174,7 +174,7 @@ public interface PeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 
 	/**
 	 * Удалить отчетный период
@@ -184,7 +184,7 @@ public interface PeriodService {
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+	void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
@@ -193,7 +193,7 @@ public interface PeriodService {
      * @param departmentList Список подразделений
      * @return Список отчетных периодов
      */
-    public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+    List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
 
 
 	/**
@@ -201,7 +201,7 @@ public interface PeriodService {
 	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
 	 * @return true - существует, false - не существует
 	 */
-	public boolean existForDepartment(Integer departmentId, long reportPeriodId);
+	boolean existForDepartment(Integer departmentId, long reportPeriodId);
 
 	/**
 	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
@@ -212,5 +212,5 @@ public interface PeriodService {
 	 * @param dictionaryTaxPeriodId
 	 * @return
 	 */
-	public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
+	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
 }

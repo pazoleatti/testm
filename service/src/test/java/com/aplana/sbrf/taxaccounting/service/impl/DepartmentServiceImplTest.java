@@ -376,15 +376,12 @@ public class DepartmentServiceImplTest {
     public void getOpenPeriodDepartmentsTest() {
         TAUser taUser = new TAUser();
         taUser.setRoles(taRoles);
-        ReportPeriod reportPeriod = new ReportPeriod();
 
-        reportPeriod.setId(0);
-        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), reportPeriod);
+        List<Integer> result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), 0);
         Assert.assertEquals(3, result.size());
         Assert.assertTrue(result.containsAll(asList(root.getId(), departmentTB2.getId(), departmentOSB311.getId())));
 
-        reportPeriod.setId(1);
-        result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), reportPeriod);
+        result = departmentService.getOpenPeriodDepartments(taUser, asList(TaxType.INCOME), 1);
         Assert.assertEquals(0, result.size());
 
         // TODO

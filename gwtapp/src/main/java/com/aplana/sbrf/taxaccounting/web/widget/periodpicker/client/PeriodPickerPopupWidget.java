@@ -165,11 +165,11 @@ public class PeriodPickerPopupWidget extends Composite implements
         if ((strings == null) || strings.isEmpty()) {
             return "";
         }
-        StringBuilder text = new StringBuilder();
+        StringBuilder s = new StringBuilder();
         for (String name : strings) {
-            text.append(name + "; ");
+            s.append(name + "; ");
         }
-        return text.toString();
+        return s.toString();
     }
 
 	@Override

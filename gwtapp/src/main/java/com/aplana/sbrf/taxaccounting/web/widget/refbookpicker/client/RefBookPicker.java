@@ -21,7 +21,7 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * @param startDate начало ограничивающего периода
 	 * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate);
+	void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate);
 	
 	
 	/**
@@ -34,13 +34,13 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
      * @param startDate начало ограничивающего периода
      * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate);
+	void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate);
 	
 	
 	/**
 	 * @return
 	 */
-	public String getDereferenceValue();
+	String getDereferenceValue();
 
     /**
      * Возвращает разименованное значение поля в выбранной строке по alias
