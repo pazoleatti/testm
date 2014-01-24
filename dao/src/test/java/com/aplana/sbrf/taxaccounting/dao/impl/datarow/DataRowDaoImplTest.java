@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -55,11 +56,11 @@ public class DataRowDaoImplTest {
         when(dbUtilsMock.getNextDataRowIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
             @Override
             public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                List<Long> ids = new ArrayList<Long>();
-                Object[] args = invocationOnMock.getArguments();
-                int count = ((Long) args[0]).intValue();
+				List<Long> ids = new ArrayList<Long>();
+				Object[] args = invocationOnMock.getArguments();
+				int count = ((Long) args[0]).intValue();
                 for (int i = 0; i < count; i++) {
-                    ids.add(cnt++);
+					ids.add(cnt++);
                 }
                 return ids;
             }
@@ -876,7 +877,6 @@ public class DataRowDaoImplTest {
 		FormData fd = formDataDao.get(1);
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
 		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
 			DataRow<Cell> dr = fd.createDataRow();
 			dataRows.add(dr);
@@ -886,8 +886,8 @@ public class DataRowDaoImplTest {
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
-
-        //проверка сдвига, id записи должны быть равны,все сдвинулись
+		Assert.assertEquals(sizeBefore + DataRowDaoImplUtils.DEFAULT_ORDER_STEP, addedDataRowsAfter.size());
+        //проверка сдвига, id записи должны быть равны, все сдвинулись
         for (int i  =0; i< sizeBefore; i++){
             Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DataRowDaoImplUtils.DEFAULT_ORDER_STEP + i)).getId());
         }
