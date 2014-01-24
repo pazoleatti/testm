@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.client.editDialog;
+package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;

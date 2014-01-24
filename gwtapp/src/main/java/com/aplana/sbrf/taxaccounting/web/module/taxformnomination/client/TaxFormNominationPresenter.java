@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog.EditDeatinationPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.EditDestinationDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
@@ -37,7 +39,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
  */
 public class TaxFormNominationPresenter
         extends Presenter<TaxFormNominationPresenter.MyView, TaxFormNominationPresenter.MyProxy>
-        implements TaxFormNominationUiHandlers {
+        implements TaxFormNominationUiHandlers, EditDestinationDialogOpenEvent.EditDestinationDialogOpenHandler  {
 
     @ProxyCodeSplit
     @NameToken(TaxFormNominationToken.taxFormNomination)
@@ -71,13 +73,21 @@ public class TaxFormNominationPresenter
 
     }
 
+    protected final EditDeatinationPresenter editDeatinationPresenter;
     private final DispatchAsync dispatcher;
 
     @Inject
-    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
+    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, EditDeatinationPresenter editDeatinationPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
+        this.editDeatinationPresenter = editDeatinationPresenter;
         getView().setUiHandlers(this);
+    }
+
+    @Override
+    protected void onBind() {
+        addRegisteredHandler(EditDestinationDialogOpenEvent.getType(), this);
+        super.onBind();
     }
 
     @Override
@@ -167,5 +177,15 @@ public class TaxFormNominationPresenter
                             getView().setTableData(result.getTableData());
                     }
                 }, this));
+    }
+
+    @Override
+    public void onClickEditDestination(EditDestinationDialogOpenEvent event) {
+        editDeatinationPresenter.initAndShowDialog(this);
+    }
+
+    @Override
+    public void onClickOpenEditDestination() {
+        EditDestinationDialogOpenEvent.fire(this);
     }
 }
