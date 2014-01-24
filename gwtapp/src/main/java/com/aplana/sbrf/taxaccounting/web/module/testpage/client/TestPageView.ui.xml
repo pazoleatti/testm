@@ -5,6 +5,7 @@
 			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
 			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 		>
     <ui:style>
         .RefbookTextBox {
@@ -50,7 +51,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <my:LabelSeparator text="test" ui:field="sep"/>
+                <style:LabelSeparator text="test dfdf dfsdf" ui:field="sep" width="100px"/>
                 <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
                 <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
                 <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"

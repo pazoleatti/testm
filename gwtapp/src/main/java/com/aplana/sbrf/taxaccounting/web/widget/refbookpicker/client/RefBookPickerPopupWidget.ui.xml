@@ -10,7 +10,7 @@
             vertical-align: middle;
         }
     </ui:style>
-    <g:HorizontalPanel width="200px" verticalAlignment="middle">
+    <g:HorizontalPanel verticalAlignment="middle">
         <g:cell width="100%">
             <g:TextBox enabled="false" ui:field="text" width="100%"/>
         </g:cell>
