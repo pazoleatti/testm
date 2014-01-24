@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -143,6 +144,14 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 				}
 			}
 		});
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				if (getUiHandlers() != null) {
+					getUiHandlers().selectionChanged();
+				}
+			}
+		});
 
 	}
 
@@ -233,24 +242,14 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
         }
     }
 
-	@Override
-	public void setReadOnly(boolean readOnly) {
-		openPeriod.setVisible(!readOnly);
-		closePeriod.setVisible(!readOnly);
-	}
-
-	public boolean isFromYearEmpty() {
-		return fromBox.getValue() == null;
-	}
-
-	@Override
-	public boolean isToYearEmpty() {
-		return toBox.getValue() == null;
-	}
-
     @Override
     public void setCanChangeDepartment(boolean canChange) {
         departmentPicker.setVisible(canChange);
         departmentPickerRO.setVisible(!canChange);
     }
+
+	@Override
+	public void setCanChangeDeadline(boolean canChangeDeadline) {
+		setDeadlineButton.setVisible(canChangeDeadline);
+	}
 }

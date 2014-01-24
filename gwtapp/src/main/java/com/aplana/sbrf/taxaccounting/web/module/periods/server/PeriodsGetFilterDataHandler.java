@@ -56,7 +56,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();
         if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
-
             switch (taxType) {
                 case PROPERTY:
                 case TRANSPORT:
@@ -72,8 +71,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                 default:
                     break;
             }
-
-
         } else { // Контролер НС
 	        switch (taxType) {
 		        case PROPERTY:

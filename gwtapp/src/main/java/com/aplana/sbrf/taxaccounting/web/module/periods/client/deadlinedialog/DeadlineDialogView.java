@@ -85,19 +85,20 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                                 public void yes() {
                                     getUiHandlers().setDepartmentDeadline(dv.getDepartmentId(), dv.getParentDepartmentId());
                                     lastSelectedDepartment = dv;
+	                                saveButton.setVisible(false);
                                     Dialog.hideMessage();
                                 }
 
                                 @Override
                                 public void no() {
-                                    departmentPicker.setValue(Arrays.asList(dv));
+                                    departmentPicker.setValue(Arrays.asList(lastSelectedDepartment));
                                     deadline.setValue(lastSelectedDeadline);
                                     Dialog.hideMessage();
                                 }
 
                                 @Override
                                 public void close() {
-                                    departmentPicker.setValue(Arrays.asList(dv));
+                                    departmentPicker.setValue(Arrays.asList(lastSelectedDepartment));
                                     deadline.setValue(lastSelectedDeadline);
                                     Dialog.hideMessage();
                                 }
@@ -119,7 +120,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
 
     @Override
     public void setTitle(String periodName, int year) {
-        deadlineDialog.setText(DIALOG_TITLE + periodName + " " + year + " года");
+        deadlineDialog.setText(DIALOG_TITLE + periodName + " " + year);
     }
 
     @Override
