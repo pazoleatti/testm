@@ -101,6 +101,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         initWidget(binder.createAndBindUi(this));
         setHeader(text);
         setMultiSelection(multiSelection);
+        setValueChangeHandler();
     }
 
     /**
@@ -220,24 +221,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
             CheckBox widget = (CheckBox) child.getWidget();
             treeItemsHash.put(child.getWidget(), child);
             child.getPanel().getElement().addClassName(style.msiTreeItem());
-
-            // изменение значения чекбокса
-            widget.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                @Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    if (!selectChild || !multiSelection) {
-                        return;
-                    }
-                    // обновить значения у всех дочерних элементов
-                    CheckBox widget = (CheckBox) event.getSource();
-                    MultiSelectTreeItem item = treeItemsHash.get(widget);
-                    List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
-                    findAllChild(list, item);
-                    for (MultiSelectTreeItem i : list) {
-                        i.setValue(widget.getValue());
-                    }
-                }
-            });
         }
         updateItems();
     }
@@ -375,5 +358,54 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
 
     public void addOpenHandler(OpenHandler<TreeItem> handler) {
         tree.addOpenHandler(handler);
+    }
+
+    /** Установить обработчик изменения значения элемента дерева (выбрать дочерние). */
+    private void setValueChangeHandler() {
+        addValueChangeHandler(new ValueChangeHandler<H>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<H> event) {
+                if (selectChild && multiSelection) {
+                    // обновить значения у всех дочерних элементов
+                    CheckBox widget = (CheckBox) getSelectedItem().getWidget();
+                    MultiSelectTreeItem item = treeItemsHash.get(widget);
+                    List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
+                    findAllChild(list, item);
+                    for (MultiSelectTreeItem i : list) {
+                        i.setValue(widget.getValue());
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Фильтр элементов дерева по названию.
+     *
+     * @param filter строка для фильтра
+     */
+    public void filter(String filter) {
+        List<MultiSelectTreeItem> list = getItems();
+        if (filter == null || "".equals(filter)) {
+            for (MultiSelectTreeItem item : list) {
+                item.setVisible(true);
+            }
+            return;
+        }
+        for (MultiSelectTreeItem item : list) {
+            String itemValue = item.getName().toLowerCase();
+            if (itemValue.contains(filter.toLowerCase())) {
+                item.setVisible(true);
+                MultiSelectTreeItem parent = (MultiSelectTreeItem) item.getParentItem();
+                while (parent != null) {
+                    parent.setVisible(true);
+                    parent.setState(true);
+                    parent = (MultiSelectTreeItem) parent.getParentItem();
+                }
+            } else {
+                item.setVisible(false);
+                item.setState(false);
+            }
+        }
     }
 }
