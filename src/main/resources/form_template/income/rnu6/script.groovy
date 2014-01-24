@@ -381,21 +381,20 @@ void logicCheck() {
             from = new GregorianCalendar()
             from.setTime(date)
             from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
-            taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, from.getTime(), date)
+            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from.getTime(), date)
+
             isFind = false
-            for (taxPeriod in taxPeriods) {
-                reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-                for (reportPeriod in reportPeriods) {
-                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
-                    if (findFormData != null && findFormData.id != formData.id) {
-                        for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
-                            // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
-                            if (findRow.code == row.code && findRow.docNumber == row.docNumber
-                                    && findRow.docDate == row.docDate) {
-                                isFind = true
-                                if (!(findRow.ruble > row.ruble)) {
-                                    logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
-                                }
+
+            for (reportPeriod in reportPeriods) {
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
+                if (findFormData != null && findFormData.id != formData.id) {
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                        // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
+                        if (findRow.code == row.code && findRow.docNumber == row.docNumber
+                                && findRow.docDate == row.docDate) {
+                            isFind = true
+                            if (!(findRow.ruble > row.ruble)) {
+                                logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
                             }
                         }
                     }
