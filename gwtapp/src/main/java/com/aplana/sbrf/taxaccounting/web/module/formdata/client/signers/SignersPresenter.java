@@ -57,7 +57,8 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                     @Override
                     public void onSuccess(GetDepartmentTreeResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        getView().setDepartment(formData.getDepartmentId());
+                        getView().setDepartment(formData.getPrintDepartmentId() != null ?
+                                formData.getPrintDepartmentId() : formData.getDepartmentId());
                     }
                 }, this));
 	}
@@ -66,7 +67,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 	public void onSave(FormDataPerformer performer, List<FormDataSigner> signers, Integer departmentId) {
         formData.setPerformer(performer);
 		formData.setSigners(signers);
-        formData.setDepartmentId(departmentId);
+        formData.setPrintDepartmentId(departmentId);
 		getView().hide();
 	}
 
