@@ -241,7 +241,7 @@ public class FlexiblePager extends AbstractPager {
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
 
-    private static final int MAX_ROWS_COUNT_ON_PAGE = 100;
+    //private static final int MAX_ROWS_COUNT_ON_PAGE = 100;
     private static final int DEFAULT_PAGE_SIZE = 20;
 
 	/**
@@ -585,9 +585,9 @@ public class FlexiblePager extends AbstractPager {
 	public void setPageSize(int pageSize) {
         if (pageSize < 1) {
             pageSize = getPageSize();
-        } else if (pageSize > MAX_ROWS_COUNT_ON_PAGE) {
+        }/* else if (pageSize > MAX_ROWS_COUNT_ON_PAGE) {
             pageSize = MAX_ROWS_COUNT_ON_PAGE;
-        }
+        }*/
         setRowsCountOnPage(pageSize);
 		super.setPageSize(pageSize);
 	}
