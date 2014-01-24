@@ -96,7 +96,7 @@ insert into form_style (id, alias, form_template_id, font_color, back_color, ita
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (3, 'alias3', 1, 1, 1, 1, 1);
 
 -- FormData
-insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
+insert into form_data(id, form_template_id, department_id, print_department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 1, 3, 1, 0);
 
 -- FormColumn
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)

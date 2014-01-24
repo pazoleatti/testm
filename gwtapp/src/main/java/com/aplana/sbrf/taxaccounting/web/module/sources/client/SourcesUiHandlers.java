@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.event.EditDestinationDialogOpenEvent;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.List;
@@ -20,5 +19,5 @@ public interface SourcesUiHandlers extends UiHandlers {
     TaxType getTaxType();
 	void showAssignErrorMessage();
 
-    void onClickOpenEditDestination();
+
 }

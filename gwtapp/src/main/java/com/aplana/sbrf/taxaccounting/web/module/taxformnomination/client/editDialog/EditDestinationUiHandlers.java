@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.sources.client.editDialog;
+package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 

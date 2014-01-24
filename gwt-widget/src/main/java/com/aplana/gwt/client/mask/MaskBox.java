@@ -95,11 +95,13 @@ public class MaskBox<T> extends ValueBox<T> {
     }
 
     public void setMask(String mask) {
-        this.mask = mask;
+        if (mask != null && !mask.isEmpty()) {
+            this.mask = mask;
 
-        setupMaskListener(mask);
-        setText(getTextPicture());
-        setLength(mask.length());
+            setupMaskListener(mask);
+            setText(getTextPicture());
+            setLength(mask.length());
+        }
     }
 
     public String getMask() {

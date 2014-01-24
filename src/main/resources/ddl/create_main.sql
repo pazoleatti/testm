@@ -383,23 +383,23 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
+  print_department_id number(9) not null,
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
   return_sign number(1) not null,
   period_order number(2),
-  print_department_id number(9) not null
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
+comment on column form_data.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
-comment on column form_data.print_department_id is 'Подразделение, которое печатает налоговую форму';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------

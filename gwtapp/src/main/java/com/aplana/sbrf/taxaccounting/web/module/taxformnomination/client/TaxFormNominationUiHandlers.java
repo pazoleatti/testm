@@ -15,4 +15,6 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
     void getTableData();
 
     void save(Set<Long> ids);
+
+    void onClickOpenEditDestination();
 }

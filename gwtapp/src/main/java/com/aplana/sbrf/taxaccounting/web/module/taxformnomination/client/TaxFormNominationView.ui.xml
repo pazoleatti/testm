@@ -54,6 +54,7 @@
                             <g:Anchor ui:field="declarationAnchor" href="#!destination;isForm=false">Декларации
                             </g:Anchor>
                             <g:Label ui:field="declarationLabel">Декларации</g:Label>
+                                <style:LinkAnchor ui:field="clickEdit" text="Открыть диалог" />
                         </g:VerticalPanel>
                     </g:HorizontalPanel>
 
