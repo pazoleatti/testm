@@ -60,6 +60,7 @@ public class FormDataDaoTest {
 		formData.setState(WorkflowState.CREATED);
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
+        formData.setPrintDepartmentId(1);
 		formData.setReportPeriodId(1);
 
 		long formDataId = formDataDao.save(formData);
@@ -82,6 +83,7 @@ public class FormDataDaoTest {
 		}
 
 		fd.setDepartmentId(Department.ROOT_BANK_ID);
+        fd.setPrintDepartmentId(Department.ROOT_BANK_ID);
 		fd.setKind(FormDataKind.SUMMARY);
 		fd.setState(WorkflowState.CREATED);
 		fd.setReportPeriodId(Constants.REPORT_PERIOD_ID);
@@ -132,6 +134,7 @@ public class FormDataDaoTest {
 		formData.setState(WorkflowState.CREATED);
 		formData.setKind(FormDataKind.SUMMARY);
 		formData.setDepartmentId(1);
+        formData.setPrintDepartmentId(1);
 		formData.setReportPeriodId(1);
 
 		return formData;
