@@ -35,29 +35,22 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
-        data.addKeyPressHandler(new KeyPressHandler() {
+        data.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyPress(KeyPressEvent keyPressEvent) {
-                //при печати идет запаздывание на 1 символ
-                setDataLength(data.getText().length() + 1);
+            public void onKeyUp(KeyUpEvent event) {
+                setDataLength();
             }
         });
-        data.addFocusHandler(new FocusHandler() {
+        data.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onFocus(FocusEvent focusEvent) {
-                setDataLength(data.getText().length());
-            }
-        });
-        data.addBlurHandler(new BlurHandler() {
-            @Override
-            public void onBlur(BlurEvent blurEvent) {
-                setDataLength(data.getText().length());
+            public void onChange(ChangeEvent event) {
+                setDataLength();
             }
         });
     }
 
-    private void setDataLength(int value) {
-        textLengthLabel.setText("Длина " + value + " (макс. " + MAX_LENGTH + ")");
+    private void setDataLength() {
+        textLengthLabel.setText("Длина " + data.getText().length() + " (макс. " + MAX_LENGTH + ")");
     }
 
     @Override

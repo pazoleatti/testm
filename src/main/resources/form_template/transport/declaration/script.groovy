@@ -94,7 +94,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     КНД:"1152004",
                     ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"), //new Date().format("dd.MM.yyyy"),
                     Период: 34,
-                    ОтчетГод: reportPeriod.taxPeriod.startDate.format('yyyy'),
+                    ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
@@ -432,8 +432,8 @@ def getParam(taxBenefitCode, okato){
 }
 
 def getBenefitMonths(def row) {
-    def periodStart = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-    def periodEnd = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
+    def periodStart = reportPeriodService.getStartDate(declarationData.reportPeriodId).time
+    def periodEnd = reportPeriodService.getEndDate(declarationData.reportPeriodId).time
     if ((row.benefitEndDate != null && row.benefitEndDate < periodStart) || row.benefitStartDate > periodEnd){
         return 0
     } else {
