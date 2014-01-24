@@ -574,7 +574,7 @@ void generateXML() {
                 КНД :  knd,
                 ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 Период : period,
-                ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
+                ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
                 НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
                 ПоМесту : taxPlaceTypeCode) {
@@ -617,7 +617,7 @@ void generateXML() {
                     // 0..n // всегда один
                     НалПУАв(
                             ТипНП : typeNP,
-                            ОКАТО : okato) {
+                            ОКТМО : okato) {
 
                         def nalPu = (nalDoplFB != 0 ? nalDoplFB : -nalUmenFB)
                         // 0..1
@@ -650,7 +650,7 @@ void generateXML() {
                         НалПУМес(
                                 [ТипНП : typeNP] +
                                         (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКАТО : okato]) {
+                                        [ОКТМО : okato]) {
 
                             def avPlat1 = empty
                             def avPlat2 = empty
@@ -701,7 +701,7 @@ void generateXML() {
                             // 0..n
                             НалПУПроц(
                                     ВидПлат : getRefBookValue(24, row.paymentType)?.CODE?.value,
-                                    ОКАТО : row.okatoCode,
+                                    ОКТМО : row.okatoCode,
                                     КБК : row.budgetClassificationCode) {
 
                                 // 0..n
@@ -716,7 +716,7 @@ void generateXML() {
                         // 0..n
                         НалПУПроц(
                                 ВидПлат :	emptyNull,
-                                ОКАТО :		emptyNull,
+                                ОКТМО :		emptyNull,
                                 КБК :		emptyNull) {
 
                             // 0..n
@@ -1798,7 +1798,7 @@ List<String> getErrorDepartment(record) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKATO == null || record.OKATO.value == null) {
-        errorList.add("«Код по ОКАТО»")
+        errorList.add("«Код по ОКТМО»")
     }
     if (record.INN == null || record.INN.value == null || record.INN.value.isEmpty()) {
         errorList.add("«ИНН»")

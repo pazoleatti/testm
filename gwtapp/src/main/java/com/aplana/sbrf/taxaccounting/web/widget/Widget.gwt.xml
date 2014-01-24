@@ -35,7 +35,6 @@
     <source path="incrementbutton"/>
     <source path="fileupload"/>
     <source path="closabledialog"/>
-    <source path="multiselecttreeold"/>
     <source path="multiselecttree"/>
     <source path="filter"/>
 </module>

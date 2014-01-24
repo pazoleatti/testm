@@ -189,7 +189,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Если форма с заданными параметрами существует, то система выводит сообщение в панель уведомления:
         // "Форма с заданными параметрами уже существует".
-        // FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
         // Проверка реализована в скриптах, где она требуется.
     }
 

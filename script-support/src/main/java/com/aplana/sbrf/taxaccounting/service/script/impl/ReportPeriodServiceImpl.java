@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -139,4 +141,8 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
         return reportPeriodService.getMonthReportDate(reportPeriodId, periodOrder);
     }
 
+    @Override
+    public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
+        return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
+    }
 }

@@ -12,11 +12,6 @@
             height: 100% !important;
         }
 
-        .footerPanel {
-            text-align: right;
-            float: right;
-        }
-
         .mainVertical {
             background-color: #E8E1CF;
             width: 100%;
@@ -45,6 +40,16 @@
         .forVersion {
             margin-right: 5px;
         }
+
+        .forCountSelected {
+            font-weight: bold;
+            margin: 0 20px 0 5px;
+        }
+
+        .forCancel {
+            margin: 0 0 0 10px;
+        }
+
     </ui:style>
 
 	<g:FlowPanel width="200px" ui:field="wrappingPanel">
@@ -86,9 +91,21 @@
                         <t:DepartmentTreeWidget ui:field="tree" headerVisible="false" addStyleNames="{style.forTree}"/>
                     </g:ScrollPanel>
 
-                    <g:HorizontalPanel spacing="10" addStyleNames="{style.footerPanel}">
-                        <g:Button ui:field="ok" text="Выбрать"/>
-                        <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forMargin0}"/>
+                    <g:HorizontalPanel spacing="10" width="100%">
+                        <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                            <g:HorizontalPanel ui:field="itemsInfoPanel">
+                                <g:Label ui:field="countItemsLabel" text="Выбрано:"/>
+                                <g:Label ui:field="countItems" addStyleNames="{style.forCountSelected}"/>
+                                <g:Anchor ui:field="showItemsAnchor" text="Показать выбранные" wordWrap="false"
+                                        visible="false"/>
+                            </g:HorizontalPanel>
+                        </g:cell>
+                        <g:cell horizontalAlignment="right"  verticalAlignment="middle">
+                            <g:HorizontalPanel>
+                                <g:Button ui:field="ok" text="Выбрать"/>
+                                <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forCancel}"/>
+                            </g:HorizontalPanel>
+                        </g:cell>
                     </g:HorizontalPanel>
 
                 </g:VerticalPanel>

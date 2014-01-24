@@ -36,8 +36,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
-                new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME}, filter, range);
+		return physicalGetRows(fd,
+				new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, filter, range);
 	}
 
 	@Override
@@ -49,8 +49,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public List<DataRow<Cell>> getRows(FormData fd, DataRowFilter filter,
 			DataRowRange range) {
-		return phisicalGetRows(fd,
-                new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME}, filter, range);
+		return physicalGetRows(fd,
+				new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, filter, range);
 	}
 
 	@Override
@@ -226,7 +226,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	private void insertRows(FormData formData, int index, long ordBegin,
 			List<DataRow<Cell>> rows) {
-
 		Long ordEnd = getOrd(formData.getId(), index + 1);
 		long ordStep = ordEnd == null ? DataRowDaoImplUtils.DEFAULT_ORDER_STEP
 				: DataRowDaoImplUtils
@@ -238,7 +237,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             int endIndex = physicalGetSize(formData,
                     new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME}, null);
 
-            /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначало выбираем временную таблицу с индексами (RR)
+            /* Делаем так чтобы пересортировать колонки в один запрос. Для этого сначала выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
              *  Прибавляем ровно ту разницу, котрая необходима для вставки строк.
              */
@@ -248,12 +247,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             map.put("formDataId", formData.getId());
             map.put("dataStartRowIndex", (long) (index + 1));
             map.put("dataEndRowIndex", (long) endIndex);
-
             String sql = "update DATA_ROW set ORD = ORD + :diff where ID in" +
                     "(select RR.ID from " +
                     "(select row_number() over (order by DR.ORD) as IDX, DR.ID, DR.ORD from DATA_ROW DR where DR.TYPE in (:types) and FORM_DATA_ID=:formDataId) " +
                     "RR where RR.IDX between (:dataStartRowIndex) and (:dataEndRowIndex))";
-            if (!isSupportOver()){
+            if (!isSupportOver()){ // для юнит-тестов (hsql db)
                 sql = sql.replaceFirst("over \\(order by DR.ORD\\)", "over ()");
             }
             getNamedParameterJdbcTemplate().update(
@@ -263,7 +261,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
-
 		physicalInsertRows(formData, rows, ordBegin, ordStep, null);
 	}
 
@@ -304,8 +301,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-	private List<DataRow<Cell>> phisicalGetRows(FormData formData, TypeFlag[] types,
-			DataRowFilter filter, DataRowRange range) {
+	private List<DataRow<Cell>> physicalGetRows(FormData formData, TypeFlag[] types,
+												DataRowFilter filter, DataRowRange range) {
 		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, filter,
 				range);
 		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
@@ -335,18 +332,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     private void physicalInsertRows(final FormData formData,
                                     final List<DataRow<Cell>> dataRows, final Long ordBegin,
                                     final Long ordStep, final List<Long> orders) {
-
         if (dataRows.isEmpty()) {
             return;
         }
 
-        if (DataRowDaoImplUtils.hasDublicats(dataRows)){
+        if (DataRowDaoImplUtils.hasDuplicates(dataRows)){
             throw new IllegalArgumentException("Дубликаты строк не допустимы в списке. Дубликаты - ссылки на один и тот же объект DataRow");
         }
-
         // получение id'шников для вставки строк батчем
         final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
-
         getJdbcTemplate().batchUpdate(
                 "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
@@ -377,12 +371,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                         return ids.size();
                     }
                 });
-
         final Iterator<DataRow<Cell>> iterator = dataRows.iterator();
         for (Long id : ids) {
             iterator.next().setId(id);
         }
-
         batchInsertCells(dataRows);
     }
 

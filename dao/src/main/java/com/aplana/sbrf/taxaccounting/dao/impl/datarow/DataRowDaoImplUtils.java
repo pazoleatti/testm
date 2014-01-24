@@ -2,8 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
@@ -65,17 +66,14 @@ public class DataRowDaoImplUtils {
 	static long calcOrdStep(Long ordBegin, Long ordEnd, int number) {
 		return (ordEnd - ordBegin) / (number + 1);
 	}
-	
-	static boolean hasDublicats(List<?> c){
-			for (ListIterator<?> li1 = c.listIterator(); li1.hasNext();) {
-				Object object = li1.next();
-				for (ListIterator<?> li2 = c.listIterator(li1.nextIndex()); li2.hasNext();) {
-					if (object == li2.next()){
-						return true;
-					}
-				}
-			}
-			return false;
+
+	/**
+	 * Ищет одинаковые элементы в списке
+	 * @return true - есть совпадания; false - иначе
+ 	 */
+	static boolean hasDuplicates(List<?> list){
+		Set<Object> set = new HashSet<Object>(list);
+		return list.size() > set.size();
 	}
 
 	static interface CellValueExtractor {

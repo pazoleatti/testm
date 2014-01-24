@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -24,7 +26,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Форма "Исполнитель и подписанты"
@@ -67,6 +71,9 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	@UiField
     VerticalPanel directionPanel;
 
+    @UiField
+    DepartmentPickerPopupWidget departmentPicker;
+
 	private final PopupPanel widget;
 	private List<FormDataSigner> signers;
 	private List<FormDataSigner> clonedSigners;
@@ -101,7 +108,17 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		}
 	}
 
-	@Override
+    @Override
+    public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
+        departmentPicker.setAvalibleValues(departments, availableDepartments);
+    }
+
+    @Override
+    public void setDepartment(Integer department) {
+        departmentPicker.setValue(Arrays.asList(department));
+    }
+
+    @Override
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
 
@@ -133,6 +150,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 			cancelButton.setText("Отмена");
 		}
 		saveButton.setVisible(!readOnlyMode);
+        departmentPicker.setEnabled(!readOnlyMode);
 		initTable(readOnlyMode);
 	}
 
@@ -248,7 +266,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 			return;
 		}
 
-		getUiHandlers().onSave(performer, signers);
+		getUiHandlers().onSave(performer, signers, departmentPicker.getValue().get(0));
 	}
 
 	private boolean validateSigners() {

@@ -31,8 +31,8 @@
 		<field name="ТипНП" class="java.lang.String">
 			<fieldDescription><![CDATA[@ТипНП]]></fieldDescription>
 		</field>
-		<field name="ОКАТО" class="java.lang.String">
-			<fieldDescription><![CDATA[@ОКАТО]]></fieldDescription>
+		<field name="ОКТМО" class="java.lang.String">
+			<fieldDescription><![CDATA[@ОКТМО]]></fieldDescription>
 		</field>
 		<field name="КБКФед" class="java.lang.String">
 			<fieldDescription><![CDATA[ФедБдж/@КБК]]></fieldDescription>
@@ -56,15 +56,15 @@
 :
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
-		<variable name="ОКАТО" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОКАТО} == null ?
+		<variable name="ОКТМО" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ОКТМО} == null ?
 "-------------------------"
 :
-($F{ОКАТО}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОКАТО} == null ?
+($F{ОКТМО}+"-------------------------").substring(0,25)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОКТМО} == null ?
 "-------------------------"
 :
-($F{ОКАТО}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ОКТМО}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="КБКФед" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КБКФед} == null ?
@@ -126,8 +126,8 @@
 		<field name="ТипНП" class="java.lang.String">
 			<fieldDescription><![CDATA[@ТипНП]]></fieldDescription>
 		</field>
-		<field name="ОКАТО" class="java.lang.String">
-			<fieldDescription><![CDATA[@ОКАТО]]></fieldDescription>
+		<field name="ОКТМО" class="java.lang.String">
+			<fieldDescription><![CDATA[@ОКТМО]]></fieldDescription>
 		</field>
 		<field name="КБКФед" class="java.lang.String">
 			<fieldDescription><![CDATA[ФедБдж/@КБК]]></fieldDescription>
@@ -156,15 +156,15 @@
 		<field name="АвПлат3С" class="java.lang.String">
 			<fieldDescription><![CDATA[СубБдж/@АвПлат3]]></fieldDescription>
 		</field>
-		<variable name="ОКАТО" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОКАТО} == null ?
+		<variable name="ОКТМО" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ОКТМО} == null ?
 "-------------------------"
 :
-($F{ОКАТО}+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОКАТО} == null ?
+($F{ОКТМО}+"-------------------------").substring(0,25)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОКТМО} == null ?
 "-------------------------"
 :
-($F{ОКАТО}+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{ОКТМО}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="КБКФед" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КБКФед} == null ?
@@ -9074,7 +9074,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Код по ОКАТО]]></text>
+							<text><![CDATA[Код по ОКТМО]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="1987201c-38e2-426c-b0b5-9625e0b39fa2" x="0" y="141" width="263" height="14"/>
@@ -9207,7 +9207,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="efced6fb-22ee-450a-a941-d3d6069913a7" x="370" y="100" width="15" height="19"/>
@@ -9221,7 +9221,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(5)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(5)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="664e758f-1ec4-4f58-943c-e2c828b5f08b" x="400" y="100" width="15" height="19"/>
@@ -9235,7 +9235,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="14a0a3a6-ab40-49a0-9a9e-c58bedf4ef29" x="310" y="100" width="15" height="19"/>
@@ -9249,7 +9249,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="f19e8066-4e7f-41a8-8695-0ac3906bd81d" x="385" y="100" width="15" height="19"/>
@@ -9263,7 +9263,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="87142ed7-15c8-4764-acc6-89ac92aa487c" x="430" y="100" width="15" height="19"/>
@@ -9277,7 +9277,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="c2e5b214-3424-4e54-93f6-91c64d1bb7d7" x="325" y="100" width="15" height="19"/>
@@ -9291,7 +9291,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(2)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="551b5653-38d9-4b58-9d82-793d61fb603b" x="445" y="100" width="15" height="19"/>
@@ -9305,7 +9305,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(10)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(10)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="764e5b96-46b9-4ab5-8071-13bf7d9f5caf" x="415" y="100" width="15" height="19"/>
@@ -9319,7 +9319,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="cfca76ad-d9f5-4816-bf8e-03c53cbfc02c" x="340" y="100" width="15" height="19"/>
@@ -9333,7 +9333,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="218cf66b-f472-46a0-8bf3-ca52d6bbe838" x="355" y="100" width="15" height="19"/>
@@ -9347,7 +9347,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="cbe16564-145c-476a-807e-7ee42a59f287" x="580" y="156" width="15" height="19"/>
@@ -11194,7 +11194,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Код по ОКАТО]]></text>
+							<text><![CDATA[Код по ОКТМО]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="fb095b72-9a77-4dc0-aeba-cc8c65195a6e" x="248" y="202" width="45" height="20"/>
@@ -11675,7 +11675,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="701e9eb0-4e27-45dc-a512-14a3cf89a2f0" x="370" y="202" width="15" height="19"/>
@@ -11689,7 +11689,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(5)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(5)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="3e236e65-c618-475f-81de-71a711e08cbf" x="400" y="202" width="15" height="19"/>
@@ -11703,7 +11703,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="61c3bf22-2361-413f-b92e-e809640cc5c0" x="310" y="202" width="15" height="19"/>
@@ -11717,7 +11717,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="9fc82f7c-62e6-4914-8eb2-fabfb39d4fcd" x="385" y="202" width="15" height="19"/>
@@ -11731,7 +11731,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a1579543-4ba0-4a5a-b72f-5be8a7a56fea" x="430" y="202" width="15" height="19"/>
@@ -11745,7 +11745,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="6e039c25-488f-411e-bee3-4879e524ff34" x="325" y="202" width="15" height="19"/>
@@ -11759,7 +11759,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(2)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="60e7179f-ba39-4e2c-81cb-cbf0630ce706" x="445" y="202" width="15" height="19"/>
@@ -11773,7 +11773,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(10)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(10)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="1504895a-f160-4209-aa80-21114b93080e" x="415" y="202" width="15" height="19"/>
@@ -11787,7 +11787,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="8b7eb2b4-e3e2-491d-93d1-3cc40f76fdbf" x="340" y="202" width="15" height="19"/>
@@ -11801,7 +11801,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a506767b-2cb9-47e2-8407-f86033aed5a0" x="355" y="202" width="15" height="19"/>
@@ -11815,7 +11815,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ОКАТО}.charAt(4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt(4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="5c9bba2c-e443-4515-9e20-d75e63b072a0" x="580" y="405" width="15" height="19"/>
