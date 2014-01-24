@@ -17,8 +17,8 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, '1 - период', 1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (2, '2 - период', 1, 2, 22, date '2013-04-01', date '2013-06-30', date '2013-04-01');
 
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 2, 1, 0);
-insert into form_data (id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (2, 2, 2, 2, 3, 2, 0);
+insert into form_data (id, form_template_id, department_id, print_department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 1, 2, 1, 0);
+insert into form_data (id, form_template_id, department_id, print_department_id, state, kind, report_period_id, return_sign) values (2, 2, 2, 2, 2, 3, 2, 0);
 
 insert into form_data_signer (id, form_data_id, name, position, ord) values (1, 1, 'name1', 'position1', 1);
 insert into form_data_signer (id, form_data_id, name, position, ord) values (2, 1, 'name2', 'position2', 2);

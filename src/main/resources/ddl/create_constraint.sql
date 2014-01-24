@@ -116,6 +116,7 @@ alter table declaration_data add constraint declaration_data_uniq_template uniqu
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_id foreign key (department_id) references department(id);
+alter table form_data add constraint form_data_fk_print_dep_id foreign key (print_department_id) references department(id);
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));

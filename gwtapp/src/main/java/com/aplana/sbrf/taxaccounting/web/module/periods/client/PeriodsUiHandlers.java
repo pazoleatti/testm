@@ -8,4 +8,5 @@ public interface PeriodsUiHandlers extends UiHandlers {
 	void onFindButton();
     void setDeadline();
 	void removePeriod();
+	void selectionChanged();
 }

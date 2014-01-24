@@ -48,7 +48,11 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         String text = "%s назначил новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
         for (DepartmentPair pair : action.getDepartments()) {
-            Department receiver = departmentService.getDepartment(pair.getParentDepartmentId());
+            Department receiver =
+		            pair.getParentDepartmentId() == null
+		            ? null
+		            : departmentService.getDepartment(pair.getParentDepartmentId());
+
             Notification notification = new Notification();
             notification.setCreateDate(new Date());
             notification.setDeadline(action.getDeadline());
@@ -56,7 +60,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setSenderDepartmentId(pair.getDepartmentId());
             notification.setReceiverDepartmentId(pair.getParentDepartmentId());
             notification.setText(String.format(text,
-                    userInfo.getUser().getName(), receiver.getName(), action.getTaxType().getName(),
+                    userInfo.getUser().getName(), receiver == null ? "" : receiver.getName(), action.getTaxType().getName(),
                     action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
 
             notifications.add(notification);
