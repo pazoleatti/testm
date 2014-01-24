@@ -27,13 +27,13 @@
             <g:FlowPanel addStyleNames="{style.content}">
 
                 <g:FlowPanel height="60px">
-                    <g:Label text="Подразделение"/>
-                    <dep:DepartmentPickerPopupWidget width="400px" ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
+                    <g:Label text="Период"/>
+                    <rep:PeriodPickerPopupWidget width="400px" ui:field="reportPeriodIds" multiselect="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
-                    <g:Label text="Отчетный период"/>
-                    <rep:PeriodPickerPopupWidget width="400px" ui:field="reportPeriodIds" multiselect="false"/>
+                    <g:Label text="Подразделение"/>
+                    <dep:DepartmentPickerPopupWidget width="400px" ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel height="60px">
@@ -51,7 +51,7 @@
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
                     <g:Button addStyleNames="{style.footerButton}"  ui:field="continueButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Закрыть"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Отмена"/>
                 </style:RightBar>
             </style:Bar>
 

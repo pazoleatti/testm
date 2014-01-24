@@ -62,6 +62,12 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @UiField
     Button cancel;
 
+    @UiField
+    HorizontalPanel itemsInfoPanel;
+
+    @UiField
+    Label countItems;
+
     /** Значения id */
     private List<Integer> value = new ArrayList<Integer>();
 
@@ -94,11 +100,14 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         this.multiselection = multiselection;
         tree.setMultiSelection(multiselection);
         selectChild.setVisible(multiselection);
+        itemsInfoPanel.setVisible(multiselection);
         popupPanel.setModal(modal);
         setHeader(header);
 
         // TODO (Ramil Timerbaev) в "Дата актуальности" пока выставил текущую дату
         setVersion(new Date());
+
+        updateCountItems();
     }
 
     @UiHandler("selectButton")
@@ -198,6 +207,8 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
         for (DepartmentPair item : tree.getValue()) {
             valueDereference.add(item.getDepartmentName());
         }
+        countItems.setText(String.valueOf(valueDereference.size()));
+        ok.setEnabled(valueDereference.size() > 0);
     }
 
     @UiHandler("ok")
@@ -220,13 +231,14 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
     @UiHandler("find")
     void onFindButtonClicked(ClickEvent event) {
-        // TODO (Ramil Timerbaev)
+        tree.filter(filter.getText());
     }
 
     @UiHandler("cancel")
     void onCancelButtonClicked(ClickEvent event) {
         popupPanel.hide();
-        setValue(value);
+        List<Integer> list = new ArrayList<Integer>(value);
+        setValue(list);
     }
 
     @UiHandler("selectChild")
@@ -250,5 +262,19 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
     @Override
     public void setSelectButtonFocus(boolean focused) {
         selectButton.setFocus(focused);
+    }
+
+    /** Обновить значение количества выбранных элементов. */
+    private void updateCountItems() {
+        tree.addValueChangeHandler(new ValueChangeHandler<List<DepartmentPair>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<DepartmentPair>> event) {
+                int size = tree.getValue().size();
+                ok.setEnabled(size > 0);
+                if (multiselection) {
+                    countItems.setText(String.valueOf(size));
+                }
+            }
+        });
     }
 }

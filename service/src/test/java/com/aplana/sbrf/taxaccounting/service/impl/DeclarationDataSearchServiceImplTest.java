@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -41,14 +40,14 @@ public class DeclarationDataSearchServiceImplTest {
 	public static void tearUp() {
 		 service = new DeclarationDataSearchServiceImpl();
 
-		DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
-		// Декларации по налогу на прибыть есть в подразделениях 1, 2, 3
-		Set<Integer> incomeDepartmentIds = new HashSet<Integer>(3);
-		incomeDepartmentIds.add(1);
-		incomeDepartmentIds.add(2);
-		incomeDepartmentIds.add(3);
-		when(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.INCOME)).thenReturn(incomeDepartmentIds);
-		ReflectionTestUtils.setField(service, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
+//		DepartmentDeclarationTypeDao departmentDeclarationTypeDao = mock(DepartmentDeclarationTypeDao.class);
+//		// Декларации по налогу на прибыть есть в подразделениях 1, 2, 3
+//		Set<Integer> incomeDepartmentIds = new HashSet<Integer>(3);
+//		incomeDepartmentIds.add(1);
+//		incomeDepartmentIds.add(2);
+//		incomeDepartmentIds.add(3);
+//		when(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(TaxType.INCOME)).thenReturn(incomeDepartmentIds);
+//		ReflectionTestUtils.setField(service, "departmentDeclarationTypeDao", departmentDeclarationTypeDao);
 
 		// В подразделении 1 есть только декларация INCOME_DECLARATION_TYPE_ID_1
 		
@@ -65,6 +64,13 @@ public class DeclarationDataSearchServiceImplTest {
 
         DepartmentService departmentService = mock(DepartmentService.class);
         when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenReturn(Arrays.asList(1));
+        Department dep1 = new Department();
+        dep1.setId(1);
+        Department dep2 = new Department();
+        dep2.setId(2);
+        Department dep3 = new Department();
+        dep3.setId(3);
+        when(departmentService.listAll()).thenReturn(Arrays.asList(dep1, dep2, dep3));
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
     }
 

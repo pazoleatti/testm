@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import org.apache.commons.logging.Log;
@@ -41,7 +42,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		}
 
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" AND fd.DEPARTMENT_ID in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
+			sql.append(" AND fd.department_id in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
 		}
 
 		if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
@@ -61,27 +62,17 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		if (filter.getAccessFilterType() == null) {
 			throw new IllegalArgumentException("AccessFilterType cannot be null");
 		}
-		
-		if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT) {
-			sql.append(" and fd.department_id = ").append(filter.getUserDepartmentId());
-		} else if (filter.getAccessFilterType() == AccessFilterType.USER_DEPARTMENT_AND_SOURCES) {
-           // TODO USER_DEPARTMENT_AND_SOURCES для роли "Контролер НС" должна быть реализована по-другому. Постановка не готова http://conf.aplana.com/pages/viewpage.action?pageId=11382061
-			// Форма либо сама относится к подразделению пользователя
-			sql.append(" and (fd.department_id = ").append(filter.getUserDepartmentId())
-			// Либо является источником для одной из форм подразделения пользователя
-				.append(" or exists (")
-				.append("select 1 from form_data_source fds, department_form_type dftSrc, department_form_type dftDest where")
-				.append(" fds.department_form_type_id = dftDest.id and fds.src_department_form_type_id = dftSrc.id")
-				.append(" and dftSrc.form_type_id = ft.id and dftSrc.kind = fd.kind and dftSrc.department_id = fd.department_id")
-				.append(" and dftDest.department_id = ").append(filter.getUserDepartmentId()).append(")")
-			// Либо является источником для одной из деклараций подразделения пользователя
-				.append(" or exists (")
-				.append("select 1 from declaration_source ds, department_form_type dftSrc, department_declaration_type ddtDest where")
-				.append(" ds.department_declaration_type_id = ddtDest.id and ds.src_department_form_type_id = dftSrc.id")
-				.append(" and dftSrc.form_type_id = ft.id and dftSrc.kind = fd.kind and dftSrc.department_id = fd.department_id")
-				.append(" and ddtDest.department_id = ").append(filter.getUserDepartmentId()).append(")")				
-				.append(")");
-		}
+
+		if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS
+                || filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
+            sql.append(" and fd.department_id in ").append(SqlUtils.transformToSqlInStatement(
+                    filter.getAvailableDepartmentIds()));
+
+            if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
+                sql.append(" and fd.kind in ").append(SqlUtils.transformFormKindsToSqlInStatement(
+                        filter.getAvailableFormDataKinds()));
+            }
+        }
 	}
 	
 	private void appendSelectClause(StringBuilder sql) {
@@ -102,6 +93,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		}
 
 		sql.append(" order by fd.id desc");
+
 		return getJdbcTemplate().query(sql.toString(), new FormDataSearchResultItemMapper());
 	}
 

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,5 +63,15 @@ public class FormTypeDaoTest {
         formTypeDao.delete(type.getId());
         type = formTypeDao.get(1);
         Assert.assertEquals(-1, type.getStatus().getId());
+    }
+
+    @Test
+    public void testGetByFilter(){
+        TemplateFilter filter = new TemplateFilter();
+        filter.setTaxType(TaxType.INCOME);
+        filter.setActive(true);
+        Assert.assertEquals(1, formTypeDao.getByFilter(filter).size());
+        filter.setActive(false);
+        Assert.assertEquals(0, formTypeDao.getByFilter(filter).size());
     }
 }

@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 @ScriptExposed
@@ -104,5 +106,12 @@ public interface ReportPeriodService {
      */
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
 
-
+    /**
+     * Список отчетных периодов за период дат по виду налога
+     * @param taxType Вид налога
+     * @param startDate Начало периода
+     * @param endDate Конец периода
+     * @return Список отчетных периодов
+     */
+    List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 }

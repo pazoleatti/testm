@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -14,14 +13,16 @@ import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.test.DepartmentFormTypeMockUtils.mockDepartmentFormType;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class FormDataSearchServiceTest {
 	
 	private static FormDataSearchServiceImpl service;
-	private static SourceService sourceService;
 	private final static List<FormType> FORM_TYPES_BY_TAX_TYPE = new ArrayList<FormType>();
 	
 	private static final int CONTROL_UNP_USER_ID = 1;
@@ -31,8 +32,9 @@ public class FormDataSearchServiceTest {
 	@BeforeClass
 	public static void tearUp() {
 		service = new FormDataSearchServiceImpl();
-		sourceService = new SourceServiceImpl();
+
         DepartmentService departmentService = mock(DepartmentService.class);
+        when(departmentService.getTaxFormDepartments(any(TAUser.class), anyListOf(TaxType.class))).thenReturn(asList(1, 2, 3));
 
 		FormTypeDao formTypeDao = mock(FormTypeDao.class);
 		when(formTypeDao.getByTaxType(TaxType.TRANSPORT)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
@@ -48,11 +50,11 @@ public class FormDataSearchServiceTest {
 		dfts = new ArrayList<DepartmentFormType>();
 		dfts.add(mockDepartmentFormType(2, 3, FormDataKind.SUMMARY));
 		dfts.add(mockDepartmentFormType(3, 2, FormDataKind.SUMMARY));
+        dfts.add(mockDepartmentFormType(1, 2, FormDataKind.PRIMARY));
 		when(departmentFormTypeDao.getDepartmentSources(1, TaxType.TRANSPORT)).thenReturn(dfts);
-
-		ReflectionTestUtils.setField(sourceService, "departmentFormTypeDao", departmentFormTypeDao);
-		ReflectionTestUtils.setField(service, "sourceService", sourceService);
         ReflectionTestUtils.setField(service, "departmentService", departmentService);
+
+        ReflectionTestUtils.setField(service, "formDataAccessService", new FormDataAccessServiceImpl());
 	}
 
 	@Test
@@ -61,20 +63,30 @@ public class FormDataSearchServiceTest {
 		userInfo.setUser(mockUser(CONTROL_UNP_USER_ID, 1, TARole.ROLE_CONTROL_UNP));
 		FormDataFilterAvailableValues values = service.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
 		assertTrue(values.getFormTypes() == FORM_TYPES_BY_TAX_TYPE);
-		assertEquals(3, values.getKinds().size());
-		assertNull(values.getDepartmentIds());
+		assertEquals(4, values.getKinds().size());
+        assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, FormDataKind.CONSOLIDATED,
+                FormDataKind.SUMMARY, null)));
+        assertEquals(3, values.getDepartmentIds().size());
+        assertTrue(values.getDepartmentIds().containsAll(asList(1, 2, 3)));
 	}
 
 	@Test
 	public void testGetAvailableFilterValuesForOperator() {
-        TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPER));
-        FormDataFilterAvailableValues values = service.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
-        assertEquals(2, values.getFormTypes().size());
-        assertEquals(0, values.getKinds().size());
-        assertFalse(values.getKinds().contains(FormDataKind.SUMMARY));
-        assertEquals(1, values.getDepartmentIds().size());
-        assertTrue(values.getDepartmentIds().contains(1));
+        try {
+            TAUserInfo userInfo = new TAUserInfo();
+            userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPER));
+            FormDataFilterAvailableValues values = service.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
+            assertEquals(0, values.getFormTypes().size());
+            assertEquals(2, values.getKinds().size());
+            assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, null)));
+            assertFalse(values.getKinds().contains(FormDataKind.SUMMARY));
+            assertFalse(values.getKinds().contains(FormDataKind.CONSOLIDATED));
+            assertEquals(3, values.getDepartmentIds().size());
+            assertTrue(values.getDepartmentIds().containsAll(asList(1, 2, 3)));
+            assertTrue(values.getDepartmentIds().contains(1));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 	@Test
@@ -82,12 +94,11 @@ public class FormDataSearchServiceTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
 		FormDataFilterAvailableValues values = service.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
-		assertEquals(3, values.getFormTypes().size());
-		assertEquals(1, values.getKinds().size());
-		assertTrue(values.getKinds().contains(FormDataKind.SUMMARY));
+		assertEquals(0, values.getFormTypes().size());
+		assertEquals(4, values.getKinds().size());
+        assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, FormDataKind.CONSOLIDATED,
+                FormDataKind.SUMMARY, null)));
 		assertEquals(3, values.getDepartmentIds().size());
-		assertTrue(values.getDepartmentIds().contains(1));
-		assertTrue(values.getDepartmentIds().contains(2));
-		assertTrue(values.getDepartmentIds().contains(3));
+        assertTrue(values.getDepartmentIds().containsAll(asList(1, 2, 3)));
 	}
 }

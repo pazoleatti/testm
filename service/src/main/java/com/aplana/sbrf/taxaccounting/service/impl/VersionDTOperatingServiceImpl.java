@@ -98,6 +98,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                         break;
                 }
             }
+        } else if (newIntersection.getEndDate() != null){
+            DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, template.getType());
+            declarationTemplateService.save(declarationTemplate);
         }
     }
 

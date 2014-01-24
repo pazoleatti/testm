@@ -9,6 +9,15 @@ import java.util.List;
  */
 public class GetDTVersionListResult implements Result {
     private List<DeclarationTemplateVersion> templateVersions;
+    private String dtTypeName;
+
+    public String getDtTypeName() {
+        return dtTypeName;
+    }
+
+    public void setDtTypeName(String dtTypeName) {
+        this.dtTypeName = dtTypeName;
+    }
 
     public List<DeclarationTemplateVersion> getTemplateVersions() {
         return templateVersions;

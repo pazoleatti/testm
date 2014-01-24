@@ -100,6 +100,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                         break;
                 }
             }
+        } else if(newIntersection.getEndDate() != null){
+            FormTemplate formTemplate =  createFakeTemplate(versionActualDateEnd, template.getType());
+            formTemplateService.save(formTemplate);
         }
 
     }
