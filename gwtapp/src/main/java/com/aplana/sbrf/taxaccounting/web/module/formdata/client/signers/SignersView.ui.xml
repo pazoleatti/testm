@@ -39,7 +39,7 @@
                         <g:Label width="100px">Телефон:</g:Label>
                         <g:TextBox maxLength="20" width="300px" ui:field="phone"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel height="250px" width="100%" spacing="3">
+                    <g:HorizontalPanel height="350px" width="100%" spacing="3">
                         <g:cell width="100%">
                             <t:GenericDataGrid ui:field="signersTable" height="250px" width="100%"/>
                         </g:cell>
