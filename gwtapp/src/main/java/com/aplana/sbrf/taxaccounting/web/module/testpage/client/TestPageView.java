@@ -6,6 +6,7 @@ import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
