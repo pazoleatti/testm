@@ -33,6 +33,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 		void setSigners(List<FormDataSigner> signers);
 		void setReadOnlyMode(boolean readOnlyMode);
         void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
+        void setDepartment(Integer department);
     }
 
 	@Inject
@@ -56,6 +57,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                     @Override
                     public void onSuccess(GetDepartmentTreeResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
+                        getView().setDepartment(formData.getDepartmentId());
                     }
                 }, this));
 	}

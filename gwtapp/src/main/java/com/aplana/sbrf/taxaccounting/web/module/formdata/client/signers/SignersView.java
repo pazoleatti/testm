@@ -26,6 +26,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -112,7 +113,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         departmentPicker.setAvalibleValues(departments, availableDepartments);
     }
 
-	@Override
+    @Override
+    public void setDepartment(Integer department) {
+        departmentPicker.setValue(Arrays.asList(department));
+    }
+
+    @Override
 	public void setSigners(List<FormDataSigner> signers) {
 		this.signers = signers;
 
@@ -144,6 +150,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 			cancelButton.setText("Отмена");
 		}
 		saveButton.setVisible(!readOnlyMode);
+        departmentPicker.setEnabled(!readOnlyMode);
 		initTable(readOnlyMode);
 	}
 
