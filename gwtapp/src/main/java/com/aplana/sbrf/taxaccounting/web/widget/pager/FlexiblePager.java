@@ -622,8 +622,8 @@ public class FlexiblePager extends AbstractPager {
 		middleLeftLabel.setText("Страница ");
 		pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
-        setPageSize(getPageSize());
-        rowsCountOnPage.setValue(getPageSize());
+        setPageSize(range.getLength());
+        rowsCountOnPage.setValue(range.getLength());
 
 		// Update the prev and first buttons.
 		setPrevPageButtonsDisabled(!hasPreviousPage());

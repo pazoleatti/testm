@@ -55,6 +55,6 @@ public class ListBoxWithTooltip<T> extends ValueListBox<T> {
 	}
 
     public void setEnabled(boolean isEnabled) {
-        DOM.setElementPropertyBoolean(this.getElement(), "disabled", isEnabled);
+        DOM.setElementPropertyBoolean(this.getElement(), "disabled", !isEnabled);
     }
 }
