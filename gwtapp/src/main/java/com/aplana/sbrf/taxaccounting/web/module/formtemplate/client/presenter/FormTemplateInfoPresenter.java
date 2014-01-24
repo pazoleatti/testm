@@ -1,22 +1,26 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.*;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.*;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.inject.*;
-import com.google.web.bindery.event.shared.*;
-import com.gwtplatform.mvp.client.*;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateInfoUiHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 import java.util.Date;
 
 public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresenter.MyView, FormTemplateInfoPresenter.MyProxy>
 		implements FormTemplateInfoUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
-	/**
+
+    /**
 	 * {@link FormTemplateInfoPresenter}'s proxy.
 	 */
 	@Title("Шаблоны налоговых форм")
@@ -29,11 +33,12 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code);
+		void setViewData(Date versionBegin, Date versionEnd, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code);
 		void onFlush();
 	}
 
-	private FormTemplate formTemplate;
+	private FormTemplateExt formTemplateExt;
+    private FormTemplate formTemplate;
 
 	@Inject
 	public FormTemplateInfoPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
@@ -50,9 +55,10 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
-		getView().setViewData(DateTimeFormat.getFormat("dd.MM.yyyy").format(formTemplate.getVersion()), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),formTemplate.getName(),
-				formTemplate.getFullName(), formTemplate.getCode());
+        formTemplateExt = event.getFormTemplateExt();
+        formTemplate = formTemplateExt.getFormTemplate();
+		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),
+                formTemplate.getName(), formTemplate.getFullName(), formTemplate.getCode());
 	}
 
 	@Override
@@ -66,8 +72,9 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	@Override
-	public void setVersion(Date version) {
-		formTemplate.setVersion(version);
+	public void setRangeRelevanceVersion(Date versionBegin, Date versionEnd) {
+		formTemplate.setVersion(versionBegin);
+        formTemplateExt.setActualEndVersionDate(versionEnd);
 	}
 
 	@Override

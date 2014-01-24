@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.gwtplatform.dispatch.shared.Result;
 
@@ -10,14 +9,14 @@ import java.util.List;
  * @author Vitalii Samolovskikh
  */
 public class GetFormResult implements Result {
-    private FormTemplate form;
+    private FormTemplateExt form;
     private List<RefBook> refBookList;
 
-    public FormTemplate getForm() {
+    public FormTemplateExt getForm() {
         return form;
     }
 
-    public void setForm(FormTemplate form) {
+    public void setForm(FormTemplateExt form) {
         this.form = form;
     }
 

@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-
-import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
@@ -17,7 +14,7 @@ public interface TaxPeriodDao {
 	 * Получить объект налогового периода по идентификатору периода
 	 * @param taxPeriodId идентификатор налогового периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DaoException если периода с заданным идентификатором не существует
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	TaxPeriod get(int taxPeriodId);
 	

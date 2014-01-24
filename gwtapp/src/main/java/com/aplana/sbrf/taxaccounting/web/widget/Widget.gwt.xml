@@ -16,6 +16,7 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.RefBookPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.periodpicker.PeriodPicker" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.VersionHistory" />
     <inherits name="com.aplana.gwt.GwtWidgetLocal"/>
 
     <!--в этом модуле имеется механизм подменны классов относительно браузера -->

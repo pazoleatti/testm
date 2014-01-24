@@ -6,7 +6,7 @@ import java.util.Date;
 
 public interface FormTemplateInfoUiHandlers extends UiHandlers {
 	void setNumberedColumns(boolean numberedColumns);
-	void setVersion(Date version);
+	void setRangeRelevanceVersion(Date versionBegin, Date versionEnd);
 	void setFixedRows(boolean fixedRows);
 	void setName(String name);
 	void setFullname(String fullName);

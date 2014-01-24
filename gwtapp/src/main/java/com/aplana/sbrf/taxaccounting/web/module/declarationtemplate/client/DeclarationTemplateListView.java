@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -12,6 +11,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -30,58 +30,60 @@ public class DeclarationTemplateListView extends ViewImpl
 	 * Список шаблонов деклараций
 	 */
 	@UiField
-	CellTable<DeclarationTemplate> declarationTemplateTable;
+	CellTable<DeclarationTypeTemplate> declarationTemplateTable;
     @UiField
     Panel filterContentPanel;
+
+    private NoSelectionModel<DeclarationTypeTemplate> selectionModel;
 
     @Inject
 	public DeclarationTemplateListView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
+        selectionModel = new NoSelectionModel<DeclarationTypeTemplate>();
+
 		// колонка Наименование декларации
-		Column<DeclarationTemplate, DeclarationTemplate> linkColumn = new Column<DeclarationTemplate, DeclarationTemplate>(
-				new AbstractCell<DeclarationTemplate>() {
+		Column<DeclarationTypeTemplate, DeclarationTypeTemplate> linkColumn = new Column<DeclarationTypeTemplate, DeclarationTypeTemplate>(
+				new AbstractCell<DeclarationTypeTemplate>() {
 					@Override
 					public void render(Context context,
-									   DeclarationTemplate declaration,
+                                       DeclarationTypeTemplate declarationTypeTemplate,
 									   SafeHtmlBuilder sb) {
-						if (declaration == null) {
+						if (declarationTypeTemplate == null) {
 							return;
 						}
 						sb.appendHtmlConstant("<a href=\"#"
-								+ DeclarationTemplateTokens.declarationTemplate + ";"
-								+ DeclarationTemplateTokens.declarationTemplateId + "="
-								+ declaration.getId() + "\">"
-								+ declaration.getDeclarationType().getName() + "</a>");
+								+ DeclarationTemplateTokens.declarationVersionList + ";"
+								+ DeclarationTemplateTokens.declarationType + "="
+								+ declarationTypeTemplate.getTypeId() + "\">"
+								+ declarationTypeTemplate.getTypeName() + "</a>");
 					}
 				}) {
 			@Override
-			public DeclarationTemplate getValue(DeclarationTemplate object) {
+			public DeclarationTypeTemplate getValue(DeclarationTypeTemplate object) {
 				return object;
 			}
 		};
 		declarationTemplateTable.addColumn(linkColumn, "Наименование");
 
-		declarationTemplateTable.addColumn(new Column<DeclarationTemplate, Boolean>(
-				new CheckboxCell()) {
+		declarationTemplateTable.addColumn(new TextColumn<DeclarationTypeTemplate>() {
 			@Override
-			public Boolean getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.isActive();
+			public String getValue(DeclarationTypeTemplate declarationTypeTemplate) {
+				return String.valueOf(declarationTypeTemplate.getVersionCount());
 			}
-		}, "Активен");
-
-		declarationTemplateTable.addColumn(new TextColumn<DeclarationTemplate>() {
-			@Override
-			public String getValue(DeclarationTemplate declarationTemplate) {
-				return declarationTemplate.getVersion();
-			}
-		}, "Версия");
+		}, "Версий");
+        declarationTemplateTable.setSelectionModel(selectionModel);
 	}
 
 	@Override
-	public void setDeclarationTemplateRows(List<DeclarationTemplate> templates) {
-		declarationTemplateTable.setRowData(templates);
+	public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result) {
+		declarationTemplateTable.setRowData(result);
 	}
+
+    @Override
+    public DeclarationTypeTemplate getSelectedElement() {
+        return selectionModel.getLastSelectedObject();
+    }
 
     @Override
     public void setInSlot(Object slot, IsWidget content) {

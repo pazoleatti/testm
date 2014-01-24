@@ -41,8 +41,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 			.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
 			+ "/acctax.xlsm";
 
-    private static final String fileName = "Налоговый_отчет_";
-    private static final String postfix = ".xlsm";
+    private static final String FILE_NAME = "Налоговый_отчет_";
+    private static final String POSTFIX = ".xlsm";
 
 	private enum CellType{
 		DATE,
@@ -163,7 +163,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 	private Date creationDate;
 
     public FormDataXlsmReportBuilder() throws IOException {
-        super(fileName, postfix);
+        super(FILE_NAME, POSTFIX);
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);

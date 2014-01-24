@@ -1,3 +1,5 @@
+
+
 create table configuration (
   code varchar2(50) not null,
   value varchar2(510)
@@ -16,6 +18,8 @@ comment on table form_type is 'Типы налоговых форм (назва�
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+
+create sequence seq_form_type;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -60,6 +64,8 @@ comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+
+create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_style (
   id					     number(9) not null,
@@ -300,12 +306,15 @@ create sequence seq_income_102 start with 100;
 create table declaration_type (
   id       number(9) not null,
   tax_type    char(1) not null,
-  name      varchar2(80) not null
+  name      varchar2(80) not null,
+  status number(1) default 0 not null
 );
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
+
+create sequence seq_declaration_type start with 100;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
   id         number(9) not null,
@@ -322,7 +331,8 @@ create sequence seq_dept_declaration_type start with 10000;
 create table declaration_template (
   id       number(9) not null,
   edition    number(9) not null,
-  version    varchar2(20) not null,
+  status number(1) default 0 not null,
+  version date not null,
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
@@ -338,6 +348,7 @@ comment on column declaration_template.create_script is 'Скрипт форми
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
+comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
 
 create sequence seq_declaration_template start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -484,13 +495,15 @@ create table department_form_type (
   id      number(9) not null,
   department_id number(9) not null,
   form_type_id number(9) not null,
-  kind     number(9) not null
+  kind     number(9) not null,
+  performer_dep_id number(9)
 );
 comment on table department_form_type is 'Связь подразделения банка с формой';
 comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
 comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
+comment on column department_form_type.performer_dep_id is 'Исполнитель';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -679,13 +692,18 @@ comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 
+create sequence seq_notification start with 10000;
+
+--------------------------------------------------------------------------------------------------------
+
 create table template_changes (
  id number(9) not null,
- form_template_id number(9) not null,
- declaration_template_id number(9) not null,
+ form_template_id number(9),
+ declaration_template_id number(9),
  event number(1),
  author number(9) not null,
- date_event date
+ date_event date,
+ edition_number number(9)
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
@@ -694,6 +712,7 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
+comment on column template_changes.edition_number is 'Номер версии';
 
-create sequence seq_notification start with 10000;
+ create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------

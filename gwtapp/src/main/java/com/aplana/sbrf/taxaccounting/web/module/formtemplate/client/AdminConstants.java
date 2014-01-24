@@ -7,11 +7,14 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client;
 
 public final class AdminConstants {
 
+    public static int oneDayMilliseconds = 86400000;
+
 	/**
 	 * Имена страниц
 	 */
 	public static final class NameTokens {
 		public static final String adminPage = "!admin";
+        public static final String formTemplateVersionList = "!formTemplateVersionList";
 		public static final String formTemplateScriptCodePage = "!formTemplateScriptCode";
 		public static final String formTemplateColumnPage = "!formTemplateColumn";
 		public static final String formTemplateRowPage = "!formTemplateRow";
@@ -19,7 +22,8 @@ public final class AdminConstants {
 		public static final String formTemplateStylePage = "!formTemplateStyle";
 		public static final String formTemplateMainPage = "!formTemplateMain";
 		public static final String formTemplateImpexPage = "!formTemplateImpex";
-		public static final String formTemplateId = "formTemplateId";
+        public static final String formTypeId = "formTypeId";
+        public static final String formTemplateId = "formTemplateId";
 		public static final String formTemplateHeaderPage = "!formTemplateHeader";
 	}
 

@@ -201,12 +201,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     // http://conf.aplana.com/pages/viewpage.action?pageId=11383234
     @Override
-    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, ReportPeriod reportPeriod) {
+    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId) {
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes);
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), departmentId.longValue());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
+                    departmentId.longValue());
             if (departmentReportPeriod != null && departmentReportPeriod.isActive()) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
@@ -220,10 +221,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // TODO blocked by http://jira.aplana.com/browse/SBRFACCTAX-5397 (реализацию подразделений-исполнителей сейчас Денис Лошкарев только запускает в работу)
     private List<Integer> getExecutorsDepartments(List<Integer> departments) {
-        List<Integer> retList = new ArrayList<Integer>();
-        // TODO все подразделения, которые назначены исполнителями для форм подразделений списка departments
-        return retList;
+        return departmentDao.getPerformers(departments);
     }
 }

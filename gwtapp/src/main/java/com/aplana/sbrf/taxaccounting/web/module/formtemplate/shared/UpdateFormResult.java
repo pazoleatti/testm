@@ -11,6 +11,8 @@ import java.util.List;
 public class UpdateFormResult implements Result {
 	private List<LogEntry> logEntries;
 
+    private int formTemplateId;
+
 	public List<LogEntry> getLogEntries() {
 		return logEntries;
 	}
@@ -18,4 +20,12 @@ public class UpdateFormResult implements Result {
 	public void setLogEntries(List<LogEntry> logEntries) {
 		this.logEntries = logEntries;
 	}
+
+    public int getFormTemplateId() {
+        return formTemplateId;
+    }
+
+    public void setFormTemplateId(int formTemplateId) {
+        this.formTemplateId = formTemplateId;
+    }
 }

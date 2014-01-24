@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Image;
  * Date: 14.01.14
  * Time: 18:43
  */
-public class Dialog extends ModalWindow {
+public final class Dialog extends ModalWindow {
 
     public static enum predefinedButton {YES, NO, OK, CANCEL, CLOSE};
 

@@ -12,8 +12,17 @@ public class DeclarationType implements Serializable {
 	private int id;
 	private TaxType taxType;
 	private String name;
+    private VersionedObjectStatus status;
 
-	/**
+    public VersionedObjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VersionedObjectStatus status) {
+        this.status = status;
+    }
+
+    /**
 	 * Получить идентификатор
 	 * @return идентфикатор
 	 */

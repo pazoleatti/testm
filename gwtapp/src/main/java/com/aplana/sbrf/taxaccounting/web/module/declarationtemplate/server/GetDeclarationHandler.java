@@ -14,6 +14,8 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.util.Date;
+
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationAction, GetDeclarationResult> {
@@ -37,6 +39,8 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
 		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
+        DeclarationTemplate declarationTemplateEnd = declarationTemplateService.getNearestDTRight(declarationTemplate);
+        result.setEndDate(declarationTemplateEnd != null?new Date(declarationTemplateEnd.getVersion().getTime() - 86400000) : null);
 		return result;
     }
 

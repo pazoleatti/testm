@@ -331,7 +331,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
     }
 
     private String getParamNumber(String paramId) {
-        return paramId.substring(paramId.lastIndexOf("_") + 1);
+        return paramId.substring(paramId.lastIndexOf('_') + 1);
     }
 
     /**

@@ -7,4 +7,5 @@ public interface FilterFormTemplateUIHandlers extends UiHandlers {
 	void onCreateClicked();
 
 	void onApplyClicked();
+    void onDeleteClick();
 }

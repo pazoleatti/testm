@@ -34,28 +34,28 @@ public final class ScriptUtils {
     private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %d содержит значение «%s», которое не " +
             "соответствует дате в формате «%s»!";
 
-    private static String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Ожидается «%s» вместо «%s»!";
 
-    private static String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество граф менее ожидаемого!";
 
-    private static String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество строк в заголовке менее ожидаемого!";
 
-    private static String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
 
-    private static String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
 
-    private static String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
 
-    private static String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
 
-    private static String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
 
-    private static String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
+    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
 
-    private static String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
+    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета

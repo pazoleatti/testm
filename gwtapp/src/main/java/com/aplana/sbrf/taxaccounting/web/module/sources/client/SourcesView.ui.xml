@@ -73,6 +73,9 @@
                     <g:cell verticalAlignment="bottom">
                         <style:LinkAnchor ui:field="cancelButton" text="Отменить назначение" />
                     </g:cell>
+                    <g:cell verticalAlignment="bottom">
+                        <style:LinkAnchor ui:field="clickEdit" text="Открыть диалог" />
+                    </g:cell>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
         </g:north>

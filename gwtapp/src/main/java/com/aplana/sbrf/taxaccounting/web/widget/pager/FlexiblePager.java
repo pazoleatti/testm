@@ -241,8 +241,8 @@ public class FlexiblePager extends AbstractPager {
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
 
-    private final int MAX_ROWS_COUNT_ON_PAGE = 100;
-    private final int DEFAULT_PAGE_SIZE = 20;
+    private static final int MAX_ROWS_COUNT_ON_PAGE = 100;
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
 	/**
 	 * The {@link Resources} used by this widget.

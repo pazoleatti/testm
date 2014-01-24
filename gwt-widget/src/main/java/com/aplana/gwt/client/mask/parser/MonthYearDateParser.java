@@ -13,15 +13,15 @@ import java.util.Date;
  */
 public class MonthYearDateParser implements Parser<Date> {
 
-    private static MonthYearDateParser INSTANCE;
+    private static MonthYearDateParser instance;
 
     public static final DateTimeFormat formatMY = DateTimeFormat.getFormat("MM.yyyy");
 
     public static Parser<Date> instanceMY() {
-        if (INSTANCE == null) {
-            INSTANCE = new MonthYearDateParser();
+        if (instance == null) {
+            instance = new MonthYearDateParser();
         }
-        return INSTANCE;
+        return instance;
     }
 
     protected MonthYearDateParser() {

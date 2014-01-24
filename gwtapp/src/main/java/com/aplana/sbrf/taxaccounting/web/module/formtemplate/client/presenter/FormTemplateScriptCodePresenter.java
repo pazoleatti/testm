@@ -72,7 +72,7 @@ public class FormTemplateScriptCodePresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
+		formTemplate = event.getFormTemplateExt().getFormTemplate();
 		getView().setScriptCode(formTemplate.getScript());
 	}
 

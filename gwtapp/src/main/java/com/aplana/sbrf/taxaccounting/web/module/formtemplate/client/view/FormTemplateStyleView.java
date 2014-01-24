@@ -183,7 +183,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 	}
 
 	private void flush() {
-		if (!styles.isEmpty()) {
+		if (styles != null && !styles.isEmpty()) {
 			driver.flush();
 		}
 	}

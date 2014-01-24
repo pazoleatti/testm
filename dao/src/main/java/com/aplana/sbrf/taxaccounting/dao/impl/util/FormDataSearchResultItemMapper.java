@@ -9,8 +9,6 @@ import java.text.SimpleDateFormat;
 
 public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchResultItem> {
 
-    private static final SimpleDateFormat YEAR_FORMATTER = new SimpleDateFormat(Formats.YYYY.getFormat());
-
 	@Override
 	public FormDataSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
 		FormDataSearchResultItem result = new FormDataSearchResultItem();

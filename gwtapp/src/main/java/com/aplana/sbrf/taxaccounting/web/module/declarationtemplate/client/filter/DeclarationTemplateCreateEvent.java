@@ -4,15 +4,15 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
-public class DeclarationTemplateCreateEvent extends GwtEvent<DeclarationTemplateCreateEvent.FormDataCreateHandler> {
+public class DeclarationTemplateCreateEvent extends GwtEvent<DeclarationTemplateCreateEvent.DTCreateHandler> {
 
-	public static interface FormDataCreateHandler extends EventHandler {
+	public static interface DTCreateHandler extends EventHandler {
 		void onClickCreate(DeclarationTemplateCreateEvent event);
 	}
 
-	private static final Type<FormDataCreateHandler> TYPE = new Type<FormDataCreateHandler>();
+	private static final Type<DTCreateHandler> TYPE = new Type<DTCreateHandler>();
 
-	public static Type<FormDataCreateHandler> getType() {
+	public static Type<DTCreateHandler> getType() {
 		return TYPE;
 	}
 
@@ -24,12 +24,12 @@ public class DeclarationTemplateCreateEvent extends GwtEvent<DeclarationTemplate
 	}
 
 	@Override
-	protected void dispatch(FormDataCreateHandler handler) {
+	protected void dispatch(DTCreateHandler handler) {
 		handler.onClickCreate(this);
 	}
 
 	@Override
-	public Type<FormDataCreateHandler> getAssociatedType() {
+	public Type<DTCreateHandler> getAssociatedType() {
 		return getType();
 	}
 }

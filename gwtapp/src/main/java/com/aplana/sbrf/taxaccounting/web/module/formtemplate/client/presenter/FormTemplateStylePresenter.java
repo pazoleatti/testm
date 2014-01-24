@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
@@ -13,12 +11,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.annotations.TabInfo;
-import com.gwtplatform.mvp.client.annotations.Title;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
+
+import java.util.List;
 
 public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePresenter.MyView, FormTemplateStylePresenter.MyProxy>
 		implements FormTemplateStyleUiHandlers, FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler{
@@ -56,9 +52,11 @@ public class FormTemplateStylePresenter extends Presenter<FormTemplateStylePrese
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		boolean isFormChanged = formTemplateId != event.getFormTemplate().getId();
-		formTemplateId = event.getFormTemplate().getId();
-		getView().setViewData(event.getFormTemplate().getStyles(), isFormChanged);
+		boolean isFormChanged = event.getFormTemplateExt().getFormTemplate().getId() == null ||
+                formTemplateId != event.getFormTemplateExt().getFormTemplate().getId();
+		formTemplateId = event.getFormTemplateExt().getFormTemplate().getId() != null?
+                event.getFormTemplateExt().getFormTemplate().getId() : 0;
+		getView().setViewData(event.getFormTemplateExt().getFormTemplate().getStyles(), isFormChanged);
 	}
 
 	@Override

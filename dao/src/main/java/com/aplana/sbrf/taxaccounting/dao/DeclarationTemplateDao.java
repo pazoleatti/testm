@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -68,4 +69,32 @@ public interface DeclarationTemplateDao {
      * @return список всех идентификаторов
      */
     List<Integer> listAllId();
+
+    /**
+     * Получает список id версий макета по типу шаблона и статусу версии.
+     * @param decTypeId вид шаблона
+     * @param decTemplateId идентификатор шаблона, котрый исключить из поиска, если нет такого то 0
+     * @param statusList статус формы
+     * @return список версий
+     */
+    List<Integer> getDeclarationTemplateVersions(int decTypeId, int decTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
+
+    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
+    int getNearestDTVersionIdLeft(int typeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Удаляет версию шаблона.
+     * По идее удалять полностью только фейковые версии шаблонов.
+     * @param declarationTemplateId
+     * @return
+     */
+    int delete(int declarationTemplateId);
+
+    /**
+     * Количество весий для вида шаблона
+     * @param decTypeId вид шаблона
+     * @param statusList статусы
+     * @return количество
+     */
+    int versionTemplateCount(int decTypeId, List<Integer> statusList);
 }

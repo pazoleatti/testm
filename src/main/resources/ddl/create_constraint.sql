@@ -2,7 +2,7 @@ alter table configuration add constraint configuration_pk primary key (code);
 
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
-alter table form_type add constraint form_type_check_status check (status in (0, 1, 2, 3));
+alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -13,7 +13,7 @@ alter table form_template add constraint form_template_uniq_version unique(type_
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
-alter table form_template add constraint form_template_check_status check (status in (0, 1, 2, 3));
+alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id);
@@ -88,6 +88,7 @@ alter table income_102 add constraint income_102_fk_department foreign key (depa
 
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
+alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
 
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
@@ -98,6 +99,7 @@ alter table declaration_template add constraint declaration_template_pk primary 
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
+alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
@@ -153,6 +155,7 @@ alter table date_value add constraint date_value_fk_column_id foreign key (colum
 alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
+alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);

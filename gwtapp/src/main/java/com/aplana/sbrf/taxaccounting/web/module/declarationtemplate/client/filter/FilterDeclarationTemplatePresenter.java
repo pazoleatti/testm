@@ -48,7 +48,6 @@ public class FilterDeclarationTemplatePresenter extends PresenterWidget<FilterDe
         getView().setTemplateFilter(filter);
 
         GetFilterFormTemplateData action = new GetFilterFormTemplateData();
-        FilterDeclarationTemplateReadyEvent.fire(FilterDeclarationTemplatePresenter.this, true);
 		dispatchAsync.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GetFilterFormTemplateDataResult>() {
 					@Override
@@ -75,5 +74,10 @@ public class FilterDeclarationTemplatePresenter extends PresenterWidget<FilterDe
 	public void onApplyClicked() {
 		DeclarationTemplateApplyEvent.fire(this);
 	}
+
+    @Override
+    public void onDeleteClicked() {
+        DeclarationTemplateDeleteEvent.fire(this);
+    }
 
 }

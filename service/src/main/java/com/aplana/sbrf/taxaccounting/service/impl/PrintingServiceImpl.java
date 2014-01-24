@@ -60,8 +60,8 @@ public class PrintingServiceImpl implements PrintingService {
     @Autowired
     RefBookFactory refBookFactory;
 
-    private static long REF_BOOK_ID = 8L;
-    private static String REF_BOOK_VALUE_NAME = "CODE";
+    private static final long REF_BOOK_ID = 8L;
+    private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {

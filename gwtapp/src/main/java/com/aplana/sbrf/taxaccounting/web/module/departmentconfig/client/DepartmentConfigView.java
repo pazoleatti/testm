@@ -358,11 +358,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      * @return
      */
     private TaxType getSelectedTaxType() {
-        TaxType type = null;
         if (taxType.getItemCount() != 0) {
-            type = TaxType.fromCode(taxType.getValue(taxType.getSelectedIndex()).charAt(0));
+            return TaxType.fromCode(taxType.getValue(taxType.getSelectedIndex()).charAt(0));
         }
-        return type;
+        return null;
     }
 
     /**

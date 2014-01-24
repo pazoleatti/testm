@@ -1,19 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplatePresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplateReadyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FormTemplateApplyEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTemplateListResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateMainEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,8 +18,14 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.Title;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+import java.util.List;
 
 /**
  * Presenter для страницы администрирования. Выполняет следующие действия:
@@ -35,7 +38,34 @@ import com.gwtplatform.mvp.client.proxy.*;
  */
 public class AdminPresenter
         extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy>
-        implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler {
+        implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler, FormTemplateDeleteEvent.MyHandler,
+        FormTemplateCreateEvent.FormDataCreateHandler{
+
+    @Override
+    @ProxyEvent
+    public void onDeleteCreate(FormTemplateDeleteEvent event) {
+        FormTypeTemplate formTypeTemplate = getView().getSelectedElement();
+        if (formTypeTemplate == null)
+            return;
+        DeleteFormTypeAction action = new DeleteFormTypeAction();
+        action.setFormTypeId(formTypeTemplate.getFormTypeId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteFormTypeResult>() {
+            @Override
+            public void onSuccess(DeleteFormTypeResult result) {
+                LogAddEvent.fire(AdminPresenter.this, result.getUuid());
+            }
+        }, this).addCallback(
+                TaManualRevealCallback.create(this, (TaPlaceManager) placeManager)));
+    }
+
+    @Override
+    @ProxyEvent
+    public void onClickCreate(FormTemplateCreateEvent event) {
+        /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
+                with(AdminConstants.NameTokens.formTemplateId, "0").
+                with(AdminConstants.NameTokens.formTypeId, "0").build());*/
+        FormTemplateMainEvent.fire(this, filterPresenter.getFilterData().getTaxType());
+    }
 
     /**
 	 * {@link AdminPresenter}'s proxy.
@@ -51,19 +81,22 @@ public class AdminPresenter
 	 * Presenter.
 	 */
 	public interface MyView extends View {
-		void setFormTemplateTable(List<FormTemplate> formTemplates);
+		void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates);
+        FormTypeTemplate getSelectedElement();
 	}
 
 	private final DispatchAsync dispatcher;
     protected final FilterFormTemplatePresenter filterPresenter;
     public static final Object TYPE_filterPresenter = new Object();
+    private final PlaceManager placeManager;
 
 	@Inject
-	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter) {
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter, PlaceManager placeManager) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
-	}
+        this.placeManager = placeManager;
+    }
 
 	@Override
 	public boolean useManualReveal() {
@@ -130,7 +163,7 @@ public class AdminPresenter
                             public void onSuccess(
                                     GetFormTemplateListResult result) {
                                 getView().setFormTemplateTable(
-                                        result.getForms());
+                                        result.getFormTypeTemplates());
                             }
                         }, this).addCallback(
                         new ManualRevealCallback<GetFormTemplateListResult>(

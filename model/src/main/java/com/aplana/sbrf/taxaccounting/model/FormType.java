@@ -13,17 +13,17 @@ public class FormType implements Serializable {
 	private int id;
 	private String name;
 	private TaxType taxType;
-    private TemplateStatus status;
+    private VersionedObjectStatus status;
 
     /**
      * Статус
      * @return статус вида налоговой формы
      */
-    public TemplateStatus getStatus() {
+    public VersionedObjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TemplateStatus status) {
+    public void setStatus(VersionedObjectStatus status) {
         this.status = status;
     }
 
