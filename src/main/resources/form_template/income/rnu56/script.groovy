@@ -336,30 +336,27 @@ void logicCheck() {
         // 6. Проверка на наличие данных предыдущих отчетных периодов для заполнения графы 14 и графы 15
         // 7. Проверка корректности значения в «Графе 3»
         if (row.buyDate != null) {
-            taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
-            for (taxPeriod in taxPeriods) {
-                reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-                for (reportPeriod in reportPeriods) {
-                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                            reportPeriod.id)
-                    if (findFormData != null) {
-                        isFind = false
-                        for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
-                            if (findRow.bill == row.bill) {
-                                isFind = true
-                                // лп 7
-                                if (findRow.buyDate != row.buyDate) {
-                                    logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 за "
-                                            + reportPeriod.name)
-                                }
-                                break
+            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
+            for (reportPeriod in reportPeriods) {
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                        reportPeriod.id)
+                if (findFormData != null) {
+                    isFind = false
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                        if (findRow.bill == row.bill) {
+                            isFind = true
+                            // лп 7
+                            if (findRow.buyDate != row.buyDate) {
+                                logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-56 за "
+                                        + reportPeriod.name)
                             }
+                            break
                         }
-                        // лп 6
-                        if (!isFind) {
-                            logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
-                                    " не существует (отсутствуют первичные данные для расчёта)!")
-                        }
+                    }
+                    // лп 6
+                    if (!isFind) {
+                        logger.warn(errorMsg + "Экземпляр за период " + reportPeriod.name +
+                                " не существует (отсутствуют первичные данные для расчёта)!")
                     }
                 }
             }
@@ -417,18 +414,15 @@ def getRate(def Date date, def value) {
 def BigDecimal getCalcPrevColumn(def row, def sumColumnName) {
     def sum = 0
     if (row.buyDate != null && row.bill != null) {
-        taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, row.buyDate, startDate - 1)
-        for (taxPeriod in taxPeriods) {
-            reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-            for (reportPeriod in reportPeriods) {
-                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                        reportPeriod.id)
-                if (findFormData != null) {
-                    isFind = false
-                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
-                        if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
-                            sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
-                        }
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
+        for (reportPeriod in reportPeriods) {
+            findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                    reportPeriod.id)
+            if (findFormData != null) {
+                isFind = false
+                for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                    if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
+                        sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
                     }
                 }
             }

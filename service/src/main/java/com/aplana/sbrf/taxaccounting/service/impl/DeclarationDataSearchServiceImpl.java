@@ -1,18 +1,19 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.DeclarationTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -25,8 +26,8 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
-	@Autowired
-	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
+//	@Autowired
+//	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     @Autowired
     private DepartmentService departmentService;
@@ -42,8 +43,15 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-			// во всех подразделениях, где они есть
-			result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
+			// Все подразделения (временно, до появления версионирования)
+            List<Department> departmentList = departmentService.listAll();
+            Set<Integer> departmentIdSet = new HashSet<Integer>(departmentList.size());
+            for (Department department : departmentList) {
+                departmentIdSet.add(department.getId());
+            }
+            result.setDepartmentIds(departmentIdSet);
+            // Правильная выборка пока не реализуется
+			// result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
 		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                 List<Department> departmentList = departmentService.getTBDepartments(userInfo.getUser());

@@ -52,7 +52,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
 	@Override
 	public List<DeclarationType> listAll(){
-		return getJdbcTemplate().query("SELECT * FROM declaration_type", new DeclarationTypeRowMapper());
+		return getJdbcTemplate().query("SELECT * FROM declaration_type where status = 0", new DeclarationTypeRowMapper());
 	}
 
 	@Override

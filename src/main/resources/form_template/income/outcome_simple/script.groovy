@@ -470,24 +470,21 @@ def getSumForColumn7(def form, def dataRows, def value1) {
             if (value1 == row.code && value1 == row.balance && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
-                // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
-                def List<TaxPeriod> taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
-                taxPeriods.each { taxPeriod ->
-                    def List<ReportPeriod> reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
-                    reportPeriods.each { reportPeriod ->
-                        // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                        def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
-                        if (f != null) {
-                            def d = formDataService.getDataRowHelper(f)
-                            if (d != null) {
-                                d.allCached.each { r ->
-                                    // графа  4 - balance
-                                    // графа  5 - docNumber
-                                    // графа  6 - docDate
-                                    // графа 10 - taxAccountingRuble
-                                    if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
-                                        sum += (r.taxAccountingRuble ?: 0)
-                                    }
+                // получить отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
+                def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, row.docDate)
+                reportPeriods.each { reportPeriod ->
+                    // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
+                    def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
+                    if (f != null) {
+                        def d = formDataService.getDataRowHelper(f)
+                        if (d != null) {
+                            d.allCached.each { r ->
+                                // графа  4 - balance
+                                // графа  5 - docNumber
+                                // графа  6 - docDate
+                                // графа 10 - taxAccountingRuble
+                                if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
+                                    sum += (r.taxAccountingRuble ?: 0)
                                 }
                             }
                         }

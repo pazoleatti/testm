@@ -94,16 +94,13 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
         GetDTVersionListAction action = new GetDTVersionListAction();
-        action.setDeclarationFormType(Integer.parseInt(request.getParameter(DeclarationTemplateTokens.declarationType, "")));
+        action.setDeclarationFormTypeId(Integer.parseInt(request.getParameter(DeclarationTemplateTokens.declarationType, "")));
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetDTVersionListResult>() {
                     @Override
                     public void onSuccess(GetDTVersionListResult result) {
                         getView().setDTVersionTable(result.getTemplateVersions());
-                        if (!result.getTemplateVersions().isEmpty())
-                            getView().setLabelName(result.getTemplateVersions().get(0).getTypeName());
-                        else
-                            getView().setLabelName("Нераспознаный шаблон. Нет связанных версий макетов.");
+                        getView().setLabelName(result.getDtTypeName());
                     }
                 }, this)
         );

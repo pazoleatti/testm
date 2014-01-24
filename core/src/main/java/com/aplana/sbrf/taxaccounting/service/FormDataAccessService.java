@@ -19,7 +19,7 @@ public interface FormDataAccessService {
 	void canRead(TAUserInfo userInfo, long formDataId);
 
 	/**
-	 * Проверка прав на редактирование данных
+	 * Проверка прав на редактирование данных (права на чтение проверяется отдельно)
 	 * @param userInfo идентификатор пользователя, для которого проверяются права
 	 * @param formDataId идентификатор карточки данных по налоговой форме
 	 */	
@@ -64,4 +64,11 @@ public interface FormDataAccessService {
 	 * @return объект, содержащий информацию о правах доступа пользователя к данной налоговой форме
 	 */
 	FormDataAccessParams getFormDataAccessParams(TAUserInfo userInfo, long formDataId);
+
+    /**
+     * Список доступных типов НФ
+     * @param userInfo Пользователь
+     * @param taxTypes Виды нлога
+     */
+    List<FormDataKind> getAvailableFormDataKind(TAUserInfo userInfo, List<TaxType> taxTypes);
 }

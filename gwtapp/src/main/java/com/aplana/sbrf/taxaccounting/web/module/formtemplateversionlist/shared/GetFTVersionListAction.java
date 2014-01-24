@@ -6,16 +6,18 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * User: avanteev
  * Date: 2013
+ * Кллсс для получнния списка версий макета
  */
 public class GetFTVersionListAction extends UnsecuredActionImpl<GetFTVersionListResult> implements ActionName {
-    private int formTemplateId;
+    //Идентификатор макета FormType
+    private int formTypeId;
 
-    public int getFormTemplateId() {
-        return formTemplateId;
+    public int getFormTypeId() {
+        return formTypeId;
     }
 
-    public void setFormTemplateId(int formTemplateId) {
-        this.formTemplateId = formTemplateId;
+    public void setFormTypeId(int formTypeId) {
+        this.formTypeId = formTypeId;
     }
 
     @Override

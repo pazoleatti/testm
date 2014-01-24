@@ -358,19 +358,16 @@ def consolidationSummary() {
                                 //графа 7
                                 if (rowRNU6.ruble != null && rowRNU6.ruble != 0) {
                                     def dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(rowRNU6.date)) - 3))
-                                    def taxPeriodList = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, rowRNU6.date)
-                                    taxPeriodList.each {taxPeriod ->
-                                        def reportPeriodList = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
-                                        reportPeriodList.each {reportPeriod ->
-                                            def primaryRNU6 = formDataService.find(source.formType.id, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId()) // TODO не реализовано получение по всем подразделениям.
-                                            if (primaryRNU6 != null) {
-                                                def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
-                                                dataPrimary.getAll().each {rowPrimary ->
-                                                    if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
-                                                            rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
-                                                            rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                        graph7 += rowPrimary.taxAccountingRuble
-                                                    }
+                                    def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
+                                    reportPeriodList.each { reportPeriod ->
+                                        def primaryRNU6 = formDataService.find(source.formType.id, FormDataKind.PRIMARY, source.departmentId, reportPeriod.getId()) // TODO не реализовано получение по всем подразделениям.
+                                        if (primaryRNU6 != null) {
+                                            def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
+                                            dataPrimary.getAll().each { rowPrimary ->
+                                                if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
+                                                        rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
+                                                        rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
+                                                    graph7 += rowPrimary.taxAccountingRuble
                                                 }
                                             }
                                         }

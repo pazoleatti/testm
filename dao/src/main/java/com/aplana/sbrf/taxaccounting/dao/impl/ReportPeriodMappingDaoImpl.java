@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportPeriodMappingDao;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 
@@ -40,7 +39,9 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
     @Override
     public Integer getTaxPeriodByDate(String year) {
         try {
-            return getJdbcTemplate().queryForInt("select id from tax_period where tax_type = 'I' and year = " + year);
+            return getJdbcTemplate().queryForInt("select id from tax_period where tax_type = ? and year = ?",
+					new Object[]{TaxType.INCOME.getCode(), year},
+					new int[]{Types.VARCHAR, Types.NUMERIC});
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Не существует налогового периода типа I для года " + year);
         }

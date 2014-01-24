@@ -38,6 +38,8 @@ public class ReportExcelController {
     @Autowired
     AuditService auditService;
 
+    private static final String ENCODING = "UTF-8";
+
     /**
      * Обработка запроса на формирование отчета для налоговых форм
      * @param formDataId
@@ -49,7 +51,7 @@ public class ReportExcelController {
 	@RequestMapping(value = "/{formDataId}/{isShowChecked}",method = RequestMethod.GET)
 	public void processFormDataDownload(@PathVariable int formDataId,@PathVariable boolean isShowChecked , HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String filePath = printingService.generateExcel(securityService.currentUserInfo(), formDataId, isShowChecked);
+        String filePath = printingService.generateExcel(securityService.currentUserInfo(), formDataId, isShowChecked);
 		createResponse(req, resp, filePath);
 	}
 
@@ -66,15 +68,15 @@ public class ReportExcelController {
     }
 
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
-		File file = new File(filePath);
+        File file = new File(filePath);
 		String fileName = file.getName();
 		ServletContext context  = req.getSession().getServletContext();
 		String mimeType = context.getMimeType(filePath);
 
-		response.setContentType(mimeType == null ? 
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8" : mimeType);
+		/*response.setContentType(mimeType == null ?
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset="+ENCODING : mimeType);*/
 		response.setContentLength((int)file.length());
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+        setCorrectFileName(req, response, fileName);
 
 		DataInputStream in = new DataInputStream(new FileInputStream(file));
 		OutputStream out = response.getOutputStream();
@@ -89,4 +91,15 @@ public class ReportExcelController {
 		response.setContentLength(count);
 	}
 
+    private void setCorrectFileName(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
+        String userAgent = request.getHeader("User-Agent").toLowerCase();
+        String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
+        String fileNameAttr = "filename=";
+        if (userAgent.contains("msie") || userAgent.contains("webkit")) {
+            fileName = "\"" + fileName + "\"";
+        } else {
+            fileNameAttr = fileNameAttr.replace("=", "*=") + ENCODING + "''";
+        }
+        response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
+    }
 }

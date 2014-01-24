@@ -98,13 +98,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	@Override
 	public DeclarationDataFilter getFilterData() {
 		DeclarationDataFilter dataFilter = driver.flush();
-        if (departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty()) {
-		    dataFilter.setDepartmentIds(departmentPicker.getValue());
-        } else {
-            // Если конкретное подразделение не выбрано, то считаем такой случай идентичным случаю,
-            // когда выбраны все доступные подразделения
-            dataFilter.setDepartmentIds(departmentPicker.getAvalibleValues());
-        }
+        dataFilter.setDepartmentIds(departmentPicker.getValue());
 		return dataFilter;
 	}
 

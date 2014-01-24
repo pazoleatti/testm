@@ -155,4 +155,20 @@ public class DepartmentDaoTest {
         Assert.assertEquals(3, departmentList.size());
         Assert.assertTrue(getDepartmentIds(departmentList).containsAll(asList(1, 2, 6)));
     }
+
+    @Test
+    public void getPerformers(){
+        Department department2 = departmentDao.getDepartment(2);
+        List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()));
+        Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);
+        Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
+    }
+
+    @Test
+    public void getPerformersGroup(){
+        Department department3 = departmentDao.getDepartment(3);
+        List<Integer> performers = departmentDao.getPerformers(asList(department3.getId()));
+        Assert.assertTrue("Department(id=3) has 1 performer", performers.size() == 1);
+        Assert.assertTrue("Department(id=3) has 1 performer with id = 2", performers.get(0) == 2);
+    }
 }

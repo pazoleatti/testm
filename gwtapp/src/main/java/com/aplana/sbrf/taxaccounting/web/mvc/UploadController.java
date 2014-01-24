@@ -49,7 +49,6 @@ public class UploadController {
     }
 
     private void processUpload(HttpServletRequest request, HttpServletResponse response, boolean uploadAsTemporal) throws IOException, FileUploadException {
-        System.out.println("processUpload: "+uploadAsTemporal);
         request.setCharacterEncoding("UTF-8");
 
         FileItemFactory factory = new DiskFileItemFactory();

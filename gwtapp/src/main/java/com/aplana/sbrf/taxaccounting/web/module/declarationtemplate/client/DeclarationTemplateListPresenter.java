@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -8,10 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -53,11 +49,11 @@ public class DeclarationTemplateListPresenter
     @Override
     @ProxyEvent
     public void onDelete(DeclarationTemplateDeleteEvent event) {
-        DeclarationTemplate declarationTemplate = getView().getSelectedElement();
-        if (declarationTemplate == null)
+        DeclarationTypeTemplate declarationTypeTemplate = getView().getSelectedElement();
+        if (declarationTypeTemplate == null)
             return;
         DTDeleteAction action = new DTDeleteAction();
-        action.setDtTypeId(declarationTemplate.getType().getId());
+        action.setDtTypeId(declarationTypeTemplate.getTypeId());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DTDeleteResult>() {
             @Override
             public void onSuccess(DTDeleteResult result) {
@@ -78,8 +74,8 @@ public class DeclarationTemplateListPresenter
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
 	 */
 	public interface MyView extends View {
-		void setDeclarationTemplateRows(List<DeclarationTemplate> result);
-        DeclarationTemplate getSelectedElement();
+		void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result);
+        DeclarationTypeTemplate getSelectedElement();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -155,7 +151,7 @@ public class DeclarationTemplateListPresenter
             @Override
             public void onSuccess(
                     DeclarationListResult result) {
-                    getView().setDeclarationTemplateRows(result.getDeclarations());
+                    getView().setDeclarationTypeTemplateRows(result.getTypeTemplates());
             }
         }, this).addCallback(
                 new ManualRevealCallback<DeclarationListResult>(
