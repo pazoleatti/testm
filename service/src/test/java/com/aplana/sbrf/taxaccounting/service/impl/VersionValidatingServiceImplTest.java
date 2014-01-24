@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.VersionOperatingService;
+import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

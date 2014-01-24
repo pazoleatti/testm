@@ -99,8 +99,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Override
 	@Transactional(readOnly = false)
-    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
 		int declarationTemplateId;

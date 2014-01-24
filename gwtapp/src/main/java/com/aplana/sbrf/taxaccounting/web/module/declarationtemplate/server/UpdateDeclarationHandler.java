@@ -60,7 +60,7 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
             templateChangesService.save(changes);
 
         }else if(action.getDeclarationTemplateExt().getDeclarationTemplate().getId() != null){
-            int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate().getId(),
+            int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
                     action.getDeclarationTemplateExt().getEndDate(), logger);
             fillResult(result, dtId, logger);
 

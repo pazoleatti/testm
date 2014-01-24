@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public interface MainOperatingService {
 
-    int edit(int templateId, Date templateActualEndDate, Logger logger);
+    <T> int edit(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger);
     void deleteTemplate(int typeId, Logger logger);
