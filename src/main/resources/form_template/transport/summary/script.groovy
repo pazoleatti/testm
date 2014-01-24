@@ -525,8 +525,6 @@ def consolidation() {
             } else {
                 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
                 def taxPeriod = reportPeriod.taxPeriod
-                Calendar cl = Calendar.getInstance()
-                cl.setTime(taxPeriod.startDate);
                 // дата начала отчетного периода
                 Calendar reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
                 // дата конца отчетного периода
@@ -565,7 +563,7 @@ def consolidation() {
                     Calendar cl2 = Calendar.getInstance()
                     cl2.setTime(sRow.year);
 
-                    def diff = cl.get(Calendar.YEAR) - cl2.get(Calendar.YEAR) - 1
+                    def diff = taxPeriod.year - cl2.get(Calendar.YEAR) - 1
                     if (diff <= 0) {
                         newRow.years = 0
                     } else {

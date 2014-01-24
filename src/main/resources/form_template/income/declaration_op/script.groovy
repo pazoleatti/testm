@@ -160,7 +160,7 @@ void generateXML() {
         }
     }
     if (!findCurrentDepo) {
-        logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")
+        logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")//TODO
         return
     }
 
@@ -224,7 +224,7 @@ void generateXML() {
                 КНД :  knd,
                 ДатаДок : (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 Период : period,
-                ОтчетГод : (taxPeriod != null && taxPeriod.startDate != null ? taxPeriod.startDate.format('yyyy') : empty),
+                ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
                 НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
                 ПоМесту : taxPlaceTypeCode) {
@@ -267,7 +267,7 @@ void generateXML() {
                     // 0..n // всегда один
                     НалПУАв(
                             ТипНП : typeNP,
-                            ОКАТО : okato) {
+                            ОКТМО : okato) {
 
                         // 0..1
                         ФедБдж(
@@ -295,7 +295,7 @@ void generateXML() {
                         НалПУМес(
                                 [ТипНП : typeNP] +
                                         (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКАТО : okato]) {
+                                        [ОКТМО : okato]) {
 
                             def avPlat1 = empty
                             def avPlat2 = empty
@@ -374,7 +374,7 @@ List<String> getErrorDepartment(record) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKATO == null || record.OKATO.referenceValue == null) {
-        errorList.add("«Код по ОКАТО»")
+        errorList.add("«ОКТМО»")
     }
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")

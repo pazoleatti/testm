@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -63,12 +64,18 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     @Override
     public Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId) {
         try {
-            return getJdbcTemplate().queryForObject(
-                    "select * from notification where REPORT_PERIOD_ID = ? and SENDER_DEPARTMENT_ID = ? and RECEIVER_DEPARTMENT_ID = ?",
-                    new Object[]{reportPeriodId, senderDepartmentId, receiverDepartmentId},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
-                    new NotificationMapper()
-            );
+	        MapSqlParameterSource params = new MapSqlParameterSource();
+	        String query = "select * from notification where " +
+			        "REPORT_PERIOD_ID = :rpid and " +
+			        "SENDER_DEPARTMENT_ID = :sdid and " +
+			        "RECEIVER_DEPARTMENT_ID " + (receiverDepartmentId == null ? "is null" : "= :rdid") + "";
+	        params.addValue("rpid", reportPeriodId);
+	        params.addValue("sdid", senderDepartmentId);
+	        if (receiverDepartmentId != null) {
+		        params.addValue("rdid", receiverDepartmentId);
+	        }
+
+	        return getNamedParameterJdbcTemplate().queryForObject(query, params, new NotificationMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -131,7 +138,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         for (int i = 0; i < departments.size(); i++) {
             DepartmentPair pair = departments.get(i);
             sql.append("(SENDER_DEPARTMENT_ID=").append(pair.getDepartmentId())
-                    .append(" and RECEIVER_DEPARTMENT_ID=").append(pair.getParentDepartmentId()).append(")");
+                    .append(" and RECEIVER_DEPARTMENT_ID ").append(pair.getParentDepartmentId() == null
+		            ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
             if (i < departments.size() - 1) {
                 sql.append(" or ");
             }

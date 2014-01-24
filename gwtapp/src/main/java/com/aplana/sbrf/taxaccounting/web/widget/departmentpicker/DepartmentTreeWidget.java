@@ -65,13 +65,22 @@ public class DepartmentTreeWidget extends MultiSelectTree<List<DepartmentPair>> 
     public List<DepartmentPair> getSelectedChildren() {
         List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
         DepartmentTreeItem selectedItem = (DepartmentTreeItem) tree.getSelectedItem();
-        departments.add(selectedItem.getItemValue());
-        for (int i = 0; i < selectedItem.getChildCount(); i++) {
-            DepartmentTreeItem child = (DepartmentTreeItem) selectedItem.getChild(i);
-            departments.add(child.getItemValue());
-        }
+	    departments.add(selectedItem.getItemValue());
+	    for (DepartmentTreeItem item : getAllChildren(selectedItem)) {
+		    departments.add(item.getItemValue());
+	    }
         return departments;
     }
+
+	private List<DepartmentTreeItem> getAllChildren(DepartmentTreeItem treeItem) {
+		List<DepartmentTreeItem> allChildren = new ArrayList<DepartmentTreeItem>();
+
+		for (int i=0; i<treeItem.getChildCount(); i++) {
+			allChildren.add((DepartmentTreeItem) treeItem.getChild(i));
+			allChildren.addAll(getAllChildren((DepartmentTreeItem) treeItem.getChild(i)));
+		}
+		return allChildren;
+	}
 
     @Override
     public void setAcceptableValues(Collection<List<DepartmentPair>> values) {

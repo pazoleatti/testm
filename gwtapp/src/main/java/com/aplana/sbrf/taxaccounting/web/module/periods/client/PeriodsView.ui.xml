@@ -128,7 +128,7 @@
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
                                           ui:field="closePeriod"/>
                         <g:Button ui:field="removePeriod" text="Удалить период"/>
-                        <g:Button ui:field="setDeadlineButton" text="Назначить срок сдачи"/>
+                        <g:Button ui:field="setDeadlineButton" visible="false" text="Назначить срок сдачи"/>
                     </style:LeftBar>
                 </g:HorizontalPanel>
 
