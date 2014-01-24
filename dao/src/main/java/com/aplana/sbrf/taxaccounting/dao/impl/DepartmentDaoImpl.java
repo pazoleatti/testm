@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional(readOnly = true)
@@ -238,6 +240,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Override
     public List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes) {
         return getDepartmentsBySource(userDepartmentId, taxTypes, true);
+    }
+
+    @Override
+    public List<Integer> getPerformers(List<Integer> departments) {
+        String sql = "SELECT performer_dep_id " +
+                "FROM department_form_type " +
+                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null " +
+                "GROUP BY performer_dep_id";
+
+        Map<String, Object> parameterMap = new HashMap<String, Object>();
+        parameterMap.put("ids", departments);
+
+        return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }
 
     /**

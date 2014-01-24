@@ -221,10 +221,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // TODO blocked by http://jira.aplana.com/browse/SBRFACCTAX-5397 (реализацию подразделений-исполнителей сейчас Денис Лошкарев только запускает в работу)
     private List<Integer> getExecutorsDepartments(List<Integer> departments) {
-        List<Integer> retList = new ArrayList<Integer>();
-        // TODO все подразделения, которые назначены исполнителями для форм подразделений списка departments
-        return retList;
+        return departmentDao.getPerformers(departments);
     }
 }
