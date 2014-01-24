@@ -17,8 +17,9 @@ import com.google.gwt.user.client.ui.Image;
 
 /**
  * Модальное окно.
+ *
  * @author : vpetrov
- * Date: 16.12.13
+ *         Date: 16.12.13
  */
 public class ModalWindow extends DialogBox {
 
@@ -32,40 +33,37 @@ public class ModalWindow extends DialogBox {
 
 
     /**
-     * @param title - заголовок окна
+     * @param title   - заголовок окна
      * @param iconUrl - url ссылка на иконку в заголовке окна
      */
     @UiConstructor
     public ModalWindow(String title, String iconUrl) {
 
         super(false, true);
-//        popup = this;
         this.addStyleName("AplanaModalWindow");
-
-
 
         close = new Image(mwRes.closeImage());
 
-        if (!iconUrl.equals("")){
+        if (!iconUrl.equals("")) {
             icon.setUrl(iconUrl);
         }
 
         // Переделываем стиль DialogBox
         Element td = getCellElement(0, 1);
-        Element r0c0 = getCellElement (0,0);
-        Element r0c2 = getCellElement (0,2);
-        Element r1c0 = getCellElement (1,0);
-        Element r1c2 = getCellElement (1,2);
-        Element r2c0 = getCellElement (2,0);
-        Element r2c2 = getCellElement (2,2);
+        Element r0c0 = getCellElement(0, 0);
+        Element r0c2 = getCellElement(0, 2);
+        Element r1c0 = getCellElement(1, 0);
+        Element r1c2 = getCellElement(1, 2);
+        Element r2c0 = getCellElement(2, 0);
+        Element r2c2 = getCellElement(2, 2);
 
         // Удаляем дивы у DialigBox что бы не было зазоров
-        DOM.removeChild(((Element)r0c0.getParentElement()), (Element) r0c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r0c2.getParentElement()), (Element) r0c2.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r1c0.getParentElement()), (Element) r1c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r1c2.getParentElement()), (Element) r1c2.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r2c0.getParentElement()), (Element) r2c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r0c0.getParentElement()), (Element) r0c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r0c2.getParentElement()), (Element) r0c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r1c0.getParentElement()), (Element) r1c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r1c2.getParentElement()), (Element) r1c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r2c0.getParentElement()), (Element) r2c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
 
         Element td1 = getCellElement(1, 1);
         Element td2 = getCellElement(2, 1);
@@ -90,6 +88,7 @@ public class ModalWindow extends DialogBox {
         captionPanel.add(close);
         captionPanel.addStyleName("caption");
 
+        this.setGlassEnabled(true);
         DOM.removeChild(td, (Element) td.getFirstChildElement());
         DOM.appendChild(td, captionPanel.getElement());
     }
@@ -97,68 +96,57 @@ public class ModalWindow extends DialogBox {
     /**
      * @param title - заголовок окна
      */
-    public ModalWindow(String title)
-    {
+    public ModalWindow(String title) {
         this(title, "");
     }
 
-    public ModalWindow()
-    {
+    public ModalWindow() {
         this("");
     }
 
-
     @Override
-    public void setTitle(String title){
+    public void setTitle(String title) {
         this.title.setText(title);
     }
 
     @Override
-    public String getTitle(){
+    public String getTitle() {
         return this.title.getText();
     }
 
     @Override
-    public String getHTML()
-    {
+    public String getHTML() {
         return this.title.getHTML();
     }
 
     @Override
-    public String getText()
-    {
+    public String getText() {
         return this.title.getText();
     }
 
     @Override
-    public void setHTML(String html)
-    {
+    public void setHTML(String html) {
         this.title.setHTML(html);
     }
 
     @Override
-    public void setText(String text)
-    {
+    public void setText(String text) {
         this.title.setText(text);
     }
 
     @Override
-    protected void onPreviewNativeEvent(Event.NativePreviewEvent event)
-    {
+    protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
         NativeEvent nativeEvent = event.getNativeEvent();
-
         if ((!event.isCanceled()
                 && (event.getTypeInt() == Event.ONCLICK)
                 && isCloseEvent(nativeEvent))
-                ||(Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE))
-        {
+                || (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE)) {
             this.hide();
         }
         super.onPreviewNativeEvent(event);
     }
 
-    private boolean isCloseEvent(NativeEvent event)
-    {
+    private boolean isCloseEvent(NativeEvent event) {
         return event.getEventTarget().equals(close.getElement());
     }
 

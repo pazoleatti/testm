@@ -56,8 +56,11 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setDepartmentId(period.getDepartmentId());
 				row.setPeriodCondition(period.isActive());
 				row.setBalance(period.isBalance());
-				
+				row.setYear(year);
 				row.setCorrectPeriod(period.getCorrectPeriod());
+				Department dep = departmentService.getDepartment(period.getDepartmentId().intValue());
+				Notification notification = notificationService.get(reportPeriod.getId(), dep.getId(), dep.getParentId());
+				row.setDeadline(notification != null ? notification.getDeadline() : null);
 				per.get(year).add(row);
 			}
 		}

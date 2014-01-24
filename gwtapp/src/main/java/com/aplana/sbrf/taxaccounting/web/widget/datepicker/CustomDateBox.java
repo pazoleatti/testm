@@ -89,9 +89,14 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 			@Override
 			public void onBlur(BlurEvent event) {
 				try {
-					Date formattedDate = format.parseStrict(dateBox.getValue());
-					dateBox.setValue(format.format(formattedDate));
-					lastValidDate = format.format(formattedDate);
+					if (dateBox.getValue().isEmpty()) {
+						dateBox.setValue("");
+						lastValidDate = "";
+					} else {
+						Date formattedDate = format.parseStrict(dateBox.getValue());
+						dateBox.setValue(format.format(formattedDate));
+						lastValidDate = format.format(formattedDate);
+					}
 				} catch (IllegalArgumentException e) {
 					dateBox.setValue(lastValidDate);
 				}

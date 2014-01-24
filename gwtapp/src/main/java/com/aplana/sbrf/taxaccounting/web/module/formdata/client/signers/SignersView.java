@@ -266,6 +266,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 			return;
 		}
 
+        if(departmentPicker.getValue().isEmpty()){
+            Dialog.warningMessage("Не указано подразделение-исполнитель!");
+            return;
+        }
+
 		getUiHandlers().onSave(performer, signers, departmentPicker.getValue().get(0));
 	}
 

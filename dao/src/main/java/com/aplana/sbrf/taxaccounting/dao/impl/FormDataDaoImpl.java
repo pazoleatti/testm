@@ -70,6 +70,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
+            fd.setPrintDepartmentId(rs.getInt("print_department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -91,6 +92,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			FormData result = new FormData();
 			result.setId(rs.getLong("id"));
 			result.setDepartmentId(rs.getInt("department_id"));
+            result.setPrintDepartmentId(rs.getInt("print_department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -145,10 +147,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign, period_order)" +
-							" values (?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, print_department, kind, state, report_period_id, return_sign, period_order)" +
+							" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
-					formData.getDepartmentId(), formData.getKind().getId(),
+					formData.getDepartmentId(), formData.getPrintDepartmentId(), formData.getKind().getId(),
 					formData.getState().getId(), formData.getReportPeriodId(), 0, formData.getPeriodOrder());
 			formData.setId(formDataId);
 		} else {
@@ -298,7 +300,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
+					"SELECT fd.id, fd.department_id, fd.print_department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },
