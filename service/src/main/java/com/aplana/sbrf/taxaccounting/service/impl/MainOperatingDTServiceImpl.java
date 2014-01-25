@@ -23,7 +23,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static int ONE_DAY_MILLISECONDS = 86400000;
     private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
     @Autowired
@@ -44,8 +43,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
-        Date dbVersionEndDate = declarationTemplateService.getNearestDTRight(declarationTemplate) != null ?
-                new Date(declarationTemplateService.getNearestDTRight(declarationTemplate).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
+        Date dbVersionEndDate = declarationTemplateService.getNearestDTRight(declarationTemplate.getId()) != null ?
+                new Date(declarationTemplateService.getNearestDTRight(declarationTemplate.getId()).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
         if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ||
                 dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ){
             versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);
@@ -108,7 +107,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger) {
         DeclarationTemplate template = declarationTemplateService.get(templateId);
-        DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(template);
+        DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(templateId);
         Date dateEndActualize = nearestDT != null ? nearestDT.getVersion() : null;
         versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))

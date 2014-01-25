@@ -234,7 +234,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         valueMap.put("statusList", statusList);
         valueMap.put("actualStartVersion", actualBeginVersion);
         valueMap.put("actualEndVersion", actualEndVersion);
-        valueMap.put("formTemplateId", decTemplateId);
+        valueMap.put("decTemplateId", decTemplateId);
 
         StringBuilder builder = new StringBuilder("select id");
         builder.append(" from declaration_template where declaration_type_id = :typeId");
@@ -247,7 +247,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             builder.append(" and version > :actualStartVersion");
 
         if (decTemplateId != 0)
-            builder.append(" and id <> :formTemplateId");
+            builder.append(" and id <> :decTemplateId");
         builder.append(" order by version, edition");
 
         try {

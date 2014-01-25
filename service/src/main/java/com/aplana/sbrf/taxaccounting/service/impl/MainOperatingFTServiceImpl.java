@@ -23,8 +23,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
-    private static int ONE_DAY_MILLISECONDS = 86400000;
-
     private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
     @Autowired
@@ -45,8 +43,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         FormTemplate formTemplate = (FormTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         Date dbVersionBeginDate = formTemplateService.get(formTemplate.getId()).getVersion();
-        Date dbVersionEndDate = formTemplateService.getNearestFTRight(formTemplate) != null ?
-                new Date(formTemplateService.getNearestFTRight(formTemplate).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
+        Date dbVersionEndDate = formTemplateService.getNearestFTRight(formTemplate.getId()) != null ?
+                new Date(formTemplateService.getNearestFTRight(formTemplate.getId()).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
         if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ||
                 dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ){
             versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
@@ -107,7 +105,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger) {
         FormTemplate template = formTemplateService.get(templateId);
-        FormTemplate nearestFT = formTemplateService.getNearestFTRight(template);
+        FormTemplate nearestFT = formTemplateService.getNearestFTRight(template.getId());
         Date dateEndActualize = nearestFT != null ? nearestFT.getVersion() : null;
         versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))

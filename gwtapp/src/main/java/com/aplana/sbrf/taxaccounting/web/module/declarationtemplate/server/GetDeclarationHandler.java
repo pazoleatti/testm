@@ -40,7 +40,7 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
 		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
-        DeclarationTemplate declarationTemplateEnd = declarationTemplateService.getNearestDTRight(declarationTemplate);
+        DeclarationTemplate declarationTemplateEnd = declarationTemplateService.getNearestDTRight(declarationTemplate.getId());
         result.setEndDate(declarationTemplateEnd != null?new Date(declarationTemplateEnd.getVersion().getTime() - 86400000) : null);
 		return result;
     }

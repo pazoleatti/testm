@@ -9,6 +9,7 @@ import java.util.Date;
  * Основные операции над макетами
  */
 public interface MainOperatingService {
+    public static int ONE_DAY_MILLISECONDS = 86400000;
 
     <T> int edit(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger);

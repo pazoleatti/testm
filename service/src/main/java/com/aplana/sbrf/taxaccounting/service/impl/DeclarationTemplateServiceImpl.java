@@ -151,14 +151,18 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         /*Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());*/
         List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
         formTemplateVersionIds.addAll(declarationTemplateDao.getDeclarationTemplateVersions(decFormTypeId,
-                declarationTemplate.getId() != null ? declarationTemplate.getId() : 0,
+                declarationTemplate.getId() != null && declarationTemplate.getId() != 0 ? declarationTemplate.getId() : 0,
                 statusList, declarationTemplate.getVersion(), actualEndVersion));
 
+        System.out.println("formTemplateVersionIds size: " + formTemplateVersionIds.size());
+        for (Integer integer : formTemplateVersionIds){
+            System.out.println("id: " + integer);
+        }
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
-                DeclarationTemplate beginTemplate = declarationTemplateDao.get(i);
-                DeclarationTemplate endTemplate = declarationTemplateDao.get(i++);
+                DeclarationTemplate beginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i));
+                DeclarationTemplate endTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i++));
                 segmentIntersection.setStatus(beginTemplate.getStatus());
                 segmentIntersection.setBeginDate(beginTemplate.getVersion());
                 segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()));
@@ -210,8 +214,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public DeclarationTemplate getNearestDTRight(DeclarationTemplate declarationTemplate, VersionedObjectStatus... status) {
+    public DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
         int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
         if (id == 0)
