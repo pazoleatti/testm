@@ -110,7 +110,7 @@
             <g:cell width="1%" horizontalAlignment="right" verticalAlignment="middle">
                 <pager:FlexiblePager ui:field='pager' location='CENTER'
                     showFastForwardButton="false" fastForwardRows="0"
-                    showLastPageButton="true" addStyleNames="{style.pager}"/>
+                    showLastPageButton="true" addStyleNames="{style.pager}" type="refBookPicker"/>
             </g:cell>
         </g:HorizontalPanel>
 

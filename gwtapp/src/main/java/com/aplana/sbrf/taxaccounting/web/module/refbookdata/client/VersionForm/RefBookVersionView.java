@@ -56,6 +56,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 				getUiHandlers().onSelectionChanged();
 			}
 		});
+        refbookDataTable.setPageSize(pager.getPageSize());
 		pager.setDisplay(refbookDataTable);
 	}
 
@@ -111,7 +112,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		data.addDataDisplay(refbookDataTable);
 	}
 
-	@Override
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
 	public void setRange(Range range) {
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
 	}

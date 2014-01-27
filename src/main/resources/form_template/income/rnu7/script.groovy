@@ -364,7 +364,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-        def code = getKnu(row.kny)
+        def String code = row.kny
         if (sumRowsByCode[code] != null) {
             sumRowsByCode[code] += row.taxAccountingRuble ?: 0
         } else {
@@ -417,13 +417,13 @@ void logicCheck() {
 
     // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     totalRows.each { key, val ->
-        if (totalRows.get(key) != sumRowsByCode.get(key)) {
+        if (val != sumRowsByCode[key]) {
             def msg = formData.createDataRow().getCell('taxAccountingRuble').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
     totalRows2.each { key, val ->
-        if (totalRows2.get(key) != sumRowsByCode2.get(key)) {
+        if (val != sumRowsByCode2[key]) {
             def msg = formData.createDataRow().getCell('ruble').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }

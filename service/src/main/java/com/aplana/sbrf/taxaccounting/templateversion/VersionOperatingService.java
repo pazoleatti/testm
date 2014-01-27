@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.service;
+package com.aplana.sbrf.taxaccounting.templateversion;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 

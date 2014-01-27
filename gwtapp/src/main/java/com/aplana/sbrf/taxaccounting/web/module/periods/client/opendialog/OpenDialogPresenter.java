@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -88,18 +89,31 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                     public void onSuccess(CheckPeriodStatusResult result) {
                         switch (result.getStatus()) {
                             case OPEN:
-                                Window.alert("Периорд уже открыт!");
+                                Dialog.infoMessage("Периорд уже открыт!");
                                 break;
                             case NOT_EXIST:
                                 open(openFilterData);
                                 break;
                             case CLOSE:
-                                if (Window.confirm("Период закрыт, выполнить его переоткрытие?")) {
-                                    open(openFilterData);
-                                }
+                                Dialog.confirmMessage("Период закрыт, выполнить его переоткрытие?", new DialogHandler() {
+                                    @Override
+                                    public void yes() {
+                                        open(openFilterData);
+                                    }
+
+                                    @Override
+                                    public void no() {
+                                        return;
+                                    }
+
+                                    @Override
+                                    public void close() {
+                                       no();
+                                    }
+                                });
                                 break;
                             case BALANCE_STATUS_CHANGED:
-                                Window.alert("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                Dialog.warningMessage("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
                                 break;
                             default:
                                 getView().hide();

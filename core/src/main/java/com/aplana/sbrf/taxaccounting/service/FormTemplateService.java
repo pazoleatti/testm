@@ -117,11 +117,11 @@ public interface FormTemplateService {
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.
-     * @param formTemplate версия макета
+     * @param formTemplateId идентификатор версии макета
      * @param status статус
      * @return ближайшая правее
      */
-    FormTemplate getNearestFTRight(FormTemplate formTemplate, VersionedObjectStatus... status);
+    FormTemplate getNearestFTRight(int formTemplateId, VersionedObjectStatus... status);
 
     /**
      * Возвращает количество версий для вида шаблона

@@ -48,7 +48,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
 
-	private static final int PAGE_SIZE = 20;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
@@ -56,6 +55,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
+        int getPageSize();
 		void setRange(Range range);
 		void updateTable();
 		void setRefBookNameDesc(String desc);
@@ -72,7 +72,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(PAGE_SIZE, dataProvider);
+		getView().assignDataProvider(getView().getPageSize(), dataProvider);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
-								getView().setRange(new Range(0, PAGE_SIZE));
+								getView().setRange(new Range(0, getView().getPageSize()));
 								editFormPresenter.init(refBookDataId);
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}

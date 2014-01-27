@@ -10,4 +10,5 @@ public interface LogEntriesView{
     public void setLogEntries(int start, int totalCount,  List<LogEntry> logEntries);
     public void clearLogEntries();
     public void setDataProvider(AsyncDataProvider<LogEntry> dataProvider);
+    public int getPageSize();
 }

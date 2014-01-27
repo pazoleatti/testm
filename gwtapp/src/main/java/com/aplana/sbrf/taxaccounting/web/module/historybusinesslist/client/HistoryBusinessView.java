@@ -51,8 +51,6 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
-    private static final int PAGE_SIZE = 20;
-
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
     private static final String noteColumnHeader = "Текст события";
@@ -161,7 +159,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
             }
         };
 
-        logBusinessTable.setPageSize(PAGE_SIZE);
+        logBusinessTable.setPageSize(pager.getPageSize());
         logBusinessTable.addColumn(dateColumn, dateColumnHeader);
         logBusinessTable.addColumn(eventColumn, eventColumnHeader);
         logBusinessTable.addColumn(noteColumn, noteColumnHeader);

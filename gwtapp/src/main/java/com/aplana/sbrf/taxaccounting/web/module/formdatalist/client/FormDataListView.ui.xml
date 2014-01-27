@@ -73,7 +73,7 @@
 
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
-                                     fastForwardRows="0" showLastPageButton="true"/>
+                                     fastForwardRows="0" showLastPageButton="true" type="formDataList"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

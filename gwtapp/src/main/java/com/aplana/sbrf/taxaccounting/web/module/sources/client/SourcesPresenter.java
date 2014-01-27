@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -210,7 +211,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     @Override
 	public void showAssignErrorMessage() {
         // TODO Заменить на http://jira.aplana.com/browse/SBRFACCTAX-5398 по готовности
-        Window.alert("Выбранное назначение налоговой формы уже является источником " +
+        Dialog.warningMessage("Выбранное назначение налоговой формы уже является источником " +
                 "для выбранного приемника!");
     }
 

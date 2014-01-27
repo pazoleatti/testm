@@ -3,19 +3,24 @@ package com.aplana.sbrf.taxaccounting.web.module.testpage2.client;
 //import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
@@ -72,6 +77,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
     private NoSelectionModel<DataRow<Cell>> selectionModel;
 
     @Inject
+    @UiConstructor
     public TestPage2View(final Binder uiBinder) {
         initTree();
         simpleTree = new SimpleTree("Наименование подразделения", true);
@@ -124,7 +130,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 //        tree.setValue(values);
     }
 
-    void initMultiSelectTree(SimpleTree tree) {
+    void initMultiSelectTree(final SimpleTree tree) {
         List<MultiSelectTreeItem> items = new ArrayList<MultiSelectTreeItem>();
         MultiSelectTreeItem item1 = new MultiSelectTreeItem(1, "Открытое акционерное общестро «Сбербанк России»");
         MultiSelectTreeItem item2 = new MultiSelectTreeItem(2, "222222222222222222222222222222222222222222222222222");
@@ -157,6 +163,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         item5.addItem(item55);
         item55.addItem(item555);
         item1.addItem(item6);
+        item6.addItem(getEmptyItem());
         item1.addItem(item7);
         item1.addItem(item8);
         item8.addItem(item88);
@@ -180,6 +187,22 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         tree.setValue(values);
 
         itemTmp = item3;
+
+        tree.addOpenHandler(new OpenHandler<TreeItem>() {
+            @Override
+            public void onOpen(OpenEvent<TreeItem> event) {
+                MultiSelectTreeItem m = (MultiSelectTreeItem) event.getTarget();
+                if (m.getChildCount() > 0 && m.getChild(0) != null &&
+                        ((MultiSelectTreeItem) m.getChild(0)).getId() == null) {
+                    m.removeItems();
+
+                    getUiHandlers().getData(m);
+
+                    // MultiSelectTreeItem newItem = new MultiSelectTreeItem(tmpId++, "opened" + tmpId, tree.isMultiSelection());
+                    // m.addItem(newItem);
+                }
+            }
+        });
     }
 
     @UiHandler("ok")
@@ -246,12 +269,26 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
         }
 
         setRowsData(1, count, dataRows);
+
         pager.setDisplay(formDataTable);
+        formDataTable.setPageSize(pager.getPageSize());
     }
 
     private void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
-        // Window.alert("182!");
         formDataTable.setRowCount(totalCount);
         formDataTable.setRowData(start, rowsData);
+    }
+
+    @Override
+    public void addToTree(MultiSelectTreeItem item, List<TAUser> list) {
+        for (TAUser i : list) {
+            MultiSelectTreeItem newItem = new MultiSelectTreeItem(i.getId(), i.getName());
+            newItem.addItem(getEmptyItem());
+            simpleTree.addTreeItem(item, newItem);
+        }
+    }
+
+    private MultiSelectTreeItem getEmptyItem() {
+        return new MultiSelectTreeItem("");
     }
 }

@@ -114,7 +114,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
         setDeclarationTemplate();
-        getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
 	}
 
 	@Override
@@ -213,6 +212,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 						public void onSuccess(GetDeclarationResult result) {
                             declarationTemplateExt = new DeclarationTemplateExt();
 							declarationTemplate = result.getDeclarationTemplate();
+                            getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                             declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
                             declarationTemplateExt.setEndDate(result.getEndDate());
 							getView().setDeclarationTemplate(declarationTemplateExt);
