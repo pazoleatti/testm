@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -31,6 +32,7 @@ import com.google.gwt.view.client.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author sgoryachkin
@@ -158,6 +160,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 		pager.setDisplay(cellTable);
 
 		dataProvider.addDataDisplay(cellTable);
+
 		txtFind.addKeyPressHandler(new KeyPressHandler() {
 			@Override
 			public void onKeyPress(KeyPressEvent event) {
@@ -270,16 +273,20 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
     }
 
 	@Override
-	public void setHeaders(List<String> headers) {
+	public void setHeaders(Map<String, Integer> headers) {
         for (int i = cellTable.getColumnCount()-1; i >= 0; i--) {
             cellTable.removeColumn(i);
         }
-		for (int i = 0; i < headers.size(); i++) {
+        int i = 0;
+        System.out.println(headers);
+        for(Map.Entry<String, Integer> entry : headers.entrySet()){
             RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i);
             refBookItemTextColumn.setSortable(true);
             sortableColumns.put(refBookItemTextColumn, i);
-			cellTable.addColumn(refBookItemTextColumn, headers.get(i));
-		}
+            cellTable.addColumn(refBookItemTextColumn, entry.getKey());
+            cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
+            i++;
+        }
 	}
 
 	@Override

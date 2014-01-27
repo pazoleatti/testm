@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared;
 
 import java.util.List;
+import java.util.Map;
 
 import com.gwtplatform.dispatch.shared.Result;
 
@@ -10,13 +11,13 @@ public class InitRefBookResult implements Result {
 	
 	private long refBookId;
 
-	private List<String> headers;
+	private Map<String, Integer> headers;
 
-	public List<String> getHeaders() {
+	public Map<String, Integer> getHeaders() {
 		return headers;
 	}
 
-	public void setHeaders(List<String> headers) {
+	public void setHeaders(Map<String, Integer> headers) {
 		this.headers = headers;
 	}
 

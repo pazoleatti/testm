@@ -18,19 +18,24 @@
             padding: 0 !important;
         }
 
-        .table {
+        .tableWrapper {
             border-left: 1px solid #000000;
             border-right: 1px solid #000000;
             border-top: 1px solid #000000;
             border-bottom: 0;
 
             margin: 0 10px;
-            background-color: #ffffff;
             position: absolute !important;
             top: 100px;
             bottom: 72px;
-            right: 0;
             left: 0;
+            right: 0;
+        }
+
+        .table {
+            background-color: #ffffff;
+            width: 100%;
+            height: 100%;
         }
 
         .pagerPanel {
@@ -101,7 +106,10 @@
             </g:cell>
         </g:HorizontalPanel>
 
-        <style:GenericDataGrid ui:field="cellTable" addStyleNames="{style.table}"/>
+        <g:HTMLPanel addStyleNames="{style.tableWrapper}">
+            <style:GenericDataGrid ui:field="cellTable" addStyleNames="{style.table}"/>
+        </g:HTMLPanel>
+
 
         <g:HorizontalPanel addStyleNames="{style.pagerPanel}">
             <g:cell horizontalAlignment="left" width="100%" verticalAlignment="middle">
