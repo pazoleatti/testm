@@ -154,8 +154,8 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
             }
         });
 
+        cellTable.setPageSize(pager.getPageSize());
 		pager.setDisplay(cellTable);
-		pager.setPageSize(15);
 
 		dataProvider.addDataDisplay(cellTable);
 		txtFind.addKeyPressHandler(new KeyPressHandler() {

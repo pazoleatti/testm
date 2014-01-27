@@ -114,7 +114,7 @@
 
                 <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
                                      showFastForwardButton="false" fastForwardRows="0"
-                                     showLastPageButton="true"/>
+                                     showLastPageButton="true" type="members"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

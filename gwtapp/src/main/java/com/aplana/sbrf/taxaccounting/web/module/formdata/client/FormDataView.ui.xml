@@ -269,7 +269,7 @@
                 <style:GenericDataGrid ui:field="formDataTable" addStyleNames="{style.table}"/>
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
-                                     fastForwardRows="0" showLastPageButton="true"/>
+                                     fastForwardRows="0" showLastPageButton="true" type="formData"/>
 
             </fm:BodyContainer>
         </fm:body>
