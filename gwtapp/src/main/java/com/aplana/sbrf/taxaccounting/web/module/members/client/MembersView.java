@@ -33,7 +33,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     }
 
     private final Widget widget;
-	private static final  int PAGE_SIZE = 20;
 
 	private AsyncDataProvider<TAUserFull> dataProvider = new  AsyncDataProvider<TAUserFull>() {
 		@Override
@@ -135,7 +134,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
         },"Роль");
 
 
-	    taUserFullCellTable.setPageSize(PAGE_SIZE);
+	    taUserFullCellTable.setPageSize(pager.getPageSize());
 	    pager.setDisplay(taUserFullCellTable);
 	    dataProvider.addDataDisplay(taUserFullCellTable);
     }

@@ -52,8 +52,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
-    private static final int PAGE_SIZE = 20;
-
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
     private static final String noteColumnHeader = "Текст события";
@@ -164,7 +162,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
-        auditTable.setPageSize(PAGE_SIZE);
         dataProvider.addDataDisplay(auditTable);
 
         auditTable.addColumn(dateColumn, dateColumnHeader);
@@ -193,6 +190,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 		    }
 	    });
 
+        auditTable.setPageSize(pager.getPageSize());
         pager.setDisplay(auditTable);
     }
 

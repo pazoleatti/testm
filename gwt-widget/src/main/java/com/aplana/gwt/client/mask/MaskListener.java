@@ -27,7 +27,7 @@ public class MaskListener {
         this.textbox = box;
 
         // Рисуем пользовательскую маску
-        picture = MaskBox.createMaskPicture(mask);
+        picture = MaskUtils.createMaskPicture(mask);
 
         /*
          *   Через KeyDown обрабатываем удаление
@@ -43,7 +43,6 @@ public class MaskListener {
                     return;
                 }
 
-
                 if (nativeKeyCode == KeyCodes.KEY_BACKSPACE || nativeKeyCode == KeyCodes.KEY_DELETE) {
                     debug("KeyDown: baskspace or delete");
 
@@ -52,7 +51,7 @@ public class MaskListener {
                     String input = textbox.getText();
                     int cursor = textbox.getCursorPos();
 
-                    if (textbox.getSelectionLength() > 0) {
+                    if (input.length() > 0 && textbox.getSelectionLength() > 0) {
                         debug("KeyDown: textbox has selection");
 
                         applied = new StringBuffer();
@@ -88,19 +87,27 @@ public class MaskListener {
                         return;
                     }
 
-                    char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
                     applied = new StringBuffer();
 
+                    // если курсор в самом конце - не обратаываем нажатие
+                    if(cursor >= mask.length()){
+                        return;
+                    }
+                    char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
+
                     //Заменяем введенный символ на прочерк если он попадает под маску
-                    if (mc == '9' || mc == 'X') {
+                    if ((mc == '9' || mc == 'X') && input.length() > 0) {
                         applied.append(input.substring(0, cursor));
                         applied.append("_");
                         applied.append(input.substring(cursor + 1));
-                    } else
+                    } else {
                         applied.append(input);
+                    }
 
                     textbox.setText(applied.length() != 0 ? applied.toString() : picture);
-                    textbox.setCursorPos(cursor);
+                    if (applied.length() != 0) {
+                        textbox.setCursorPos(cursor);
+                    }
 
                     textbox.removeExceptionStyle();
 
@@ -135,7 +142,7 @@ public class MaskListener {
 
                 int cursor = textbox.getCursorPos();
 
-                if (textbox.getSelectionLength() > 0) {
+                if (textbox.getText().length() > 0 && textbox.getSelectionLength() > 0) {
                     debug("KeyPress: textbox has selection");
                     applied = new StringBuffer();
 

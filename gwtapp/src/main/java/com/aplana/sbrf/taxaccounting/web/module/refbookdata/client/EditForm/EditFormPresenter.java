@@ -157,11 +157,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Window.alert("Не указана дата начала актуальности");
+                Dialog.warningMessage("Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Window.alert("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
 			if (currentUniqueRecordId == null) {

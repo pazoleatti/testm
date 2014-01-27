@@ -23,16 +23,19 @@
             margin-left: 10px;
         }
 
+        .mainPanel {
+            background-color: yellow;
+        }
     </ui:style>
 
-    <g:VerticalPanel>
-        <g:HorizontalPanel width="600px">
+    <g:VerticalPanel addStyleNames="{style.mainPanel}">
+        <g:HorizontalPanel width="600px" visible="false">
             <style:GenericDataGrid height="200px" ui:field="formDataTable"/>
         </g:HorizontalPanel>
         <g:HorizontalPanel addStyleNames="{style.pagerBar}" width="600px">
             <pager:FlexiblePager ui:field="pager" location="CENTER"
                                  showFastForwardButton="false" fastForwardRows="0"
-                                 showLastPageButton="true" styleName="{style.pager}" />
+                                 showLastPageButton="true" styleName="{style.pager}" type="testPage2"/>
         </g:HorizontalPanel>
 
         <g:HorizontalPanel styleName="{style.treeStyle}">
@@ -45,7 +48,7 @@
             <g:Button ui:field="w" text="w+"/>
         </g:HorizontalPanel>
         <g:HorizontalPanel styleName="{style.treeStyle}" height="200px">
-            <t:SimpleTree ui:field="simpleTree"/>
+            <t:SimpleTree ui:field="simpleTree" height="400px" width="400px"/>
             <t:SimpleTree ui:field="simpleTree2" addStyleNames="{style.msileft}" headerVisible="false"/>
         </g:HorizontalPanel>
 

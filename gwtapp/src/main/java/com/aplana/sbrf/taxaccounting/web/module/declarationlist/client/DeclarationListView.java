@@ -34,8 +34,6 @@ public class DeclarationListView extends
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
 
-    private static final int PAGE_SIZE = 20;
-
 	private DeclarationDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
@@ -135,7 +133,7 @@ public class DeclarationListView extends
 		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
-        declarationTable.setPageSize(PAGE_SIZE);
+        declarationTable.setPageSize(pager.getPageSize());
         dataProvider.addDataDisplay(declarationTable);
 
 		pager.setDisplay(declarationTable);

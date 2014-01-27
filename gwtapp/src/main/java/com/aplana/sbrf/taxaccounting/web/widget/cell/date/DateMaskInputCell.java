@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell.date;
 
 import com.aplana.gwt.client.mask.MaskBox;
+import com.aplana.gwt.client.mask.MaskUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.AbstractEditableCell;
@@ -172,7 +173,7 @@ public class DateMaskInputCell extends
 
         this.dateFormat = DEFAULT_DATE_FORMAT;
         this.mask = DEFAULT_DATE_MASK;
-        this.maskPicture = MaskBox.createMaskPicture(this.mask);
+        this.maskPicture = MaskUtils.createMaskPicture(this.mask);
 
 	}
 
@@ -180,7 +181,7 @@ public class DateMaskInputCell extends
         this(renderer, columnContext);
         this.dateFormat = dateFormat;
         this.mask = mask;
-        this.maskPicture = MaskBox.createMaskPicture(mask);
+        this.maskPicture = MaskUtils.createMaskPicture(mask);
     }
 
 	@Override
@@ -322,7 +323,7 @@ public class DateMaskInputCell extends
         String inputText = elem.getValue();
         int cursor = TextUtils.getCursorPos(elem);
 
-        if (TextUtils.getSelectionLength(elem) > 0) {
+        if (elem.getValue().length() > 0 && TextUtils.getSelectionLength(elem) > 0) {
             String tmp = prepareTextWithSelection(elem, inputText, mask);
             cursor = TextUtils.getSelectionStart(elem);
             // Если получивщийся текст пустой то вставляем маску для пользователя
@@ -339,11 +340,16 @@ public class DateMaskInputCell extends
             return;
         }
 
-        char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
         StringBuffer applied = new StringBuffer();
+        // если курсор в самом конце - не обратаываем нажатие
+        if(cursor >= mask.length()){
+            return;
+        }
+
+        char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
 
         //Заменяем введенный символ на прочерк если он попадает под маску
-        if (mc == '9' || mc == 'X') {
+        if ((mc == '9' || mc == 'X')  && inputText.length() > 0) {
             applied.append(inputText.substring(0, cursor));
             applied.append("_");
             applied.append(inputText.substring(cursor + 1));
@@ -351,7 +357,9 @@ public class DateMaskInputCell extends
             applied.append(inputText);
 
         elem.setValue(applied.length() != 0 ? applied.toString() : picture);
-        TextUtils.setCursorPos(elem, cursor);
+        if (applied.length() != 0) {
+            TextUtils.setCursorPos(elem, cursor);
+        }
     }
 
     private void onPress(InputElement elem, NativeEvent event, String mask, String picture){
@@ -362,7 +370,7 @@ public class DateMaskInputCell extends
 
         int cursor = TextUtils.getCursorPos(elem);
 
-        if (TextUtils.getSelectionLength(elem) > 0) {
+        if (elem.getValue().length() > 0 && TextUtils.getSelectionLength(elem) > 0) {
             inputText = prepareTextWithSelection(elem, inputText, mask);
             cursor = TextUtils.getSelectionStart(elem);
         }
