@@ -118,7 +118,7 @@ public class MaskBox<T> extends ValueBox<T> {
     }
 
     public void addExceptionStyle() {
-        getElement().getStyle().setBackgroundColor("yellow");
+        getElement().getStyle().setBackgroundColor("#ffccd2");
     }
 
     public void removeExceptionStyle() {
