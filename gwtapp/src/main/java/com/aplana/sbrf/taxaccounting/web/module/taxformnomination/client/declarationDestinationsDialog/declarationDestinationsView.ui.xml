@@ -1,0 +1,82 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client"
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:dw="urn:import:com.aplana.gwt.client"
+             xmlns:a='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
+    <ui:style>
+        .content {
+            margin: 20px;
+        }
+
+        .content tr{
+            width: 480px;
+        }
+
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin:  8px 10px 8px 0px !important;
+            width: 74px;
+        }
+
+        .labels{
+            text-align: right;
+            width: 150px;
+            padding-right: 5px;
+        }
+
+        .rowMiddle td{
+            /*выравние по вертикали все строчки */
+            vertical-align: middle !important;
+        }
+
+        /*.datePo{
+            padding-left:  10px;
+            padding-right: 10px;
+        }*/
+    </ui:style>
+
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Редактирование назначения налоговых форм" >
+        <g:VerticalPanel height="100%" >
+
+            <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
+<!-- эта штука понадобится в 0.3.7
+                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
+                    <g:Label text="Период с" addStyleNames="{style.labels}"/>
+                    <d:CustomDateBox width="110px"/>
+                    <g:Label text="по " addStyleNames="{style.datePo}"/>
+                    <d:CustomDateBox width="104px"/>
+                </g:HorizontalPanel>
+-->
+
+                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                    <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true"/>
+                </g:HorizontalPanel>
+
+                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                    <g:Label text="Вид декларации" addStyleNames="{style.labels}"/>
+                    <g:ValueListBox width="250px" ui:field="declarationTypeId"/>
+                </g:HorizontalPanel>
+
+            </g:VerticalPanel>
+
+            <style:Bar addStyleNames="{style.footerPanel}">
+                <style:RightBar>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
+                </style:RightBar>
+            </style:Bar>
+
+        </g:VerticalPanel>
+    </dw:ModalWindow>
+
+</ui:UiBinder>

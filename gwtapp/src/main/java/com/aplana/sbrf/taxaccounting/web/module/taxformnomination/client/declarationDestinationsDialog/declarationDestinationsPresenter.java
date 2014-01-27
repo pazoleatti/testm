@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog;
+package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -9,38 +9,35 @@ import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-
-public class EditDeatinationPresenter extends PresenterWidget<EditDeatinationPresenter.MyView> implements EditDestinationUiHandlers {
-
+/**
+ * @author auldanov
+ */
+public class DeclarationDestinationsPresenter extends PresenterWidget<DeclarationDestinationsPresenter.MyView> implements DeclarationDestinationsUiHandlers {
     private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
 
-    public interface MyView extends PopupView, HasUiHandlers<EditDestinationUiHandlers> {
+    @Override
+    public void onConfirm() {
+
+    }
+
+    public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
+
     }
 
     @Inject
-    public EditDeatinationPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+    public DeclarationDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
         super(eventBus, view);
         this.placeManager = placeManager;
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }
 
-    @Override
-    protected void onReveal() {
-        super.onReveal();
-    }
-
-    @Override
-    public void onConfirm() {
-        //TODO логика
-        getView().hide();
-    }
-
     public void initAndShowDialog(final HasPopupSlot slotForMe) {
+        //getView().resetForm();
+        slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
         //TODO логика загрузки данных
-        slotForMe.addToPopupSlot(EditDeatinationPresenter.this);
-    }
 
+    }
 
 }

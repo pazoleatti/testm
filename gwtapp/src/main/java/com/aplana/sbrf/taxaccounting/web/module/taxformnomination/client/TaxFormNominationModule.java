@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog.EditDeatinationPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog.EditDestinationView;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsView;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 /**
@@ -15,7 +17,8 @@ public class TaxFormNominationModule extends AbstractPresenterModule {
 	protected void configure() {
 		bindPresenter(TaxFormNominationPresenter.class, TaxFormNominationPresenter.MyView.class,
 				TaxFormNominationView.class, TaxFormNominationPresenter.MyProxy.class);
-        bindSingletonPresenterWidget(EditDeatinationPresenter.class, EditDeatinationPresenter.MyView.class, EditDestinationView.class);
+        bindSingletonPresenterWidget(FormDestinationsPresenter.class, FormDestinationsPresenter.MyView.class, FormDestinationsView.class);
+        bindSingletonPresenterWidget(DeclarationDestinationsPresenter.class, DeclarationDestinationsPresenter.MyView.class, DeclarationDestinationsView.class);
 
     }
 

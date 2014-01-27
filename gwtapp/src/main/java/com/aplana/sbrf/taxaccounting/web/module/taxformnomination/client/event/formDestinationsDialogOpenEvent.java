@@ -4,10 +4,10 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
-public class EditDestinationDialogOpenEvent extends GwtEvent<EditDestinationDialogOpenEvent.EditDestinationDialogOpenHandler> {
+public class FormDestinationsDialogOpenEvent extends GwtEvent<FormDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler> {
 
 	public static interface EditDestinationDialogOpenHandler extends EventHandler {
-		void onClickEditDestination(EditDestinationDialogOpenEvent event);
+		void onClickEditFormDestination(FormDestinationsDialogOpenEvent event);
 	}
 
 	private static final Type<EditDestinationDialogOpenHandler> TYPE = new Type<EditDestinationDialogOpenHandler>();
@@ -17,15 +17,15 @@ public class EditDestinationDialogOpenEvent extends GwtEvent<EditDestinationDial
 	}
 
 	public static void fire(HasHandlers source) {
-		source.fireEvent(new EditDestinationDialogOpenEvent());
+		source.fireEvent(new FormDestinationsDialogOpenEvent());
 	}
 
-	public EditDestinationDialogOpenEvent() {
+	public FormDestinationsDialogOpenEvent() {
 	}
 
 	@Override
 	protected void dispatch(EditDestinationDialogOpenHandler handler) {
-		handler.onClickEditDestination(this);
+		handler.onClickEditFormDestination(this);
 	}
 
 	@Override

@@ -12,9 +12,12 @@ import java.util.Set;
 public interface TaxFormNominationUiHandlers extends UiHandlers {
     void getTaxFormKind();
 
-    void getTableData();
+    void reloadFormTableData();
+    void reloadDeclarationTableData();
 
     void save(Set<Long> ids);
 
-    void onClickOpenEditDestination();
+    void onClickOpenFormDestinations();
+
+    void onClickOpenDeclarationDestinations();
 }
