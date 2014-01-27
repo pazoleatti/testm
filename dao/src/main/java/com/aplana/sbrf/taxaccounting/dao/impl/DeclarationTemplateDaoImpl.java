@@ -42,7 +42,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
 			d.setActive(rs.getBoolean("is_active"));
-			d.setVersion(rs.getDate("version"));
+			d.setVersion(new Date(rs.getTimestamp("version").getTime()));
 			d.setEdition(rs.getInt("edition"));
 			d.setType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
