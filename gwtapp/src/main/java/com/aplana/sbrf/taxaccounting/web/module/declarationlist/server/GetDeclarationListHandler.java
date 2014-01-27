@@ -14,8 +14,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -42,9 +40,18 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
 		if(action == null || action.getDeclarationFilter() == null){
 			return null;
 		}
+
+        boolean wasEmpty = false;
+
+        if (action.getDeclarationFilter().getDepartmentIds() == null || action.getDeclarationFilter().getDepartmentIds().isEmpty()) {
+            action.getDeclarationFilter().setDepartmentIds(departmentService.getTaxFormDepartments(
+                    securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType())));
+            wasEmpty = true;
+        }
+
         // Для всех пользователей, кроме пользователей с колью "Контролер УНП" происходит принудительная фильтрация
         // деклараций по подразделениям
-        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
             // Список доступных подразделений
             List<Integer> availableList = departmentService.getTaxFormDepartments(
                     securityService.currentUserInfo().getUser(), asList(action.getDeclarationFilter().getTaxType()));
