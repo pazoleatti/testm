@@ -54,7 +54,7 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 		formTemplateService.validateFormTemplate(action.getForm(), logger);
 		if (logger.getEntries().isEmpty() && action.getForm().getId() != null && action.getForm().getType().getId() != 0) {
 			/*formTemplateService.save(action.getForm());*/
-            formTemplateId = mainOperatingService.edit(action.getForm().getId(), action.getVersionEndDate(), logger);
+            formTemplateId = mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger);
             changes.setEvent(TemplateChangesEvent.MODIFIED);
             changes.setEventDate(new Date());
             changes.setFormTemplateId(formTemplateId);

@@ -9,8 +9,9 @@ import java.util.Date;
  * Основные операции над макетами
  */
 public interface MainOperatingService {
+    public static int ONE_DAY_MILLISECONDS = 86400000;
 
-    int edit(int templateId, Date templateActualEndDate, Logger logger);
+    <T> int edit(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger);
     <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger);
     void deleteTemplate(int typeId, Logger logger);

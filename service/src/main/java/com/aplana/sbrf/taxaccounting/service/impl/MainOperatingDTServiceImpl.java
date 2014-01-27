@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static int ONE_DAY_MILLISECONDS = 86400000;
     private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
     @Autowired
@@ -39,21 +39,21 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private VersionOperatingService<DeclarationTemplate> versionOperatingService;
 
     @Override
-    public int edit(int templateId, Date templateActualEndDate, Logger logger) {
-        DeclarationTemplate template = declarationTemplateService.get(templateId);
+    public <T> int edit(T template, Date templateActualEndDate, Logger logger) {
+        DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
-        Date dbVersionBeginDate = declarationTemplateService.get(template.getId()).getVersion();
-        Date dbVersionEndDate = declarationTemplateService.getNearestDTRight(template) != null ?
-                new Date(declarationTemplateService.getNearestDTRight(template).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
-        if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(template.getVersion()) !=0 ||
-                dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(template.getVersion()) !=0 ){
-            versionOperatingService.isIntersectionVersion(template, templateActualEndDate, logger);
+        Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
+        Date dbVersionEndDate = declarationTemplateService.getNearestDTRight(declarationTemplate.getId()) != null ?
+                new Date(declarationTemplateService.getNearestDTRight(declarationTemplate.getId()).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
+        if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ||
+                dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ){
+            versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);
             checkError(logger);
         }
 
-        versionOperatingService.isUsedVersion(template, templateActualEndDate, logger);
+        versionOperatingService.isUsedVersion(declarationTemplate, templateActualEndDate, logger);
         checkError(logger);
-        return declarationTemplateService.save(template);
+        return declarationTemplateService.save(declarationTemplate);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
         checkError(logger);*/
         DeclarationType type = declarationTemplate.getType();
-        type.setStatus(VersionedObjectStatus.DRAFT);
+        type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName("Declaration name");
         int formTypeId = declarationTypeService.save(type);
         declarationTemplate.getType().setId(formTypeId);
@@ -81,7 +81,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);
         checkError(logger);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        declarationTemplate.setEdition(declarationTemplateService.versionTemplateCount(declarationTemplate.getType().getId()));
+        declarationTemplate.setEdition(declarationTemplateService.versionTemplateCount(declarationTemplate.getType().getId()) + 1);
         return declarationTemplateService.save(declarationTemplate);
     }
 
@@ -107,7 +107,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger) {
         DeclarationTemplate template = declarationTemplateService.get(templateId);
-        DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(template);
+        DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(templateId);
         Date dateEndActualize = nearestDT != null ? nearestDT.getVersion() : null;
         versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))

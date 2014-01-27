@@ -35,8 +35,6 @@ public class FormDataListView extends
 		ViewWithUiHandlers<FormDataListUiHandlers> implements
 		FormDataListPresenter.MyView {
 	
-	private static final int PAGE_SIZE = 20;
-
 	public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
 	public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
 	public static final String DEPARTMENT_TITLE = "Подразделение";
@@ -178,7 +176,7 @@ public class FormDataListView extends
 		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE));
 
 		pager.setDisplay(formDataTable);
-		formDataTable.setPageSize(PAGE_SIZE);
+        formDataTable.setPageSize(pager.getPageSize());
 		dataProvider.addDataDisplay(formDataTable);
 
 	}

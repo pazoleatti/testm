@@ -45,7 +45,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId());
-        FormTemplate ftNext = formTemplateService.getNearestFTRight(formTemplate);
+        FormTemplate ftNext = formTemplateService.getNearestFTRight(formTemplate.getId());
         formTemplateExt.setActualEndVersionDate(ftNext != null ?
                 new Date(ftNext.getVersion().getTime() - AdminConstants.oneDayMilliseconds) : null);
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId()));

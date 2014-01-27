@@ -149,7 +149,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 				}
 			}
 		});
-		pager.setDisplay(formDataTable);
+        formDataTable.setPageSize(pager.getPageSize());
+        pager.setDisplay(formDataTable);
 
         recalcReportPeriodLabelWidth();     // пересчитаем при первом отображении страницы
 
@@ -524,7 +525,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
-	@Override
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
 	public void updateData() {
 		formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
 	}

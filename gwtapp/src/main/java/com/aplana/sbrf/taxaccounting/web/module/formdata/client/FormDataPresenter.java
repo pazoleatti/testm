@@ -38,8 +38,6 @@ import java.util.ArrayList;
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers {
 
-	public static final int PAGE_SIZE = 15;
-
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -55,7 +53,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(PAGE_SIZE);
+		getView().assignDataProvider(getView().getPageSize());
 	}
 
 	@Override
@@ -88,10 +86,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 getView().setPagingVisible(false);
                             } else {
 								getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
-                                if (result.getDataRows().size() > PAGE_SIZE) {
+                                if (result.getDataRows().size() > getView().getPageSize()) {
 									getView().assignDataProvider(result.getDataRows().size());
 								}
-                                getView().setPagingVisible(result.getDataRows().getTotalCount() > PAGE_SIZE);
+                                getView().setPagingVisible(result.getDataRows().getTotalCount() > getView().getPageSize());
 							}
 							modifiedRows.clear();
 						}

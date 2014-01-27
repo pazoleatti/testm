@@ -20,7 +20,7 @@
         <g:south size="30">
             <pager:FlexiblePager ui:field="pager" location="CENTER"
                                  showFastForwardButton="false" fastForwardRows="0"
-                                 showLastPageButton="true" styleName="{style.pager}"/>
+                                 showLastPageButton="true" styleName="{style.pager}" type="LogEntries"/>
         </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>
