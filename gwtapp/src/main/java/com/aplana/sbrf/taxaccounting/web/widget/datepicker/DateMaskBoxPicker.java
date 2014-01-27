@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -20,7 +21,7 @@ import java.util.Date;
  *
  * @author aivanov
  */
-public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisibility, HasValue<Date>{
+public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
     interface DateBoxUiBinder extends UiBinder<Widget, DateMaskBoxPicker> {
 	}
