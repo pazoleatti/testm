@@ -28,24 +28,6 @@ public class RefBook implements Serializable {
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 40;
 
-    public static RefBookAttribute getVersionFromAttribute() {
-        RefBookAttribute attr = new RefBookAttribute();
-        attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
-        attr.setName(REF_BOOK_VERSION_FROM_TITLE);
-        attr.setAttributeType(RefBookAttributeType.DATE);
-        attr.setAlias(RECORD_VERSION_FROM_ALIAS);
-        return attr;
-    }
-
-    public static RefBookAttribute getVersionToAttribute() {
-        RefBookAttribute attr = new RefBookAttribute();
-        attr.setWidth(REF_BOOK_VERSION_TO_WIDTH);
-        attr.setName(REF_BOOK_VERSION_TO_TITLE);
-        attr.setAttributeType(RefBookAttributeType.DATE);
-        attr.setAlias(RECORD_VERSION_TO_ALIAS);
-        return attr;
-    }
-
 	/** Код справочника */
 	private Long id;
 
@@ -60,6 +42,30 @@ public class RefBook implements Serializable {
 
 	/** Признак отображения справочника */
 	private boolean visible;
+
+	/** Тип справочника (0 - Линейный, 1 - Иерархический) */
+	private int type;
+
+	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
+	private boolean readOnly;
+
+	public static RefBookAttribute getVersionFromAttribute() {
+		RefBookAttribute attr = new RefBookAttribute();
+		attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
+		attr.setName(REF_BOOK_VERSION_FROM_TITLE);
+		attr.setAttributeType(RefBookAttributeType.DATE);
+		attr.setAlias(RECORD_VERSION_FROM_ALIAS);
+		return attr;
+	}
+
+	public static RefBookAttribute getVersionToAttribute() {
+		RefBookAttribute attr = new RefBookAttribute();
+		attr.setWidth(REF_BOOK_VERSION_TO_WIDTH);
+		attr.setName(REF_BOOK_VERSION_TO_TITLE);
+		attr.setAttributeType(RefBookAttributeType.DATE);
+		attr.setAlias(RECORD_VERSION_TO_ALIAS);
+		return attr;
+	}
 
 	/**
 	 * Возвращает код справочника
@@ -201,14 +207,33 @@ public class RefBook implements Serializable {
 		this.visible = visible;
 	}
 
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
 	@Override
-    public String toString() {
-        return "RefBook{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", attributes=" + attributes +
-                ", scriptId=" + scriptId +
-				", visible=" + visible +
-                '}';
-    }
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("RefBook{");
+		sb.append("attributes=").append(attributes);
+		sb.append(", id=").append(id);
+		sb.append(", name='").append(name).append('\'');
+		sb.append(", scriptId='").append(scriptId).append('\'');
+		sb.append(", visible=").append(visible);
+		sb.append(", type=").append(type);
+		sb.append(", readOnly=").append(readOnly);
+		sb.append('}');
+		return sb.toString();
+	}
 }

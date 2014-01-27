@@ -57,7 +57,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -112,6 +112,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setScriptId(rs.getString("script_id"));
 			result.setVisible(rs.getBoolean("visible"));
             result.setAttributes(getAttributes(result.getId()));
+			result.setType(rs.getInt("type"));
+			result.setReadOnly(rs.getBoolean("read_only"));
             return result;
         }
     }
@@ -201,10 +203,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * Динамически формирует запрос для справочника
      *
      * @param refBookId     код справочника
-     * @param recordId      идентификатора записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
+     * @param recordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
      * @param version       дата актуальности данных справочника. Если = null, то версионирование не учитывается
      * @param sortAttribute сортируемый столбец. Может быть не задан
-     * @param pagingParams
+     * @param pagingParams  параметры для постраничной навигации. Может быть null, тогда возвращается весь набор данных по текущему срезу
      * @return
      */
     private PreparedStatementData getRefBookSql(Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, boolean isSortAscending) {

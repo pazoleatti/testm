@@ -29,12 +29,12 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
-alter table ref_book add constraint ref_book_chk_editable  check (editable in (0, 1));
+alter table ref_book add constraint ref_book_chk_read_only check (read_only in (0, 1));
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
-alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (lower(alias) <> 'record_id' and lower(alias) <> 'row_number_over');
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (not lower(alias) in ('record_id', 'row_number_over', 'record_version_from', 'record_version_to'));
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));

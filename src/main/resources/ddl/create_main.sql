@@ -109,7 +109,7 @@ create table ref_book (
   script_id varchar2(36),
   visible number(1) default 1 not null,
   type number(1) default 0 not null,
-  editable  number(1) default 1 not null
+  read_only number(1) default 0 not null
 );
 
 comment on table ref_book is 'Справочник';
@@ -118,7 +118,7 @@ comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
 comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
-comment on column ref_book.editable is 'Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю)';
+comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -388,7 +388,7 @@ create table form_data (
   kind number(9) not null,
   report_period_id number(9) not null,
   return_sign number(1) not null,
-  period_order number(2),
+  period_order number(2)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
