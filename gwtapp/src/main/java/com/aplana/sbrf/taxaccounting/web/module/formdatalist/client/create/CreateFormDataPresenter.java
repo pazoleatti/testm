@@ -3,12 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 import java.util.List;
 import java.util.Set;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
@@ -36,7 +33,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		void setAcceptableFormKindList(List<FormDataKind> list);
 		void setAcceptableFormTypeList(List<FormType> list);
 		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
-		
+
 		FormDataFilter getFilterData();
 		void setFilterData(FormDataFilter filter);
 	}
@@ -86,8 +83,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 						getView().setAcceptableFormKindList(filterValues.getKinds());
 						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
 						getView().setAcceptableReportPeriods(result.getReportPeriods());
-						
+
 						// setSelectedFilterValues(filter);
+
+                        // в текущей постановке фильтры не передаются
+                        getView().setFilterData(new FormDataFilter());
+
 						slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
 					}
 				}, this));
