@@ -86,9 +86,10 @@ public class DeclarationDataSearchServiceImplTest {
 		assertEquals(2, valuesIncome.getDeclarationTypes().size());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_1, valuesIncome.getDeclarationTypes().get(0).getId());
 		assertEquals(INCOME_DECLARATION_TYPE_ID_2, valuesIncome.getDeclarationTypes().get(1).getId());
-		assertEquals(3, valuesIncome.getDepartmentIds().size());
+		assertEquals(1, valuesIncome.getDepartmentIds().size());
+        System.out.println(valuesIncome.getDepartmentIds());
 
-		assertTrue(valuesIncome.getDepartmentIds().containsAll(Arrays.asList(1, 2, 3)));
+		assertTrue(valuesIncome.getDepartmentIds().containsAll(Arrays.asList(1)));
 	}
 	
 	@Test

@@ -88,7 +88,7 @@ public class FormDataListPresenter extends
 	@Override
 	public void onClickFind(FormDataListApplyEvent event) {
 		FormDataFilter filter = filterPresenter.getFilterData();
-		saveFilterSatet(filter.getTaxType(), filter);
+		saveFilterState(filter.getTaxType(), filter);
 		getView().updateData(0);
 	}
 
@@ -105,7 +105,7 @@ public class FormDataListPresenter extends
 					getView().updateHeader("Список налоговых форм");
 				}
 				this.taxType = filter.getTaxType();
-				saveFilterSatet(filter.getTaxType(), filter);
+				saveFilterState(filter.getTaxType(), filter);
 				getView().updateData(0);
 				
 				// Презентор фильтра успешно проинициализировался - делаем ревал
@@ -122,7 +122,7 @@ public class FormDataListPresenter extends
 		getView().updateData();
 	}
 
-	private void saveFilterSatet(TaxType taxType, FormDataFilter filter){
+	private void saveFilterState(TaxType taxType, FormDataFilter filter){
 		// Это ворк эраунд.
 		// Нужно клонировать состояние т.к. в FilterFormDataPresenter 
 		// может менять значения в этом объекте, что нужно не всегда.
