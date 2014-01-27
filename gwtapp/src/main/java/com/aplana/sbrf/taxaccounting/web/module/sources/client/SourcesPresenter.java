@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.editDialog.EditDeatinationPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.event.EditDestinationDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.google.gwt.user.client.Window;
@@ -25,7 +23,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.*;
 
 public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
-		implements SourcesUiHandlers, EditDestinationDialogOpenEvent.EditDestinationDialogOpenHandler {
+		implements SourcesUiHandlers{
 
 	@ProxyCodeSplit
 	@NameToken(SourcesTokens.SOURCES)
@@ -72,25 +70,17 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	private final DispatchAsync dispatcher;
-    protected final EditDeatinationPresenter editDeatinationPresenter;
 
     private TaxType taxType;
 
     private boolean isForm = true;
 
 	@Inject
-	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher,EditDeatinationPresenter editDeatinationPresenter) {
+	public SourcesPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
-        this.editDeatinationPresenter = editDeatinationPresenter;
 		getView().setUiHandlers(this);
 	}
-
-    @Override
-    protected void onBind() {
-        addRegisteredHandler(EditDestinationDialogOpenEvent.getType(), this);
-        super.onBind();
-    }
 
 	/**
 	 * @param request запрос
@@ -252,14 +242,4 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 					}
 				}, this));
 	}
-
-    @Override
-    public void onClickEditDestination(EditDestinationDialogOpenEvent event) {
-        editDeatinationPresenter.initAndShowDialog(this);
-    }
-
-    @Override
-    public void onClickOpenEditDestination() {
-        EditDestinationDialogOpenEvent.fire(this);
-    }
 }

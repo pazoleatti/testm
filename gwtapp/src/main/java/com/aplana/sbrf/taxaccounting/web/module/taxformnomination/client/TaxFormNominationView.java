@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
@@ -81,6 +82,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     Label labelKind;
     @UiField
     DockLayoutPanel panelFormDataKind2;
+    @UiField
+    LinkAnchor clickEdit;
 
     private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
@@ -106,6 +109,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         if ((depoId != null && !depoId.equals(id)) || (depoId == null && id != null)) {
             depoId = id;
             onDepoChange();
+        }
+    }
+
+    @UiHandler("clickEdit")
+    public void clickk(ClickEvent event) {
+        if(getUiHandlers() != null){
+            getUiHandlers().onClickOpenEditDestination();
         }
     }
 

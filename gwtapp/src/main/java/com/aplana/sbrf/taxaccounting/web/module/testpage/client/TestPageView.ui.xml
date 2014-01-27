@@ -8,12 +8,18 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
 		>
     <ui:style>
-        .RefbookTextBox {
-            padding-left: 10px;
+
+        .titleText {
+            font-size: 14px;
+            color:  #636460;
         }
 
         .ms {
             padding-left: 10px;
+        }
+
+        .marginRight5{
+            margin-right: 5px;
         }
     </ui:style>
 
@@ -23,13 +29,11 @@
             <fm:HeaderContainer>
                 <fm:right>
                     <fm:Right>
-                        <g:Label text="Режим редактирования"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkButton ui:field="create" text="Создать налоговую форму..."
+                                              img="resources/img/add.png" title="Создание налоговой формы"/>
+                            <g:Label text="Режим редактирования" addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                        </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
@@ -40,28 +44,20 @@
                 </fm:resizable>
                 <fm:left>
                     <fm:Left>
-                        <g:Label text="Список налоговых форм"/>
-                        <g:Label text="-"/>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
                     </fm:Left>
                 </fm:left>
-
-
 
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <style:LabelSeparator text="test dfdf dfsdf" ui:field="sep" width="100px"/>
-                <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
-                <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
-                <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                    text="my button hyperlink" ui:field="ibl"/>
-                <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#"
-                              ui:field="ian"/>
-                <g:HorizontalPanel addStyleNames="{style.ms}" width="100px">
-                    <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
+                <style:LabelSeparator text="test dfdf dfsdf" ui:field="sep" width="500px"/>
+                <g:HorizontalPanel addStyleNames="{style.ms}" width="200px">
                     <my:MultiListBox ui:field="mlistbox"/>
-
                 </g:HorizontalPanel>
                 <g:Label ui:field="showResult"/>
                 <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
@@ -87,7 +83,7 @@
                         <g:Label ui:field="boxYLb" width="100%"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel  spacing="2">
-                        <mask:TextMaskBox mask="XXXXXXX" ui:field="boxText"/>
+                        <mask:TextMaskBox mask="999999" text="1" ui:field="boxText"/>
                         <g:Label ui:field="boxTextLb" width="100%"/>
                     </g:HorizontalPanel>
 

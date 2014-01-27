@@ -33,15 +33,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     LabelSeparator sep;
 
-    @UiField
-    ImageButtonLink ibl;
-
-    @UiField
-    ImgBtnLnk ian;
-
-    @UiField
-    RefBookTextBox refbookTextBox;
-
     @UiField(provided = true)
     MultiListBox mlistbox;
 
@@ -124,34 +115,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         initWidget(uiBinder.createAndBindUi(this));
 
-        ibl.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.alert("Привет!");
-            }
-        });
-
-        List<RefBookButtonData> list = new ArrayList();
-        list.add(new RefBookButtonData("http://127.0.0.1:8888/resources/img/question_mark.png", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.alert("Кнопка 1");
-            }
-        }));
-        list.add(new RefBookButtonData("http://127.0.0.1:8888/resources/img/exclamation_mark.png", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.alert("Кнопка 2");
-            }
-        }));
-        list.add(new RefBookButtonData("http://127.0.0.1:8888/resources/img/email.png", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.alert("Кнопка 3");
-            }
-        }));
-
-        refbookTextBox.addButtons(list);
-
         List<TestItem> getM = (List<TestItem>) mlistbox.getValue();
         String strCont = "";
         for (TestItem str : getM)
@@ -190,7 +153,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         boxMy.setValue(date);
         boxY.setValue(date);
 
-        boxText.setText("fdfsdff");
 
         boxDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
