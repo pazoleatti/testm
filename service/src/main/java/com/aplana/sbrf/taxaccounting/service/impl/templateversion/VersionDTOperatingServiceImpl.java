@@ -33,6 +33,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
 
     @Override
     public void isUsedVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
+        if (template.getStatus() == VersionedObjectStatus.DRAFT)
+            return;
         List<Long> ddIds = declarationDataService.getDeclarationDataLisByVersionTemplate(template.getId());
         if (!ddIds.isEmpty()){
             logger.error("Обнаружено использование макета для налоговых форм");
