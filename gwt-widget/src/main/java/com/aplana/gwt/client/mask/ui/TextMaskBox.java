@@ -1,14 +1,13 @@
 package com.aplana.gwt.client.mask.ui;
 
 import com.aplana.gwt.client.mask.MaskBox;
+import com.aplana.gwt.client.mask.parser.TextMaskParser;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.text.shared.testing.PassthroughParser;
 import com.google.gwt.text.shared.testing.PassthroughRenderer;
+import com.google.gwt.uibinder.client.UiConstructor;
 
 /**
  * Виджет для ввода текста с маской
- *
- * beta-версия
  *
  * @author aivanov
  */
@@ -17,8 +16,10 @@ public class TextMaskBox extends MaskBox<String> {
     private String deferredValue;
     private boolean mayBeNull = true;
 
-    public TextMaskBox() {
-        super(PassthroughRenderer.instance(), PassthroughParser.instance());
+    @UiConstructor
+    public TextMaskBox(String mask) {
+        super(PassthroughRenderer.instance(), TextMaskParser.instance(mask));
+        super.setMask(mask);
     }
 
     @Override
@@ -31,10 +32,8 @@ public class TextMaskBox extends MaskBox<String> {
             if(getMask().length() < text.length()){
                 text = text.substring(0, getMask().length());
             }
-            super.setText(text);
-        } else {
-            super.setText(text);
         }
+        super.setText(text);
     }
 
     @Override
@@ -45,7 +44,6 @@ public class TextMaskBox extends MaskBox<String> {
         return super.getValue();
     }
 
-
     @Override
     public void setValue(String value) {
         this.setValue(value, false);
@@ -55,7 +53,7 @@ public class TextMaskBox extends MaskBox<String> {
     public void setValue(String value, boolean fireEvents) {
         if (checkValue(value)) {
             super.setValue(value, false);
-            setText(value == null ? getTextPicture() : value);
+            setText(getTextIfNullOrEmpty(value));
             removeExceptionStyle();
         }
         if (fireEvents) {
@@ -64,18 +62,25 @@ public class TextMaskBox extends MaskBox<String> {
     }
 
     /**
-     * Проверить что дата не пуста и после запомнить удачное значение
+     * Проверить что текст не пуста и после запомнить удачное значение
      *
-     * @param value дата
+     * @param value текст
      * @return если null то вернет false
      */
     private boolean checkValue(String value) {
-        if (value == null && !mayBeNull) {
-            return false;
-        } else {
-            deferredValue = value;
+        if (value == null) {
+            if (!mayBeNull) {
+                return false;
+            }
+            deferredValue = null;
             return true;
         }
+        deferredValue = value;
+        return true;
+    }
+
+    private String getTextIfNullOrEmpty(String text){
+        return (text == null || text.isEmpty()) ? getTextPicture() : text;
     }
 
     public boolean isMayBeNull() {
