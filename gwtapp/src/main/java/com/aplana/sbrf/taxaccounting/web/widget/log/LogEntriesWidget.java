@@ -33,8 +33,6 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
     @UiField
     DockLayoutPanel dock;
 
-    public static final int PAGE_SIZE = 50;
-
     private AsyncDataProvider<LogEntry> dataProvider;
 
 	public LogEntriesWidget() {
@@ -78,7 +76,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
         }
         dataProvider.addDataDisplay(logCellTable);
         pager.setDisplay(logCellTable);
-        logCellTable.setPageSize(PAGE_SIZE);
+        logCellTable.setPageSize(pager.getPageSize());
     }
 
     @Override
@@ -98,7 +96,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
         logCellTable.setRowCount(totalCount);
         logCellTable.setRowData(start, logEntries);
 
-        boolean isVisible = totalCount > PAGE_SIZE;
+        boolean isVisible = totalCount > pager.getPageSize();
         pager.setVisible(isVisible);
         dock.setWidgetSize(pager, isVisible ? 30 : 0);
     }
@@ -112,4 +110,9 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 	public void setTableElementId(String id) {
 		this.getElement().setId(id);
 	}
+
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
 }

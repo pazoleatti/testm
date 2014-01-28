@@ -43,8 +43,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     private final Log logger = LogFactory.getLog(getClass());
 
-    private Calendar calendar = Calendar.getInstance();
-
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
@@ -182,8 +180,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
-                FormTemplate beginTemplate = formTemplateDao.get(i);
-                FormTemplate endTemplate = formTemplateDao.get(i++);
+                FormTemplate beginTemplate = formTemplateDao.get(formTemplateVersionIds.get(i));
+                FormTemplate endTemplate = formTemplateDao.get(formTemplateVersionIds.get(i++));
                 segmentIntersection.setStatus(beginTemplate.getStatus());
                 segmentIntersection.setBeginDate(beginTemplate.getVersion());
                 segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()));
@@ -235,14 +233,34 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public FormTemplate getNearestFTRight(FormTemplate formTemplate, VersionedObjectStatus... status) {
+    public FormTemplate getNearestFTRight(int formTemplateId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
-        formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
+        //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
         int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
         if (id == 0)
             return null;
         return formTemplateDao.get(id);
+    }
+
+    @Override
+    public Date getFTEndDate(int formTemplateId) {
+        Calendar calendar = Calendar.getInstance();
+        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id == 0)
+            return null;
+        FormTemplate templateEnd = formTemplateDao.get(id);
+        if (templateEnd.getStatus() == VersionedObjectStatus.FAKE){
+            calendar.setTime(templateEnd.getVersion());
+            return calendar.getTime();
+        }else {
+            calendar.setTime(templateEnd.getVersion());
+            calendar.add(Calendar.DAY_OF_YEAR, -1);
+            return calendar.getTime();
+        }
     }
 
     @Override
@@ -332,6 +350,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
     private Date addCalendar(int fieldNumber, int numberDays, Date actualDate){
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(actualDate);
         calendar.add(fieldNumber, numberDays);
         Date time = calendar.getTime();

@@ -12,5 +12,5 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
     </bean>
 
-    <bean id="versionValidatingService" class="com.aplana.sbrf.taxaccounting.service.impl.VersionFTOperatingServiceImpl" />
+    <bean id="versionValidatingService" class="com.aplana.sbrf.taxaccounting.service.impl.templateversion.VersionFTOperatingServiceImpl" />
 </beans>

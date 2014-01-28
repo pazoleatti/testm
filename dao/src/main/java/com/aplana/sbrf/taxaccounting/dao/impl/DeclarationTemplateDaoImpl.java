@@ -42,7 +42,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
 			d.setActive(rs.getBoolean("is_active"));
-			d.setVersion(rs.getDate("version"));
+			d.setVersion(new Date(rs.getTimestamp("version").getTime()));
 			d.setEdition(rs.getInt("edition"));
 			d.setType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
@@ -99,8 +99,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Override
 	@Transactional(readOnly = false)
-    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
+            @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
 		int count = 0;
 		int declarationTemplateId;
@@ -234,7 +234,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         valueMap.put("statusList", statusList);
         valueMap.put("actualStartVersion", actualBeginVersion);
         valueMap.put("actualEndVersion", actualEndVersion);
-        valueMap.put("formTemplateId", decTemplateId);
+        valueMap.put("decTemplateId", decTemplateId);
 
         StringBuilder builder = new StringBuilder("select id");
         builder.append(" from declaration_template where declaration_type_id = :typeId");
@@ -247,7 +247,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             builder.append(" and version > :actualStartVersion");
 
         if (decTemplateId != 0)
-            builder.append(" and id <> :formTemplateId");
+            builder.append(" and id <> :decTemplateId");
         builder.append(" order by version, edition");
 
         try {

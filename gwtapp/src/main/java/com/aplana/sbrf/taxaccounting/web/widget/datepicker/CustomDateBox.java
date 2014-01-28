@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,7 +18,14 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
-public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>{
+/**
+ *
+ *
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker
+ */
+@Deprecated
+public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
     interface DateBoxUiBinder extends UiBinder<Widget, CustomDateBox> {
 	}

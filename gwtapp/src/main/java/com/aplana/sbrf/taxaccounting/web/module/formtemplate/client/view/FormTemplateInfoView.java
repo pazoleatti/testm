@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateInfoPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -17,10 +17,10 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	public interface Binder extends UiBinder<Widget, FormTemplateInfoView> { }
 
 	@UiField
-    CustomDateBox versionDateBegin;
+    DateMaskBoxPicker versionDateBegin;
 
     @UiField
-    CustomDateBox versionDateEnd;
+    DateMaskBoxPicker versionDateEnd;
 
 	@UiField
 	CheckBox numberedColumnsBox;

@@ -8,7 +8,7 @@ import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,7 +46,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	CheckBox balancePeriod;
 
 	@UiField
-	CustomDateBox term;
+    DateMaskBoxPicker term;
 
 	@UiField
 	RefBookPickerPopupWidget period;

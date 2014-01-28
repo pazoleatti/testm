@@ -114,22 +114,22 @@ public interface DeclarationTemplateService {
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param formTemplate
-     * @return
+     * @param declarationTemplate версия декларации
+     * @return удаленный идентфикатор
      */
     int delete(DeclarationTemplate declarationTemplate);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.
-     * @param formTemplate версия макета
+     * @param declarationTemplateId идентификатор версия макета
      * @param status статус
      * @return ближайшая правее
      */
-    DeclarationTemplate getNearestDTRight(DeclarationTemplate declarationTemplate, VersionedObjectStatus... status);
+    DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status);
 
     /**
      * Возвращает количество версий для вида шаблона
-     * @param formTypeId вид шаблона
+     * @param typeId идентификатор вида шаблона
      * @param status статусы
      * @return количество
      */

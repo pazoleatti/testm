@@ -83,12 +83,12 @@
                         <g:Label ui:field="boxYLb" width="100%"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel  spacing="2">
-                        <mask:TextMaskBox mask="999999" text="1" ui:field="boxText"/>
+                        <mask:TextMaskBox mask="XXXXXX" text="1" ui:field="boxText" mayBeNull="true" />
                         <g:Label ui:field="boxTextLb" width="100%"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel  spacing="2">
-                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px"/>
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" enabled="true" visible="false"/>
                         <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

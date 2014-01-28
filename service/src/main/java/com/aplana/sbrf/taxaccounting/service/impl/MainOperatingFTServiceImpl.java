@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,6 @@ import java.util.List;
 @Service("formTemplateMainOperatingService")
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
-
-    private static int ONE_DAY_MILLISECONDS = 86400000;
 
     private static String ERROR_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
@@ -40,21 +39,21 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private FormTypeService formTypeService;
 
     @Override
-    public int edit(int templateId, Date templateActualEndDate, Logger logger) {
-        FormTemplate template = formTemplateService.get(templateId);
+    public <T> int edit(T template, Date templateActualEndDate, Logger logger) {
+        FormTemplate formTemplate = (FormTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
-        Date dbVersionBeginDate = formTemplateService.get(template.getId()).getVersion();
-        Date dbVersionEndDate = formTemplateService.getNearestFTRight(template) != null ?
-                new Date(formTemplateService.getNearestFTRight(template).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
-        if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(template.getVersion()) !=0 ||
-                dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(template.getVersion()) !=0 ){
-            versionOperatingService.isIntersectionVersion(template, templateActualEndDate, logger);
+        Date dbVersionBeginDate = formTemplateService.get(formTemplate.getId()).getVersion();
+        Date dbVersionEndDate = formTemplateService.getNearestFTRight(formTemplate.getId()) != null ?
+                new Date(formTemplateService.getNearestFTRight(formTemplate.getId()).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
+        if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ||
+                dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ){
+            versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
             checkError(logger);
         }
 
-        versionOperatingService.isUsedVersion(template, templateActualEndDate, logger);
+        versionOperatingService.isUsedVersion(formTemplate, templateActualEndDate, logger);
         checkError(logger);
-        return formTemplateService.save(template);
+        return formTemplateService.save(formTemplate);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
         checkError(logger);
         formTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        formTemplate.setEdition(formTemplateService.versionTemplateCount(formTemplate.getType().getId()));
+        formTemplate.setEdition(formTemplateService.versionTemplateCount(formTemplate.getType().getId()) + 1);
         return formTemplateService.save(formTemplate);
     }
 
@@ -106,7 +105,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger) {
         FormTemplate template = formTemplateService.get(templateId);
-        FormTemplate nearestFT = formTemplateService.getNearestFTRight(template);
+        FormTemplate nearestFT = formTemplateService.getNearestFTRight(template.getId());
         Date dateEndActualize = nearestFT != null ? nearestFT.getVersion() : null;
         versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))

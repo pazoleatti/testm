@@ -91,13 +91,20 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
         // ПОЛЬЗОВАТЕЛЬСКАЯ ФИЛЬТРАЦИЯ
 
-        // Подразделения (могут быть не заданы - тогда все доступные)
-        formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
+        // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
+        List<Integer> departments = formDataFilter.getDepartmentIds();
+        if (departments == null || departments.isEmpty()) {
+            departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    asList(formDataFilter.getTaxType()));
+        }
+        formDataDaoFilter.setDepartmentIds(departments);
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
         if (formDataFilter.getFormDataKind() != null) {
             formDataDaoFilter.setFormDataKind(asList(formDataFilter.getFormDataKind()));
+        } else {
+            formDataDaoFilter.setFormDataKind(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
         }
         // Вид форм
         if (formDataFilter.getFormTypeId() != null) {

@@ -7,18 +7,13 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -69,6 +64,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private SourceService sourceService;
     @Autowired
     private FormTypeDao formTypeDao;
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
@@ -593,6 +590,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
      */
     private boolean isTemplateIntesectReportPeriod(FormTemplate formTemplate, Integer reportPeriodId) {
         // TODO Таск http://jira.aplana.com/browse/SBRFACCTAX-5509
-        return true;
+        if (formTemplate.getStatus() != VersionedObjectStatus.NORMAL)
+            return false;
+        Date templateEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
+
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+        //Сказали что дату окончания не обязательно сравнивать, т.к. она при сохранении макета должна быть кратна отчетному периоду
+        if (templateEndDate != null)
+            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0
+                    && templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0;
+        else
+            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
+                    || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0;
     }
 }

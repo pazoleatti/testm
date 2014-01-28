@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.VersionOperatingService;
+import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +54,7 @@ public class VersionValidatingServiceImplTest {
         formTemplate1.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate1.setEdition(1);
 
-        calendar.set(2013, Calendar.JANUARY, 1);
+        calendar.set(2012, Calendar.JUNE, 1);
         FormTemplate formTemplate2 = new FormTemplate();
         formTemplate2.setId(FORM_TEMPLATE_ID_S);
         formTemplate2.setCode("code");
@@ -63,7 +63,14 @@ public class VersionValidatingServiceImplTest {
         formTemplate2.setStatus(VersionedObjectStatus.FAKE);
         formTemplate2.setEdition(1);
 
-        when(formTemplateService.get(FORM_TEMPLATE_ID_F)).thenReturn(formTemplate1);
+        calendar.set(2013, Calendar.JANUARY, 1);
+        FormTemplate formTemplate3 = new FormTemplate();
+        formTemplate3.setId(FORM_TEMPLATE_ID_TH);
+        formTemplate3.setCode("code");
+        formTemplate3.setVersion(calendar.getTime());
+        calendar.clear();
+        formTemplate3.setStatus(VersionedObjectStatus.DRAFT);
+        formTemplate3.setEdition(1);
 
         //Настройка пересечений
         List<SegmentIntersection> segmentIntersections = new ArrayList<SegmentIntersection>();
@@ -79,15 +86,25 @@ public class VersionValidatingServiceImplTest {
         segmentIntersection2.setBeginDate(calendar.getTime());
         segmentIntersection2.setStatus(VersionedObjectStatus.FAKE);
         calendar.clear();
-        segmentIntersections.add(segmentIntersection1);
-        segmentIntersections.add(segmentIntersection2);
+        SegmentIntersection segmentIntersection3 = new SegmentIntersection();
+        calendar.set(2014, Calendar.JANUARY, 1);
+        segmentIntersection3.setTemplateId(FORM_TEMPLATE_ID_TH);
+        segmentIntersection3.setBeginDate(calendar.getTime());
+        segmentIntersection3.setStatus(VersionedObjectStatus.DRAFT);
+        calendar.set(2014, Calendar.DECEMBER, 1);
+        segmentIntersection3.setEndDate(calendar.getTime());
+        calendar.clear();
 
-        calendar.set(2013, Calendar.FEBRUARY, 1);
+        segmentIntersections.add(segmentIntersection2);
+        segmentIntersections.add(segmentIntersection3);
+
+        calendar.set(2014, Calendar.JULY, 1);
         actualEndVersion = calendar.getTime();
         when(formTemplateService.findFTVersionIntersections(formTemplate1, actualEndVersion)).thenReturn(segmentIntersections);
         calendar.clear();
         when(formTemplateService.get(FORM_TEMPLATE_ID_F)).thenReturn(formTemplate1);
         when(formTemplateService.get(FORM_TEMPLATE_ID_S)).thenReturn(formTemplate2);
+        when(formTemplateService.get(FORM_TEMPLATE_ID_TH)).thenReturn(formTemplate3);
 
         /*when(formTemplateService.getNearestFTRight(formTemplate2,
                 VersionedObjectStatus.FAKE, VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL)).thenReturn(formTemplate1);
@@ -96,7 +113,7 @@ public class VersionValidatingServiceImplTest {
 
     @Test
     public void testIsIntersectionVersion(){
-        FormTemplate formTemplate = formTemplateService.get(1);
+        FormTemplate formTemplate = formTemplateService.get(FORM_TEMPLATE_ID_F);
         Logger logger = new Logger();
 
         versionOperatingService.isIntersectionVersion(formTemplate, actualEndVersion, logger);

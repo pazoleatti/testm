@@ -48,7 +48,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
-            formTemplate.setVersion(rs.getDate("version"));
+            formTemplate.setVersion(new Date(rs.getTimestamp("version").getTime()));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));

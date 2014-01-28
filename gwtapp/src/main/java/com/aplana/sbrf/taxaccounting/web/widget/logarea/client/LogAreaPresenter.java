@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesView;
-import com.aplana.sbrf.taxaccounting.web.widget.log.LogEntriesWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.GetLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.GetLogEntriesResult;
 import com.google.gwt.core.client.GWT;
@@ -76,7 +75,7 @@ public class LogAreaPresenter extends
             getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
 
         }
-        onRangeChange(0, LogEntriesWidget.PAGE_SIZE);
+        onRangeChange(0, getView().getLogEntriesView().getPageSize());
     }
 
     @Override

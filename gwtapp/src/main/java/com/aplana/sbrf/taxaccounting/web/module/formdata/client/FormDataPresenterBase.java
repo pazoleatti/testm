@@ -86,6 +86,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void assignDataProvider(int pageSize);
 
+        int getPageSize();
+
 		void updateData();
 		
 		void updateData(int pageNumber);

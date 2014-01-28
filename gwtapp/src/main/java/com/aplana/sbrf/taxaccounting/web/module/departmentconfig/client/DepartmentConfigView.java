@@ -293,7 +293,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      */
     private boolean checkUnsaved(CheckUnsavedHandler handler) {
         if (isEditMode && driver.isDirty()) {
-            if (!Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?")) {
+            if (!     Window.confirm("Все несохранённые данные будут потеряны. Выйти из режима редактирования?")) {
                 if (handler != null) {
                     handler.onCancel();
                 }

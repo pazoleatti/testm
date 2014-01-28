@@ -32,11 +32,11 @@
     </ui:style>
 
     <ui:with field="imageResources"
-             type="com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker.Icon"/>
+             type="com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker.Icons"/>
 
-    <g:HTMLPanel addStyleNames="{style.main}">
+    <g:HTMLPanel ui:field="mainPanel" addStyleNames="{style.main}">
         <mask:DateMaskBox ui:field="dateBox" addStyleNames="{style.textBox}"/>
-        <g:Image ui:field="clearImage" resource="{imageResources.icon}" styleName="{style.clearBtn}"/>
-        <g:Image ui:field="dateImage" url="resources/img/calendar-16.gif" styleName="{style.imageStyle}"/>
+        <g:Image ui:field="clearImage" resource="{imageResources.clearBtn}" styleName="{style.clearBtn}"/>
+        <g:Image ui:field="calendarImage" resource="{imageResources.calPickerBtn}" styleName="{style.imageStyle}"/>
     </g:HTMLPanel>
 </ui:UiBinder>

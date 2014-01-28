@@ -13,11 +13,11 @@
             <g:HorizontalPanel width="80%" spacing="10">
                 <g:VerticalPanel spacing="5">
                         <g:Label text="Действует с:"/>
-                        <d:CustomDateBox ui:field="versionStart"/>
+                        <d:DateMaskBoxPicker ui:field="versionStart"/>
                 </g:VerticalPanel>
                 <g:VerticalPanel spacing="5">
                         <g:Label text="Действует по:"/>
-                        <d:CustomDateBox ui:field="versionEnd" canBeEmpty="true"/>
+                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true"/>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
         </g:cell>

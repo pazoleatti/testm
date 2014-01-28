@@ -30,18 +30,17 @@
                 <g:cell>
                     <g:HorizontalPanel>
                         <g:Label width="30px" text="С" />
-                        <d:CustomDateBox ui:field="fromSearchDate"/>
+                        <d:DateMaskBoxPicker ui:field="fromSearchDate"/>
                     </g:HorizontalPanel>
                 </g:cell>
                 <g:cell>
                     <g:HorizontalPanel>
                         <g:Label width="30px" text="По" />
-                        <d:CustomDateBox ui:field="toSearchDate" />
+                        <d:DateMaskBoxPicker ui:field="toSearchDate" />
                     </g:HorizontalPanel>
                 </g:cell>
             </g:VerticalPanel>
         </g:cell>
-
 
         <g:cell width="15%" verticalAlignment="top">
             <g:VerticalPanel>

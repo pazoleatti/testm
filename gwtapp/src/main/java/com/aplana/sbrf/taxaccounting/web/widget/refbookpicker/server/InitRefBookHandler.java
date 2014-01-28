@@ -35,12 +35,12 @@ public class InitRefBookHandler extends
 	public InitRefBookResult execute(InitRefBookAction action,
 			ExecutionContext context) throws ActionException {
 		InitRefBookResult result = new InitRefBookResult();
-		List<String> headers = new ArrayList<String>();
+		Map<String, Integer> headers = new HashMap<String, Integer>();
 
 		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
 			if (refBookAttribute.isVisible()) {
-				headers.add(refBookAttribute.getName());
+				headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
 			}
 		}
 		

@@ -23,9 +23,9 @@
 		<g:north size="30">
 			<g:HorizontalPanel>
                 <g:Label width="300px">Период актульности с</g:Label>
-                <datepicker:CustomDateBox ui:field="versionDateBegin"/>
+                <datepicker:DateMaskBoxPicker ui:field="versionDateBegin"/>
                 <g:Label width="300px">по</g:Label>
-                <datepicker:CustomDateBox ui:field="versionDateEnd"/>
+                <datepicker:DateMaskBoxPicker ui:field="versionDateEnd"/>
                 <t:Bar>
 				    <t:LeftBar>
 					    <g:Button text="Сохранить" ui:field="saveButton" />
