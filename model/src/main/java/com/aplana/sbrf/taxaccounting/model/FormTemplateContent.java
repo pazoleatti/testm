@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -48,8 +49,8 @@ public class FormTemplateContent {
 		formTemplate.setFullName(fullName);
 		formTemplate.setCode(code);
 		formTemplate.getStyles().clear();
-		formTemplate.getStyles().addAll(styles);
+		formTemplate.getStyles().addAll(styles != null?styles:new ArrayList<FormStyle>());
 		formTemplate.getColumns().clear();
-		formTemplate.getColumns().addAll(columns);
+		formTemplate.getColumns().addAll(columns != null?columns:new ArrayList<Column>());
 	}
 }
