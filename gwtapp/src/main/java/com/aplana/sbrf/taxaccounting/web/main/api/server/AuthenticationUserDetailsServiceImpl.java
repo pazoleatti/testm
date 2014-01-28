@@ -21,42 +21,41 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AuthenticationUserDetailsServiceImpl implements
-		AuthenticationUserDetailsService<Authentication> {
+public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
 	TAUserService userService;
 
-    @Autowired
-    private AuditService auditService;
+	@Autowired
+	private AuditService auditService;
 
 	@Override
-	public UserDetails loadUserDetails(Authentication token)
-			throws UsernameNotFoundException {
+	public UserDetails loadUserDetails(Authentication token) throws UsernameNotFoundException {
 		String userName = token.getName();
-		TAUser user = userService.getUser(userName.toLowerCase());
-		if (user == null) {
-			String message = "User with login '" + userName
-					+ "' was not found in TaxAccounting database";
+
+		if (!userService.existsUser(userName)) {
+			String message = "User with login '" + userName + "' was not found in TaxAccounting database";
 			logger.error(message);
 			throw new UsernameNotFoundException(message);
 		}
 
-		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(
-				user.getRoles().size());
+		TAUser user = userService.getUser(userName.toLowerCase());
 
+		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
 		for (TARole role : user.getRoles()) {
 			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
 		}
-        TAUserInfo info = new TAUserInfo();
-        info.setUser(user);
-        info.setIp(((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest().getRemoteAddr());
-        auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
+
+		TAUserInfo info = new TAUserInfo();
+		info.setUser(user);
+		info.setIp(
+				((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
+		);
+		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
+
 		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
 		// возможно в будущем задействуем и их
 		return new UserAuthenticationToken(info, grantedAuthorities);
 	}
-
 }
