@@ -63,7 +63,6 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
         driver.edit(formDataFilter);
     }
 
-
     @Override
     public TemplateFilter getDataFilter() {
     	return driver.flush();
@@ -75,23 +74,10 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
         taxType.setAcceptableValues(taxTypes);
 	}
 
-    @UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCreateClicked();
-        }
-	}
-
 	@UiHandler("apply")
 	void onAppyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onApplyClicked();
 		}
 	}
-
-    @UiHandler("delete")
-    void onDeleteTemplate(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteClick();
-    }
 }
