@@ -75,12 +75,15 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                                 return;
                             } else
                                 logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
-                                        intersection.getEndDate(), intersection.getEndDate(), intersection.getEndDate(), intersection.getTemplateId());
+                                        createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
+                                        createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
+                                        createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
+                                        intersection.getTemplateId());
                         }
                         //2 Шаг. Система проверяет наличие даты окончания актуальности.
                         //Пересечений нет
                         else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
-                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd);
+                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
                             DeclarationTemplate formTemplate =  createFakeTemplate(date, template.getType());
                             declarationTemplateService.save(formTemplate);
                         }
@@ -90,7 +93,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                         //Варианты 15
                         if (compareResult == -2){
                             DeclarationTemplate formTemplate = declarationTemplateService.get(intersection.getTemplateId());
-                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd));
+                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,19,20
@@ -129,9 +132,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
         return declarationTemplate;
     }
 
-    private Date createActualizationDates(int calendarTime, int time, Date actualTemplateDate){
+    private Date createActualizationDates(int calendarTime, int time, long actualTemplateDate){
         calendar.clear();
-        calendar.setTime(actualTemplateDate);
+        calendar.setTime(new Date(actualTemplateDate));
         calendar.add(calendarTime, time);
         return calendar.getTime();
     }

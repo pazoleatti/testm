@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.TemplateChangesExt;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;

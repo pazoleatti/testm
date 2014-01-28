@@ -71,9 +71,15 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
 
     @Override
     public void onHistoryClick() {
-        versionHistoryPresenter.initHistory(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")),
-                VersionHistoryPresenter.TemplateType.FORM);
-        addToPopupSlot(versionHistoryPresenter);
+        GetFTVersionHistoryAction action = new GetFTVersionHistoryAction();
+        action.setFormTypeId(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")));
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetFTVersionHistoryResult>() {
+            @Override
+            public void onSuccess(GetFTVersionHistoryResult result) {
+                versionHistoryPresenter.initHistory(result.getChangeses());
+                addToPopupSlot(versionHistoryPresenter);
+            }
+        }, this));
     }
 
     @Override
