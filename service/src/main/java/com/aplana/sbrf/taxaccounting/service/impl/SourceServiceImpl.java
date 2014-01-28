@@ -89,6 +89,11 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void saveDFT(Long departmentId, int typeId, int formId, int performerId) {
+        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId, performerId);
+    }
+
+    @Override
     public void deleteDFT(Collection<Long> ids) {
     	for (Long id : ids) {
     		departmentFormTypeDao.delete(id);
@@ -126,4 +131,9 @@ public class SourceServiceImpl implements SourceService {
 	public DeclarationType getDeclarationType(int declarationTypeId) {
 		return declarationTypeDao.get(declarationTypeId);
 	}
+
+    @Override
+    public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind) {
+        return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
+    }
 }

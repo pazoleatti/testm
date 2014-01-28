@@ -138,6 +138,17 @@ public interface SourceService {
     void saveDFT(Long departmentId, int typeId, int formId);
 
     /**
+     * Добавляет налоговые формы, назначенные подразделению
+     *
+     *
+     * @param departmentId id подразделения
+     * @param typeId       id типа налоговой формы
+     * @param formId       id вида налоговой формы
+     * @param performerId  id исполнителя
+     */
+    void saveDFT(Long departmentId, int typeId, int formId, int performerId);
+
+    /**
      * Удаляет налоговые формы, назначенные подразделению
      *
      * @param id id на удаление
@@ -194,5 +205,14 @@ public interface SourceService {
      */
     List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
-    
+    /**
+     * Проверяет существование формы назначения для позразделения с id = departmentId
+     * c идентификатором вида typeId и идентификатором типа kindId
+     *
+     * @param departmentId
+     * @param typeId
+     * @param kindId
+     * @return true - существует форма, false в противном случае
+     */
+    boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 }

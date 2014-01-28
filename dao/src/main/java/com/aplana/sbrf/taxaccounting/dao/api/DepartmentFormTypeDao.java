@@ -130,7 +130,23 @@ public interface DepartmentFormTypeDao {
     void save(int departmentId, int typeId, int formId);
 
     /**
+     * Добавляет назначенные НФ
+     */
+    void save(int departmentId, int typeId, int kindId, int performerId);
+
+    /**
      * Удаляет назначение НФ
      */
     void delete(Long id);
+
+    /**
+     * Проверяет существование формы назначения для позразделения с id = departmentId
+     * c идентификатором вида typeId и идентификатором типа kindId
+     *
+     * @param departmentId
+     * @param typeId
+     * @param kind
+     * @return true - существует форма, false в противном случае
+     */
+    boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 }

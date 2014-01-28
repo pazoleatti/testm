@@ -302,4 +302,34 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     		throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
     	} 
     }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void save(int departmentId, int typeId, int kindId, int performerId) {
+        try {
+            getJdbcTemplate().update(
+                    "insert into department_form_type (department_id, form_type_id, id, kind, performer_dep_id) " +
+                            " values (?, ?, seq_department_form_type.nextval, ?, ?)",
+                    new Object[]{ departmentId, typeId, kindId, performerId });
+        } catch (DataIntegrityViolationException e){
+            throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
+        }
+    }
+
+
+    private static final String CHECK_EXIST = "select id from department_form_type src_dft where "
+            + "department_id = ? and form_type_id= ? and kind = ? ";
+
+    @Override
+    public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind){
+        return getJdbcTemplate().queryForList(
+                    CHECK_EXIST,
+                    new Object[]{
+                        departmentId,
+                        typeId,
+                        kind.getId()
+                    },
+                    Integer.class
+                ).size() > 0;
+    }
 }

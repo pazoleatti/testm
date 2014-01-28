@@ -14,4 +14,28 @@ public final class StringUtils {
 
         return cleanString;
     }
+
+    public static String join(Object[] array, char separator){
+        if (array == null) {
+            return null;
+        }
+
+        int startIndex = 0;
+        int endIndex = array.length;
+
+        int bufSize = (endIndex - startIndex);
+
+        bufSize *= ((array[startIndex] == null ? 16 : array[startIndex].toString().length()) + 1);
+        StringBuffer buf = new StringBuffer(bufSize);
+
+        for (int i = startIndex; i < endIndex; i++) {
+            if (i > startIndex) {
+                buf.append(separator);
+            }
+            if (array[i] != null) {
+                buf.append(array[i]);
+            }
+        }
+        return buf.toString();
+    }
 }
