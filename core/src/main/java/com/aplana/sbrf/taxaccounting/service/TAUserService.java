@@ -9,13 +9,21 @@ import com.aplana.sbrf.taxaccounting.model.TAUserFull;
 
 /**
  * Сервис для работы с таблицей сохраненных пользователей.
- * @author avanteev
  *
+ * @author avanteev
  */
 public interface TAUserService {
+	/**
+	 * Проверяет, есть ли пользователь с таким логином.
+	 *
+	 * @param login проверяемый логин пользователя
+	 * @return true если пользователь с таким логином есть, false если нет
+	 */
+	boolean existsUser(String login);
 
 	/**
 	 * Ищет пользователя по его логину
+	 *
 	 * @param login
 	 * @return
 	 */
@@ -23,6 +31,7 @@ public interface TAUserService {
 
 	/**
 	 * Ищет пользователя по его коду
+	 *
 	 * @param userId
 	 * @return
 	 */
@@ -30,6 +39,7 @@ public interface TAUserService {
 
 	/**
 	 * Активирует\блокирует учетную запись пользователя
+	 *
 	 * @param login
 	 * @param isActive
 	 */
@@ -37,12 +47,14 @@ public interface TAUserService {
 
 	/**
 	 * Обновляет сведения о пользователе
+	 *
 	 * @param user
 	 */
 	void updateUser(TAUser user);
 
 	/**
 	 * Заводит в системе нового пользователя
+	 *
 	 * @param user
 	 * @return
 	 */
@@ -50,18 +62,19 @@ public interface TAUserService {
 
 	/**
 	 * Возвращает список заведенных в системе пользователей. Включая активных и заблокированных.
+	 *
 	 * @return
 	 */
 	List<TAUser> listAllUsers();
 
 	/**
 	 * Возвращает список только активных пользователей.
+	 *
 	 * @return
 	 */
-    List<TAUserFull> listAllFullActiveUsers();
+	List<TAUserFull> listAllFullActiveUsers();
 
 	/**
-	 *
 	 * @param filter фильтер
 	 * @return возвращает страницу со списком пользователей
 	 */
