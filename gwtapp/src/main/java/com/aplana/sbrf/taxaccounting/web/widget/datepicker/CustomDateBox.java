@@ -18,6 +18,13 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
+/**
+ *
+ *
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker
+ */
+@Deprecated
 public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
     interface DateBoxUiBinder extends UiBinder<Widget, CustomDateBox> {

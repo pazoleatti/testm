@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
@@ -210,7 +211,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetStatusFormResult>() {
             @Override
             public void onSuccess(SetStatusFormResult result) {
-                getView().activateVersionName(result.getStatus() == 0? "Вывести из действия" : "Ввести в действие");
+                if (result.getUuid() != null)
+                    LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
+                /*getView().activateVersionName(result.getStatus() == 0? "Вывести из действия" : "Ввести в действие");*/
+                setFormTemplate();
             }
         }, this));
     }
@@ -238,6 +242,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							getView().setLogMessages(null);
 							getView().setFormId(formTemplate.getId());
 							getView().setTitle(formTemplate.getType().getName());
+                            getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
 							TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
 							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
 							FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, result.getForm(), result.getRefBookList());

@@ -42,17 +42,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	@Override
 	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
-		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-			// Все подразделения (временно, до появления версионирования)
-            List<Department> departmentList = departmentService.listAll();
-            Set<Integer> departmentIdSet = new HashSet<Integer>(departmentList.size());
-            for (Department department : departmentList) {
-                departmentIdSet.add(department.getId());
-            }
-            result.setDepartmentIds(departmentIdSet);
-            // Правильная выборка пока не реализуется
-			// result.setDepartmentIds(departmentDeclarationTypeDao.getDepartmentIdsByTaxType(taxType));
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                 List<Department> departmentList = departmentService.getTBDepartments(userInfo.getUser());
                 if (departmentList.size() != 1) {

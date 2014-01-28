@@ -34,6 +34,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
 
     @Override
     public void isUsedVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
+        if (template.getStatus() == VersionedObjectStatus.DRAFT)
+            return;
         List<Long> fdIds = formDataService.getFormDataLisByVersionTemplate(template.getId());
         if (!fdIds.isEmpty()){
             logger.error("Обнаружено использование макета для налоговых форм");
@@ -57,7 +59,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
         List<SegmentIntersection> segmentIntersections = formTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
             for (SegmentIntersection intersection : segmentIntersections){
-                int compareResult = 0;
+                int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
                     case DRAFT:

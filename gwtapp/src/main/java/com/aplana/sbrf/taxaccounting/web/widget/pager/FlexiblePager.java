@@ -458,15 +458,19 @@ public class FlexiblePager extends AbstractPager {
         rowsCountOnPage.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
-                setPageSize(rowsCountOnPage.getValue());
+                updateRowsCountOnPage();
             }
         });
         rowsCountOnPage.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
-                if (event.getUnicodeCharCode() == 13 && rowsCountOnPage.getValue() != null) {
-                    setPageSize(rowsCountOnPage.getValue());
-                    setRowsCountOnPage(rowsCountOnPage.getValue());
+                if (event.getUnicodeCharCode() == 13) {
+                    updateRowsCountOnPage();
+                } else {
+                    // запретить символы кроме цифр, цифры в таблице кодировки 48..57
+                    if (event.getUnicodeCharCode() < 48 || 57 < event.getUnicodeCharCode()) {
+                        event.preventDefault();
+                    }
                 }
             }
         });
@@ -704,11 +708,14 @@ public class FlexiblePager extends AbstractPager {
 		prevPage.setDisabled(disabled);
 	}
 
-    /**  Задать количество строк на странице в локальном хранилище браузера. */
-    private void setRowsCountOnPage(int value) {
-        Storage storage = Storage.getLocalStorageIfSupported();
-        if (storage != null) {
-            storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(value));
+    /**  Обновить количество строк на странице в локальном хранилище браузера. */
+    private void updateRowsCountOnPage() {
+        if (rowsCountOnPage.getValue() != null) {
+            setPageSize(rowsCountOnPage.getValue());
+            Storage storage = Storage.getLocalStorageIfSupported();
+            if (storage != null) {
+                storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(rowsCountOnPage.getValue()));
+            }
         }
     }
 }
