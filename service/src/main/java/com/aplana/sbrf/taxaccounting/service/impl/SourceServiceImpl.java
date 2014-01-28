@@ -136,4 +136,9 @@ public class SourceServiceImpl implements SourceService {
     public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind) {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
+
+	@Override
+	public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
+		return declarationTypeDao.listAllByTaxType(taxType);
+	}
 }

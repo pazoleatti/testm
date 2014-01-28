@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -186,7 +187,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         checkBoxColumn.setFieldUpdater(new FieldUpdater<TableModel, Boolean>() {
             @Override
             public void update(int index, TableModel object, Boolean value) {
-                formGrid.getVisibleItem(index).setChecked(value);
+	            declarationGrid.getVisibleItem(index).setChecked(value);
                 //enableAnchor(cancelAnchor, isCanCancel());
             }
         });
@@ -356,7 +357,18 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         return departmentPicker.getValue();
     }
 
-    /**
+	@Override
+	public List<FormTypeKind> getSelectedItems() {
+		List<FormTypeKind> selected = new ArrayList<FormTypeKind>();
+		for (TableModel row : declarationGrid.getVisibleItems()) {
+			if (row.isChecked()) {
+				selected.add(row.departmentFormType);
+			}
+		}
+		return selected;
+	}
+
+	/**
      * Установить вид представления на "Назначение налоговых форм"
      * и применить изменения к представлению
      *
@@ -530,4 +542,16 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         }
     }
+
+	@UiHandler("cancelAnchor")
+	public void clickCancelAnchor(ClickEvent event){
+		if (getUiHandlers() != null) {
+			if (isForm) {
+
+			} else {
+				getUiHandlers().onClickDeclarationCancelAnchor();
+			}
+		}
+	}
+
 }

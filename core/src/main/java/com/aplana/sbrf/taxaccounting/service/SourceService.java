@@ -215,4 +215,6 @@ public interface SourceService {
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
+
+	List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
 }

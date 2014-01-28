@@ -20,4 +20,6 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
     void onClickOpenFormDestinations();
 
     void onClickOpenDeclarationDestinations();
+
+	void onClickDeclarationCancelAnchor();
 }
