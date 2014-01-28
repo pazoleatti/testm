@@ -34,6 +34,9 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
         @Source("clear.png")
         public ImageResource clearBtn();
 
+        @Source("clear_disable.png")
+        public ImageResource clearBtnDisable();
+
         @Source("calendar_picker.png")
         public ImageResource calPickerBtn();
 
@@ -79,8 +82,10 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     }
 
     @UiHandler("clearImage")
-    public void onClearImage(ClickEvent event){
-        setValue(null, true);
+    public void onClearImage(ClickEvent event) {
+        if (widgetEnabled) {
+            setValue(null, true);
+        }
     }
 
     public DatePicker getDatePicker() {
@@ -154,6 +159,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		dateBox.setEnabled(enabled);
         calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
+        clearImage.setResource(enabled ? iconsRecources.clearBtn() : iconsRecources.clearBtnDisable());
+        clearImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
 	}
 
 	@Override
