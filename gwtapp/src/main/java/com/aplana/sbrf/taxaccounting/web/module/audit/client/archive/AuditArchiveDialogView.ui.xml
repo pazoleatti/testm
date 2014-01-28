@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
@@ -24,7 +23,7 @@
         <g:VerticalPanel width="250px">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
-                    <d:CustomDateBox ui:field="toSearchDate"/>
+                    <d:DateMaskBoxPicker ui:field="toSearchDate" />
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">

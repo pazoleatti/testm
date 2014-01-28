@@ -2,14 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.model.TaskParamTypeValues;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskJndiInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -157,7 +156,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                 if (paramValueWidget instanceof TextBox) {
                     paramModel.setTaskParamValue(((TextBox) paramValueWidget).getValue());
                 } else {
-                    paramModel.setTaskParamDateValue(((CustomDateBox) paramValueWidget).getValue());
+                    paramModel.setTaskParamDateValue(((DateMaskBoxPicker) paramValueWidget).getValue());
                 }
                 params.add(paramModel);
             }
@@ -254,13 +253,13 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                 if (event.getValue() == TaskParamTypeValues.DATE) {
                     if (targetParamValue instanceof TextBox) {
                         targetParamValue.removeFromParent();
-                        CustomDateBox valueBox = new CustomDateBox();
+                        DateMaskBoxPicker valueBox = new DateMaskBoxPicker();
                         valueBox.getElement().setId("paramValue" + paramNumber);
                         valueBox.setWidth("130px");
                         targetParamValuePanel.add(valueBox);
                     }
                 } else {
-                    if (targetParamValue instanceof CustomDateBox) {
+                    if (targetParamValue instanceof DateMaskBoxPicker) {
                         targetParamValue.removeFromParent();
                         TextBox valueBox = new TextBox();
                         valueBox.getElement().setId("paramValue_" + paramNumber);
@@ -395,7 +394,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
                     }
                 }
             } else {
-                if (((CustomDateBox) paramValueWidget).getValue() == null) {
+                if (((DateMaskBoxPicker) paramValueWidget).getValue() == null) {
                     validateMsg.append("Не заполнено поле 'Значение' у пользовательского параметра задачи").append("; ");
                 }
             }

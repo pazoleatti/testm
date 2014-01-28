@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidgetPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared.RefBookItem;
@@ -17,8 +17,6 @@ import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -54,7 +52,7 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
 	TextBox txtFind;
 
 	@UiField
-    CustomDateBox version;
+    DateMaskBoxPicker version;
 
 	@UiField
 	FlexiblePager pager;
@@ -278,7 +276,6 @@ public class RefBookPickerWidget extends Composite implements RefBookPicker, MyV
             cellTable.removeColumn(i);
         }
         int i = 0;
-        System.out.println(headers);
         for(Map.Entry<String, Integer> entry : headers.entrySet()){
             RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i);
             refBookItemTextColumn.setSortable(true);

@@ -16,6 +16,10 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 import java.util.Date;
 
+/**
+ * Ячейка с датой с вводом по маске с возможностью задать формат даты
+ * @author aivanov
+ */
 public class DateMaskInputWithModesCell extends DateMaskInputCell {
 
 	public DateMaskInputWithModesCell(final ColumnContext columnContext) {

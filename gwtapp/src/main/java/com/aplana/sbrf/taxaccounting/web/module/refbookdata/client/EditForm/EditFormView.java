@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTo
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -45,9 +45,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	Button cancel;
 
     @UiField
-    CustomDateBox versionStart;
+    DateMaskBoxPicker versionStart;
     @UiField
-    CustomDateBox versionEnd;
+    DateMaskBoxPicker versionEnd;
     @UiField
     LinkAnchor allVersion;
 
@@ -82,7 +82,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 				case DATE:
-					widget = new CustomDateBox();
+					widget = new DateMaskBoxPicker();
 					break;
 				case REFERENCE:
                     RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget(true);

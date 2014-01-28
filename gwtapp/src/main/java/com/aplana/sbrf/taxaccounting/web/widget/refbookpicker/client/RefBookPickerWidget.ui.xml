@@ -96,7 +96,7 @@
                             <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{style.forVersion}"/>
                         </g:cell>
                         <g:cell horizontalAlignment="left" >
-                            <d:CustomDateBox ui:field="version"/>
+                            <d:DateMaskBoxPicker ui:field="version"/>
                         </g:cell>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

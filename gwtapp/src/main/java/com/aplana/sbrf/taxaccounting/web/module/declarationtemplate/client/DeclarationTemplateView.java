@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -30,11 +30,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Path("declarationTemplate.version")
-    CustomDateBox versionDateBegin;
+    DateMaskBoxPicker versionDateBegin;
 
     @UiField
     @Path("endDate")
-    CustomDateBox versionDateEnd;
+    DateMaskBoxPicker versionDateEnd;
 	
 	@UiField
 	@Editor.Ignore

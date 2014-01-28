@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.*;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.date.DateInputWithModesCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.date.DateMaskInputWithModesCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.google.gwt.cell.client.*;

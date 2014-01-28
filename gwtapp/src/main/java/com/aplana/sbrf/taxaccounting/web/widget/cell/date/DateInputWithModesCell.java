@@ -13,6 +13,12 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 import java.util.*;
 
+/**
+ *
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.cell.date.DateMaskInputWithModesCell
+ */
+@Deprecated
 public class DateInputWithModesCell extends DateInputCell {
 
 	public static final String STORE_DATE_FORMAT = "dd.MM.yyyy";

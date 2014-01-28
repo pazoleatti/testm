@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell.date;
 
-import com.aplana.gwt.client.mask.MaskBox;
 import com.aplana.gwt.client.mask.MaskUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
