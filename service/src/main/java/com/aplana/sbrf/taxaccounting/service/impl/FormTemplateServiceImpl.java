@@ -43,8 +43,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     private final Log logger = LogFactory.getLog(getClass());
 
-    private Calendar calendar = Calendar.getInstance();
-
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
@@ -247,6 +245,25 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public Date getFTEndDate(int formTemplateId) {
+        Calendar calendar = Calendar.getInstance();
+        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id == 0)
+            return null;
+        FormTemplate templateEnd = formTemplateDao.get(id);
+        if (templateEnd.getStatus() == VersionedObjectStatus.FAKE){
+            calendar.setTime(templateEnd.getVersion());
+            return calendar.getTime();
+        }else {
+            calendar.setTime(templateEnd.getVersion());
+            calendar.add(Calendar.DAY_OF_YEAR, -1);
+            return calendar.getTime();
+        }
+    }
+
+    @Override
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
@@ -333,6 +350,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
     private Date addCalendar(int fieldNumber, int numberDays, Date actualDate){
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(actualDate);
         calendar.add(fieldNumber, numberDays);
         Date time = calendar.getTime();

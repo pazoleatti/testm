@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.migration.client;
 
+import com.aplana.gwt.client.MultiListBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -9,7 +11,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,32 +34,36 @@ public class MigrationView extends ViewWithUiHandlers<MigrationUiHandlers>
     @UiField
     Button loadButton;
 
-    @UiField
-    VerticalPanel years;
-    @UiField
-    VerticalPanel rnus;
+    @UiField(provided = true)
+    MultiListBox<Long> years;
 
-    List<CheckBox> yearCheckBoxes = new ArrayList<CheckBox>();
-    List<CheckBox> rnuCheckBoxes = new ArrayList<CheckBox>();
+    @UiField(provided = true)
+    MultiListBox<Long> rnus;
 
     @Inject
     @UiConstructor
     public MigrationView(final Binder uiBinder) {
+        years = new MultiListBox<Long>(new AbstractRenderer<Long>() {
+            @Override
+            public String render(Long object) {
+                return object == null ? "" : object.toString();
+            }
+        }, true, true);
+
+        rnus = new MultiListBox<Long>(new AbstractRenderer<Long>() {
+            @Override
+            public String render(Long object) {
+                return object == null ? "" : object.toString();
+            }
+        }, true, true);
+
         initWidget(uiBinder.createAndBindUi(this));
 
-        for (Long year : yearList) {
-            CheckBox checkBox = new CheckBox(year.toString());
-            checkBox.setValue(true);
-            yearCheckBoxes.add(checkBox);
-            years.add(checkBox);
-        }
+        years.setAvailableValues(yearList);
+        years.setValue(yearList);
 
-        for (Long rnu : rnuList) {
-            CheckBox checkBox = new CheckBox(rnu.toString());
-            checkBox.setValue(true);
-            rnuCheckBoxes.add(checkBox);
-            rnus.add(checkBox);
-        }
+        rnus.setAvailableValues(rnuList);
+        rnus.setValue(rnuList);
 
         loadButton.addClickHandler(new ClickHandler() {
             @Override
@@ -76,22 +81,11 @@ public class MigrationView extends ViewWithUiHandlers<MigrationUiHandlers>
 
     @Override
     public List<Long> getRnus() {
-        return getChecked(rnuCheckBoxes);
+        return rnus.getValue();
     }
 
     @Override
     public List<Long> getYears() {
-        return getChecked(yearCheckBoxes);
+        return years.getValue();
     }
-
-    private List<Long> getChecked(List<CheckBox> checkBoxes) {
-        List<Long> longs = new ArrayList<Long>();
-        for (CheckBox checkBox : checkBoxes) {
-            if (checkBox.getValue()) {
-                longs.add(Long.parseLong(checkBox.getText()));
-            }
-        }
-        return longs;
-    }
-
 }

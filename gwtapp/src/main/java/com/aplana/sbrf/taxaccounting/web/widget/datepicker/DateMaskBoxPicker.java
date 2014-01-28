@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -13,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
@@ -26,24 +28,36 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     interface DateBoxUiBinder extends UiBinder<Widget, DateMaskBoxPicker> {
 	}
 
-	private final PopupPanel datePickerPanel = new PopupPanel(true, true);
-	private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
 	private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
 
-    public static interface Icon extends ClientBundle {
+    public static interface Icons extends ClientBundle {
         @Source("clear.png")
-        ImageResource icon();
+        public ImageResource clearBtn();
+
+        @Source("calendar_picker.png")
+        public ImageResource calPickerBtn();
+
+        @Source("calendar_picker_disable.png")
+        public ImageResource calPickerBtnDisable();
     }
 
 	@UiField
     DateMaskBox dateBox;
 
 	@UiField
-	Image dateImage;
+	Image calendarImage;
 
     @UiField
     Image clearImage;
 
+    @UiField
+    HTMLPanel mainPanel;
+
+    Icons iconsRecources = GWT.create(Icons.class);
+
+    private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
+    private final PopupPanel datePickerPanel = new PopupPanel(true, true);
+    private boolean widgetEnabled = true;
     private boolean canBeEmpty = false;
 
 	public DateMaskBoxPicker() {
@@ -56,15 +70,21 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
         addDateBoxHandlers();
 	}
 
-    @UiHandler("dateImage")
+    @UiHandler("calendarImage")
     public void onDateImage(ClickEvent event) {
-        datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
-        datePickerPanel.show();
+        if (widgetEnabled) {
+            datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
+            datePickerPanel.show();
+        }
     }
 
     @UiHandler("clearImage")
     public void onClearImage(ClickEvent event){
         setValue(null, true);
+    }
+
+    public DatePicker getDatePicker() {
+        return datePicker;
     }
 
     public void setWidth(String width){
@@ -125,21 +145,24 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
 	@Override
 	public boolean isEnabled() {
-		return dateBox.isEnabled();
+		return widgetEnabled;
 	}
 
 	@Override
 	public void setEnabled(boolean enabled) {
+        this.widgetEnabled = enabled;
 		dateBox.setEnabled(enabled);
+        calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
+        calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
 	}
 
 	@Override
 	public boolean isVisible() {
-		return dateImage.isVisible();
+		return mainPanel.isVisible();
 	}
 
 	@Override
 	public void setVisible(boolean visible) {
-		dateImage.setVisible(visible);
+        mainPanel.setVisible(visible);
 	}
 }

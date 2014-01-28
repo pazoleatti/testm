@@ -19,9 +19,9 @@
 			<g:HorizontalPanel>
 				<g:Label width="300px">Период актульности с</g:Label>
 				<!--<g:TextBox width="100px" ui:field="versionBox" />-->
-                <datepicker:CustomDateBox ui:field="versionDateBegin"/>
+                <datepicker:DateMaskBoxPicker ui:field="versionDateBegin"/>
                 <g:Label width="300px">по</g:Label>
-                <datepicker:CustomDateBox ui:field="versionDateEnd"/>
+                <datepicker:DateMaskBoxPicker ui:field="versionDateEnd"/>
 			</g:HorizontalPanel>
 
 			<g:HorizontalPanel>
