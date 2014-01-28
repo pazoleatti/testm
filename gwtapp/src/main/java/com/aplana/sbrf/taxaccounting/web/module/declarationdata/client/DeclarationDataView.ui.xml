@@ -175,7 +175,7 @@
                                 <g:Label title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
                             </g:cell>
                             <g:cell verticalAlignment="middle">
-                                <d:CustomDateBox ui:field="dateBox" />
+                                <d:DateMaskBoxPicker ui:field="dateBox" />
                             </g:cell>
                         </g:HorizontalPanel>
                 </g:HorizontalPanel>

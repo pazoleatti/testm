@@ -45,7 +45,7 @@
                                 <g:Label styleName="{style.caption}">Срок сдачи отчетности</g:Label>
                             </g:cell>
                             <g:cell horizontalAlignment="ALIGN_LEFT">
-                                <d:CustomDateBox width="130px" ui:field="deadline"/>
+                                <d:DateMaskBoxPicker width="130px" ui:field="deadline"/>
                             </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>

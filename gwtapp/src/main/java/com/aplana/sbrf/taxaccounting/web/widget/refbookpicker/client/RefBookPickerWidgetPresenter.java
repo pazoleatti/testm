@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
@@ -60,7 +61,7 @@ public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerW
 	}
 
 	interface MyView extends View, HasValue<Long>, HasUiHandlers<RefBookPickerWidgetUiHandlers>{
-		void setHeaders(List<String> headers);
+		void setHeaders(Map<String, Integer> headers);
 		
 		void setVersion(Date version);
 		

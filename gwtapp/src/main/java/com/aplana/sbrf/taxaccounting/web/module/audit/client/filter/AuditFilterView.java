@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
@@ -37,10 +37,10 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     interface Binder extends UiBinder<Widget, AuditFilterView> { }
 
     @UiField
-    CustomDateBox fromSearchDate;
+    DateMaskBoxPicker fromSearchDate;
 
     @UiField
-    CustomDateBox toSearchDate;
+    DateMaskBoxPicker toSearchDate;
 
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;

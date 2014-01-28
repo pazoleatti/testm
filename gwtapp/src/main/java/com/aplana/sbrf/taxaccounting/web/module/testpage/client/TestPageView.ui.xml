@@ -88,7 +88,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel  spacing="2">
-                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px"/>
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" enabled="true" visible="false"/>
                         <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

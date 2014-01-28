@@ -1,5 +1,9 @@
 alter table configuration add constraint configuration_pk primary key (code);
 
+alter table oktmo add constraint oktmo_pk primary key (id);
+alter table oktmo add constraint oktmo_fk_parent_id foreign key (parent_id) references oktmo(id);
+alter table oktmo add constraint oktmo_chk_status check (status in (0,-1,1,2));
+
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
 alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
@@ -237,3 +241,4 @@ create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
+create index i_oktmo_code on oktmo(code);

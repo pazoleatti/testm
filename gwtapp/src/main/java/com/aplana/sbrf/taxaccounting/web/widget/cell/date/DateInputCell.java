@@ -20,6 +20,14 @@ import java.util.Date;
 
 import static com.google.gwt.dom.client.BrowserEvents.*;
 
+/**
+ *
+ * Ячейка с датой с вводом по маске с возможностью задать формат даты
+ * @author unknown
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.cell.date.DateMaskInputCell
+ */
+@Deprecated
 public class DateInputCell extends
 		AbstractEditableCell<Date, DateInputCell.ViewData> {
 

@@ -6,7 +6,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -22,6 +24,8 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiField
 	Button downloadFormTemplateButton;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
 	@Inject
 	public FormTemplateImpexView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
@@ -30,7 +34,8 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
 				if (!event.getResults().toLowerCase().contains("error")) {
-					getUiHandlers().uploadFormTemplateSuccess();
+                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+					getUiHandlers().uploadFormTemplateSuccess(uuid);
 				} else {
 					getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
 				}

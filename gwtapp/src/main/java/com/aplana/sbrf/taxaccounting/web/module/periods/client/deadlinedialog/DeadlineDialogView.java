@@ -5,7 +5,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentTreeWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -39,7 +39,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
     DepartmentTreeWidget departmentPicker;
 
     @UiField
-    CustomDateBox deadline;
+    DateMaskBoxPicker deadline;
 
     @UiField
     Button saveButton;
