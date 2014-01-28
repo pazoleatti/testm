@@ -1,3 +1,4 @@
+drop index i_oktmo_code;
 drop index i_ref_book_value_string;
 drop index i_form_data_signer_formdataid;
 drop index i_form_data_kind;
@@ -73,3 +74,4 @@ drop table tax_period;
 drop table form_type;
 drop sequence seq_form_type;
 drop table configuration;
+drop table oktmo;
