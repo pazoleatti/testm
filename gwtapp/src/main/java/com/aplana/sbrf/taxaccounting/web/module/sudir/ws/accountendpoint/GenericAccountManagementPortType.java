@@ -165,7 +165,11 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public List<GenericAccountInfo> getAccountList()
 			throws GenericAccountManagementException_Exception {
 		try {
-			return gais.desassembleUsers(userService.listAllUsers());
+            List<GenericAccountInfo> accountInfos = gais.desassembleUsers(userService.listAllUsers());
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
+			return accountInfos;
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());

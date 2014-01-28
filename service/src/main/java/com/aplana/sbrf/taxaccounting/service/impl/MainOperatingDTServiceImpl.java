@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -38,8 +36,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Qualifier("declarationTemplateOperatingService")
     private VersionOperatingService<DeclarationTemplate> versionOperatingService;
 
+    @Autowired
+    private TemplateChangesService templateChangesService;
+
     @Override
-    public <T> int edit(T template, Date templateActualEndDate, Logger logger) {
+    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
@@ -53,11 +54,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         versionOperatingService.isUsedVersion(declarationTemplate, templateActualEndDate, logger);
         checkError(logger);
-        return declarationTemplateService.save(declarationTemplate);
+        int id = declarationTemplateService.save(declarationTemplate);
+
+        logging(id, TemplateChangesEvent.MODIFIED, user);
+        return id;
     }
 
     @Override
-    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger) {
+    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(template, templateActualEndDate, logger);
         checkError(logger);*/
@@ -70,11 +74,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger);
         declarationTemplate.setEdition(1);//т.к. первый
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-        return declarationTemplateService.save(declarationTemplate);
+        int id = declarationTemplateService.save(declarationTemplate);
+
+        logging(id, TemplateChangesEvent.CREATED, user);
+        return id;
     }
 
     @Override
-    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger) {
+    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         checkError(logger);
@@ -82,11 +89,14 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         declarationTemplate.setEdition(declarationTemplateService.versionTemplateCount(declarationTemplate.getType().getId()) + 1);
-        return declarationTemplateService.save(declarationTemplate);
+        int id = declarationTemplateService.save(declarationTemplate);
+
+        logging(id, TemplateChangesEvent.CREATED, user);
+        return id;
     }
 
     @Override
-    public void deleteTemplate(int typeId, Logger logger) {
+    public void deleteTemplate(int typeId, Logger logger, TAUser user) {
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
@@ -102,10 +112,12 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         DeclarationType decType = declarationTypeService.get(typeId);
         decType.setStatus(VersionedObjectStatus.DELETED);
         declarationTypeService.save(decType);
+
+        logging(typeId, TemplateChangesEvent.DELETED, user);
     }
 
     @Override
-    public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger) {
+    public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate template = declarationTemplateService.get(templateId);
         DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(templateId);
         Date dateEndActualize = nearestDT != null ? nearestDT.getVersion() : null;
@@ -120,25 +132,38 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             declarationTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
         }
+        logging(templateId, TemplateChangesEvent.DELETED, user);
     }
 
     @Override
-    public void setStatusTemplate(int templateId, Logger logger) {
+    public void setStatusTemplate(int templateId, Logger logger, TAUser user) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
+
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate, null, logger);
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException("Макет используется и не может быть выведен из действия", logEntryService.save(logger.getEntries()));
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.save(declarationTemplate);
+            logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
         } else {
             declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
             declarationTemplateService.save(declarationTemplate);
+            logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
     }
 
     private void checkError(Logger logger){
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
+    }
+
+    private void logging(int id, TemplateChangesEvent event, TAUser user){
+        TemplateChanges changes = new TemplateChanges();
+        changes.setEvent(event);
+        changes.setEventDate(new Date());
+        changes.setFormTemplateId(id);
+        changes.setAuthor(user);
+        templateChangesService.save(changes);
     }
 }

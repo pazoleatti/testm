@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
-import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.SetActiveAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.SetActiveResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -31,7 +31,7 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
     private LogEntryService logEntryService;
 
     @Autowired
-    private TemplateChangesService templateChangesService;
+    private SecurityService securityService;
 
     public SetActiveHandler() {
         super(SetActiveAction.class);
@@ -41,7 +41,7 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
     public SetActiveResult execute(SetActiveAction action, ExecutionContext context) throws ActionException {
         SetActiveResult result = new SetActiveResult();
         Logger logger = new Logger();
-        mainOperatingService.setStatusTemplate(action.getDtId(), logger);
+        mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser());
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Найдены экземпляры налоговых форм", logEntryService.save(logger.getEntries()));
         }
