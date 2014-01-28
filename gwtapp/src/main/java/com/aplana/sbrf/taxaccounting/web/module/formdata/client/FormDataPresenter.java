@@ -81,18 +81,20 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-							if(result==null || result.getDataRows().getTotalCount() == 0) {
-								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
-                                getView().setPagingVisible(false);
+                            if (result == null || result.getDataRows().getTotalCount() == 0) {
+                                getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
                             } else {
-								getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
+                                getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
                                 if (result.getDataRows().size() > getView().getPageSize()) {
-									getView().assignDataProvider(result.getDataRows().size());
-								}
-                                getView().setPagingVisible(result.getDataRows().getTotalCount() > getView().getPageSize());
-							}
-							modifiedRows.clear();
-						}
+                                    getView().assignDataProvider(result.getDataRows().size());
+                                } else {
+                                    getView().assignDataProvider(getView().getPageSize());
+                                }
+                                getView().isCanEditPage(!fixedRows);
+                                //getView().setPagingVisible(result.getDataRows().getTotalCount() > getView().getPageSize());
+                            }
+                            modifiedRows.clear();
+                        }
 					}, FormDataPresenter.this));
 		}
 	}
@@ -100,7 +102,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
 		modifiedRows.add(dataRow);
-
 	}
 
     @Override

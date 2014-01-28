@@ -1,11 +1,9 @@
 .pageDetails {
-    padding: 0 8px 2px;
     vertical-align: middle;
     text-align: center;
 }
 
 .button {
-    padding-bottom: 1px;
     vertical-align: middle;
     text-align: center;
     cursor: pointer;
@@ -13,8 +11,6 @@
 }
 
 .buttonLastPage {
-    padding-right: 4px;
-    padding-bottom: 1px;
     vertical-align: middle;
     text-align: center;
     cursor: pointer;
@@ -22,20 +18,18 @@
 }
 
 .disabledButton {
-    padding-bottom: 2px;
     cursor: default;
 }
 
 .pageNumber {
-    padding: 2px 0;
 }
 
 .rowsCountOnPage {
-    padding: 2px 2px 2px 2px;
 }
 
 .panel {
+    min-height: 30px;
     float: right;
-    padding-right: 2px;
+    padding-right: 10px;
     padding-left: 2px;
 }

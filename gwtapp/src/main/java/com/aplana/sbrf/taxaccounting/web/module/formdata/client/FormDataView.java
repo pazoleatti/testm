@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,6 +35,11 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Вьюха конкретной формы с данными
+ *
+ * @author unknown
+ */
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
@@ -140,7 +144,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			public void onCellPreview(CellPreviewEvent<DataRow<Cell>> event) {
 				if ("mouseover".equals(event.getNativeEvent().getType())) {
 					long index = (event.getIndex() - (pager.getPage() * formDataTable.getPageSize()));
-					TableCellElement cellElement = formDataTable.getRowElement((int) index).getCells().getItem(event.getColumn());
+                    System.out.println("1 " + pager.getPageSize());
+                    TableCellElement cellElement = formDataTable.getRowElement((int) index).getCells().getItem(event.getColumn());
 					if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
 						cellElement.removeAttribute("title");
 					} else {
@@ -151,7 +156,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		});
         formDataTable.setPageSize(pager.getPageSize());
         pager.setDisplay(formDataTable);
-
+        System.out.println("2 " + pager.getPageSize());
         recalcReportPeriodLabelWidth();     // пересчитаем при первом отображении страницы
 
         Window.addResizeHandler(new ResizeHandler() {
@@ -519,7 +524,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void assignDataProvider(int pageSize) {
-		formDataTable.setPageSize(pageSize);
+        System.out.println("assignDataProvider " + pageSize);
+        formDataTable.setPageSize(pageSize);
 		if(!dataProvider.getDataDisplays().contains(formDataTable)) {
 			dataProvider.addDataDisplay(formDataTable);
 		}
@@ -527,6 +533,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @Override
     public int getPageSize() {
+        System.out.println("3 " + pager.getPageSize());
         return pager.getPageSize();
     }
 
@@ -543,9 +550,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void updateData(int pageNumber) {
 		if (pager.getPage() == pageNumber){
+            System.out.println("4 " + pager.getPageSize());
 			updateData();
+            System.out.println("5 " + pager.getPageSize());
 		} else {
 			pager.setPage(pageNumber);
+            System.out.println("6 " + pager.getPageSize());
 		}
 	}
 
@@ -555,7 +565,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setPagingVisible(boolean visible) {
-        pager.setVisible(visible);
+    public void isCanEditPage(boolean visible){
+        pager.isCanEditPage(visible);
     }
 }
