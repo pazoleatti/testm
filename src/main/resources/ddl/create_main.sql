@@ -1,4 +1,20 @@
 
+create table OKTMO (
+  id number(18) not null,
+  code varchar2(4000) not null,
+  name varchar2(4000) not null,
+  parent_id number(18),
+  version date not null,
+  status number(1) not null 
+);
+comment on table OKTMO is 'ОКТМО';
+comment on column OKTMO.id is 'Идентификатор записи';
+comment on column OKTMO.code is 'Код';
+comment on column OKTMO.name is 'Наименование';
+comment on column OKTMO.parent_id is 'Идентификатор родительской записи';
+comment on column OKTMO.version is 'Версия. Дата актуальности записи';
+comment on column OKTMO.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+--------------------------------------------------------------------------------------------------------------
 
 create table configuration (
   code varchar2(50) not null,
@@ -383,7 +399,7 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
-  print_department_id number(9) not null,
+  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
