@@ -853,7 +853,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             StringBuilder in = new StringBuilder();
             for (Map<String, RefBookValue> record : records) {
                 for (RefBookAttribute attribute : attributes) {
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
+                            record.get(attribute.getAlias()) != null) {
                         in.append(record.get(attribute.getAlias()).getReferenceValue()).append(",");
                     }
                 }
