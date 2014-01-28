@@ -52,6 +52,7 @@
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 
+	<!-- Login page -->
 	<servlet>
 		<servlet-name>login</servlet-name>
 		<jsp-file>/WEB-INF/jsp/login.jsp</jsp-file>
@@ -60,6 +61,12 @@
 		<servlet-name>login</servlet-name>
 		<url-pattern>/login</url-pattern>
 	</servlet-mapping>
+
+	<!-- Error 403. Access forbidden. Unknown user. -->
+	<error-page>
+		<error-code>403</error-code>
+		<location>/WEB-INF/jsp/forbidden.jsp</location>
+	</error-page>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
