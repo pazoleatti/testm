@@ -71,7 +71,7 @@ public class FormTemplateController {
 			throws FileUploadException, IOException {
         Logger logger = new Logger();
         Date endDate = formTemplateService.getFTEndDate(formTemplateId);
-        mainOperatingService.edit(formTemplateService.get(formTemplateId), endDate, logger);
+        mainOperatingService.edit(formTemplateService.get(formTemplateId), endDate, logger, securityService.currentUserInfo().getUser());
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
 

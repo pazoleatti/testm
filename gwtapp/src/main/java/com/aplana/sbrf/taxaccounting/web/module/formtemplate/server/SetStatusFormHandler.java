@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.SetStatusFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.SetStatusFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -32,6 +33,9 @@ public class SetStatusFormHandler extends AbstractActionHandler<SetStatusFormAct
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService securityService;
+
     public SetStatusFormHandler() {
         super(SetStatusFormAction.class);
     }
@@ -40,7 +44,7 @@ public class SetStatusFormHandler extends AbstractActionHandler<SetStatusFormAct
     public SetStatusFormResult execute(SetStatusFormAction action, ExecutionContext context) throws ActionException {
         SetStatusFormResult result = new SetStatusFormResult();
         Logger logger =  new Logger();
-        mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger);
+        mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser());
         result.setStatus(formTemplateService.get(action.getFormTemplateId()).getStatus().getId());
         if (logger.containsLevel(LogLevel.ERROR)){
             /*throw new ServiceLoggerException("Найдены экземпляры налоговых форм", logEntryService.save(logger.getEntries()));*/
