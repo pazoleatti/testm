@@ -25,6 +25,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
     public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
         result.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(RefBook.RECORD_UNIQUE_ID_ALIAS)));
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(RefBook.RECORD_ID_ALIAS)));
         for (RefBookAttribute attribute: refBook.getAttributes()) {
             Object value = null;
             if (rs.getObject(attribute.getAlias()) != null) {

@@ -240,6 +240,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery("  r.id as \"");
         ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
         ps.appendQuery("\",\n");
+        ps.appendQuery("  r.record_id as \"");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("\",\n");
 
         if (version == null) {
             ps.appendQuery("  t.version as \"");
@@ -343,6 +346,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         sql.append("select\n");
         sql.append("  r.id as \"");
         sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
+        sql.append("\",\n");
+        sql.append("  r.record_id as \"");
+        sql.append(RefBook.RECORD_ID_ALIAS);
         sql.append("\",\n");
         List<RefBookAttribute> attributes = refBook.getAttributes();
         for (int i = 0; i < attributes.size(); i++) {
