@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSaveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
@@ -50,7 +51,9 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	@Override
-	public void uploadFormTemplateSuccess() {
+	public void uploadFormTemplateSuccess(String uuid) {
+        if (uuid != null)
+            LogAddEvent.fire(this, uuid);
 		MessageEvent.fire(this, "Форма импортирована");
 		FormTemplateSaveEvent.fire(this);
 	}
