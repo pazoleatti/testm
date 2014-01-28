@@ -463,6 +463,12 @@ public class RefBookDaoTest {
         assertEquals(1, records.size());
     }
 
+    @Test
+    public void isVersionExist() {
+        assertTrue(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2013)));
+        assertFalse(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2014)));
+    }
+
     private static Date getZeroTimeDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

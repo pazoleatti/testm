@@ -68,4 +68,11 @@ public interface TAUserDao {
 	public List<Integer> getByFilter(MembersFilterData filter);
 
 	public int count(MembersFilterData filter);
+
+	/**
+	 * Проверяет, есть ли пользователь с таким логином.
+	 * @param login проверяемый логин пользователя
+	 * @return true если пользователь с таким логином есть, false если нет
+	 */
+	boolean existsUser(String login);
 }

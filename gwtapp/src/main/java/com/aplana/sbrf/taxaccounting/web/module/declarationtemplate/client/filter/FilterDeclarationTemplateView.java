@@ -76,25 +76,10 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
         taxType.setAcceptableValues(taxTypes);
 	}
 
-
-    @UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onCreateClicked();
-        }
-	}
-
 	@UiHandler("apply")
 	void onAppyButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onApplyClicked();
 		}
 	}
-
-    @UiHandler("delete")
-    void onDeleteButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onDeleteClicked();
-        }
-    }
 }

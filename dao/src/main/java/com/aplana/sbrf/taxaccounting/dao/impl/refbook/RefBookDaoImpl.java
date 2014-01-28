@@ -536,6 +536,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    @Override
+    public boolean isVersionExist(Long refBookId, Long recordId, Date version) {
+        String sql = "select count(*) from ref_book_record where ref_book_id = ? and record_id = ? and version = trunc(?, 'DD')";
+        return getJdbcTemplate().queryForInt(sql, refBookId, recordId, version) != 0;
+    }
+
     private static final String CHECK_REF_BOOK_RECORD_UNIQUE_SQL = "select id from ref_book_record " +
             "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?";
 
