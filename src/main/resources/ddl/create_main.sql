@@ -399,7 +399,7 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
-  print_department_id number(9) not null,
+  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
