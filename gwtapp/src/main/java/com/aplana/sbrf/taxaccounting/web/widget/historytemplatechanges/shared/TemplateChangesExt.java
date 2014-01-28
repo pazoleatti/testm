@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared;
+package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 

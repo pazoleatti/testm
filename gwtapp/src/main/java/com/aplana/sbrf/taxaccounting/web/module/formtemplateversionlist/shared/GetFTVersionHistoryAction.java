@@ -5,7 +5,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 /**
  * User: avanteev
  */
-public class GetVersionHistoryAction extends UnsecuredActionImpl<GetVersionHistoryResult> {
+public class GetFTVersionHistoryAction extends UnsecuredActionImpl<GetFTVersionHistoryResult> {
     private int formTypeId;
 
     public int getFormTypeId() {

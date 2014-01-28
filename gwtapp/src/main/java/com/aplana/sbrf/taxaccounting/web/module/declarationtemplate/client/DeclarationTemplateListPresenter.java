@@ -12,11 +12,11 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
@@ -35,34 +35,10 @@ import java.util.List;
  */
 public class DeclarationTemplateListPresenter
         extends Presenter<DeclarationTemplateListPresenter.MyView, DeclarationTemplateListPresenter.MyProxy>
-        implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler, DeclarationTemplateCreateEvent.DTCreateHandler,
-        DeclarationTemplateDeleteEvent.MyHandler{
+        implements DeclarationTemplateApplyEvent.MyHandler, FilterDeclarationTemplateReadyEvent.MyHandler,
+        DeclarationTemplateListUiHandlers {
 
     private final PlaceManager placeManager;
-
-    @Override
-    @ProxyEvent
-    public void onClickCreate(DeclarationTemplateCreateEvent event) {
-        DTCreateNewTypeEvent.fire(this, filterPresenter.getFilterData().getTaxType());
-    }
-
-    @Override
-    @ProxyEvent
-    public void onDelete(DeclarationTemplateDeleteEvent event) {
-        DeclarationTypeTemplate declarationTypeTemplate = getView().getSelectedElement();
-        if (declarationTypeTemplate == null)
-            return;
-        DTDeleteAction action = new DTDeleteAction();
-        action.setDtTypeId(declarationTypeTemplate.getTypeId());
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DTDeleteResult>() {
-            @Override
-            public void onSuccess(DTDeleteResult result) {
-                if (result.getLogEntriesUuid() != null)
-                    LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
-                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
-            }
-        }, this));
-    }
 
     @Title("Шаблоны деклараций")
 	@ProxyCodeSplit
@@ -73,7 +49,7 @@ public class DeclarationTemplateListPresenter
 	/**
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
 	 */
-	public interface MyView extends View {
+	public interface MyView extends View, HasUiHandlers<DeclarationTemplateListUiHandlers> {
 		void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result);
         DeclarationTypeTemplate getSelectedElement();
 	}
@@ -89,6 +65,7 @@ public class DeclarationTemplateListPresenter
         this.placeManager = placeManager;
         this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
+        getView().setUiHandlers(this);
 	}
 
 	/**
@@ -105,7 +82,6 @@ public class DeclarationTemplateListPresenter
         defaultFilter.setTaxType(null);
         defaultFilter.setActive(true);
         filterPresenter.initFilter(defaultFilter);
-
 	}
 
 	@Override
@@ -156,5 +132,27 @@ public class DeclarationTemplateListPresenter
         }, this).addCallback(
                 new ManualRevealCallback<DeclarationListResult>(
                 DeclarationTemplateListPresenter.this)));
+    }
+
+    @Override
+    public void onCreateClicked() {
+        DTCreateNewTypeEvent.fire(this, filterPresenter.getFilterData().getTaxType());
+    }
+
+    @Override
+    public void onDeleteClicked() {
+        DeclarationTypeTemplate declarationTypeTemplate = getView().getSelectedElement();
+        if (declarationTypeTemplate == null)
+            return;
+        DTDeleteAction action = new DTDeleteAction();
+        action.setDtTypeId(declarationTypeTemplate.getTypeId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DTDeleteResult>() {
+            @Override
+            public void onSuccess(DTDeleteResult result) {
+                if (result.getLogEntriesUuid() != null)
+                    LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
+            }
+        }, this));
     }
 }

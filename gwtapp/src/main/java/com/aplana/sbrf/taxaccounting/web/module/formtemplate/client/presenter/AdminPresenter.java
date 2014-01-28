@@ -14,11 +14,11 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
@@ -38,34 +38,8 @@ import java.util.List;
  */
 public class AdminPresenter
         extends Presenter<AdminPresenter.MyView, AdminPresenter.MyProxy>
-        implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler, FormTemplateDeleteEvent.MyHandler,
-        FormTemplateCreateEvent.FormDataCreateHandler{
-
-    @Override
-    @ProxyEvent
-    public void onDeleteCreate(FormTemplateDeleteEvent event) {
-        FormTypeTemplate formTypeTemplate = getView().getSelectedElement();
-        if (formTypeTemplate == null)
-            return;
-        DeleteFormTypeAction action = new DeleteFormTypeAction();
-        action.setFormTypeId(formTypeTemplate.getFormTypeId());
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteFormTypeResult>() {
-            @Override
-            public void onSuccess(DeleteFormTypeResult result) {
-                LogAddEvent.fire(AdminPresenter.this, result.getUuid());
-            }
-        }, this).addCallback(
-                TaManualRevealCallback.create(this, (TaPlaceManager) placeManager)));
-    }
-
-    @Override
-    @ProxyEvent
-    public void onClickCreate(FormTemplateCreateEvent event) {
-        /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
-                with(AdminConstants.NameTokens.formTemplateId, "0").
-                with(AdminConstants.NameTokens.formTypeId, "0").build());*/
-        FormTemplateMainEvent.fire(this, filterPresenter.getFilterData().getTaxType());
-    }
+        implements FormTemplateApplyEvent.FormDataApplyHandler, FilterFormTemplateReadyEvent.MyHandler,
+        AdminUIHandlers {
 
     /**
 	 * {@link AdminPresenter}'s proxy.
@@ -80,7 +54,7 @@ public class AdminPresenter
 	 * Интерфейс формы, т.е. вида, т.е. представления. Такой, каким видит его
 	 * Presenter.
 	 */
-	public interface MyView extends View {
+	public interface MyView extends View, HasUiHandlers<AdminUIHandlers> {
 		void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates);
         FormTypeTemplate getSelectedElement();
 	}
@@ -96,6 +70,7 @@ public class AdminPresenter
 		this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
         this.placeManager = placeManager;
+        getView().setUiHandlers(this);
     }
 
 	@Override
@@ -170,4 +145,24 @@ public class AdminPresenter
                                 AdminPresenter.this)));
     }
 
+    @Override
+    public void onCreateClicked() {
+        FormTemplateMainEvent.fire(this, filterPresenter.getFilterData().getTaxType());
+    }
+
+    @Override
+    public void onDeleteClick() {
+        FormTypeTemplate formTypeTemplate = getView().getSelectedElement();
+        if (formTypeTemplate == null)
+            return;
+        DeleteFormTypeAction action = new DeleteFormTypeAction();
+        action.setFormTypeId(formTypeTemplate.getFormTypeId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteFormTypeResult>() {
+            @Override
+            public void onSuccess(DeleteFormTypeResult result) {
+                LogAddEvent.fire(AdminPresenter.this, result.getUuid());
+            }
+        }, this).addCallback(
+                TaManualRevealCallback.create(this, (TaPlaceManager) placeManager)));
+    }
 }

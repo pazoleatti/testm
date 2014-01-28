@@ -2,11 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminUIHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -15,7 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewImpl;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
 
@@ -25,7 +28,7 @@ import java.util.List;
  * @author Vitalii Samolovskikh
  * @author Eugene Stetsenko
  */
-public class AdminView extends ViewImpl implements AdminPresenter.MyView {
+public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements AdminPresenter.MyView {
 	interface Binder extends UiBinder<Widget, AdminView> {
 	}
 
@@ -105,4 +108,16 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
         return selectionModel.getLastSelectedObject();
     }
 
+    @UiHandler("delete")
+    void onDeleteTemplate(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().onDeleteClick();
+    }
+
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
 }

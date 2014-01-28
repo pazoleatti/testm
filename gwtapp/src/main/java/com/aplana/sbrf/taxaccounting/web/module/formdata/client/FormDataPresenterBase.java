@@ -94,8 +94,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
 
-        void setPagingVisible(boolean visible);
-	}
+        void isCanEditPage(boolean visible);
+    }
 
 	public static final String NAME_TOKEN = "!formData";
 

@@ -121,6 +121,11 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
