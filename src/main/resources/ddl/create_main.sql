@@ -149,7 +149,8 @@ create table ref_book_attribute (
   precision number(2),
   width number(9) default 15 not null,
   required number(1) default 0 not null,
-  is_unique number(1) default 0 not null
+  is_unique number(1) default 0 not null,
+  sort_order number(9)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -165,6 +166,7 @@ comment on column ref_book_attribute.precision is 'Точность, колич�
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
+comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,

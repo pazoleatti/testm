@@ -126,7 +126,7 @@ public interface RefBookDataProvider {
     /**
      * Возвращает значения уникальных атрибутов для конкретной версии записи справочника
      * @param uniqueRecordId идентификатор версии записи
-     * @return
+     * @return not null всегда - ожидается возврат результата
      */
     List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
 

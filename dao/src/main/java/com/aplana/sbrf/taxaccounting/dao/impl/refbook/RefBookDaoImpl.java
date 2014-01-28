@@ -122,7 +122,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<RefBookAttribute> getAttributes(Long refBookId) {
         try {
             return getJdbcTemplate().query(
-                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, is_unique " +
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+							"is_unique, sort_order " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -148,6 +149,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setWidth(rs.getInt("width"));
             result.setRequired(rs.getBoolean("required"));
             result.setUnique(rs.getBoolean("is_unique"));
+			result.setSortOrder(rs.getInt("sort_order"));
             return result;
         }
     }

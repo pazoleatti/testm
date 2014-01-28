@@ -23,7 +23,7 @@ import java.util.*;
  * Провайдер данных для таблицы user
  * @author auldanov
  */
-@Service("RefBookUser")
+@Service("refBookUser")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookUser implements RefBookDataProvider {

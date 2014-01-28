@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -221,6 +224,36 @@ public class RefBook implements Serializable {
 
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+
+	/** Возвращает упорядоченный список атрибутов для сортировки по умолчанию. В запросах пока используется только
+	 * первый в списке, то есть мультисортировка пока не поддерживается.
+	 * @return всегда определен, не может быть null
+	 */
+	private List<RefBookAttribute> getSortAttributes() {
+		List<RefBookAttribute> defaultSort = new ArrayList<RefBookAttribute>();
+		for (RefBookAttribute attr : attributes) {
+			if (attr.getSortOrder() != null) {
+				defaultSort.add(attr);
+			}
+		}
+		if (defaultSort.size() > 0) {
+			Collections.sort(defaultSort, new Comparator<RefBookAttribute>() {
+				@Override
+				public int compare(RefBookAttribute o1, RefBookAttribute o2) {
+					return o1.getSortOrder() - o2.getSortOrder();
+				}
+			});
+		}
+		return defaultSort;
+	}
+
+	/** Возвращает атрибут для сортировки по умолчанию
+	 * @return может быть null
+	 */
+	public RefBookAttribute getSortAttribute() {
+		List<RefBookAttribute> list = getSortAttributes();
+		return list.size() > 0 ? list.get(0) : null;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,66 +11,82 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Провайдер для работы со справочником подразделений
- * В текущей версии расчитано что он будет использоваться только  для получение данных, возможности вставки данных НЕТ, версионирования НЕТ (данные в одном экземпляре)
- * Смотри http://jira.aplana.com/browse/SBRFACCTAX-3245
- * User: ekuvshinov
+ * Универсальный провайдер данных для справочников, хранящихся в отдельных таблицах. Только для чтения и без версионирования.
  */
-@Service("refBookDepartment")
+@Service("refBookSimple")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
-public class RefBookDepartment implements RefBookDataProvider {
+public class RefBookSimple implements RefBookDataProvider {
 
-    public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
+	/** Код справочника */
+    public Long refBookId;
+
+	/** Название таблицы для запроса данных*/
+	private String tableName;
+
+	/** Дополнительная фильтрация выборки */
+	private String whereClause;
 
     @Autowired
     RefBookDao refBookDao;
 
-    @Autowired
-    private RefBookDepartmentDao refBookDepartmentDao;
+	@Autowired
+	private RefBookUtils refBookUtils;
 
-    @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookDepartmentDao.getRecords(pagingParams, filter, sortAttribute, isSortAscending);
+	@Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
+			RefBookAttribute sortAttribute, boolean isSortAscending) {
+		return refBookUtils.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
+			RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return refBookDepartmentDao.getRecordData(recordId);
+		return refBookUtils.getRecordData(getRefBookId(), getTableName(), recordId);
     }
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        // версионирования нет, только одна версия
-		return Arrays.asList(new Date[]{new Date(0)});
+        List<Date> list = new ArrayList<Date>();
+        list.add(new GregorianCalendar().getTime());
+        return list;
+    }
+
+	@Override
+	public RefBookValue getValue(Long recordId, Long attributeId) {
+		RefBook refBook = refBookDao.get(getRefBookId());
+		RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		return getRecordData(recordId).get(attribute.getAlias());
 	}
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        throw new UnsupportedOperationException();
+    public PagingResult<Map<String, RefBookValue>> getRecordVersions(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
     }
+
+	@Override
+	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		throw new UnsupportedOperationException();
+	}
 
     @Override
     public void insertRecords(Date version, List<Map<String, RefBookValue>> records) {
@@ -93,21 +109,18 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public RefBookValue getValue(Long recordId, Long attributeId) {
-        RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        RefBookAttribute attribute = refBook.getAttribute(attributeId);
-        return refBookDepartmentDao.getRecordData(recordId).get(attribute.getAlias());
-    }
-
-    @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
+		RefBookRecordVersion version = new RefBookRecordVersion();
+		version.setRecordId(uniqueRecordId);
+		Date d = new GregorianCalendar().getTime();
+		version.setVersionStart(d);
+		version.setVersionEnd(d);
+        return version;
     }
-
 
     @Override
     public int getRecordVersionsCount(Long refBookRecordId) {
-        throw new UnsupportedOperationException();
+        return 1;
     }
 
     @Override
@@ -117,7 +130,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long recordId) {
-        throw new UnsupportedOperationException();
+        return new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
     }
 
     @Override
@@ -142,6 +155,37 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public Long getRecordId(Long uniqueRecordId) {
-        throw new UnsupportedOperationException();
+        return uniqueRecordId;
     }
+
+	public Long getRefBookId() {
+		if (refBookId == null) {
+			throw new IllegalArgumentException("Field \"refBookId\" must be set");
+		}
+		return refBookId;
+	}
+
+	public void setRefBookId(Long refBookId) {
+		this.refBookId = refBookId;
+	}
+
+	public String getTableName() {
+		if (StringUtils.isEmpty(tableName)) {
+			throw new IllegalArgumentException("Field \"tableName\" must be set");
+		}
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public String getWhereClause() {
+		return whereClause;
+	}
+
+	public void setWhereClause(String whereClause) {
+		this.whereClause = whereClause;
+	}
+
 }
