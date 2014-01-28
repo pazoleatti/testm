@@ -1,20 +1,81 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+			 xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
     <ui:style>
-        .title {
-            font-size: 16px;
-            margin: 10px;
+        .header {
+            font-size: 14px;
+            color:  #636460;
+        }
+
+        .btnPanel {
+            padding-left: 7px;
+            height: 30px;
+        }
+
+        .btnPanel td {
+            vertical-align: middle !important;
+        }
+
+        .table {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 75px;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 4px 9px;
+            border-top: 1px solid #aeaeac;
         }
     </ui:style>
-    <g:FlowPanel>
-        <g:HorizontalPanel>
-            <g:Label styleName="{style.title}">Список шаблонов деклараций</g:Label>
-            <g:FlowPanel width="100%" ui:field="filterContentPanel" />
-        </g:HorizontalPanel>
-        <g:VerticalPanel width="100%">
-            <style:GenericCellTable ui:field="declarationTemplateTable" width="100%" />
-        </g:VerticalPanel>
-    </g:FlowPanel>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <g:Label text="Настройка макетов" addStyleNames="{style.header}"/>
+                            <g:Label text="—" addStyleNames="{style.header}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar childValign="middle" height="100%">
+
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label text="Список макетов деклараций"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <g:FlowPanel width="100%" ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <!--Панель кнопок-->
+                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                    <style:LeftBar childValign="middle" marginRight="9">
+                        <g:Button ui:field="create" text="Создать макет"/>
+                        <g:Button ui:field="delete" text="Удалить макет"/>
+                    </style:LeftBar>
+                </g:HorizontalPanel>
+
+                <g:ScrollPanel addStyleNames="{style.table}">
+                    <style:GenericCellTable ui:field="declarationTemplateTable" width="100%" height="100%"/>
+                </g:ScrollPanel>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>
