@@ -307,6 +307,16 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        for (Long uniqueRecordId : uniqueRecordIds) {
+            Long recordId = refBookDao.getRecordId(uniqueRecordId);
+            crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionEnd, null, null),
+                    versionEnd, null, logger);
+            refBookDao.createRecordVersion(refBookId, recordId, addDayToDate(versionEnd, 1), VersionedObjectStatus.FAKE, null);
+        }
+    }
+
+    @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
             boolean isReferenceToVersionExists = refBookDao.isVersionUsed(uniqueRecordIds);
