@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.DeleteFormTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.DeleteFormTypeResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -27,6 +28,9 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService securityService;
+
     public DeleteFormTypeHandler() {
         super(DeleteFormTypeAction.class);
     }
@@ -35,7 +39,7 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
     public DeleteFormTypeResult execute(DeleteFormTypeAction action, ExecutionContext context) throws ActionException {
         DeleteFormTypeResult result = new DeleteFormTypeResult();
         Logger logger = new Logger();
-        mainOperatingService.deleteTemplate(action.getFormTypeId(), logger);
+        mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo().getUser());
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
