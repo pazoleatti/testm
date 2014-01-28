@@ -309,6 +309,10 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         for (Long uniqueRecordId : uniqueRecordIds) {
+            List<Long> relatedVersions = refBookDao.getRelatedVersions(uniqueRecordIds);
+            if (!relatedVersions.isEmpty() && relatedVersions.size() > 1) {
+                refBookDao.deleteRecordVersions(relatedVersions);
+            }
             Long recordId = refBookDao.getRecordId(uniqueRecordId);
             crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionEnd, null, null),
                     versionEnd, null, logger);
