@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -11,47 +10,33 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Универсальный провайдер данных для справочников, хранящихся в отдельных таблицах. Только для чтения и без версионирования.
+ * <p>
+ * Абстрактный класс для провайдеров данных справочников. Предназначен для справочников без возможности редактирования,
+ * и, следовательно, без версионирования и содержащий только одну версию. В качестве версии (даты начала актуальности)
+ * каждый раз возвращается "01.01.1970".
+ * </p>
+ * <p>
+ * Реализует базовые методы для чтения данных плоского справочника. Вся специфика определяется в классах наследниках.
+ * В методах, которые относятся к API редактирования выбрасываются исключения {@link UnsupportedOperationException}.
+ * </p>
+ * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
+ * @since 29.01.14 17:11
  */
-@Service("refBookSimple")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Transactional
-public class RefBookSimple implements RefBookDataProvider {
+public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
 	/** Код справочника */
-    public Long refBookId;
-
-	/** Название таблицы для запроса данных*/
-	private String tableName;
-
-	/** Дополнительная фильтрация выборки */
-	private String whereClause;
+    private Long refBookId;
 
     @Autowired
     RefBookDao refBookDao;
-
-	@Autowired
-	private RefBookUtils refBookUtils;
-
-	@Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
-			RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
-    }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
@@ -60,14 +45,9 @@ public class RefBookSimple implements RefBookDataProvider {
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(Long recordId) {
-		return refBookUtils.getRecordData(getRefBookId(), getTableName(), recordId);
-    }
-
-    @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
         List<Date> list = new ArrayList<Date>();
-        list.add(new GregorianCalendar().getTime());
+        list.add(new Date(0));
         return list;
     }
 
@@ -112,7 +92,7 @@ public class RefBookSimple implements RefBookDataProvider {
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
 		RefBookRecordVersion version = new RefBookRecordVersion();
 		version.setRecordId(uniqueRecordId);
-		Date d = new GregorianCalendar().getTime();
+		Date d = new Date(0);
 		version.setVersionStart(d);
 		version.setVersionEnd(d);
         return version;
@@ -173,24 +153,4 @@ public class RefBookSimple implements RefBookDataProvider {
 	public void setRefBookId(Long refBookId) {
 		this.refBookId = refBookId;
 	}
-
-	public String getTableName() {
-		if (StringUtils.isEmpty(tableName)) {
-			throw new IllegalArgumentException("Field \"tableName\" must be set");
-		}
-		return tableName;
-	}
-
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
-	public String getWhereClause() {
-		return whereClause;
-	}
-
-	public void setWhereClause(String whereClause) {
-		this.whereClause = whereClause;
-	}
-
 }

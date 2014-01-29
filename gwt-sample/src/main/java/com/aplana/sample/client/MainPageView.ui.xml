@@ -17,5 +17,11 @@
 			<g:cell><aplana:SimpleDatePicker precision="MONTH" enabled="false"/></g:cell>
 			<g:cell><aplana:SimpleDatePicker precision="YEAR" enabled="false"/></g:cell>
 		</g:VerticalPanel>
+		<g:HorizontalPanel>
+			<g:cell><aplana:AplanaTextBox /></g:cell>
+			<g:cell><aplana:AplanaTextBox enabled="false"/></g:cell>
+			<g:cell><aplana:AplanaTextBox ui:field="enabledTextBox" /></g:cell>
+			<g:cell><aplana:AplanaTextBox enabled="false" ui:field="disabledTextBox"/></g:cell>
+		</g:HorizontalPanel>
 	</g:HTMLPanel>
 </ui:UiBinder>
