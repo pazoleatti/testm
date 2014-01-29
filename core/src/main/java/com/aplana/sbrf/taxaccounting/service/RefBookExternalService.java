@@ -7,15 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import java.io.InputStream;
 
 public interface RefBookExternalService {
-	
-	/**
-	 * Импортирует данные справочника
-	 * 
-	 * @param refBookId код справочника
-	 * @return
-	 */
-	public void importRefBook(TAUserInfo userInfo, Logger logger, Long refBookId, InputStream is) throws ServiceLoggerException;
-	
 	/**
 	 * Ворк эраунд
 	 * http://jira.aplana.com/browse/SBRFACCTAX-3841
