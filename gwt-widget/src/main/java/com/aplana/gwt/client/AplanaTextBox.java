@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.TextBox;
  * TextBox, который в задимсабленном состоянии показывает Label.
  * @author Vitaliy Samolovskikh
  */
-public class AplanaTextBox extends DoubleStateWrapper<String> {
+public class AplanaTextBox extends DoubleStateWrapper<TextBox, String> {
 	public AplanaTextBox() {
 		super(new TextBox());
 	}

@@ -61,21 +61,24 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 		} else {
 			// Show the label
 			if (this instanceof HasValue) {
-				Object value = ((HasValue) this).getValue();
-				String stringValue;
-				if (value == null) {
-					stringValue = EMPTY_STRING_VALUE;
-				} else {
-					stringValue = value.toString();
-					if (stringValue.trim().isEmpty()) {
-						stringValue = EMPTY_STRING_VALUE;
-					}
-				}
-				label.setText(stringValue);
+				setLabelValue(((HasValue) this).getValue());
 			}
 			deckPanel.showWidget(1);
 		}
 
 		this.enabled = enabled;
+	}
+
+	protected void setLabelValue(Object value){
+		String stringValue;
+		if (value == null) {
+			stringValue = EMPTY_STRING_VALUE;
+		} else {
+			stringValue = value.toString();
+			if (stringValue.trim().isEmpty()) {
+				stringValue = EMPTY_STRING_VALUE;
+			}
+		}
+		label.setText(stringValue);
 	}
 }

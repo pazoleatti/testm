@@ -214,6 +214,7 @@ public class Spinner extends DoubleStateComposite
 		} else if (maxValue < value) {
 			this.value = maxValue;
 		}
+		setLabelValue(value);
 		textBox.setValue(String.valueOf(this.value));
 	}
 
