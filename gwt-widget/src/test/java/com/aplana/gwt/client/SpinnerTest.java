@@ -38,7 +38,10 @@ public class SpinnerTest extends GWTTestCase {
 		Spinner spinner = new Spinner();
 
 		spinner.setMinValue(-100);
+		assertEquals(-100, spinner.getMinValue());
+
 		spinner.setMaxValue(100);
+		assertEquals(100, spinner.getMaxValue());
 
 		spinner.setValue(-1000);
 		assertEquals(Integer.valueOf(-100), spinner.getValue());

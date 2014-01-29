@@ -17,17 +17,12 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  *
  * @author Vitaliy Samolovskikh
  */
-public class Spinner extends Composite
-		implements HasValue<Integer>, HasValueChangeHandlers<Integer>, HasEnabled {
+public class Spinner extends DoubleStateComposite
+		implements HasValue<Integer>, HasValueChangeHandlers<Integer> {
 	/**
 	 * Название класса стиял для компонента.
 	 */
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "Spinner";
-
-	/**
-	 * Название стиля для задисабленных элементов. Это нужно для поддержки IE8.
-	 */
-	public static final String STYLE_DISABLED = "disabled";
 
 	/**
 	 * Высота виджета по умолчанию в пикселях.
@@ -98,9 +93,9 @@ public class Spinner extends Composite
 	 */
 	private void initLayout() {
 		// Инициализируем панель, как основной виджет компонента.
-		panel.setHeight(DEFAULT_HEIGHT + "px");
-		panel.setWidth(DEFAULT_WIDTH + "px");
 		initWidget(panel);
+		setHeight(DEFAULT_HEIGHT + "px");
+		setWidth(DEFAULT_WIDTH + "px");
 
 		// Устаналиваем текст слева.
 		panel.add(textBox);
@@ -257,36 +252,6 @@ public class Spinner extends Composite
 	public void fireEvent(GwtEvent<?> event) {
 		handlerHolder.fireEvent(event);
 		super.fireEvent(event);
-	}
-
-	/**
-	 * @return true если виджет активен, false если нет.
-	 */
-	@Override
-	public boolean isEnabled() {
-		return textBox.isEnabled();
-	}
-
-	/**
-	 * Активирует или деактивирует виджет.
-	 *
-	 * @param enabled true чтобы активировать виджет.
-	 */
-	@Override
-	public void setEnabled(boolean enabled) {
-		textBox.setEnabled(enabled);
-		incButton.setEnabled(enabled);
-		decButton.setEnabled(enabled);
-
-		if (enabled) {
-			textBox.removeStyleName(STYLE_DISABLED);
-			incButton.removeStyleName(STYLE_DISABLED);
-			decButton.removeStyleName(STYLE_DISABLED);
-		} else {
-			textBox.addStyleName(STYLE_DISABLED);
-			incButton.addStyleName(STYLE_DISABLED);
-			decButton.addStyleName(STYLE_DISABLED);
-		}
 	}
 
 	/**
