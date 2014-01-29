@@ -7,4 +7,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface HistoryBusinessUIHandler extends UiHandlers {
     void onRangeChange(final int start, int length);
+    void onPrintButtonClicked();
 }

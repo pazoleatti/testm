@@ -7,4 +7,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface AuditClientUIHandler extends UiHandlers {
     void onRangeChange(final int start, int length);
+    void onPrintButtonClicked();
+    void onArchiveButtonClicked();
 }

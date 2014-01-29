@@ -40,15 +40,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         AuditClientSearchEvent.fire(this);
     }
 
-    @Override
-    public void onPrintButtonClicked() {
-        AuditFilterPrintEvent.fire(this);
-    }
-
-    @Override
-    public void onArchiveButtonClicked() {
-        AuditClientArchiveEvent.fire(this);
-    }
 
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers>{

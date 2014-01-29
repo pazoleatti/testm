@@ -105,12 +105,12 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void calc() {
     // РНУ-5
     if (getFormDataRnu(317) == null) {
-        def ftRnu5 = formTemplateService.get(317);
+        def ftRnu5 = formTypeService.get(317);
         throw new ServiceException("Не найдены экземпляры «${ftRnu5.name}» за текущий отчетный период!")
     }
     // РНУ-6
     if (getFormDataRnu(318) == null) {
-        def ftRnu6 = formTemplateService.get(318);
+        def ftRnu6 = formTypeService.get(318);
         throw new ServiceException("Не найдены экземпляры «${ftRnu6.name}» за текущий отчетный период!")
     }
 
