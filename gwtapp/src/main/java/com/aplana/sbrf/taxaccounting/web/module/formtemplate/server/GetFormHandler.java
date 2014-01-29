@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormResult;
@@ -15,8 +14,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 /**
  * @author Vitalii Samolovskikh
@@ -45,9 +42,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
         FormTemplateExt formTemplateExt = new FormTemplateExt();
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId());
-        FormTemplate ftNext = formTemplateService.getNearestFTRight(formTemplate.getId());
-        formTemplateExt.setActualEndVersionDate(ftNext != null ?
-                new Date(ftNext.getVersion().getTime() - AdminConstants.oneDayMilliseconds) : null);
+        formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId()));
 		formTemplateService.lock(action.getId(), userInfo);
         formTemplateExt.setFormTemplate(formTemplate);
