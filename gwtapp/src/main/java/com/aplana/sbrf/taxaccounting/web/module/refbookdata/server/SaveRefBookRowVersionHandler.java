@@ -45,7 +45,7 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 		}
 		List<Map<String, RefBookValue>> valuesToSaveList = new ArrayList<Map<String, RefBookValue>>();
 		RefBookValue id = new RefBookValue(RefBookAttributeType.NUMBER, action.getRecordId());
-		valueToSave.put(RefBook.RECORD_UNIQUE_ID_ALIAS, id);
+		valueToSave.put(RefBook.RECORD_ID_ALIAS, id);
 		valuesToSaveList.add(valueToSave);
 
         SaveRefBookRowVersionResult result = new SaveRefBookRowVersionResult();

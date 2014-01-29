@@ -88,10 +88,10 @@ public class RefBookValueTest {
 	@Test
 	public void testRefObject() {
 		Map<String, RefBookValue> testRef = new HashMap<String, RefBookValue>();
-		testRef.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, TEST_REF));
+		testRef.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, TEST_REF));
 
 		Map<String, RefBookValue> wrongTestRef = new HashMap<String, RefBookValue>();
-		wrongTestRef.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, WRONG_TEST_REF));
+		wrongTestRef.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, WRONG_TEST_REF));
 
 		RefBookValue value = new RefBookValue(RefBookAttributeType.REFERENCE, testRef);
 		Assert.assertEquals(testRef, value.getReferenceObject());

@@ -143,17 +143,17 @@ public interface RefBookDataProvider {
     /**
      * Устанавливает дату окончания периода актуальности для указанных версий записей справочника
      * @param versionEnd задает дату окончания периода актуальности
-     * @param uniqueRecordIds список кодов обновляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
      */
     void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
     /**
      * Удаляет все версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
      */
     void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds);
     /**
      * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
 
@@ -194,7 +194,7 @@ public interface RefBookDataProvider {
     /**
      * Удаляет записи из справочника
      * @param version задает дату удаления данных
-     * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param recordIds список уникальных идентификаторов версий записей справочника
      *
      * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteRecordVersions}
      */

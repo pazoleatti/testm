@@ -44,7 +44,7 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         StringBuilder sql = new StringBuilder("SELECT id ");
-        sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
+        sql.append(RefBook.RECORD_ID_ALIAS);
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             sql.append(", ");
             sql.append(attribute.getAlias());

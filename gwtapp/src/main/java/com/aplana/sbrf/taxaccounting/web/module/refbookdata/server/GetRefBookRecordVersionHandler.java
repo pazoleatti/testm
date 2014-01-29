@@ -94,7 +94,7 @@ public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRef
                 }
                 RefBookDataRow tableRow = new RefBookDataRow();
 
-                Long recordId = record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
+                Long recordId = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
 
 
                 tableRow.setValues(tableRowData);

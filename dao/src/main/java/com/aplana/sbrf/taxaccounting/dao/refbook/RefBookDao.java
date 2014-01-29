@@ -276,7 +276,7 @@ public interface RefBookDao {
     Long getRecordId(Long uniqueRecordId);
     /**
      * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     void deleteRecordVersions(List<Long> uniqueRecordIds);
 
@@ -290,7 +290,7 @@ public interface RefBookDao {
     /**
      * Удаляет все версии записи из справочника
      * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
      */
     void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds);
 

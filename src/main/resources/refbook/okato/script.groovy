@@ -206,7 +206,7 @@ void importFromXML() {
                 addList.add(value)
                 if (actualName != null) {
                     // Если такой код ОКАТО уже был, то старая запись должна отметиться как удаленная
-                    delList.add(actualValue.get(RefBook.RECORD_UNIQUE_ID_ALIAS).numberValue)
+                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
             }
         }
@@ -217,7 +217,7 @@ void importFromXML() {
 
             if (actualValue != null) {
                 // Запись нашлась
-                delList.add(value.get(RefBook.RECORD_UNIQUE_ID_ALIAS).numberValue)
+                delList.add(value.get(RefBook.RECORD_ID_ALIAS).numberValue)
             }
         }
 
