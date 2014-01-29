@@ -1,5 +1,6 @@
 package com.aplana.sample.client;
 
+import com.aplana.gwt.client.AplanaTextBox;
 import com.aplana.gwt.client.SimpleDatePicker;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -20,9 +21,19 @@ public class MainPageView extends ViewImpl implements MainPagePresenter.MyView {
 	@UiField
 	SimpleDatePicker currentDate;
 
+	@UiField
+	AplanaTextBox enabledTextBox;
+
+	@UiField
+	AplanaTextBox disabledTextBox;
+
 	@Inject
 	public MainPageView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 		currentDate.setValue(new Date());
+
+		enabledTextBox.setValue("enabled");
+		disabledTextBox.setValue("disabled");
+		disabledTextBox.setEnabled(false);
 	}
 }
