@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -34,6 +36,18 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 
     @Override
     public void onConfirm() {
+	    StringBuilder errorMsg = new StringBuilder("Не заполнены обязательные атрибуты, необходимые для создания назначения: ");
+	    if (getView().getSelectedDepartments().isEmpty()) {
+			errorMsg.append("Подразделение; ");
+	    }
+	    if (getView().getSelectedDeclarationTypes().isEmpty()) {
+		    errorMsg.append("Вид декларации; ");
+	    }
+	    if (getView().getSelectedDepartments().isEmpty() || getView().getSelectedDeclarationTypes().isEmpty()) {
+		    Dialog.errorMessage("Ошибка", errorMsg.toString());
+		    return;
+	    }
+
 	    AddDeclarationSourceAction action = new AddDeclarationSourceAction();
 	    action.setTaxType(taxType);
 	    action.setDeclarationTypeId(getView().getSelectedDeclarationTypes());
@@ -49,7 +63,26 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 					    }, this));
     }
 
-    public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
+	@Override
+	public void onCancel() {
+		if (getView().getSelectedDepartments().isEmpty() && getView().getSelectedDeclarationTypes().isEmpty()) {
+			getView().hide();
+		} else {
+			Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
+				@Override
+				public void yes() {
+					onConfirm();
+				}
+				@Override
+				public void no() {
+					getView().hide();
+				}
+			});
+		}
+
+	}
+
+	public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
 		List<Integer> getSelectedDepartments();
 	    List<Integer> getSelectedDeclarationTypes();
 	    void setDepartments(List<Department> departments, Set<Integer> availableValues);
