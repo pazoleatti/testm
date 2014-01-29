@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import com.aplana.gwt.client.AplanaTextArea;
+import com.aplana.gwt.client.AplanaTextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -10,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.Departme
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -68,7 +69,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private boolean isReportPeriodActive = false;
 
     @UiField
-    TextBox inn,
+    AplanaTextBox inn,
             kpp,
             phone,
             taxOrganCode,
@@ -81,7 +82,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             formatVersion;
 
     @UiField
-    TextArea approveDocName,
+	AplanaTextArea approveDocName,
             approveOrgName;
 
     @UiField
@@ -103,7 +104,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             type;
 
     @UiField
-    TextArea name;
+    AplanaTextArea name;
 
     // Контейнер для справочника периодов
     @UiField
@@ -337,7 +338,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     /**
      * Выбранный тип налога
      *
-     * @return
+     * @return тип налога
      */
     private TaxType getSelectedTaxType() {
         if (taxType.getItemCount() != 0) {
@@ -366,8 +367,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     /**
      * Период по Map'е выбранных значений
      *
-     * @param periodsMap
-     * @return
+     * @param periodsMap TODO WTF???
+     * @return отчетный период
      */
     private ReportPeriod getReportPeriod(Map<Integer, ReportPeriod> periodsMap) {
         if (periodsMap != null && periodsMap.size() != 0) {
@@ -458,14 +459,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
      */
     private void enableAllChildren(boolean enable, Widget widget) {
         if (widget instanceof HasWidgets) {
-            Iterator<Widget> iter = ((HasWidgets) widget).iterator();
-            while (iter.hasNext()) {
-                Widget nextWidget = iter.next();
-                enableAllChildren(enable, nextWidget);
-                if (nextWidget instanceof HasEnabled) {
-                    ((HasEnabled) nextWidget).setEnabled(enable);
-                }
-            }
+			for (Widget nextWidget : ((HasWidgets) widget)) {
+				enableAllChildren(enable, nextWidget);
+				if (nextWidget instanceof HasEnabled) {
+					((HasEnabled) nextWidget).setEnabled(enable);
+				}
+			}
         }
     }
 

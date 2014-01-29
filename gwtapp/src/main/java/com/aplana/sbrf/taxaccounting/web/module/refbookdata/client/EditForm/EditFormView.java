@@ -65,14 +65,19 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (widgets != null) widgets.clear();
 		Map<RefBookColumn, HasValue> widgets = new HashMap<RefBookColumn, HasValue>();
 		for (RefBookColumn col : attributes) {
+
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
+
             Label label = getArrtibuteLabel(col);
-            label.setWordWrap(true);
-			HorizontalPanel panel = new HorizontalPanel();
-			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-			panel.setWidth("100%");
-			oneField.add(label);
+            label.getElement().getStyle().setProperty("lineHeight", "12px");
+            label.getElement().getStyle().setProperty("minWidth", "150px");
+            label.getElement().getStyle().setProperty("maxWidth", "250px");
+            oneField.add(label);
+            oneField.setCellWidth(label, "20%");
+            oneField.setCellHorizontalAlignment(label, HasHorizontalAlignment.ALIGN_RIGHT);
+            oneField.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
+
 			Widget widget;
 			switch (col.getAttributeType()) {
 				case NUMBER:
@@ -94,21 +99,29 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 			}
-            widget.setWidth("300px");
-			panel.add(widget);
-			HasValue hasValue = (HasValue)widget;
-			hasValue.addValueChangeHandler(new ValueChangeHandler() {
-				@Override
-				public void onValueChange(ValueChangeEvent event) {
-					if (event.getSource() instanceof UIObject) {
-						((UIObject) event.getSource()).setTitle(event.getValue().toString());
-					}
-					if (getUiHandlers() != null) {
-						getUiHandlers().valueChanged();
-					}
-				}
-			});
-			oneField.add(panel);
+
+            HasValue hasValue = (HasValue)widget;
+            hasValue.addValueChangeHandler(new ValueChangeHandler() {
+                @Override
+                public void onValueChange(ValueChangeEvent event) {
+                    if (event.getSource() instanceof UIObject) {
+                        ((UIObject) event.getSource()).setTitle(event.getValue().toString());
+                    }
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().valueChanged();
+                    }
+                }
+            });
+
+            widget.setWidth("100%");
+            widget.getElement().getStyle().setProperty("minWidth", "100px");
+            widget.getElement().getStyle().setProperty("maxWidth", "350px");
+
+            oneField.add(widget);
+            oneField.setCellWidth(widget, "80%");
+            oneField.setCellHorizontalAlignment(widget, HasHorizontalAlignment.ALIGN_LEFT);
+            oneField.setCellVerticalAlignment(widget, HasVerticalAlignment.ALIGN_MIDDLE);
+
 			editPanel.add(oneField);
 			widgets.put(col, (HasValue)widget);
 		}
@@ -280,7 +293,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         allVersion.setVisible(!isVersionMode);
         versionStart.setEnabled(isVersionMode);
         versionEnd.setEnabled(isVersionMode);
-        allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
+        allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
