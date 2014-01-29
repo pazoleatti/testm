@@ -44,8 +44,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
-        Date dbVersionEndDate = declarationTemplateService.getNearestDTRight(declarationTemplate.getId()) != null ?
-                new Date(declarationTemplateService.getNearestDTRight(declarationTemplate.getId()).getVersion().getTime() - ONE_DAY_MILLISECONDS) : null;
+        Date dbVersionEndDate = declarationTemplateService.getDTEndDate(declarationTemplate.getId());
         if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ||
                 dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(declarationTemplate.getVersion()) !=0 ){
             versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);
@@ -119,8 +118,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     @Override
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
         DeclarationTemplate template = declarationTemplateService.get(templateId);
-        DeclarationTemplate nearestDT = declarationTemplateService.getNearestDTRight(templateId);
-        Date dateEndActualize = nearestDT != null ? nearestDT.getVersion() : null;
+        Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
         versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
