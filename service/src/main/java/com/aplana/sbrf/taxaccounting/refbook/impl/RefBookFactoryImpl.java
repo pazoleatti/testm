@@ -22,10 +22,6 @@ import java.util.List;
 @Transactional
 public class RefBookFactoryImpl implements RefBookFactory {
 
-	public static final Long FORM_TYPE_REF_BOOK_ID = 93L;
-
-	private static final String FORM_TYPE_TABLE_NAME = "FORM_TYPE";
-
     @Autowired
     private RefBookDao refBookDao;
 
@@ -51,19 +47,23 @@ public class RefBookFactoryImpl implements RefBookFactory {
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
         if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
+            return applicationContext.getBean("refBNookDepartment", RefBookDataProvider.class);
         } else if (RefBookIncome101.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
         } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
         } else if (RefBookUser.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookUser", RefBookDataProvider.class);
-        } else if (FORM_TYPE_REF_BOOK_ID.equals(refBookId)) {
-			// учесть фильтр по статусу
-			RefBookSimple refBookSimple =  (RefBookSimple) applicationContext.getBean("refBookSimple", RefBookDataProvider.class);
-			refBookSimple.setRefBookId(FORM_TYPE_REF_BOOK_ID);
-			refBookSimple.setTableName(FORM_TYPE_TABLE_NAME);
+        } else if (RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Виды налоговых форм"
+			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_TYPE_TABLE_NAME);
 			refBookSimple.setWhereClause("STATUS = 0");
+			return refBookSimple;
+		} else if (RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Системные роли"
+			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
 			return refBookSimple;
 		} else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
