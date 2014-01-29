@@ -23,7 +23,7 @@ import java.util.*;
  * Провайдер данных для таблицы user
  * @author auldanov
  */
-@Service("RefBookUser")
+@Service("refBookUser")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookUser implements RefBookDataProvider {
@@ -117,6 +117,11 @@ public class RefBookUser implements RefBookDataProvider {
 
     @Override
     public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 

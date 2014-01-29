@@ -175,7 +175,7 @@ void calc() {
     def dataPrev = null
     if (!isMonthBalace()) {
         if (getFormDataPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
-            logger.error("Не найдены экземпляры ${formTemplateService.get(formData.formTemplateId).fullName} за прошлый отчетный период!")
+            logger.error("Не найдены экземпляры ${formTypeService.get(342).name} за прошлый отчетный период!")
         } else {
             dataPrev = getDataRowHelperPrev()
         }

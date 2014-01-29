@@ -123,6 +123,15 @@ public interface RefBookDao {
     void updateRecordVersion(Long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> records);
 
     /**
+     * Проверяет существование версии записи справочника
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор записи справочника без учета версий
+     * @param version версия записи справочника
+     * @return
+     */
+    boolean isVersionExist(Long refBookId, Long recordId, Date version);
+
+    /**
      * Проверка и поиск Id записи по:
      * @param refBookId Id справочника
      * @param version Версия

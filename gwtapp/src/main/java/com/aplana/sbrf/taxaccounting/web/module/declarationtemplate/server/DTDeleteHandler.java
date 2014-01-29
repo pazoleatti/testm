@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DTDeleteResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -27,6 +28,9 @@ public class DTDeleteHandler extends AbstractActionHandler<DTDeleteAction, DTDel
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService securityService;
+
     public DTDeleteHandler() {
         super(DTDeleteAction.class);
     }
@@ -35,7 +39,7 @@ public class DTDeleteHandler extends AbstractActionHandler<DTDeleteAction, DTDel
     public DTDeleteResult execute(DTDeleteAction action, ExecutionContext context) throws ActionException {
         DTDeleteResult result = new DTDeleteResult();
         Logger logger = new Logger();
-        mainOperatingService.deleteTemplate(action.getDtTypeId(), logger);
+        mainOperatingService.deleteTemplate(action.getDtTypeId(), logger, securityService.currentUserInfo().getUser());
         if (!logger.getEntries().isEmpty())
             result.setLogEntriesUuid(logEntryService.save(logger.getEntries()));
         return result;

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
-import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeleteDTVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeleteDTVersionResult;
@@ -34,9 +33,6 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
     private LogEntryService logEntryService;
 
     @Autowired
-    private TemplateChangesService templateChangesService;
-
-    @Autowired
     private SecurityService securityService;
 
 
@@ -48,7 +44,7 @@ public class DeleteDTVersionHandler extends AbstractActionHandler<DeleteDTVersio
     public DeleteDTVersionResult execute(DeleteDTVersionAction action, ExecutionContext context) throws ActionException {
         DeleteDTVersionResult result = new DeleteDTVersionResult();
         Logger logger = new Logger();
-        mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), null, logger);
+        mainOperatingService.deleteVersionTemplate(action.getDeclarationTemplateId(), null, logger, securityService.currentUserInfo().getUser());
         result.setLogEntryUuid(logEntryService.save(logger.getEntries()));
 
         TemplateChanges changes = new TemplateChanges();

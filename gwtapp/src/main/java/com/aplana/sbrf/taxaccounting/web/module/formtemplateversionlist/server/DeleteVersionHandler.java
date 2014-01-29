@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.DeleteVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.DeleteVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -28,6 +29,9 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private SecurityService  securityService;
+
 
     public DeleteVersionHandler() {
         super(DeleteVersionAction.class);
@@ -37,7 +41,7 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
     public DeleteVersionResult execute(DeleteVersionAction action, ExecutionContext context) throws ActionException {
         Logger logger = new Logger();
         DeleteVersionResult result = new DeleteVersionResult();
-        mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), null, logger);
+        mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), null, logger, securityService.currentUserInfo().getUser());
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;

@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class RefBookUtils extends AbstractDao {
 	 * Формирует простой sql-запрос по принципу: один справочник - одна таблица
 	 */
 	public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
-			String filter, PagingParams pagingParams, boolean isSortAscending) {
+			String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
 		PreparedStatementData ps = new PreparedStatementData();
 		ps.appendQuery("SELECT ");
 		ps.appendQuery("id ");
@@ -49,7 +50,8 @@ public class RefBookUtils extends AbstractDao {
 		}
 		ps.appendQuery(" FROM (SELECT ");
 		if (isSupportOver()) {
-			String sortColumn = sortAttribute == null ? "id" : sortAttribute.getAlias();
+			RefBookAttribute defaultSort = refBook.getSortAttribute();
+			String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
             String sortDirection = isSortAscending ? "ASC" : "DESC";
 			ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
 		} else {
@@ -72,6 +74,15 @@ public class RefBookUtils extends AbstractDao {
 				ps.addParam(filterPS.getParams());
 			}
 		}
+		if (whereClause != null && whereClause.trim().length() > 0) {
+			if (filterPS.getQuery().length() > 0) {
+				ps.appendQuery(" AND ");
+			} else {
+				ps.appendQuery(" WHERE ");
+			}
+			ps.appendQuery(whereClause);
+		}
+
 		ps.appendQuery(")");
 		if (pagingParams != null) {
 			ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
@@ -81,8 +92,8 @@ public class RefBookUtils extends AbstractDao {
 		return ps;
 	}
 
-    public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams) {
-        return getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, true);
+    public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause) {
+        return getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, true, whereClause);
     }
 
 	/**
@@ -92,17 +103,18 @@ public class RefBookUtils extends AbstractDao {
 	 * @param pagingParams
 	 * @param filter
 	 * @param sortAttribute
+	 * @param whereClause дополнительный фильтр для секции WHERE
 	 * @return
 	 */
 	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+			String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
 		RefBook refBook = refBookDao.get(refBookId);
 		// получаем страницу с данными
-		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending);
+		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
 		List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
 		// получаем информацию о количестве всех записей с текущим фильтром
-		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending);
+		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
 		result.setTotalCount(getRecordsCount(ps));
 		return result;
 	}
@@ -115,10 +127,12 @@ public class RefBookUtils extends AbstractDao {
      * @param pagingParams
      * @param filter
      * @param sortAttribute
+	 * @param whereClause
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return getRecords(refBookId, tableName, pagingParams, filter, sortAttribute, true);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+			String filter, RefBookAttribute sortAttribute, String whereClause) {
+        return getRecords(refBookId, tableName, pagingParams, filter, sortAttribute, true, whereClause);
     }
 
 	/**
@@ -164,5 +178,21 @@ public class RefBookUtils extends AbstractDao {
 
         return errors;
     }
+
+	public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long recordId) {
+		RefBook refBook = refBookDao.get(refBookId);
+		StringBuilder sql = new StringBuilder("SELECT id ");
+		sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
+		for (RefBookAttribute attribute : refBook.getAttributes()) {
+			sql.append(", ");
+			sql.append(attribute.getAlias());
+		}
+		sql.append(" FROM ");
+		sql.append(tableName);
+		sql.append(" WHERE id = :id");
+		Map<String, Long> params = new HashMap<String, Long>();
+		params.put("id", recordId);
+		return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+	}
 
 }

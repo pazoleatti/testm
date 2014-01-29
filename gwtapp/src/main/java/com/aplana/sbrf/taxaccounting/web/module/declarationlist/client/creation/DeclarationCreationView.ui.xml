@@ -32,7 +32,7 @@
                 </g:FlowPanel>
                 
                 <g:FlowPanel height="60px">
-                    <g:Label text="Отчетный период" />
+                    <g:Label text="Период" />
                      <rep:PeriodPickerPopupWidget width="400px" ui:field="periodPicker" multiselect="false"/>
                 </g:FlowPanel>
 

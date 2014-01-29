@@ -126,7 +126,7 @@ public interface RefBookDataProvider {
     /**
      * Возвращает значения уникальных атрибутов для конкретной версии записи справочника
      * @param uniqueRecordId идентификатор версии записи
-     * @return
+     * @return not null всегда - ожидается возврат результата
      */
     List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
 
@@ -139,6 +139,13 @@ public interface RefBookDataProvider {
      * @param records список обновленных значений атрибутов записи справочника
      */
     void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
+
+    /**
+     * Устанавливает дату окончания периода актуальности для указанных версий записей справочника
+     * @param versionEnd задает дату окончания периода актуальности
+     * @param uniqueRecordIds список кодов обновляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}
+     */
+    void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
     /**
      * Удаляет все версии записи из справочника
      * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_UNIQUE_ID_ALIAS Код записи}

@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +63,9 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        // В справочнике департментов нет версий там всегда актуальная информация, по крайне мере на текущий момент
-        List<Date> result = new ArrayList<Date>(1);
-        result.add(new Date(0));
-        return result;
-    }
+        // версионирования нет, только одна версия
+		return Arrays.asList(new Date[]{new Date(0)});
+	}
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
@@ -124,6 +122,11 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 

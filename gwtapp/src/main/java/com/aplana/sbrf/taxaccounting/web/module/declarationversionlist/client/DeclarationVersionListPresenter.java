@@ -71,10 +71,16 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
 
     @Override
     public void onHistoryClick() {
-        versionHistoryPresenter.initHistory(
-                Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationType, "")),
-                VersionHistoryPresenter.TemplateType.DECLARATION);
-        addToPopupSlot(versionHistoryPresenter);
+        GetDTHistoryAction action = new GetDTHistoryAction();
+        action.setTypeId(Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationType, "")));
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDTHistoryResult>() {
+            @Override
+            public void onSuccess(GetDTHistoryResult result) {
+                versionHistoryPresenter.initHistory(result.getTemplateChangesExts());
+                addToPopupSlot(versionHistoryPresenter);
+            }
+        }, this));
+
     }
 
 

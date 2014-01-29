@@ -1,5 +1,5 @@
 
-create table OKTMO (
+create table REF_BOOK_OKTMO (
   id number(18) not null,
   code varchar2(4000) not null,
   name varchar2(4000) not null,
@@ -7,13 +7,13 @@ create table OKTMO (
   version date not null,
   status number(1) not null 
 );
-comment on table OKTMO is 'ОКТМО';
-comment on column OKTMO.id is 'Идентификатор записи';
-comment on column OKTMO.code is 'Код';
-comment on column OKTMO.name is 'Наименование';
-comment on column OKTMO.parent_id is 'Идентификатор родительской записи';
-comment on column OKTMO.version is 'Версия. Дата актуальности записи';
-comment on column OKTMO.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+comment on table REF_BOOK_OKTMO is 'ОКТМО';
+comment on column REF_BOOK_OKTMO.id is 'Идентификатор записи';
+comment on column REF_BOOK_OKTMO.code is 'Код';
+comment on column REF_BOOK_OKTMO.name is 'Наименование';
+comment on column REF_BOOK_OKTMO.parent_id is 'Идентификатор родительской записи';
+comment on column REF_BOOK_OKTMO.version is 'Версия. Дата актуальности записи';
+comment on column REF_BOOK_OKTMO.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 --------------------------------------------------------------------------------------------------------------
 
 create table configuration (
@@ -125,7 +125,7 @@ create table ref_book (
   script_id varchar2(36),
   visible number(1) default 1 not null,
   type number(1) default 0 not null,
-  editable  number(1) default 1 not null
+  read_only number(1) default 0 not null
 );
 
 comment on table ref_book is 'Справочник';
@@ -134,7 +134,7 @@ comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
 comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
-comment on column ref_book.editable is 'Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю)';
+comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -149,7 +149,8 @@ create table ref_book_attribute (
   precision number(2),
   width number(9) default 15 not null,
   required number(1) default 0 not null,
-  is_unique number(1) default 0 not null
+  is_unique number(1) default 0 not null,
+  sort_order number(9)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -165,6 +166,7 @@ comment on column ref_book_attribute.precision is 'Точность, колич�
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
+comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -399,12 +401,12 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
-  print_department_id number(9) not null,
+  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
   return_sign number(1) not null,
-  period_order number(2),
+  period_order number(2)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
@@ -11,8 +10,6 @@ import java.util.List;
 public class FormTemplateContent {
 	@XmlElement
 	private FormType type;
-	@XmlElement
-	private Date version;
 	@XmlElement
 	private boolean numberedColumns;
 	@XmlElement
@@ -30,7 +27,6 @@ public class FormTemplateContent {
 
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
 		this.type = formTemplate.getType();
-		this.version = formTemplate.getVersion();
 		this.numberedColumns = formTemplate.isNumberedColumns();
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
@@ -42,7 +38,6 @@ public class FormTemplateContent {
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
 		formTemplate.setType(type);
-		formTemplate.setVersion(version);
 		formTemplate.setNumberedColumns(numberedColumns);
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);

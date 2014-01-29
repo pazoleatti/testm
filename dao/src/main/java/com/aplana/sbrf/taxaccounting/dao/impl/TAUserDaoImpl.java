@@ -48,7 +48,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			TAUser result = new TAUser();
 			result.setId(rs.getInt("id"));
 			result.setName(rs.getString("name"));
-			result.setActive(rs.getInt("is_active")==1?true:false);
+			result.setActive(rs.getInt("is_active") == 1);
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setLogin(rs.getString("login"));
 			result.setEmail(rs.getString("email"));
@@ -83,7 +83,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
-		
 	}
 	
 	private void initUser(TAUser user) {
@@ -334,5 +333,14 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-
+	/**
+	 * Проверяет, есть ли пользователь с таким логином.
+	 *
+	 * @param login проверяемый логин пользователя
+	 * @return true если пользователь с таким логином есть, false если нет
+	 */
+	@Override
+	public boolean existsUser(String login) {
+		return getJdbcTemplate().queryForInt("select count(id) from sec_user where lower(login) = ?", login) == 1;
+	}
 }

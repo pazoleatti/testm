@@ -1,6 +1,6 @@
-package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared;
+package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared;
 
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.TemplateChangesExt;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * User: avanteev
  */
-public class GetVersionHistoryResult implements Result {
+public class GetFTVersionHistoryResult implements Result {
     private List<TemplateChangesExt> changeses;
 
     public List<TemplateChangesExt> getChangeses() {

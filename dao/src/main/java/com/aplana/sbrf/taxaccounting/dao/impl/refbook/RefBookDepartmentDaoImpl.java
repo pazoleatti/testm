@@ -23,34 +23,21 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
 	private static final String TABLE_NAME = "DEPARTMENT";
 
-    @Autowired
-    private RefBookDao refBookDao;
-
 	@Autowired
 	private RefBookUtils refBookUtils;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending);
+		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, true);
+        return getRecords(pagingParams, filter, sortAttribute, true);
     }
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        StringBuilder sql = new StringBuilder("SELECT id ");
-        sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            sql.append(", ");
-            sql.append(attribute.getAlias());
-        }
-        sql.append(" FROM department WHERE id = :id");
-        Map<String, Long> params = new HashMap<String, Long>();
-        params.put("id", recordId);
-        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+		return refBookUtils.getRecordData(REF_BOOK_ID, TABLE_NAME, recordId);
     }
 }

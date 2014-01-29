@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.pager;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.resources.client.ClientBundle;
@@ -29,6 +27,7 @@ import com.google.gwt.view.client.Range;
  * <h3>Example</h3>
  * {@example com.google.gwt.examples.cellview.SimplePagerExample}
  * </p>
+ * TODO aivanov 28.01.14 Класс слишком большой, нужно вынести внутренние интерфейсы в отдельыне классы, и вообще лучше определить через ui.xml
  */
 public class FlexiblePager extends AbstractPager {
 	/**
@@ -200,13 +199,7 @@ public class FlexiblePager extends AbstractPager {
 			}
 
 			this.disabled = isDisabled;
-			if (disabled) {
-				setResource(resDisabled);
-				getElement().getParentElement().addClassName(styleDisabled);
-			} else {
-				setResource(resEnabled);
-				getElement().getParentElement().removeClassName(styleDisabled);
-			}
+            setResource(disabled ? resDisabled : resEnabled);
 			Roles.getButtonRole().setAriaDisabledState(getElement(), disabled);
 		}
 	}
@@ -237,13 +230,14 @@ public class FlexiblePager extends AbstractPager {
     private final HTML rightLabel = new HTML();
     private final IntegerBox rowsCountOnPage = new IntegerBox();
     private String type;
+    private HorizontalPanel layout;
 
 	private final ImageButton lastPage;
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
 
-    //private static final int MAX_ROWS_COUNT_ON_PAGE = 100;
     private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int DEFAULT_SPACING = 3;
 
 	/**
 	 * The {@link Resources} used by this widget.
@@ -383,7 +377,8 @@ public class FlexiblePager extends AbstractPager {
 		}
 
 		// Construct the widget.
-		HorizontalPanel layout = new HorizontalPanel();
+		layout = new HorizontalPanel();
+        layout.setSpacing(3);
 		layout.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         layout.getElement().setClassName(style.panel());
 		initWidget(layout);
@@ -408,26 +403,16 @@ public class FlexiblePager extends AbstractPager {
 		}
 
 		// Add style names to the cells.
-		firstPage.getElement().getParentElement().addClassName(style.button());
 		firstPage.getElement().addClassName(style.button());
-
-		prevPage.getElement().getParentElement().addClassName(style.button());
 		prevPage.getElement().addClassName(style.button());
-
-		middleLeftLabel.getElement().getParentElement().addClassName(style.pageDetails());
 		pageNumber.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
-        pageNumber.getElement().getParentElement().addClassName(style.pageNumber());
-		middleRightLabel.getElement().getParentElement().addClassName(style.pageDetails());
-		leftLabel.getElement().getParentElement().addClassName(style.pageDetails());
-		nextPage.getElement().getParentElement().addClassName(style.button());
+		middleRightLabel.getElement().addClassName(style.pageDetails());
 		nextPage.getElement().addClassName(style.button());
 
 		if (showFastForwardButton) {
-			fastForward.getElement().getParentElement().addClassName(style.button());
 			fastForward.getElement().addClassName(style.button());
 		}
 		if (showLastPageButton) {
-			lastPage.getElement().getParentElement().addClassName(style.buttonLastPage());
 			lastPage.getElement().addClassName(style.button());
 		}
 
@@ -452,15 +437,7 @@ public class FlexiblePager extends AbstractPager {
         layout.add(rightLabel);
         layout.add(rowsCountOnPage);
 
-        rightLabel.getElement().getParentElement().addClassName(style.pageDetails());
         rowsCountOnPage.getElement().getStyle().setWidth(3, com.google.gwt.dom.client.Style.Unit.EM);
-        rowsCountOnPage.getElement().getParentElement().addClassName(style.rowsCountOnPage());
-        rowsCountOnPage.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Integer> event) {
-                updateRowsCountOnPage();
-            }
-        });
         rowsCountOnPage.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -593,11 +570,35 @@ public class FlexiblePager extends AbstractPager {
 	public void setPageSize(int pageSize) {
         if (pageSize < 1) {
             pageSize = getPageSize();
-        }/* else if (pageSize > MAX_ROWS_COUNT_ON_PAGE) {
-            pageSize = MAX_ROWS_COUNT_ON_PAGE;
-        }*/
+        }
 		super.setPageSize(pageSize);
 	}
+
+    /**
+     * Показывать только надпись "Показано: 1-xx из xx" или показывать весть пейджинг
+     * @param visible true - всё, false - только надпись
+     */
+    public void isCanEditPage(boolean visible) {
+        layout.setSpacing(visible ? DEFAULT_SPACING : 0);
+        isVisibleLayoutChild(firstPage, visible);
+        isVisibleLayoutChild(prevPage, visible);
+        isVisibleLayoutChild(middleLeftLabel, visible);
+        isVisibleLayoutChild(pageNumber, visible);
+        isVisibleLayoutChild(middleRightLabel, visible);
+        isVisibleLayoutChild(nextPage, visible);
+        //isVisibleLayoutChild(fastForward, visible);
+        isVisibleLayoutChild(lastPage, visible);
+        isVisibleLayoutChild(rightLabel, visible);
+        isVisibleLayoutChild(rowsCountOnPage, visible);
+    }
+
+    private void isVisibleLayoutChild(Widget childInLayout, boolean visible){
+        getStyleParentWidget(childInLayout).setProperty("display", visible ? "table-cell" : "none");
+    }
+
+    private com.google.gwt.dom.client.Style getStyleParentWidget(Widget childInLayout){
+        return childInLayout.getElement().getParentElement().getStyle();
+    }
 
 	/**
 	 * Let the page know that the table is loading. Call this method to clear all
@@ -626,7 +627,7 @@ public class FlexiblePager extends AbstractPager {
 		boolean exact = display.isRowCountExact();
 
 		leftLabel.setHTML(templates.leftLabel(startIntex + "-" + endIndex, display.getRowCount()));
-		middleLeftLabel.setText("Страница ");
+		middleLeftLabel.setText("Страница: ");
 		pageNumber.setValue(page);
 		middleRightLabel.setText((exact ? " из " : " более ") + pageCount);
         setPageSize(range.getLength());
@@ -677,12 +678,8 @@ public class FlexiblePager extends AbstractPager {
 		}
 		if (disabled) {
 			fastForward.setResource(resources.flexiblePagerFastForwardDisabled());
-			fastForward.getElement().getParentElement().addClassName(
-					style.disabledButton());
 		} else {
 			fastForward.setResource(resources.flexiblePagerFastForward());
-			fastForward.getElement().getParentElement().removeClassName(
-					style.disabledButton());
 		}
 	}
 
