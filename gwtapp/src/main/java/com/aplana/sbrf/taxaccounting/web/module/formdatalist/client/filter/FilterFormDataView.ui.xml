@@ -45,7 +45,7 @@
                     <g:cell>
                         <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
                             <g:Label text="Подразделение: " ui:field="departmentPickerLbl"/>
-                            <g:Label text="Отчетный период: " ui:field="reportPeriodIdsLbl"/>
+                            <g:Label text="Период: " ui:field="reportPeriodIdsLbl"/>
                         </g:VerticalPanel>
                     </g:cell>
                     <g:cell width="25%">

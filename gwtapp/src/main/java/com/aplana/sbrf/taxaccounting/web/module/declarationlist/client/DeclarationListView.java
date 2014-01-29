@@ -221,7 +221,7 @@ public class DeclarationListView extends
 	private void setSortByColumn(String sortByColumn){
 		if ("Подразделение".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DEPARTMENT_NAME;
-		} else if ("Отчетный период".equals(sortByColumn)){
+		} else if ("Период".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
 		} else if("Вид декларации".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;

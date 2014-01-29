@@ -85,7 +85,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void closePeriod() {
         if (getView().getSelectedRow() == null) {
-            MessageEvent.fire(this, "В списке не выбран отчетный период");
+            MessageEvent.fire(this, "В списке не выбран период");
             return;
         }
         if (!getView().getSelectedRow().isSubHeader()) {
@@ -138,7 +138,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
     @Override
     public void setDeadline() {
         if (getView().getSelectedRow() == null) {
-            MessageEvent.fire(this, "В списке не выбран отчетный период");
+            MessageEvent.fire(this, "В списке не выбран период");
             return;
         }
         final DepartmentPair departmentPair = getView().getDepartmentId();

@@ -128,6 +128,14 @@ public interface DeclarationTemplateService {
     DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status);
 
     /**
+     * Получает дату окончания макета. Расчет осуществляется путем поиска
+     * версии макета ближайшей "справа" по дате.
+     * @param declarationTemplateId идентификатор макета декларации
+     * @return дата окончания актуальности макета
+     */
+    Date getDTEndDate(int declarationTemplateId);
+
+    /**
      * Возвращает количество версий для вида шаблона
      * @param typeId идентификатор вида шаблона
      * @param status статусы
