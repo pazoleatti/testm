@@ -70,6 +70,8 @@ public class TaxFormNominationPresenter
         TaxType getTaxType();
 
         List<Integer> getDepartments();
+
+	    List<FormTypeKind> getSelectedItems();
     }
 
     protected final FormDestinationsPresenter formDestinationsPresenter;
@@ -206,7 +208,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickEditDeclarationDestination(DeclarationDestinationsDialogOpenEvent event) {
-        declarationDestinationsPresenter.initAndShowDialog(this);
+        declarationDestinationsPresenter.initAndShowDialog(this, this);
     }
 
     @Override
@@ -216,6 +218,20 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickOpenDeclarationDestinations() {
-        DeclarationDestinationsDialogOpenEvent.fire(this);
+	    declarationDestinationsPresenter.initAndShowDialog(this, this);
     }
+
+	@Override
+	public void onClickDeclarationCancelAnchor() {
+		DeleteDeclarationSourcesAction action = new DeleteDeclarationSourcesAction();
+		action.setKind(getView().getSelectedItems());
+		dispatcher.execute(action,
+				CallbackUtils.defaultCallback(
+						new AbstractCallback<DeleteDeclarationSourcesResult>() {
+							@Override
+							public void onSuccess(DeleteDeclarationSourcesResult result) {
+								reloadDeclarationTableData();
+							}
+						}, this));
+	}
 }

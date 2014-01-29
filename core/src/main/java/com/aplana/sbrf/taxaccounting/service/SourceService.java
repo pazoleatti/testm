@@ -82,7 +82,7 @@ public interface SourceService {
      */
     void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
 
-
+ 
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -220,4 +220,6 @@ public interface SourceService {
      * Обновление исполнителя для назначенной формы
      */
     void updatePerformer(int departmentId, int typeId, int kindId, int performerId);
+
+	List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
 }

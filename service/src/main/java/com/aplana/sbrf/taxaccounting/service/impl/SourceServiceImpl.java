@@ -137,6 +137,11 @@ public class SourceServiceImpl implements SourceService {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
 
+	@Override
+	public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
+		return declarationTypeDao.listAllByTaxType(taxType);
+	}
+
     @Override
     public void updatePerformer(int departmentId, int typeId, int kindId, int performerId){
         departmentFormTypeDao.updatePerformer(departmentId, typeId, kindId, performerId);
