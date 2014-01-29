@@ -99,7 +99,7 @@ void logicCheck() {
 
         // 1. Проверка наличия предыдущего экземпляра отчета
         if (rowOld == null && formDataEvent != FormDataEvent.COMPOSE) {
-            logger.error("Не найдены экземпляры «${formTemplateService.get(formData.formTemplateId).fullName}» за прошлый отчетный период!")
+            logger.error("Не найдены экземпляры «${formTypeService.get(328).name}» за прошлый отчетный период!")
         }
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)

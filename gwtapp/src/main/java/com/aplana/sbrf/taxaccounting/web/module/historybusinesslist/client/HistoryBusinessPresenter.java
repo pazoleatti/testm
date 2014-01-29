@@ -126,4 +126,9 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
         historyBusinessFilterPresenter.initFilterData();
         getView().updateData(0);
     }
+
+    @Override
+    public void onPrintButtonClicked() {
+        LogBusinessPrintEvent.fire(this);
+    }
 }

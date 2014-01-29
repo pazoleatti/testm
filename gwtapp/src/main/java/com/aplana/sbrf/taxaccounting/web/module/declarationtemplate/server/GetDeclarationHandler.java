@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDeclarationAction;
@@ -13,8 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.GetDe
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-
-import java.util.Date;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
@@ -40,8 +37,7 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
 		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
-        DeclarationTemplate declarationTemplateEnd = declarationTemplateService.getNearestDTRight(declarationTemplate.getId());
-        result.setEndDate(declarationTemplateEnd != null?new Date(declarationTemplateEnd.getVersion().getTime() - 86400000) : null);
+        result.setEndDate(declarationTemplateService.getDTEndDate(declarationTemplate.getId()));
 		return result;
     }
 

@@ -34,7 +34,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 	@Autowired
 	FormTemplateService formTemplateService;
 
-    private static final String ERROR_SELECT_REPORT_PERIOD = "Отчетный период не выбран!";
+    private static final String ERROR_SELECT_REPORT_PERIOD = "Период не выбран!";
     private static final String ERROR_SELECT_DEPARTMENT = "Подразделение не выбрано!";
     private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
