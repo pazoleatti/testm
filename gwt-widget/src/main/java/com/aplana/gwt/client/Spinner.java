@@ -62,7 +62,7 @@ public class Spinner extends DoubleStateComposite
 	/**
 	 * Текущее значение спиннера.
 	 */
-	private int value = 0;
+	private Integer value = null;
 
 	/**
 	 * Минимальнодопустимое значение. По умолчанию Integer.MIN_VALUE.
@@ -117,7 +117,6 @@ public class Spinner extends DoubleStateComposite
 	 * Задает поведение виджета.
 	 */
 	private void initBehavior() {
-		setValue(0);
 		textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -125,6 +124,9 @@ public class Spinner extends DoubleStateComposite
 				if (stringValue.matches("\\-?\\d+")) {
 					// Если введено число
 					setValue(Integer.decode(stringValue), true);
+				} else if (stringValue.trim().isEmpty()) {
+					// Устанавливаем пустое значение
+					setValue(null, true);
 				} else {
 					// Если введено не число, а какая-то ерунда.
 					textBox.setValue(String.valueOf(value));
@@ -171,11 +173,19 @@ public class Spinner extends DoubleStateComposite
 	}
 
 	private void decrementValue() {
-		setValue(getValue() - 1, true);
+		Integer value1 = getValue();
+		if (value1 == null) {
+			value1 = 0;
+		}
+		setValue(value1 - 1, true);
 	}
 
 	private void incrementValue() {
-		setValue(getValue() + 1, true);
+		Integer value1 = getValue();
+		if (value1 == null) {
+			value1 = 0;
+		}
+		setValue(value1 + 1, true);
 	}
 
 	/**
@@ -207,15 +217,23 @@ public class Spinner extends DoubleStateComposite
 	 */
 	@Override
 	public void setValue(Integer value) {
-		if (minValue <= value && value <= maxValue) {
+		if (value == null) {
+			this.value = null;
+		} else if (minValue <= value && value <= maxValue) {
 			this.value = value;
 		} else if (value < minValue) {
 			this.value = minValue;
 		} else if (maxValue < value) {
 			this.value = maxValue;
 		}
+
 		setLabelValue(value);
-		textBox.setValue(String.valueOf(this.value));
+
+		if (value != null) {
+			textBox.setValue(String.valueOf(this.value));
+		} else {
+			textBox.setValue(null);
+		}
 	}
 
 	/**

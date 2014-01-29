@@ -22,7 +22,6 @@ public class SpinnerTest extends GWTTestCase {
 
 	public void testSetValue(){
 		Spinner spinner = new Spinner();
-		assertEquals(Integer.valueOf(0), spinner.getValue());
 
 		spinner.setValue(Integer.MIN_VALUE);
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), spinner.getValue());
@@ -53,6 +52,23 @@ public class SpinnerTest extends GWTTestCase {
 		assertEquals(Integer.valueOf(100), spinner.getValue());
 	}
 
+	public void testNullValue(){
+		Spinner spinner = new Spinner();
+		assertNull(spinner.getValue());
+
+		spinner.setValue(1);
+		assertEquals(1, spinner.getValue().intValue());
+
+		spinner.setValue(null);
+		assertNull(spinner.getValue());
+
+		spinner.setMinValue(-10);
+		spinner.setMaxValue(10);
+		spinner.setValue(1);
+		spinner.setValue(null);
+		assertNull(spinner.getValue());
+	}
+
 	public void testHandler(){
 		final boolean[] flag = {false};
 
@@ -64,6 +80,11 @@ public class SpinnerTest extends GWTTestCase {
 			}
 		});
 		spinner.setValue(1, true);
+
+		assertTrue("Handler didn't work.", flag[0]);
+
+		flag[0] = false;
+		spinner.setValue(null, true);
 
 		assertTrue("Handler didn't work.", flag[0]);
 	}
