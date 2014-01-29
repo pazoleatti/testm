@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
+import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,7 +20,7 @@ import com.google.gwt.user.client.ui.*;
  * Версионный справочник с выбором значения из выпадающего списка с пагинацией
  * @author Dmitriy Levykin
  */
-public class RefBookPickerPopupWidget extends Composite implements RefBookPickerPopup {
+public class RefBookPickerPopupWidget extends DoubleStateComposite implements RefBookPickerPopup {
 
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {
     }
@@ -116,18 +117,6 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
         return refBookPiker.addValueChangeHandler(handler);
     }
 
-    @Override
-    public boolean isEnabled() {
-        return selectButton.isVisible();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        // При недоступности кнопка прячется
-        selectButton.setVisible(enabled);
-    }
-
-
 	@Override
 	public String getDereferenceValue() {
 		return text.getValue();
@@ -136,11 +125,11 @@ public class RefBookPickerPopupWidget extends Composite implements RefBookPicker
 	@Override
 	public void setDereferenceValue(String value) {
 		text.setValue(value);
+		setLabelValue(value);
 	}
 
     /**
-     * Id отображаемого атрибута
-     * @return
+     * @return Id отображаемого атрибута
      */
     public Long getAttributeId() {
         return attributeId;

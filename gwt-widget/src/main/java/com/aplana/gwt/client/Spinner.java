@@ -17,17 +17,12 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  *
  * @author Vitaliy Samolovskikh
  */
-public class Spinner extends Composite
-		implements HasValue<Integer>, HasValueChangeHandlers<Integer>, HasEnabled {
+public class Spinner extends DoubleStateComposite
+		implements HasValue<Integer>, HasValueChangeHandlers<Integer> {
 	/**
 	 * Название класса стиял для компонента.
 	 */
 	public static final String STYLE_NAME = Constants.STYLE_PREFIX + "Spinner";
-
-	/**
-	 * Название стиля для задисабленных элементов. Это нужно для поддержки IE8.
-	 */
-	public static final String STYLE_DISABLED = "disabled";
 
 	/**
 	 * Высота виджета по умолчанию в пикселях.
@@ -67,7 +62,7 @@ public class Spinner extends Composite
 	/**
 	 * Текущее значение спиннера.
 	 */
-	private int value = 0;
+	private Integer value = null;
 
 	/**
 	 * Минимальнодопустимое значение. По умолчанию Integer.MIN_VALUE.
@@ -98,9 +93,9 @@ public class Spinner extends Composite
 	 */
 	private void initLayout() {
 		// Инициализируем панель, как основной виджет компонента.
-		panel.setHeight(DEFAULT_HEIGHT + "px");
-		panel.setWidth(DEFAULT_WIDTH + "px");
 		initWidget(panel);
+		setHeight(DEFAULT_HEIGHT + "px");
+		setWidth(DEFAULT_WIDTH + "px");
 
 		// Устаналиваем текст слева.
 		panel.add(textBox);
@@ -122,7 +117,6 @@ public class Spinner extends Composite
 	 * Задает поведение виджета.
 	 */
 	private void initBehavior() {
-		setValue(0);
 		textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -130,6 +124,9 @@ public class Spinner extends Composite
 				if (stringValue.matches("\\-?\\d+")) {
 					// Если введено число
 					setValue(Integer.decode(stringValue), true);
+				} else if (stringValue.trim().isEmpty()) {
+					// Устанавливаем пустое значение
+					setValue(null, true);
 				} else {
 					// Если введено не число, а какая-то ерунда.
 					textBox.setValue(String.valueOf(value));
@@ -176,11 +173,19 @@ public class Spinner extends Composite
 	}
 
 	private void decrementValue() {
-		setValue(getValue() - 1, true);
+		Integer value1 = getValue();
+		if (value1 == null) {
+			value1 = 0;
+		}
+		setValue(value1 - 1, true);
 	}
 
 	private void incrementValue() {
-		setValue(getValue() + 1, true);
+		Integer value1 = getValue();
+		if (value1 == null) {
+			value1 = 0;
+		}
+		setValue(value1 + 1, true);
 	}
 
 	/**
@@ -212,14 +217,23 @@ public class Spinner extends Composite
 	 */
 	@Override
 	public void setValue(Integer value) {
-		if (minValue <= value && value <= maxValue) {
+		if (value == null) {
+			this.value = null;
+		} else if (minValue <= value && value <= maxValue) {
 			this.value = value;
 		} else if (value < minValue) {
 			this.value = minValue;
 		} else if (maxValue < value) {
 			this.value = maxValue;
 		}
-		textBox.setValue(String.valueOf(this.value));
+
+		setLabelValue(value);
+
+		if (value != null) {
+			textBox.setValue(String.valueOf(this.value));
+		} else {
+			textBox.setValue(null);
+		}
 	}
 
 	/**
@@ -257,36 +271,6 @@ public class Spinner extends Composite
 	public void fireEvent(GwtEvent<?> event) {
 		handlerHolder.fireEvent(event);
 		super.fireEvent(event);
-	}
-
-	/**
-	 * @return true если виджет активен, false если нет.
-	 */
-	@Override
-	public boolean isEnabled() {
-		return textBox.isEnabled();
-	}
-
-	/**
-	 * Активирует или деактивирует виджет.
-	 *
-	 * @param enabled true чтобы активировать виджет.
-	 */
-	@Override
-	public void setEnabled(boolean enabled) {
-		textBox.setEnabled(enabled);
-		incButton.setEnabled(enabled);
-		decButton.setEnabled(enabled);
-
-		if (enabled) {
-			textBox.removeStyleName(STYLE_DISABLED);
-			incButton.removeStyleName(STYLE_DISABLED);
-			decButton.removeStyleName(STYLE_DISABLED);
-		} else {
-			textBox.addStyleName(STYLE_DISABLED);
-			incButton.addStyleName(STYLE_DISABLED);
-			decButton.addStyleName(STYLE_DISABLED);
-		}
 	}
 
 	/**
