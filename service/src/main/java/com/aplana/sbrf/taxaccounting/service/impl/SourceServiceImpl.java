@@ -136,4 +136,9 @@ public class SourceServiceImpl implements SourceService {
     public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind) {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
+
+    @Override
+    public void updatePerformer(int departmentId, int typeId, int kindId, int performerId){
+        departmentFormTypeDao.updatePerformer(departmentId, typeId, kindId, performerId);
+    }
 }

@@ -82,7 +82,7 @@ public interface SourceService {
      */
     void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
 
- 
+
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -215,4 +215,9 @@ public interface SourceService {
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
+
+    /**
+     * Обновление исполнителя для назначенной формы
+     */
+    void updatePerformer(int departmentId, int typeId, int kindId, int performerId);
 }
