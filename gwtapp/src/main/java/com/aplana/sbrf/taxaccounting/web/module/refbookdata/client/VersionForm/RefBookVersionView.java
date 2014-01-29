@@ -39,8 +39,6 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	Panel contentPanel;
     @UiField
     Label titleDetails;
-	@UiField
-	Label titleDesc;
     @UiField
     LinkAnchor backAction;
 
@@ -131,7 +129,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
 	@Override
 	public void setRefBookNameDesc(String desc) {
-		titleDesc.setText(desc);
+        backAction.setText(desc);
 	}
 
 	@Override

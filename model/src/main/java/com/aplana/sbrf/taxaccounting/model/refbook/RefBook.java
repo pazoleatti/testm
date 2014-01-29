@@ -25,11 +25,11 @@ public class RefBook implements Serializable {
 
     public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
-    public static final int REF_BOOK_VERSION_FROM_WIDTH = 40;
+    public static final int REF_BOOK_VERSION_FROM_WIDTH = 80;
 
     public final static String RECORD_VERSION_TO_ALIAS = "record_version_to";
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
-    public static final int REF_BOOK_VERSION_TO_WIDTH = 40;
+    public static final int REF_BOOK_VERSION_TO_WIDTH = 80;
 
 	/** Код справочника */
 	private Long id;
