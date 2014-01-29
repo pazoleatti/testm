@@ -72,6 +72,17 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         }, this));
     }
 
+    @Override
+    public void onPrintButtonClicked() {
+        AuditFilterPrintEvent.fire(this);
+    }
+
+
+    @Override
+    public void onArchiveButtonClicked() {
+        AuditClientArchiveEvent.fire(this);
+    }
+
     @ProxyEvent
     @Override
     public void onAuditArchiveClickEvent(AuditArchiveDialogEvent event) {

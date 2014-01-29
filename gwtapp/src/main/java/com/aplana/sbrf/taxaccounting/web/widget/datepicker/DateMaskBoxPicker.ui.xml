@@ -4,6 +4,7 @@
     <ui:style>
         .imageStyle {
             border: 1px solid #008000;
+            border-right: 0;
             vertical-align: text-bottom;
             cursor: pointer;
             float: left;

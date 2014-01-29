@@ -13,6 +13,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -61,16 +62,13 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    Panel formKindPanel;
-
-    @UiField
-    Panel formTypePanel;
+    RefBookPickerPopupWidget user;
 
     @UiField
     Panel declarationTypePanel;
 
     @UiField
-    RefBookPickerPopupWidget user;
+    Panel formPanel;
 
 	private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
@@ -138,30 +136,27 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void setVisibleTaxFields() {
-        formTypePanel.setVisible(true);
-        formKindPanel.setVisible(true);
-        declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
         formKind.setValue(FormDataKind.PRIMARY);
+        formPanel.setVisible(true);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
     public void setVisibleDeclarationFields() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
         formTypeId.setValue(null);
         formKind.setValue(null);
+        formPanel.setVisible(false);
         declarationTypePanel.setVisible(true);
     }
 
     @Override
     public void hideAll() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
         formTypeId.setValue(null);
         formKind.setValue(null);
-        declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
@@ -243,15 +238,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             getUiHandlers().onSearchButtonClicked();
     }
 
-    @UiHandler("printButton")
-    void onPrintButtonClicked(ClickEvent event){
-        getUiHandlers().onPrintButtonClicked();
-    }
 
-    @UiHandler("archive")
-    void onArchive(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onArchiveButtonClicked();
-        }
-    }
+
 }

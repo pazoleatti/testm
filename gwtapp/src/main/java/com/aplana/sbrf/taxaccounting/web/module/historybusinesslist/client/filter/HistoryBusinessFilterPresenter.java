@@ -48,11 +48,6 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         LogBusinessSearchEvent.fire(this);
     }
 
-    @Override
-    public void onPrintButtonClicked() {
-        LogBusinessPrintEvent.fire(this);
-    }
-
     public interface MyView extends View,HasUiHandlers<HistoryBusinessUIHandler> {
         // Получение значений фильтра
         LogBusinessFilterValues getDataFilter();
