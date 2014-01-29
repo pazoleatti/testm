@@ -1,8 +1,8 @@
 alter table configuration add constraint configuration_pk primary key (code);
 
-alter table oktmo add constraint oktmo_pk primary key (id);
-alter table oktmo add constraint oktmo_fk_parent_id foreign key (parent_id) references oktmo(id);
-alter table oktmo add constraint oktmo_chk_status check (status in (0,-1,1,2));
+alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
+alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
+alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
 
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -33,12 +33,12 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
-alter table ref_book add constraint ref_book_chk_editable  check (editable in (0, 1));
+alter table ref_book add constraint ref_book_chk_read_only check (read_only in (0, 1));
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
-alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (lower(alias) <> 'record_id' and lower(alias) <> 'row_number_over');
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (not lower(alias) in ('record_id', 'row_number_over', 'record_version_from', 'record_version_to'));
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
@@ -241,4 +241,4 @@ create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
-create index i_oktmo_code on oktmo(code);
+create index i_ref_book_oktmo_code on ref_book_oktmo(code);

@@ -11,7 +11,7 @@
 
     <jee:remote-slsb
             id="taskManager"
-            jndi-name="ejblocal:taxaccounting-0.3.5/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
+            jndi-name="ejblocal:${buildName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
             business-interface="com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager"
             lookup-home-on-startup="true"
             />

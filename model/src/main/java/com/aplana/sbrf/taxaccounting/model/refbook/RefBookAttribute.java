@@ -55,6 +55,9 @@ public class RefBookAttribute implements Serializable {
     /** Признак уникальности атрибута */
     private boolean unique;
 
+	/** Определяет порядок сортировки данных по умолчанию */
+	private Integer sortOrder;
+
 	/**
 	 * Возвращает код атрибута
 	 * @return код атрибута
@@ -223,7 +226,15 @@ public class RefBookAttribute implements Serializable {
         this.unique = unique;
     }
 
-    @Override
+	public Integer getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Integer sortOrder) {
+		this.sortOrder = sortOrder;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
@@ -265,7 +276,9 @@ public class RefBookAttribute implements Serializable {
         if (unique != that.unique){
             return false;
         }
-
+		if (sortOrder != null ? !sortOrder.equals(that.sortOrder) : that.sortOrder != null) {
+			return false;
+		}
 		return true;
 	}
 
@@ -288,6 +301,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", width=").append(width);
 		sb.append(", required=").append(required);
         sb.append(", unique=").append(unique);
+		sb.append(", sortOrder=").append(sortOrder);
 		sb.append('}');
 		return sb.toString();
 	}

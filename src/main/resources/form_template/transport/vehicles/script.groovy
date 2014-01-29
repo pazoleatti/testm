@@ -8,7 +8,7 @@ import groovy.transform.Field
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог
  * formTemplateId=201
- *
+ *  TODO заменить ОКАТО на ОКТМО
  * @author ivildanov
  * @author Stanislav Yasinskiy
  */

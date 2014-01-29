@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,24 +31,6 @@ public class RefBook implements Serializable {
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 40;
 
-    public static RefBookAttribute getVersionFromAttribute() {
-        RefBookAttribute attr = new RefBookAttribute();
-        attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
-        attr.setName(REF_BOOK_VERSION_FROM_TITLE);
-        attr.setAttributeType(RefBookAttributeType.DATE);
-        attr.setAlias(RECORD_VERSION_FROM_ALIAS);
-        return attr;
-    }
-
-    public static RefBookAttribute getVersionToAttribute() {
-        RefBookAttribute attr = new RefBookAttribute();
-        attr.setWidth(REF_BOOK_VERSION_TO_WIDTH);
-        attr.setName(REF_BOOK_VERSION_TO_TITLE);
-        attr.setAttributeType(RefBookAttributeType.DATE);
-        attr.setAlias(RECORD_VERSION_TO_ALIAS);
-        return attr;
-    }
-
 	/** Код справочника */
 	private Long id;
 
@@ -60,6 +45,30 @@ public class RefBook implements Serializable {
 
 	/** Признак отображения справочника */
 	private boolean visible;
+
+	/** Тип справочника (0 - Линейный, 1 - Иерархический) */
+	private int type;
+
+	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
+	private boolean readOnly;
+
+	public static RefBookAttribute getVersionFromAttribute() {
+		RefBookAttribute attr = new RefBookAttribute();
+		attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
+		attr.setName(REF_BOOK_VERSION_FROM_TITLE);
+		attr.setAttributeType(RefBookAttributeType.DATE);
+		attr.setAlias(RECORD_VERSION_FROM_ALIAS);
+		return attr;
+	}
+
+	public static RefBookAttribute getVersionToAttribute() {
+		RefBookAttribute attr = new RefBookAttribute();
+		attr.setWidth(REF_BOOK_VERSION_TO_WIDTH);
+		attr.setName(REF_BOOK_VERSION_TO_TITLE);
+		attr.setAttributeType(RefBookAttributeType.DATE);
+		attr.setAlias(RECORD_VERSION_TO_ALIAS);
+		return attr;
+	}
 
 	/**
 	 * Возвращает код справочника
@@ -201,14 +210,63 @@ public class RefBook implements Serializable {
 		this.visible = visible;
 	}
 
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	/** Возвращает упорядоченный список атрибутов для сортировки по умолчанию. В запросах пока используется только
+	 * первый в списке, то есть мультисортировка пока не поддерживается.
+	 * @return всегда определен, не может быть null
+	 */
+	private List<RefBookAttribute> getSortAttributes() {
+		List<RefBookAttribute> defaultSort = new ArrayList<RefBookAttribute>();
+		for (RefBookAttribute attr : attributes) {
+			if (attr.getSortOrder() != null) {
+				defaultSort.add(attr);
+			}
+		}
+		if (defaultSort.size() > 0) {
+			Collections.sort(defaultSort, new Comparator<RefBookAttribute>() {
+				@Override
+				public int compare(RefBookAttribute o1, RefBookAttribute o2) {
+					return o1.getSortOrder() - o2.getSortOrder();
+				}
+			});
+		}
+		return defaultSort;
+	}
+
+	/** Возвращает атрибут для сортировки по умолчанию
+	 * @return может быть null
+	 */
+	public RefBookAttribute getSortAttribute() {
+		List<RefBookAttribute> list = getSortAttributes();
+		return list.size() > 0 ? list.get(0) : null;
+	}
+
 	@Override
-    public String toString() {
-        return "RefBook{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", attributes=" + attributes +
-                ", scriptId=" + scriptId +
-				", visible=" + visible +
-                '}';
-    }
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("RefBook{");
+		sb.append("attributes=").append(attributes);
+		sb.append(", id=").append(id);
+		sb.append(", name='").append(name).append('\'');
+		sb.append(", scriptId='").append(scriptId).append('\'');
+		sb.append(", visible=").append(visible);
+		sb.append(", type=").append(type);
+		sb.append(", readOnly=").append(readOnly);
+		sb.append('}');
+		return sb.toString();
+	}
 }

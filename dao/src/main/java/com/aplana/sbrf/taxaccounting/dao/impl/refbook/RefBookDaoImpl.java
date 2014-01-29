@@ -57,7 +57,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -112,6 +112,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setScriptId(rs.getString("script_id"));
 			result.setVisible(rs.getBoolean("visible"));
             result.setAttributes(getAttributes(result.getId()));
+			result.setType(rs.getInt("type"));
+			result.setReadOnly(rs.getBoolean("read_only"));
             return result;
         }
     }
@@ -120,7 +122,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<RefBookAttribute> getAttributes(Long refBookId) {
         try {
             return getJdbcTemplate().query(
-                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, is_unique " +
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+							"is_unique, sort_order " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -146,6 +149,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setWidth(rs.getInt("width"));
             result.setRequired(rs.getBoolean("required"));
             result.setUnique(rs.getBoolean("is_unique"));
+			result.setSortOrder(rs.getInt("sort_order"));
             return result;
         }
     }
@@ -201,10 +205,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * Динамически формирует запрос для справочника
      *
      * @param refBookId     код справочника
-     * @param recordId      идентификатора записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
+     * @param recordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
      * @param version       дата актуальности данных справочника. Если = null, то версионирование не учитывается
      * @param sortAttribute сортируемый столбец. Может быть не задан
-     * @param pagingParams
+     * @param pagingParams  параметры для постраничной навигации. Может быть null, тогда возвращается весь набор данных по текущему срезу
      * @return
      */
     private PreparedStatementData getRefBookSql(Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, boolean isSortAscending) {
@@ -1035,10 +1039,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (records.size() == 0) {
             return;
         }
-
-        RefBook refBook = get(refBookId);
-        List<Object[]> listValues = new ArrayList<Object[]>();
-
         final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(records.size()));
 
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
@@ -1053,62 +1053,76 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         };
 
-        for (int i = 0; i < records.size(); i++) {
-            // создаем строки справочника
-
-            // записываем значения ячеек
-            Map<String, RefBookValue> record = records.get(i);
-            List<RefBookAttribute> attributes = refBook.getAttributes();
-
-            // проверка обязательности заполнения записей справочника
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-            if (errors.size() > 0){
-                throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
-            }
-
-            for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
-                String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
-                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
-                    continue;
-                }
-                RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
-                Object[] values = new Object[6];
-                values[0] = refBookRecordIds.get(i);
-                values[1] = attribute.getId();
-                values[2] = null;
-                values[3] = null;
-                values[4] = null;
-                values[5] = null;
-                switch (attribute.getAttributeType()) {
-                    case STRING: {
-                        values[2] = entry.getValue().getStringValue();
-                    }
-                    break;
-                    case NUMBER: {
-                        if (entry.getValue().getNumberValue() != null) {
-                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
-                        }
-                    }
-                    break;
-                    case DATE: {
-                        values[4] = entry.getValue().getDateValue();
-                    }
-                    break;
-                    case REFERENCE: {
-                        values[5] = entry.getValue().getReferenceValue();
-                    }
-                    break;
-                }
-                listValues.add(values);
-            }
-        }
         JdbcTemplate jt = getJdbcTemplate();
         jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), batchRefBookRecordsPS);
+
+		List<Object[]> listValues = getListValuesForBatch(refBookId, records, refBookRecordIds);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
     }
 
+	/**
+	 * Преобразует данные элементов справочников в удобный формат для передачи значений в batchUpdate
+	 * @param refBookId код справочника, чьи данные необходимо записать
+	 * @param records данные элементов справочника для преобразования
+	 * @param refBookRecordIds идентификаторы новых строк
+	 * @return данные в формате batchUpdate
+	 */
+	private List<Object[]> getListValuesForBatch(Long refBookId, List<Map<String, RefBookValue>> records, final List<Long> refBookRecordIds) {
+		RefBook refBook = get(refBookId);
+		List<Object[]> listValues = new ArrayList<Object[]>();
+		for (int i = 0; i < records.size(); i++) {
+			// создаем строки справочника
+
+			// записываем значения ячеек
+			Map<String, RefBookValue> record = records.get(i);
+			List<RefBookAttribute> attributes = refBook.getAttributes();
+
+			// проверка обязательности заполнения записей справочника
+			List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+			if (errors.size() > 0){
+				throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
+			}
+
+			for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+				String attributeAlias = entry.getKey();
+				if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+						RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+					continue;
+				}
+				RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+				Object[] values = new Object[6];
+				values[0] = refBookRecordIds.get(i);
+				values[1] = attribute.getId();
+				values[2] = null;
+				values[3] = null;
+				values[4] = null;
+				values[5] = null;
+				switch (attribute.getAttributeType()) {
+					case STRING: {
+						values[2] = entry.getValue().getStringValue();
+					}
+					break;
+					case NUMBER: {
+						if (entry.getValue().getNumberValue() != null) {
+							values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+									.setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+						}
+					}
+					break;
+					case DATE: {
+						values[4] = entry.getValue().getDateValue();
+					}
+					break;
+					case REFERENCE: {
+						values[5] = entry.getValue().getReferenceValue();
+					}
+					break;
+				}
+				listValues.add(values);
+			}
+		}
+		return listValues;
+	}
 
     private static final String UPDATE_REF_BOOK_RECORD_SQL_OLD = "insert into ref_book_record (id, ref_book_id, version," +
             "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), 0, ?)";
@@ -1134,7 +1148,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             RefBook refBook = get(refBookId);
             List<Object[]> recordAddIds = new ArrayList<Object[]>();
-            List<Object[]> listValues = new ArrayList<Object[]>();
             List<Object[]> delValues = new LinkedList<Object[]>();
             List<Long> recordsId = new ArrayList<Long>();
             int needIdsCnt = 0;
@@ -1174,41 +1187,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
             }
 
-            for (int i = 0; i < records.size(); i++) {
-                Map<String, RefBookValue> record = records.get(i);
-                Long recordId = recordsId.get(i);
-                for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
-                    String attributeAlias = entry.getKey();
-                    if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
-                            RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
-                        continue;
-                    }
-                    RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
-                    Object[] values = new Object[]{recordId, attribute.getId(), null, null, null, null};
-                    switch (attribute.getAttributeType()) {
-                        case STRING: {
-                            values[2] = entry.getValue().getStringValue();
-                        }
-                        break;
-                        case NUMBER: {
-                            if (entry.getValue().getNumberValue() != null) {
-                                values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                        .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
-                            }
-                        }
-                        break;
-                        case DATE: {
-                            values[4] = entry.getValue().getDateValue();
-                        }
-                        break;
-                        case REFERENCE: {
-                            values[5] = entry.getValue().getReferenceValue();
-                        }
-                        break;
-                    }
-                    listValues.add(values);
-                }
-            }
             JdbcTemplate jt = getJdbcTemplate();
             // - REF_BOOK_VALUE
             if (!delValues.isEmpty()) {
@@ -1219,6 +1197,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), recordAddIds);
             }
             // + REF_BOOK_VALUE
+			List<Object[]> listValues = getListValuesForBatch(refBookId, records, refBookRecordIds);
             jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
         }
         catch (DaoException ex) {
