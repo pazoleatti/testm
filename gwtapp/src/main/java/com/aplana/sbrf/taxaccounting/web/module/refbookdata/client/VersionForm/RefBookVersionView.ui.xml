@@ -49,9 +49,9 @@
                 </g:cell>
                 <g:cell height="45px" verticalAlignment="bottom">
                     <g:HorizontalPanel styleName="{style.btnAddDel}" spacing="5">
-                        <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow"
+                        <style:LinkAnchor title="Добавить запись" text="Добавить запись" ui:field="addRow"
                                           img="resources/img/exclamation_mark.png"/>
-                        <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
+                        <style:LinkAnchor title="Удалить запись" text="Удалить запись" ui:field="deleteRow"
                                           img="resources/img/exclamation_mark.png"/>
                     </g:HorizontalPanel>
                 </g:cell>
