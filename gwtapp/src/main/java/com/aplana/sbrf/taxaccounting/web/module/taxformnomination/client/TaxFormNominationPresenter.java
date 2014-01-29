@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.DeclarationDestinationsDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.FormDestinationsDialogOpenEvent;
@@ -234,6 +236,11 @@ public class TaxFormNominationPresenter
 							@Override
 							public void onSuccess(DeleteDeclarationSourcesResult result) {
 								reloadDeclarationTableData();
+								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
+									Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+								}
+
 							}
 						}, this));
 	}
