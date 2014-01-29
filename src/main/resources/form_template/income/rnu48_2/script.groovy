@@ -21,18 +21,18 @@ import java.math.RoundingMode
 // 3 - summ        - Сумма, включаемая в состав материальных расходов , (руб.)
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         checkCreation()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         checkRNU48_1()
         calc()
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
@@ -111,7 +111,7 @@ BigDecimal calcTotal(def dataRows) {
 
 def checkRNU48_1() {
     if (formData.kind == FormDataKind.PRIMARY && getFormDataRNU48_1() == null) {
-        throw new ServiceException("Не найдены экземпляры «${formTemplateService.get(343).fullName}» за текущий отчетный период!")
+        throw new ServiceException("Не найдены экземпляры «${formTypeService.get(343).name}» за текущий отчетный период!")
     }
 }
 

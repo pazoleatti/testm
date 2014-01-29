@@ -154,10 +154,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 declarationTemplate.getId() != null && declarationTemplate.getId() != 0 ? declarationTemplate.getId() : 0,
                 statusList, declarationTemplate.getVersion(), actualEndVersion));
 
-        System.out.println("formTemplateVersionIds size: " + formTemplateVersionIds.size());
-        for (Integer integer : formTemplateVersionIds){
-            System.out.println("id: " + integer);
-        }
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
@@ -165,7 +161,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                 DeclarationTemplate endTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i++));
                 segmentIntersection.setStatus(beginTemplate.getStatus());
                 segmentIntersection.setBeginDate(beginTemplate.getVersion());
-                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()));
+                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion().getTime()));
                 segmentIntersection.setTemplateId(beginTemplate.getId());
 
                 segmentIntersections.add(segmentIntersection);
@@ -174,10 +170,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
             DeclarationTemplate lastBeginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
             int idRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, lastBeginTemplate.getVersion());
-            DeclarationTemplate lastEndTemplate = idRight != 0? declarationTemplateDao.get(idRight): null;
+
             lastSegmentIntersection.setStatus(lastBeginTemplate.getStatus());
             lastSegmentIntersection.setBeginDate(lastBeginTemplate.getVersion());
-            lastSegmentIntersection.setEndDate(lastEndTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, lastEndTemplate.getVersion()) : null);
+            lastSegmentIntersection.setEndDate(getDTEndDate(idRight));
             lastSegmentIntersection.setTemplateId(lastBeginTemplate.getId());
             segmentIntersections.add(lastSegmentIntersection);
             return segmentIntersections;
@@ -190,11 +186,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (idLeft != 0){
             DeclarationTemplate beginTemplate = declarationTemplateDao.get(idLeft);
             int idLeftRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, beginTemplate.getVersion());
-            DeclarationTemplate endTemplate = idLeftRight != 0 ? declarationTemplateDao.get(idLeftRight) : null;
+
             SegmentIntersection segmentIntersection = new SegmentIntersection();
             segmentIntersection.setStatus(beginTemplate.getStatus());
             segmentIntersection.setBeginDate(beginTemplate.getVersion());
-            segmentIntersection.setEndDate(endTemplate != null ? addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion()) : null);
+            segmentIntersection.setEndDate(getDTEndDate(idLeftRight));
             segmentIntersection.setTemplateId(beginTemplate.getId());
 
             segmentIntersections.add(segmentIntersection);
@@ -222,6 +218,22 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (id == 0)
             return null;
         return declarationTemplateDao.get(id);
+    }
+
+    @Override
+    public Date getDTEndDate(int declarationTemplateId) {
+        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+
+        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
+        if (id == 0)
+            return null;
+        DeclarationTemplate templateEnd = declarationTemplateDao.get(id);
+        if (templateEnd.getStatus() == VersionedObjectStatus.FAKE){
+            return templateEnd.getVersion();
+        }else {
+            return addCalendar(Calendar.DAY_OF_YEAR, -1, templateEnd.getVersion().getTime());
+        }
     }
 
     @Override
@@ -266,8 +278,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return statusList;
     }
 
-    private Date addCalendar(int fieldNumber, int numberDays, Date actualDate){
-        calendar.setTime(actualDate);
+    private Date addCalendar(int fieldNumber, int numberDays, long actualDate){
+        calendar.setTime(new Date(actualDate));
         calendar.add(fieldNumber, numberDays);
         Date time = calendar.getTime();
         calendar.clear();

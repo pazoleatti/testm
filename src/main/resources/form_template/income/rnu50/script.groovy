@@ -179,7 +179,7 @@ void checkCreation() {
         // проверка наличия формы рну 49 в статусе подготовлена или выше (но не создана)
         def formData49 = getFormDataRNU49()
         if (formData49 == null || formData49.state != WorkflowState.ACCEPTED) {
-            logger.error("Отсутствует или не находится в статусе «Принята» форма «${formTemplateService.get(312).fullName}» за текущий отчетный период!")
+            logger.error("Отсутствует или не находится в статусе «Принята» форма «${formTypeService.get(312).name}» за текущий отчетный период!")
             return
         }
     }

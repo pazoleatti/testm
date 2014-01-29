@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.service.script.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.service.script.FormTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -14,15 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @author @author Dmitriy Levykin
  */
 @Transactional(readOnly = true)
-@Component("formTemplateService")
+@Component("formTypeService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FormTemplateServiceImpl implements FormTemplateService {
+public class FormTypeServiceImpl implements FormTypeService {
 
     @Autowired
-    private com.aplana.sbrf.taxaccounting.service.FormTemplateService formTemplateService;
+    private com.aplana.sbrf.taxaccounting.service.FormTypeService formTypeService;
 
     @Override
-    public FormTemplate get(int formTemplateId) {
-        return formTemplateService.getFullFormTemplate(formTemplateId);
+    public FormType get(int formTypeId) {
+        return formTypeService.get(formTypeId);
     }
 }

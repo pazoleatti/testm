@@ -18,7 +18,7 @@ public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
     }
 
     public PeriodPickerWidget(boolean multiselect){
-        super("Выберите отчетный период", multiselect);
+        super("Выберите период", multiselect);
     }
 
     @Override

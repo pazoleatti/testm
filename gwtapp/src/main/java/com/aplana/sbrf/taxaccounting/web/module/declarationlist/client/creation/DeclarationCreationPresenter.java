@@ -156,7 +156,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			return false;
 		}
 		if(filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty()){
-			MessageEvent.fire(this, "Для создания декларации необходимо выбрать один отчетный период");
+			MessageEvent.fire(this, "Для создания декларации необходимо выбрать один период");
 			return false;
 		}
 		if(filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty()){

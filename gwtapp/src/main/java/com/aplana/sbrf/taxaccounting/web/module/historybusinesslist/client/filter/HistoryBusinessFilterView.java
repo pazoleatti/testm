@@ -64,10 +64,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    Panel formKindPanel;
-
-    @UiField
-    Panel formTypePanel;
+    Panel formPanel;
 
     @UiField
     Panel declarationTypePanel;
@@ -202,24 +199,21 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     private void setVisibleTaxFields() {
-        formTypePanel.setVisible(true);
-        formKindPanel.setVisible(true);
+        formPanel.setVisible(true);
         declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
         formDataKind.setValue(FormDataKind.PRIMARY);
     }
 
     private void setVisibleDeclarationFields() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
+        formPanel.setVisible(false);
         formTypeId.setValue(null);
         formDataKind.setValue(null);
         declarationTypePanel.setVisible(true);
     }
 
     private void hideAll() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
+        formPanel.setVisible(false);
         formTypeId.setValue(null);
         formDataKind.setValue(null);
         declarationTypePanel.setVisible(false);
@@ -251,9 +245,5 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         }
     }
 
-    @UiHandler("printButton")
-    void onPrintClicked(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onPrintButtonClicked();
-    }
+
 }

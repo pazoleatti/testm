@@ -82,7 +82,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             }
         };
         refbookDataTable.addColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
-        refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.PX);
+        refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.EM);
 
         TextColumn<RefBookDataRow> versionToColumn = new TextColumn<RefBookDataRow>() {
             @Override
@@ -91,7 +91,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             }
         };
         refbookDataTable.addColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
-        refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.PX);
+        refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.EM);
 
 		for (final RefBookColumn header : columns) {
 			TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
