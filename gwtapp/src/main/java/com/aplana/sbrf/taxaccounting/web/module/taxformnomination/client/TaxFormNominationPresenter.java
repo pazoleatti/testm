@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.DeclarationDestinationsDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.FormDestinationsDialogOpenEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -35,9 +36,10 @@ import java.util.Set;
  */
 public class TaxFormNominationPresenter
         extends Presenter<TaxFormNominationPresenter.MyView, TaxFormNominationPresenter.MyProxy>
-        implements TaxFormNominationUiHandlers, FormDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler, DeclarationDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler  {
+        implements TaxFormNominationUiHandlers, FormDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler,
+				DeclarationDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler, UpdateTable.UpdateTableHandler {
 
-    @ProxyCodeSplit
+	@ProxyCodeSplit
     @NameToken(TaxFormNominationToken.taxFormNomination)
     public interface MyProxy extends ProxyPlace<TaxFormNominationPresenter>, Place {
     }
@@ -91,6 +93,7 @@ public class TaxFormNominationPresenter
     protected void onBind() {
         addRegisteredHandler(FormDestinationsDialogOpenEvent.getType(), this);
         addRegisteredHandler(DeclarationDestinationsDialogOpenEvent.getType(), this);
+	    addRegisteredHandler(UpdateTable.getType(), this);
         super.onBind();
     }
 
@@ -159,12 +162,12 @@ public class TaxFormNominationPresenter
     @Override
     public void reloadDeclarationTableData(){
         dispatcher.execute(getTableDataAction(), CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-                    @Override
-                    public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(result.getTableData());
-                    }
-                }, this));
+		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+			        @Override
+			        public void onSuccess(GetTableDataResult result) {
+				        getView().setDataToDeclarationTable(result.getTableData());
+			        }
+		        }, this));
     }
 
      private GetTableDataAction getTableDataAction(){
@@ -208,7 +211,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickEditDeclarationDestination(DeclarationDestinationsDialogOpenEvent event) {
-        declarationDestinationsPresenter.initAndShowDialog(this, this);
+        declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
     }
 
     @Override
@@ -218,7 +221,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickOpenDeclarationDestinations() {
-	    declarationDestinationsPresenter.initAndShowDialog(this, this);
+	    declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
     }
 
 	@Override
@@ -233,5 +236,10 @@ public class TaxFormNominationPresenter
 								reloadDeclarationTableData();
 							}
 						}, this));
+	}
+
+	@Override
+	public void onUpdateTable(UpdateTable event) {
+		reloadDeclarationTableData();
 	}
 }

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDeclarationPopUpFilterAction;
@@ -29,12 +30,12 @@ import java.util.Set;
 public class DeclarationDestinationsPresenter extends PresenterWidget<DeclarationDestinationsPresenter.MyView> implements DeclarationDestinationsUiHandlers {
     private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
-	TaxFormNominationPresenter parent;
+	TaxType taxType;
 
     @Override
     public void onConfirm() {
 	    AddDeclarationSourceAction action = new AddDeclarationSourceAction();
-	    action.setTaxType(parent.getView().getTaxType());
+	    action.setTaxType(taxType);
 	    action.setDeclarationTypeId(getView().getSelectedDeclarationTypes());
 	    action.setDepartmentId(getView().getSelectedDepartments());
 	    dispatchAsync.execute(action,
@@ -42,7 +43,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 					    new AbstractCallback<AddDeclarationSourceResult>() {
 						    @Override
 						    public void onSuccess(AddDeclarationSourceResult result) {
-								parent.reloadDeclarationTableData();
+								UpdateTable.fire(DeclarationDestinationsPresenter.this);
 							    getView().hide();
 						    }
 					    }, this));
@@ -63,13 +64,13 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         getView().setUiHandlers(this);
     }
 
-    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxFormNominationPresenter parent) {
+    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
         //getView().resetForm();
-	    this.parent = parent;
+	    this.taxType = taxType;
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
 
 	    GetDeclarationPopUpFilterAction action = new GetDeclarationPopUpFilterAction();
-	    action.setTaxType(parent.getView().getTaxType());
+	    action.setTaxType(taxType);
 	    dispatchAsync.execute(action,
 			    CallbackUtils.defaultCallback(
 					    new AbstractCallback<GetDeclarationPopUpFilterResult>() {
