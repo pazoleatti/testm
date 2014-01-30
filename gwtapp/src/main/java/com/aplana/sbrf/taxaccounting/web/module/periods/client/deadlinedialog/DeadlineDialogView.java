@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -64,6 +66,34 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
         super(eventBus);
         initWidget(uiBinder.createAndBindUi(this));
 
+        //Обработка нажатия закрытия окна
+        deadlineDialog.setOnHideHandler(new OnHideHandler<CanHide>() {
+            @Override
+            public void OnHide(CanHide modalWindow) {
+                if (saveButton.isEnabled()) {
+                    Dialog.confirmMessage("Отмена установки срока сдачи отчетности", "Вы уверены, что хотите отменить изменения?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            deadlineDialog.hide();
+                            super.yes();
+                        }
+
+                        @Override
+                        public void no() {
+                            super.no();
+                        }
+
+                        @Override
+                        public void close() {
+                            super.close();
+                        }
+                    });
+                } else {
+                    deadlineDialog.hide();
+                }
+            }
+        });
+
         deadline.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -83,12 +113,12 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                     } else {
                         if (!lastSelectedDepartment.equals(departmentValue)) {
                             final DepartmentPair dv = departmentValue;
-                            Dialog.confirmMessage("Вы уверены, что хотите прекратить редактирование? Все несохраненные изменения будут потеряны.", new DialogHandler() {
+                            Dialog.confirmMessage("Отмена установки срока сдачи отчетности", "Вы уверены, что хотите прекратить редактирование? Все несохраненные изменения будут потеряны.", new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     getUiHandlers().setDepartmentDeadline(dv.getDepartmentId(), dv.getParentDepartmentId());
                                     lastSelectedDepartment = dv;
-	                                saveButton.setEnabled(false);
+                                    saveButton.setEnabled(false);
                                     Dialog.hideMessage();
                                 }
 
@@ -139,7 +169,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
     @UiHandler("saveButton")
     public void onSave(ClickEvent event) {
         if (departmentPicker.isSelectedItemHasChildren()) {
-            Dialog.confirmMessage("Назначить нижестоящим подразделениям?", new DialogHandler() {
+            Dialog.confirmMessage("Назначение срока сдачи отчетности", "Назначить нижестоящим подразделениям?", new DialogHandler() {
                 @Override
                 public void yes() {
                     getUiHandlers().updateDepartmentDeadline(departmentPicker.getSelectedChildren(), deadline.getValue(), true);
@@ -164,14 +194,34 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
 
     @UiHandler("exitButton")
     public void onExit(ClickEvent event) {
-        deadlineDialog.hide();
+        if (saveButton.isEnabled()) {
+            Dialog.confirmMessage("Отмена установки срока сдачи отчетности", "Вы уверены, что хотите отменить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    deadlineDialog.hide();
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void close() {
+                    Dialog.hideMessage();
+                }
+            });
+        } else {
+            deadlineDialog.hide();
+        }
     }
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
         final DeadlineDialogView t = this;
         if (saveButton.isEnabled()) {
-            Dialog.confirmMessage("Вы уверены, что хотите отменить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Отмена установки срока сдачи отчетности", "Вы уверены, что хотите отменить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     t.hide();
@@ -188,8 +238,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                     Dialog.hideMessage();
                 }
             });
-        }
-        else{
+        } else {
             hide();
         }
     }
