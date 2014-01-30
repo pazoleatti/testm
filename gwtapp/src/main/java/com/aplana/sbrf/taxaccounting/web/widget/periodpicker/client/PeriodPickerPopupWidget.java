@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.google.gwt.core.client.GWT;
@@ -13,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -37,7 +39,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	Button clearButton;
 	
 	@UiField
-	PopupPanel popupPanel;
+    ModalWindow popupPanel;
 	
 	@UiField
 	Panel panel;
@@ -56,12 +58,14 @@ public class PeriodPickerPopupWidget extends Composite implements
 	public PeriodPickerPopupWidget(){
 		periodPicker = new PeriodPickerWidget();
 		initWidget(binder.createAndBindUi(this));
+        periodPicker.setHeaderVisible(false);
 	}
 	
 	@UiConstructor
 	public PeriodPickerPopupWidget(boolean multiselect){
 		periodPicker = new PeriodPickerWidget(multiselect);
 		initWidget(binder.createAndBindUi(this));
+        periodPicker.setHeaderVisible(false);
 	}
 
     @Override
@@ -130,9 +134,7 @@ public class PeriodPickerPopupWidget extends Composite implements
     @UiHandler("selectButton")
     public void onSelectClick(ClickEvent event){
         periodPicker.setValue(this.value);
-        popupPanel.setPopupPosition(panel.getAbsoluteLeft(),
-                panel.getAbsoluteTop() + panel.getOffsetHeight());
-        popupPanel.show();
+        popupPanel.center();
     }
 
     @UiHandler("clearButton")
