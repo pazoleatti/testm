@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8,chrome=1">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<title>АС "Учёт налогов"</title>
 
 	<link rel="icon" href="resources/img/favicon.ico" type="image/vnd.microsoft.icon" />
