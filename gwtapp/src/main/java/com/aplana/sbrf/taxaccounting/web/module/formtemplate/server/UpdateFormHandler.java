@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.Calendar;
 
 /**
  * @author Vitalii Samolovskikh
@@ -42,11 +45,11 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
         int formTemplateId = 0;
 
-		formTemplateService.validateFormTemplate(action.getForm(), logger);
+        makeDates(action);
+        formTemplateService.validateFormTemplate(action.getForm(), logger);
 		if (logger.getEntries().isEmpty() && action.getForm().getId() != null && action.getForm().getType().getId() != 0) {
 			/*formTemplateService.save(action.getForm());*/
             formTemplateId = mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
-
 		} else if(logger.getEntries().isEmpty() && action.getForm().getId() == null && action.getForm().getType().getId() != 0){
             formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
         } else if(logger.getEntries().isEmpty() && action.getForm().getId() == null && action.getForm().getType().getId() == 0){
@@ -62,6 +65,20 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
     @Override
     public void undo(UpdateFormAction action, UpdateFormResult result, ExecutionContext context) throws ActionException {
         // Nothing!
+    }
+
+    private void makeDates(UpdateFormAction action){
+        Calendar calendar = Calendar.getInstance();
+        FormTemplate formTemplate = action.getForm();
+        calendar.setTime(formTemplate.getVersion());
+        calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
+        formTemplate.setVersion(calendar.getTime());
+        if (action.getVersionEndDate() != null){
+            calendar.clear();
+            calendar.setTime(action.getVersionEndDate());
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
+            action.setVersionEndDate(calendar.getTime());
+        }
     }
 
 }

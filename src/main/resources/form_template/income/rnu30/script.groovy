@@ -427,7 +427,7 @@ void migration() {
         def total = getCalcTotalRow()
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
-        dataRowHelper.insert(total, dataRows.size + 1)
+        dataRowHelper.insert(total, dataRows.size() + 1)
     }
 }
 

@@ -112,7 +112,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         decType.setStatus(VersionedObjectStatus.DELETED);
         declarationTypeService.save(decType);
 
-        logging(typeId, TemplateChangesEvent.DELETED, user);
+        /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }
 
     @Override
@@ -123,7 +123,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
                     logEntryService.save(logger.getEntries()));
-        versionOperatingService.cleanVersions(template, dateEndActualize, logger);
+        versionOperatingService.cleanVersions(templateId, dateEndActualize, logger);
         declarationTemplateService.delete(template);
         if (declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
@@ -139,8 +139,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate, null, logger);
-            if (logger.containsLevel(LogLevel.ERROR))
-                throw new ServiceLoggerException("Макет используется и не может быть выведен из действия", logEntryService.save(logger.getEntries()));
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.save(declarationTemplate);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
@@ -160,7 +158,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         TemplateChanges changes = new TemplateChanges();
         changes.setEvent(event);
         changes.setEventDate(new Date());
-        changes.setFormTemplateId(id);
+        changes.setDeclarationTemplateId(id);
         changes.setAuthor(user);
         templateChangesService.save(changes);
     }

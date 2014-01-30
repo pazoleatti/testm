@@ -44,6 +44,14 @@
             width: 100%;
             padding-right: 10px;
         }
+
+        .leftPanel{
+            margin-right: 5px;
+        }
+
+        .rightPanel{
+            margin-left: 5px;
+        }
     </ui:style>
 
     <g:DockLayoutPanel>
@@ -81,7 +89,7 @@
             <g:SplitLayoutPanel>
                 <g:north size="350">
                     <g:HorizontalPanel height="100%" width="100%">
-                        <g:FlowPanel>
+                        <g:FlowPanel addStyleNames="{style.leftPanel}" >
                             <g:Label text="Приёмник" addStyleNames="{style.destinationLabel}" />
                             <g:HorizontalPanel height="30px">
                                 <g:cell verticalAlignment="middle">
@@ -93,7 +101,7 @@
                             <style:GenericDataGrid ui:field="formReceiversTable" width="100%" height="350px" />
                             <style:GenericDataGrid ui:field="declarationReceiversTable" width="100%" height="350px" />
                         </g:FlowPanel>
-                        <g:FlowPanel>
+                        <g:FlowPanel addStyleNames="{style.rightPanel}">
                             <g:Label text="Источник" addStyleNames="{style.destinationLabel}" />
                             <g:HorizontalPanel height="30px">
                                 <g:cell verticalAlignment="middle">

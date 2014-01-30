@@ -10,7 +10,7 @@ import groovy.transform.Field
  *  formTemplateId=501
  *
  * графа - rowNumber
- * графа - code
+ * графа - knu
  * графа - incomeType
  * графа - sum
  *
@@ -61,11 +61,11 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['code', 'sum']
+def editableColumns = ['knu', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'code', 'incomeType', 'sum']
+def nonEmptyColumns = ['rowNumber', 'knu', 'incomeType', 'sum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -107,18 +107,18 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.code) })
+        dataRowHelper.save(dataRows.sort { getKnu(it.knu) })
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (row in dataRows) {
             row.rowNumber = ++number
-            row.incomeType = row.code
+            row.incomeType = row.knu
         }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
+    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
     dataRowHelper.save(dataRows)
 }
 
@@ -128,7 +128,7 @@ def calcTotalRow(def dataRows) {
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 3
-    ['rowNumber', 'fix', 'code', 'incomeType', 'sum'].each {
+    ['rowNumber', 'fix', 'knu', 'incomeType', 'sum'].each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
@@ -158,12 +158,12 @@ void logicCheck() {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
-        if (row.code != row.incomeType) {
+        if (row.knu != row.incomeType) {
             logger.error(errorMsg + "Вид (наименование) дохода не соответствует коду налогового учета!")
         }
 
         // Проверки соответствия НСИ
-        checkNSI(27, row, "code")
+        checkNSI(27, row, "knu")
         checkNSI(27, row, "incomeType")
     }
 
@@ -171,6 +171,6 @@ void logicCheck() {
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
-def String getKnu(def code) {
-    return getRefBookValue(27, code)?.CODE?.stringValue
+def String getKnu(def knu) {
+    return getRefBookValue(27, knu)?.CODE?.stringValue
 }

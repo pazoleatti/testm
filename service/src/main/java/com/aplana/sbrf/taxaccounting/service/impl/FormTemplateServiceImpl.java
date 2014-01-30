@@ -181,6 +181,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
+                System.out.println("formTemplateVersionIds.get(i): " + formTemplateVersionIds.get(i));
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
                 FormTemplate beginTemplate = formTemplateDao.get(formTemplateVersionIds.get(i));
                 FormTemplate endTemplate = formTemplateDao.get(formTemplateVersionIds.get(i++));
@@ -191,7 +192,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
                 segmentIntersections.add(segmentIntersection);
             }
-
+            System.out.println("formTemplateVersionIds.get(i): " + formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
             SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
             FormTemplate lastBeginTemplate = formTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
             int idRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, lastBeginTemplate.getVersion());
@@ -207,6 +208,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             return formTemplateVersionIds;*/
         //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
         int idLeft = formTemplateDao.getNearestFTVersionIdLeft(formTypeId, statusList, formTemplate.getVersion());
+        System.out.println("idLeft: " + idLeft);
         if (idLeft != 0){
             FormTemplate beginTemplate = formTemplateDao.get(idLeft);
             int idLeftRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, beginTemplate.getVersion());
@@ -246,6 +248,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public Date getFTEndDate(int formTemplateId) {
+        if (formTemplateId == 0)
+            return null;
         List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());

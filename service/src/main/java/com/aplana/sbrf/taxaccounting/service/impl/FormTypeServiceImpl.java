@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,9 +38,10 @@ public class FormTypeServiceImpl implements FormTypeService {
 
     @Override
     public List<FormType> getByFilter(TemplateFilter filter) {
-        if (filter.getTaxType() != null)
-            return formTypeDao.getByFilter(filter);
-        else
-            return formTypeDao.getAll();
+        List<Integer> ids = formTypeDao.getByFilter(filter);
+        List<FormType> formTypes = new ArrayList<FormType>();
+        for (Integer id : ids)
+            formTypes.add(formTypeDao.get(id));
+        return formTypes;
     }
 }
