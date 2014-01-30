@@ -50,12 +50,16 @@
             margin: 0 0 0 10px;
         }
 
+        .selected{
+            color: #000000;
+        }
+
     </ui:style>
 
 	<g:FlowPanel width="200px" ui:field="wrappingPanel">
 		<g:HorizontalPanel verticalAlignment="middle" height="100%" ui:field="panel">
 			<g:cell width="100%">
-				<g:TextBox enabled="false" ui:field="selected" width="100%" />
+				<g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="selected" width="100%" />
 			</g:cell>
 			<g:cell>
 				<g:Button ui:field="selectButton" text="..." width="25px" />
