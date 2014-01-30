@@ -2,11 +2,17 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'
 	xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
+    <ui:style>
+        .selected{
+            color: #000000;
+        }
+    </ui:style>
+
 	<g:FlowPanel width="200px" ui:field="wrappingPanel">
 		<g:HorizontalPanel verticalAlignment="middle"
 			width="100%" ui:field="panel">
 			<g:cell width="100%">
-				<g:TextBox enabled="false" ui:field="text" width="100%" />
+				<g:TextBox readOnly="true" addStyleNames="{style.selected}"  ui:field="text" width="100%" />
 			</g:cell>
 			<g:cell>
 				<g:Button text="..." ui:field="selectButton" width="25px" />
