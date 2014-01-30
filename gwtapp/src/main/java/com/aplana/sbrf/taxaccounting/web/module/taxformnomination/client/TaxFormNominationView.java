@@ -452,6 +452,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @Override
     public void setDataToFormTable(List<FormTypeKind> departmentFormTypes) {
+        selectedRows.clear();
         List<TableModel> types = new ArrayList<TableModel>();
 
         Collections.sort(departmentFormTypes, new Comparator<FormTypeKind>() {
@@ -592,6 +593,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         } else {
             getUiHandlers().onClickDeclarationCancelAnchor();
         }
+
 	}
 
 }

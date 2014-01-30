@@ -236,7 +236,11 @@ public class TaxFormNominationPresenter
 
 	@Override
 	public void onUpdateTable(UpdateTable event) {
-		reloadDeclarationTableData();
+        if (getView().isForm()){
+            reloadFormTableData();
+        } else {
+            reloadDeclarationTableData();
+        }
 	}
 
     @Override

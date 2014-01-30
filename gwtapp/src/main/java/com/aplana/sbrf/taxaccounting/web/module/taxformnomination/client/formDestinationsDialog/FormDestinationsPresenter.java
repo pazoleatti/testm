@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -113,6 +114,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                             Dialog.infoMessage("Сообщение", "Назначения налоговых форм подразделениям выполнены успешно.");
                         }
                         getView().hide();
+                        UpdateTable.fire(FormDestinationsPresenter.this);
                     }
                 }, this));
     }
@@ -131,6 +133,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                     @Override
                     public void onSuccess(EditFormResult result) {
                         getView().hide();
+                        UpdateTable.fire(FormDestinationsPresenter.this);
                     }
                 }, this));
     }
