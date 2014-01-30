@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -7,8 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.DeclarationDestinationsDialogOpenEvent;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.FormDestinationsDialogOpenEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -23,7 +23,6 @@ import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
-import com.aplana.gwt.client.dialog.Dialog;
 
 import java.util.List;
 import java.util.Set;
@@ -160,11 +159,11 @@ public class TaxFormNominationPresenter
     public void reloadDeclarationTableData(){
         dispatcher.execute(getTableDataAction(), CallbackUtils
 		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-			        @Override
-			        public void onSuccess(GetTableDataResult result) {
-				        getView().setDataToDeclarationTable(result.getTableData());
-			        }
-		        }, this));
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToDeclarationTable(result.getTableData());
+                    }
+                }, this));
     }
 
      private GetTableDataAction getTableDataAction(){
@@ -207,8 +206,8 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onClickEditDeclarationDestination() {
-        declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
+    public void onClickEditFormDestinations(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes) {
+        formDestinationsPresenter.initAndShowEditDialog(this, selectedDepartments, selectedKinds, selectedTypes);
     }
 
     @Override
