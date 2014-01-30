@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDestanationPopupDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDestanationPopupDataResult;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -35,8 +37,18 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         void setFormTypesMap(List<FormType> formTypes);
         // установка данных в поле "исполнители"
         void setPerformers(List<Department> performers, Set<Integer> availablePerformers);
-        // сброс формы, перед показом
-        void resetForm();
+        // подготовить форму для создания
+        void prepareCreationForm();
+        // показать модальную форму редактирования
+        void prepareEditForm(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes);
+        // получить список поздазделений
+        List<Integer> getDepartments();
+         // получить список исполнителей
+        List<Integer> getPerformers();
+        // получить тип формы
+        FormDataKind getFormDataKind();
+        // получить вид формы
+        Integer getFormTypeId();
     }
 
 
@@ -74,20 +86,63 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
 
     @Override
     protected void onReveal() {
+
         super.onReveal();
     }
 
     @Override
     public void onConfirm() {
-        //TODO логика
-        getView().hide();
+        AssignFormsAction action = new AssignFormsAction();
+        action.setDepartments(getView().getDepartments());
+        action.setFormDataKind(getView().getFormDataKind());
+        action.setFormTypeId(getView().getFormTypeId());
+        action.setPerformers(getView().getPerformers());
+
+        LogCleanEvent.fire(this);
+        dispatchAsync.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<AssignFormsResult>() {
+                    @Override
+                    public void onSuccess(AssignFormsResult result) {
+
+                        if (result.isIssetRelations()){
+                            LogAddEvent.fire(FormDestinationsPresenter.this, result.getUuid());
+                            // показать сообщение
+                            Dialog.warningMessage("Предупреждение", "Часть назначений налоговых форм подразделениям была выполнена ранее.");
+                        } else {
+                            // Если в БД не было найдено ни одного сочетания, которое пытался создать пользователь (то есть ни разу не был выполнен сценарий 5А), Система выводит Диалог - сообщение:
+                            Dialog.infoMessage("Сообщение", "Назначения налоговых форм подразделениям выполнены успешно.");
+                        }
+                        getView().hide();
+                    }
+                }, this));
+    }
+
+    @Override
+    public void onEdit(){
+        // Для каждого выбранного пользователем назначения, выполняется изменение / добавление исполнителя
+        EditFormsAction action = new EditFormsAction();
+        action.setDepartments(getView().getDepartments());
+        action.setFormDataKind(getView().getFormDataKind());
+        action.setFormTypeId(getView().getFormTypeId());
+        action.setPerformers(getView().getPerformers());
+
+        dispatchAsync.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<EditFormResult>() {
+                    @Override
+                    public void onSuccess(EditFormResult result) {
+                        getView().hide();
+                    }
+                }, this));
     }
 
     public void initAndShowDialog(final HasPopupSlot slotForMe) {
-        getView().resetForm();
+        getView().prepareCreationForm();
         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
-        //TODO логика загрузки данных
+    }
 
+    public void initAndShowEditDialog(final HasPopupSlot slotForMe, Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes){
+        getView().prepareEditForm(selectedDepartments, selectedKinds, selectedTypes);
+        slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
     }
 
 }

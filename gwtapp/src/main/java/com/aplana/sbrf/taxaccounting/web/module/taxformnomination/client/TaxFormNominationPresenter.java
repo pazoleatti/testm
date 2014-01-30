@@ -1,15 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.DeclarationDestinationsDialogOpenEvent;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.FormDestinationsDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -35,7 +32,7 @@ import java.util.Set;
  */
 public class TaxFormNominationPresenter
         extends Presenter<TaxFormNominationPresenter.MyView, TaxFormNominationPresenter.MyProxy>
-        implements TaxFormNominationUiHandlers, FormDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler, DeclarationDestinationsDialogOpenEvent.EditDestinationDialogOpenHandler  {
+        implements TaxFormNominationUiHandlers  {
 
     @ProxyCodeSplit
     @NameToken(TaxFormNominationToken.taxFormNomination)
@@ -71,7 +68,8 @@ public class TaxFormNominationPresenter
 
         List<Integer> getDepartments();
 
-	    List<FormTypeKind> getSelectedItems();
+	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
+        List<FormTypeKind> getSelectedItemsOnFormGrid();
     }
 
     protected final FormDestinationsPresenter formDestinationsPresenter;
@@ -85,13 +83,6 @@ public class TaxFormNominationPresenter
         this.formDestinationsPresenter = formDestinationsPresenter;
         this.declarationDestinationsPresenter = declarationDestinationsPresenter;
         getView().setUiHandlers(this);
-    }
-
-    @Override
-    protected void onBind() {
-        addRegisteredHandler(FormDestinationsDialogOpenEvent.getType(), this);
-        addRegisteredHandler(DeclarationDestinationsDialogOpenEvent.getType(), this);
-        super.onBind();
     }
 
     @Override
@@ -202,29 +193,28 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onClickEditFormDestination(FormDestinationsDialogOpenEvent event) {
+    public void onClickOpenFormDestinations() {
         formDestinationsPresenter.initAndShowDialog(this);
     }
 
     @Override
-    public void onClickEditDeclarationDestination(DeclarationDestinationsDialogOpenEvent event) {
+    public void onClickEditFormDestinations(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes) {
+        formDestinationsPresenter.initAndShowEditDialog(this, selectedDepartments, selectedKinds, selectedTypes);
+    }
+   
+    public void onClickEditDeclarationDestination() {
         declarationDestinationsPresenter.initAndShowDialog(this, this);
     }
 
     @Override
-    public void onClickOpenFormDestinations() {
-        FormDestinationsDialogOpenEvent.fire(this);
-    }
-
-    @Override
     public void onClickOpenDeclarationDestinations() {
-	    declarationDestinationsPresenter.initAndShowDialog(this, this);
+        declarationDestinationsPresenter.initAndShowDialog(this, this);
     }
 
 	@Override
 	public void onClickDeclarationCancelAnchor() {
 		DeleteDeclarationSourcesAction action = new DeleteDeclarationSourcesAction();
-		action.setKind(getView().getSelectedItems());
+		action.setKind(getView().getSelectedItemsOnDeclarationGrid());
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteDeclarationSourcesResult>() {
@@ -234,4 +224,20 @@ public class TaxFormNominationPresenter
 							}
 						}, this));
 	}
+
+    @Override
+    public void onClickFormCancelAnchor(){
+        DeleteFormsSourseAction action = new DeleteFormsSourseAction();
+        action.setKind(getView().getSelectedItemsOnFormGrid());
+        LogCleanEvent.fire(this);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<DeleteFormsSourceResult>() {
+                            @Override
+                            public void onSuccess(DeleteFormsSourceResult result) {
+                                LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+                                reloadFormTableData();
+                            }
+                        }, this));
+    }
 }

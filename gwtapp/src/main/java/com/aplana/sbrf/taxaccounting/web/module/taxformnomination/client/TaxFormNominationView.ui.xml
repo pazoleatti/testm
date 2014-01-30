@@ -73,7 +73,7 @@
 
 
                     <g:HorizontalPanel spacing="10" verticalAlignment="ALIGN_MIDDLE">
-                        <style:LinkAnchor ui:field="editAnchor" text="Редактировать"/>
+                        <style:LinkButton ui:field="editAnchor" enabled="false" text="Редактировать"/>
                         <style:LinkAnchor ui:field="assignAnchor" text="Назначить"/>
                         <style:LinkAnchor enabled="false" ui:field="cancelAnchor" text="Отменить назначение"/>
                     </g:HorizontalPanel>

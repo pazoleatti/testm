@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
@@ -17,7 +18,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -76,7 +76,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     GenericDataGrid<TableModel> declarationGrid;
     @UiField
-    Anchor editAnchor;
+    LinkButton editAnchor;
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
     @UiField
@@ -86,10 +86,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
+    // список с инде4ксами выделенных строк в гриде
+    private Set<Integer> selectedRows;
 
     @Inject
     @UiConstructor
     public TaxFormNominationView(final Binder uiBinder) {
+        selectedRows = new HashSet<Integer>();
         initBoxes();
         initWidget(uiBinder.createAndBindUi(this));
         initFormGrid();
@@ -112,7 +115,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             @Override
             public void update(int index, TableModel object, Boolean value) {
                 formGrid.getVisibleItem(index).setChecked(value);
-                //enableAnchor(cancelAnchor, isCanCancel());
+                if (value) {
+                    selectedRows.add(index);
+                } else {
+                    selectedRows.remove(index);
+                }
+
+                cancelAnchor.setEnabled(selectedRows.size() > 0);
+                //enableAnchor(cancelAnchor, selectedRows.size() > 0);
             }
         });
 
@@ -358,15 +368,24 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
 	@Override
-	public List<FormTypeKind> getSelectedItems() {
-		List<FormTypeKind> selected = new ArrayList<FormTypeKind>();
-		for (TableModel row : declarationGrid.getVisibleItems()) {
-			if (row.isChecked()) {
-				selected.add(row.departmentFormType);
-			}
-		}
-		return selected;
+	public List<FormTypeKind> getSelectedItemsOnDeclarationGrid() {
+		return getSelectedItems(declarationGrid);
 	}
+
+    @Override
+    public List<FormTypeKind> getSelectedItemsOnFormGrid() {
+        return getSelectedItems(formGrid);
+    }
+
+    private List<FormTypeKind> getSelectedItems(GenericDataGrid<TableModel> grid) {
+        List<FormTypeKind> selected = new ArrayList<FormTypeKind>();
+        for (TableModel row : grid.getVisibleItems()) {
+            if (row.isChecked()) {
+                selected.add(row.departmentFormType);
+            }
+        }
+        return selected;
+    }
 
 	/**
      * Установить вид представления на "Назначение налоговых форм"
@@ -525,9 +544,23 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
 
     @UiHandler("editAnchor")
-    public void clickk(ClickEvent event) {
+    public void clickEdit(ClickEvent event) {
         if(getUiHandlers() != null){
-            getUiHandlers().onClickOpenFormDestinations();
+            // выбрать строки для которых отмечены чекбоксы.
+            Set<Integer> selectedDepartments = new HashSet<Integer>();
+            // TODO пока передам только первый тип
+            Set<FormDataKind> selectedKinds = new HashSet<FormDataKind>();
+            // выбранные типы
+            Set<Integer> selectedTypes = new HashSet<Integer>();
+
+            for (Integer index: selectedRows){
+                TableModel model = formGrid.getVisibleItems().get(index);
+                selectedDepartments.add(model.getDepartment().getId());
+                selectedKinds.add(model.getDepartmentFormType().getKind());
+                selectedTypes.add(model.getDepartmentFormType().getFormTypeId().intValue());
+            }
+
+            getUiHandlers().onClickEditFormDestinations(selectedDepartments, selectedKinds, selectedTypes);
         }
     }
 
@@ -543,15 +576,22 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         }
     }
 
+    private void enableAnchor(Anchor anchor, boolean enabled) {
+        if (enabled) {
+            anchor.setStyleName(css.enabled());
+        } else {
+            anchor.setStyleName(css.disabled());
+        }
+        anchor.setEnabled(enabled);
+    }
+
 	@UiHandler("cancelAnchor")
 	public void clickCancelAnchor(ClickEvent event){
 		if (getUiHandlers() != null) {
-			if (isForm) {
-
-			} else {
-				getUiHandlers().onClickDeclarationCancelAnchor();
-			}
-		}
+            getUiHandlers().onClickFormCancelAnchor();
+        } else {
+            getUiHandlers().onClickDeclarationCancelAnchor();
+        }
 	}
 
 }

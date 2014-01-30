@@ -73,13 +73,14 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" header="Выберите исполнителя" modal="true" multiselection="true"/>
+                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" header="Выберите исполнителя" modal="true" multiselection="false"/>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="continueButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="editButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="createButton" text="Создать"/>
                     <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Закрыть"/>
                 </style:RightBar>
             </style:Bar>
