@@ -192,7 +192,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "from\n" +
                     "  ref_book_record\n" +
                     "where\n" +
-                    "  ref_book_id = %d and status = 0 and version <= to_date('%s', 'DD.MM.YYYY')\n" +
+                    "  ref_book_id = ? and status = 0 and version <= ?\n" +
                     "group by\n" +
                     "  record_id)\n";
 
@@ -233,13 +233,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
         if (version != null) {
-            ps.appendQuery(String.format(WITH_STATEMENT, refBookId, sdf.format(version)));
+            ps.appendQuery(WITH_STATEMENT);
+			ps.addParam(refBookId);
+			ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, recordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
-        ps.appendQuery("SELECT * FROM ");
+        ps.appendQuery("SELECT * FROM "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
         ps.appendQuery("(select\n");
         ps.appendQuery("  r.id as \"");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);

@@ -172,7 +172,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetActiveResult>() {
             @Override
             public void onSuccess(SetActiveResult result) {
-                getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Ввести в действие" : "Вывести из действия");
+                if (result.getUuid() != null)
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                setDeclarationTemplate();
             }
         }, this));
     }

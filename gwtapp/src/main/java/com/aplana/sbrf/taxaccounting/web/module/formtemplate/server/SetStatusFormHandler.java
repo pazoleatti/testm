@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -46,10 +45,7 @@ public class SetStatusFormHandler extends AbstractActionHandler<SetStatusFormAct
         Logger logger =  new Logger();
         mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser());
         result.setStatus(formTemplateService.get(action.getFormTemplateId()).getStatus().getId());
-        if (logger.containsLevel(LogLevel.ERROR)){
-            /*throw new ServiceLoggerException("Найдены экземпляры налоговых форм", logEntryService.save(logger.getEntries()));*/
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }else if (!logger.getEntries().isEmpty()){
+        if (!logger.getEntries().isEmpty()){
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
         return result;

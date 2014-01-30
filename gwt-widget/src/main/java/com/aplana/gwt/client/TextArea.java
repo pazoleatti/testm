@@ -1,14 +1,12 @@
 package com.aplana.gwt.client;
 
-import com.google.gwt.user.client.ui.TextArea;
-
 /**
  * TextArea, который в задимсабленном состоянии показывает Label.
  * @author Vitaliy Samolovskikh
  */
-public class AplanaTextArea extends DoubleStateWrapper<TextArea, String> {
-	public AplanaTextArea() {
-		super(new TextArea());
+public class TextArea extends DoubleStateWrapper<com.google.gwt.user.client.ui.TextArea, String> {
+	public TextArea() {
+		super(new com.google.gwt.user.client.ui.TextArea());
 	}
 
 	public int getVisibleLines() {

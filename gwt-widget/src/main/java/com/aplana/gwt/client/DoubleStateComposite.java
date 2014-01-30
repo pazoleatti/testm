@@ -60,13 +60,21 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 			deckPanel.showWidget(0);
 		} else {
 			// Show the label
-			if (this instanceof HasValue) {
-				setLabelValue(((HasValue) this).getValue());
-			}
+			updateLabelValue();
 			deckPanel.showWidget(1);
 		}
 
 		this.enabled = enabled;
+	}
+
+	/**
+	 * Обновляет значение Label в состоянии disabled.
+	 * Кошерно для переопределния.
+	 */
+	protected void updateLabelValue() {
+		if (this instanceof HasValue) {
+			setLabelValue(((HasValue) this).getValue());
+		}
 	}
 
 	protected void setLabelValue(Object value){

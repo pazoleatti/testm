@@ -72,7 +72,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
         return dateTimeFormat.parse(String.valueOf(year));
     }
 
-    private int convertFromDate(Date date){
+    private Integer convertFromDate(Date date){
+        if (date == null)
+            return null;
         return Integer.parseInt(dateTimeFormat.format(date));
     }
 
