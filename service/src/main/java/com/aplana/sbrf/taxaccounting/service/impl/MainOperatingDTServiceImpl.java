@@ -139,8 +139,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate, null, logger);
-            if (logger.containsLevel(LogLevel.ERROR))
-                throw new ServiceLoggerException("Макет используется и не может быть выведен из действия", logEntryService.save(logger.getEntries()));
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.save(declarationTemplate);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);

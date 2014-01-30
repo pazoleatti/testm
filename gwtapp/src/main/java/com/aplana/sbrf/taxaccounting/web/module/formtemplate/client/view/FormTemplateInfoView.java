@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.Fo
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,6 +52,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
         versionDateEnd.setValue(convertFromDate(versionEnd));
 		numberedColumnsBox.setValue(numberedColumns);
 		fixedRowsCheckBox.setValue(fixedRows);
+        Window.confirm(name + " " + fullName + " " + code);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
 		codeBox.setValue(code);
