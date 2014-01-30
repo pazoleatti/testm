@@ -203,7 +203,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(AdminConstants.NameTokens.adminPage));
+		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).
+                with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
 	}
 
     @Override
@@ -261,7 +262,16 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	}
 
 	private void saveAfterFlush() {
-
+        if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty() || formTemplate.getCode().isEmpty()){
+            MessageEvent.fire(FormTemplateMainPresenter.this, "Не заполнено одно из обязательных полей. " +
+                    "Проверьте поля \"Наименование формы\", \"Полное наименование формы\", \"Код формы\"");
+            return;
+        }
+        if (formTemplateExt.getActualEndVersionDate() != null &&
+                formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) >=0 ){
+            MessageEvent.fire(FormTemplateMainPresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            return;
+        }
 		UpdateFormAction action = new UpdateFormAction();
         action.setForm(formTemplate);
         action.setVersionEndDate(formTemplateExt.getActualEndVersionDate());

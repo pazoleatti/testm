@@ -140,6 +140,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void save() {
+        if (declarationTemplateExt.getEndDate() != null &&
+                declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >=0 ){
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            return;
+        }
+
 		UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplateExt(declarationTemplateExt);
         dispatcher.execute(action, CallbackUtils
@@ -161,7 +167,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(DeclarationTemplateTokens.declarationTemplateList));
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).
+                with(DeclarationTemplateTokens.declarationType, String.valueOf(declarationTemplate.getType().getId())).build());
 	}
 
     @Override
