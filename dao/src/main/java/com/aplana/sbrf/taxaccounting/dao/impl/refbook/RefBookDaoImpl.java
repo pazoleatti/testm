@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -483,7 +484,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String DELETE_REF_BOOK_VALUE_SQL = "delete from ref_book_value where record_id = ?";
 
     @Override
-    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
         if (uniqueRecordId == null || records == null) {
             throw new IllegalArgumentException("uniqueRecordId: " + uniqueRecordId + "; records: " + records);
         }
@@ -495,41 +496,38 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             RefBook refBook = get(refBookId);
             List<Object[]> listValues = new ArrayList<Object[]>();
 
-            for (int i = 0; i < records.size(); i++) {
-                Map<String, RefBookValue> record = records.get(i);
-
-                for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
-                    String attributeAlias = entry.getKey();
-                    if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
-                            RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
-                        continue;
-                    }
-                    RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
-                    Object[] values = new Object[]{uniqueRecordId, attribute.getId(), null, null, null, null};
-                    switch (attribute.getAttributeType()) {
-                        case STRING: {
-                            values[2] = entry.getValue().getStringValue();
-                        }
-                        break;
-                        case NUMBER: {
-                            if (entry.getValue().getNumberValue() != null) {
-                                values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
-                                        .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
-                            }
-                        }
-                        break;
-                        case DATE: {
-                            values[4] = entry.getValue().getDateValue();
-                        }
-                        break;
-                        case REFERENCE: {
-                            values[5] = entry.getValue().getReferenceValue();
-                        }
-                        break;
-                    }
-                    listValues.add(values);
+            for (Map.Entry<String, RefBookValue> entry : records.entrySet()) {
+                String attributeAlias = entry.getKey();
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                    continue;
                 }
+                RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+                Object[] values = new Object[]{uniqueRecordId, attribute.getId(), null, null, null, null};
+                switch (attribute.getAttributeType()) {
+                    case STRING: {
+                        values[2] = entry.getValue().getStringValue();
+                    }
+                    break;
+                    case NUMBER: {
+                        if (entry.getValue().getNumberValue() != null) {
+                            values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                    .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                        }
+                    }
+                    break;
+                    case DATE: {
+                        values[4] = entry.getValue().getDateValue();
+                    }
+                    break;
+                    case REFERENCE: {
+                        values[5] = entry.getValue().getReferenceValue();
+                    }
+                    break;
+                }
+                listValues.add(values);
             }
+
             JdbcTemplate jt = getJdbcTemplate();
             //Удаляем старые значения атрибутов
             jt.update(DELETE_REF_BOOK_VALUE_SQL, uniqueRecordId);
@@ -722,6 +720,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
+        final Map<Long, Date> result = new HashMap<Long, Date>();
+        getJdbcTemplate().query(String.format("select id, version from ref_book_record where id in %s",
+                SqlUtils.transformToSqlInStatement(uniqueRecordIds)), new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                result.put(rs.getLong("id"), rs.getDate("version"));
+            }
+        });
+        return result;
     }
 
     @Override

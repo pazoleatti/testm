@@ -294,9 +294,7 @@ public class RefBookDaoTest {
 		record.get(ATTRIBUTE_PAGECOUNT).setValue(123);
 		record.get(ATTRIBUTE_AUTHOR).setValue(null);
 		// сохраняем изменения
-		List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-		records.add(record);
-        refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), records);
+        refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
         refBookDao.updateVersionRelevancePeriod(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
 		// проверяем изменения
 		data = refBookDao.getRecords(refBook.getId(), version2, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
@@ -322,7 +320,7 @@ public class RefBookDaoTest {
         record.get(RefBookDaoTest.ATTRIBUTE_NAME).setValue("Вий. Туда и обратно");
         record.get(ATTRIBUTE_PAGECOUNT).setValue(123);
         record.get(RefBookDaoTest.ATTRIBUTE_AUTHOR).setValue(7L);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
         record = data.get(1);
@@ -343,11 +341,11 @@ public class RefBookDaoTest {
 
         Map<String, RefBookValue> record = data.get(0);
         record.get(ATTRIBUTE_WEIGHT).setValue(0.123456789d);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
 
         record = data.get(1);
         record.get(ATTRIBUTE_WEIGHT).setValue(-345.9905);
-        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), Arrays.asList(record));
+        refBookDao.updateRecordVersion(refBookId, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
 
         data = refBookDao.getRecords(refBookId, version, new PagingParams(), null, null);
 
@@ -467,6 +465,13 @@ public class RefBookDaoTest {
     public void isVersionExist() {
         assertTrue(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2013)));
         assertFalse(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2014)));
+    }
+
+    @Test
+    public void getRecordsVersionStart() {
+        Map<Long, Date> result = refBookDao.getRecordsVersionStart(Arrays.asList(1L, 2L));
+        assertEquals(getZeroTimeDate(getDate(1, 1, 2013)), result.get(1L));
+        assertEquals(getZeroTimeDate(getDate(1, 2, 2013)), result.get(2L));
     }
 
     private static Date getZeroTimeDate(Date date) {
