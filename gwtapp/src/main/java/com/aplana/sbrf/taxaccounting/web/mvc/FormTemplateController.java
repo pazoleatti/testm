@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -69,11 +70,13 @@ public class FormTemplateController {
 	@RequestMapping(value = "formTemplate/upload/{formTemplateId}",method = RequestMethod.POST)
 	public void upload(@PathVariable int formTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, IOException {
+        if (formTemplateId == 0)
+            throw new ServiceException("Сначала сохраните шаблон.");
         Logger logger = new Logger();
         Date endDate = formTemplateService.getFTEndDate(formTemplateId);
         mainOperatingService.edit(formTemplateService.get(formTemplateId), endDate, logger, securityService.currentUserInfo().getUser());
         if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("Найдены пересечения.", logEntryService.save(logger.getEntries()));
 
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);

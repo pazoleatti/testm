@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.List;
 
@@ -36,4 +37,6 @@ public interface DeclarationTypeDao {
     int save(DeclarationType type);
 
     void delete(int typeId);
+
+    List<Integer> getByFilter(TemplateFilter filter);
 }
