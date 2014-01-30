@@ -65,7 +65,6 @@ switch (formDataEvent) {
         break
 }
 
-
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS']
@@ -73,11 +72,15 @@ def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPer
 //Аттрибуты, очищаемые перед импортом формы
 @Field
 def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS', 'logicalCheck',
-    'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
+        'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
-def rowsCalc = ['R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15','R16','R17','R1','R26','R27',
-        'R28','R29', 'R30','R31','R32', 'R70','R71']
+def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R1',
+        'R26', 'R27', 'R28', 'R29', 'R30', 'R31', 'R32', 'R70', 'R71']
+
+@Field
+def notImportSum = ['R1', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12', 'R13', 'R15', 'R16', 'R17', 'R27', 'R29',
+        'R67', 'R68', 'R71']
 
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
@@ -449,7 +452,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        def curRow = getDataRow(rows, "R" + rowIndex)
+        def alias = "R" + rowIndex
+        def curRow = getDataRow(rows, alias)
 
         //очищаем столбцы
         resetColumns.each {
@@ -486,14 +490,16 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 5
 
         // графа 6
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (val.isBigDecimal()) {
+            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
         // графа 7
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (val.isBigDecimal()) {
+            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -501,8 +507,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (!notImportSum.contains(alias) && val.isBigDecimal()) {
+            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
     }
