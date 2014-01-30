@@ -54,7 +54,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     Button selectButton;
 
     @UiField
-    TextBox txt;
+	com.google.gwt.user.client.ui.TextBox txt;
 
     @UiField
     ScrollPanel scrollPanel;

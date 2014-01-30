@@ -1150,6 +1150,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             RefBook refBook = get(refBookId);
             List<Object[]> recordAddIds = new ArrayList<Object[]>();
+            List<Object[]> listValues = new ArrayList<Object[]>();
             List<Object[]> delValues = new LinkedList<Object[]>();
             List<Long> recordsId = new ArrayList<Long>();
             int needIdsCnt = 0;
@@ -1189,6 +1190,41 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
             }
 
+            for (int i = 0; i < records.size(); i++) {
+                Map<String, RefBookValue> record = records.get(i);
+                Long recordId = recordsId.get(i);
+                for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
+                    String attributeAlias = entry.getKey();
+                    if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
+                            RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                        continue;
+                    }
+                    RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
+                    Object[] values = new Object[]{recordId, attribute.getId(), null, null, null, null};
+                    switch (attribute.getAttributeType()) {
+                        case STRING: {
+                            values[2] = entry.getValue().getStringValue();
+                        }
+                        break;
+                        case NUMBER: {
+                            if (entry.getValue().getNumberValue() != null) {
+                                values[3] = BigDecimal.valueOf(entry.getValue().getNumberValue().doubleValue())
+                                        .setScale(attribute.getPrecision(), RoundingMode.HALF_UP).doubleValue();
+                            }
+                        }
+                        break;
+                        case DATE: {
+                            values[4] = entry.getValue().getDateValue();
+                        }
+                        break;
+                        case REFERENCE: {
+                            values[5] = entry.getValue().getReferenceValue();
+                        }
+                        break;
+                    }
+                    listValues.add(values);
+                }
+            }
             JdbcTemplate jt = getJdbcTemplate();
             // - REF_BOOK_VALUE
             if (!delValues.isEmpty()) {
@@ -1199,7 +1235,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 jt.batchUpdate(String.format(UPDATE_REF_BOOK_RECORD_SQL_OLD, refBookId, sdf.format(version)), recordAddIds);
             }
             // + REF_BOOK_VALUE
-			List<Object[]> listValues = getListValuesForBatch(refBookId, records, refBookRecordIds);
             jt.batchUpdate(INSERT_REF_BOOK_VALUE_OLD, listValues);
         }
         catch (DaoException ex) {

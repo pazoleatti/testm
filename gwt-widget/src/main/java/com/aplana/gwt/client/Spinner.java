@@ -47,7 +47,7 @@ public class Spinner extends DoubleStateComposite
 	/**
 	 * Поле для ввода значения непосредственно.
 	 */
-	private TextBox textBox = new TextBox();
+	private com.google.gwt.user.client.ui.TextBox textBox = new com.google.gwt.user.client.ui.TextBox();
 
 	/**
 	 * Кнопка для увеличения значения на 1.

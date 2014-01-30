@@ -66,11 +66,15 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setCode(codeBox.getValue());
 	}
 
-    private Date convertToDate(int year){
+    private Date convertToDate(Integer year){
+        if (year == null)
+            return null;
         return dateTimeFormat.parse(String.valueOf(year));
     }
 
-    private int convertFromDate(Date date){
+    private Integer convertFromDate(Date date){
+        if (date == null)
+            return null;
         return Integer.parseInt(dateTimeFormat.format(date));
     }
 

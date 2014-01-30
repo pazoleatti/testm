@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
@@ -66,4 +67,11 @@ public class LinkAnchor extends Anchor{
         String textDiv = !text.isEmpty() ? templates.text(text).asString() : "";
         setHTML(image + textDiv);
     }
+
+    @Override
+    public void fireEvent(GwtEvent<?> event){
+        if (this.isEnabled())
+            super.fireEvent(event);
+    }
+
 }
