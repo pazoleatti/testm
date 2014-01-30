@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,5 +40,14 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     @Override
     public List<DeclarationType> listAll() {
         return declarationTypeDao.listAll();
+    }
+
+    @Override
+    public List<DeclarationType> getByFilter(TemplateFilter filter) {
+        List<Integer> integerList = declarationTypeDao.getByFilter(filter);
+        List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
+        for (Integer id : integerList)
+            declarationTypes.add(declarationTypeDao.get(id));
+        return declarationTypes;
     }
 }

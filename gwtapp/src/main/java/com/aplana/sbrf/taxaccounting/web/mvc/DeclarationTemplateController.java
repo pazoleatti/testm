@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import java.io.*;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -41,7 +42,6 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		
 		String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
 		resp.setContentType("application/dect");
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
@@ -55,6 +55,8 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
 	public void uploadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, IOException {
+        if (declarationTemplateId == 0)
+            throw new ServiceException("Сначала сохраните шаблон.");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
@@ -83,6 +85,8 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, UnsupportedEncodingException {
+        if (declarationTemplateId == 0)
+            throw new ServiceException("Сначала сохраните шаблон.");
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);

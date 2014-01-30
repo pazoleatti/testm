@@ -34,7 +34,7 @@ public interface FormTypeDao {
      */
 	List<FormType> getByTaxType(TaxType taxType);
 
-    List<FormType> getByFilter(TemplateFilter filter);
+    List<Integer> getByFilter(TemplateFilter filter);
 
     /**
      * Сохранение нового ааблона
