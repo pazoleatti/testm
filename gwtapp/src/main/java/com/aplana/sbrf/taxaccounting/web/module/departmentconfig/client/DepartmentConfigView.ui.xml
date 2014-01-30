@@ -344,7 +344,7 @@
                                             <g:Label text="Ставка налога:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:DoubleBox ui:field="taxRate" width="200px" addStyleNames="gwt-TextBox"/>
+                                            <aplana:DoubleBox ui:field="taxRate" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -387,7 +387,7 @@
                                                     text="Сумма налога на прибыль, выплаченная за пределами РФ в отчётном периоде:"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:LongBox ui:field="sumTax" width="200px" addStyleNames="gwt-TextBox"/>
+                                            <aplana:LongBox ui:field="sumTax" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="sumDividendsPanel" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -396,7 +396,7 @@
                                                     text="Сумма налога с выплаченных дивидендов за пределами РФ в последнем квартале отчётного периода:"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:LongBox ui:field="sumDividends" width="200px" addStyleNames="gwt-TextBox"/>
+                                            <aplana:LongBox ui:field="sumDividends" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                 </g:VerticalPanel>

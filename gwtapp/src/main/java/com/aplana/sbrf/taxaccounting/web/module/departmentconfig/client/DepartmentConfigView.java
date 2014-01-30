@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import com.aplana.gwt.client.DoubleBox;
+import com.aplana.gwt.client.LongBox;
 import com.aplana.gwt.client.TextArea;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
@@ -86,10 +88,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             approveOrgName;
 
     @UiField
-    DoubleBox taxRate;
+	DoubleBox taxRate;
 
     @UiField
-    LongBox sumTax,
+	LongBox sumTax,
             sumDividends;
 
     @UiField
@@ -104,7 +106,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             type;
 
     @UiField
-	com.aplana.gwt.client.TextArea name;
+	TextArea name;
 
     // Контейнер для справочника периодов
     @UiField
@@ -113,7 +115,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    HorizontalPanel sumTaxPanel,
+	HorizontalPanel sumTaxPanel,
             sumDividendsPanel,
             payPanelObligation,
             payPanelType,
@@ -121,7 +123,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    Button saveButton,
+	Button saveButton,
             cancelButton;
 
     @UiField
@@ -130,7 +132,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    FormPanel formPanel;
+	FormPanel formPanel;
 
     @UiField
     @Ignore
