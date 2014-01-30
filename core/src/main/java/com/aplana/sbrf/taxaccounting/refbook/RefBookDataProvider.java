@@ -108,6 +108,13 @@ public interface RefBookDataProvider {
     RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
 
     /**
+     * Возвращает дату начала периода актуальности для указанных версий записей справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return идентификатор версии - дата начала периода актуальности
+     */
+    Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
+
+    /**
      * Возвращает количество существующих версий для элемента справочника
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return
@@ -116,9 +123,9 @@ public interface RefBookDataProvider {
 
     /**
      * Создает новую версию записи справочника
-     * @param recordId идентификатор записи справочника без учета версии
+     * @param recordId идентификатор записи справочника без учета версии. Если null - создается новая версия
      * @param versionFrom дата начала актуальности новый версии
-     * @param versionTo дата конца актуальности новый версии
+     * @param versionTo дата конца актуальности новый версии. Может быть null
      * @param records список новых значений атрибутов записи справочника
      */
     void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
@@ -134,11 +141,11 @@ public interface RefBookDataProvider {
      * Обновляет данные версии записи справочника
      * Если был изменен период актуальности, выполняются дополнительные проверки пересечений
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @param versionFrom дата начала актуальности новый версии
-     * @param versionTo дата конца актуальности новый версии
+     * @param versionFrom дата начала актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param versionTo дата конца актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
      * @param records список обновленных значений атрибутов записи справочника
      */
-    void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
+    void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
 
     /**
      * Устанавливает дату окончания периода актуальности для указанных версий записей справочника

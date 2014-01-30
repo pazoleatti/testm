@@ -93,12 +93,18 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
+        return refBookDao.getRecordsVersionStart(uniqueRecordIds);
+    }
+
+    @Override
     public int getRecordVersionsCount(Long uniqueRecordId) {
         return refBookDao.getRecordVersionsCount(refBookId, uniqueRecordId);
     }
 
     @Override
     public void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+        System.out.println("records: "+records.size());
         try {
             if (!refBookDao.isVersionExist(refBookId, recordId, versionFrom)) {
                 List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
@@ -253,35 +259,39 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         try {
+            boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
+
             List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
             //Получаем идентификатор записи справочника без учета версий
             Long recordId = refBookDao.getRecordId(uniqueRecordId);
 
             //Проверка обязательности заполнения записей справочника
-            for (Map<String, RefBookValue> record : records) {
-                List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-                if (errors.size() > 0){
-                    throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-                }
+            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
+            if (errors.size() > 0){
+                throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
             }
 
             RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
 
-            boolean isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
-                    || (versionTo != null && !versionTo.equals(oldVersionPeriod.getVersionEnd()))
-                    || (oldVersionPeriod.getVersionEnd() != null && !oldVersionPeriod.getVersionEnd().equals(versionTo));
+            boolean isRelevancePeriodChanged = false;
+            if (!isJustNeedValuesUpdate) {
+                isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
+                        || (versionTo != null && !versionTo.equals(oldVersionPeriod.getVersionEnd()))
+                        || (oldVersionPeriod.getVersionEnd() != null && !oldVersionPeriod.getVersionEnd().equals(versionTo));
 
-            if (isRelevancePeriodChanged) {
-                //Проверка пересечения версий
-                crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
-                        versionFrom, versionTo, logger);
-            }
-            //Проверка использования
-            boolean isReferenceToVersionExists = refBookDao.isVersionUsed(uniqueRecordId, versionFrom);
-            if (isReferenceToVersionExists) {
-                throw new ServiceException("Обнаружено использование версии в других точках запроса");
+                if (isRelevancePeriodChanged) {
+                    //Проверка пересечения версий
+                    crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
+                            versionFrom, versionTo, logger);
+                }
+
+                //Проверка использования
+                boolean isReferenceToVersionExists = refBookDao.isVersionUsed(uniqueRecordId, versionFrom);
+                if (isReferenceToVersionExists) {
+                    throw new ServiceException("Обнаружено использование версии в других точках запроса");
+                }
             }
 
             //Обновление периода актуальности

@@ -114,7 +114,7 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         throw new UnsupportedOperationException();
     }
 
@@ -130,6 +130,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 

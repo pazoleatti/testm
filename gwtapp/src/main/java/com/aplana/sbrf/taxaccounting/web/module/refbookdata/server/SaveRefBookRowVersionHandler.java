@@ -43,14 +43,10 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 			RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
 			valueToSave.put(v.getKey(), value);
 		}
-		List<Map<String, RefBookValue>> valuesToSaveList = new ArrayList<Map<String, RefBookValue>>();
-		RefBookValue id = new RefBookValue(RefBookAttributeType.NUMBER, action.getRecordId());
-		valueToSave.put(RefBook.RECORD_ID_ALIAS, id);
-		valuesToSaveList.add(valueToSave);
 
         SaveRefBookRowVersionResult result = new SaveRefBookRowVersionResult();
         Logger logger = new Logger();
-		refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valuesToSaveList);
+		refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valueToSave);
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

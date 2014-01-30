@@ -104,6 +104,11 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
+    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int getRecordVersionsCount(Long refBookRecordId) {
         throw new UnsupportedOperationException();
     }
@@ -119,7 +124,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
-    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
+    public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
         throw new UnsupportedOperationException();
     }
 
