@@ -136,7 +136,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
             @Override
             public void onChange(ChangeEvent event) {
                 if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    Window.confirm("Сначала сохраните шаблон");
+                    confirm();
                     uploadJrxml.setName("");
                     uploadDectForm.reset();
                     uploadJrxmlForm.reset();
@@ -147,7 +147,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
             @Override
             public void onChange(ChangeEvent event) {
                 if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    Window.confirm("Сначала сохраните шаблон");
+                    confirm();
                     uploadJrxml.setName("");
                     uploadDectForm.reset();
                     uploadJrxmlForm.reset();
@@ -164,6 +164,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Override
     public void activateButtonName(String name) {
         activateVersion.setText(name);
+    }
+
+    @Override
+    public void confirm() {
+        Window.confirm("Сначала сохраните шаблон");
     }
 
     @UiHandler("saveButton")

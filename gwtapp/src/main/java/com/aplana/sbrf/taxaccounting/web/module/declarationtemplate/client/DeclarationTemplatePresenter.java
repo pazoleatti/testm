@@ -89,6 +89,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
+        void confirm();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -181,11 +182,19 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
 	public void downloadJrxml() {
+        if (declarationTemplate.getId() == null){
+            getView().confirm();
+            return;
+        }
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
 	
 	@Override
 	public void downloadDect() {
+        if (declarationTemplate.getId() == null){
+            getView().confirm();
+            return;
+        }
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
 	}
 
