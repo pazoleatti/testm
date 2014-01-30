@@ -102,13 +102,26 @@ public class RefBookUniversal implements RefBookDataProvider {
         try {
             if (!refBookDao.isVersionExist(refBookId, recordId, versionFrom)) {
                 List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+                List<String> errors = new ArrayList<String>();
                 //Проверка обязательности заполнения записей справочника
                 for (Map<String, RefBookValue> record : records) {
-                    List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
+                    errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
                     if (errors.size() > 0){
                         throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
                     }
                 }
+
+                //Проверка корректности значений атрибутов
+                for (Map<String, RefBookValue> record : records) {
+                    errors = refBookUtils.checkRefBookAtributeValues(attributes, record);
+                }
+                if (errors.size() > 0){
+                    for (String error : errors) {
+                        logger.error(error);
+                    }
+                    throw new ServiceException("Обнаружено некорректное значение атрибута");
+                }
+
 
                 //Проверка корректности
                 List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
