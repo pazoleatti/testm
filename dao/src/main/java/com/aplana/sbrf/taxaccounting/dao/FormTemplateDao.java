@@ -87,13 +87,28 @@ public interface FormTemplateDao {
      */
     List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
 
+    /**
+     * Поиск версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
+     * @param formTypeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор "правой" версии макета
+     */
     int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
+     * @param formTypeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор версии макета "слева"
+     */
     int getNearestFTVersionIdLeft(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Удаляет версию шаблона. По идее удалять полностью только фейковые версии шаблонов.
-     * @param formTemplateId
-     * @return
+     * @param formTemplateId идентификатор макета
+     * @return удаленный идентификатор макета
      */
     int delete(int formTemplateId);
 

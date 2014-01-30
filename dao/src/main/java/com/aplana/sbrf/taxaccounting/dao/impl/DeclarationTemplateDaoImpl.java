@@ -42,7 +42,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
 			d.setActive(rs.getBoolean("is_active"));
-			d.setVersion(new Date(rs.getTimestamp("version").getTime()));
+			d.setVersion(rs.getDate("version"));
 			d.setEdition(rs.getInt("edition"));
 			d.setType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
@@ -102,7 +102,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
             @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
-		int count = 0;
+		int count;
 		int declarationTemplateId;
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
@@ -211,7 +211,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         );
 
         if (filter.getTaxType() != null) {
-            query.append(" and declaration_type.TAX_TYPE = \'" + filter.getTaxType().getCode() + "\'");
+            query.append(" and declaration_type.TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
         }
         return getJdbcTemplate().queryForList(
                 query.toString(),
@@ -244,7 +244,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         if (actualBeginVersion != null && actualEndVersion != null)
             builder.append(" and version between :actualStartVersion and :actualEndVersion");
         else if (actualBeginVersion != null)
-            builder.append(" and version > :actualStartVersion");
+            builder.append(" and version >= :actualStartVersion");
 
         if (decTemplateId != 0)
             builder.append(" and id <> :decTemplateId");

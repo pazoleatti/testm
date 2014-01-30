@@ -52,7 +52,7 @@ public interface DeclarationTemplateDao {
 
     /**
      * Получение тела скрипта.
-     * @param declarationTemplateId
+     * @param declarationTemplateId идентификатор макета
      * @return тело скрипта
      */
     String getDeclarationTemplateScript(int declarationTemplateId);
@@ -79,14 +79,29 @@ public interface DeclarationTemplateDao {
      */
     List<Integer> getDeclarationTemplateVersions(int decTypeId, int decTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
 
+    /**
+     * Поиск версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
+     * @param typeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор "правой" версии макета
+     */
     int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
+     * @param typeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор версии макета "слева"
+     */
     int getNearestDTVersionIdLeft(int typeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Удаляет версию шаблона.
      * По идее удалять полностью только фейковые версии шаблонов.
-     * @param declarationTemplateId
-     * @return
+     * @param declarationTemplateId идентификатор макета
+     * @return удаленный идентификатор макета
      */
     int delete(int declarationTemplateId);
 

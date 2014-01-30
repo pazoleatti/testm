@@ -48,7 +48,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
 			formTemplate.setId(rs.getInt("id"));
-            formTemplate.setVersion(new Date(rs.getTimestamp("version").getTime()));
+            formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
@@ -224,7 +224,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         );
 
         if (filter.getTaxType() != null) {
-            query.append(" and form_type.TAX_TYPE = \'" + filter.getTaxType().getCode() + "\'");
+            query.append(" and form_type.TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
         }
         return getJdbcTemplate().queryForList(
                 query.toString(),
@@ -257,7 +257,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         if (actualBeginVersion != null && actualEndVersion != null)
             builder.append(" and version between :actualStartVersion and :actualEndVersion");
         else if (actualBeginVersion != null)
-            builder.append(" and version > :actualStartVersion");
+            builder.append(" and version >= :actualStartVersion");
 
         if (formTemplateId != 0)
             builder.append(" and id <> :formTemplateId");
