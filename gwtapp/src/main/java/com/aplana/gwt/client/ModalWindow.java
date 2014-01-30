@@ -1,5 +1,7 @@
 package com.aplana.gwt.client;
 
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -14,14 +16,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 
-
 /**
  * Модальное окно.
  *
  * @author : vpetrov
- *         Date: 16.12.13
+ * @since : 16.12.13
  */
-public class ModalWindow extends DialogBox {
+public class ModalWindow extends DialogBox implements CanHide {
 
     Image close;
     HTML title;
@@ -31,6 +32,12 @@ public class ModalWindow extends DialogBox {
     private FlowPanel captionPanel = new FlowPanel();
     private FlowPanel captionTitlePanel = new FlowPanel();
 
+    private OnHideHandler<CanHide> hideHandler = new OnHideHandler<CanHide>() {
+        @Override
+        public void OnHide(CanHide modalWindow) {
+            modalWindow.hide();
+        }
+    };
 
     /**
      * @param title   - заголовок окна
@@ -93,11 +100,21 @@ public class ModalWindow extends DialogBox {
         DOM.appendChild(td, captionPanel.getElement());
     }
 
+    public ModalWindow(String title, OnHideHandler<CanHide> hideHandler) {
+        this(title, "");
+        this.hideHandler = hideHandler;
+    }
+
     /**
      * @param title - заголовок окна
      */
     public ModalWindow(String title) {
         this(title, "");
+    }
+
+    public ModalWindow(OnHideHandler<CanHide> hideHandler) {
+        this("");
+        this.hideHandler = hideHandler;
     }
 
     public ModalWindow() {
@@ -141,13 +158,19 @@ public class ModalWindow extends DialogBox {
                 && (event.getTypeInt() == Event.ONCLICK)
                 && isCloseEvent(nativeEvent))
                 || (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE)) {
-            this.hide();
+            hideHandler.OnHide(this);
         }
         super.onPreviewNativeEvent(event);
     }
 
     private boolean isCloseEvent(NativeEvent event) {
         return event.getEventTarget().equals(close.getElement());
+    }
+
+    public void setOnHideHandler(OnHideHandler<CanHide> hideHandler) {
+        if (hideHandler != null){
+            this.hideHandler = hideHandler;
+        }
     }
 
     interface ModalWindowResources extends ClientBundle {

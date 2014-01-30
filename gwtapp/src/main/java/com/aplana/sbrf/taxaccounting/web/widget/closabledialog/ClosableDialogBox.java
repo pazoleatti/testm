@@ -7,9 +7,13 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+/**
+ * @see com.aplana.gwt.client.ModalWindow
+ * @deprecated
+ */
+@Deprecated
 public class ClosableDialogBox  extends DialogBox {
 
     HTML close = new HTML("X");

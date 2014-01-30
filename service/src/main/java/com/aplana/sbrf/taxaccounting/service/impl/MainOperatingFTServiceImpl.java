@@ -136,6 +136,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public void setStatusTemplate(int templateId, Logger logger, TAUser user) {
         FormTemplate formTemplate = formTemplateService.get(templateId);
+        formTemplate.setScript(formTemplateService.getFormTemplateScript(templateId));
 
         if (formTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(formTemplate, null, logger);
