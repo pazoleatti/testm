@@ -17,16 +17,13 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0px !important;
             width: 84px;
         }
 
-        .caption {
-            margin: 0px 10px;
-        }
-
-        .dateBoxPopup {
-            z-index: 1000001;
+        .marginLeft{
+            margin-left: 10px;
+            border: 1px solid #aeaeac;
         }
     </ui:style>
 
@@ -37,25 +34,38 @@
             <g:cell>
                 <g:HorizontalPanel addStyleNames="{style.content}">
                     <g:cell horizontalAlignment="ALIGN_LEFT" width="100%" height="100%">
-                        <picker:DepartmentTreeWidget header="Подразделение" ui:field="departmentPicker" height="270px" width="300px" multiSelection="false"/>
+                        <picker:DepartmentTreeWidget header="Подразделение" ui:field="departmentPicker" height="270px"
+                                                     width="300px" multiSelection="false"/>
                     </g:cell>
-                    <g:cell verticalAlignment="MIDDLE">
-                        <g:HorizontalPanel width="300px">
-                            <g:cell>
-                                <g:Label styleName="{style.caption}">Срок сдачи отчетности</g:Label>
-                            </g:cell>
-                            <g:cell horizontalAlignment="ALIGN_LEFT">
-                                <d:DateMaskBoxPicker width="130px" ui:field="deadline"/>
-                            </g:cell>
-                        </g:HorizontalPanel>
+                    <g:cell verticalAlignment="MIDDLE" height="100%">
+                        <g:SimplePanel height="295px"  width="300px" addStyleNames="{style.marginLeft}">
+                            <g:VerticalPanel height="100%" >
+                                <g:cell verticalAlignment="bottom">
+                                    <g:HorizontalPanel spacing="4" width="300px">
+                                        <g:cell verticalAlignment="middle">
+                                            <g:Label wordWrap="false" text="Срок сдачи отчетности"/>
+                                        </g:cell>
+                                        <g:cell verticalAlignment="middle">
+                                            <d:DateMaskBoxPicker ui:field="deadline" />
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                </g:cell>
+                                <g:cell horizontalAlignment="right" verticalAlignment="bottom">
+                                    <g:HorizontalPanel spacing="4">
+                                        <g:Button ui:field="saveButton" text="Сохранить"/>
+                                        <g:Button ui:field="cancelButton" text="Отменить"/>
+                                    </g:HorizontalPanel>
+                                </g:cell>
+                            </g:VerticalPanel>
+                        </g:SimplePanel>
                     </g:cell>
+
                 </g:HorizontalPanel>
             </g:cell>
 
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="saveButton">Сохранить</g:Button>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton">Отмена</g:Button>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="exitButton" text="Закрыть"/>
                 </g:FlowPanel>
             </g:cell>
         </g:VerticalPanel>
