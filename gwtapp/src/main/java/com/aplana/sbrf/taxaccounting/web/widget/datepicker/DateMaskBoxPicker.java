@@ -93,7 +93,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     }
 
     public void setWidth(String width){
-        dateBox.setWidth(width);
+        mainPanel.setWidth(width);
     }
 
 	private void addDatePickerHandlers() {
@@ -159,6 +159,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		dateBox.setEnabled(enabled);
         calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
+        clearImage.setVisible(getValue()!= null && enabled);
         clearImage.setResource(enabled ? iconsRecources.clearBtn() : iconsRecources.clearBtnDisable());
         clearImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
 	}

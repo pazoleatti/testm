@@ -10,5 +10,4 @@
 	<inherits name="com.aplana.sbrf.taxaccounting.web.main.api.MainApi"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.widget.Widget"/>
     <source path='client' />
-	<source path="shared"/>
 </module>

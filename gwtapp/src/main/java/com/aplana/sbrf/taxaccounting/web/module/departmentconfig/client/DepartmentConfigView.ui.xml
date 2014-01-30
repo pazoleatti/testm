@@ -4,7 +4,8 @@
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
-             xmlns:fm="urn:import:com.aplana.gwt.client.form">
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+			 xmlns:aplana="urn:import:com.aplana.gwt.client">
 
     <ui:style>
         .titleText {
@@ -69,6 +70,7 @@
             max-width: 450px;
         }
 
+/*
         .textArea {
             resize: none;
             font-family: Tahoma, helvetica, arial, sans-serif !important;
@@ -80,11 +82,14 @@
             border: 1px solid green;
             overflow: auto;
 
-            /*Потому что в текстбоксах тоже есть, нужно выпиливать но не
-            известно как поведут другие зависимые от текстбокса компоненты(виджеты)*/
+            */
+/*Потому что в текстбоксах тоже есть, нужно выпиливать но не
+            известно как поведут другие зависимые от текстбокса компоненты(виджеты)*//*
+
             margin-left: -1px;
 
         }
+*/
 
         .toLongLabel{
             line-height: 11px;
@@ -178,7 +183,7 @@
                                             <g:Label text="Наименование:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextArea ui:field="name" visibleLines="4" styleName="{style.textArea}"/>
+                                            <aplana:AplanaTextArea ui:field="name" visibleLines="4"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -195,7 +200,7 @@
                                             <g:Label text="Номер контактного телефона:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="phone" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="phone" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -203,7 +208,7 @@
                                             <g:Label text="ИНН:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="inn" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="inn" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -219,7 +224,7 @@
                                             <g:Label text="Код налогового органа:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="taxOrganCode" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="taxOrganCode" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -227,7 +232,7 @@
                                             <g:Label text="КПП:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="kpp" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="kpp" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -254,7 +259,7 @@
                                             <g:Label text="ИНН реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="reorgInn" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="reorgInn" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -262,7 +267,7 @@
                                             <g:Label text="КПП реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="reorgKpp" width="150px"/>
+                                            <aplana:AplanaTextBox ui:field="reorgKpp" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                 </g:VerticalPanel>
@@ -285,7 +290,7 @@
                                             <g:Label text="Фамилия подписанта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="signatorySurname" addStyleNames="{style.fixRelativeWidth}"/>
+                                            <aplana:AplanaTextBox ui:field="signatorySurname" addStyleNames="{style.fixRelativeWidth}"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -293,7 +298,7 @@
                                             <g:Label text="Имя подписанта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="signatoryFirstname" addStyleNames="{style.fixRelativeWidth}"/>
+                                            <aplana:AplanaTextBox ui:field="signatoryFirstname" addStyleNames="{style.fixRelativeWidth}"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -301,7 +306,7 @@
                                             <g:Label text="Отчество подписанта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="signatoryLastname" addStyleNames="{style.fixRelativeWidth}"/>
+                                            <aplana:AplanaTextBox ui:field="signatoryLastname" addStyleNames="{style.fixRelativeWidth}"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1">
@@ -310,7 +315,7 @@
                                                      text="Наименование документа, подтверждающего полномочия представителя:" />
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextArea ui:field="approveDocName" visibleLines="4" addStyleNames="{style.textArea}"/>
+                                            <aplana:AplanaTextArea ui:field="approveDocName" visibleLines="4"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1">
@@ -319,7 +324,7 @@
                                                      text="Наименование организации-представителя налогоплательщика:"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextArea ui:field="approveOrgName" visibleLines="4" addStyleNames="{style.textArea}"/>
+                                            <aplana:AplanaTextArea ui:field="approveOrgName" visibleLines="4"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
 
@@ -348,7 +353,7 @@
                                                      addStyleNames="{style.rightLabels}, {style.toLongLabel}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="appVersion" width="200px"/>
+                                            <aplana:AplanaTextBox ui:field="appVersion" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -356,7 +361,7 @@
                                             <g:Label text="Версия формата:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <g:TextBox ui:field="formatVersion" width="200px"/>
+                                            <aplana:AplanaTextBox ui:field="formatVersion" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="payPanelObligation" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">

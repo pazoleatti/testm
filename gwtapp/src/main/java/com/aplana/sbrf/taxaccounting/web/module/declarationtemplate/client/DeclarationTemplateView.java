@@ -62,10 +62,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiField
 	@Editor.Ignore
-	Button downloadJrxmlButton;
-
-	@UiField
-	@Editor.Ignore
 	Label title;
 
 	@UiField

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -101,6 +103,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         logger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «"+refBook.getName()+"»"));
         executeScript(bindings, script, logger);
         logger.setMessageDecorator(null);
+
+        // Откат при возникновении фатальных ошибок в скрипте
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Произошли ошибки в скрипте импорта справочника");
+        }
     }
 
     /**

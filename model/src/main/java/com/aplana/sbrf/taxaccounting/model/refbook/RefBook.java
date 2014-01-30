@@ -18,18 +18,17 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-	public final static String RECORD_UNIQUE_ID_ALIAS = "id";
     public final static String RECORD_ID_ALIAS = "record_id";
 
 	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
 
     public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
-    public static final int REF_BOOK_VERSION_FROM_WIDTH = 40;
+    public static final int REF_BOOK_VERSION_FROM_WIDTH = 6;
 
     public final static String RECORD_VERSION_TO_ALIAS = "record_version_to";
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
-    public static final int REF_BOOK_VERSION_TO_WIDTH = 40;
+    public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
 
 	/** Код справочника */
 	private Long id;
@@ -170,7 +169,7 @@ public class RefBook implements Serializable {
 	 */
 	public Map<String, RefBookValue> createRecord() {
 		Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-		result.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
 		result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
 		for (RefBookAttribute attribute : getAttributes()) {
 			result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), null));
