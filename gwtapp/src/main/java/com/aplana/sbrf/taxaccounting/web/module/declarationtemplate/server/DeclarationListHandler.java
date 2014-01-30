@@ -34,7 +34,7 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 	public DeclarationListResult execute(DeclarationListAction action, ExecutionContext executionContext) throws ActionException {
 		DeclarationListResult result = new DeclarationListResult();
 		/*result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));*/
-        List<DeclarationType> declarationTypes = declarationTypeService.listAll();
+        List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
 
         List<DeclarationTypeTemplate> typeTemplateList = new ArrayList<DeclarationTypeTemplate>();
         for (DeclarationType type : declarationTypes){

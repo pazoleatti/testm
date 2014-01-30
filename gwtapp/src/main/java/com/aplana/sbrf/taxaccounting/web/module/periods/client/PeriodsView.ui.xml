@@ -17,7 +17,7 @@
         }
 
         .btnPanel {
-            padding-left: 7px;
+            padding-left: 10px;
             height: 23px;
         }
 
@@ -25,11 +25,15 @@
             vertical-align: middle !important;
         }
 
+        .depWidget{
+            min-width: 200px;
+        }
+
         .table {
             position: absolute !important;
             bottom: 30px;
             right: 0;
-            left: 0;
+            left: 10px;
             top: 70px;
         }
 
@@ -45,6 +49,12 @@
             border-right: 1px solid #aeaeac;
         }
 
+        .bold {
+            font-weight: bold;
+            height: 22px;
+            line-height: 22px;
+        }
+
     </ui:style>
 
     <ui:style field="margin">
@@ -57,6 +67,7 @@
         .right10{
             margin-right: 10px;
         }
+
     </ui:style>
 
 
@@ -85,25 +96,25 @@
         <fm:body>
             <fm:BodyContainer>
 
-                <g:HorizontalPanel spacing="3" width="80%" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel spacing="3" width="100%" addStyleNames="{style.btnPanel}">
                     <g:cell horizontalAlignment="right">
                         <g:Label width="100px" text="Подразделение:" addStyleNames="{margin.right5}"/>
                     </g:cell>
-                    <g:cell width="100%">
+                    <g:cell width="30%">
                         <g:HorizontalPanel width="100%">
                             <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                                                                multiselection="false" width="100%" modal="true"/>
-                            <g:Label wordWrap="false" ui:field="departmentPickerRO" width="100%"/>
+                                                                multiselection="false" width="100%" modal="true" addStyleNames="{style.depWidget}"/>
+                            <g:Label wordWrap="false" ui:field="departmentPickerRO" width="100%" addStyleNames="{style.bold}"/>
                         </g:HorizontalPanel>
                     </g:cell>
 
-                    <g:cell horizontalAlignment="right">
+                    <g:cell horizontalAlignment="left">
                         <g:Label wordWrap="false" text="Период, c:" addStyleNames="{margin.right5}, {margin.left5}"/>
                     </g:cell>
                     <g:cell>
                         <w:Spinner minValue="1920" maxValue="2100" width="80px" ui:field="fromBox" addStyleNames="{margin.right5}"/>
                     </g:cell>
-                    <g:cell horizontalAlignment="right">
+                    <g:cell horizontalAlignment="left">
                         <g:Label wordWrap="false" text="по" addStyleNames="{margin.right5}"/>
                     </g:cell>
                     <g:cell>
@@ -115,6 +126,9 @@
                     </g:cell>
 
                     <g:Button title="Поиск" text="Поиск" ui:field="find"/>
+                    <g:cell width="70%">
+                        <g:Label width="100%"/>
+                    </g:cell>
                 </g:HorizontalPanel>
 
                 <g:Label addStyleNames="{style.horSep}"/>
