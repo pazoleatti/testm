@@ -101,11 +101,8 @@
                         <g:Label width="100px" text="Подразделение:" addStyleNames="{margin.right5}"/>
                     </g:cell>
                     <g:cell width="30%">
-                        <g:HorizontalPanel width="100%">
-                            <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                                                                multiselection="false" width="100%" modal="true" addStyleNames="{style.depWidget}"/>
-                            <g:Label wordWrap="false" ui:field="departmentPickerRO" width="100%" addStyleNames="{style.bold}"/>
-                        </g:HorizontalPanel>
+                        <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
+                            multiselection="false" width="100%" modal="true" addStyleNames="{style.depWidget}"/>
                     </g:cell>
 
                     <g:cell horizontalAlignment="left">

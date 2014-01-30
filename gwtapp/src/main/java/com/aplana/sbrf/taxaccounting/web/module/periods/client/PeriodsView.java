@@ -64,9 +64,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@UiField
     DepartmentPickerPopupWidget departmentPicker;
 
-    @UiField
-    Label departmentPickerRO;
-
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
     @UiField
     Label nalogTypeLabel;
@@ -175,7 +172,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo) {
         departmentPicker.setAvalibleValues(departments, null);
         departmentPicker.setValueByDepartmentPair(selectedDepartments, false);
-        departmentPickerRO.setText(selectedDepartments.get(0).getDepartmentName());
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
 	}
@@ -244,8 +240,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 
     @Override
     public void setCanChangeDepartment(boolean canChange) {
-        departmentPicker.setVisible(canChange);
-        departmentPickerRO.setVisible(!canChange);
+        departmentPicker.setEnabled(canChange);
     }
 
 	@Override
