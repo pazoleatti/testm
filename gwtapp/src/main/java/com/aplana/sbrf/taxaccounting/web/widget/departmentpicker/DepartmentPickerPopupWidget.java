@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.departmentpicker;
 
+import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
@@ -21,7 +22,7 @@ import java.util.*;
  * Виджет для выбора подразделений
  * @author Eugene Stetsenko
  */
-public class DepartmentPickerPopupWidget extends Composite implements HasEnabled, DepartmentPicker {
+public class DepartmentPickerPopupWidget extends DoubleStateComposite implements DepartmentPicker {
 
     @UiField
     FlowPanel wrappingPanel;
@@ -78,13 +79,14 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
 
     @Override
     public boolean isEnabled() {
-        return (selectButton.isEnabled());
+		return super.isEnabled();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectButton.setEnabled(enabled);
-        clearButton.setEnabled(enabled);
+		selectButton.setEnabled(enabled);
+		clearButton.setEnabled(enabled);
+		super.setEnabled(enabled);
     }
 
     interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {
@@ -150,13 +152,25 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
             this.value.addAll(value);
         }
         setValueById(this.value);
-        selected.setText(joinListToString(valueDereference));
+
+		String text = joinListToString(valueDereference);
+		selected.setText(text);
+		setLabelValue(text);
+
         if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
     }
 
-    /** Установить выбранными узлы дерева для указанных подразделений. */
+	/**
+	 * Обновляет значение Label в состоянии disabled.
+	 */
+	@Override
+	protected void updateLabelValue() {
+		setLabelValue(joinListToString(valueDereference));
+	}
+
+	/** Установить выбранными узлы дерева для указанных подразделений. */
     public void setValueByDepartmentPair(List<DepartmentPair> values, boolean fireEvents) {
         List<Integer> list = new ArrayList<Integer>();
         for (DepartmentPair i : values) {
@@ -220,7 +234,11 @@ public class DepartmentPickerPopupWidget extends Composite implements HasEnabled
             this.valueDereference.add(item.getDepartmentName());
         }
         ValueChangeEvent.fire(this, this.value);
-        selected.setText(joinListToString(valueDereference));
+
+		String text = joinListToString(valueDereference);
+		selected.setText(text);
+		this.setLabelValue(text);
+
         popupPanel.hide();
     }
 
