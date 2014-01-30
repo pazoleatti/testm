@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDeclarationPopUpFilterAction;
@@ -29,12 +32,24 @@ import java.util.Set;
 public class DeclarationDestinationsPresenter extends PresenterWidget<DeclarationDestinationsPresenter.MyView> implements DeclarationDestinationsUiHandlers {
     private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
-	TaxFormNominationPresenter parent;
+	TaxType taxType;
 
     @Override
     public void onConfirm() {
+	    StringBuilder errorMsg = new StringBuilder("Не заполнены обязательные атрибуты, необходимые для создания назначения: ");
+	    if (getView().getSelectedDepartments().isEmpty()) {
+			errorMsg.append("Подразделение; ");
+	    }
+	    if (getView().getSelectedDeclarationTypes().isEmpty()) {
+		    errorMsg.append("Вид декларации; ");
+	    }
+	    if (getView().getSelectedDepartments().isEmpty() || getView().getSelectedDeclarationTypes().isEmpty()) {
+		    Dialog.errorMessage("Ошибка", errorMsg.toString());
+		    return;
+	    }
+
 	    AddDeclarationSourceAction action = new AddDeclarationSourceAction();
-	    action.setTaxType(parent.getView().getTaxType());
+	    action.setTaxType(taxType);
 	    action.setDeclarationTypeId(getView().getSelectedDeclarationTypes());
 	    action.setDepartmentId(getView().getSelectedDepartments());
 	    dispatchAsync.execute(action,
@@ -42,13 +57,32 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 					    new AbstractCallback<AddDeclarationSourceResult>() {
 						    @Override
 						    public void onSuccess(AddDeclarationSourceResult result) {
-								parent.reloadDeclarationTableData();
+								UpdateTable.fire(DeclarationDestinationsPresenter.this);
 							    getView().hide();
 						    }
 					    }, this));
     }
 
-    public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
+	@Override
+	public void onCancel() {
+		if (getView().getSelectedDepartments().isEmpty() && getView().getSelectedDeclarationTypes().isEmpty()) {
+			getView().hide();
+		} else {
+			Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
+				@Override
+				public void yes() {
+					onConfirm();
+				}
+				@Override
+				public void no() {
+					getView().hide();
+				}
+			});
+		}
+
+	}
+
+	public interface MyView extends PopupView, HasUiHandlers<DeclarationDestinationsUiHandlers>{
 		List<Integer> getSelectedDepartments();
 	    List<Integer> getSelectedDeclarationTypes();
 	    void setDepartments(List<Department> departments, Set<Integer> availableValues);
@@ -63,13 +97,13 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         getView().setUiHandlers(this);
     }
 
-    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxFormNominationPresenter parent) {
+    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
         //getView().resetForm();
-	    this.parent = parent;
+	    this.taxType = taxType;
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
 
 	    GetDeclarationPopUpFilterAction action = new GetDeclarationPopUpFilterAction();
-	    action.setTaxType(parent.getView().getTaxType());
+	    action.setTaxType(taxType);
 	    dispatchAsync.execute(action,
 			    CallbackUtils.defaultCallback(
 					    new AbstractCallback<GetDeclarationPopUpFilterResult>() {

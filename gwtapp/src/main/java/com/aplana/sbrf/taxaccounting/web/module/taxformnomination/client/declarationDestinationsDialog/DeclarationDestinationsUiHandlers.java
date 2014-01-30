@@ -7,4 +7,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface DeclarationDestinationsUiHandlers extends UiHandlers {
     void onConfirm();
+	void onCancel();
 }

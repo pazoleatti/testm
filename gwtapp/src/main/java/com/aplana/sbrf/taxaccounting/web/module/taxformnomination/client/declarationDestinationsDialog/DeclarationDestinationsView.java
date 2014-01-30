@@ -56,7 +56,9 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 
 	@UiHandler("cancelButton")
 	void onCancelButtonClicked(ClickEvent event) {
-		hide();
+		if (getUiHandlers() != null) {
+			getUiHandlers().onCancel();
+		}
 	}
 
 	@UiHandler("continueButton")
@@ -73,12 +75,17 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 
 	@Override
 	public List<Integer> getSelectedDeclarationTypes() {
-		return Arrays.asList(declarationTypeId.getValue().getId());
+		if (declarationTypeId.getValue() == null) {
+			return Collections.EMPTY_LIST;
+		} else {
+			return Arrays.asList(declarationTypeId.getValue().getId());
+		}
 	}
 
 	@Override
 	public void setDepartments(List<Department> departments, Set<Integer> availableValues) {
 		departmentPicker.setAvalibleValues(departments, availableValues);
+		departmentPicker.setValue(null);
 	}
 
 	@Override

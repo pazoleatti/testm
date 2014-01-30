@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.DeclarationDestinationsDialogOpenEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.FormDestinationsDialogOpenEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -21,6 +23,7 @@ import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.aplana.gwt.client.dialog.Dialog;
 
 import java.util.List;
 import java.util.Set;
@@ -32,9 +35,9 @@ import java.util.Set;
  */
 public class TaxFormNominationPresenter
         extends Presenter<TaxFormNominationPresenter.MyView, TaxFormNominationPresenter.MyProxy>
-        implements TaxFormNominationUiHandlers  {
+        implements TaxFormNominationUiHandlers, UpdateTable.UpdateTableHandler  {
 
-    @ProxyCodeSplit
+	@ProxyCodeSplit
     @NameToken(TaxFormNominationToken.taxFormNomination)
     public interface MyProxy extends ProxyPlace<TaxFormNominationPresenter>, Place {
     }
@@ -83,6 +86,12 @@ public class TaxFormNominationPresenter
         this.formDestinationsPresenter = formDestinationsPresenter;
         this.declarationDestinationsPresenter = declarationDestinationsPresenter;
         getView().setUiHandlers(this);
+    }
+
+    @Override
+    protected void onBind() {
+        addRegisteredHandler(UpdateTable.getType(), this);
+        super.onBind();
     }
 
     @Override
@@ -150,12 +159,12 @@ public class TaxFormNominationPresenter
     @Override
     public void reloadDeclarationTableData(){
         dispatcher.execute(getTableDataAction(), CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-                    @Override
-                    public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(result.getTableData());
-                    }
-                }, this));
+		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+			        @Override
+			        public void onSuccess(GetTableDataResult result) {
+				        getView().setDataToDeclarationTable(result.getTableData());
+			        }
+		        }, this));
     }
 
      private GetTableDataAction getTableDataAction(){
@@ -198,17 +207,13 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onClickEditFormDestinations(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes) {
-        formDestinationsPresenter.initAndShowEditDialog(this, selectedDepartments, selectedKinds, selectedTypes);
-    }
-   
     public void onClickEditDeclarationDestination() {
-        declarationDestinationsPresenter.initAndShowDialog(this, this);
+        declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
     }
 
     @Override
     public void onClickOpenDeclarationDestinations() {
-        declarationDestinationsPresenter.initAndShowDialog(this, this);
+	    declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
     }
 
 	@Override
@@ -221,8 +226,18 @@ public class TaxFormNominationPresenter
 							@Override
 							public void onSuccess(DeleteDeclarationSourcesResult result) {
 								reloadDeclarationTableData();
+								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
+									Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+								}
+
 							}
 						}, this));
+	}
+
+	@Override
+	public void onUpdateTable(UpdateTable event) {
+		reloadDeclarationTableData();
 	}
 
     @Override
