@@ -69,7 +69,7 @@
                                               title="Экспорт макета деклараций"/>
                             <g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data" method="post">
                                 <g:HorizontalPanel>
-                                    <g:FileUpload name="uploadDectFile"/>
+                                    <g:FileUpload ui:field="uploadDectFile" name="uploadDectFile"/>
                                     <g:SubmitButton text="Импорт макета"/>
                                 </g:HorizontalPanel>
                             </g:FormPanel>

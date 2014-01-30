@@ -84,6 +84,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                         //Пересечений нет
                         else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
                             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
+                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getEndDate(), logger);
                             DeclarationTemplate formTemplate =  createFakeTemplate(date, template.getType());
                             declarationTemplateService.save(formTemplate);
                         }
@@ -104,6 +105,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                 }
             }
         } else if (newIntersection.getEndDate() != null){
+            cleanVersions(newIntersection.getTemplateId(), newIntersection.getEndDate(), logger);
             DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, template.getType());
             declarationTemplateService.save(declarationTemplate);
         }
@@ -117,8 +119,10 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
     }
 
     @Override
-    public void cleanVersions(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
-        DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(template.getId(), VersionedObjectStatus.FAKE);
+    public void cleanVersions(int templateId, Date versionActualDateEnd, Logger logger) {
+        if (templateId == 0)
+            return;
+        DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId, VersionedObjectStatus.FAKE);
         if (declarationTemplateFake != null)
             declarationTemplateService.delete(declarationTemplateFake);
     }

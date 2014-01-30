@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
@@ -93,5 +94,15 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
             logger.error("Ошибка при удалении макета", e);
             throw new DaoException("Ошибка при удалении макета", e);
         }
+    }
+
+    @Override
+    public List<Integer> getByFilter(TemplateFilter filter) {
+        StringBuilder query = new StringBuilder("select id from declaration_type where status = ");
+        query.append(filter.isActive()?0:1);
+        if (filter.getTaxType() != null) {
+            query.append(" and TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
+        }
+        return getJdbcTemplate().queryForList(query.toString(), Integer.class);
     }
 }

@@ -222,6 +222,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public Date getDTEndDate(int declarationTemplateId) {
+        if (declarationTemplateId == 0)
+            return null;
         List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 

@@ -47,6 +47,9 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
     @UiField
     Button cancelButton;
 
+    @UiField
+    Button exitButton;
+
     private static final String DIALOG_TITLE = "Сроки сдачи отчетности для периода: ";
 
     // Последние выбранные значения на форме. Нужны для восстановления без подгрузки с сервера
@@ -64,7 +67,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
         deadline.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                saveButton.setVisible(true);
+                saveButton.setEnabled(true);
                 lastSelectedDeadline = event.getValue();
             }
         });
@@ -74,7 +77,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
             public void onValueChange(ValueChangeEvent<List<DepartmentPair>> event) {
                 if (event.getValue() != null && !event.getValue().isEmpty()) {
                     DepartmentPair departmentValue = event.getValue().get(0);
-                    if (!saveButton.isVisible()) {
+                    if (!saveButton.isEnabled()) {
                         getUiHandlers().setDepartmentDeadline(departmentValue.getDepartmentId(), departmentValue.getParentDepartmentId());
                         lastSelectedDepartment = departmentValue;
                     } else {
@@ -85,7 +88,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
                                 public void yes() {
                                     getUiHandlers().setDepartmentDeadline(dv.getDepartmentId(), dv.getParentDepartmentId());
                                     lastSelectedDepartment = dv;
-	                                saveButton.setVisible(false);
+	                                saveButton.setEnabled(false);
                                     Dialog.hideMessage();
                                 }
 
@@ -114,7 +117,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
     public void setDepartments(List<Department> departments, List<DepartmentPair> selectedDepartments) {
         departmentPicker.setAvailableValues(departments);
         departmentPicker.setValue(selectedDepartments);
-        saveButton.setVisible(false);
+        saveButton.setEnabled(false);
         lastSelectedDepartment = selectedDepartments.get(0);
     }
 
@@ -130,7 +133,7 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
 
     @Override
     public void hideButtons() {
-        saveButton.setVisible(false);
+        saveButton.setEnabled(false);
     }
 
     @UiHandler("saveButton")
@@ -159,10 +162,15 @@ public class DeadlineDialogView extends PopupViewWithUiHandlers<DeadlineDialogUi
         }
     }
 
+    @UiHandler("exitButton")
+    public void onExit(ClickEvent event) {
+        deadlineDialog.hide();
+    }
+
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
         final DeadlineDialogView t = this;
-        if (saveButton.isVisible()) {
+        if (saveButton.isEnabled()) {
             Dialog.confirmMessage("Вы уверены, что хотите отменить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
