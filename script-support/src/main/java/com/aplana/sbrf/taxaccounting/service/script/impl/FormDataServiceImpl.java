@@ -304,7 +304,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                     return refBookCache.get(recordId);
                 } else {
                     Map<String, RefBookValue> retVal = new HashMap<String, RefBookValue>();
-                    retVal.put(RefBook.RECORD_UNIQUE_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+                    retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
                     return retVal;
                 }
             }
@@ -317,7 +317,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         PagingResult<Map<String, RefBookValue>> records = provider.getRecords(date, null, filter, null);
         if (records.size() == 1) {
             Map<String, RefBookValue> retVal = records.get(0);
-            Long recordId = retVal.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
+            Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             recordCache.get(refBookId).put(dateStr + filter, recordId);
             if (refBookCache != null) {
                 refBookCache.put(recordId, retVal);
@@ -359,7 +359,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
 
         if (record != null) {
-            Long retVal = record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
+            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             if (retVal != null) {
                 return retVal;
             }
@@ -381,7 +381,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
 
         if (record != null) {
-            Long retVal = record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue();
+            Long retVal = record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             if (retVal != null) {
                 return retVal;
             }

@@ -242,7 +242,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery("SELECT * FROM ");
         ps.appendQuery("(select\n");
         ps.appendQuery("  r.id as \"");
-        ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
         ps.appendQuery("\",\n");
 
         if (version == null) {
@@ -346,7 +346,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         StringBuilder sql = new StringBuilder();
         sql.append("select\n");
         sql.append("  r.id as \"");
-        sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
+        sql.append(RefBook.RECORD_ID_ALIAS);
         sql.append("\",\n");
         List<RefBookAttribute> attributes = refBook.getAttributes();
         for (int i = 0; i < attributes.size(); i++) {
@@ -431,7 +431,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
                         RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
@@ -498,7 +498,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                 for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                     String attributeAlias = entry.getKey();
-                    if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+                    if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
                             RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
                         continue;
                     }
@@ -642,7 +642,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         @Override
         public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookRecordVersion result = new RefBookRecordVersion();
-            result.setRecordId(rs.getLong(RefBook.RECORD_UNIQUE_ID_ALIAS));
+            result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
             result.setVersionStart(rs.getDate("versionStart"));
             result.setVersionEnd(rs.getDate("versionEnd"));
             return result;
@@ -657,7 +657,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
-                    RefBook.RECORD_UNIQUE_ID_ALIAS);
+                    RefBook.RECORD_ID_ALIAS);
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {
                             uniqueRecordId
@@ -970,7 +970,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
         String sql = String.format(GET_NEXT_RECORD_VERSION,
-                sdf.format(versionFrom), RefBook.RECORD_UNIQUE_ID_ALIAS);
+                sdf.format(versionFrom), RefBook.RECORD_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {
@@ -1085,7 +1085,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 			for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
 				String attributeAlias = entry.getKey();
-				if (RefBook.RECORD_UNIQUE_ID_ALIAS.equals(attributeAlias) ||
+				if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
 						RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
 					continue;
 				}
@@ -1158,7 +1158,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 checkFillRequiredFields(record, refBook);
 
                 // создаем строки справочника
-                Long rowId = getRowId(record.get(RefBook.RECORD_UNIQUE_ID_ALIAS).getNumberValue().longValue());
+                Long rowId = getRowId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
 
                 Long recordId = checkRecordUnique(refBookId, version, rowId);
 

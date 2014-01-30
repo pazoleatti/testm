@@ -43,7 +43,7 @@ public class RefBookUtils extends AbstractDao {
 		PreparedStatementData ps = new PreparedStatementData();
 		ps.appendQuery("SELECT ");
 		ps.appendQuery("id ");
-		ps.appendQuery(RefBook.RECORD_UNIQUE_ID_ALIAS);
+		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
 		for (RefBookAttribute attribute : refBook.getAttributes()) {
 			ps.appendQuery(", ");
 			ps.appendQuery(attribute.getAlias());
@@ -182,7 +182,7 @@ public class RefBookUtils extends AbstractDao {
 	public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long recordId) {
 		RefBook refBook = refBookDao.get(refBookId);
 		StringBuilder sql = new StringBuilder("SELECT id ");
-		sql.append(RefBook.RECORD_UNIQUE_ID_ALIAS);
+		sql.append(RefBook.RECORD_ID_ALIAS);
 		for (RefBookAttribute attribute : refBook.getAttributes()) {
 			sql.append(", ");
 			sql.append(attribute.getAlias());
