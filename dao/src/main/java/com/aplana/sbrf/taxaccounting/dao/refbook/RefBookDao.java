@@ -120,7 +120,7 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @param records список значений атрибутов
      */
-    void updateRecordVersion(Long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> records);
+    void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records);
 
     /**
      * Проверяет существование версии записи справочника
@@ -310,6 +310,13 @@ public interface RefBookDao {
      * @return
      */
     Long getFirstRecordId(Long refBookId, Long uniqueRecordId);
+
+    /**
+     * Возвращает дату начала периода актуальности для указанных версий записей справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return идентификатор версии - дата начала периода актуальности
+     */
+    Map<Long,Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
 
     /**
      * Создает новые записи в справочнике

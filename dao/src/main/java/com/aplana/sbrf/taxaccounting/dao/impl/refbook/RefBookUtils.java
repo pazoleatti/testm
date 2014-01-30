@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Класс для формирования стандартных запросов для провайдеров данных справочников.
@@ -173,6 +176,34 @@ public class RefBookUtils extends AbstractDao {
         for (RefBookAttribute a :attributes){
             if (a.isRequired() && (!record.containsKey(a.getAlias()) || record.get(a.getAlias()).isEmpty())){
                 errors.add(a.getName());
+            }
+        }
+
+        return errors;
+    }
+
+    public List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, Map<String,RefBookValue> record) {
+        List<String> errors = new ArrayList<String>();
+        String okatoRegex = "\\d{11}";
+        String codeTSRegex = "\\d{3}(\\d{2}|[?]{2})";
+        Pattern okatoPattern = Pattern.compile(okatoRegex);
+        Pattern codeTSPattern = Pattern.compile(codeTSRegex);
+        for (RefBookAttribute a :attributes){
+            //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
+            if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 810L) &&
+                    !NumberUtils.isNumber(record.get(a.getAlias()).getStringValue())){
+                //TODO добавить еще Определяющая часть кода ОКТМО
+                errors.add("Значение атрибута " + a.getName() + " должно содержать только цифры");
+            }
+
+            //Проверка формата для кода окато
+            if ((a.getId() == 7L) && !okatoPattern.matcher(record.get(a.getAlias()).getStringValue()).matches()) {
+                errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ×××××××××××, где × - цифра");
+            }
+
+            //Проверка формата для кода ТС
+            if ((a.getId() == 411L) && !codeTSPattern.matcher(record.get(a.getAlias()).getStringValue()).matches()) {
+                errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ××××× или ***??, где × - цифра");
             }
         }
 
