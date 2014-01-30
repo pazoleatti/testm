@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
@@ -42,9 +40,11 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
         SetActiveResult result = new SetActiveResult();
         Logger logger = new Logger();
         mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser());
-        if (logger.containsLevel(LogLevel.ERROR)){
+        if (!logger.getEntries().isEmpty())
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        /*if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Найдены экземпляры налоговых форм", logEntryService.save(logger.getEntries()));
-        }
+        }*/
         return result;
     }
 
