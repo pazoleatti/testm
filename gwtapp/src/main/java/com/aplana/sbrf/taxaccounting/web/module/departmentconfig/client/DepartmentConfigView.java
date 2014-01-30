@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
-import com.aplana.gwt.client.AplanaTextArea;
-import com.aplana.gwt.client.AplanaTextBox;
+import com.aplana.gwt.client.TextArea;
+import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -69,7 +69,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private boolean isReportPeriodActive = false;
 
     @UiField
-    AplanaTextBox inn,
+	TextBox inn,
             kpp,
             phone,
             taxOrganCode,
@@ -82,7 +82,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             formatVersion;
 
     @UiField
-	AplanaTextArea approveDocName,
+	TextArea approveDocName,
             approveOrgName;
 
     @UiField
@@ -104,7 +104,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             type;
 
     @UiField
-    AplanaTextArea name;
+	com.aplana.gwt.client.TextArea name;
 
     // Контейнер для справочника периодов
     @UiField
