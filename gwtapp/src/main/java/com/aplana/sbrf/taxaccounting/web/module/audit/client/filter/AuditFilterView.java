@@ -13,7 +13,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,7 +34,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     PeriodPicker reportPeriodIds;
 
-    interface Binder extends UiBinder<Widget, AuditFilterView> { }
+    interface Binder extends UiBinder<Widget, AuditFilterView> {
+    }
 
     @UiField
     DateMaskBoxPicker fromSearchDate;
@@ -70,7 +70,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     Panel formPanel;
 
-	private static final int oneDayTime = 24 * 60 * 60 * 1000;
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;
@@ -84,7 +84,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     public void setFormTypeId(Map<Integer, String> formTypesMap) {
         this.formTypesMap = formTypesMap;
         formTypeId.setAcceptableValues(formTypesMap.keySet());
-
     }
 
     @Override
@@ -230,14 +229,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        user.setEndDate(new Date());
     }
 
     @UiHandler("search")
-    void onSearchButtonClicked(ClickEvent event){
-        if(getUiHandlers() != null)
+    void onSearchButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null)
             getUiHandlers().onSearchButtonClicked();
     }
-
 
 
 }
