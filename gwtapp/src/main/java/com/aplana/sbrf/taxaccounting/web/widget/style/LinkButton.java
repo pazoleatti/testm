@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.style;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.impl.ImageResourcePrototype;
@@ -64,6 +65,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		this.text = text == null ? DEFAULT_TEXT : text;
 		this.img = img == null ? DEFAULT_IMG : img;
         setHTML(templates.render(UriUtils.fromTrustedString(this.img), this.text));
+        getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
 	}
 
 	@Override
