@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceAction;
@@ -58,6 +59,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 						    @Override
 						    public void onSuccess(AddDeclarationSourceResult result) {
 								UpdateTable.fire(DeclarationDestinationsPresenter.this);
+							    LogAddEvent.fire(DeclarationDestinationsPresenter.this, result.getUuid());
 							    getView().hide();
 						    }
 					    }, this));
