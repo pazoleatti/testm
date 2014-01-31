@@ -45,6 +45,7 @@ public class GetDeclarationDDTHandler
 
 		Map<Integer, DeclarationType> declarationTypes = new HashMap<Integer, DeclarationType>();
 		for (DepartmentDeclarationType receiver : receivers) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			declarationTypes.put(receiver.getDeclarationTypeId(),
 					sourceService.getDeclarationType(receiver.getDeclarationTypeId()));
 		}

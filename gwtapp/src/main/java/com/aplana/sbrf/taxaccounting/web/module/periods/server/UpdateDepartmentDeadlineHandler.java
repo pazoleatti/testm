@@ -48,6 +48,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         String text = "%s назначил новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
         for (DepartmentPair pair : action.getDepartments()) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             Department receiver =
 		            pair.getParentDepartmentId() == null
 		            ? null

@@ -42,6 +42,7 @@ public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryActio
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL, VersionedObjectStatus.DELETED);
 
         for (DeclarationTemplate formTemplate : declarationTemplates) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             for (TemplateChanges changes : templateChangesService.getByFormTemplateId(formTemplate.getId())){
                 TemplateChangesExt templateChangesExt = new TemplateChangesExt();
                 templateChangesExt.setTemplateChanges(changes);

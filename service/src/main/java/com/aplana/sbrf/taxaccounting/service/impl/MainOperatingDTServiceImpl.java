@@ -105,6 +105,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
                             logEntryService.save(logger.getEntries()));
                 declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
+                //TODO dloshkarev: можно переделать на batch
                 declarationTemplateService.save(declarationTemplate);
             }
         }

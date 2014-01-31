@@ -91,6 +91,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void deleteDFT(Collection<Long> ids) {
     	for (Long id : ids) {
+            //TODO dloshkarev: можно переделать на in запрос
     		departmentFormTypeDao.delete(id);
     	}
     }
@@ -103,6 +104,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void deleteDDT(Collection<Long> ids) {
     	for (Long id : ids) {
+            //TODO dloshkarev: можно переделать на in запрос
     		departmentDeclarationTypeDao.delete(id);
 		}
     }

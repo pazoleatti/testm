@@ -49,6 +49,7 @@ public class GetFormTemplateListHandler extends AbstractActionHandler<GetFormTem
             typeTemplate.setTaxType(type.getTaxType());
             typeTemplate.setFormTypeId(type.getId());
             typeTemplate.setFormTypeName(type.getName());
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             typeTemplate.setVersionCount(formTemplateService.versionTemplateCount(type.getId(), VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL));
 
             formTypeTemplates.add(typeTemplate);

@@ -41,6 +41,7 @@ public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersi
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL, VersionedObjectStatus.DELETED);
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>();
         for (FormTemplate formTemplate : formTemplates) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             for (TemplateChanges changes : templateChangesService.getByFormTemplateId(formTemplate.getId())){
                 TemplateChangesExt templateChangesExt = new TemplateChangesExt();
                 templateChangesExt.setTemplateChanges(changes);

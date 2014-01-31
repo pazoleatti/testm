@@ -125,6 +125,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public List<DeclarationTemplate> getByFilter(TemplateFilter filter) {
         List<DeclarationTemplate> templates = new ArrayList<DeclarationTemplate>();
         for (Integer id : declarationTemplateDao.getByFilter(filter)) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             templates.add(declarationTemplateDao.get(id));
         }
         return templates;
@@ -136,6 +137,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         List<Integer> declarationTemplateIds =  declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
         List<DeclarationTemplate> declarationTemplates = new ArrayList<DeclarationTemplate>();
+        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
         for (Integer id : declarationTemplateIds)
             declarationTemplates.add(declarationTemplateDao.get(id));
         return declarationTemplates;
@@ -157,6 +159,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
+                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
                 DeclarationTemplate beginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i));
                 DeclarationTemplate endTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i++));
                 segmentIntersection.setStatus(beginTemplate.getStatus());

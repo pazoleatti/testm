@@ -40,6 +40,7 @@ public class FormTypeServiceImpl implements FormTypeService {
     public List<FormType> getByFilter(TemplateFilter filter) {
         List<Integer> ids = formTypeDao.getByFilter(filter);
         List<FormType> formTypes = new ArrayList<FormType>();
+        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
         for (Integer id : ids)
             formTypes.add(formTypeDao.get(id));
         return formTypes;

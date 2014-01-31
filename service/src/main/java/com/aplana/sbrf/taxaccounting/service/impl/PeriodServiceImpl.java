@@ -181,6 +181,7 @@ public class PeriodServiceImpl implements PeriodService{
 		boolean allGood = true;
 		for (Integer id : departments) {
 			for (FormData formData : formDataDao.find(id, reportPeriodId)) {
+                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 				ObjectLock<Long> lock = objectLockDao.getObjectLock(formData.getId(), FormData.class);
 				if (lock != null) {
 					logs.add(new LogEntry(LogLevel.WARNING,
@@ -410,6 +411,7 @@ public class PeriodServiceImpl implements PeriodService{
 							"в следующих подразделениях: "
 			);
 			for (Integer dep : blockedBy) {
+                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 				msg.append(departmentService.getDepartment(dep).getName() + "; ");
 			}
 			logs.add(new LogEntry(LogLevel.ERROR, msg.toString()));
@@ -421,6 +423,7 @@ public class PeriodServiceImpl implements PeriodService{
 	private void removePeriodWithLog(int reportPeriodId, List<Integer> departmentId, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
 			departmentReportPeriodDao.delete(reportPeriodId, id);
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
 			logs.add(new LogEntry(LogLevel.INFO,
 					rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для подразделения " + departmentService.getDepartment(id).getName()));

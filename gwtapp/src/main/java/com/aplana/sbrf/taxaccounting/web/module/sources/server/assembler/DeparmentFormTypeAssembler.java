@@ -35,6 +35,7 @@ public class DeparmentFormTypeAssembler {
     	
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : departmentFormTypes) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			formTypes.put(departmentFormType.getFormTypeId(),
 					departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()));
 		}
