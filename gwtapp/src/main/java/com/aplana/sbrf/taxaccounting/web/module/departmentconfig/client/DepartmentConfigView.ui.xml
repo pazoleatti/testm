@@ -70,27 +70,6 @@
             max-width: 450px;
         }
 
-/*
-        .textArea {
-            resize: none;
-            font-family: Tahoma, helvetica, arial, sans-serif !important;
-            font-size: small;
-            width: 100%;
-            min-width: 200px;
-            max-width: 450px;
-            line-height: 13px;
-            border: 1px solid green;
-            overflow: auto;
-
-            */
-/*Потому что в текстбоксах тоже есть, нужно выпиливать но не
-            известно как поведут другие зависимые от текстбокса компоненты(виджеты)*//*
-
-            margin-left: -1px;
-
-        }
-*/
-
         .toLongLabel{
             line-height: 11px;
         }

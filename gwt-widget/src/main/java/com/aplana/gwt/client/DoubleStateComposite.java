@@ -18,7 +18,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 	/**
 	 * Label со значением.
 	 */
-	private Label label = new Label(EMPTY_STRING_VALUE);
+	protected Label label = new Label(EMPTY_STRING_VALUE);
 
 	/**
 	 * Флаг скрытия

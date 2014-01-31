@@ -1361,8 +1361,8 @@ td.datePickerMonth {
 
 .aplana-DoubleStateComposite-label {
 	font-weight: bold;
-	margin-top: 1px;
 	margin-bottom: 1px;
+	padding: 2px 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
