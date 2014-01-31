@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -168,7 +169,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @Override
     public void confirm() {
-        Window.confirm("Сначала сохраните шаблон");
+        Dialog.confirmMessage("Сначала сохраните шаблон");
     }
 
     @UiHandler("saveButton")
