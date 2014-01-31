@@ -419,7 +419,6 @@ public class RefBookDaoTest {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
         List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), refBook.getAttributes(), records);
-        System.out.println(matches);
         assertEquals(2, matches.size());
     }
 

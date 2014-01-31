@@ -104,7 +104,6 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     @Override
     public void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records) {
-        System.out.println("records: "+records.size());
         try {
             if (!refBookDao.isVersionExist(refBookId, recordId, versionFrom)) {
                 List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
