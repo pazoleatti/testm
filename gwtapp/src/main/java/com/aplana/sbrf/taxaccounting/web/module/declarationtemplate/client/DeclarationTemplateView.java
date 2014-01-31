@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -33,11 +34,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Path("declarationTemplate.version")
-    DateMaskBoxPicker versionDateBegin;
+    DateMaskBoxAbstract versionDateBegin;
 
     @UiField
     @Path("endDate")
-    DateMaskBoxPicker versionDateEnd;
+    DateMaskBoxAbstract versionDateEnd;
 	
 	@UiField
 	@Editor.Ignore
@@ -136,7 +137,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
             @Override
             public void onChange(ChangeEvent event) {
                 if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    Window.confirm("Сначала сохраните шаблон");
+                    confirm();
                     uploadJrxml.setName("");
                     uploadDectForm.reset();
                     uploadJrxmlForm.reset();
@@ -147,7 +148,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
             @Override
             public void onChange(ChangeEvent event) {
                 if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    Window.confirm("Сначала сохраните шаблон");
+                    confirm();
                     uploadJrxml.setName("");
                     uploadDectForm.reset();
                     uploadJrxmlForm.reset();
@@ -164,6 +165,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Override
     public void activateButtonName(String name) {
         activateVersion.setText(name);
+    }
+
+    @Override
+    public void confirm() {
+        Dialog.confirmMessage("Сначала сохраните шаблон");
     }
 
     @UiHandler("saveButton")

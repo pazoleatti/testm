@@ -38,6 +38,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     PeriodPickerPopupWidget reportPeriodIds;
 
     @UiField
+    @Path("departmentIds")
     DepartmentPicker departmentPicker;
 
 	@UiField(provided = true)
@@ -92,13 +93,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     @Override
 	public void setDataFilter(DeclarationDataFilter formDataFilter) {
 		driver.edit(formDataFilter);
-		departmentPicker.setValue(formDataFilter.getDepartmentIds());
+		//departmentPicker.setValue(formDataFilter.getDepartmentIds());
 	}
 
 	@Override
 	public DeclarationDataFilter getFilterData() {
 		DeclarationDataFilter dataFilter = driver.flush();
-        dataFilter.setDepartmentIds(departmentPicker.getValue());
+        //dataFilter.setDepartmentIds(departmentPicker.getValue());
 		return dataFilter;
 	}
 

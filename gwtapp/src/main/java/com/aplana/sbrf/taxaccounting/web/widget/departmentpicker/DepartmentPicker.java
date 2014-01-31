@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.HasValue;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Set;
 /**
  * @author Eugene Stetsenko
  */
-public interface DepartmentPicker extends HasValue<List<Integer>> {
+public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEditor<List<Integer>> {
     /**
      * Установка списка подразделений для дерева и подразделений, доступных для выбора
      * @param departments Подразделения для построения дерева

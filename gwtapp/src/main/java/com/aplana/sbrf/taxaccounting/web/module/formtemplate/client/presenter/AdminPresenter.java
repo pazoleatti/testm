@@ -2,14 +2,14 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateMainEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FilterFormTemplateReadyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter.FormTemplateApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -21,7 +21,6 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.annotations.Title;
 import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -62,14 +61,12 @@ public class AdminPresenter
 	private final DispatchAsync dispatcher;
     protected final FilterFormTemplatePresenter filterPresenter;
     public static final Object TYPE_filterPresenter = new Object();
-    private final PlaceManager placeManager;
 
-	@Inject
-	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter, PlaceManager placeManager) {
+    @Inject
+	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher, FilterFormTemplatePresenter filterPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
         this.filterPresenter = filterPresenter;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
     }
 
@@ -160,9 +157,10 @@ public class AdminPresenter
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteFormTypeResult>() {
             @Override
             public void onSuccess(DeleteFormTypeResult result) {
-                LogAddEvent.fire(AdminPresenter.this, result.getUuid());
+                if (result.getUuid() != null)
+                    LogAddEvent.fire(AdminPresenter.this, result.getUuid());
+                updateFormData();
             }
-        }, this).addCallback(
-                TaManualRevealCallback.create(this, (TaPlaceManager) placeManager)));
+        }, this));
     }
 }

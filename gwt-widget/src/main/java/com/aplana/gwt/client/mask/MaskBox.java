@@ -1,6 +1,7 @@
 package com.aplana.gwt.client.mask;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -22,7 +23,7 @@ import java.text.ParseException;
  *
  * @author aivanov
  */
-public class MaskBox<T> extends ValueBox<T> {
+public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
 
     private int length = 255;
     private boolean enabled;
@@ -104,7 +105,8 @@ public class MaskBox<T> extends ValueBox<T> {
         return length;
     }
 
-    public void enable(boolean enabled) {
+    @Override
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         setReadOnly(!enabled);
         if (!enabled) {

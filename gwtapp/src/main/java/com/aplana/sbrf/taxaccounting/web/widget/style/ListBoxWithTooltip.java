@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
@@ -15,7 +16,7 @@ import java.util.Collection;
  * Выпадающий список с возможностью отображать значения
  * в виде подсказки для элементов(это необходимо для длинных значений в IE8)
  */
-public class ListBoxWithTooltip<T> extends ValueListBox<T> {
+public class ListBoxWithTooltip<T> extends ValueListBox<T> implements LeafValueEditor<T> {
 	boolean showTooltip = false;
 
 	Renderer<T> renderer;

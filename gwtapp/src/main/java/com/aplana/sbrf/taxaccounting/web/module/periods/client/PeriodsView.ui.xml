@@ -48,13 +48,6 @@
             margin: 0 9px;
             border-right: 1px solid #aeaeac;
         }
-
-        .bold {
-            font-weight: bold;
-            height: 22px;
-            line-height: 22px;
-        }
-
     </ui:style>
 
     <ui:style field="margin">
@@ -64,10 +57,6 @@
         .left5{
             margin-left: 5px;
         }
-        .right10{
-            margin-right: 10px;
-        }
-
     </ui:style>
 
 
@@ -102,7 +91,8 @@
                     </g:cell>
                     <g:cell width="30%">
                         <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                            multiselection="false" width="100%" modal="true" addStyleNames="{style.depWidget}"/>
+                            multiselection="false" width="100%" modal="true" addStyleNames="{style.depWidget}"
+								labelWordWrap="false"/>
                     </g:cell>
 
                     <g:cell horizontalAlignment="left">

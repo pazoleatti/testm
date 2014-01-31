@@ -55,6 +55,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	PeriodPickerPopupWidget reportPeriodIds;
 
 	@UiField
+    @Path("departmentIds")
 	DepartmentPicker departmentPicker;
 
 	@Ignore
@@ -139,7 +140,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     public void setDataFilter(FormDataFilter formDataFilter) {
         driver.edit(formDataFilter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-        departmentPicker.setValue(formDataFilter.getDepartmentIds());
+        //departmentPicker.setValue(formDataFilter.getDepartmentIds());
     }
 
 
@@ -147,7 +148,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     public FormDataFilter getDataFilter() {
     	FormDataFilter filter = driver.flush();
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	filter.setDepartmentIds(departmentPicker.getValue());
+    	//filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
     }
 

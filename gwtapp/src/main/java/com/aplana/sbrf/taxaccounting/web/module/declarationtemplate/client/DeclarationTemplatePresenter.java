@@ -89,6 +89,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
+        void confirm();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -139,7 +140,13 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void save() {
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
+        if (declarationTemplateExt.getEndDate() != null &&
+                declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >=0 ){
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            return;
+        }
+
+        UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplateExt(declarationTemplateExt);
         dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
@@ -160,7 +167,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(DeclarationTemplateTokens.declarationTemplateList));
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList).
+                with(DeclarationTemplateTokens.declarationType, String.valueOf(declarationTemplate.getType().getId())).build());
 	}
 
     @Override
@@ -181,11 +189,19 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
 	public void downloadJrxml() {
+        if (declarationTemplate.getId() == null){
+            getView().confirm();
+            return;
+        }
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
 	
 	@Override
 	public void downloadDect() {
+        if (declarationTemplate.getId() == null){
+            getView().confirm();
+            return;
+        }
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
 	}
 

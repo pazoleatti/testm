@@ -77,7 +77,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 		}
 	}
 
-	protected void setLabelValue(Object value){
+	protected void setLabelValue(Object value) {
 		String stringValue;
 		if (value == null) {
 			stringValue = EMPTY_STRING_VALUE;
@@ -88,5 +88,23 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 			}
 		}
 		label.setText(stringValue);
+	}
+
+	/**
+	 * Устанавливает правила переноса по словам в Label.
+	 *
+	 * @param wrap true - переносить по словам, false - не переносить.
+	 */
+	public void setLabelWordWrap(boolean wrap) {
+		label.setWordWrap(wrap);
+	}
+
+	/**
+	 * Возвращает правила переноса по словам в Label.
+	 *
+	 * @return true - есть перенос, false - нет переноса.
+	 */
+	public boolean getLabelWordWrap() {
+		return label.getWordWrap();
 	}
 }

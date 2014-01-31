@@ -123,6 +123,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
                         getView().setLogMessages(null);
                         getView().setTitle(formTemplate.getType().getName());
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateMainPage).
+                                with(AdminConstants.NameTokens.formTemplateId, "0").build());
                         TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
                         FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
@@ -201,7 +203,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(AdminConstants.NameTokens.adminPage));
+		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).
+                with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
 	}
 
     @Override
@@ -259,7 +262,16 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	}
 
 	private void saveAfterFlush() {
-
+        if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty() || formTemplate.getCode().isEmpty()){
+            MessageEvent.fire(FormTemplateMainPresenter.this, "Не заполнено одно из обязательных полей. " +
+                    "Проверьте поля \"Наименование формы\", \"Полное наименование формы\", \"Код формы\"");
+            return;
+        }
+        if (formTemplateExt.getActualEndVersionDate() != null &&
+                formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) >=0 ){
+            MessageEvent.fire(FormTemplateMainPresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            return;
+        }
 		UpdateFormAction action = new UpdateFormAction();
         action.setForm(formTemplate);
         action.setVersionEndDate(formTemplateExt.getActualEndVersionDate());
@@ -269,11 +281,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     public void onSuccess(UpdateFormResult result) {
                         if (!result.getLogEntries().isEmpty()) {
                             getView().setLogMessages(result.getLogEntries());
-                        } else {
-                            MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
-                            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
-                                    with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
                         }
+                        MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
+                                with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
                     }
                 }, this));
 	}

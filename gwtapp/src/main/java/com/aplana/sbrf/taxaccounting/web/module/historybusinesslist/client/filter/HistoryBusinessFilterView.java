@@ -32,7 +32,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         Editor<LogBusinessFilterValues> {
 
 
-    interface Binder extends UiBinder<Widget, HistoryBusinessFilterView> { }
+    interface Binder extends UiBinder<Widget, HistoryBusinessFilterView> {
+    }
 
     @UiField
     PeriodPicker reportPeriodIds;
@@ -196,6 +197,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        user.setEndDate(new Date());
     }
 
     private void setVisibleTaxFields() {
@@ -221,7 +223,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiHandler("auditFormTypeId")
-    public void onClick(ValueChangeEvent<AuditFormType> event){
+    public void onClick(ValueChangeEvent<AuditFormType> event) {
         if (event.getValue() == AuditFormType.FORM_TYPE_TAX) {
             setVisibleTaxFields();
         } else if (event.getValue() == AuditFormType.FORM_TYPE_DECLARATION) {
@@ -239,11 +241,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiHandler("taxType")
-    void onTaxTypeValueChange(ValueChangeEvent<TaxType> event){
-        if (getUiHandlers() != null){
+    void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
+        if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
         }
     }
-
-
 }

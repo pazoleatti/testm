@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:w='urn:import:com.aplana.gwt.client'>
+             xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
 
 	<ui:style>
 		.formStyle {
@@ -19,10 +19,10 @@
 			<g:HorizontalPanel>
 				<g:Label width="300px">Период актульности с</g:Label>
 				<!--<g:TextBox width="100px" ui:field="versionBox" />-->
-                <w:Spinner ui:field="versionDateBegin"/>
+                <w:YearMaskBox ui:field="versionDateBegin"/>
                 <g:Label width="100px">1 января</g:Label>
                 <g:Label width="300px">по</g:Label>
-                <w:Spinner ui:field="versionDateEnd"/>
+                <w:YearMaskBox ui:field="versionDateEnd"/>
                 <g:Label width="100px">31 декабря</g:Label>
 			</g:HorizontalPanel>
 

@@ -1,5 +1,6 @@
 package com.aplana.gwt.client;
 
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -18,7 +19,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * @author Vitaliy Samolovskikh
  */
 public class Spinner extends DoubleStateComposite
-		implements HasValue<Integer>, HasValueChangeHandlers<Integer> {
+		implements HasValue<Integer>, HasValueChangeHandlers<Integer>, LeafValueEditor<Integer> {
 	/**
 	 * Название класса стиял для компонента.
 	 */
