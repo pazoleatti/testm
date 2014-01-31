@@ -42,6 +42,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
 			d.setActive(rs.getBoolean("is_active"));
+            d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
 			d.setEdition(rs.getInt("edition"));
 			d.setType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
@@ -69,7 +70,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, is_active, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
+					"select id, is_active, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
 					new Object[] { declarationTemplateId },
 					new DeclarationTemplateRowMapper()
 			);
@@ -107,10 +108,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, version, is_active, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, name, version, is_active, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							declarationTemplate.getEdition(),
+                            declarationTemplate.getName(),
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
@@ -121,6 +123,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					new int[] {
 							Types.NUMERIC,
 							Types.NUMERIC,
+                            Types.VARCHAR,
 							Types.DATE,
 							Types.NUMERIC,
 							Types.VARCHAR,
@@ -139,9 +142,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}*/
 			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
+					"update declaration_template set edition = ?, name = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
 					new Object[] {
                             declarationTemplate.getEdition(),
+                            declarationTemplate.getName(),
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
@@ -152,6 +156,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					},
 					new int[] {
 							Types.NUMERIC,
+                            Types.VARCHAR,
 							Types.DATE,
 							Types.NUMERIC,
 							Types.VARCHAR,
