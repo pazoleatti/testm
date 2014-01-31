@@ -145,7 +145,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
 
-			if (row.getRefBookRowId() == recordId) {
+			if (row.getRefBookRowId().equals(recordId)) {
 				selectionModel.setSelected(row, true);
 				refbookDataTable.setKeyboardSelectedRow(i, true);
 				return;
