@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,7 +27,7 @@ import com.google.gwt.user.client.ui.*;
  * Виджет для загрузки файлов.
  * Поле TextBox используется для имитации выбора файла, редиректит к <input type-"file" />.
  */
-public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>{
+public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>, LeafValueEditor<String> {
 
     @UiField
     FileUpload uploader;

@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
@@ -21,7 +22,7 @@ import com.google.gwt.user.client.ui.*;
  *
  * @author rtimerbaev
  */
-public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H> {
+public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H>, LeafValueEditor<H> {
 
     interface Binder extends UiBinder<Widget, MultiSelectTree> {
     }

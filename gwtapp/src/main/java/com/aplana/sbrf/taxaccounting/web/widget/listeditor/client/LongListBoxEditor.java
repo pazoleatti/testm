@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.listeditor.client;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.ListBox;
 
+@Deprecated
 public class LongListBoxEditor extends ListBox implements LeafValueEditor<Long> {
 	@Override
 	public void setValue(Long value) {
