@@ -334,10 +334,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
-    public void updatePerformer(int departmentId, int typeId, int kindId, int performerId){
+    public void updatePerformer(int id, int performerId){
         getJdbcTemplate().update(
-            "update department_form_type set performer_dep_id = ? " +
-                    "where department_id = ? and form_type_id = ? and kind = ? ",
-            new Object[]{performerId, departmentId, typeId, kindId});
+            "update department_form_type set performer_dep_id = ? where id = ?",
+            new Object[]{performerId, id});
     }
 }
