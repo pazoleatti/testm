@@ -179,7 +179,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 boxTextLb.setText(getTestMaskValues(event.getValue(), boxText.getValue()));
-                boxDatePicker.setEnabled(!boxDatePicker.isEnabled());
+                System.out.println(boxY.isEnabled());
+                boxY.setEnabled(!boxY.isEnabled());
             }
         });
 

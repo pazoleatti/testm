@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -194,9 +195,10 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         //Название параметра
         HorizontalPanel namePanel = new HorizontalPanel();
-        namePanel.setSpacing(7);
-        Label nameLabel = new Label("Название");
-        nameLabel.setWidth("200px");
+        namePanel.setSpacing(5);
+        Label nameLabel = new Label("Название:");
+        nameLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
+        nameLabel.setWidth("150px");
         TextBox nameTextBox = new TextBox();
         nameTextBox.getElement().setId("paramName_" + paramsCounter);
         nameTextBox.setWidth("370px");
@@ -208,9 +210,10 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         //Тип параметра
         HorizontalPanel typePanel = new HorizontalPanel();
-        typePanel.setSpacing(7);
-        Label typeLabel = new Label("Тип");
-        typeLabel.setWidth("200px");
+        typePanel.setSpacing(5);
+        Label typeLabel = new Label("Тип:");
+        typeLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
+        typeLabel.setWidth("150px");
         ValueListBox<TaskParamTypeValues> typeListBox = new ValueListBox<TaskParamTypeValues>(
                 new AbstractRenderer<TaskParamTypeValues>() {
                     @Override
@@ -275,8 +278,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         //Кнопка удаления параметра
         if (param == null) {
-            Button paramDeleteButton = new Button();
-            paramDeleteButton.setText("Удалить");
+            Button paramDeleteButton = new Button("Удалить");
             paramDeleteButton.getElement().setId("deleteParamBtn_" + paramsCounter);
             paramDeleteButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -303,9 +305,10 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
 
         //Значение параметра
         HorizontalPanel valuePanel = new HorizontalPanel();
-        valuePanel.setSpacing(7);
-        Label valueLabel = new Label("Значение");
-        valueLabel.setWidth("200px");
+        valuePanel.setSpacing(5);
+        Label valueLabel = new Label("Значение:");
+        valueLabel.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
+        valueLabel.setWidth("150px");
         TextBox valueBox = new TextBox();
         valueBox.getElement().setId("paramValue_" + paramsCounter);
         valueBox.setWidth("370px");

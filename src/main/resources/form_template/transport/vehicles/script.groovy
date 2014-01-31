@@ -8,7 +8,7 @@ import groovy.transform.Field
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог
  * formTemplateId=201
- *  TODO заменить ОКАТО на ОКТМО
+ *
  * @author ivildanov
  * @author Stanislav Yasinskiy
  */
@@ -47,7 +47,7 @@ switch (formDataEvent) {
 }
 
 // 1 № пп  -  rowNumber
-// 2 Код ОКАТО  -  codeOKATO
+// 2 Код ОКТМО  -  codeOKATO
 // 3 Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)  -  regionName
 // 4 Код вида ТС  -  tsTypeCode
 // 5 Вид ТС  -  tsType
@@ -114,17 +114,17 @@ void calc() {
     }
 }
 
-// сортировка ОКАТО - Муниципальное образование - Код вида ТС
+// сортировка ОКТМО - Муниципальное образование - Код вида ТС
 void sort() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.getAllCached().sort { a, b ->
-        def valA = getRefBookValue(3, a.codeOKATO).OKATO.stringValue
-        def valB = getRefBookValue(3, b.codeOKATO).OKATO.stringValue
-        int val = valA.compareTo(valB)
+        def valA = getRefBookValue(96, a.codeOKATO)?.CODE?.stringValue
+        def valB = getRefBookValue(96, b.codeOKATO)?.CODE?.stringValue
+        def val = (valA != null && valB != null) ? valA.compareTo(valB) : 0
         if (val == 0) {
-            valA = getRefBookValue(42, a.tsTypeCode).CODE.stringValue
-            valB = getRefBookValue(42, b.tsTypeCode).CODE.stringValue
-            val = valA.compareTo(valB)
+            valA = getRefBookValue(42, a.tsTypeCode)?.CODE?.stringValue
+            valB = getRefBookValue(42, b.tsTypeCode)?.CODE?.stringValue
+            val = (valA != null && valB != null) ? valA.compareTo(valB) : 0
         }
         return val
     }
@@ -169,7 +169,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКАТО = ${getRefBookValue(3, row.codeOKATO).OKATO.stringValue}, " +
+                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКТМО = ${getRefBookValue(96, row.codeOKATO).CODE.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
                         "Регистрационный знак = $row.regNumber совпадают!")
             }
@@ -185,7 +185,7 @@ def logicCheck() {
         }
 
         // Проверки соответствия НСИ
-        checkNSI(3, row, "codeOKATO")
+        checkNSI(96, row, "codeOKATO")
         checkNSI(42, row, "tsTypeCode")
         checkNSI(40, row, "ecoClass")
         checkNSI(12, row, "baseUnit")

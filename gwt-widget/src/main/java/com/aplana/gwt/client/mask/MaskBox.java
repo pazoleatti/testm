@@ -105,7 +105,8 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
         return length;
     }
 
-    public void enable(boolean enabled) {
+    @Override
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         setReadOnly(!enabled);
         if (!enabled) {

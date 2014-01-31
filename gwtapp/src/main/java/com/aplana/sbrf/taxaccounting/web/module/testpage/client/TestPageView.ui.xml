@@ -79,7 +79,7 @@
                         <g:Label ui:field="boxMyLb" width="100%"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel  spacing="2">
-                        <mask:YearMaskBox ui:field="boxY"/>
+                        <mask:YearMaskBox ui:field="boxY" />
                         <g:Label ui:field="boxYLb" width="100%"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel  spacing="2">
@@ -88,7 +88,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel  spacing="2">
-                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" enabled="true" visible="true"/>
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" visible="true"/>
                         <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
