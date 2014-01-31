@@ -8,18 +8,6 @@
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
-
-        .titleText{
-            font-size: 16px;
-        }
-
-        .titlePanel{
-            padding-left: 10px
-        }
-        .lable{
-            margin-bottom: 2px
-        }
-
         .separator {
             height: 78px;
             margin: 0 9px 0 15px;
@@ -36,65 +24,66 @@
 
         }
 
-        .FirstlabelBlockMargin{
+        .FirstlabelBlockMargin {
             margin-right: 5px;
 
         }
     </ui:style>
 
-    <g:HorizontalPanel width="100%">
+    <g:HorizontalPanel width="100%" verticalAlignment="middle">
         <g:HorizontalPanel>
-            <g:cell>
-                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.FirstlabelBlockMargin}">
-                    <g:cell verticalAlignment="middle"  height="26px">
-                        <g:Label text="С:" width="110px"/>
+            <g:cell verticalAlignment="middle">
+                <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
+                                 addStyleNames="{style.FirstlabelBlockMargin}">
+                    <g:cell height="26px">
+                        <g:Label text="С:" width="70px"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
-                        <g:Label text="По:" width="110px"/>
+                    <g:cell height="26px">
+                        <g:Label text="По:" width="70px"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
-                        <g:Label text="Вид налога:" width="110px"/>
+                    <g:cell height="26px">
+                        <g:Label text="Вид налога:" width="70px"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
-            <g:cell horizontalAlignment="left" width="150px">
-                <g:VerticalPanel width="150px" >
-                    <g:cell verticalAlignment="middle" height="26px">
+            <g:cell horizontalAlignment="left" verticalAlignment="middle" width="150px">
+                <g:VerticalPanel width="150px" verticalAlignment="middle">
+                    <g:cell height="26px">
                         <d:DateMaskBoxPicker ui:field="fromSearchDate" width="100%"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
+                    <g:cell height="26px">
                         <d:DateMaskBoxPicker ui:field="toSearchDate" width="100%"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
+                    <g:cell height="26px">
                         <g:ValueListBox ui:field="taxType" width="100%"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="150px">
-                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:cell verticalAlignment="middle" height="26px">
-                        <g:Label width="150px" text="Период:"/>
+                <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
+                                 addStyleNames="{style.labelBlockMargin}">
+                    <g:cell height="26px">
+                        <g:Label width="130px" text="Период:"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
-                        <g:Label width="150px" text="Подразделение:"/>
+                    <g:cell height="26px">
+                        <g:Label width="130px" text="Подразделение:"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
-                        <g:Label width="150px" text="Пользователь:" />
+                    <g:cell height="26px">
+                        <g:Label width="130px" text="Пользователь:"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="40%">
-                <g:VerticalPanel width="100%">
-
-                    <g:cell verticalAlignment="middle" height="26px">
+                <g:VerticalPanel verticalAlignment="middle" width="100%">
+                    <g:cell height="26px">
                         <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
+                    <g:cell height="26px">
                         <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
                                                        header="Выберите подразделение" multiselection="false"
                                                        modal="true" width="100%"/>
                     </g:cell>
-                    <g:cell verticalAlignment="middle" height="26px">
+                    <g:cell height="26px">
                         <r:RefBookPickerPopupWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"/>
                     </g:cell>
 
@@ -102,63 +91,60 @@
             </g:cell>
             <g:cell horizontalAlignment="left" width="60%">
                 <g:VerticalPanel width="100%">
-                    <g:HorizontalPanel width="100%">
-                        <g:cell horizontalAlignment="right" verticalAlignment="middle" height="26px">
-                            <g:Label width="190px" text="Тип формы:" addStyleNames="{style.labelBlockMargin}" />
+                    <g:HorizontalPanel width="100%" verticalAlignment="middle">
+                        <g:cell horizontalAlignment="right" height="26px">
+                            <g:Label width="180px" text="Тип формы:" addStyleNames="{style.labelBlockMargin}"/>
                         </g:cell>
-                        <g:cell width="100%">
-                            <g:VerticalPanel width="100%">
-                                <g:cell verticalAlignment="middle" height="26px">
-                                    <g:ValueListBox ui:field="auditFormTypeId" width="100%"/>
-
-                                </g:cell>
-                            </g:VerticalPanel>
+                        <g:cell width="100%" height="26px">
+                            <g:ValueListBox ui:field="auditFormTypeId" width="100%"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel width="100%" visible="false" ui:field="formPanel">
                         <g:cell>
-                            <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                                <g:cell verticalAlignment="middle" height="26px">
-                                    <g:Label width="190px" text="Вид налоговой формы:" />
+                            <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
+                                             addStyleNames="{style.labelBlockMargin}">
+                                <g:cell height="26px">
+                                    <g:Label width="180px" text="Вид налоговой формы:"/>
                                 </g:cell>
-                                <g:cell verticalAlignment="middle" height="26px">
-                                    <g:Label width="190px" text="Тип налоговой формы:" />
+                                <g:cell height="26px">
+                                    <g:Label width="180px" text="Тип налоговой формы:"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="100%">
-                            <g:VerticalPanel>
-                                <g:cell verticalAlignment="middle" height="26px">
-                                    <g:ValueListBox ui:field="formDataKind" width="100%" addStyleNames="{style.labelBlockMargin}" />
+                            <g:VerticalPanel verticalAlignment="middle">
+                                <g:cell height="26px">
+                                    <g:ValueListBox ui:field="formDataKind" width="100%"
+                                                    addStyleNames="{style.labelBlockMargin}"/>
                                 </g:cell>
-                                <g:cell verticalAlignment="middle" height="26px">
+                                <g:cell height="26px">
                                     <style:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel width="100%" visible="false" ui:field="declarationTypePanel">
-                        <g:cell horizontalAlignment="right" verticalAlignment="middle" height="26px">
-                            <g:Label width="190px" addStyleNames="{style.labelBlockMargin}" text="Вид декларации:"/>
+                    <g:HorizontalPanel width="100%" verticalAlignment="middle" visible="false"
+                                       ui:field="declarationTypePanel">
+                        <g:cell horizontalAlignment="right" height="26px">
+                            <g:Label width="180px" addStyleNames="{style.labelBlockMargin}" text="Вид декларации:"/>
                         </g:cell>
-                        <g:cell verticalAlignment="middle" height="26px" width="100%">
+                        <g:cell height="26px" width="100%">
                             <style:ListBoxWithTooltip width="100%" ui:field="declarationTypeIds" showTooltip="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>
-
         </g:HorizontalPanel>
-
-        <g:cell width="18px" verticalAlignment="middle" horizontalAlignment="right">
+        <g:cell width="18px" horizontalAlignment="right">
             <g:HTML addStyleNames="{style.separator}"/>
         </g:cell>
-        <g:cell width="71px" verticalAlignment="middle">
+        <g:cell width="71px">
             <g:VerticalPanel>
                 <g:Label height="20px" text="Дата архивации: " visible="false"/>
                 <g:Button ui:field="search" addStyleNames="{style.btnFind}">Поиск</g:Button>
             </g:VerticalPanel>
         </g:cell>
     </g:HorizontalPanel>
+
 
 </ui:UiBinder>

@@ -69,7 +69,9 @@
 
                 <g:HorizontalPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}" />
 
-                <style:GenericDataGrid ui:field="formDataTable" addStyleNames="{style.table}"/>
+                <g:ResizeLayoutPanel  addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="formDataTable" height="100%" width="100%"/>
+                </g:ResizeLayoutPanel>
 
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"

@@ -119,6 +119,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @UiField
     Label editModeLabel;
+    @UiField
+    ResizeLayoutPanel tableWrapper;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -482,13 +484,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
      * @param isLockInfoVisible показано ли сообщение
      */
     private void changeTableTopPosition(Boolean isLockInfoVisible){
-        Style formDataTableStyle = formDataTable.getElement().getStyle();
+        Style formDataTableStyle = tableWrapper.getElement().getStyle();
         int downShift = 0;
         if (isLockInfoVisible){
             downShift = LOCK_INFO_BLOCK_HEIGHT;
         }
         formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
-        formDataTable.onResize();
     }
 
     /**

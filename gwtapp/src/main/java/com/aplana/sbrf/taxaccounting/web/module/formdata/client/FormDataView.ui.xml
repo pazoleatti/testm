@@ -266,7 +266,10 @@
                 <g:Label ui:field="lockInformation" visible="false"
                          addStyleNames="{lockInformationStyle.lockInformation}"/>
 
-                <style:GenericDataGrid ui:field="formDataTable" addStyleNames="{style.table}"/>
+                <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>
+                </g:ResizeLayoutPanel>
+
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
                                      fastForwardRows="0" showLastPageButton="true" type="formData"/>

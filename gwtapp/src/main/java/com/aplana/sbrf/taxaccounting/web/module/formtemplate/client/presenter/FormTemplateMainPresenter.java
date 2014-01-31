@@ -288,4 +288,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     }
                 }, this));
 	}
+
+    @Override
+    public void onReturnClicked() {
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
+    }
 }

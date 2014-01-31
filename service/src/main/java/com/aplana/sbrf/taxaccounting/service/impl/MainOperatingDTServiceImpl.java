@@ -66,7 +66,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger);*/
         DeclarationType type = declarationTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
-        type.setName("Declaration name");
+        type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
         int formTypeId = declarationTypeService.save(type);
         declarationTemplate.getType().setId(formTypeId);
         versionOperatingService.isIntersectionVersion(declarationTemplate, templateActualEndDate, logger);

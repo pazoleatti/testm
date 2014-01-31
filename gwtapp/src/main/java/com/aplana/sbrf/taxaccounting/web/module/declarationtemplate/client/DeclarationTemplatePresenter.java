@@ -64,6 +64,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 .defaultCallback(new AbstractCallback<CreateNewDTTypeResult>() {
                     @Override
                     public void onSuccess(CreateNewDTTypeResult result) {
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                                with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
                         declarationTemplateExt = new DeclarationTemplateExt();
                         declarationTemplate = new DeclarationTemplate();
                         declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
@@ -157,7 +159,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                                 with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
-						setDeclarationTemplate();
 					}
 				}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
 	}
