@@ -3,8 +3,8 @@
              xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
              xmlns:fileuplod='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:datepicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:fm="urn:import:com.aplana.gwt.client.form">
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
 
     <ui:style>
         .header {
@@ -99,11 +99,11 @@
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Период актульности с"/>
                             <g:HorizontalPanel width="300px">
-                                <datepicker:DateMaskBoxPicker ui:field="versionDateBegin" width="134px"/>
+                                <w:YearMaskBox ui:field="versionDateBegin" width="134px"/>
                                 <g:cell horizontalAlignment="center">
                                     <g:Label width="30px" text="по"/>
                                 </g:cell>
-                                <datepicker:DateMaskBoxPicker ui:field="versionDateEnd" width="134px"/>
+                                <w:YearMaskBox ui:field="versionDateEnd" width="134px"/>
                             </g:HorizontalPanel>
                         </g:HorizontalPanel>
 
