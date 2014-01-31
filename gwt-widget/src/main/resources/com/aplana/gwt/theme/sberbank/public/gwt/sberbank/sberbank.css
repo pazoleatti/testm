@@ -1215,7 +1215,7 @@ a, a:visited, a:hover {
 
 td.datePickerMonth {
     text-align: center;
-    vertical-align: center;
+    vertical-align: middle;
     white-space: nowrap;
     font-size: 70%;
     font-weight: bold;
@@ -1363,4 +1363,7 @@ td.datePickerMonth {
 	font-weight: bold;
 	margin-top: 1px;
 	margin-bottom: 1px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
 }
