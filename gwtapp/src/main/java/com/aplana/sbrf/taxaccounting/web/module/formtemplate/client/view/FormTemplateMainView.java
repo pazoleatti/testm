@@ -52,6 +52,9 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
     @UiField
     Button activateVersion;
 
+    @UiField
+    Anchor returnAnchor;
+
 	@UiField(provided = true)
 	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
@@ -159,10 +162,21 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	@Override
 	public void setTitle(String title) {
 		this.title.setText(title);
+        this.title.setTitle(title);
 	}
 
     @Override
     public void activateVersionName(String s) {
         activateVersion.setText(s);
+    }
+
+    @UiHandler("returnAnchor")
+    void onReturnAnchor(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onReturnClicked();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
     }
 }
