@@ -18,7 +18,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 	/**
 	 * Label со значением.
 	 */
-	private Label label = new Label(EMPTY_STRING_VALUE);
+	protected Label label = new Label(EMPTY_STRING_VALUE);
 
 	/**
 	 * Флаг скрытия
@@ -69,7 +69,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 
 	/**
 	 * Обновляет значение Label в состоянии disabled.
-	 * Кошерно для переопределния.
+	 * Кошерно для переопределения, например.
 	 */
 	protected void updateLabelValue() {
 		if (this instanceof HasValue) {
@@ -88,6 +88,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 			}
 		}
 		label.setText(stringValue);
+		label.setTitle(stringValue);
 	}
 
 	/**

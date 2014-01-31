@@ -18,6 +18,24 @@ public class FormTypeKind implements Serializable {
     private Long formTypeId;
     private FormDataKind kind;
     private String name;
+    private Department department;
+    private Department performer;
+
+    public Department getPerformer() {
+        return performer;
+    }
+
+    public void setPerformer(Department performer) {
+        this.performer = performer;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
     /**
      * Получить идентификатор записи

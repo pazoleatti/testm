@@ -1,24 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import java.util.List;
-import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.editDialog.EditDeatinationPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.EditDestinationDialogOpenEvent;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpenDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesAction;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTaxFormTypesResult;
-import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.SaveAction;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog.DeclarationDestinationsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog.FormDestinationsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -32,6 +24,9 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Презентер для формы "Назначение форм и деклараций"
  *
@@ -39,9 +34,9 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
  */
 public class TaxFormNominationPresenter
         extends Presenter<TaxFormNominationPresenter.MyView, TaxFormNominationPresenter.MyProxy>
-        implements TaxFormNominationUiHandlers, EditDestinationDialogOpenEvent.EditDestinationDialogOpenHandler  {
+        implements TaxFormNominationUiHandlers, UpdateTable.UpdateTableHandler  {
 
-    @ProxyCodeSplit
+	@ProxyCodeSplit
     @NameToken(TaxFormNominationToken.taxFormNomination)
     public interface MyProxy extends ProxyPlace<TaxFormNominationPresenter>, Place {
     }
@@ -51,18 +46,21 @@ public class TaxFormNominationPresenter
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
         // Инициализация
-        void init(Boolean isForm, TaxType nType);
+        void init(TaxType nType);
 
 
         // установка данных
         void setTaxFormKind(List<FormType> formTypes);
 
-        void setTableData(List<FormTypeKind> departmentFormTypes);
+        // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
+        void setDataToFormTable(List<FormTypeKind> departmentFormTypes);
+        // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
+        void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
 
         // получение данных
         boolean isForm();
 
-        Long departmentId();
+        //Long departmentId();
 
         Integer getTypeId();
 
@@ -70,23 +68,28 @@ public class TaxFormNominationPresenter
 
         TaxType getTaxType();
 
+        List<Integer> getDepartments();
 
+	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
+        List<FormTypeKind> getSelectedItemsOnFormGrid();
     }
 
-    protected final EditDeatinationPresenter editDeatinationPresenter;
+    protected final FormDestinationsPresenter formDestinationsPresenter;
+    protected final DeclarationDestinationsPresenter declarationDestinationsPresenter;
     private final DispatchAsync dispatcher;
 
     @Inject
-    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, EditDeatinationPresenter editDeatinationPresenter) {
+    public TaxFormNominationPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, FormDestinationsPresenter formDestinationsPresenter, DeclarationDestinationsPresenter declarationDestinationsPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.editDeatinationPresenter = editDeatinationPresenter;
+        this.formDestinationsPresenter = formDestinationsPresenter;
+        this.declarationDestinationsPresenter = declarationDestinationsPresenter;
         getView().setUiHandlers(this);
     }
 
     @Override
     protected void onBind() {
-        addRegisteredHandler(EditDestinationDialogOpenEvent.getType(), this);
+        addRegisteredHandler(UpdateTable.getType(), this);
         super.onBind();
     }
 
@@ -109,10 +112,10 @@ public class TaxFormNominationPresenter
                                     return;
                                 }
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                                Boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
                                 String value = request.getParameter("nType", "");
                                 TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
-                                getView().init(isForm, nType);
+                                getView().init(nType);
+                                formDestinationsPresenter.initForm(getView().getTaxType());
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
@@ -128,6 +131,7 @@ public class TaxFormNominationPresenter
         GetTaxFormTypesAction action = new GetTaxFormTypesAction();
         action.setTaxType(getView().getTaxType());
         action.setForm(getView().isForm());
+
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetTaxFormTypesResult>() {
                     @Override
@@ -138,22 +142,38 @@ public class TaxFormNominationPresenter
     }
 
     /**
-     * Перезагрузка таблицы
+     * Перезагрузка таблицы, отображающий данные для "Назначение деклараций"
      */
     @Override
-    public void getTableData() {
-        GetTableDataAction action = new GetTableDataAction();
-        action.setDepoId(getView().departmentId());
-        action.setTaxType(getView().getTaxType().getCode());
-        action.setForm(getView().isForm());
-        dispatcher.execute(action, CallbackUtils
+    public void reloadFormTableData() {
+        dispatcher.execute(getTableDataAction(), CallbackUtils
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setTableData(result.getTableData());
+                        getView().setDataToFormTable(result.getTableData());
                     }
                 }, this));
     }
+
+    @Override
+    public void reloadDeclarationTableData(){
+        dispatcher.execute(getTableDataAction(), CallbackUtils
+		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToDeclarationTable(result.getTableData());
+                    }
+                }, this));
+    }
+
+     private GetTableDataAction getTableDataAction(){
+         GetTableDataAction action = new GetTableDataAction();
+         action.setDepartmentsIds(getView().getDepartments());
+         action.setTaxType(getView().getTaxType().getCode());
+         action.setForm(getView().isForm());
+
+         return action;
+     }
 
     /**
      * Добавление, удаление зависимостей
@@ -164,7 +184,7 @@ public class TaxFormNominationPresenter
     public void save(Set<Long> ids) {
         SaveAction action = new SaveAction();
         action.setIds(ids);
-        action.setDepartmentId(getView().departmentId());
+        // ?? action.setDepartmentsIds(getView().getDepartments());
         action.setTypeId(getView().getTypeId());
         action.setFormId(getView().getFormId());
         action.setTaxType(getView().getTaxType().getCode());
@@ -174,18 +194,68 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getTableData() != null)
-                            getView().setTableData(result.getTableData());
+                            getView().setDataToFormTable(result.getTableData());
+                        // ??
                     }
                 }, this));
     }
 
     @Override
-    public void onClickEditDestination(EditDestinationDialogOpenEvent event) {
-        editDeatinationPresenter.initAndShowDialog(this);
+    public void onClickOpenFormDestinations() {
+        formDestinationsPresenter.initAndShowDialog(this);
     }
 
     @Override
-    public void onClickOpenEditDestination() {
-        EditDestinationDialogOpenEvent.fire(this);
+    public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
+        formDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds);
+    }
+
+    @Override
+    public void onClickOpenDeclarationDestinations() {
+	    declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
+    }
+
+	@Override
+	public void onClickDeclarationCancelAnchor() {
+		DeleteDeclarationSourcesAction action = new DeleteDeclarationSourcesAction();
+		action.setKind(getView().getSelectedItemsOnDeclarationGrid());
+		dispatcher.execute(action,
+				CallbackUtils.defaultCallback(
+						new AbstractCallback<DeleteDeclarationSourcesResult>() {
+							@Override
+							public void onSuccess(DeleteDeclarationSourcesResult result) {
+								reloadDeclarationTableData();
+								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
+									Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+								}
+
+							}
+						}, this));
+	}
+
+	@Override
+	public void onUpdateTable(UpdateTable event) {
+        if (getView().isForm()){
+            reloadFormTableData();
+        } else {
+            reloadDeclarationTableData();
+        }
+	}
+
+    @Override
+    public void onClickFormCancelAnchor(){
+        DeleteFormsSourseAction action = new DeleteFormsSourseAction();
+        action.setKind(getView().getSelectedItemsOnFormGrid());
+        LogCleanEvent.fire(this);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<DeleteFormsSourceResult>() {
+                            @Override
+                            public void onSuccess(DeleteFormsSourceResult result) {
+                                LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+                                reloadFormTableData();
+                            }
+                        }, this));
     }
 }
