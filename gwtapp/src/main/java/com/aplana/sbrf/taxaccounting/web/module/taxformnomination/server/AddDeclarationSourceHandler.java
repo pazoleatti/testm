@@ -1,6 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.AddDeclarationSourceResult;
@@ -10,6 +16,9 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -22,15 +31,24 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 
 	@Autowired
 	SourceService departmentFormTypeService;
+	@Autowired
+	DepartmentService departmentService;
+	@Autowired
+	DeclarationTypeService declarationTypeService;
+	@Autowired
+	LogEntryService logEntryService;
 
 	@Override
 	public AddDeclarationSourceResult execute(AddDeclarationSourceAction action, ExecutionContext executionContext) throws ActionException {
+		List<LogEntry> logs = new ArrayList<LogEntry>();
 		for (Integer depId : action.getDepartmentId()) {
 			for (Integer dt : action.getDeclarationTypeId()) {
 				boolean canAssign = true;
 				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType())) {
 					if (ddt.getDeclarationTypeId() == dt) {
 						canAssign = false;
+						logs.add(new LogEntry(LogLevel.WARNING, "Для " + departmentService.getDepartment(depId).getName() +
+								" уже существует назначение " + declarationTypeService.get(ddt.getDeclarationTypeId()).getName()));
 					}
 				}
 				if (canAssign) {
@@ -38,7 +56,9 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 				}
 			}
 		}
-		return new AddDeclarationSourceResult();
+		AddDeclarationSourceResult result = new AddDeclarationSourceResult();
+		result.setUuid(logEntryService.save(logs));
+		return result;
 	}
 
 	@Override
