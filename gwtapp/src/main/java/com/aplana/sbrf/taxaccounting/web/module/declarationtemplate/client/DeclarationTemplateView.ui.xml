@@ -96,6 +96,16 @@
 
                 <g:HorizontalPanel addStyleNames="{style.marginLeft}">
                     <g:VerticalPanel addStyleNames="{style.btnPanel2}">
+                        <g:cell>
+                            <g:HorizontalPanel>
+                                <g:cell>
+                                    <g:Label width="150px" text="Наименование декларации"/>
+                                </g:cell>
+                                <g:cell>
+                                    <g:TextBox width="300px" ui:field="decName"/>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                        </g:cell>
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Период актульности с"/>
                             <g:HorizontalPanel width="300px">

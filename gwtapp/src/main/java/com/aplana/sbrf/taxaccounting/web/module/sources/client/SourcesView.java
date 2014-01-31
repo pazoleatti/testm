@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
@@ -86,15 +87,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	DepartmentPickerPopupWidget departmentSourcePicker;
 
 	@UiField
-	Anchor formAnchor;
-	@UiField
-	Anchor declarationAnchor;
-	@UiField
 	Anchor assignButton;
 	@UiField
 	Anchor cancelButton;
-	@UiField
-	Label declarationLabel, titleLabel, formLabel;
+
+    @UiField
+    LinkAnchor formDecAnchor;
+    @UiField
+    Label titleLabel;
 
     @Inject
 	@UiConstructor
@@ -121,13 +121,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	@Override
 	public void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
 		this.isForm = isForm;
-        titleLabel.setText("Указание источников для " + (isForm ? "налоговых форм" : "деклараций"));
 
-		formLabel.setVisible(isForm);
-		formAnchor.setVisible(!isForm);
-		declarationLabel.setVisible(!isForm);
-		declarationAnchor.setVisible(isForm);
-		formReceiversTable.setVisible(isForm);
+        titleLabel.setText(isForm ? "Налоговые формы" : "Декларации");
+        formDecAnchor.setText("Указание источников для " + (isForm ? "деклараций" : "налоговых форм"));
+
+        formReceiversTable.setVisible(isForm);
 		declarationReceiversTable.setVisible(!isForm);
 		taxTypePicker.setValue(taxType);
 		taxTypePicker.setAcceptableValues(TAX_TYPES);
@@ -169,8 +167,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
     private void updateLinks(TaxType taxType, Integer selectedReceiverId, Integer selectedSourceId) {
         String receiverStr = selectedReceiverId == null ? "" : ";dst=" + selectedReceiverId;
         String sourceStr = selectedSourceId == null ? "" : ";src=" + selectedSourceId;
-        formAnchor.setHref("#!sources;nType=" + taxType.name() + receiverStr + sourceStr + ";isForm=true");
-        declarationAnchor.setHref("#!sources;nType=" + taxType.name() + receiverStr + sourceStr + ";isForm=false");
+        String href = "#!sources;nType=" + taxType.name() + receiverStr + sourceStr + ";isForm=" + !isForm;
+        formDecAnchor.setHref(href);
     }
 
 	@Override

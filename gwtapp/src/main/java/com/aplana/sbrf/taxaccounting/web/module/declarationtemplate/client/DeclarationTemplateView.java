@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
@@ -17,7 +17,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -87,6 +86,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Editor.Ignore
     Button activateVersion;
+
+    @UiField
+    @Path("declarationTemplate.name")
+    TextBox decName;
 
 	@Inject
 	@UiConstructor

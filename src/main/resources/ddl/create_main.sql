@@ -351,6 +351,7 @@ create table declaration_template (
   edition    number(9) not null,
   status number(1) default 0 not null,
   version date not null,
+  name varchar2(600) not null,
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
@@ -361,6 +362,7 @@ comment on table declaration_template is 'Шаблоны налоговых де
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_template.edition is 'Номер редакции';
 comment on column declaration_template.version is 'Версия';
+comment on column declaration_template.name is 'Наименование версии макета';
 comment on column declaration_template.is_active is 'Признак активности';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';

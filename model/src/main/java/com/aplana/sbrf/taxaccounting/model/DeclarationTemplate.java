@@ -15,8 +15,17 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	private Integer edition;
     private String xsdId;
     private String jrxmlBlobId;
+    private String name;
 
-	private String createScript;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    private String createScript;
 
     private VersionedObjectStatus status;
 
