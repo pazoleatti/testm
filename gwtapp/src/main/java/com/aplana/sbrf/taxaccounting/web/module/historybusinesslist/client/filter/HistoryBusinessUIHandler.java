@@ -8,5 +8,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface HistoryBusinessUIHandler extends UiHandlers {
     void getReportPeriods(TaxType taxType);
+
     void onSearchClicked();
 }

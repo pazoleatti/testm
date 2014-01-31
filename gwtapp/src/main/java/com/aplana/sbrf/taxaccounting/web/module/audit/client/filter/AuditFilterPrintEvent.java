@@ -9,7 +9,7 @@ import com.google.gwt.event.shared.HasHandlers;
  */
 public class AuditFilterPrintEvent extends GwtEvent<AuditFilterPrintEvent.AuditFilterPrintHandler> {
 
-    public interface AuditFilterPrintHandler extends EventHandler{
+    public interface AuditFilterPrintHandler extends EventHandler {
         void onPrintButtonClicked(AuditFilterPrintEvent event);
     }
 
@@ -19,7 +19,7 @@ public class AuditFilterPrintEvent extends GwtEvent<AuditFilterPrintEvent.AuditF
         source.fireEvent(new AuditFilterPrintEvent());
     }
 
-    public static Type<AuditFilterPrintHandler> getType(){
+    public static Type<AuditFilterPrintHandler> getType() {
         return TYPE;
     }
 

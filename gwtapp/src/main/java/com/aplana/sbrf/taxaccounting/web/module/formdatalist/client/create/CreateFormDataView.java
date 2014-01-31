@@ -46,6 +46,7 @@ Editor<FormDataFilter> {
     private final MyDriver driver;
 
 	@UiField
+    @Path("departmentIds")
     DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField
@@ -184,7 +185,7 @@ Editor<FormDataFilter> {
 	public FormDataFilter getFilterData(){
     	FormDataFilter filter = driver.flush();
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	filter.setDepartmentIds(departmentPicker.getValue());
+    	//filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
 	}
 
@@ -197,6 +198,6 @@ Editor<FormDataFilter> {
 	public void setFilterData(FormDataFilter filter) {
         driver.edit(filter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-        departmentPicker.setValue(filter.getDepartmentIds());
+        //departmentPicker.setValue(filter.getDepartmentIds());
 	}
 }

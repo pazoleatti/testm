@@ -146,7 +146,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             return;
         }
 
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
+        UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplateExt(declarationTemplateExt);
         dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
@@ -167,7 +167,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void close() {
-        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList).
                 with(DeclarationTemplateTokens.declarationType, String.valueOf(declarationTemplate.getType().getId())).build());
 	}
 
