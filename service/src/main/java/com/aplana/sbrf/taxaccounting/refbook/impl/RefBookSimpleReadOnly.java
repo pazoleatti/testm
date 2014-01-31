@@ -29,6 +29,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	// Справочник "Системные роли"
 	public static final Long SEC_ROLE_REF_BOOK_ID = 95L;
 	public static final String SEC_ROLE_TABLE_NAME = "SEC_ROLE";
+    // Справочник "ОКТМО"
+    public static final Long OKTMO_REF_BOOK_ID = 96L;
+    public static final String OKTMO_TABLE_NAME = "REF_BOOK_OKTMO";
 
 	@Autowired
 	private RefBookUtils refBookUtils;
