@@ -92,10 +92,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	@UiHandler("createButton")
 	public void onSave(ClickEvent event){
         // проверка заполненности полей
-        if (!checkRequiredFields()){
+        if (!checkRequiredFieldsOnCreate()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNamesOnCeate().toArray(), ',')
             );
         } else {
             getUiHandlers().onConfirm();
@@ -104,10 +104,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event){
-        if (!checkRequiredFields()){
+        if (!checkRequiredFieldsOnEdit()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNamesOnEdit().toArray(), ',')
             );
         } else {
             getUiHandlers().onEdit(selectedDFT);
@@ -145,7 +145,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             * Если хотя бы одно значение было установлено пользователем: Система выводит Диалог - вопрос:
             *
             */
-            if (getEmptyFieldsNames().size() != REQUIDED_FIELDS_COUNT){
+            if (getEmptyFieldsNamesOnCeate().size() != REQUIDED_FIELDS_COUNT){
                 Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
                     @Override
                     public void yes() {
@@ -175,14 +175,22 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	}
 
     /**
-     * Проверка заполненности полей
+     * Проверка заполненности полей, при создании назначений
      * @return true - если заполнены все требуемые поля, false в обратном случае
      */
-    private boolean checkRequiredFields(){
-        return getEmptyFieldsNames().size() == 0;
+    private boolean checkRequiredFieldsOnCreate(){
+        return getEmptyFieldsNamesOnCeate().size() == 0;
     }
 
-    private List<String> getEmptyFieldsNames(){
+    /**
+     * Проверка заполненности полей, при редактировании назначений
+     * @return true - если заполнены все требуемые поля, false в обратном случае
+     */
+    private boolean checkRequiredFieldsOnEdit(){
+        return getEmptyFieldsNamesOnEdit().size() == 0;
+    }
+
+    private List<String> getEmptyFieldsNamesOnCeate(){
         List<String> emptyFields = new ArrayList<String>();
         // Подразделение
         if (departmentPicker.getValue().size() == 0){
@@ -199,6 +207,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             emptyFields.add("Вид налоговой формы");
         }
 
+        return emptyFields;
+    }
+
+    private List<String> getEmptyFieldsNamesOnEdit(){
+        List<String> emptyFields = getEmptyFieldsNamesOnCeate();
         // Исполнитель
         if (performersPickerWidget.getValue().size() == 0){
             emptyFields.add("Исполнитель");
@@ -262,7 +275,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @Override
     public Integer getPerformer(){
-        return performersPickerWidget.getValue().get(0);
+        // а больше одного и быть не может, так как мультиселект отключен
+        return performersPickerWidget.getValue().size() == 1 ? performersPickerWidget.getValue().get(0) : null;
     }
 
     @Override
@@ -273,7 +287,9 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     @Override
     public List<Integer> getFormTypes() {
         // TODO ждду виджет с мульттиселектом
-        return new ArrayList(formTypeId.getValue());
+        List<Integer> result = new ArrayList<Integer>();
+        result.add(formTypeId.getValue());
+        return result;
     }
 
     @Override
