@@ -206,8 +206,8 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onClickEditFormDestinations(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes) {
-        formDestinationsPresenter.initAndShowEditDialog(this, selectedDepartments, selectedKinds, selectedTypes);
+    public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
+        formDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds);
     }
 
     @Override

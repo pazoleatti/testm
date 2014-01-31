@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormTypeService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -35,10 +36,8 @@ public class EditFormHandler extends AbstractActionHandler<EditFormsAction, Edit
 
     @Override
     public EditFormResult execute(EditFormsAction action, ExecutionContext executionContext) throws ActionException {
-        for (Integer departmentId : action.getDepartments()){
-            for (Integer performerId : action.getPerformers()){
-                departmentFormTypeService.updatePerformer(departmentId, action.getFormTypeId(), action.getFormDataKind().getId(), performerId);
-            }
+        for (FormTypeKind f : action.getFormTypeKinds()){
+            departmentFormTypeService.updatePerformer(f.getId().intValue(), action.getPerformer());
         }
         return null;
     }

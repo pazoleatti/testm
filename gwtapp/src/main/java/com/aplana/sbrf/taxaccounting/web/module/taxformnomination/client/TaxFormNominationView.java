@@ -547,21 +547,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiHandler("editAnchor")
     public void clickEdit(ClickEvent event) {
         if(getUiHandlers() != null){
-            // выбрать строки для которых отмечены чекбоксы.
-            Set<Integer> selectedDepartments = new HashSet<Integer>();
-            // TODO пока передам только первый тип
-            Set<FormDataKind> selectedKinds = new HashSet<FormDataKind>();
-            // выбранные типы
-            Set<Integer> selectedTypes = new HashSet<Integer>();
-
-            for (Integer index: selectedRows){
-                TableModel model = formGrid.getVisibleItems().get(index);
-                selectedDepartments.add(model.getDepartment().getId());
-                selectedKinds.add(model.getDepartmentFormType().getKind());
-                selectedTypes.add(model.getDepartmentFormType().getFormTypeId().intValue());
-            }
-
-            getUiHandlers().onClickEditFormDestinations(selectedDepartments, selectedKinds, selectedTypes);
+            getUiHandlers().onClickEditFormDestinations(getSelectedItemsOnFormGrid());
         }
     }
 

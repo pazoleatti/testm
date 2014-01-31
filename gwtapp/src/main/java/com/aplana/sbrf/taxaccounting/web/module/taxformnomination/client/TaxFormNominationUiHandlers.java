@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.gwtplatform.mvp.client.UiHandlers;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,7 +20,7 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
     void save(Set<Long> ids);
 
     void onClickOpenFormDestinations();
-    void onClickEditFormDestinations(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes);
+    void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds);
 
     void onClickOpenDeclarationDestinations();
 

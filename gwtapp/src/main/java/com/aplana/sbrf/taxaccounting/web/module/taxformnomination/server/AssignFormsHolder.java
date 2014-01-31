@@ -46,18 +46,18 @@ public class AssignFormsHolder extends AbstractActionHandler<AssignFormsAction, 
         Logger logger = new Logger();
 
         for (Integer departmentId : action.getDepartments()){
-            for (Integer performerId : action.getPerformers()){
+            for (Integer formTypeId: action.getFormTypes()){
                 // Для полученного сочетания "Подразделение-Тип налоговой формы-Вид налоговой формы", Система проверяет наличие этого сочетания в таблице БД "Назначение НФ подразделениям". Сочетание НЕ существует.
-                if (departmentFormTypeService.existAssignedForm(departmentId, action.getFormTypeId(), action.getFormDataKind())) {
+                if (departmentFormTypeService.existAssignedForm(departmentId, formTypeId, action.getFormDataKind())) {
                     detectRelations = true;
 
                     // сообщение в лог
                     Department department = departmentService.getDepartment(departmentId);
-                    FormType formType = formTypeService.get(action.getFormTypeId());
+                    FormType formType = formTypeService.get(formTypeId);
                     logger.warn("Для "+department.getName()+" уже существует назначение "+action.getFormDataKind().getName()+" - "+formType.getName());
                 } else {
                     // сохранение
-                    departmentFormTypeService.saveDFT(departmentId.longValue(), action.getFormTypeId(), action.getFormDataKind().getId(), performerId);
+                    departmentFormTypeService.saveDFT(departmentId.longValue(), formTypeId, action.getFormDataKind().getId(), action.getPerformer());
                 }
             }
         }

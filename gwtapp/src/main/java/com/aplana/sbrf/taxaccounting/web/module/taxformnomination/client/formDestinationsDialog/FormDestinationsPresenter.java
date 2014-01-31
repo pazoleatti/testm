@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -41,15 +38,15 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         // подготовить форму для создания
         void prepareCreationForm();
         // показать модальную форму редактирования
-        void prepareEditForm(Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes);
+        void prepareEditForm(List<FormTypeKind> formTypeKinds);
         // получить список поздазделений
         List<Integer> getDepartments();
          // получить список исполнителей
-        List<Integer> getPerformers();
+        Integer getPerformer();
         // получить тип формы
         FormDataKind getFormDataKind();
         // получить вид формы
-        Integer getFormTypeId();
+        List<Integer> getFormTypes();
     }
 
 
@@ -96,8 +93,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         AssignFormsAction action = new AssignFormsAction();
         action.setDepartments(getView().getDepartments());
         action.setFormDataKind(getView().getFormDataKind());
-        action.setFormTypeId(getView().getFormTypeId());
-        action.setPerformers(getView().getPerformers());
+        action.setFormTypes(getView().getFormTypes());
+        action.setPerformer(getView().getPerformer());
 
         LogCleanEvent.fire(this);
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(
@@ -120,13 +117,11 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     }
 
     @Override
-    public void onEdit(){
+    public void onEdit(List<FormTypeKind> formTypeKinds){
         // Для каждого выбранного пользователем назначения, выполняется изменение / добавление исполнителя
         EditFormsAction action = new EditFormsAction();
-        action.setDepartments(getView().getDepartments());
-        action.setFormDataKind(getView().getFormDataKind());
-        action.setFormTypeId(getView().getFormTypeId());
-        action.setPerformers(getView().getPerformers());
+        action.setFormTypeKinds(formTypeKinds);
+        action.setPerformer(getView().getPerformer());
 
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<EditFormResult>() {
@@ -143,8 +138,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
     }
 
-    public void initAndShowEditDialog(final HasPopupSlot slotForMe, Set<Integer> selectedDepartments, Set<FormDataKind> selectedKinds, Set<Integer> selectedTypes){
-        getView().prepareEditForm(selectedDepartments, selectedKinds, selectedTypes);
+    public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<FormTypeKind> formTypeKinds){
+        getView().prepareEditForm(formTypeKinds);
         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
     }
 
