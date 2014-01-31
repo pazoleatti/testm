@@ -89,7 +89,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveDFT(Long departmentId, int typeId, int formId, int performerId) {
+    public void saveDFT(Long departmentId, int typeId, int formId, Integer performerId) {
         departmentFormTypeDao.save(departmentId.intValue(), typeId, formId, performerId);
     }
 

@@ -132,7 +132,7 @@ public interface DepartmentFormTypeDao {
     /**
      * Добавляет назначенные НФ
      */
-    void save(int departmentId, int typeId, int kindId, int performerId);
+    void save(int departmentId, int typeId, int kindId, Integer performerId);
 
     /**
      * Обновление исполнителя для назначенной формы

@@ -170,7 +170,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             formTypeKind.setName(rs.getString("name"));
             formTypeKind.setFormTypeId(rs.getLong("typeId"));
             formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
-            formTypeKind.setPerformer(departmentDao.getDepartment(rs.getInt("performer_id")));
+            Integer performerId = rs.getInt("performer_id");
+            if (rs.wasNull()){
+                formTypeKind.setPerformer(null);
+            } else{
+                formTypeKind.setPerformer(departmentDao.getDepartment(performerId));
+            }
 
             return formTypeKind;
         }
@@ -305,7 +310,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void save(int departmentId, int typeId, int kindId, int performerId) {
+    public void save(int departmentId, int typeId, int kindId, Integer performerId) {
         try {
             getJdbcTemplate().update(
                     "insert into department_form_type (department_id, form_type_id, id, kind, performer_dep_id) " +
