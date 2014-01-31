@@ -68,8 +68,8 @@ def checkAndbildXml() {
     // проверка наличия источников в стутусе принят
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
     if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-        logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
-        return
+         logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
+         return
     }
     // формируем xml
 
@@ -143,7 +143,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     СумНалПУ("КБК": "18210604011021000110") {
                         /*
                         * Получить сводную НФ по трансп. со статусом принята
-                        * Сгруппировать строки сводной налоговой формы по атрибуту «Код по ОКАТО». (okato)
+                        * Сгруппировать строки сводной налоговой формы по атрибуту «Код по ОКТМО». (okato)
                         */
                         def formData = formDataCollection.find(departmentId, 200, FormDataKind.SUMMARY)
                         def rowsData
@@ -196,7 +196,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 // В случае  если полученное значение отрицательно,  - не заполняется
                                 //resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].amountOfTaxPayable < 0 ? 0:resultMap[row.okato].amountOfTaxPayable;
 
-                                // Формирование данных для РасчНалТС, собираем строки с текущим значением ОКАТО
+                                // Формирование данных для РасчНалТС, собираем строки с текущим значением ОКТМО
                                 resultMap[row.okato].rowData.add(row);
                             }
 
@@ -204,7 +204,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                         resultMap.each { okato, row ->
                             СумПУ(
-                                    ОКАТО: getRefBookValue(3, okato, "OKATO"),
+                                    ОКТМО: getRefBookValue(96, okato, "CODE"),
                                     НалИсчисл: row.taxSumToPay,
                                     АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                                     АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
@@ -316,59 +316,26 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 }
 
 /**
- * Получение региона по коду ОКАТО
- * @param okato
+ * Получение региона по коду ОКТМО
  */
-def getRegionByOkatoOrg(okato) {
-    /*
-    * первые две цифры проверяемого кода ОКАТО
-    * совпадают со значением поля «Определяющая часть кода ОКАТО»
-    * справочника «Коды субъектов Российской Федерации»
-    */
-    // провайдер для справочника - Коды субъектов Российской Федерации
-    def refDataProvider = refBookFactory.getDataProvider(4)
-    def records = refDataProvider.getRecords(new Date(), null, "OKATO_DEFINITION like '" + okato.toString().substring(0, 2) + "%'", null).getRecords()
-
-    if (records.size() == 1) {
-        return records.get(0);
+def getRegionByOKTMO(def okato) {
+    def okato3 = getRefBookValue(96, okato)?.CODE?.stringValue.substring(0, 2)
+    if (okato3.equals("719")) {
+        return getRecord(4, 'CODE', '89', null, null, new Date());
+    } else if (okato3.equals("718")) {
+        return getRecord(4, 'CODE', '86', null, null, new Date());
+    } else if (okato3.equals("118")) {
+        return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        /**
-         * Если первые пять цифр кода равны "71140" то код ОКАТО соответствует
-         * Ямало-ненецкому АО (код 89 в справочнике «Коды субъектов Российской Федерации»)
-         */
-
-        def reg89 = records.find {
-            if (it.CODE.toString().length() >= 5) {
-                return it.CODE.toString().substring(0, 5).equals("71140")
-            } else return false
+        // TODO заменить OKATO_DEFINITION  на "Определяющая часть кода ОКТМО"
+        def filter = "OKATO_DEFINITION like '" + okato3.substring(0, 1) + "%'"
+        def record = getRecord(4, filter, new Date())
+        if (record != null) {
+            return record
+        } else {
+            logger.error("Не удалось определить регион по коду ОКТМО")
+            return null;
         }
-        if (reg89 != null) return reg89;
-
-        /**
-         * Если первые пять цифр кода равны "71100" то
-         * код ОКАТО соответствует Ханты-мансийскому АО
-         * (код 86 в справочнике «Коды субъектов Российской Федерации»)
-         */
-        def reg86 = records.find {
-            if (it.CODE.toString().length() >= 5) {
-                return it.CODE.toString().substring(0, 5).equals("71100")
-            } else return false
-        }
-        if (reg86 != null) return reg86;
-
-        /**
-         * Если первые четыре цифры кода равны "1110"
-         * то код ОКАТО соответствует Ненецкому АО
-         * (код 83 в справочнике «Коды субъектов Российской Федерации»)
-         */
-        def reg83 = records.find {
-            if (it.CODE.toString().length() >= 4) {
-                return it.CODE.toString().substring(0, 4).equals("1110")
-            } else return false
-        }
-        if (reg83 != null) return reg83;
-
-        logger.error("Не удалось определить регион по коду ОКАТО")
     }
 }
 
@@ -411,11 +378,8 @@ def getRefBookValue(refBookID, recordId, alias) {
 
 def getParam(taxBenefitCode, okato) {
     if (taxBenefitCode != null) {
-        // получения региона по кода ОКАТО по справочнику Регионов
-        def tOkato = getRefBookValue(3, okato, "OKATO")
-        def region = getRegionByOkatoOrg(tOkato);
-
-
+        // получения региона по коду ОКТМО по справочнику Регионов
+        def region = getRegionByOKTMO(okato);
 
         def refBookProvider = refBookFactory.getDataProvider(7)
 
@@ -448,6 +412,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
+    // TODO вместо аттрибута OKATO будет ОКТМО
     if (record.OKATO == null || record.OKATO.referenceValue == null) {
         errorList.add("«Код по ОКАТО»")
     }

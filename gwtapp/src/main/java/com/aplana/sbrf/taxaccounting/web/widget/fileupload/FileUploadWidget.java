@@ -37,6 +37,8 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     @UiField
     LinkButton uploadButton;
+    @UiField
+    Button justButton;
 
     public static interface IconResource extends ClientBundle{
         @Source("importIcon.png")
@@ -64,6 +66,11 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         if (fireEvents){
             ValueChangeEvent.fire(this, this.value);
         }
+    }
+
+    public void setSimpleButton(boolean simpleButton){
+        uploadButton.setVisible(!simpleButton);
+        justButton.setVisible(simpleButton);
     }
 
     @Override
@@ -104,8 +111,16 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
-        uploader.getElement().<InputElement>cast().click();
+        uploaderClick();
+    }
 
+    @UiHandler("justButton")
+    void onJustButtonClicked(ClickEvent event){
+        uploaderClick();
+    }
+
+    private void uploaderClick(){
+        uploader.getElement().<InputElement>cast().click();
     }
 
     /**
@@ -119,9 +134,17 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     public void setText(String text) {
         uploadButton.setText(text);
+        justButton.setText(text);
     }
 
     public String getText() {
         return uploadButton.getText();
     }
+
+    public void setWidth(String width){
+        uploadButton.setWidth(width);
+        justButton.setWidth(width);
+    }
+
+
 }

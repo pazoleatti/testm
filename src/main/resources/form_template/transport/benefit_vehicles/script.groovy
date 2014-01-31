@@ -46,7 +46,7 @@ switch (formDataEvent) {
 }
 
 // 1 № пп  -  rowNumber
-// 2 Код ОКАТО  -  codeOKATO
+// 2 Код ОКТМО  -  codeOKATO
 // 3 Идентификационный номер  -  identNumber
 // 4 Регистрационный знак  -  regNumber
 // 5 Код налоговой льготы - taxBenefitCode
@@ -97,13 +97,13 @@ void calc() {
     }
 }
 
-// сортировка ОКАТО
+// сортировка ОКТМО
 void sort() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.getAllCached().sort { a, b ->
-        def valA = getRefBookValue(3, a.codeOKATO).OKATO.stringValue
-        def valB = getRefBookValue(3, b.codeOKATO).OKATO.stringValue
-        return valA.compareTo(valB)
+        def valA = getRefBookValue(96, a.codeOKATO)?.CODE?.stringValue
+        def valB = getRefBookValue(96, b.codeOKATO)?.CODE?.stringValue
+        return (valA != null && valB != null) ? valA.compareTo(valB) : 0
     }
 }
 
@@ -125,7 +125,7 @@ def logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        if (row.benefitStartDate != null && row.benefitEndDate != null){
+        if (row.benefitStartDate != null && row.benefitEndDate != null) {
             // 2. Поверка на соответствие дат использования льготы
             if (row.benefitEndDate.compareTo(row.benefitStartDate) < 0) {
                 logger.error(errorMsg + 'Неверно указаны даты начала и окончания использования льготы!')
@@ -133,7 +133,7 @@ def logicCheck() {
 
             // 4. Проверка на наличие в списке ТС строк, период использования льготы которых не пересекается
             // с отчётным / налоговым периодом, к которому относится налоговая форма
-            if(row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
+            if (row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
                 logger.error(errorMsg + 'Период использования льготы ТС ('
                         + row.benefitStartDate.format(dFormat) + ' - ' + row.benefitEndDate.format(dFormat) + ') ' +
                         ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
@@ -142,7 +142,7 @@ def logicCheck() {
         }
 
         // 3. Проверка на наличие в списке ТС строк, для которых графы 2, 3, 4
-        // («Код ОКАТО», «Идентификационный номер», «Регистрационный знак») одинаковы
+        // («Код ОКТМО», «Идентификационный номер», «Регистрационный знак») одинаковы
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
@@ -153,7 +153,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКАТО = $row.codeOKATO, " +
+                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКТМО = ${getRefBookValue(96, row.codeOKATO).CODE.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
                         "Регистрационный знак = $row.regNumber совпадают!")
             }
@@ -161,7 +161,7 @@ def logicCheck() {
         checkedRows.add(row)
 
         // Проверки соответствия НСИ
-        checkNSI(3, row, "codeOKATO")
+        checkNSI(96, row, "codeOKATO")
         checkNSI(6, row, "taxBenefitCode")
     }
 
