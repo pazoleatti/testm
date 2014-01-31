@@ -47,7 +47,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
         if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("refBNookDepartment", RefBookDataProvider.class);
+            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
         } else if (RefBookIncome101.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
         } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
