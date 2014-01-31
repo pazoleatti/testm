@@ -167,7 +167,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         performerColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel object) {
-                return object.getPerformer().getName();
+                return object.getPerformer() != null ? object.getPerformer().getName():"";
             }
         };
 
