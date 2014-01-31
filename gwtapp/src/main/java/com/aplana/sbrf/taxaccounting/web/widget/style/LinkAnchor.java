@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -43,6 +44,7 @@ public class LinkAnchor extends Anchor{
 
 	public LinkAnchor() {
 		super(templates.img(DEFAULT_URL));
+        getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
 	}
 
 	public void setText(String text){

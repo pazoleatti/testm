@@ -36,7 +36,11 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
 
     @Override
     public GetTaskListResult execute(GetTaskListAction getTaskListAction, ExecutionContext executionContext) throws ActionException {
-        try {
+        GetTaskListResult result = new GetTaskListResult();
+        List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
+        result.setTasks(records);
+        return result;
+        /*try {
             SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
             GetTaskListResult result = new GetTaskListResult();
             List<TaskSearchResultItem> records = new ArrayList<TaskSearchResultItem>();
@@ -58,7 +62,7 @@ public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction,
             return result;
         } catch (TaskSchedulingException e) {
             throw new ActionException("Ошибка получения списка задач планировщика", e);
-        }
+        }*/
     }
 
     @Override
