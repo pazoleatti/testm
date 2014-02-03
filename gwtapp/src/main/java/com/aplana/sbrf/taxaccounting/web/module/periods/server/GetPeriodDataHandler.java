@@ -42,24 +42,23 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 
 
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
-		List<DepartmentReportPeriod> drp = periodService.listByDepartmentId(action.getDepartmentId());
+		List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType(action.getDepartmentId(), action.getTaxType());
 		for (DepartmentReportPeriod period : drp) {
 			int year = period.getReportPeriod().getTaxPeriod().getYear();
 			if ((action.getFrom() <= year) && (year <= action.getTo())) {
 				if (per.get(year) == null) {
 					per.put(year, new ArrayList<TableRow>());
 				}
-				ReportPeriod reportPeriod = periodService.getReportPeriod(period.getReportPeriod().getId());
 				TableRow row = new TableRow();
-				row.setPeriodName(reportPeriod.getName());
-				row.setReportPeriodId(reportPeriod.getId());
+				row.setPeriodName(period.getReportPeriod().getName());
+				row.setReportPeriodId(period.getReportPeriod().getId());
 				row.setDepartmentId(period.getDepartmentId());
 				row.setPeriodCondition(period.isActive());
 				row.setBalance(period.isBalance());
 				row.setYear(year);
 				row.setCorrectPeriod(period.getCorrectPeriod());
 				Department dep = departmentService.getDepartment(period.getDepartmentId().intValue());
-				Notification notification = notificationService.get(reportPeriod.getId(), dep.getId(), dep.getParentId());
+				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
 				row.setDeadline(notification != null ? notification.getDeadline() : null);
 				per.get(year).add(row);
 			}

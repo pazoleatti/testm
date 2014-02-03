@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -47,6 +48,17 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 				.query("select * from DEPARTMENT_REPORT_PERIOD where DEPARTMENT_ID=?",
 						new Object[] { departmentId },
 						new int[] { Types.NUMERIC},
+						mapper);
+	}
+
+	@Override
+	public List<DepartmentReportPeriod> getByDepartmentAndTaxType(Long departmentId, TaxType taxType) {
+		return getJdbcTemplate()
+				.query("select drp.* from DEPARTMENT_REPORT_PERIOD drp " +
+						"left join report_period rp on drp.report_period_id = rp.ID " +
+						"left join tax_period tp on rp.TAX_PERIOD_ID=tp.ID where drp.DEPARTMENT_ID=? and tp.TAX_TYPE=?",
+						new Object[] { departmentId, String.valueOf(taxType.getCode()) },
+						new int[] { Types.NUMERIC, Types.CHAR},
 						mapper);
 	}
 

@@ -64,7 +64,14 @@ public interface PeriodService {
 	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
-	
+
+	/**
+	 * Получает список по подразделению и типу налога
+	 * @param departmentId подразделение
+	 * @param taxType тип налога
+	 * @return список подразделение-отчетный период
+	 */
+	List<DepartmentReportPeriod> listByDepartmentIdAndTaxType(long departmentId, TaxType taxType);
 	
 	/**
 	 * Получает список налоговых периодов по типу налога.

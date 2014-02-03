@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 public interface DepartmentReportPeriodDao {
 	
@@ -14,6 +15,14 @@ public interface DepartmentReportPeriodDao {
 	 * @return
 	 */
 	List<DepartmentReportPeriod> getByDepartment(Long departmentId);
+
+	/**
+	 * Получает список по подразделению и типу налога
+	 * @param departmentId подразделение
+	 * @param taxType тип налога
+	 * @return список подразделение-отчетный период
+	 */
+	List<DepartmentReportPeriod> getByDepartmentAndTaxType(Long departmentId, TaxType taxType);
 	
 	/**
 	 * Сохраняет DepartmentReportPeriod
