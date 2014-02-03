@@ -70,6 +70,7 @@
                 </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
                 <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
+                    <g:CheckBox ui:field="checkBoxNull" text="Могут принимать пустые значения"/>
                     <g:HorizontalPanel spacing="2">
                         <mask:DateMaskBox ui:field="boxDate"/>
                         <g:Label ui:field="boxDateLb" width="100%"/>
