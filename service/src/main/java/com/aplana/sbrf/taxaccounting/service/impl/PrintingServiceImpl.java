@@ -106,7 +106,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateExcelUsers(List<TAUserFull> taUserFullList) {
+    public String generateExcelUsers(List<TAUserFullWithDepartmentPath> taUserFullList) {
         try {
             TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserFullList);
             return taBuilder.createReport();
