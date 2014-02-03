@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class TAUsersReportBuilder extends AbstractReportBuilder {
 
-    private List<TAUserFull> taUserList;
+    private List<TAUserFullWithDepartmentPath> taUserList;
 
     private int rowNumber = 3;
     private int cellNumber = 0;
@@ -29,7 +29,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
     private static final String SIXTH_COLUMN = "Роль";
 
 
-    public TAUsersReportBuilder(List<TAUserFull> taUserList) {
+    public TAUsersReportBuilder(List<TAUserFullWithDepartmentPath> taUserList) {
         super("Список_пользователей_", ".xlsx");
         this.taUserList = taUserList;
         this.workBook = new XSSFWorkbook();
@@ -102,7 +102,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         cs.setBorderRight(CellStyle.BORDER_DOUBLE);
         cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
 
-        for (TAUserFull user : taUserList){
+        for (TAUserFullWithDepartmentPath user : taUserList){
             Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 
 	        Cell cell = row.createCell(cellNumber);
@@ -132,7 +132,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(user.getDepartment().getName());
+	        cell.setCellValue(user.getFullDepartmentPath());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

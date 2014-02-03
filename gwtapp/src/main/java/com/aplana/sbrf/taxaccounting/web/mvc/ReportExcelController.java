@@ -55,18 +55,6 @@ public class ReportExcelController {
 		createResponse(req, resp, filePath);
 	}
 
-    /**
-     * Обработка запроса на формирования отчета по пользователям системы АС Учет налогов
-     * @param req
-     * @param response
-     * @throws IOException
-     */
-    @RequestMapping(value = "/processSecUserDownload",method = RequestMethod.GET)
-    public void processSecUserDownload(HttpServletRequest req, HttpServletResponse response) throws IOException {
-        String filePath = printingService.generateExcelUsers(taUserService.listAllFullActiveUsers());
-        createResponse(req, response, filePath);
-    }
-
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
         File file = new File(filePath);
 		String fileName = file.getName();

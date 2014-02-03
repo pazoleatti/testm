@@ -6,11 +6,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
-import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.DeclarationTemplateApplyEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplatePresenter;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.FilterDeclarationTemplateReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
@@ -23,7 +24,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,9 +57,8 @@ public class DeclarationTemplateListPresenter
 	private final DispatchAsync dispatcher;
     protected final FilterDeclarationTemplatePresenter filterPresenter;
     public static final Object OBJECT = new Object();
-    List<HandlerRegistration> handlers = new ArrayList<HandlerRegistration>();
 
-	@Inject
+    @Inject
 	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher, FilterDeclarationTemplatePresenter filterPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.placeManager = placeManager;
@@ -153,6 +152,6 @@ public class DeclarationTemplateListPresenter
                     LogAddEvent.fire(DeclarationTemplateListPresenter.this, result.getLogEntriesUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
             }
-        }, this));
+        }, this).addCallback(new ManualRevealCallback<DTDeleteResult>(DeclarationTemplateListPresenter.this)));
     }
 }

@@ -237,6 +237,11 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	@Override
+	public List<DepartmentReportPeriod> listByDepartmentIdAndTaxType(long departmentId, TaxType taxType) {
+		return departmentReportPeriodDao.getByDepartmentAndTaxType(departmentId, taxType);
+	}
+
+	@Override
 	public List<TaxPeriod> listByTaxType(TaxType taxType) {
 		return taxPeriodDao.listByTaxType(taxType);
 	}

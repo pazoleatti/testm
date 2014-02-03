@@ -91,7 +91,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
-        void confirm();
 	}
 
 	private final DispatchAsync dispatcher;
@@ -132,8 +131,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void onHide() {
 		super.onHide();
-        unlockForm(declarationTemplate.getId());
-		closeDeclarationTemplateHandlerRegistration.removeHandler();
+        unlockForm(declarationTemplate.getId() != null?declarationTemplate.getId():0);
+		if (closeDeclarationTemplateHandlerRegistration != null)
+            closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
 
 	/**
@@ -147,6 +147,10 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             MessageEvent.fire(DeclarationTemplatePresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
+        if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Введите имя декларации");
+            return;
+        }
 
         UpdateDeclarationAction action = new UpdateDeclarationAction();
 		action.setDeclarationTemplateExt(declarationTemplateExt);
@@ -157,6 +161,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                         if (result.getLogUuid() != null)
                             LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                        declarationTemplate.setId(result.getDeclarationTemplateId());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                                 with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
 					}
@@ -164,11 +169,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	/**
-	 * Закрыть декларацию редактирования и вернуться на форму администрирования со списком шаблонов деклараций.
+	 * Закрыть декларацию редактирования и вернуться на форму администрирования со списком версий шаблонов деклараций.
 	 */
 	@Override
 	public void close() {
-        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList).
+        if (declarationTemplate.getType().getId() == 0)
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
+        else
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList).
                 with(DeclarationTemplateTokens.declarationType, String.valueOf(declarationTemplate.getType().getId())).build());
 	}
 
@@ -190,19 +198,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
 	public void downloadJrxml() {
-        if (declarationTemplate.getId() == null){
-            getView().confirm();
-            return;
-        }
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
 	
 	@Override
 	public void downloadDect() {
-        if (declarationTemplate.getId() == null){
-            getView().confirm();
-            return;
-        }
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
 	}
 
@@ -242,7 +242,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	private void unlockForm(int declarationId){
-		UnlockDeclarationAction action = new UnlockDeclarationAction();
+        if (declarationId == 0)
+            return;
+        UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}

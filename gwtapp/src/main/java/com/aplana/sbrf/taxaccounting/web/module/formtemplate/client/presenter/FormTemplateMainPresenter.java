@@ -178,8 +178,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	@Override
 	public void onHide() {
 		super.onHide();
-		unlockForm(formTemplate.getId());
-		closeFormTemplateHandlerRegistration.removeHandler();
+		unlockForm(formTemplate.getId() != null?formTemplate.getId():0);
+        if (closeFormTemplateHandlerRegistration != null)
+		    closeFormTemplateHandlerRegistration.removeHandler();
 	}
 
 	/**
@@ -203,7 +204,10 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).
+        if (formTemplate.getType().getId() == 0)
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.adminPage).build());
+		else
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).
                 with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
 	}
 
@@ -256,6 +260,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	@SuppressWarnings("unchecked")
 	private void unlockForm(int formId){
+        if (formId == 0)
+            return;
 		UnlockFormAction action = new UnlockFormAction();
 		action.setFormId(formId);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());

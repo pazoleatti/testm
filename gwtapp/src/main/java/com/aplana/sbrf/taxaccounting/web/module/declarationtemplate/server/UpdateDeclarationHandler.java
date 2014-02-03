@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.Calendar;
 
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
@@ -40,6 +43,7 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
         TemplateChanges changes = new TemplateChanges();
 
         Logger logger = new Logger();
+        makeDates(action);
         if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null
                 && action.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId() != 0){
             int dtId = mainOperatingService.createNewTemplateVersion(action.getDeclarationTemplateExt().getDeclarationTemplate(),
@@ -68,6 +72,20 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
         if (!logger.getEntries().isEmpty())
             result.setLogUuid(logEntryService.save(logger.getEntries()));
         result.setDeclarationTemplateId(dtId);
+    }
+
+    private void makeDates(UpdateDeclarationAction action){
+        Calendar calendar = Calendar.getInstance();
+        DeclarationTemplate formTemplate = action.getDeclarationTemplateExt().getDeclarationTemplate();
+        calendar.setTime(formTemplate.getVersion());
+        calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
+        formTemplate.setVersion(calendar.getTime());
+        if (action.getDeclarationTemplateExt().getEndDate() != null){
+            calendar.clear();
+            calendar.setTime((action.getDeclarationTemplateExt().getEndDate()));
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 31);
+            action.getDeclarationTemplateExt().setEndDate(calendar.getTime());
+        }
     }
 
 }
