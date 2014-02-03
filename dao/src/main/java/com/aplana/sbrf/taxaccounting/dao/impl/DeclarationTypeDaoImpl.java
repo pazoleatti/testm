@@ -31,6 +31,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 			res.setId(rs.getInt("id"));
 			res.setName(rs.getString("name"));
 			res.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            res.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
 			return res;
 		}
 		
@@ -87,9 +88,9 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
     @Override
     public void delete(int typeId) {
         try {
-            getJdbcTemplate().update("update declaration_type set status = ? where id = ?",
-                    new Object[]{VersionedObjectStatus.DELETED.getId(), typeId},
-                    new int[]{Types.INTEGER,Types.INTEGER});
+            getJdbcTemplate().update("update declaration_type set status = -1 where id = ?",
+                    new Object[]{typeId},
+                    new int[]{Types.INTEGER});
         } catch (DataAccessException e){
             logger.error("Ошибка при удалении макета", e);
             throw new DaoException("Ошибка при удалении макета", e);
