@@ -413,7 +413,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         RefBook refBook = get(refBookId);
 
-        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(records.size()));
+        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(Long.valueOf(records.size()));
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -1052,7 +1052,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (records.size() == 0) {
             return;
         }
-        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(records.size()));
+        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(Long.valueOf(records.size()));
 
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
@@ -1186,7 +1186,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
 
             // генерация нужного количества id'шников
-            List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(new Long(needIdsCnt));
+            List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(Long.valueOf(needIdsCnt));
             Iterator<Long> idsIterator = refBookRecordIds.iterator();
             for (int i=0; i < recordAddIds.size(); i++){
                 if (recordAddIds.get(i)[0] == null){

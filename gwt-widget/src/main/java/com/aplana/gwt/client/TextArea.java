@@ -2,6 +2,7 @@ package com.aplana.gwt.client;
 
 /**
  * TextArea, который в задимсабленном состоянии показывает Label.
+ *
  * @author Vitaliy Samolovskikh
  */
 public class TextArea extends DoubleStateWrapper<com.google.gwt.user.client.ui.TextArea, String> {
@@ -15,5 +16,6 @@ public class TextArea extends DoubleStateWrapper<com.google.gwt.user.client.ui.T
 
 	public void setVisibleLines(int lines) {
 		widget.setVisibleLines(lines);
+		label.setHeight(20 * lines + "px");
 	}
 }

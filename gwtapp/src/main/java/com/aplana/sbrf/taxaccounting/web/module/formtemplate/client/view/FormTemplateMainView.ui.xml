@@ -3,40 +3,95 @@
              xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:c="urn:import:com.google.gwt.user.cellview.client"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
         >
 
-<ui:style>
-    .title {
-        font-size: 16px;
-        padding: 10px;
-    }
-</ui:style>
+    <ui:style>
 
-<g:DockLayoutPanel unit='PX' height="100%" width="100%" ui:field="dockPanel">
-    <g:north size="40">
-        <g:Label styleName="{style.title}" ui:field="title" />
-    </g:north>
+        .titleText {
+            font-size: 14px !important;
+            color: #636460;
+            white-space: nowrap;
+        }
 
-    <g:north size="30">
-        <t:Bar>
-            <t:LeftBar>
-                <g:Button text="Сохранить" ui:field="saveButton"/>
-                <g:Button text="Сбросить" ui:field="resetButton"/>
-                <g:Button text="Отмена" ui:field="cancelButton"/>
-                <g:Button text="Ввести в действие" ui:field="activateVersion"/>
-            </t:LeftBar>
-        </t:Bar>
-    </g:north>
+        .titleText div {
+            font-size: 14px !important;
+        }
 
+        .btnPanel {
+            padding-left: 10px;
+            padding-top: 10px;
+        }
 
-    <g:north size="80">
-        <g:ScrollPanel width="100%" ui:field="logPanel">
-            <c:CellList ui:field="loggerList" />
-        </g:ScrollPanel>
-    </g:north>
+        .table {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 45px;
+            margin: 0 5px;
+        }
 
-    <g:center>
-        <npui:SimpleTabPanel ui:field="tabPanel"/>
-    </g:center>
-</g:DockLayoutPanel>
+        .header {
+            font-size: 14px;
+            color: #636460;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 10px 10px;
+            border-top: 1px solid #aeaeac;
+        }
+    </ui:style>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку версий макета налоговой формы"
+                                              text="Версии макета налоговой формы" addStyleNames="{style.titleText}" disableImage="true"/>
+                            <g:Label text="—" addStyleNames="{style.header}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="title"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+
+                <t:LeftBar childValign="middle" marginRight="10" addStyleNames="{style.btnPanel}">
+                    <g:Button text="Сохранить" ui:field="saveButton"/>
+                    <g:Button text="Сбросить" ui:field="resetButton"/>
+                    <g:Button text="Отмена" ui:field="cancelButton"/>
+                    <g:Button text="Ввести в действие" ui:field="activateVersion"/>
+                </t:LeftBar>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <g:DockLayoutPanel ui:field="dockPanel" addStyleNames="{style.table}">
+                    <g:north size="80">
+                        <g:ScrollPanel width="100%" ui:field="logPanel">
+                            <c:CellList ui:field="loggerList"/>
+                        </g:ScrollPanel>
+                    </g:north>
+                    <g:center>
+                        <npui:SimpleTabPanel ui:field="tabPanel"/>
+                    </g:center>
+                </g:DockLayoutPanel>
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>

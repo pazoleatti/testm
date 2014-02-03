@@ -151,6 +151,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public List<FormTemplate> getByFilter(TemplateFilter filter) {
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
         for (Integer id : formTemplateDao.getByFilter(filter)) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             formTemplates.add(formTemplateDao.get(id));
         }
         return formTemplates;
@@ -162,6 +163,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
+        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
         for (Integer id : formTemplateIds)
             formTemplates.add(formTemplateDao.get(id));
         return formTemplates;
@@ -182,6 +184,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (!formTemplateVersionIds.isEmpty()){
             for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
                 SegmentIntersection segmentIntersection = new SegmentIntersection();
+                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
                 FormTemplate beginTemplate = formTemplateDao.get(formTemplateVersionIds.get(i));
                 FormTemplate endTemplate = formTemplateDao.get(formTemplateVersionIds.get(i++));
                 segmentIntersection.setStatus(beginTemplate.getStatus());

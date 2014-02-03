@@ -20,10 +20,6 @@
             border-bottom: 1px solid #aeaeac;
         }
 
-        .filterPanel td {
-            vertical-align: middle !important;
-        }
-
         .filterWidgets {
             min-width: 150px;
         }
@@ -70,27 +66,6 @@
             max-width: 450px;
         }
 
-/*
-        .textArea {
-            resize: none;
-            font-family: Tahoma, helvetica, arial, sans-serif !important;
-            font-size: small;
-            width: 100%;
-            min-width: 200px;
-            max-width: 450px;
-            line-height: 13px;
-            border: 1px solid green;
-            overflow: auto;
-
-            */
-/*Потому что в текстбоксах тоже есть, нужно выпиливать но не
-            известно как поведут другие зависимые от текстбокса компоненты(виджеты)*//*
-
-            margin-left: -1px;
-
-        }
-*/
-
         .toLongLabel{
             line-height: 11px;
         }
@@ -110,19 +85,23 @@
         .withMiddleChild td{
             vertical-align: middle !important;
         }
+        .marginRight5{
+            margin-right: 5px;
+        }
 
     </ui:style>
-
 
     <fm:MainContainer>
         <fm:header>
             <fm:HeaderContainer>
-                <!--<fm:left>-->
-                <!--<fm:Left>-->
-                <!--<style:LeftBar marginRight="5" childValign="middle" height="100%">-->
-                <!--</style:LeftBar>-->
-                <!--</fm:Left>-->
-                <!--</fm:left>-->
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="taxTypeLabel" addStyleNames="{style.titleText}, {style.marginRight5}" />
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
@@ -140,17 +119,11 @@
         <fm:body>
             <fm:BodyContainer>
 
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.filterPanel}">
-                    <g:cell horizontalAlignment="right">
-                        <g:Label wordWrap="false" width="80px" text="Вид налога:"/>
-                    </g:cell>
-                    <g:cell width="33%">
-                        <g:ListBox width="100%" ui:field="taxType" addStyleNames="{style.filterWidgets}"/>
-                    </g:cell>
+                <g:HorizontalPanel spacing="5" addStyleNames="{style.filterPanel}" verticalAlignment="middle">
                     <g:cell horizontalAlignment="right">
                         <g:Label width="100px" text="Подразделение:"/>
                     </g:cell>
-                    <g:cell width="33%">
+                    <g:cell width="50%">
                         <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" modal="false"
                                                        header="Выберите подразделение" width="100%"
                                                        addStyleNames="{style.filterWidgets}"/>
@@ -158,13 +131,13 @@
                     <g:cell horizontalAlignment="right">
                         <g:Label width="65px" text="Период:"/>
                     </g:cell>
-                    <g:cell width="33%">
+                    <g:cell width="50%">
                         <rep:PeriodPickerPopupWidget width="100%" ui:field="periodPickerPopup" multiselect="false"
                                                      addStyleNames="{style.filterWidgets}"/>
                     </g:cell>
 
                     <!--Пока скрыл кнопку поиска(и сепаратор), может в будущем понадобится-->
-                    <g:cell verticalAlignment="middle">
+                    <g:cell>
                         <g:HTML addStyleNames="{style.separator}" visible="false"/>
                     </g:cell>
 

@@ -44,7 +44,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
+                            <g:Label ui:field="titleDesc" addStyleNames="{style.titleText}, {style.marginRight5}"  />
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -59,7 +59,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="titleDesc"/>
+                        <g:Label ui:field="formHeader" text="Список налоговых форм"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
@@ -69,7 +69,9 @@
 
                 <g:HorizontalPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}" />
 
-                <style:GenericDataGrid ui:field="formDataTable" addStyleNames="{style.table}"/>
+                <g:ResizeLayoutPanel  addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="formDataTable" height="100%" width="100%"/>
+                </g:ResizeLayoutPanel>
 
                 <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"

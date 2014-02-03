@@ -2,7 +2,6 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'
-             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
     <ui:style>

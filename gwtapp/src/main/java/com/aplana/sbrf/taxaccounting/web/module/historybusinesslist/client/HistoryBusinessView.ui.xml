@@ -8,7 +8,7 @@
     <ui:style>
         .titleText {
             font-size: 14px;
-            color:  #636460;
+            color: #636460;
         }
 
         .btnPanel {
@@ -31,20 +31,23 @@
             top: 95px;
         }
 
-        .marginRight5{
+        .marginRight5 {
             margin-right: 5px;
+        }
+
+        .marginRight10 {
+            margin-right: 10px;
         }
     </ui:style>
 
-
     <fm:MainContainer>
-
         <fm:header>
             <fm:HeaderContainer>
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Администрирование" />
+                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}"
+                                     text="Администрирование"/>
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -52,9 +55,10 @@
                 </fm:left>
                 <fm:right>
                     <fm:Right>
-                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkAnchor  text="Выгрузить в xlsx" ui:field="printButton" img="resources/img/download-xls-16.png"
-                                               title="Выгрузка отчета в excel"/>
+                        <style:LeftBar marginRight="10" childValign="middle" height="100%">
+                            <style:LinkAnchor text="Выгрузить в Excel" ui:field="printButton"
+                                              img="resources/img/download-xls-16.png"
+                                              title="Выгрузка отчета в excel"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -68,20 +72,17 @@
 
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="2" ui:field="filterContentPanel" addStyleNames="{style.btnPanel}" />
+                <g:HorizontalPanel spacing="2" ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
 
-                <style:GenericDataGrid ui:field="logBusinessTable" addStyleNames="{style.table}"/>
-
+                <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="logBusinessTable" height="100%" width="100%"/>
+                </g:ResizeLayoutPanel>
 
                 <pager:FlexiblePager ui:field="pager" location="CENTER"
                                      showFastForwardButton="false" fastForwardRows="0"
                                      showLastPageButton="true" styleName="{style.pager}" type="historyBusiness"/>
-
-
             </fm:BodyContainer>
-
         </fm:body>
-
     </fm:MainContainer>
 
 </ui:UiBinder>

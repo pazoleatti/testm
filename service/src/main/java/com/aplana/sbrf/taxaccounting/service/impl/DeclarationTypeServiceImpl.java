@@ -46,6 +46,7 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     public List<DeclarationType> getByFilter(TemplateFilter filter) {
         List<Integer> integerList = declarationTypeDao.getByFilter(filter);
         List<DeclarationType> declarationTypes = new ArrayList<DeclarationType>();
+        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
         for (Integer id : integerList)
             declarationTypes.add(declarationTypeDao.get(id));
         return declarationTypes;

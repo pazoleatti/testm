@@ -139,13 +139,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiField
 	@Ignore
-	ListBox taxType;
-
-	@UiField
-	@Ignore
 	Label editModeLabel;
 
-	@Inject
+    @UiField
+    @Ignore
+    Label taxTypeLabel;
+
+    @Inject
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -228,60 +228,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			}
 		});
 
-		// Вид налога
-		taxType.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				if (isEditMode && driver.isDirty()) {
-					Dialog.confirmMessage(
-							"Все несохранённые данные будут потеряны. Выйти из режима редактирования?",
-							new DialogHandler() {
-								@Override
-								public void yes() {
-									setEditMode(false);
-									currentTaxType = getSelectedTaxType();
-									// Очистка формы
-									clear();
-									// Сброс выбранного отчетного периода
-									currentReportPeriodId = null;
-									periodPickerPopup.setValue(null);
-									updateVisibility();
-									// Обновление дерева подразделений
-									reloadDepartments();
-									Dialog.hideMessage();
-								}
-
-								@Override
-								public void no() {
-									// Вернуть старое значение
-									for (int i = 0; i < taxType.getItemCount(); i++) {
-										if (taxType.getValue(i).charAt(0) == currentTaxType.getCode()) {
-											taxType.setSelectedIndex(i);
-											break;
-										}
-									}
-									Dialog.hideMessage();
-								}
-
-								@Override
-								public void close() {
-									no();
-								}
-							}
-					);
-				} else {
-					setEditMode(false);
-					currentTaxType = getSelectedTaxType();
-					// Очистка формы
-					clear();
-					// Сброс выбранного отчетного периода
-					currentReportPeriodId = null;
-					periodPickerPopup.setValue(null);
-					updateVisibility();
-					// Обновление дерева подразделений
-					reloadDepartments();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -309,21 +255,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		okvedCode.setDereferenceValue(null);
 		type.setDereferenceValue(null);
 
-		DepartmentCombined emptyParams = new DepartmentCombined();
-		emptyParams.setTaxType(currentTaxType);
-		driver.edit(emptyParams);
-	}
-
-	/**
-	 * Выбранный тип налога
-	 *
-	 * @return тип налога
-	 */
-	private TaxType getSelectedTaxType() {
-		if (taxType.getItemCount() != 0) {
-			return TaxType.fromCode(taxType.getValue(taxType.getSelectedIndex()).charAt(0));
-		}
-		return null;
+		driver.edit(new DepartmentCombined());
 	}
 
 	/**
@@ -558,13 +490,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	}
 
 	@Override
-	public void setTaxTypes(List<TaxType> types) {
-		taxType.clear();
-		if (types != null) {
-			for (TaxType type : types) {
-				taxType.addItem(type.getName(), String.valueOf(type.getCode()));
-			}
-		}
+	public void setTaxType(TaxType taxType) {
+        currentTaxType = taxType;
+        taxTypeLabel.setText(taxType.getName());
 		reloadDepartments();
 	}
 

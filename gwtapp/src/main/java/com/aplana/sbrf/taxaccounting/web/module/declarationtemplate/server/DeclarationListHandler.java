@@ -41,6 +41,8 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
             DeclarationTypeTemplate typeTemplate = new DeclarationTypeTemplate();
             typeTemplate.setTypeId(type.getId());
             typeTemplate.setTypeName(type.getName());
+
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             typeTemplate.setVersionCount(declarationTemplateService.versionTemplateCount(type.getId(), VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT));
 
             typeTemplateList.add(typeTemplate);

@@ -12,6 +12,8 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DirectionalTextHelper;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHTML;
@@ -21,11 +23,10 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		HasHTML, HasSafeHtml {
 
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
-		@Template("<div style=\"cursor: pointer !important; cursor: hand !important;\">" +
+		@Template("<div>" +
                     "<img style=\"display: inline; border: none; margin-right: -16px; vertical-align: top;\" src=\"{0}\"/>" +
                     "<div style=\"" +
                         "text-decoration: underline;" +
-                        "color: #004276; " +
                         "font-size: 12px; " +
                         "white-space: nowrap; " +
                         "margin-left: 19px;" +
@@ -66,6 +67,9 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		this.img = img == null ? DEFAULT_IMG : img;
         setHTML(templates.render(UriUtils.fromTrustedString(this.img), this.text));
         getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
+        getElement().getStyle().setColor("#004276");
+        getElement().getStyle().setCursor(Style.Cursor.POINTER);
+
 	}
 
 	@Override
@@ -158,4 +162,16 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
             super.fireEvent(event);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (enabled){
+            getElement().getStyle().setColor("#004276");
+            getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        }
+        else{
+            getElement().getStyle().setColor("#ADADAD");
+            getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+        }
+    }
 }

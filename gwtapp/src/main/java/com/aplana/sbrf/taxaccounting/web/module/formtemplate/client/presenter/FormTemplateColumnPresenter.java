@@ -117,7 +117,7 @@ public class FormTemplateColumnPresenter
 		while (aliasExists(column)) {
 			column.setAlias(oldAlias + ++i);
 		}
-		if (oldAlias != column.getAlias()) {
+		if (!oldAlias.equals(column.getAlias())) {
 			getView().setColumn(column);
 		}
 	}

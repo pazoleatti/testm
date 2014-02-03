@@ -39,6 +39,7 @@ public class GetFormDFTHandler extends AbstractActionHandler<GetFormDFTAction, G
 
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : receivers) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			formTypes.put(departmentFormType.getFormTypeId(),
 					sourceService.getFormType(departmentFormType.getFormTypeId()));
 		}
