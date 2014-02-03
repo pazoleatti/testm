@@ -46,7 +46,7 @@ public class TaxFormNominationPresenter
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
         // Инициализация
-        void init(TaxType nType);
+        void init(TaxType nType, boolean isForm);
 
 
         // установка данных
@@ -66,13 +66,13 @@ public class TaxFormNominationPresenter
 
         Integer getFormId();
 
-        TaxType getTaxType();
-
         List<Integer> getDepartments();
 
 	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
         List<FormTypeKind> getSelectedItemsOnFormGrid();
     }
+
+    private TaxType taxType;
 
     protected final FormDestinationsPresenter formDestinationsPresenter;
     protected final DeclarationDestinationsPresenter declarationDestinationsPresenter;
@@ -114,8 +114,10 @@ public class TaxFormNominationPresenter
                                 getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                                 String value = request.getParameter("nType", "");
                                 TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
-                                getView().init(nType);
-                                formDestinationsPresenter.initForm(getView().getTaxType());
+                                TaxFormNominationPresenter.this.taxType = nType;
+                                boolean isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+                                getView().init(nType, isForm);
+                                formDestinationsPresenter.initForm(nType);
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetOpenDataResult>(this)));
@@ -129,7 +131,7 @@ public class TaxFormNominationPresenter
     @Override
     public void getTaxFormKind() {
         GetTaxFormTypesAction action = new GetTaxFormTypesAction();
-        action.setTaxType(getView().getTaxType());
+        action.setTaxType(taxType);
         action.setForm(getView().isForm());
 
         dispatcher.execute(action, CallbackUtils
@@ -169,7 +171,7 @@ public class TaxFormNominationPresenter
      private GetTableDataAction getTableDataAction(){
          GetTableDataAction action = new GetTableDataAction();
          action.setDepartmentsIds(getView().getDepartments());
-         action.setTaxType(getView().getTaxType().getCode());
+         action.setTaxType(taxType.getCode());
          action.setForm(getView().isForm());
 
          return action;
@@ -187,7 +189,7 @@ public class TaxFormNominationPresenter
         // ?? action.setDepartmentsIds(getView().getDepartments());
         action.setTypeId(getView().getTypeId());
         action.setFormId(getView().getFormId());
-        action.setTaxType(getView().getTaxType().getCode());
+        action.setTaxType(taxType.getCode());
         action.setForm(getView().isForm());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
@@ -212,7 +214,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickOpenDeclarationDestinations() {
-	    declarationDestinationsPresenter.initAndShowDialog(this, getView().getTaxType());
+	    declarationDestinationsPresenter.initAndShowDialog(this, taxType);
     }
 
 	@Override

@@ -51,9 +51,6 @@ public class DepartmentCombined implements Serializable {
     private Double taxRate;
     private Long type;
 
-    // Тип налога
-    private TaxType taxType;
-
     public Long getRecordId() {
         return recordId;
     }
@@ -272,13 +269,5 @@ public class DepartmentCombined implements Serializable {
 
     public void setSumDividends(Long sumDividends) {
         this.sumDividends = sumDividends;
-    }
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
     }
 }

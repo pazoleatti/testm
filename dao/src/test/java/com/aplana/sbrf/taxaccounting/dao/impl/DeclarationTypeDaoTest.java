@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ public class DeclarationTypeDaoTest {
 	@Test
 	public void testListAll() {
 		List<DeclarationType> list = declarationTypeDao.listAll();
-		assertEquals(4, list.size());
+		assertEquals(3, list.size());
 	}
 
 	@Test
@@ -61,5 +62,12 @@ public class DeclarationTypeDaoTest {
         Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
         filter.setActive(false);
         Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
+    }
+
+    @Test
+    public void testDelete(){
+        DeclarationType dt = declarationTypeDao.get(1);
+        declarationTypeDao.delete(dt.getId());
+        assertEquals(VersionedObjectStatus.DELETED, declarationTypeDao.get(dt.getId()).getStatus());
     }
 }

@@ -97,7 +97,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label ui:field="titleLabel" text="Налоговые формы" addStyleNames="{style.nd}"/>
+                        <g:Label ui:field="titleLabel" text="Налоговые формы"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

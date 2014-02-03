@@ -32,7 +32,7 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
     @Autowired
     private DeclarationTypeService declarationTypeService;
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     public GetDTVersionListHandler() {
         super(GetDTVersionListAction.class);
@@ -48,11 +48,11 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
         List<DeclarationTemplateVersion> declarationTemplateVersions = new LinkedList<DeclarationTemplateVersion>();
         for (int i = 0; i < declarationTemplateList.size() - 1; i++){
             DeclarationTemplateVersion decTemplateVersion = new DeclarationTemplateVersion();
-            DeclarationTemplate formTemplate = declarationTemplateList.get(i);
-            decTemplateVersion.setDtId(String.valueOf(formTemplate.getId()));
-            decTemplateVersion.setTypeName(formTemplate.getType().getName());
-            decTemplateVersion.setVersionNumber(String.valueOf(formTemplate.getEdition()));
-            decTemplateVersion.setActualBeginVersionDate(SDF.format(formTemplate.getVersion()));
+            DeclarationTemplate declarationTemplate = declarationTemplateList.get(i);
+            decTemplateVersion.setDtId(String.valueOf(declarationTemplate.getId()));
+            decTemplateVersion.setTypeName(declarationTemplate.getName());
+            decTemplateVersion.setVersionNumber(String.valueOf(declarationTemplate.getEdition()));
+            decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplate.getVersion()));
 
             if (declarationTemplateList.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
                 decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
@@ -69,7 +69,7 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
         if (!declarationTemplateList.isEmpty() && declarationTemplateList.get(declarationTemplateList.size() - 1).getStatus() != VersionedObjectStatus.FAKE){
             DeclarationTemplateVersion decTemplateVersion = new DeclarationTemplateVersion();
             decTemplateVersion.setDtId(String.valueOf(declarationTemplateList.get(declarationTemplateList.size() - 1).getId()));
-            decTemplateVersion.setTypeName(declarationTemplateList.get(declarationTemplateList.size() - 1).getType().getName());
+            decTemplateVersion.setTypeName(declarationTemplateList.get(declarationTemplateList.size() - 1).getName());
             decTemplateVersion.setVersionNumber(String.valueOf(declarationTemplateList.get(declarationTemplateList.size() - 1).getEdition()));
             decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplateList.get(declarationTemplateList.size() - 1).getVersion()));
             declarationTemplateVersions.add(decTemplateVersion);
