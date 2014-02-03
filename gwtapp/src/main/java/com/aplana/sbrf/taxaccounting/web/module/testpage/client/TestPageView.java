@@ -7,6 +7,8 @@ import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -14,13 +16,16 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import javax.annotation.Untainted;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,7 +71,19 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     DateMaskBoxPicker boxDatePicker;
     @UiField
     Label boxDatePickerLb;
+    @UiField
+    CheckBox checkBoxNull;
 
+    @UiField
+    LinkButton linkButtonDisable;
+    @UiField
+    LinkButton linkButton;
+
+    @UiField
+    LinkAnchor linkAnchor;
+
+    @UiField
+    LinkAnchor linkAnchorDisable;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -143,7 +160,53 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         });
 
+        checkBoxNull.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boxDate.setMayBeNull(event.getValue());
+                boxMy.setMayBeNull(event.getValue());
+                boxY.setMayBeNull(event.getValue());
+                boxText.setMayBeNull(event.getValue());
+                boxDatePicker.setCanBeEmpty(event.getValue());
+                if (event.getValue()) {
+                    boxDate.setValue(null, true);
+                    boxMy.setValue(null, true);
+                    boxY.setValue(null, true);
+                    boxText.setValue(null, true);
+                    boxDatePicker.setValue(null, true);
+                }
+            }
+        });
+
         testMaskBox();
+
+        linkButtonDisable.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("!!!");
+            }
+        });
+
+        linkButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("!!!!");
+            }
+        });
+
+        linkAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("@@@@");
+            }
+        });
+
+        linkAnchorDisable.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("@@@@");
+            }
+        });
     }
 
 

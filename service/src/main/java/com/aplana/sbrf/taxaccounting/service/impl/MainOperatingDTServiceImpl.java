@@ -109,9 +109,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 declarationTemplateService.save(declarationTemplate);
             }
         }
-        DeclarationType decType = declarationTypeService.get(typeId);
-        decType.setStatus(VersionedObjectStatus.DELETED);
-        declarationTypeService.save(decType);
+        declarationTypeService.delete(typeId);
 
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }

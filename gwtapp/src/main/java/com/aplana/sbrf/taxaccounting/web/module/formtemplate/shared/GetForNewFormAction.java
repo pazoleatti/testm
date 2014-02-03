@@ -4,6 +4,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
  * User: avanteev
+ * Действие создания нового вида формы
  */
 public class GetForNewFormAction extends UnsecuredActionImpl<GetForNewFormResult> {
 }

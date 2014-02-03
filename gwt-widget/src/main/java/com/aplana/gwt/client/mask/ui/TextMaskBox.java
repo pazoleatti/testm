@@ -29,8 +29,12 @@ public class TextMaskBox extends MaskBox<String> {
 
     public void setText(String text){
         if (getMask() != null) {
-            if(getMask().length() < text.length()){
-                text = text.substring(0, getMask().length());
+            if (text != null) {
+                if (getMask().length() < text.length()) {
+                    text = text.substring(0, getMask().length());
+                }
+            } else {
+                text = getTextPicture();
             }
         }
         super.setText(text);

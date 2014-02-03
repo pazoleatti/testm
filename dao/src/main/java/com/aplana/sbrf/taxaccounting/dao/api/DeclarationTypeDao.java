@@ -22,7 +22,7 @@ public interface DeclarationTypeDao {
 	DeclarationType get(int declarationTypeId);
 
 	/**
-	 * Получить список всех видов деклараций
+	 * Получить список всех действующих видов деклараций
 	 * @return список видов деклараций
 	 * @throws DaoException если в БД нет такой записи
 	 */

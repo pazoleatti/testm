@@ -239,4 +239,9 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals(2, declarationTemplateDao.versionTemplateCount(1, list));
 
     }
+
+    @Test
+    public void getBadDeclarationTemplateScriptTest(){
+        assertEquals("", declarationTemplateDao.getDeclarationTemplateScript(100));
+    }
 }

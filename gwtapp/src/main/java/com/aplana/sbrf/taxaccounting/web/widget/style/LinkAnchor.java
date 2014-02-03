@@ -24,7 +24,6 @@ public class LinkAnchor extends Anchor{
 	interface LocalHtmlTemplates extends SafeHtmlTemplates {
 		@Template("<div style=\"" +
                     "text-decoration: underline;" +
-                    "color: #004276; " +
                     "font-size: 12px; " +
                     "margin-left: 3px; " +
                     "display: inline; " +
@@ -45,6 +44,8 @@ public class LinkAnchor extends Anchor{
 	public LinkAnchor() {
 		super(templates.img(DEFAULT_URL));
         getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
+        getElement().getStyle().setColor("#004276");
+        getElement().getStyle().setCursor(Style.Cursor.POINTER);
 	}
 
 	public void setText(String text){
@@ -74,6 +75,19 @@ public class LinkAnchor extends Anchor{
     public void fireEvent(GwtEvent<?> event){
         if (this.isEnabled())
             super.fireEvent(event);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (enabled){
+            getElement().getStyle().setColor("#004276");
+            getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        }
+        else{
+            getElement().getStyle().setColor("#ADADAD");
+            getElement().getStyle().setCursor(Style.Cursor.DEFAULT);
+        }
     }
 
 }
