@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
@@ -9,8 +8,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -91,6 +88,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Path("declarationTemplate.name")
     TextBox decName;
 
+    @UiField
+    @Editor.Ignore
+    Anchor downloadDectButton;
+
 	@Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -124,6 +125,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@Override
 	public void setDeclarationTemplate(final DeclarationTemplateExt declarationTemplateExt) {
+        uploadDectForm.reset();
+        uploadJrxmlForm.reset();
         Integer id = declarationTemplateExt.getDeclarationTemplate().getId();
 		uploadDectForm.setAction(GWT.getHostPageBaseURL() + "download/declarationTemplate/uploadDect/" + (id != null?id:0));
 		uploadJrxmlForm.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + (id != null?id:0));
@@ -134,30 +137,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 				driver.edit(declarationTemplateExt);
 			}
 		});
-        //TODO Проверка на существование макета
-        // Такую же проверку надо сделать после того как произойдет верстка на форме
-        uploadJrxml.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    confirm();
-                    uploadJrxml.setName("");
-                    uploadDectForm.reset();
-                    uploadJrxmlForm.reset();
-                }
-            }
-        });
-        uploadDectFile.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (declarationTemplateExt.getDeclarationTemplate().getId() == null){
-                    confirm();
-                    uploadJrxml.setName("");
-                    uploadDectForm.reset();
-                    uploadJrxmlForm.reset();
-                }
-            }
-        });
+
+        downloadDectButton.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        uploadJrxml.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        uploadDectFile.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        fileUploader.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
 	}
 
     @Override
@@ -168,11 +152,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Override
     public void activateButtonName(String name) {
         activateVersion.setText(name);
-    }
-
-    @Override
-    public void confirm() {
-        Dialog.confirmMessage("Сначала сохраните шаблон");
     }
 
     @UiHandler("saveButton")

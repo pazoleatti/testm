@@ -25,6 +25,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.List;
 
 /**
+ * Список версий макетов деклараций
  * User: avanteev
  */
 public class DeclarationVersionListPresenter extends Presenter<DeclarationVersionListPresenter.MyView, DeclarationVersionListPresenter.MyProxy>
@@ -63,8 +64,11 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteDTVersionResult>() {
             @Override
             public void onSuccess(DeleteDTVersionResult result) {
+                String typeId = placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationType, "");
                 if (result.getLogEntryUuid() != null)
                     LogAddEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList)
+                        .with(DeclarationTemplateTokens.declarationType, typeId).build());
             }
         }, this).addCallback(new ManualRevealCallback<DeleteDTVersionResult>(DeclarationVersionListPresenter.this)));
     }
