@@ -144,4 +144,11 @@ public interface DepartmentService {
      * @return
      */
     List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId);
+
+	/**
+	 * Получить подразделения по списку идентификаторов
+	 * @param departmentId список идентификаторов
+	 * @return набор сочетаний идентификатор-подразделение
+	 */
+	Map<Integer, Department> getDepartments(List<Integer> departmentId);
 }

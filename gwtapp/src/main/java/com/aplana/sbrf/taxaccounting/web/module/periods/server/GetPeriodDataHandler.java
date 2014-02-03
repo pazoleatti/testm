@@ -43,6 +43,12 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
 		List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType(action.getDepartmentId(), action.getTaxType());
+		List<Integer> depIds = new ArrayList<Integer>();
+		for (DepartmentReportPeriod d : drp) {
+			depIds.add(d.getDepartmentId().intValue());
+		}
+		Map<Integer, Department> departmentMap = departmentService.getDepartments(depIds);
+
 		for (DepartmentReportPeriod period : drp) {
 			int year = period.getReportPeriod().getTaxPeriod().getYear();
 			if ((action.getFrom() <= year) && (year <= action.getTo())) {
@@ -57,7 +63,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 				row.setBalance(period.isBalance());
 				row.setYear(year);
 				row.setCorrectPeriod(period.getCorrectPeriod());
-				Department dep = departmentService.getDepartment(period.getDepartmentId().intValue());
+				Department dep = departmentMap.get(period.getDepartmentId().intValue());
 				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
 				row.setDeadline(notification != null ? notification.getDeadline() : null);
 				per.get(year).add(row);
