@@ -48,12 +48,12 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
         if (depCombined != null
                 && depCombined.getDepartmentId() != null
-                && depCombined.getTaxType() != null
+                && action.getTaxType() != null
                 && action.getReportPeriodId() != null ){
 
             RefBookDataProvider provider = null;
 
-            switch (depCombined.getTaxType()) {
+            switch (action.getTaxType()) {
                 case INCOME:
                     provider = rbFactory.getDataProvider(33L);
                     break;
@@ -97,7 +97,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             paramsMap.put(DepartmentParamAliases.FORMAT_VERSION.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getFormatVersion()));
 
             // Налог на прибыль
-            if (depCombined.getTaxType() == TaxType.INCOME) {
+            if (action.getTaxType() == TaxType.INCOME) {
                 paramsMap.put(DepartmentParamAliases.SUM_TAX.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumTax()));
                 paramsMap.put(DepartmentParamAliases.SUM_DIVIDENDS.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getSumDividends()));
                 paramsMap.put(DepartmentParamAliases.OBLIGATION.name(), new RefBookValue(RefBookAttributeType.REFERENCE, depCombined.getObligation()));

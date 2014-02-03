@@ -76,10 +76,10 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void resetRefBookWidgetsDatePeriod(Integer reportPeriodId);
 
         /**
-         * Установка доступных типов налога
-         * @param types
+         * Установка типа налога
+         * @param type
          */
-        void setTaxTypes(List<TaxType> types);
+        void setTaxType(TaxType type);
 
         /**
          * Перезагрузка параметров подразделения
@@ -212,6 +212,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+
+        String value = request.getParameter("nType", "");
+        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+        getView().setTaxType(nType);
+
         dispatcher.execute(new GetUserDepartmentAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetUserDepartmentResult>() {
@@ -223,8 +228,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 }
                                 // Текущее подразделение пользователя
                                 userDepartment = result.getDepartment();
-                                // Доступные типы налогов
-                                getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL));
                             }
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }

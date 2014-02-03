@@ -48,7 +48,6 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             throws ActionException {
 
         DepartmentCombined depCombined = new DepartmentCombined();
-        depCombined.setTaxType(action.getTaxType());
 
         // Параметры пагинации
         PagingParams pp = new PagingParams();
