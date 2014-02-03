@@ -115,7 +115,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
             widget.setWidth("100%");
             widget.getElement().getStyle().setProperty("minWidth", "100px");
-            widget.getElement().getStyle().setProperty("maxWidth", "350px");
+            widget.getElement().getStyle().setProperty("maxWidth", "100%");
 
             oneField.add(widget);
             oneField.setCellWidth(widget, "80%");
