@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -47,26 +48,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     interface Binder extends UiBinder<Widget, TaxFormNominationView> {
     }
 
-    interface LinkStyle extends CssResource {
-        String enabled();
-
-        String disabled();
-    }
-
     //private Long depoId = null;
-
-    @UiField
-    LinkStyle css;
-    @UiField
-    Anchor formAnchor;
-    @UiField
-    Label formLabel;
-    @UiField
-    Anchor declarationAnchor;
-    @UiField
-    Label declarationLabel;
-    @UiField(provided = true)
-    MyValueListBox<TaxType> boxTaxType;
     @UiField
     Anchor assignAnchor;
     @UiField
@@ -83,8 +65,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     Button search;
     @UiField
     Button assign;
+    @UiField
+    Label taxTypeLabel;
+    @UiField
+    LinkAnchor switchMode;
+    @UiField
+    Label formHeader;
 
-    private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
     // список с инде4ксами выделенных строк в гриде
     private Set<Integer> selectedRows;
@@ -93,7 +80,6 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiConstructor
     public TaxFormNominationView(final Binder uiBinder) {
         selectedRows = new HashSet<Integer>();
-        initBoxes();
         initWidget(uiBinder.createAndBindUi(this));
         initFormGrid();
         initDeclarationGrid();
@@ -253,19 +239,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         getUiHandlers().reloadDeclarationTableData();
     }
 
-    private void initBoxes() {
-        boxTaxType = new MyValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
-            @Override
-            public String render(TaxType object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
-        boxTaxType.setAcceptableValues(TAX_TYPES);
-    }
-
+    // TODO не надо в формах определять классы моделек. вынести в shared
     private class TableModel {
         private boolean checked;
         private int index;
@@ -324,42 +298,16 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
      * Инициализируется при создании формы
      */
     @Override
-    public void init(TaxType nType) {
-        this.isForm = true;
+    public void init(TaxType nType, boolean isForm) {
+        this.isForm = isForm;
         // Вид налога: в зависимости от налога, выбранного в главном меню ("Вид налога": "Налог на прибыль")
-        boxTaxType.setValue((nType != null ? nType : TaxType.INCOME), false);
-        setTaxFormKind(new ArrayList<FormType>());
-        //boxFormDataKind.setAcceptableValues(new ArrayList<FormDataKind>());
-        setHandlers();
-    }
-
-    private void setHandlers(){
-        // переключение режима просмотра на "Назначение налоговых форм"
-        formAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                formViewInit();
-                event.preventDefault();
-            }
-        });
-
-        // переключение режима просмотра на "Назначение деклараций"
-        declarationAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                declarationViewInit();
-                event.preventDefault();
-            }
-        });
-
-        search.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                //setDepoId(departmentPicker.getValue());
-                if (isForm) reloadFormGrid();
-                else reloadDeclarationGrid();
-            }
-        });
+        taxTypeLabel.setText(nType!= null ? nType.getName() : "Неизвестный вид налога");
+        setupHeader();
+        if(isForm){
+            formViewInit();
+        } else {
+            declarationViewInit();
+        }
     }
 
     @Override
@@ -375,6 +323,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public List<FormTypeKind> getSelectedItemsOnFormGrid() {
         return getSelectedItems(formGrid);
+    }
+
+    private void setupHeader(){
+        // леваяя ссылка
+        switchMode.setText(isForm ? "Назначение деклараций" : "Назначение налоговых форм");
+        // средний лейбл
+        formHeader.setText(!isForm ? "Назначение деклараций" : "Назначение налоговых форм");
     }
 
     private List<FormTypeKind> getSelectedItems(GenericDataGrid<TableModel> grid) {
@@ -393,6 +348,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
      *
      * TODO: Год: не заполнен (в 0.3.5 не реализуем)
      * TODO Таблица "Список назначенных налоговых форм на подразделение": не заполнена
+     *
+     * TODO можно и в один метод с параметром isForm запилить
      */
     private void formViewInit(){
         isForm = true;
@@ -413,6 +370,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
      *
      * TODO Год: указанный в назначении налоговых форм (в 0.3.5 не реализуем)
      * TODO Таблица "Список назначенных деклараций на подразделение": не заполнена
+     *
+     * TODO можно и в один метод с параметром isForm запилить
      */
     private void declarationViewInit(){
         isForm = false;
@@ -432,11 +391,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
      * Отображение навигации (а-ля вкладки)
      */
     private void renderNav(){
-        formLabel.setVisible(isForm);
-        formAnchor.setVisible(!isForm);
-        // показать соответствующую таблицу
-        declarationLabel.setVisible(!isForm);
-        declarationAnchor.setVisible(isForm);
+        setupHeader();
         // очистить таблицу
         formGrid.setRowCount(0);
     }
@@ -537,10 +492,25 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         return null;//boxTaxFormKind.hasSelectedItem() ? boxTaxFormKind.getValue().getId() : null;
     }
 
+    @UiHandler("search")
+    public void onSearchClick(ClickEvent event) {
+        //setDepoId(departmentPicker.getValue());
+        if (isForm) {
+            reloadFormGrid();
+        } else {
+            reloadDeclarationGrid();
+        }
+    }
 
-    @Override
-    public TaxType getTaxType() {
-        return boxTaxType.getValue();
+    @UiHandler("switchMode")
+    public void onSwitchModeClick(ClickEvent event) {
+        // если уже режим формы то включаем режим декларации
+        if (isForm) {
+            declarationViewInit();
+        } else {
+            formViewInit();
+        }
+        event.preventDefault();
     }
 
 
@@ -559,27 +529,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             } else {
                 getUiHandlers().onClickOpenDeclarationDestinations();
             }
-
         }
     }
 
-    private void enableAnchor(Anchor anchor, boolean enabled) {
-        if (enabled) {
-            anchor.setStyleName(css.enabled());
-        } else {
-            anchor.setStyleName(css.disabled());
+    @UiHandler("cancelAnchor")
+    public void clickCancelAnchor(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            if (isForm) {
+                getUiHandlers().onClickFormCancelAnchor();
+            } else {
+                getUiHandlers().onClickDeclarationCancelAnchor();
+            }
         }
-        anchor.setEnabled(enabled);
     }
-
-	@UiHandler("cancelAnchor")
-	public void clickCancelAnchor(ClickEvent event){
-		if (getUiHandlers() != null) {
-            getUiHandlers().onClickFormCancelAnchor();
-        } else {
-            getUiHandlers().onClickDeclarationCancelAnchor();
-        }
-
-	}
-
 }
