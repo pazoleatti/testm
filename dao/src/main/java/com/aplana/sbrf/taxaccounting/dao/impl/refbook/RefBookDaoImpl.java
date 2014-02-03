@@ -897,16 +897,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
-            "\tversionTo IS NOT NULL and (\n" +
-            "\t\t(%s IS NULL and versionTo >= to_date('%s', 'DD.MM.YYYY')) or\n" +
-            "\t\t(versionFrom <= to_date('%s', 'DD.MM.YYYY') and versionTo >= to_date('%s', 'DD.MM.YYYY')) or \n" +
-            "\t\t(versionFrom >= to_date('%s', 'DD.MM.YYYY') and versionFrom <= to_date('%s', 'DD.MM.YYYY'))\n" +
-            "\t)\n" +
+            "\tversionTo IS NOT NULL and (versionFrom <= to_date('%s', 'DD.MM.YYYY') and versionTo >= to_date('%s', 'DD.MM.YYYY'))\n" +
             ") or (\n" +
-            "\tversionTo IS NULL and (\n" +
-            "\t\tversionFrom <= to_date('%s', 'DD.MM.YYYY') or\n" +
             "\t\t(versionFrom >= to_date('%s', 'DD.MM.YYYY') and (%s IS NULL or versionFrom <= to_date('%s', 'DD.MM.YYYY')))\n" +
-            "\t)\n" +
             ")";
 
     @Override
@@ -921,9 +914,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 SqlUtils.transformToSqlInStatement(recordIds),
-                sVersionTo, sVersionFrom, sVersionFrom, sVersionFrom,
-                sVersionFrom, sVersionTo, sVersionFrom, sVersionFrom,
-                sVersionTo, sVersionTo);
+                sVersionFrom, sVersionFrom, sVersionFrom, sVersionTo, sVersionTo);
         List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class);
         if (conflictedIds.size() > 0) {
             StringBuilder attrNames = new StringBuilder();
