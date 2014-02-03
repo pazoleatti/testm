@@ -16,13 +16,16 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import javax.annotation.Untainted;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -68,6 +71,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     DateMaskBoxPicker boxDatePicker;
     @UiField
     Label boxDatePickerLb;
+    @UiField
+    CheckBox checkBoxNull;
 
     @UiField
     LinkButton linkButtonDisable;
@@ -153,6 +158,24 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 mw.show();
             }
 
+        });
+
+        checkBoxNull.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boxDate.setMayBeNull(event.getValue());
+                boxMy.setMayBeNull(event.getValue());
+                boxY.setMayBeNull(event.getValue());
+                boxText.setMayBeNull(event.getValue());
+                boxDatePicker.setCanBeEmpty(event.getValue());
+                if (event.getValue()) {
+                    boxDate.setValue(null, true);
+                    boxMy.setValue(null, true);
+                    boxY.setValue(null, true);
+                    boxText.setValue(null, true);
+                    boxDatePicker.setValue(null, true);
+                }
+            }
         });
 
         testMaskBox();
