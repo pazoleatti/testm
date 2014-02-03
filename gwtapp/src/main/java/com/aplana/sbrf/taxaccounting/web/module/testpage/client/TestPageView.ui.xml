@@ -92,6 +92,20 @@
                         <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" visible="true"/>
                         <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <style:LinkButton ui:field="linkButton" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" />
+
+                        <style:LinkButton ui:field="linkButtonDisable" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" enabled="false" />
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <style:LinkAnchor ui:field="linkAnchor" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" />
+
+                        <style:LinkAnchor ui:field="linkAnchorDisable" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" enabled="false" />
+                    </g:HorizontalPanel>
                 </g:VerticalPanel>
 
             </fm:BodyContainer>

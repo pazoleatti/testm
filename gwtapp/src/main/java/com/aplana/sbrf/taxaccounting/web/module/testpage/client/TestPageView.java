@@ -7,6 +7,8 @@ import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -72,6 +74,16 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     CheckBox checkBoxNull;
 
+    @UiField
+    LinkButton linkButtonDisable;
+    @UiField
+    LinkButton linkButton;
+
+    @UiField
+    LinkAnchor linkAnchor;
+
+    @UiField
+    LinkAnchor linkAnchorDisable;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -167,6 +179,34 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         });
 
         testMaskBox();
+
+        linkButtonDisable.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("!!!");
+            }
+        });
+
+        linkButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("!!!!");
+            }
+        });
+
+        linkAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("@@@@");
+            }
+        });
+
+        linkAnchorDisable.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("@@@@");
+            }
+        });
     }
 
 
