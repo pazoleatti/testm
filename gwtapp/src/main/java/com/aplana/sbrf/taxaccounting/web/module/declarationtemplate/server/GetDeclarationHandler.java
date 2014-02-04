@@ -34,7 +34,6 @@ public class GetDeclarationHandler extends AbstractActionHandler<GetDeclarationA
 		declarationTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
 		DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getId());
         declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
-        declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(action.getId()));
 		declarationTemplateService.lock(action.getId(), userInfo);
 		result.setDeclarationTemplate(declarationTemplate);
         result.setEndDate(declarationTemplateService.getDTEndDate(declarationTemplate.getId()));
