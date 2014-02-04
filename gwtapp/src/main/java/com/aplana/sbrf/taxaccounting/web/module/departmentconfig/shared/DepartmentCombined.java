@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Составная модель для параметров подразделений.<br>
@@ -18,27 +19,27 @@ public class DepartmentCombined implements Serializable {
     private Long recordId;
 
     // Общие параметры
-    private Long departmentId;
-    private Long dictRegionId;
-    private Long okato;
+    private List<Long> departmentId;
+    private List<Long> dictRegionId;
+    private List<Long> okato;
     private String inn;
     private String kpp;
     private String taxOrganCode;
-    private Long okvedCode;
+    private List<Long> okvedCode;
     private String phone;
-    private Long reorgFormCode;
+    private List<Long> reorgFormCode;
     private String reorgInn;
     private String reorgKpp;
     private String name;
 
     // Во всех налогах
-    private Long signatoryId;
+    private List<Long> signatoryId;
     private String signatorySurname;
     private String signatoryFirstname;
     private String signatoryLastname;
     private String approveDocName;
     private String approveOrgName;
-    private Long taxPlaceTypeCode;
+    private List<Long> taxPlaceTypeCode;
     private String appVersion;
     private String formatVersion;
 
@@ -47,9 +48,9 @@ public class DepartmentCombined implements Serializable {
     private Long sumDividends;
 
     // Налог на прибыль
-    private Long obligation;
+    private List<Long> obligation;
     private Double taxRate;
-    private Long type;
+    private List<Long> type;
 
     public Long getRecordId() {
         return recordId;
@@ -63,27 +64,27 @@ public class DepartmentCombined implements Serializable {
         super();
     }
 
-    public Long getDepartmentId() {
+    public List<Long> getDepartmentId() {
         return departmentId;
     }
 
-    public void setDepartmentId(Long departmentId) {
+    public void setDepartmentId(List<Long> departmentId) {
         this.departmentId = departmentId;
     }
 
-    public Long getDictRegionId() {
+    public List<Long> getDictRegionId() {
         return dictRegionId;
     }
 
-    public void setDictRegionId(Long dictRegionId) {
+    public void setDictRegionId(List<Long> dictRegionId) {
         this.dictRegionId = dictRegionId;
     }
 
-    public Long getOkato() {
+    public List<Long> getOkato() {
         return okato;
     }
 
-    public void setOkato(Long okato) {
+    public void setOkato(List<Long> okato) {
         this.okato = okato;
     }
 
@@ -111,11 +112,11 @@ public class DepartmentCombined implements Serializable {
         this.taxOrganCode = taxOrganCode;
     }
 
-    public Long getOkvedCode() {
+    public List<Long> getOkvedCode() {
         return okvedCode;
     }
 
-    public void setOkvedCode(Long okvedCode) {
+    public void setOkvedCode(List<Long> okvedCode) {
         this.okvedCode = okvedCode;
     }
 
@@ -127,11 +128,11 @@ public class DepartmentCombined implements Serializable {
         this.phone = phone;
     }
 
-    public Long getReorgFormCode() {
+    public List<Long> getReorgFormCode() {
         return reorgFormCode;
     }
 
-    public void setReorgFormCode(Long reorgFormCode) {
+    public void setReorgFormCode(List<Long> reorgFormCode) {
         this.reorgFormCode = reorgFormCode;
     }
 
@@ -159,11 +160,11 @@ public class DepartmentCombined implements Serializable {
         this.name = name;
     }
 
-    public Long getSignatoryId() {
+    public List<Long> getSignatoryId() {
         return signatoryId;
     }
 
-    public void setSignatoryId(Long signatoryId) {
+    public void setSignatoryId(List<Long> signatoryId) {
         this.signatoryId = signatoryId;
     }
 
@@ -207,11 +208,11 @@ public class DepartmentCombined implements Serializable {
         this.approveOrgName = approveOrgName;
     }
 
-    public Long getTaxPlaceTypeCode() {
+    public List<Long> getTaxPlaceTypeCode() {
         return taxPlaceTypeCode;
     }
 
-    public void setTaxPlaceTypeCode(Long taxPlaceTypeCode) {
+    public void setTaxPlaceTypeCode(List<Long> taxPlaceTypeCode) {
         this.taxPlaceTypeCode = taxPlaceTypeCode;
     }
 
@@ -239,19 +240,19 @@ public class DepartmentCombined implements Serializable {
         this.taxRate = taxRate;
     }
 
-    public Long getObligation() {
+    public List<Long> getObligation() {
         return obligation;
     }
 
-    public void setObligation(Long obligation) {
+    public void setObligation(List<Long> obligation) {
         this.obligation = obligation;
     }
 
-    public Long getType() {
+    public List<Long> getType() {
         return type;
     }
 
-    public void setType(Long type) {
+    public void setType(List<Long> type) {
         this.type = type;
     }
 

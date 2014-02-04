@@ -33,10 +33,10 @@ public class HeaderCell extends AbstractCell {
 	}
 
 	@Override
-	public Object setValue(Object value) {
+	public Object setValue(Object value, Integer rowNumber) {
 		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
 		if (hasValueOwner()) {
-			getValueOwner().setValue(value);
+			getValueOwner().setValue(value, null);
 			return getValueOwner().getValue();
 		}
 		this.value = String.valueOf(value);

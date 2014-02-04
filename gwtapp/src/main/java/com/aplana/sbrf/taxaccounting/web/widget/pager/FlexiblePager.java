@@ -419,17 +419,19 @@ public class FlexiblePager extends AbstractPager {
 		pageNumber.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				if (pageNumber.getValue() != null) {
-					Range range = getDisplay().getVisibleRange();
-					int totalNumberOfRecords = getDisplay().getRowCount();
-					int nextStartRecord = (pageNumber.getValue() - 1) * range.getLength();
-					int numberOfRecordsToDisplay = range.getLength();
-					if ((totalNumberOfRecords - nextStartRecord) < numberOfRecordsToDisplay) {
-						lastPage();
-					} else if (getDisplay() != null) {
-						setPageStart(nextStartRecord);
-					}
-				}
+                if (event.getNativeKeyCode()==KeyCodes.KEY_ENTER){
+                    if (pageNumber.getValue() != null) {
+                        Range range = getDisplay().getVisibleRange();
+                        int totalNumberOfRecords = getDisplay().getRowCount();
+                        int nextStartRecord = (pageNumber.getValue() - 1) * range.getLength();
+                        int numberOfRecordsToDisplay = range.getLength();
+                        if ((totalNumberOfRecords - nextStartRecord) < numberOfRecordsToDisplay) {
+                            lastPage();
+                        } else if (getDisplay() != null) {
+                            setPageStart(nextStartRecord);
+                        }
+                    }
+                }
 			}
 		});
 

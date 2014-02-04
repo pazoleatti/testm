@@ -3,10 +3,14 @@ package form_template.transport.declaration
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+
+import java.text.SimpleDateFormat
 
 /**
  * Формирование XML для декларации по транспортному налогу.
@@ -38,6 +42,10 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 void checkDeparmentParams(LogLevel logLevel) {
     def date = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
@@ -76,7 +84,7 @@ def checkAndbildXml() {
     // Получить параметры по транспортному налогу
     /** Предпослденяя дата отчетного периода на которую нужно получить настройки подразделения из справочника. */
     def reportDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
-    if (reportDate != null) {
+    if (reportDate == null) {
         logger.error("Ошибка определения даты конца отчетного периода")
     }
 
@@ -184,11 +192,11 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 // вспомогательный taxRate
                                 resultMap[row.okato].taxRate += taxRate ?: 0
                                 // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? 0.25 * row.taxBase * taxRate : 0)
+                                resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? 0.25 * row.taxBase * taxRate : 0.0)
                                 // АвПУКв2 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за второй квартал //// Заполняется во 2, 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation && reportPeriod.order > 1 ? 0.25 * row.taxBase * taxRate : 0)
+                                resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation && reportPeriod.order > 1 ? 0.25 * row.taxBase * taxRate : 0.0)
                                 // АвПУКв3 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за третий квартал //// Заполняется во 3, 4 отчетном периоде.
-                                resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation && reportPeriod.order > 2 ? 0.25 * row.taxBase * taxRate : 0)
+                                resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation && reportPeriod.order > 2 ? 0.25 * row.taxBase * taxRate : 0.0)
                                 // НалПУ = НалИсчисл – (АвПУКв1+ АвПУКв2+ АвПУКв3)
                                 resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].calculationOfTaxes - (
                                 resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
@@ -339,6 +347,57 @@ def getRegionByOKTMO(def okato) {
     }
 }
 
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
+              def Date date, boolean required = true) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
+            rowIndex, columnName, logger, required)
+}
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = sdf.format(date)
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                return refBookCache.get(recordId)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def provider
+    if (!providerCache.containsKey(refBookId)) {
+        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
+    }
+    provider = providerCache.get(refBookId)
+
+    def records = provider.getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null)
+            refBookCache.put(recordId, retVal)
+        return retVal
+    }
+    return null
+}
+
+
 /** Получение полного справочника */
 def getModRefBookValue(refBookId, filter, date = new Date()) {
     // провайдер для справочника
@@ -354,11 +413,11 @@ def getModRefBookValue(refBookId, filter, date = new Date()) {
 
     // получение связанных данных
     refBook.attributes.each() { RefBookAttribute attr ->
-        def ref = record[attr.alias].referenceValue;
-        if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
-            def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
-            record[attr.alias] = attrProvider.getRecordData(ref);
-        }
+            def ref = record[attr.alias].referenceValue;
+            if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
+                def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
+                record[attr.alias] = attrProvider.getRecordData(ref);
+            }
     }
     record
 }
@@ -387,9 +446,10 @@ def getParam(taxBenefitCode, okato) {
         def params = refBookProvider.getRecords(new Date(), null, query, null).getRecords()
 
         if (params.size() == 1)
-            param = params.get(0)
+            return params.get(0)
         else {
             logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» $taxBenefitCode")
+            return null
         }
     }
 

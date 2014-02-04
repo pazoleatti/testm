@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -40,19 +41,22 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
                 .getDataProvider(action.getRefBookId());
 
 
-        List<Map<String, RefBookValue>> valuesToSaveList = new ArrayList<Map<String, RefBookValue>>();
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
         for (Map<String, RefBookValueSerializable> map : action.getRecords()) {
-            Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
+            Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
             for(Map.Entry<String, RefBookValueSerializable> v : map.entrySet()) {
                 RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
-                valueToSave.put(v.getKey(), value);
+                values.put(v.getKey(), value);
             }
-            valuesToSaveList.add(valueToSave);
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(values);
+            record.setRecordId(action.getRecordId());
+            records.add(record);
         }
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         Logger logger = new Logger();
-        refBookDataProvider.createRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valuesToSaveList);
+        refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records);
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;

@@ -4,7 +4,7 @@
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
     <ui:style>
@@ -28,6 +28,11 @@
             margin-right: 5px;
 
         }
+
+        .nalogType{
+            margin-right: -1px;
+            margin-left:  -1px;
+        }
     </ui:style>
 
     <g:HorizontalPanel width="100%" verticalAlignment="middle">
@@ -49,13 +54,13 @@
             <g:cell horizontalAlignment="left" verticalAlignment="middle" width="150px">
                 <g:VerticalPanel width="150px" verticalAlignment="middle">
                     <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="fromSearchDate" width="100%"/>
+                        <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="toSearchDate" width="100%"/>
+                        <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <g:ValueListBox ui:field="taxType" width="100%"/>
+                        <g:ValueListBox ui:field="taxType" width="150px" addStyleNames="{style.nalogType}"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
@@ -84,7 +89,8 @@
                                                        modal="true" width="100%"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <r:RefBookPickerPopupWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"/>
+                        <r:RefBookMultiPickerModalWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"
+                                                    multiSelect="false"/>
                     </g:cell>
 
                 </g:VerticalPanel>

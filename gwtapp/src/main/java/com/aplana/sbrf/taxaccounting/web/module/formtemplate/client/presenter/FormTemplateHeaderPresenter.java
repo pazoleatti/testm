@@ -90,9 +90,9 @@ public class FormTemplateHeaderPresenter
 		if (row != null) {
 			for (Column column: formTemplate.getColumns()) {
 				if (column.getWidth() > 0) {
-				row.getCell(column.getAlias()).setValue(formTemplate.getColumn(column.getAlias()).getName());
+				row.getCell(column.getAlias()).setValue(formTemplate.getColumn(column.getAlias()).getName(), null);
 				} else {
-					row.getCell(column.getAlias()).setValue("");
+					row.getCell(column.getAlias()).setValue("", null);
 				}
 			}
 			formTemplate.getHeaders().add(row);
@@ -106,9 +106,9 @@ public class FormTemplateHeaderPresenter
 			int colNum = 1;
 			for (Column column: formTemplate.getColumns()) {
 				if (column.getWidth() > 0) {
-					row.getCell(column.getAlias()).setValue(colNum++);
+					row.getCell(column.getAlias()).setValue(colNum++, null);
 				} else {
-					row.getCell(column.getAlias()).setValue("");
+					row.getCell(column.getAlias()).setValue("", null);
 				}
 			}
 			formTemplate.getHeaders().add(row);

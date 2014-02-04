@@ -31,8 +31,6 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
         // загрузка данных для поля "Тип налоговой формы"
         void setFormDataKinds(List<FormDataKind> formDataKinds);
-        // установить данные в выпадающий список "Вип налоговой формы"
-        void setFormTypesMap(List<FormType> formTypes);
         // установка данных в поле "исполнители"
         void setPerformers(List<Department> performers, Set<Integer> availablePerformers);
         // подготовить форму для создания
@@ -46,7 +44,9 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         // получить тип формы
         FormDataKind getFormDataKind();
         // получить вид формы
-        List<Integer> getFormTypes();
+        List<Long> getFormTypes();
+        // установить фильтр для справочника
+        void setFilterForFormTypes(String filter);
     }
 
 
@@ -61,9 +61,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     /**
      * Первичная инициализация формы, вызывается извне используемым модулем
      */
-    public void initForm(TaxType taxType){
+    public void initForm(final TaxType taxType){
         GetDestanationPopupDataAction action = new GetDestanationPopupDataAction();
-        action.setTaxType(taxType);
 
         dispatchAsync.execute(action,
             CallbackUtils.defaultCallback(
@@ -74,10 +73,10 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                         // загрузка данных для поля "Тип налоговой формы"
                         getView().setFormDataKinds(result.getFormDataKinds());
-                        // загрузка данных для поля "Вип налоговой формы"
-                        getView().setFormTypesMap(result.getFormTypes());
                         // установка данных в поле "исполнители"
                         getView().setPerformers(result.getPerformers(), result.getAvailablePerformers());
+                        // установить фильтр для видов нф
+                        getView().setFilterForFormTypes("TAX_TYPE LIKE '"+taxType.getCode()+"'");
                     }
                 }, this));
     }
