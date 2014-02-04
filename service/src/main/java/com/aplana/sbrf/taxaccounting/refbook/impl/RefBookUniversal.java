@@ -182,16 +182,15 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBookRecordVersion nextVersion = null;
             if (record.getRecordId() != null) {
                 nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
+            } else {
+                record.setRecordId(generatedIds.get(counter));
+                counter++;
             }
             if (versionTo == null) {
                 if (nextVersion != null && logger != null) {
                     logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                 }
             } else {
-                if (record.getRecordId() == null) {
-                    record.setRecordId(generatedIds.get(counter));
-                    counter++;
-                }
                 if (nextVersion == null) {
                     //Следующая версия не существует - создаем фиктивную версию
                     refBookDao.createFakeRecordVersion(refBookId, record.getRecordId(), addDayToDate(versionTo, 1));
