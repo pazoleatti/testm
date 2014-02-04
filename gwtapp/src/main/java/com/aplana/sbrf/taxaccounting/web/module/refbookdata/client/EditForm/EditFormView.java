@@ -114,8 +114,16 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             });
 
             widget.setWidth("100%");
-            widget.getElement().getStyle().setProperty("minWidth", "100px");
-            widget.getElement().getStyle().setProperty("maxWidth", "100%");
+            // Устанавливаем фиксированную ширину для поля типа DATE
+            switch (col.getAttributeType()) {
+                case DATE:
+                    widget.getElement().getStyle().setProperty("width", "110px");
+                    break;
+                default:
+                    widget.getElement().getStyle().setProperty("minWidth", "100px");
+                    widget.getElement().getStyle().setProperty("maxWidth", "100%");
+                    break;
+            }
 
             oneField.add(widget);
             oneField.setCellWidth(widget, "80%");
