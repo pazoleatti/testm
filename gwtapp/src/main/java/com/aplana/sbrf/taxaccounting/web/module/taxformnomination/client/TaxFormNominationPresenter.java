@@ -70,6 +70,11 @@ public class TaxFormNominationPresenter
 
 	    List<FormTypeKind> getSelectedItemsOnDeclarationGrid();
         List<FormTypeKind> getSelectedItemsOnFormGrid();
+
+        /**
+         * Обновление линков редактировать/отменить назначение
+         */
+        void updatePanelAnchors();
     }
 
     private TaxType taxType;
@@ -153,6 +158,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToFormTable(result.getTableData());
+                        getView().updatePanelAnchors();
                     }
                 }, this));
     }

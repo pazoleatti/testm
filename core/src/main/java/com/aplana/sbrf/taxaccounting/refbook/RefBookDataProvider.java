@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -123,12 +124,11 @@ public interface RefBookDataProvider {
 
     /**
      * Создает новую версию записи справочника
-     * @param recordId идентификатор записи справочника без учета версии. Если null - создается новая версия
      * @param versionFrom дата начала актуальности новый версии
      * @param versionTo дата конца актуальности новый версии. Может быть null
-     * @param records список новых значений атрибутов записи справочника
+     * @param records список новых значений записи справочника
      */
-    void createRecordVersion(Logger logger, Long recordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
+    void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
 
     /**
      * Возвращает значения уникальных атрибутов для конкретной версии записи справочника

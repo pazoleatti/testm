@@ -76,7 +76,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                         // установка данных в поле "исполнители"
                         getView().setPerformers(result.getPerformers(), result.getAvailablePerformers());
                         // установить фильтр для видов нф
-                        //getView().setFilterForFormTypes("TAX_TYPE = '"+taxType.getName()+"'");
+                        getView().setFilterForFormTypes("TAX_TYPE LIKE '"+taxType.getCode()+"'");
                     }
                 }, this));
     }
