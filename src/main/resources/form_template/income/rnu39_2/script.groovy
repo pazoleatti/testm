@@ -189,7 +189,7 @@ void calc() {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
         totalColumns.each { alias ->
-            lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow))
+            lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow), null)
         }
     }
     dataRowHelper.save(dataRows)

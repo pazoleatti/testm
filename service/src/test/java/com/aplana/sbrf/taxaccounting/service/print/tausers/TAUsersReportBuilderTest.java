@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.print.tausers;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.TARole;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,11 +14,11 @@ import java.util.List;
  */
 public class TAUsersReportBuilderTest {
 
-    private List<TAUserFull> taUserList = new ArrayList<TAUserFull>();
+    private List<TAUserFullWithDepartmentPath> taUserList = new ArrayList<TAUserFullWithDepartmentPath>();
 
     @Before
     public void setUp() {
-        TAUserFull  userFull = new TAUserFull();
+	    TAUserFullWithDepartmentPath  userFull = new TAUserFullWithDepartmentPath();
         TAUser user = new TAUser();
         TARole role = new TARole();
         TARole role1 = new TARole();

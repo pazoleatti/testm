@@ -43,6 +43,17 @@
             border-top: 1px solid #aeaeac;
         }
 
+        .labelStyle {
+            text-align: right;
+            min-width: 150px;
+            max-width: 250px;
+            margin-right: 10px;
+        }
+
+        .bothMargin {
+            margin: 0 10px
+        }
+
     </ui:style>
 
     <g:HTMLPanel addStyleNames="{style.wrapper}">
@@ -50,11 +61,24 @@
         <g:ScrollPanel addStyleNames="{style.scrPanel}">
             <g:VerticalPanel styleName="{style.editPadding}">
                 <g:cell height="30px">
-                    <g:HorizontalPanel spacing="4" addStyleNames="{style.childMiddle}">
-                        <g:Label wordWrap="false" text="Действует с:"/>
-                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px"/>
-                        <g:Label text=" по:" width="20px"/>
-                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px"/>
+                    <g:HorizontalPanel spacing="10" width="100%" addStyleNames="{style.childMiddle}">
+                        <g:VerticalPanel width="100%">
+                            <g:HorizontalPanel width="100%">
+                                <g:cell width="20%" horizontalAlignment="right">
+                                    <g:Label wordWrap="false" text="Действует с:" addStyleNames="{style.labelStyle}"/>
+                                </g:cell>
+
+                                <g:cell width="80%">
+                                    <g:HorizontalPanel>
+                                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px"/>
+                                        <g:Label text=" по:" width="20px" addStyleNames="{style.bothMargin}"/>
+                                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px"/>
+                                    </g:HorizontalPanel>
+                                </g:cell>
+                            </g:HorizontalPanel>
+
+                        </g:VerticalPanel>
+
                     </g:HorizontalPanel>
                 </g:cell>
                 <g:cell>

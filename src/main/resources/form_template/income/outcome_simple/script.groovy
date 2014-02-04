@@ -238,7 +238,7 @@ def consolidationBank(def dataRows) {
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
-                row.getCell(alias).setValue(0)
+                row.getCell(alias).setValue(0, row.getIndex())
             }
         }
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->

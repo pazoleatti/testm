@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -94,7 +94,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			sumDividends;
 
 	@UiField
-	RefBookPickerPopupWidget
+    RefBookMultiPickerModalWidget
 			dictRegionId,
 			reorgFormCode,
 			signatoryId,
@@ -156,17 +156,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	private void initListeners() {
 		periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-				if (event.getValue() != null && event.getValue().size() == 1) {
-					onReportPeriodsSelected(event.getValue().get(0));
-				} else {
-					onReportPeriodsSelected(null);
-					isReportPeriodActive = false;
-				}
-				editButton.setEnabled(isReportPeriodActive);
-			}
-		});
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                if (event.getValue() != null && event.getValue().size() == 1) {
+                    onReportPeriodsSelected(event.getValue().get(0));
+                } else {
+                    onReportPeriodsSelected(null);
+                    isReportPeriodActive = false;
+                }
+                editButton.setEnabled(isReportPeriodActive);
+            }
+        });
 		// Подразделение
 		departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
 
@@ -496,7 +496,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		reloadDepartments();
 	}
 
-	@Override
+    @Override
+    public TaxType getTaxType() {
+        return currentTaxType;
+    }
+
+    @Override
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
 		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);

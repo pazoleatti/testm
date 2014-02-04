@@ -525,7 +525,7 @@ def getNewRow(def alias, def totalColumns, def sums, def data) {
     newRow.issuer = alias + ' итог'
     setTotalStyle(newRow)
     totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
+        newRow.getCell(it).setValue(sums[it], null)
     }
     return newRow
 }
@@ -902,7 +902,7 @@ def getCalcTotalRow() {
     setTotalStyle(totalRow)
     def data = formDataService.getDataRowHelper(formData)
     totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(data, alias))
+        totalRow.getCell(alias).setValue(getSum(data, alias), null)
     }
     return totalRow
 }

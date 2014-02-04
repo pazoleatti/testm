@@ -197,11 +197,18 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Override
     @Cacheable(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplateId + new String(\"_script\")")
     public String getDeclarationTemplateScript(int declarationTemplateId) {
-        return getJdbcTemplate().queryForObject(
-                "select create_script from declaration_template where id = ?",
-                new Object[] { declarationTemplateId },
-                new int[]{Types.INTEGER},
-                String.class);
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select create_script from declaration_template where id = ?",
+                    new Object[] { declarationTemplateId },
+                    new int[]{Types.INTEGER},
+                    String.class);
+        } catch (EmptyResultDataAccessException e){
+            return "";
+        } catch (DataAccessException e){
+            logger.error("Ошибка получения скрипта декларации.", e);
+            throw new DaoException("Ошибка получения скрипта декларации.", e);
+        }
     }
 
     @Override

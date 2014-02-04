@@ -274,9 +274,9 @@ public class FormTemplate extends IdentityObject<Integer> {
     private HeaderCell createHeaderCell(Column column) {
         HeaderCell cell = new HeaderCell(column);
         if (column.getWidth() > 0) {
-            cell.setValue(column.getName());
+            cell.setValue(column.getName(), null);
         } else {
-            cell.setValue("");
+            cell.setValue("", null);
         }
         return cell;
     }
