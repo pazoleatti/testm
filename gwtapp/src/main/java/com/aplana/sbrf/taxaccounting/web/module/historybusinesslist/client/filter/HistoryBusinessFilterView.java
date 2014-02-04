@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -71,7 +71,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     Panel declarationTypePanel;
 
     @UiField
-    RefBookPickerPopupWidget user;
+    RefBookMultiPickerModalWidget user;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;
@@ -98,7 +98,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         lbf.setFromSearchDate(fromSearchDate.getValue());
         lbf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lbf.setUserId(user.getValue());
+        lbf.setUserId(user.getSingleValue());
         lbf.setTaxType(taxType.getValue());
         return lbf;
     }

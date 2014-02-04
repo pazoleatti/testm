@@ -3,6 +3,7 @@ alter table configuration add constraint configuration_pk primary key (code);
 alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
 alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
 alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
+create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
 
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
