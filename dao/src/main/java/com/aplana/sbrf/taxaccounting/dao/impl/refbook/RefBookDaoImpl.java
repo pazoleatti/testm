@@ -390,34 +390,31 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
     }
 
-    private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, ref_book_id, version," +
-            "status, record_id) values (?, %d, to_date('%s', 'DD.MM.YYYY'), %d, %s)";
+    private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
+            "status) values (?, ?, %d, to_date('%s', 'DD.MM.YYYY'), %d)";
     private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public Long createRecordVersion(Long refBookId, Long recordId, Date version, VersionedObjectStatus status, List<Map<String, RefBookValue>> records) {
-        List<Object[]> recordIds = new ArrayList<Object[]>();
+    public void createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, final List<RefBookRecord> records) {
+        System.out.println("refBookId: "+refBookId);
+        System.out.println("version: "+version);
+        System.out.println("status: "+status);
+        System.out.println("records: "+records);
         List<Object[]> listValues = new ArrayList<Object[]>();
 
         if (records == null || records.isEmpty()) {
-            if (status == VersionedObjectStatus.FAKE) {
-                //Обработка создания фиктивной версии
-                records = new ArrayList<Map<String, RefBookValue>>();
-                Long id = generateId("seq_ref_book_record", Long.class);
-                recordIds.add(new Object[]{id});
-            } else {
-                return null;
-            }
+            return;
         }
 
         RefBook refBook = get(refBookId);
 
-        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds(Long.valueOf(records.size()));
+        final List<Long> refBookRecordIds  = dbUtils.getNextRefBookRecordIds((long) records.size());
         BatchPreparedStatementSetter batchRefBookRecordsPS = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, refBookRecordIds.get(i));
+                ps.setLong(2, records.get(i).getRecordId());
             }
 
             @Override
@@ -430,7 +427,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             // создаем строки справочника
 
            // записываем значения ячеек
-            Map<String, RefBookValue> record = records.get(i);
+            Map<String, RefBookValue> record = records.get(i).getValues();
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
@@ -474,11 +471,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL,
                 refBookId,
                 sdf.format(version),
-                status.getId(),
-                recordId == null ? "seq_ref_book_record_row_id.nextval" : recordId
+                status.getId()
         ), batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
-        return recordId;
+    }
+
+    private static final String INSERT_FAKE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
+            "status) values (seq_ref_book_record.nextval, ?, ?, to_date('%s', 'DD.MM.YYYY'), 2)";
+
+    @Override
+    public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
+        System.out.println("createFakeRecordVersion:");
+        System.out.println("refBookId: "+refBookId);
+        System.out.println("recordId: "+recordId);
+        System.out.println("version: "+version);
+        getJdbcTemplate().update(String.format(INSERT_FAKE_REF_BOOK_RECORD_SQL, sdf.format(version)),
+                recordId, refBookId);
     }
 
     private static final String DELETE_REF_BOOK_VALUE_SQL = "delete from ref_book_value where record_id = ?";
@@ -813,7 +821,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
     @Override
-    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
+    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
         List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
@@ -827,7 +835,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     ps.appendQuery(" (");
                 }
                 for (int i=0; i < records.size(); i++) {
-                    Map<String, RefBookValue> record = records.get(i);
+                    Map<String, RefBookValue> values = records.get(i).getValues();
                     ps.appendQuery("(v.ATTRIBUTE_ID = ?");
                     ps.addParam(attribute.getId());
 
@@ -842,7 +850,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
                         ps.appendQuery(" = to_date('%s', 'DD.MM.YYYY'))");
                     }
-                    attributeValues.add(record.get(attribute.getAlias()));
+                    attributeValues.add(values.get(attribute.getAlias()));
 
                     if (i < records.size() - 1) {
                         ps.appendQuery(" or ");
@@ -871,14 +879,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < to_date('%s', 'DD.MM.YYYY') and ID in (%s)";
 
     @Override
-    public boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records) {
+    public boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         if (attributes.size() > 0) {
             StringBuilder in = new StringBuilder();
-            for (Map<String, RefBookValue> record : records) {
+            for (RefBookRecord record : records) {
+                Map<String, RefBookValue> values = record.getValues();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
-                            record.get(attribute.getAlias()) != null) {
-                        in.append(record.get(attribute.getAlias()).getReferenceValue()).append(",");
+                            values.get(attribute.getAlias()) != null) {
+                        in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
                     }
                 }
             }

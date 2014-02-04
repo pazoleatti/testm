@@ -106,13 +106,20 @@ public interface RefBookDao {
 	 * Создает новые версии записи в справочнике.
      * Если задан параметр recordId - то создается новая версия записи справочника
 	 * @param refBookId код справочника
-     * @param recordId идентификатор записи
 	 * @param version дата актуальности новых записей
      * @param status статус записи
 	 * @param records список новых записей
-     * @return идентификатор записи справчоника (без учета версий)
+     * @return идентификатор записи справочника (без учета версий)
 	 */
-	Long createRecordVersion(Long refBookId, Long recordId, Date version, VersionedObjectStatus status, List<Map<String, RefBookValue>> records);
+	void createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
+
+    /**
+     * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии
+     * @param refBookId код справочника
+     * @param recordId идентификатор записи справочника без учета версий
+     * @param version версия записи справочника
+     */
+    void createFakeRecordVersion(Long refBookId, Long recordId, Date version);
 
     /**
      * Обновляет значения атрибутов у указанной версии
@@ -199,7 +206,7 @@ public interface RefBookDao {
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
      * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
@@ -208,7 +215,7 @@ public interface RefBookDao {
      * @param records новые значения полей элемента справочника
      * @return ссылочные атрибуты в порядке?
      */
-    boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records);
+    boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
