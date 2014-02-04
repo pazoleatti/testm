@@ -27,6 +27,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.history.server.HistoryServerModu
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server.VersionHistoryServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.server.LogAreaModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.server.MainMenuServerModule;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server.RefBookMultiPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.server.RefBookPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionControlServerModule;
@@ -45,7 +46,7 @@ import org.springframework.context.annotation.Import;
         DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
         HistoryBusinessServerModule.class, TestPageServerModule.class, DeclarationVersionListServerModule.class,
-        VersionHistoryServerModule.class, TestPage2ServerModule.class})
+        VersionHistoryServerModule.class, TestPage2ServerModule.class, RefBookMultiPickerServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

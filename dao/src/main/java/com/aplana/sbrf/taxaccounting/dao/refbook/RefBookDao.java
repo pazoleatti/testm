@@ -332,6 +332,8 @@ public interface RefBookDao {
      * @param refBookId код справочника
      * @param version задает дату актуальности
      * @param records список обновленных записей
+     *
+     * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#updateRecordVersion}
      */
     @Deprecated
     void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records);
@@ -341,6 +343,8 @@ public interface RefBookDao {
      * @param refBookId код справочника
      * @param version задает дату удаления данных
      * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     *
+     * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#deleteRecordVersions}
      */
     @Deprecated    
     void deleteRecords(Long refBookId, Date version, List<Long> recordIds);
@@ -351,6 +355,8 @@ public interface RefBookDao {
      *
      * @param refBookId Id справочника
      * @param version Дата удаления записей
+     *
+     * Вместо этого метода, надо использовать {@link com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao#deleteAllRecordVersions}
      */
     @Deprecated
     void deleteAllRecords(Long refBookId, Date version);

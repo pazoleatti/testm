@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -62,7 +62,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    RefBookPickerPopupWidget user;
+    RefBookMultiPickerModalWidget user;
 
     @UiField
     Panel declarationTypePanel;
@@ -128,7 +128,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(user.getValue());
+        lsf.setUserId(user.getSingleValue());
         lsf.setTaxType(taxType.getValue());
         return lsf;
     }

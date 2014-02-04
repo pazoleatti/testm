@@ -62,19 +62,19 @@ public class ScriptUtilsTest {
 
         DataRow row1 = fd.createDataRow();
         row1.setAlias(ROW1_ALIAS);
-        row1.getCell(STRING_ALIAS).setValue("книга");
-        row1.getCell(NUMBER_ALIAS).setValue(1.04);
-        row1.getCell(DATE_ALIAS).setValue(DATE_CONST);
+        row1.getCell(STRING_ALIAS).setValue("книга", null);
+        row1.getCell(NUMBER_ALIAS).setValue(1.04, null);
+        row1.getCell(DATE_ALIAS).setValue(DATE_CONST, null);
 
         DataRow row2 = fd.createDataRow();
         row2.setAlias(ROW2_ALIAS);
-        row2.getCell(STRING_ALIAS).setValue("карандаш");
-        row2.getCell(NUMBER_ALIAS).setValue(2.1);
+        row2.getCell(STRING_ALIAS).setValue("карандаш", null);
+        row2.getCell(NUMBER_ALIAS).setValue(2.1, null);
 
         DataRow row3 = fd.createDataRow();
         row3.setAlias(ROW3_ALIAS);
-        row3.getCell(STRING_ALIAS).setValue("блокнот");
-        row3.getCell(DATE_ALIAS).setValue(DATE_CONST);
+        row3.getCell(STRING_ALIAS).setValue("блокнот", null);
+        row3.getCell(DATE_ALIAS).setValue(DATE_CONST, null);
 
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
         dataRows.add(row1);
