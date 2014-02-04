@@ -114,6 +114,9 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			int departmentId, int reportPeriodId) {
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
+		if (!reportPeriodService.isActivePeriod(reportPeriodId, departmentId)) {
+			throw new AccessDeniedException("Выбранный период закрыт");
+		}
 		DeclarationTemplate declarationTemplate = declarationTemplateDao
 				.get(declarationTemplateId);
 		int declarationTypeId = declarationTemplate.getType()

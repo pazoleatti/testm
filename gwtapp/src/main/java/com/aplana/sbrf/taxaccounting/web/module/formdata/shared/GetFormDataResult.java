@@ -42,6 +42,8 @@ public class GetFormDataResult implements Result {
 	
 	private boolean balancePeriod;
 
+	private boolean isFormInClosedPeriod;
+
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
 	таком формате строку*/
@@ -186,7 +188,15 @@ public class GetFormDataResult implements Result {
         this.reportPeriodYear = reportPeriodYear;
     }
 
-    @Override
+	public boolean isFormInClosedPeriod() {
+		return isFormInClosedPeriod;
+	}
+
+	public void setFormInClosedPeriod(boolean formInClosedPeriod) {
+		isFormInClosedPeriod = formInClosedPeriod;
+	}
+
+	@Override
     public String toString() {
         return "GetFormDataResult{" +
                 "formData=" + formData +

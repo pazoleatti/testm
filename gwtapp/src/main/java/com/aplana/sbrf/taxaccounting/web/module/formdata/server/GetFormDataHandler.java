@@ -121,6 +121,8 @@ public class GetFormDataHandler extends
 		result.setReportPeriodStartDate(reportPeriod.getStartDate());
 		result.setReportPeriodEndDate(reportPeriod.getEndDate());
 
+		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));
+
         result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
 	}
 
