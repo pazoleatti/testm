@@ -199,9 +199,9 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
             if (dataItem.isChk())
                 tmpList.add(dataItem.getValue()); // Добавляем выбранные
         }
+        this.value = tmpList;                             // очищаем список значений
+        //this.value.addAll(tmpList);                     // копируем новые значения в наш список
         updateTxtValue();
-        this.value.clear();                             // очищаем список значений
-        this.value.addAll(tmpList);                     // копируем новые значения в наш список
         ValueChangeEvent.fire(this, this.value);        // Генерируем событие изменения
     }
 
