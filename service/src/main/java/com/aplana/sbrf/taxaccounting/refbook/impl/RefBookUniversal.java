@@ -169,6 +169,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     private void createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
+        System.out.println("records: "+records);
         long countIds = 0;
         for (RefBookRecord record : records) {
             if (record.getRecordId() == null) {
@@ -182,16 +183,17 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBookRecordVersion nextVersion = null;
             if (record.getRecordId() != null) {
                 nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
+            } else {
+                System.out.println("record.getRecordId(): "+record.getRecordId());
+                record.setRecordId(generatedIds.get(counter));
+                counter++;
+                System.out.println("record.getRecordId()2: "+record.getRecordId());
             }
             if (versionTo == null) {
                 if (nextVersion != null && logger != null) {
                     logger.info("Установлена дата окончания актуальности версии "+sdf.format(addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                 }
             } else {
-                if (record.getRecordId() == null) {
-                    record.setRecordId(generatedIds.get(counter));
-                    counter++;
-                }
                 if (nextVersion == null) {
                     //Следующая версия не существует - создаем фиктивную версию
                     refBookDao.createFakeRecordVersion(refBookId, record.getRecordId(), addDayToDate(versionTo, 1));
@@ -203,6 +205,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
         }
+        System.out.println("records: "+records);
 
         refBookDao.createRecordVersion(refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
     }
