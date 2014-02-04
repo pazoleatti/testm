@@ -69,6 +69,8 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @UiField
     Label countItems;
 
+    private Boolean doubleState = true;
+
     /** Значения id */
     private List<Integer> value = new ArrayList<Integer>();
 
@@ -86,7 +88,16 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     public void setEnabled(boolean enabled) {
 		selectButton.setEnabled(enabled);
 		clearButton.setEnabled(enabled);
-		super.setEnabled(enabled);
+        if (isDoubleState())
+		    super.setEnabled(enabled);
+    }
+
+    public Boolean isDoubleState() {
+        return doubleState;
+    }
+
+    public void setDoubleState(Boolean doubleState) {
+        this.doubleState = doubleState;
     }
 
     interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {

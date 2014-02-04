@@ -1,4 +1,5 @@
 drop index i_ref_book_oktmo_code;
+drop index i_ref_book_oktmo_record_id;
 drop index i_ref_book_value_string;
 drop index i_form_data_signer_formdataid;
 drop index i_form_data_kind;

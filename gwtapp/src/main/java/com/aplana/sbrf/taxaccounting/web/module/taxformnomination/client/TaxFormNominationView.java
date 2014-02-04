@@ -9,9 +9,6 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,7 +47,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     //private Long depoId = null;
     @UiField
-    Anchor assignAnchor;
+    Button assignAnchor;
     @UiField
     Anchor cancelAnchor;
     @UiField
@@ -64,13 +61,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     Button search;
     @UiField
-    Button assign;
-    @UiField
     Label taxTypeLabel;
     @UiField
     LinkAnchor switchMode;
     @UiField
     Label formHeader;
+    @UiField
+    ResizeLayoutPanel formGridWrapper;
+    @UiField
+    ResizeLayoutPanel declarationGridWrapper;
 
     private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
     // список с инде4ксами выделенных строк в гриде
@@ -107,8 +106,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
                     selectedRows.remove(index);
                 }
 
-                cancelAnchor.setEnabled(selectedRows.size() > 0);
-                //enableAnchor(cancelAnchor, selectedRows.size() > 0);
+                updatePanelAnchors();
             }
         });
 
@@ -170,6 +168,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         formGrid.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 
         formGrid.addColumn(performerColumn, "Исполнитель");
+    }
+
+    /**
+     * Обновление линков редактировать/отменить назначение
+     */
+    public void updatePanelAnchors(){
+        cancelAnchor.setEnabled(selectedRows.size() > 0);
+        editAnchor.setEnabled(selectedRows.size() > 0);
     }
 
     private void initDeclarationGrid(){
@@ -360,8 +366,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
         cancelAnchor.setEnabled(false);
         // показать соответствующую таблицу
-        formGrid.setVisible(true);
-        declarationGrid.setVisible(false);
+        formGridWrapper.setVisible(true);
+        declarationGridWrapper.setVisible(false);
     }
 
     /**
@@ -381,8 +387,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         // Кнопка "Отменить назначение" — неактивна (в 0.3.7 удаляем)
         cancelAnchor.setEnabled(false);
         // показать соответствующую таблицу
-        formGrid.setVisible(false);
-        declarationGrid.setVisible(true);
+        formGridWrapper.setVisible(false);
+        declarationGridWrapper.setVisible(true);
         // очистить таблицу с декларациями
         declarationGrid.setRowCount(0);
     }

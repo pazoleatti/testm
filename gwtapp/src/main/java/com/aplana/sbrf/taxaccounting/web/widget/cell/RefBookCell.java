@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -48,7 +48,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
     private ModalWindow panel;
-	private RefBookPicker refBookPiker = new RefBookPickerWidget();
+	private RefBookMultiPicker refBookPiker = new RefBookMultiPickerView();
 	
 	private HandlerRegistration changeHandlerRegistration;
 
@@ -106,17 +106,17 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			refBookPiker.setValue(nvalue);
 			
 			// Регистрируем событие изменения значени 
-			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
+			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
 				@Override
-				public void onValueChange(ValueChangeEvent<Long> event) {
+				public void onValueChange(ValueChangeEvent<List<Long>> event) {
 					// Update the cell and value updater.
-					Long value = event.getValue();
+                    List<Long> values = event.getValue();
+                    Long value = (values != null && !values.isEmpty() ? values.get(0) : null);
 
 					@SuppressWarnings("unchecked")
 					DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
 					Cell cell = dataRow.getCell(RefBookCell.this.column.getAlias());
-					cell.setRefBookDereference(refBookPiker
-							.getDereferenceValue());
+					cell.setRefBookDereference(refBookPiker.getDereferenceValue());
 
 					setValue(context, parent, value);
 

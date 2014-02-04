@@ -2,10 +2,11 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client"
+             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:a='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
     <ui:style>
         .content {
@@ -68,7 +69,7 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Вид налоговой формы" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox width="250px" ui:field="formTypeId"/>
+                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="835" modal="true" width="150px" multiSelect="true"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">

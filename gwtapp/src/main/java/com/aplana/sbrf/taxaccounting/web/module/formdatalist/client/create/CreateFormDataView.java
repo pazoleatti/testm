@@ -101,6 +101,7 @@ Editor<FormDataFilter> {
                 updateEnabled();
             }
         });
+        departmentPicker.setDoubleState(false);
     }
 
     @Override
