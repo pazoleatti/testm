@@ -92,6 +92,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @Editor.Ignore
     Anchor downloadDectButton;
 
+    @UiField
+    @Editor.Ignore
+    Anchor downloadJrxmlButton;
+
 	@Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -142,6 +146,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         uploadJrxml.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
         uploadDectFile.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
         fileUploader.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        downloadJrxmlButton.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
 	}
 
     @Override
