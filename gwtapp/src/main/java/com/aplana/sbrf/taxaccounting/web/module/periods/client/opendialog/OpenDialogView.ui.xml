@@ -4,7 +4,7 @@
 	xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
 	xmlns:w='urn:import:com.aplana.gwt.client'
 	xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-	xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
+	xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
 	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
     <ui:style>
@@ -54,7 +54,8 @@
 								<g:Label ui:field="periodLbl" text="Период: " width="150px" />
 							</g:cell>
 							<g:cell width="100%" horizontalAlignment="left">
-								<r:RefBookPickerPopupWidget ui:field="period" modal="true" width="100%" attributeIdInt="26" />
+								<r:RefBookMultiPickerModalWidget ui:field="period" modal="true" width="100%" attributeIdInt="26"
+                                                            multiSelect="false"/>
 							</g:cell>
 						</g:HorizontalPanel>
 

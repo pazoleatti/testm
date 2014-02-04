@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,7 +49,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
     DateMaskBoxPicker term;
 
 	@UiField
-	RefBookPickerPopupWidget period;
+    RefBookMultiPickerModalWidget period;
 
     @UiField
     CheckBox correctPeriod;
@@ -99,7 +99,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 		openFilterData.setYear(yearBox.getValue());
 		openFilterData.setBalancePeriod(balancePeriod.getValue());
 		openFilterData.setDepartmentId(Long.valueOf(departmentPicker.getValue().iterator().next()));
-	    openFilterData.setDictionaryTaxPeriodId(period.getValue());
+	    openFilterData.setDictionaryTaxPeriodId(period.getSingleValue());
         if (correctPeriod.getValue()) {
             openFilterData.setHasCorrectPeriod(true);
             openFilterData.setCorrectPeriod(term.getValue());

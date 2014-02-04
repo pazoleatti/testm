@@ -1,0 +1,23 @@
+package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
+
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
+import com.google.gwt.user.cellview.client.TextColumn;
+
+public class RefBookItemTextColumn extends TextColumn<RefBookItem> {
+	
+	private final int valueIndex;
+
+	RefBookItemTextColumn(int valueIndex){
+		this.valueIndex = valueIndex;
+	}
+
+	@Override
+	public String getValue(RefBookItem object) {
+		return object.getValues().get(valueIndex);
+	}
+
+    @Override
+    public int hashCode() {
+        return valueIndex;
+    }
+}

@@ -19,9 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Получение параметров подразделения и списка доступных налоговых периодов
@@ -85,27 +83,27 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             depCombined.setRecordId(paramsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
 
             // Общая часть
-            depCombined.setDepartmentId(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue());
-            depCombined.setDictRegionId(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue());
-            depCombined.setOkato(paramsMap.get(DepartmentParamAliases.OKATO.name()).getReferenceValue());
+            depCombined.setDepartmentId(getList(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue()));
+            depCombined.setDictRegionId(getList(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue()));
+            depCombined.setOkato(getList(paramsMap.get(DepartmentParamAliases.OKATO.name()).getReferenceValue()));
             depCombined.setInn(paramsMap.get(DepartmentParamAliases.INN.name()).getStringValue());
             depCombined.setKpp(paramsMap.get(DepartmentParamAliases.KPP.name()).getStringValue());
             depCombined.setTaxOrganCode(paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE.name()).getStringValue());
-            depCombined.setOkvedCode(paramsMap.get(DepartmentParamAliases.OKVED_CODE.name()).getReferenceValue());
+            depCombined.setOkvedCode(getList(paramsMap.get(DepartmentParamAliases.OKVED_CODE.name()).getReferenceValue()));
             depCombined.setPhone(paramsMap.get(DepartmentParamAliases.PHONE.name()).getStringValue());
-            depCombined.setReorgFormCode(paramsMap.get(DepartmentParamAliases.REORG_FORM_CODE.name()).getReferenceValue());
+            depCombined.setReorgFormCode(getList(paramsMap.get(DepartmentParamAliases.REORG_FORM_CODE.name()).getReferenceValue()));
             depCombined.setReorgInn(paramsMap.get(DepartmentParamAliases.REORG_INN.name()).getStringValue());
             depCombined.setReorgKpp(paramsMap.get(DepartmentParamAliases.REORG_KPP.name()).getStringValue());
             depCombined.setName(paramsMap.get(DepartmentParamAliases.NAME.name()).getStringValue());
 
             // Общая частная часть
-            depCombined.setSignatoryId(paramsMap.get(DepartmentParamAliases.SIGNATORY_ID.name()).getReferenceValue());
+            depCombined.setSignatoryId(getList(paramsMap.get(DepartmentParamAliases.SIGNATORY_ID.name()).getReferenceValue()));
             depCombined.setSignatorySurname(paramsMap.get(DepartmentParamAliases.SIGNATORY_SURNAME.name()).getStringValue());
             depCombined.setSignatoryFirstname(paramsMap.get(DepartmentParamAliases.SIGNATORY_FIRSTNAME.name()).getStringValue());
             depCombined.setSignatoryLastname(paramsMap.get(DepartmentParamAliases.SIGNATORY_LASTNAME.name()).getStringValue());
             depCombined.setApproveDocName(paramsMap.get(DepartmentParamAliases.APPROVE_DOC_NAME.name()).getStringValue());
             depCombined.setApproveOrgName(paramsMap.get(DepartmentParamAliases.APPROVE_ORG_NAME.name()).getStringValue());
-            depCombined.setTaxPlaceTypeCode(paramsMap.get(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name()).getReferenceValue());
+            depCombined.setTaxPlaceTypeCode(getList(paramsMap.get(DepartmentParamAliases.TAX_PLACE_TYPE_CODE.name()).getReferenceValue()));
             depCombined.setAppVersion(paramsMap.get(DepartmentParamAliases.APP_VERSION.name()).getStringValue());
             depCombined.setFormatVersion(paramsMap.get(DepartmentParamAliases.FORMAT_VERSION.name()).getStringValue());
 
@@ -115,10 +113,10 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 depCombined.setSumTax(sumTax == null ? null : sumTax.longValue());
                 Number sumDividends = paramsMap.get(DepartmentParamAliases.SUM_DIVIDENDS.name()).getNumberValue();
                 depCombined.setSumDividends(sumDividends == null ? null : sumDividends.longValue());
-                depCombined.setObligation(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue());
+                depCombined.setObligation(getList(paramsMap.get(DepartmentParamAliases.OBLIGATION.name()).getReferenceValue()));
                 Number taxRate = paramsMap.get(DepartmentParamAliases.TAX_RATE.name()).getNumberValue();
                 depCombined.setTaxRate(taxRate == null ? null : taxRate.doubleValue());
-                depCombined.setType(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue());
+                depCombined.setType(getList(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue()));
             }
         }
 
@@ -127,7 +125,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         // Если запись не нашлась, то готовим новую
         if (result.getDepartmentCombined().getDepartmentId() == null && action.getDepartmentId() != null) {
-            result.getDepartmentCombined().setDepartmentId(action.getDepartmentId().longValue());
+            result.getDepartmentCombined().setDepartmentId(getList(action.getDepartmentId().longValue()));
         }
 
         // Признак открытости
@@ -136,29 +134,29 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         // Получение текстовых значений справочника
         Map<Long, String> rbTextValues = new HashMap<Long, String>();
 
-        if (depCombined.getDictRegionId() != null) {
-            rbTextValues.put(9L, getStringValue(rbFactory.getDataProvider(4L).getValue(depCombined.getDictRegionId(), 9L)));
+        if (depCombined.getDictRegionId() != null && !depCombined.getDictRegionId().isEmpty()) {
+            rbTextValues.put(9L, getStringValue(rbFactory.getDataProvider(4L).getValue(depCombined.getDictRegionId().get(0), 9L)));
         }
-        if (depCombined.getOkato() != null) {
-            rbTextValues.put(7L, getStringValue(rbFactory.getDataProvider(3L).getValue(depCombined.getOkato(), 7L)));
+        if (depCombined.getOkato() != null && !depCombined.getOkato().isEmpty()) {
+            rbTextValues.put(7L, getStringValue(rbFactory.getDataProvider(3L).getValue(depCombined.getOkato().get(0), 7L)));
         }
-        if (depCombined.getOkvedCode() != null) {
-            rbTextValues.put(210L, getStringValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode(), 210L)));
+        if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
+            rbTextValues.put(210L, getStringValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode().get(0), 210L)));
         }
-        if (depCombined.getReorgFormCode() != null) {
-            rbTextValues.put(13L, getStringValue(rbFactory.getDataProvider(5L).getValue(depCombined.getReorgFormCode(), 13L)));
+        if (depCombined.getReorgFormCode() != null && !depCombined.getReorgFormCode().isEmpty()) {
+            rbTextValues.put(13L, getStringValue(rbFactory.getDataProvider(5L).getValue(depCombined.getReorgFormCode().get(0), 13L)));
         }
-        if (depCombined.getSignatoryId() != null) {
-            rbTextValues.put(213L, getStringValue(rbFactory.getDataProvider(35L).getValue(depCombined.getSignatoryId(), 213L)));
+        if (depCombined.getSignatoryId() != null && !depCombined.getSignatoryId().isEmpty()) {
+            rbTextValues.put(213L, getStringValue(rbFactory.getDataProvider(35L).getValue(depCombined.getSignatoryId().get(0), 213L)));
         }
-        if (depCombined.getTaxPlaceTypeCode() != null) {
-            rbTextValues.put(3L, getStringValue(rbFactory.getDataProvider(2L).getValue(depCombined.getTaxPlaceTypeCode(), 3L)));
+        if (depCombined.getTaxPlaceTypeCode() != null && !depCombined.getTaxPlaceTypeCode().isEmpty()) {
+            rbTextValues.put(3L, getStringValue(rbFactory.getDataProvider(2L).getValue(depCombined.getTaxPlaceTypeCode().get(0), 3L)));
         }
-        if (depCombined.getObligation() != null) {
-            rbTextValues.put(110L, getNumberValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation(), 110L)));
+        if (depCombined.getObligation() != null && !depCombined.getObligation().isEmpty()) {
+            rbTextValues.put(110L, getNumberValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation().get(0), 110L)));
         }
-        if (depCombined.getType() != null) {
-            rbTextValues.put(120L, getNumberValue(rbFactory.getDataProvider(26L).getValue(depCombined.getType(), 120L)));
+        if (depCombined.getType() != null && !depCombined.getType().isEmpty()) {
+            rbTextValues.put(120L, getNumberValue(rbFactory.getDataProvider(26L).getValue(depCombined.getType().get(0), 120L)));
         }
 
         result.setRbTextValues(rbTextValues);
@@ -187,5 +185,14 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     public void undo(GetDepartmentCombinedAction action, GetDepartmentCombinedResult result,
                      ExecutionContext executionContext) throws ActionException {
         // Не требуется
+    }
+
+    private List<Long> getList(Long value) {
+        List<Long> list = null;
+        if (value != null) {
+            list = new ArrayList<Long>();
+            list.add(value);
+        }
+        return list;
     }
 }

@@ -106,6 +106,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param reportPeriodActive
          */
         void setReportPeriodActive(boolean reportPeriodActive);
+
+        TaxType getTaxType();
     }
 
     @Inject
@@ -125,6 +127,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
         action.setDepartmentCombined(combinedDepartmentParam);
         action.setReportPeriodId(period);
+        action.setTaxType(getView().getTaxType());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
