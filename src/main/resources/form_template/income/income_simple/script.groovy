@@ -278,11 +278,11 @@ def consolidationBank() {
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
             if (row.getCell(alias).isEditable() || row.getAlias() in ['R53', 'R156']) {
-                row.getCell(alias).setValue(0)
+                row.getCell(alias).setValue(0, row.getIndex())
             }
         }
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
     }
     // получить данные из источников
@@ -298,7 +298,7 @@ def consolidationBank() {
                 def rowResult = getDataRow(dataRows, row.getAlias())
                 for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {
                     if (row.getCell(alias).getValue() != null) {
-                        rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)))
+                        rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)), null)
                     }
                 }
             }
@@ -313,7 +313,7 @@ def consolidationSummary() {
     // Очистить форму
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
     }
 

@@ -250,7 +250,7 @@ public final class ScriptUtils {
             for (int j = 0; j < fromRect.getWidth(); j++) {
                 Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
                 Cell cell = toRows.get(toRect.y1 + i).getCell(toCols.get(toRect.x1 + j).getAlias());
-                cell.setValue(value);
+                cell.setValue(value, null);
             }
         }
     }
@@ -653,7 +653,7 @@ public final class ScriptUtils {
                     }
                 }
             }
-            totalRow.getCell(alias).setValue(sum);
+            totalRow.getCell(alias).setValue(sum, null);
         }
     }
 

@@ -255,7 +255,7 @@ void calc() {
         // графа 1, 3..10, 12
         ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
                 'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka'].each { alias ->
-            caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue())
+            caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
         }
 
         // графа 11

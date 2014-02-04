@@ -86,7 +86,7 @@ def sortColumns = ["okato", "tsTypeCode"]
 
 // Автозаполняемые атрибуты
 @Field
-def nonEmptyColumns = [['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase']]
+def nonEmptyColumns = ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase']
 
 @Field
 def monthCountInPeriod
@@ -709,7 +709,7 @@ def getMonthCount() {
         if (period == null) {
             logger.error('Не найден отчетный период для налоговой формы.')
         } else {
-            monthCountInPeriod = period.getMonths()
+            monthCountInPeriod = period.endDate[Calendar.MONTH] - period.startDate[Calendar.MONTH]
         }
     }
     return monthCountInPeriod
