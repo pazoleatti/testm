@@ -106,8 +106,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
                     selectedRows.remove(index);
                 }
 
-                cancelAnchor.setEnabled(selectedRows.size() > 0);
-                editAnchor.setEnabled(selectedRows.size() > 0);
+                updatePanelAnchors();
             }
         });
 
@@ -169,6 +168,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         formGrid.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 
         formGrid.addColumn(performerColumn, "Исполнитель");
+    }
+
+    /**
+     * Обновление линков редактировать/отменить назначение
+     */
+    public void updatePanelAnchors(){
+        cancelAnchor.setEnabled(selectedRows.size() > 0);
+        editAnchor.setEnabled(selectedRows.size() > 0);
     }
 
     private void initDeclarationGrid(){
