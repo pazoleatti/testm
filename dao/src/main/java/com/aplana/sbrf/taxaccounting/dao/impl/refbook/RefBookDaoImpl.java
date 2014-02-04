@@ -397,10 +397,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, final List<RefBookRecord> records) {
-        System.out.println("refBookId: "+refBookId);
-        System.out.println("version: "+version);
-        System.out.println("status: "+status);
-        System.out.println("records: "+records);
         List<Object[]> listValues = new ArrayList<Object[]>();
 
         if (records == null || records.isEmpty()) {
@@ -481,10 +477,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
-        System.out.println("createFakeRecordVersion:");
-        System.out.println("refBookId: "+refBookId);
-        System.out.println("recordId: "+recordId);
-        System.out.println("version: "+version);
         getJdbcTemplate().update(String.format(INSERT_FAKE_REF_BOOK_RECORD_SQL, sdf.format(version)),
                 recordId, refBookId);
     }
@@ -971,6 +963,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
         boolean hasReferences = getJdbcTemplate().queryForInt(sql) != 0;
         if (!hasReferences) {
+            //Проверка использования в налоговых формах
             sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
             return getJdbcTemplate().queryForInt(sql) != 0;
         } else return true;
