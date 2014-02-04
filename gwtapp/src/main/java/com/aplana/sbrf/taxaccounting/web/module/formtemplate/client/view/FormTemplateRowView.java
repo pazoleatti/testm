@@ -314,7 +314,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	}
 
 	@Override
-	public void addCustomHeader(boolean addNumberedHeader, List<DataRow<HeaderCell>> newHeaders) {
+	public void addCustomHeader(List<DataRow<HeaderCell>> newHeaders) {
 		CustomHeaderBuilder builder = new CustomHeaderBuilder(formDataTable, false, 2, newHeaders);
 		formDataTable.setHeaderBuilder(builder);
 	}
