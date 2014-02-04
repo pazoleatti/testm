@@ -71,9 +71,6 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         // Все подразделения
         result.setPerformers(departmentService.listAll());
 
-        // виды форм
-        result.setFormTypes(sourceService.listAllByTaxType(action.getTaxType()));
-
         // типы форм
         result.setFormDataKinds(Arrays.asList(FormDataKind.values()));
 
