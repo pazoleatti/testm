@@ -357,7 +357,7 @@ void consolidation() {
                             isFind = true
                             totalSumColumns.each { alias ->
                                 def tmp = (row.getCell(alias).value ?: 0) + (sRow.getCell(alias).value ?: 0)
-                                row.getCell(alias).setValue(tmp)
+                                row.getCell(alias).setValue(tmp, null)
                             }
                             break
                         }

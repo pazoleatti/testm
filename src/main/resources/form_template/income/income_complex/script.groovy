@@ -200,7 +200,7 @@ void consolidationBank() {
         }
         // графа 11, 13..16
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
         if (row.getAlias() in [firstTotalRowAlias, secondTotalRowAlias]) {
             row.incomeTaxSumS = 0

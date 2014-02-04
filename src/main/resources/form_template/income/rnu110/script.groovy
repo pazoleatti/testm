@@ -321,7 +321,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + alias)
     totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
+        newRow.getCell(it).setValue(sums[it], null)
     }
     newRow.fix = 'Итого по ' + alias
     newRow.getCell('fix').colSpan = 6
