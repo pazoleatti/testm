@@ -496,11 +496,6 @@ public class RefBookDaoTest {
         assertEquals(getZeroTimeDate(getDate(1, 2, 2013)), result.get(2L));
     }
 
-    @Test
-    public void createFakeRecordVersion() {
-        refBookDao.createFakeRecordVersion(10L, 1L, getDate(1, 1, 2013));
-    }
-
     private static Date getZeroTimeDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
