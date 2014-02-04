@@ -34,9 +34,9 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 
     private final Widget widget;
 
-	private AsyncDataProvider<TAUserFull> dataProvider = new  AsyncDataProvider<TAUserFull>() {
+	private AsyncDataProvider<TAUserFullWithDepartmentPath> dataProvider = new  AsyncDataProvider<TAUserFullWithDepartmentPath>() {
 		@Override
-		protected void onRangeChanged(HasData<TAUserFull> display) {
+		protected void onRangeChanged(HasData<TAUserFullWithDepartmentPath> display) {
 			if (getUiHandlers() != null){
 				Range range = display.getVisibleRange();
 				getUiHandlers().onRangeChange(range.getStart(), range.getLength());
@@ -54,7 +54,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     MultiListBox<TARole> roleBox;
 
     @UiField
-    CellTable<TAUserFull> taUserFullCellTable;
+    CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
 
     @UiField
     Anchor printButton;
@@ -84,45 +84,45 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	    }, true, true);
 
         widget = binder.createAndBindUi(this);
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().getName();
 		    }
 	    },"Полное имя пользователя");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>(){
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>(){
             @Override
-            public String getValue(TAUserFull object) {
+            public String getValue(TAUserFullWithDepartmentPath object) {
                 return object.getUser().getLogin();
             }
         },"Логин");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().getEmail();
 		    }
 	    },"Электронная почта");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().isActive() ? "Да" : "Нет";
 		    }
 	    },"Признак активности");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
-            public String getValue(TAUserFull object) {
-                return object.getDepartment().getName();
+            public String getValue(TAUserFullWithDepartmentPath object) {
+                return object.getFullDepartmentPath();
             }
         },"Подразделение");
 
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
-            public String getValue(TAUserFull object) {
+            public String getValue(TAUserFullWithDepartmentPath object) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < object.getUser().getRoles().size(); i++){
                     sb.append(object.getUser().getRoles().get(i).getName());
@@ -145,7 +145,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     }
 
     @Override
-    public void setTaUserFullCellTable(PagingResult<TAUserFull> userFullList, int startIndex) {
+    public void setTaUserFullCellTable(PagingResult<TAUserFullWithDepartmentPath> userFullList, int startIndex) {
 	    taUserFullCellTable.setRowCount(userFullList.getTotalCount());
         taUserFullCellTable.setRowData(startIndex, userFullList);
 

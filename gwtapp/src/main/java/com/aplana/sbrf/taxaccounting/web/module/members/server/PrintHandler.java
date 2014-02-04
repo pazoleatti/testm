@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.server;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.PrintAction;
@@ -27,6 +32,8 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 	TAUserService taUserService;
 	@Autowired
 	BlobDataService blobDataService;
+	@Autowired
+	DepartmentService departmentService;
 
 	public PrintHandler() {
 		super(PrintAction.class);
@@ -34,7 +41,17 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 
 	@Override
 	public PrintResult execute(PrintAction printAction, ExecutionContext executionContext) throws ActionException {
-		String filePath = printingService.generateExcelUsers(taUserService.getByFilter(printAction.getMembersFilterData()));
+		PagingResult<TAUserFullWithDepartmentPath> page = new PagingResult<TAUserFullWithDepartmentPath>();
+		for (TAUserFull user : taUserService.getByFilter(printAction.getMembersFilterData())) {
+			TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
+			fullUser.setDepartment(user.getDepartment());
+			fullUser.setUser(user.getUser());
+			String fullDepartment = getFullDepartment(user.getDepartment());
+			fullDepartment = fullDepartment.substring(1);
+			fullUser.setFullDepartmentPath(fullDepartment);
+			page.add(fullUser);
+		}
+		String filePath = printingService.generateExcelUsers(page);
 		try {
 			InputStream fileInputStream = new FileInputStream(filePath);
 
@@ -48,4 +65,14 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 
 	@Override
 	public void undo(PrintAction printAction, PrintResult printResult, ExecutionContext executionContext) throws ActionException {}
+
+	String getFullDepartment(Department department) {
+
+		StringBuilder fullDepartment = new StringBuilder();
+		fullDepartment.insert(0, "/" + department.getName());
+		if (department.getParentId() != null) {
+			fullDepartment.insert(0, getFullDepartment(departmentService.getDepartment(department.getParentId())));
+		}
+		return fullDepartment.toString();
+	}
 }
