@@ -74,6 +74,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showDeleteFormButton(boolean show);
 
+		void showSignersAnchor(boolean show);
+
 		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 
 		DataRow<Cell> getSelectedRow();
