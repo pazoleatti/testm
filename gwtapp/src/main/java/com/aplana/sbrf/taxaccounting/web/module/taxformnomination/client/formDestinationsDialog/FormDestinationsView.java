@@ -78,6 +78,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         });
 
         initWidget(uiBinder.createAndBindUi(this));
+        formTypeId.setPeriodDates(new Date(), new Date());
 	}
 
 	@UiHandler("createButton")

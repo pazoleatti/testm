@@ -20,11 +20,14 @@ public class ReportPeriodMappingDaoImpl extends AbstractDao implements ReportPer
 
     @Override
     public Integer getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
-        StringBuilder sql = new StringBuilder("select rp.id ");
+        StringBuilder sql = new StringBuilder("select * from ( ");
+        sql.append("select rp.id ");
         sql.append("from report_period rp, ref_book_record rfr, ref_book_value rfv ");
         sql.append("where rp.dict_tax_period_id = rfr.id AND rfv.record_id = rp.dict_tax_period_id ");
         sql.append("AND rfv.attribute_id = 25 AND rfr.ref_book_id = 8 ");
-        sql.append("AND rp.tax_period_id = ? AND rfv.string_value = ?");
+        sql.append("AND rp.tax_period_id = ? AND rfv.string_value = ? ");
+        sql.append("order by rfr.version desc ");
+        sql.append(") where rownum = 1");
         try {
             return getJdbcTemplate().queryForInt(
                     sql.toString(),
