@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,32 +179,42 @@ public class RefBookUtils extends AbstractDao {
                 errors.add(a.getName());
             }
         }
-
         return errors;
     }
 
-    public List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, Map<String,RefBookValue> record) {
+    public List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, List<RefBookRecord> records){
+        List<String> errors = new ArrayList<String>();
+        for (RefBookRecord record : records){
+            errors.addAll(checkFillRequiredRefBookAtributes(attributes, record.getValues()));
+        }
+        return errors;
+    }
+
+    public List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         List<String> errors = new ArrayList<String>();
         String okatoRegex = "\\d{11}";
         String codeTSRegex = "\\d{3}(\\d{2}|[?]{2})";
         Pattern okatoPattern = Pattern.compile(okatoRegex);
         Pattern codeTSPattern = Pattern.compile(codeTSRegex);
-        for (RefBookAttribute a :attributes){
-            //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
-            if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 810L) &&
-                    !NumberUtils.isNumber(record.get(a.getAlias()).getStringValue())){
-                //TODO добавить еще Определяющая часть кода ОКТМО
-                errors.add("Значение атрибута " + a.getName() + " должно содержать только цифры");
-            }
+        for (RefBookRecord record : records) {
+            Map<String, RefBookValue> values = record.getValues();
+            for (RefBookAttribute a :attributes){
+                //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
+                if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 810L) &&
+                        !NumberUtils.isNumber(values.get(a.getAlias()).getStringValue())){
+                    //TODO добавить еще Определяющая часть кода ОКТМО
+                    errors.add("Значение атрибута " + a.getName() + " должно содержать только цифры");
+                }
 
-            //Проверка формата для кода окато
-            if ((a.getId() == 7L) && !okatoPattern.matcher(record.get(a.getAlias()).getStringValue()).matches()) {
-                errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ×××××××××××, где × - цифра");
-            }
+                //Проверка формата для кода окато
+                if ((a.getId() == 7L) && !okatoPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
+                    errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ×××××××××××, где × - цифра");
+                }
 
-            //Проверка формата для кода ТС
-            if ((a.getId() == 411L) && !codeTSPattern.matcher(record.get(a.getAlias()).getStringValue()).matches()) {
-                errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ××××× или ***??, где × - цифра");
+                //Проверка формата для кода ТС
+                if ((a.getId() == 411L) && !codeTSPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
+                    errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ××××× или ***??, где × - цифра");
+                }
             }
         }
 
