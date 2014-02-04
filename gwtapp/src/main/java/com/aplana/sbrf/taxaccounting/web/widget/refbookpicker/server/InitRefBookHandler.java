@@ -35,7 +35,7 @@ public class InitRefBookHandler extends
 	public InitRefBookResult execute(InitRefBookAction action,
 			ExecutionContext context) throws ActionException {
 		InitRefBookResult result = new InitRefBookResult();
-		Map<String, Integer> headers = new HashMap<String, Integer>();
+        Map<String, Integer> headers = new LinkedHashMap<String, Integer>();
 
 		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {

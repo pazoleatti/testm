@@ -221,7 +221,17 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    private List<Integer> getExecutorsDepartments(List<Integer> departments) {
+	@Override
+	public Map<Integer, Department> getDepartments(List<Integer> departmentId) {
+		Map<Integer, Department> result = new HashMap<Integer, Department>();
+		for (Integer depId : departmentId) {
+			Department department = departmentDao.getDepartment(depId);
+			result.put(department.getId(), department);
+		}
+		return result;
+	}
+
+	private List<Integer> getExecutorsDepartments(List<Integer> departments) {
         return departmentDao.getPerformers(departments);
     }
 }

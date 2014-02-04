@@ -122,6 +122,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 	}
 
+	private void manageButtonsForFormInClosedPeriod(boolean isPeriodClosed) {
+		if (isPeriodClosed) {
+			getView().showSignersAnchor(false);
+			getView().showRecalculateButton(false);
+			getView().showOriginalVersionButton(false);
+			getView().showManualInputAnchor(false);
+		}
+	}
+
 	@Override
 	public void onManualInputClicked(boolean readOnlyMode) {
 		revealFormData(readOnlyMode);
@@ -350,6 +359,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         setEditMode();
                                         break;
                                 }
+
+	                            manageButtonsForFormInClosedPeriod(result.isFormInClosedPeriod());
 
                                 manageDeleteRowButtonEnabled();
 

@@ -102,6 +102,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Label stateLabel;
 	@UiField
 	Label title;
+	@UiField
+	LinkButton signersAnchor;
 
 	@UiField
 	CheckBox showCheckedColumns;
@@ -465,6 +467,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showDeleteFormButton(boolean show) {
 		deleteFormButton.setVisible(show);
+	}
+
+	@Override
+	public void showSignersAnchor(boolean show) {
+		signersAnchor.setVisible(show);
 	}
 
 	@Override

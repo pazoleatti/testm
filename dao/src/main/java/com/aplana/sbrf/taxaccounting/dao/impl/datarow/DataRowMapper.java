@@ -132,7 +132,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			// Values
 			CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
 			cell.setValue(extr.getValue(rs,
-					String.format("V%s", cell.getColumn().getId())));
+					String.format("V%s", cell.getColumn().getId())), rowNum);
 			// Styles
 			BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
 					.getColumn().getId()));

@@ -1,7 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:d='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client'
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
@@ -164,8 +164,9 @@
                                             <g:Label wordWrap="false" text="Субъект Российской Федерации (код):" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="dictRegionId" modal="true" width="150px"
-                                                                        attributeIdInt="9" title="Субъект" />
+                                            <r:RefBookMultiPickerModalWidget ui:field="dictRegionId" modal="true" width="150px"
+                                                                        attributeIdInt="9" title="Субъект"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -189,7 +190,8 @@
                                             <g:Label text="ОКАТО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="okato" attributeIdInt="7" modal="true" width="150px"/>
+                                            <r:RefBookMultiPickerModalWidget ui:field="okato" attributeIdInt="7" modal="true" width="150px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -213,7 +215,8 @@
                                             <g:Label text="ОКВЭД:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="okvedCode" attributeIdInt="210" modal="true" width="150px"/>
+                                            <r:RefBookMultiPickerModalWidget ui:field="okvedCode" attributeIdInt="210" modal="true" width="150px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
 
@@ -224,7 +227,8 @@
                                             <g:Label text="Код формы реорганизации и ликвидации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="reorgFormCode" attributeIdInt="13" modal="true" width="150px"/>
+                                            <r:RefBookMultiPickerModalWidget ui:field="reorgFormCode" attributeIdInt="13" modal="true" width="150px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -255,7 +259,8 @@
                                             <g:Label text="Признак лица подписавшего документ:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="signatoryId" attributeIdInt="213" modal="true" addStyleNames="{style.fixRelativeWidth}" />
+                                            <r:RefBookMultiPickerModalWidget ui:field="signatoryId" attributeIdInt="213" modal="true" addStyleNames="{style.fixRelativeWidth}"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -309,7 +314,8 @@
                                             <g:Label text="Код места, по которому представляется документ:" addStyleNames="{style.rightLabels},{style.toLongLabel}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="taxPlaceTypeCode" attributeIdInt="3" modal="true" width="200px" />
+                                            <r:RefBookMultiPickerModalWidget ui:field="taxPlaceTypeCode" attributeIdInt="3" modal="true" width="200px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="taxRatePanel" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -342,7 +348,8 @@
                                             <g:Label text="Обязанность по уплате налога:" addStyleNames="{style.rightLabels}" />
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="obligation" attributeIdInt="110" modal="true" width="200px"/>
+                                            <r:RefBookMultiPickerModalWidget ui:field="obligation" attributeIdInt="110" modal="true" width="200px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
 
@@ -351,7 +358,8 @@
                                             <g:Label text="Признак расчёта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerPopupWidget ui:field="type" attributeIdInt="120" modal="true" width="200px" />
+                                            <r:RefBookMultiPickerModalWidget ui:field="type" attributeIdInt="120" modal="true" width="200px"
+                                                                        multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="sumTaxPanel" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
