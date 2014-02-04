@@ -54,7 +54,7 @@ public class MappingServiceImpl implements MappingService {
     private static final String CHARSET = "cp866";
     private static final String RNU_EXT = ".rnu";
     private static final String XML_EXT = ".xml";
-    private static final String DATE_APPENDER_XML = "01.01.20";
+    private static final String DATE_APPENDER_XML = "20";
     private static final String DATE_APPENDER_RNU = "01.01.";
 
     @Override
@@ -71,6 +71,7 @@ public class MappingServiceImpl implements MappingService {
         ReportPeriod reportPeriod = null;
         Integer reportPeriodId = null;
         Integer formTemplateId = null;
+        Integer periodOrder = null;
 
         Boolean isAllreadyCreated = false;
 
@@ -89,6 +90,7 @@ public class MappingServiceImpl implements MappingService {
                 FormTemplate template = formTemplateService.get(formTemplateId);
                 formTypeId = template.getType().getId();
                 departmentId = restoreExemplar.getDepartmentId();
+                periodOrder = restoreExemplar.getPeriodOrder();
             }
 
             log.debug(restoreExemplar);
@@ -103,19 +105,21 @@ public class MappingServiceImpl implements MappingService {
 
             Logger logger = new Logger();
 
-            FormData formData = formDataDao.find(formTemplateId, FormDataKind.PRIMARY, departmentId ,reportPeriod.getId());
+            FormData formData = null;
+            // Если ежемесячная форма
+            if (periodOrder != null) {
+                formData = formDataDao.findMonth(formTemplateId, FormDataKind.PRIMARY, departmentId, restoreExemplar.getTaxPeriod(), periodOrder);
+            } else {
+                formData = formDataDao.find(formTemplateId, FormDataKind.PRIMARY, departmentId, reportPeriod.getId());
+            }
+            System.out.println("formData " + formData);
             if (formData == null) {
                 long formDataId = formDataService.createFormData(logger,
                         userInfo,
                         formTemplateId,
                         departmentId,
                         FormDataKind.PRIMARY,
-                        reportPeriod, null); // TODO Левыкин: если миграция будет выполняться для ежемесячных форм, то требуется получать periodOrder при маппинге
-
-                // Добавляем месяц, если форма ежемесячная
-                if (restoreExemplar.getPeriodOrder() != null) {
-                    formDataDao.updatePeriodOrder(formDataId, restoreExemplar.getPeriodOrder());
-                }
+                        reportPeriod, periodOrder);
 
                 // Вызов скрипта
                 formDataService.lock(formDataId, userInfo);
@@ -135,7 +139,7 @@ public class MappingServiceImpl implements MappingService {
             }
 
             // Ошибка импорта
-            log.error("Ошибка импорта файла " + filename + ": " + e.getMessage(), e);
+            log.error("Ошибка импорта файла " + filename + " : " + e.getClass() + " " +  e.getMessage(), e);
             addLog(userInfo, departmentId, reportPeriodId, formTypeId, "Ошибка импорта файла " + filename + ": "
                         + e.getMessage());
 
@@ -218,7 +222,7 @@ public class MappingServiceImpl implements MappingService {
 
             //по году определяем TAX_PERIOD
             String year = YEAR_FORMAT.format(exemplar.getBeginDate());
-            year = DATE_APPENDER_RNU + year;
+            //year = DATE_APPENDER_RNU + year;
             exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(year));
 
             // по коду отчетного периода 7 символа в назавании файла DICT_TAX_PERIOD
@@ -232,7 +236,7 @@ public class MappingServiceImpl implements MappingService {
 
             return exemplar;
         } catch (Exception e) {
-            throw new ServiceException("Ошибка разбора файла:" + e.getLocalizedMessage(), e);
+            throw new ServiceException("Ошибка (" + e.getClass() + ") разбора файла: " + e.getLocalizedMessage() + "Объект парсинга файла: " + exemplar, e);
         }
     }
 
@@ -258,7 +262,7 @@ public class MappingServiceImpl implements MappingService {
 
             //по году определяем TAX_PERIOD
             String yearCut = xmlFilename.substring(29, 31);                     // 13
-            yearCut = DATE_APPENDER_XML + yearCut;                                  // 01.01.20 + 13 - > 01.01.2013
+            yearCut = DATE_APPENDER_XML + yearCut;                                  // 20 + 13 - > 2013
             exemplar.setTaxPeriod(reportPeriodMappingDao.getTaxPeriodByDate(yearCut));
 
             String period = xmlFilename.substring(26, 29);                      // q06

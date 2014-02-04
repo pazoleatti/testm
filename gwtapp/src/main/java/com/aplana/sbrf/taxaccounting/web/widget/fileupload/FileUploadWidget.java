@@ -47,6 +47,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     @Override
     public void setEnabled(boolean enabled) {
         uploadButton.setEnabled(enabled);
+        justButton.setEnabled(enabled);
     }
 
     public static interface IconResource extends ClientBundle{
