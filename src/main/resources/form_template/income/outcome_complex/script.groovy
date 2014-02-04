@@ -208,8 +208,8 @@ void calcTotal() {
 
     // суммы для графы 9
     ['consumptionTaxSumS'].each { alias ->
-        totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'))
-        totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'))
+        totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'), totalRow1.getIndex())
+        totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'), totalRow2.getIndex())
     }
 }
 
@@ -228,19 +228,19 @@ void consolidation() {
     dataRowHelper.getAllCached().each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
             if (row.getCell(alias).isEditable()) {
-                row.getCell(alias).setValue(0)
+                row.getCell(alias).setValue(0,  row.getIndex())
             }
         }
         // графа 11, 13..16
         ['logicalCheck', 'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
         if (row.getAlias() in ['R67', 'R93']) {
             row.consumptionTaxSumS = 0
         }
     }
 
-    // получить консолидированные формы из источников
+    // получить консолидированные формы из источников     .
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
@@ -251,7 +251,7 @@ void consolidation() {
                 def rowResult = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), row.getAlias())
                 ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                     if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
+                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
                     }
                 }
             }
