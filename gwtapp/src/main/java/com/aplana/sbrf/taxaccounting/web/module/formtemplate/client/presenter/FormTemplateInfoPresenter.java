@@ -33,7 +33,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(Date versionBegin, Date versionEnd, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code);
+		void setViewData(Date versionBegin, Date versionEnd, boolean fixedRows, String name, String fullName, String code);
 		void onFlush();
 	}
 
@@ -57,18 +57,13 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	public void onSet(FormTemplateSetEvent event) {
         formTemplateExt = event.getFormTemplateExt();
         formTemplate = formTemplateExt.getFormTemplate();
-		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isNumberedColumns(), formTemplate.isFixedRows(),
+		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
                 formTemplate.getName(), formTemplate.getFullName(), formTemplate.getCode());
 	}
 
 	@Override
 	public void onFlush(FormTemplateFlushEvent event) {
 		getView().onFlush();
-	}
-
-	@Override
-	public void setNumberedColumns(boolean numberedColumns) {
-		formTemplate.setNumberedColumns(numberedColumns);
 	}
 
 	@Override

@@ -36,7 +36,6 @@ public class FormTemplateDaoTest {
 		FormTemplate ft1 = formTemplateDao.get(1);
 		Assert.assertEquals(1, ft1.getId().intValue());
 		Assert.assertEquals(1, ft1.getType().getId());
-		Assert.assertFalse(ft1.isNumberedColumns());
 		Assert.assertTrue(ft1.isFixedRows());
 		Assert.assertEquals("name_1", ft1.getName());
 		Assert.assertEquals("fullname_1", ft1.getFullName());
@@ -45,7 +44,6 @@ public class FormTemplateDaoTest {
 		FormTemplate ft2 = formTemplateDao.get(2);
 		Assert.assertEquals(2, ft2.getId().intValue());
 		Assert.assertEquals(2, ft2.getType().getId());
-		Assert.assertTrue(ft2.isNumberedColumns());
 		Assert.assertFalse(ft2.isFixedRows());
 		Assert.assertEquals("name_2", ft2.getName());
 		Assert.assertEquals("fullname_2", ft2.getFullName());
@@ -60,7 +58,6 @@ public class FormTemplateDaoTest {
 	@Test
 	public void testSave() {
 		FormTemplate formTemplate = formTemplateDao.get(1);		
-		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
 		formTemplate.setVersion(new Date());
 		formTemplate.setName("name_3");
@@ -69,7 +66,6 @@ public class FormTemplateDaoTest {
 		formTemplate.setScript("test_script");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
-		Assert.assertTrue(formTemplate.isNumberedColumns());
 		Assert.assertFalse(formTemplate.isFixedRows());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
@@ -91,7 +87,6 @@ public class FormTemplateDaoTest {
 		formTemplate.getHeaders().add(headers1);
 		formTemplate.getHeaders().add(headers2);
 		
-		formTemplate.setNumberedColumns(true);
 		formTemplate.setFixedRows(false);
 		formTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		formTemplate.setName("name_3");
@@ -100,7 +95,6 @@ public class FormTemplateDaoTest {
 		formTemplate.setScript("test_script");
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
-		Assert.assertTrue(formTemplate.isNumberedColumns());
 		Assert.assertFalse(formTemplate.isFixedRows());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
@@ -115,7 +109,6 @@ public class FormTemplateDaoTest {
     @Test
     public void testGetTextScript() {
         FormTemplate formTemplate = formTemplateDao.get(1);
-        formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setName("name_3");
         formTemplate.setFullName("fullname_3");
@@ -129,7 +122,6 @@ public class FormTemplateDaoTest {
     @Test
     public void testGetDataCells() {
         FormTemplate formTemplate = formTemplateDao.get(1);
-        formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
@@ -145,7 +137,6 @@ public class FormTemplateDaoTest {
     @Test
     public void testGetHeaderCells() {
         FormTemplate formTemplate = formTemplateDao.get(1);
-        formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
         formTemplate.setName("name_3");
@@ -222,7 +213,6 @@ public class FormTemplateDaoTest {
     public void testSaveNew(){
         FormTemplate formTemplate = new FormTemplate();
         formTemplate.setEdition(1);
-        formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setVersion(new Date());
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);

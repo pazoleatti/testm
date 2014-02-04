@@ -41,7 +41,7 @@ public class FormTemplateRowPresenter
 
 		void setStylesData(List<FormStyle> styles);
 
-		void addCustomHeader(boolean addNumberedHeader, List<DataRow<HeaderCell>> newHeaders);
+		void addCustomHeader(List<DataRow<HeaderCell>> newHeaders);
 	}
 
 	private FormTemplate formTemplate;
@@ -87,7 +87,7 @@ public class FormTemplateRowPresenter
 		getView().setStylesData(formTemplate.getStyles());
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setRowsData(formTemplate.getRows());
-		getView().addCustomHeader(formTemplate.isNumberedColumns(), formTemplate.getHeaders());
+		getView().addCustomHeader(formTemplate.getHeaders());
 	}
 
 }

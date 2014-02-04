@@ -17,7 +17,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	private FormType type;
 	private Date version;
 	private int edition;
-	private boolean numberedColumns;
     private boolean fixedRows;
     
     private String name;
@@ -244,31 +243,6 @@ public class FormTemplate extends IdentityObject<Integer> {
 	
 	public List<DataRow<HeaderCell>> getHeaders() {
 		return headers;
-	}
-
-	/**
-	 * Возвращает признак того, что столбцы налоговой формы должны быть
-	 * пронумерованы Если значание установлено в true, то в заголовке налоговой
-	 * формы появляется новая строка (внизу заголовка), в которой каждому
-	 * столбцу присваивается номер, начиная с 1. Нумерация соответствует порядку
-	 * столбцов в форме и отдельно нигде не хранится.
-	 * 
-	 * @return если возвращает true, то нумеровать столбцы нужно, если false, то
-	 *         не нужно
-	 */
-	public boolean isNumberedColumns() {
-		return numberedColumns;
-	}
-
-	/**
-	 * Устанавливает признак того, что столбцы налоговой формы должны быть
-	 * пронумерованы
-	 * 
-	 * @param numberedColumns
-	 *            true - нумеровать столбцы нужно, false - не нужно
-	 */
-	public void setNumberedColumns(boolean numberedColumns) {
-		this.numberedColumns = numberedColumns;
 	}
 
     private HeaderCell createHeaderCell(Column column) {

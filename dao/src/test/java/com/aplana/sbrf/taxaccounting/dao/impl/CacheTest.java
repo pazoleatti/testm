@@ -88,7 +88,6 @@ public class CacheTest {
     @Test
     public void testFormTemplateCache() throws NamingException {
         FormTemplate formTemplate = formTemplateDao.get(1);
-        formTemplate.setNumberedColumns(true);
         formTemplate.setFixedRows(false);
         formTemplate.setVersion(new Date());
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
