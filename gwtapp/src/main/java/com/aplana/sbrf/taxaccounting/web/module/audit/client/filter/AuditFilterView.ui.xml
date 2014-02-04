@@ -28,6 +28,11 @@
             margin-right: 5px;
 
         }
+
+        .nalogType{
+            margin-right: -1px;
+            margin-left:  -1px;
+        }
     </ui:style>
 
     <g:HorizontalPanel width="100%" verticalAlignment="middle">
@@ -49,13 +54,13 @@
             <g:cell horizontalAlignment="left" verticalAlignment="middle" width="150px">
                 <g:VerticalPanel width="150px" verticalAlignment="middle">
                     <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="fromSearchDate" width="100%"/>
+                        <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="toSearchDate" width="100%"/>
+                        <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <g:ValueListBox ui:field="taxType" width="100%"/>
+                        <g:ValueListBox ui:field="taxType" addStyleNames="{style.nalogType}" width="150px"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>
