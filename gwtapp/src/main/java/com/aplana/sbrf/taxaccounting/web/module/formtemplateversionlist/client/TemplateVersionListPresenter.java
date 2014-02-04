@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
@@ -63,9 +61,12 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteVersionResult>() {
             @Override
             public void onSuccess(DeleteVersionResult result) {
-                LogAddEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
+                if (result.getUuid() == null)
+                    LogAddEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList)
+                        .with(AdminConstants.NameTokens.formTypeId, placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")).build());
             }
-        }, this).addCallback(TaManualRevealCallback.create(this, (TaPlaceManager)placeManager)));
+        }, this));
 
     }
 
