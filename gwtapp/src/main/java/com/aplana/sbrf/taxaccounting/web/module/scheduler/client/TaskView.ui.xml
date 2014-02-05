@@ -2,7 +2,9 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
+
 
     <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.scheduler.client.TaskView.LinkStyle">
         .separator {
@@ -115,7 +117,7 @@
                                 </g:HorizontalPanel>
                                 <g:HorizontalPanel spacing="5" verticalAlignment="middle">
                                     <g:Label text="Тип задачи:" addStyleNames="{style.label}"/>
-                                    <style:ListBoxWithTooltip width="475px" ui:field="jndi"/>
+                                    <dw:ListBoxWithTooltip width="475px" ui:field="jndi"/>
                                 </g:HorizontalPanel>
                             </g:VerticalPanel>
                         </g:cell>
