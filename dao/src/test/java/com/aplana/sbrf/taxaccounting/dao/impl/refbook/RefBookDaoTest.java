@@ -482,4 +482,24 @@ public class RefBookDaoTest {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
+
+	private static final String PARENT_FILTER_1 = RefBook.RECORD_PARENT_ID_ALIAS + " = 1";
+	private static final String PARENT_FILTER_NULL = RefBook.RECORD_PARENT_ID_ALIAS + " is null";
+
+	@Test
+	public void getParentFilterTest1() {
+		Assert.assertEquals(PARENT_FILTER_1, RefBookDaoImpl.getParentFilter("", 1L));
+	}
+
+	@Test
+	public void getParentFilterTest2() {
+		final String filter = "NAME = 'sample'";
+		Assert.assertEquals(filter + " AND " + PARENT_FILTER_1, RefBookDaoImpl.getParentFilter(filter, 1L));
+	}
+
+	@Test
+	public void getParentFilterTest3() {
+		final String filter = "NAME = 'sample'";
+		Assert.assertEquals(filter + " AND " + PARENT_FILTER_NULL, RefBookDaoImpl.getParentFilter(filter, null));
+	}
 }
