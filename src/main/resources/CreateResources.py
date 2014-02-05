@@ -103,9 +103,6 @@ MQActivationSpecName        = 'TAX Activation specifications MQ'
 MQActivationSpecJndi        = 'jms/transportMQ'
 MQActivationSpecDest        = 'jms/transportQueueMQ'
 
-transportMQ    = 'jms/transportMQ'
-queueMQ        = 'jms/rateQueue'+ suffixForResources
-
 print '--------------------------------'
 print '- JAASAuthData'
 jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
