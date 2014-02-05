@@ -59,22 +59,22 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true" width="300px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Тип налоговой формы" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox width="250px" ui:field="formDataKind" />
+                    <g:ValueListBox ui:field="formDataKind" width="300px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Вид налоговой формы" addStyleNames="{style.labels}"/>
-                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="835" modal="true" width="150px" multiSelect="true"/>
+                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="835" modal="true" multiSelect="true" width="300px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" header="Выберите исполнителя" modal="true" multiselection="false"/>
+                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" header="Выберите исполнителя" modal="true" multiselection="false" width="300px"/>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
 
