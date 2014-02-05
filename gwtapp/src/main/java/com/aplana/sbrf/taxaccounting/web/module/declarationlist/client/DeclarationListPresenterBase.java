@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterPresenter;
@@ -31,7 +32,8 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void updateTitle(String title);
 
-	}
+        void updatePageSize(TaxType taxType);
+    }
 
 	protected final DispatchAsync dispatcher;
 	protected final PlaceManager placeManager;

@@ -113,7 +113,6 @@ public class GetFormDataHandler extends
 		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
-		result.setNumberedHeader(formTemplate.isNumberedColumns());
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());

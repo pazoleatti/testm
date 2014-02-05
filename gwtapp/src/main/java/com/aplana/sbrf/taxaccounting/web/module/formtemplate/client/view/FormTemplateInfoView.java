@@ -23,9 +23,6 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
     DateMaskBoxAbstract versionDateEnd;
 
 	@UiField
-	CheckBox numberedColumnsBox;
-
-	@UiField
 	CheckBox fixedRowsCheckBox;
 	
 	@UiField
@@ -43,10 +40,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(Date version, Date versionEnd, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code) {
+	public void setViewData(Date version, Date versionEnd, boolean fixedRows, String name, String fullName, String code) {
         versionDateBegin.setValue(version);
         versionDateEnd.setValue(versionEnd);
-		numberedColumnsBox.setValue(numberedColumns);
 		fixedRowsCheckBox.setValue(fixedRows);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
@@ -56,7 +52,6 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	@Override
 	public void onFlush() {
 		getUiHandlers().setRangeRelevanceVersion(versionDateBegin.getValue(), versionDateEnd.getValue());
-		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
 		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
 		getUiHandlers().setName(nameBox.getValue());
 		getUiHandlers().setFullname(fullnameBox.getValue());

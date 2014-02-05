@@ -184,7 +184,7 @@ void logicCheck() {
             def msg2 = row.getCell('total').column.name
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
-        // Корректность дат сделки  dealDate - 9гр, dealDoneDate - 16гр
+        // Корректность дат сделки dealDate - 9гр, dealDoneDate - 16гр
         def dealDoneDate = row.getCell('dealDoneDate')
         if (dealDateCell.value > dealDoneDate.value) {
             def msg1 = dealDoneDate.column.name
@@ -345,7 +345,7 @@ void importData() {
             (xml.row[0].cell[4]): 'Номер договора',
             (xml.row[0].cell[5]): 'Дата договора',
             (xml.row[0].cell[6]): 'Номер сделки',
-            (xml.row[0].cell[7]): 'Дата  заключения сделки',
+            (xml.row[0].cell[7]): 'Дата заключения сделки',
             (xml.row[0].cell[8]): 'Код валюты по сделке',
             (xml.row[0].cell[9]): 'Код страны происхождения предмета сделки по классификатору ОКСМ',
             (xml.row[0].cell[10]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',

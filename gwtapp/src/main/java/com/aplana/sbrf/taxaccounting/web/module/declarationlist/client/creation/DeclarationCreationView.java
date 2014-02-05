@@ -10,7 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;

@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;

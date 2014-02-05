@@ -3,10 +3,13 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.TAException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentCombinedAction;
@@ -41,6 +44,9 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         super(GetDepartmentCombinedAction.class);
     }
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public GetDepartmentCombinedResult execute(GetDepartmentCombinedAction action, ExecutionContext executionContext)
             throws ActionException {
@@ -54,16 +60,25 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         RefBookDataProvider provider = null;
 
+        Long parentRefBookId = null;
+
         switch (action.getTaxType()) {
             case INCOME:
+                parentRefBookId = 33L;
                 provider = rbFactory.getDataProvider(33L);
                 break;
             case TRANSPORT:
+                parentRefBookId = 31L;
                 provider = rbFactory.getDataProvider(31L);
                 break;
             case DEAL:
+                parentRefBookId = 37L;
                 provider = rbFactory.getDataProvider(37L);
                 break;
+        }
+
+        if (parentRefBookId != null) {
+             provider = rbFactory.getDataProvider(parentRefBookId);
         }
 
         Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
@@ -134,43 +149,65 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         // Получение текстовых значений справочника
         Map<Long, String> rbTextValues = new HashMap<Long, String>();
 
+        Logger logger = new Logger();
+
         if (depCombined.getDictRegionId() != null && !depCombined.getDictRegionId().isEmpty()) {
-            rbTextValues.put(9L, getStringValue(rbFactory.getDataProvider(4L).getValue(depCombined.getDictRegionId().get(0), 9L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
         }
         if (depCombined.getOkato() != null && !depCombined.getOkato().isEmpty()) {
-            rbTextValues.put(7L, getStringValue(rbFactory.getDataProvider(3L).getValue(depCombined.getOkato().get(0), 7L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 3L, 7L, depCombined.getOkato().get(0), logger);
         }
         if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
-            rbTextValues.put(210L, getStringValue(rbFactory.getDataProvider(34L).getValue(depCombined.getOkvedCode().get(0), 210L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 34L, 210L, depCombined.getOkvedCode().get(0), logger);
         }
         if (depCombined.getReorgFormCode() != null && !depCombined.getReorgFormCode().isEmpty()) {
-            rbTextValues.put(13L, getStringValue(rbFactory.getDataProvider(5L).getValue(depCombined.getReorgFormCode().get(0), 13L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 5L, 13L, depCombined.getReorgFormCode().get(0), logger);
         }
         if (depCombined.getSignatoryId() != null && !depCombined.getSignatoryId().isEmpty()) {
-            rbTextValues.put(213L, getStringValue(rbFactory.getDataProvider(35L).getValue(depCombined.getSignatoryId().get(0), 213L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 35L, 213L, depCombined.getSignatoryId().get(0), logger);
         }
         if (depCombined.getTaxPlaceTypeCode() != null && !depCombined.getTaxPlaceTypeCode().isEmpty()) {
-            rbTextValues.put(3L, getStringValue(rbFactory.getDataProvider(2L).getValue(depCombined.getTaxPlaceTypeCode().get(0), 3L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 2L, 3L, depCombined.getTaxPlaceTypeCode().get(0), logger);
         }
         if (depCombined.getObligation() != null && !depCombined.getObligation().isEmpty()) {
-            rbTextValues.put(110L, getNumberValue(rbFactory.getDataProvider(25L).getValue(depCombined.getObligation().get(0), 110L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 25L, 110L, depCombined.getObligation().get(0), logger);
         }
         if (depCombined.getType() != null && !depCombined.getType().isEmpty()) {
-            rbTextValues.put(120L, getNumberValue(rbFactory.getDataProvider(26L).getValue(depCombined.getType().get(0), 120L)));
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 26L, 120L, depCombined.getType().get(0), logger);
         }
 
         result.setRbTextValues(rbTextValues);
 
+        // Запись ошибок в лог при наличии
+        if (!logger.getEntries().isEmpty()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+
         return result;
     }
 
-    private String getStringValue(RefBookValue value) {
-        if (value == null) {
-            return null;
+    /**
+     * Разыменование значения справочника с обработкой исключения, возникающего при отсутствии записи
+     * @param map Id атрибута -> Разыменованное значение
+     * @param parentRefBookId Id справочника формы настроек
+     * @param refBookId Id справочника
+     * @param attributeId Id атрибута
+     * @param recordId Id записи
+     * @param logger Логгер для передачи клиенту
+     */
+    private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
+        try {
+            map.put(attributeId, getNumberValue(rbFactory.getDataProvider(refBookId).getValue(recordId, attributeId)));
+        } catch (TAException e) {
+            logger.error(String.format("Ошибка получения значений для формы «%s»: " +
+                    "Обнаружена ссылка на несуществующую запись справочника «%s», id = %d",
+                    rbFactory.get(parentRefBookId).getName(), rbFactory.get(refBookId).getName(), recordId), e);
         }
-        return value.getStringValue();
     }
 
+    /**
+     * Разыменование числовых значений как строк и строк как строк
+     */
     private String getNumberValue(RefBookValue value) {
         if (value == null) {
             return null;

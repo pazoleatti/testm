@@ -394,6 +394,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 formData.getFormType()
                                                         .getName());
 	                            getView().updateData(0);
+
+                                getView().updatePageSize(result.getFormData().getFormType().getTaxType());
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));

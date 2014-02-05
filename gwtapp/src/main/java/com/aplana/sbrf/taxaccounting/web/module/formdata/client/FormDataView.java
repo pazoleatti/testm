@@ -44,6 +44,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
 	private NoSelectionModel<DataRow<Cell>> selectionModel;
+    private TaxType taxType;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -568,5 +569,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void isCanEditPage(boolean visible){
         pager.isCanEditPage(visible);
+    }
+
+    @Override
+    public void updatePageSize(TaxType taxType) {
+        if (this.taxType == null || !this.taxType.equals(taxType)) {
+            this.taxType = taxType;
+            pager.setType("formData" + taxType.getCode());
+            formDataTable.setPageSize(pager.getPageSize());
+        }
     }
 }
