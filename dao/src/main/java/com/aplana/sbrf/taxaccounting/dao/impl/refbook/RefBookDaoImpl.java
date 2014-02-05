@@ -637,18 +637,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private class RecordVersionMapper implements RowMapper<RefBookRecordVersion>{
-
-        @Override
-        public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
-            RefBookRecordVersion result = new RefBookRecordVersion();
-            result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
-            result.setVersionStart(rs.getDate("versionStart"));
-            result.setVersionEnd(rs.getDate("versionEnd"));
-            return result;
-        }
-    }
-
     private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.ref_book_id, r.record_id, r.version from ref_book_record r where r.id=?),\n" +
             "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id)\n" +
             "select cr.id as %s, cr.version as versionStart, nv.version as versionEnd from currentRecord cr, nextVersion nv";
@@ -662,7 +650,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new Object[] {
                             uniqueRecordId
                     },
-                    new RecordVersionMapper());
+                    new RefBookUtils.RecordVersionMapper());
         } catch (EmptyResultDataAccessException ex) {
             throw new DaoException("Не найдены версии для указанного элемента справочника", ex);
         }
@@ -981,7 +969,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new Object[] {
                             refBookId, recordId
                     },
-                    new RecordVersionMapper());
+                    new RefBookUtils.RecordVersionMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
