@@ -66,12 +66,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
 			return refBookSimple;
         } else if(RefBookSimpleReadOnly.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
-             // TODO временное решение, потом переделать на свой провайдер (http://jira.aplana.com/browse/SBRFACCTAX-5534)
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
-            refBookSimple.setRefBookId(refBookId);
-            refBookSimple.setTableName(RefBookSimpleReadOnly.OKTMO_TABLE_NAME);
-            refBookSimple.setWhereClause("STATUS = 0");
-            return refBookSimple;
+            return applicationContext.getBean("RefBookOktmo", RefBookDataProvider.class);
 		} else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
