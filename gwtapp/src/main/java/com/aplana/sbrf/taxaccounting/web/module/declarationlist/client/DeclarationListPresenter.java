@@ -77,6 +77,7 @@ public class DeclarationListPresenter extends
 			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
 			getView().updateTitle(taxType.getName());
+            getView().updatePageSize(taxType);
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список деклараций", e);
 		}

@@ -5,7 +5,6 @@ import com.gwtplatform.mvp.client.*;
 import java.util.Date;
 
 public interface FormTemplateInfoUiHandlers extends UiHandlers {
-	void setNumberedColumns(boolean numberedColumns);
 	void setRangeRelevanceVersion(Date versionBegin, Date versionEnd);
 	void setFixedRows(boolean fixedRows);
 	void setName(String name);
