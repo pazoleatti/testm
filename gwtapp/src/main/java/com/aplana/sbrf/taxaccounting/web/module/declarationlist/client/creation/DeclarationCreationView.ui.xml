@@ -17,7 +17,7 @@
 
         .footerButton {
             margin:  8px 10px 8px 0 !important;
-            width: 64px;
+            width: 75px;
         }
     </ui:style>
 
@@ -47,7 +47,7 @@
                     <g:Label width="140px" wordWrap="false" text="Вид декларации:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ListBoxWithTooltip width="100%" ui:field="declarationTypeBox" showTooltip="true"/>
+                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="declarationTypeBox" showTooltip="true"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -56,7 +56,7 @@
                     <g:Label/>
                 </g:cell>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>
