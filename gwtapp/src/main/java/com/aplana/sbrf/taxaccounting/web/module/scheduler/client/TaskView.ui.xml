@@ -5,7 +5,6 @@
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
-
     <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.scheduler.client.TaskView.LinkStyle">
         .separator {
             border: 1px dashed #949494;
@@ -61,7 +60,6 @@
             border-top: 1px solid #aeaeac;
         }
     </ui:style>
-
 
     <fm:MainContainer>
         <fm:header>
@@ -140,6 +138,5 @@
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
-
 
 </ui:UiBinder>
