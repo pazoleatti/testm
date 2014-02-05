@@ -53,7 +53,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setFullName(rs.getString("fullname"));
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
             formTemplate.setEdition(rs.getInt("edition"));
-            formTemplate.setNumberedColumns(rs.getBoolean("numbered_columns"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setCode(rs.getString("code"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
@@ -85,7 +84,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, script, status " +
+					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -137,12 +136,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         // TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, numbered_columns = ?, version = ?, fixed_rows = ?, name = ?, " +
+			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
 			"fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
 			storedEdition,
-			formTemplate.isNumberedColumns(),
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
             formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -159,7 +157,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, numbered_columns, fixed_rows, code, status" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status" +
                 " from form_template where status = 0", new FormTemplateMapper(false));
 	}
 
@@ -351,13 +349,12 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formStyleDao.saveFormStyles(formTemplate);
             columnDao.saveFormColumns(formTemplate);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, edition, numbered_columns, version, fixed_rows, name, fullname, code, script, status, type_id) " +
-                    "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, code, script, status, type_id) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
                             formTemplate.getEdition(),
-                            formTemplate.isNumberedColumns(),
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",

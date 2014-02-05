@@ -36,8 +36,6 @@ public class GetFormDataResult implements Result {
 	
 	private FormDataAccessParams formDataAccessParams;
 
-	private boolean numberedHeader;
-
 	private List<FormStyle> allStyles;
 	
 	private boolean balancePeriod;
@@ -107,14 +105,6 @@ public class GetFormDataResult implements Result {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
-
-    public boolean isNumberedHeader() {
-		return numberedHeader;
-	}
-
-	public void setNumberedHeader(boolean numberedHeader) {
-		this.numberedHeader = numberedHeader;
-	}
 
 	public List<FormStyle> getAllStyles() {
 		return allStyles;
@@ -205,7 +195,6 @@ public class GetFormDataResult implements Result {
                 ", departmenName='" + departmenName + '\'' +
                 ", reportPeriod=" + reportPeriod +
                 ", formDataAccessParams=" + formDataAccessParams +
-                ", numberedHeader=" + numberedHeader +
                 ", allStyles=" + allStyles +
                 ", balancePeriod=" + balancePeriod +
                 ", lockDate='" + lockDate + '\'' +

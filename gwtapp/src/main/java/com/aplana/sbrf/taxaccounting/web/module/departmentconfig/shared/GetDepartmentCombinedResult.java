@@ -18,6 +18,16 @@ public class GetDepartmentCombinedResult implements Result {
     // Признак открытости выбранного отчетного периода
     private boolean isReportPeriodActive;
 
+    private String uuid;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public DepartmentCombined getDepartmentCombined() {
         return departmentCombined;
     }

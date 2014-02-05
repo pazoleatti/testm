@@ -56,11 +56,10 @@ a, a:visited, a:hover {
 
 .gwt-Button[disabled] {
     cursor: default;
-    color: #060;
-}
-
-.gwt-Button[disabled]:hover {
-    border: 1px outset #00940C;
+    border: solid 1px #AAA;
+    background-color: #6A6A6A;
+    background-image: none;
+    color: #AAA;
 }
 
 .gwt-SubmitButton {
@@ -1021,10 +1020,10 @@ a, a:visited, a:hover {
 }
 
 .gwt-TextArea {
-	border: 1px solid green;
-	padding: 2px 0;
-	margin-left: -1px;
-	margin-right: -1px;
+    border: 1px solid green;
+    padding: 2px 0;
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .gwt-TextArea-readonly {
@@ -1032,10 +1031,10 @@ a, a:visited, a:hover {
 }
 
 .gwt-TextBox {
-	border: 1px solid green;
-	padding: 2px 0;
-	margin-left: -1px;
-	margin-right: -1px;
+    border: 1px solid green;
+    padding: 2px 0;
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .gwt-TextBox-readonly {
@@ -1306,64 +1305,64 @@ td.datePickerMonth {
     padding-left: 10px;
 }
 
-/* Spinner */
+    /* Spinner */
 .aplana-Spinner-textBox, .aplana-Spinner-button {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .aplana-Spinner-textBox {
-	border: none;
-	text-align: right;
-	vertical-align: middle;
+    border: none;
+    text-align: right;
+    vertical-align: middle;
 }
 
 .aplana-Spinner-panel {
-	border: 1px solid #bbbbbb;
-	margin-left: -1px;
-	margin-right: -1px;
+    border: 1px solid #bbbbbb;
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .aplana-Spinner-button {
-	background: url(images/spinner.png) no-repeat;
+    background: url(images/spinner.png) no-repeat;
 }
 
 .aplana-Spinner-incButton {
-	border-top: none;
-	border-right: none;
-	border-bottom: 1px solid #bbbbbb;
-	border-left: 1px solid #bbbbbb;
-	background-position: 0 0;
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid #bbbbbb;
+    border-left: 1px solid #bbbbbb;
+    background-position: 0 0;
 }
 
 .aplana-Spinner-decButton {
-	border-top: 1px solid #bbbbbb;
-	border-right: none;
-	border-bottom: none;
-	border-left: 1px solid #bbbbbb;
-	background-position: 0 -9px;
+    border-top: 1px solid #bbbbbb;
+    border-right: none;
+    border-bottom: none;
+    border-left: 1px solid #bbbbbb;
+    background-position: 0 -9px;
 }
 
 .aplana-Spinner-incButton.disabled {
-	background-position: -9px 0 !important;
+    background-position: -9px 0 !important;
 }
 
 .aplana-Spinner-decButton.disabled {
-	background-position: -9px -9px !important;
+    background-position: -9px -9px !important;
 }
 
-/* DatePicker */
+    /* DatePicker */
 .aplana-SimpleDatePicker-date, .aplana-SimpleDatePicker-month {
-	margin-right: 5px;
+    margin-right: 5px;
 }
 
 .aplana-DoubleStateComposite-label {
-	font-weight: bold;
-	margin-bottom: 1px;
-	padding: 2px 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-ms-text-overflow: ellipsis;
+    font-weight: bold;
+    margin-bottom: 1px;
+    padding: 2px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
 }

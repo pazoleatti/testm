@@ -72,9 +72,10 @@ public class FormDataListPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		LogCleanEvent.fire(this);
 		LogShowEvent.fire(this, false);
-		TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+		taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		filterPresenter.initFilter(taxType, filterStates.get(taxType));
 		filterPresenter.changeFilterElementNames(taxType);
+        getView().updatePageSize(taxType);
 		super.prepareFromRequest(request);
 	}
 
@@ -149,6 +150,9 @@ public class FormDataListPresenter extends
 	@Override
 	public void onRangeChange(final int start, int length) {
 		FormDataFilter filter = getFilterState(taxType);
+        if (filter == null) {
+            return;
+        }
 		filter.setCountOfRecords(length);
 		filter.setStartIndex(start);
 		filter.setAscSorting(getView().isAscSorting());

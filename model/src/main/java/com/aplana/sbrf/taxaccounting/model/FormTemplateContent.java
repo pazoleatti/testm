@@ -11,8 +11,6 @@ public class FormTemplateContent {
 	@XmlElement
 	private FormType type;
 	@XmlElement
-	private boolean numberedColumns;
-	@XmlElement
 	private boolean fixedRows;
 	@XmlElement
 	private String name;
@@ -27,7 +25,6 @@ public class FormTemplateContent {
 
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
 		this.type = formTemplate.getType();
-		this.numberedColumns = formTemplate.isNumberedColumns();
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
 		this.fullName = formTemplate.getFullName();
@@ -38,7 +35,6 @@ public class FormTemplateContent {
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
 		formTemplate.setType(type);
-		formTemplate.setNumberedColumns(numberedColumns);
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);

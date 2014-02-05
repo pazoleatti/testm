@@ -19,17 +19,33 @@ cacheProviderId = AdminConfig.getid(resourceRootLocation +'/CacheProvider:CacheP
 print 'Found cache provider ID='+ cacheProviderId
 
 # prefix for resources
-suffixForResources = '_test'
+suffixForResources = '-0.3.7'
 
 # database info
-dataBaseHost        = 'nalog-db.aplana.local'
-dataBasePort        = '1521'
-dataBaseSvcName     = 'orcl.aplana.local'
+dataBaseHost                 = 'nalog-db.aplana.local'
+dataBasePort                 = '1521'
+dataBaseSvcName              = 'orcl.aplana.local'
+migrationDataBaseHost        = 'nalog-db.aplana.local'
+migrationDataBasePort        = '1521'
+migrationDataBaseSvcName     = 'orcl.aplana.local'
+
+# MQ server info
+MQServerHost         = 'nalog-db.aplana.local'
+MQServerPort         = '1521'
+MQServerChanel       = 'Q_CH'
+MQServerQueueName    = 'Q_MDB'
+MQServerQueueManager = 'QM_MDB'
 
 # auth info
-jaasAlias    = 'TAX'+ suffixForResources
-jassUserId   = 'TAX'+ suffixForResources
-jassUserPass = 'TAX'
+jaasAlias             = 'TAX'+ suffixForResources
+jassUserId            = 'TAX'+ suffixForResources
+jassUserPass          = 'TAX'
+migrationJaasAlias    = 'TAX_MIGRATION'
+migrationJassUserId   = 'MIGRATION'
+migrationJassUserPass = 'MIGRATION'
+mqJaasAlias           = 'mq_admin'
+mqJassUserId          = 'Administrator@NALOG-WEB'
+mqJassUserPass        = 'password'
 
 # JDBC provider
 jdbcProviderName = 'Oracle JDBC Driver'+ suffixForResources
@@ -37,10 +53,14 @@ jdbcDriverPath   = 'C:/ojdbc6.jar'
 jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
 
 # datasource info
-dataSuorceName      = 'TAX Datasource'+ suffixForResources
-dataSourceJndi      = 'jdbc/TaxAccDS'+ suffixForResources
-dataSourceHelpClass = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
-dataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ dataBaseHost +')(PORT='+ dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ dataBaseSvcName +')))'
+dataSuorceName               = 'TAX Datasource'+ suffixForResources
+dataSourceJndi               = 'jdbc/TaxAccDS'+ suffixForResources
+dataSourceHelpClass          = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
+dataSourceUrl                = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ dataBaseHost +')(PORT='+ dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ dataBaseSvcName +')))'
+migrationDataSuorceName      = 'TAX Datasource Migration'+ suffixForResources
+migrationDataSourceJndi      = 'jdbc/TaxAccDS_MIGRATION'+ suffixForResources
+migrationDataSourceHelpClass = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
+migrationDataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ migrationDataBaseHost +')(PORT='+ migrationDataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ migrationDataBaseSvcName +')))'
 
 # scheduler
 taskSchedulerName = 'TAX Scheduler'+ suffixForResources
@@ -74,6 +94,15 @@ SIBJMSQueueJndi             = 'jms/transportQueue'+ suffixForResources
 SIBJMSActivationSpecName    = 'TAX Activation specifications'+ suffixForResources
 SIBJMSActivationSpecJndi    = 'jms/transportAS'+ suffixForResources
 
+# MQ messaging provider
+MQConnectionFactoryName     = 'TAX Connection factories for MQ'
+MQConnectionFactoryJndi     = 'jms/mqtransportConnectionFactory'
+MQQueuesName                = 'TAX Rate Queue MQ'
+MQQueuesJndi                = 'jms/rateQueue'+ suffixForResources
+MQActivationSpecName        = 'TAX Activation specifications MQ'
+MQActivationSpecJndi        = 'jms/transportMQ'
+MQActivationSpecDest        = 'jms/transportQueueMQ'
+
 print '--------------------------------'
 print '- JAASAuthData'
 jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
@@ -90,6 +119,24 @@ if jassAuthDataIds[0] != '':
 if jassAuthDataNotFound:
 	print 'Initiated the creation of an JAASAuthData'
 	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', jaasAlias], ['userId', jassUserId], ['password', jassUserPass]])
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+print '________________________________'
+jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
+jassAuthDataNotFound = 1
+if jassAuthDataIds[0] != '':
+	for jassAuthDataId in jassAuthDataIds:
+		jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
+		if jassAuthDataAlias[-len(migrationJaasAlias):] == migrationJaasAlias:
+			jassAuthDataNotFound = 0
+			print 'Found existing JAASAuthData:'
+			print 'jassAuthDataAlias='+ jassAuthDataAlias
+			print 'jassAuthDataId='+ jassAuthDataId
+			break
+if jassAuthDataNotFound:
+	print 'Initiated the creation of an JAASAuthData'
+	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', migrationJaasAlias], ['userId', migrationJassUserId], ['password', migrationJassUserPass]])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
@@ -116,6 +163,19 @@ else:
 	print 'id='+ dataSuorceId
 	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', dataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', dataSourceUrl]])
 	AdminConfig.create('J2EEResourceProperty', AdminConfig.showAttribute(dataSuorceId, 'propertySet'), [['name', 'connectionProperties'], ['type', 'java.lang.String'], ['value', 'defaultRowPrefetch=1000']])
+	print 'Parameters are set'
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+print '________________________________'
+migrationDataSuorceId = AdminConfig.getid(resourceRootLocation +'/JDBCProvider:'+ jdbcProviderName +'/DataSource:'+ migrationDataSuorceName +'/')
+if len(migrationDataSuorceId):
+	print 'Found existing data source id='+ migrationDataSuorceId
+else:
+	print 'Initiated the creation of an data source'
+	migrationDataSuorceId = AdminConfig.create('DataSource', jdbcProviderId, [['name', migrationDataSuorceName], ['jndiName', migrationDataSourceJndi], ['datasourceHelperClassname', migrationDataSourceHelpClass], ['authDataAlias', migrationJaasAlias]])
+	print 'id='+ migrationDataSuorceId
+	AdminConfig.create('J2EEResourceProperty', AdminConfig.create('J2EEResourcePropertySet', migrationDataSuorceId, []), [['name', 'URL'], ['type', 'java.lang.String'], ['value', migrationDataSourceUrl]])
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'
