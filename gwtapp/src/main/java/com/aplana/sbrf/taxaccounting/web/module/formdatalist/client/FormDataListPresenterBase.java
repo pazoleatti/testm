@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create.CreateFormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataPresenter;
@@ -62,6 +63,8 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		void updateTitle(String title);
 
 		void updateHeader(String title);
+
+        void updatePageSize(TaxType taxType);
 	}
 	
 	protected final PlaceManager placeManager;
