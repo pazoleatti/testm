@@ -3,12 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared;
 import java.io.Serializable;
 import java.util.List;
 
-
 /**
  * GUI модель для строки справочника
  * 
  * @author sgoryachkin
- *
  */
 public class RefBookItem implements Serializable{
 	private static final long serialVersionUID = 6686089751137927944L;
@@ -16,8 +14,11 @@ public class RefBookItem implements Serializable{
 	private Long id;
 	
 	private String dereferenceValue;
-	
+
+    // Порядок соответсвия для всех листов должен гарантироваться
 	private List<String> values;
+    private List<Long> valuesAttrId;
+    private List<String> valuesAttrAlias;
 
 	public Long getId() {
 		return id;
@@ -42,5 +43,20 @@ public class RefBookItem implements Serializable{
 	public void setDereferenceValue(String dereferenceValue) {
 		this.dereferenceValue = dereferenceValue;
 	}
-	
+
+    public List<Long> getValuesAttrId() {
+        return valuesAttrId;
+    }
+
+    public void setValuesAttrId(List<Long> valuesAttrId) {
+        this.valuesAttrId = valuesAttrId;
+    }
+
+    public List<String> getValuesAttrAlias() {
+        return valuesAttrAlias;
+    }
+
+    public void setValuesAttrAlias(List<String> valuesAttrAlias) {
+        this.valuesAttrAlias = valuesAttrAlias;
+    }
 }

@@ -48,24 +48,24 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         LogBusinessSearchEvent.fire(this);
     }
 
-    @Override
-    public void onPrintButtonClicked() {
-        LogBusinessPrintEvent.fire(this);
-    }
-
-    public interface MyView extends View,HasUiHandlers<HistoryBusinessUIHandler> {
+    public interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler> {
         // Получение значений фильтра
         LogBusinessFilterValues getDataFilter();
 
         void setDepartments(List<Department> list, Set<Integer> availableValues);
+
         void setFormTypeId(Map<Integer, String> formTypesMap);
+
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
+
         void setFormDataKind(List<FormDataKind> list);
+
         void setFormDataTaxType(List<TaxType> taxTypeList);
+
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
     }
 
-    public void initFilterData(){
+    public void initFilterData() {
 
         GetHistoryBusinessFilterAction action = new GetHistoryBusinessFilterAction();
         dispatchAsync.execute(action, CallbackUtils
@@ -84,7 +84,7 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
     }
 
-    public LogBusinessFilterValues getLogSystemFilter(){
+    public LogBusinessFilterValues getLogSystemFilter() {
         return getView().getDataFilter();
     }
 }

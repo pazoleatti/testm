@@ -35,5 +35,12 @@ public class MyValueListBox<T> extends ValueListBox<T> {
         return listBox.getSelectedIndex() != -1;
     }
 
+    public void setEnabled(boolean enabled){
+        listBox.setEnabled(enabled);
+    }
+
+    public boolean isEnabled(){
+        return listBox.isEnabled();
+    }
 
 }

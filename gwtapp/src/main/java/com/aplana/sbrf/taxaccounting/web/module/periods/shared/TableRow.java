@@ -13,7 +13,17 @@ public class TableRow implements Serializable {
 	private Boolean periodCondition;
 	private boolean isSubHeader;
     private Boolean balance;
-    private Date deadline;
+	int year; //TODO Возможно не  нужно хранить дату в каждом экземпляре
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	private Date deadline;
     private Date correctPeriod;
 
 	public int getId() {

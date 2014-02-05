@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
@@ -13,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.Range;
@@ -38,8 +39,6 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	Panel contentPanel;
     @UiField
     Label titleDetails;
-	@UiField
-	Label titleDesc;
     @UiField
     LinkAnchor backAction;
 
@@ -55,6 +54,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 				getUiHandlers().onSelectionChanged();
 			}
 		});
+        refbookDataTable.setPageSize(pager.getPageSize());
 		pager.setDisplay(refbookDataTable);
 	}
 
@@ -80,7 +80,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             }
         };
         refbookDataTable.addColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
-        refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.PX);
+        refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.EM);
 
         TextColumn<RefBookDataRow> versionToColumn = new TextColumn<RefBookDataRow>() {
             @Override
@@ -89,7 +89,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             }
         };
         refbookDataTable.addColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
-        refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.PX);
+        refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.EM);
 
 		for (final RefBookColumn header : columns) {
 			TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
@@ -110,7 +110,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		data.addDataDisplay(refbookDataTable);
 	}
 
-	@Override
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
 	public void setRange(Range range) {
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
 	}
@@ -124,7 +129,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
 	@Override
 	public void setRefBookNameDesc(String desc) {
-		titleDesc.setText(desc);
+        backAction.setText(desc);
 	}
 
 	@Override
@@ -144,7 +149,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
 
-			if (row.getRefBookRowId() == recordId) {
+			if (row.getRefBookRowId().equals(recordId)) {
 				selectionModel.setSelected(row, true);
 				refbookDataTable.setKeyboardSelectedRow(i, true);
 				return;
@@ -178,6 +183,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
+        selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
@@ -188,12 +194,25 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
-		if (confirm) {
-			if (getUiHandlers() != null) {
-				getUiHandlers().onDeleteRowClicked();
-			}
-		}
+        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onDeleteRowClicked();
+                }
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                no();
+            }
+        });
 	}
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {

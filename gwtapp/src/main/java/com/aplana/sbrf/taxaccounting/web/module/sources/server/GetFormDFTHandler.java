@@ -20,7 +20,7 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDFTHandler extends AbstractActionHandler<GetFormDFTAction, GetFormDFTResult> {
 
 	@Autowired
@@ -39,6 +39,7 @@ public class GetFormDFTHandler extends AbstractActionHandler<GetFormDFTAction, G
 
 		Map<Integer, FormType> formTypes = new HashMap<Integer, FormType>();
 		for (DepartmentFormType departmentFormType : receivers) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			formTypes.put(departmentFormType.getFormTypeId(),
 					sourceService.getFormType(departmentFormType.getFormTypeId()));
 		}

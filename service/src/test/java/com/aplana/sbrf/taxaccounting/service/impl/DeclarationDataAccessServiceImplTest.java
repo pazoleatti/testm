@@ -118,10 +118,10 @@ public class DeclarationDataAccessServiceImplTest {
 		Department departmentBank = mockDepartment(Department.ROOT_BANK_ID, Department.ROOT_BANK_ID, DepartmentType.ROOT_BANK);
 
 		// В подразделении DEPARTMENT_TB1_ID разрешена работа с декларациями DECLARATION_TYPE_1_ID
-		Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		Department departmentTB1 = mockDepartment(DEPARTMENT_TB1_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
 		// В подразделении DEPARTMENT_TB2_ID разрешена работа с декларациями DECLARATION_TYPE_2_ID
-		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERBANK);
+		Department departmentTB2 = mockDepartment(DEPARTMENT_TB2_ID, Department.ROOT_BANK_ID, DepartmentType.TERR_BANK);
 
 		DepartmentService departmentService = mock(DepartmentService.class);
 		when(departmentService.getDepartment(Department.ROOT_BANK_ID)).thenReturn(departmentBank);
@@ -166,7 +166,7 @@ public class DeclarationDataAccessServiceImplTest {
 		ReportPeriod reportPeriod = mockReportPeriod(REPORT_PERIOD_ID);
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setTaxType(TaxType.INCOME);
-        reportPeriod.setTaxPeriod(taxPeriod);
+		when(reportPeriod.getTaxPeriod()).thenReturn(taxPeriod);
 
 		DeclarationData declarationCreatedBank = mockDeclarationData(DECLARATION_CREATED_BANK_ID, Department.ROOT_BANK_ID, false, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);
 		DeclarationData declarationAcceptedBank = mockDeclarationData(DECLARATION_ACCEPTED_BANK_ID, Department.ROOT_BANK_ID, true, DECLARATION_TEMPLATE_1_ID, REPORT_PERIOD_ID);

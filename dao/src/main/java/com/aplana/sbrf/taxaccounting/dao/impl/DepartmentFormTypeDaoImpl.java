@@ -1,30 +1,28 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentFormTypeDaoImpl extends AbstractDao implements DepartmentFormTypeDao {
+
+    @Autowired
+    DepartmentDao departmentDao;
 	
 	public static final String DUBLICATE_ERROR = "Налоговая форма указанного типа и вида уже назначена подразделению";
 	
@@ -163,7 +161,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 "insert into declaration_source (department_declaration_type_id, src_department_form_type_id) values (?, ?)", bpss);
     }
 
-    private static final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private final RowMapper<FormTypeKind> FORM_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
@@ -171,12 +169,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             formTypeKind.setKind(FormDataKind.fromId(rs.getInt("kind")));
             formTypeKind.setName(rs.getString("name"));
             formTypeKind.setFormTypeId(rs.getLong("typeId"));
+            formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+            Integer performerId = rs.getInt("performer_id");
+            if (rs.wasNull()){
+                formTypeKind.setPerformer(null);
+            } else{
+                formTypeKind.setPerformer(departmentDao.getDepartment(performerId));
+            }
+
             return formTypeKind;
         }
     };
 
     private static final String GET_FORM_ASSIGNED_SQL =
-            "select dft.id, dft.kind, tf.name, tf.id as typeId " +
+            "select dft.id, dft.kind, tf.name, tf.id as typeId, dft.performer_dep_id as performer_id, dft.department_id " +
                     " from form_type tf " +
                     " join department_form_type dft on dft.department_id = ? and dft.form_type_id = tf.id " +
                     " where tf.tax_type = ?";
@@ -193,19 +199,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
+    private final RowMapper<FormTypeKind> DECLARATION_ASSIGN_MAPPER = new RowMapper<FormTypeKind>() {
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
             formTypeKind.setId(rs.getLong("id"));
             formTypeKind.setName(rs.getString("name"));
             formTypeKind.setFormTypeId(rs.getLong("typeId"));
+            formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
             return formTypeKind;
         }
     };
 
     private static final String GET_DECLARATION_ASSIGNED_SQL =
-            " select ddt.id, dt.name, dt.id as typeId " +
+            " select ddt.id, dt.name, dt.id as typeId, ddt.department_id " +
                     "    from declaration_type dt" +
                     "    join department_declaration_type ddt on ddt.department_id = ? and ddt.declaration_type_id = dt.id" +
                     "    where dt.tax_type = ?";
@@ -299,5 +306,42 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     	} catch (DataIntegrityViolationException e){
     		throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
     	} 
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void save(int departmentId, int typeId, int kindId, Integer performerId) {
+        try {
+            getJdbcTemplate().update(
+                    "insert into department_form_type (department_id, form_type_id, id, kind, performer_dep_id) " +
+                            " values (?, ?, seq_department_form_type.nextval, ?, ?)",
+                    new Object[]{ departmentId, typeId, kindId, performerId });
+        } catch (DataIntegrityViolationException e){
+            throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
+        }
+    }
+
+
+    private static final String CHECK_EXIST = "select id from department_form_type src_dft where "
+            + "department_id = ? and form_type_id= ? and kind = ? ";
+
+    @Override
+    public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind){
+        return getJdbcTemplate().queryForList(
+                    CHECK_EXIST,
+                    new Object[]{
+                        departmentId,
+                        typeId,
+                        kind.getId()
+                    },
+                    Integer.class
+                ).size() > 0;
+    }
+
+    @Override
+    public void updatePerformer(int id, int performerId){
+        getJdbcTemplate().update(
+            "update department_form_type set performer_dep_id = ? where id = ?",
+            new Object[]{performerId, id});
     }
 }

@@ -3,17 +3,23 @@ package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.ArrayOfGenericAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.ArrayOfXsdString;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAccountInfo;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.accountendpoint.GenericAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint.TaxAccDepartment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class GenericAccountInfoAssembler {
+public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
+
+    @Autowired
+    private DepartmentService departmentService;
 	
 	private static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
 	
@@ -64,6 +70,8 @@ public class GenericAccountInfoAssembler {
 		List<GenericAccountInfo> listGenericAccountInfo = new ArrayList<GenericAccountInfo>();
 		
 		for (TAUser taUser : users) {
+            if (taUser.getId() < 1)
+                continue;
 			GenericAccountInfo gai = new GenericAccountInfo();
 			ArrayOfGenericAttribute aOfga = new ArrayOfGenericAttribute();
 			GenericAttribute ga = new GenericAttribute();
@@ -125,17 +133,16 @@ public class GenericAccountInfoAssembler {
 		return listGenericAccountInfo;
 		
 	}
-	
+
 	public List<TaxAccDepartment> desassembleDepartments(List<Department> listDepartments){
 		List<TaxAccDepartment> listTaxAccDepartments = new ArrayList<TaxAccDepartment>();
 		for (Department department : listDepartments) {
 			TaxAccDepartment taxAccDepartment = new TaxAccDepartment();
-			taxAccDepartment.setId(Integer.toString(department.getId()));
-			taxAccDepartment.setName(department.getName());
-			if(department.getParentId()!=null)
-				taxAccDepartment.setParentId(Integer.toString(department.getParentId()));
-			else
-				taxAccDepartment.setParentId(Integer.toString(0));
+            StringBuilder builder = new StringBuilder();
+            taxAccDepartment.setParentId(Integer.toString(0));
+            buildAttrName(builder, department);
+            taxAccDepartment.setId(Integer.toString(department.getId()));
+            taxAccDepartment.setName(builder.toString().substring(1));
 			
 			listTaxAccDepartments.add(taxAccDepartment);
 		}
@@ -143,5 +150,11 @@ public class GenericAccountInfoAssembler {
 		return listTaxAccDepartments;
 		
 	}
+
+    private void buildAttrName(StringBuilder builder, Department department){
+        if (department.getParentId() != null)
+            buildAttrName(builder, departmentService.getDepartment(department.getParentId()));
+        builder.append("/").append(department.getShortName());
+    }
 
 }

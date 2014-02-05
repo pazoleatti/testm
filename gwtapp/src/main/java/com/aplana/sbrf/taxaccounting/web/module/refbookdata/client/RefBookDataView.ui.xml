@@ -1,82 +1,114 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:date="urn:import:com.google.gwt.user.datepicker.client"
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'>
+             xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+        >
     <ui:style>
-        .titleLabel {
-            font-size: 26px;
-            margin: 10px;
+        .titleText {
+            font-size: 14px !important;
+            color: #636460;
+            white-space: nowrap;
+        }
+
+        .titleText div {
+            font-size: 14px !important;
+        }
+
+        .btnPanel {
+            height: 30px;
+            padding-left: 10px;
+        }
+
+        .btnPanel td {
+            vertical-align: middle !important;
+        }
+
+        .splitter {
+            position: absolute !important;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 34px;
+        }
+
+        .table{
+            position: absolute !important;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            top: 0;
         }
 
         .pager {
-            margin-right: auto;
-            margin-left: auto;
+            position: absolute;
+            bottom: 0;
+            right: 0;
         }
 
-        .titleText{
-            font-size: 26px;
+        .marginRight5{
+            margin-right: 5px;
         }
 
-        .titleDesc{
-            font-size: 16px;
-            padding-left: 10px
-        }
-
-        .btnAddDel{
-            margin-top: 5px;
-            margin-left: 300px;
+        .horSep {
+            height: 0;
+            margin-top: 2px;
+            border-top: 1px solid #aeaeac;
         }
 
     </ui:style>
-    <g:DockLayoutPanel>
-        <g:north size="100">
-            <g:VerticalPanel>
-                <g:cell height="30px">
-                    <g:HorizontalPanel >
-                        <g:cell width="26px">
-                            <style:LinkAnchor title="Перейти к списку справочников" img="resources/img/arrow-left-24.png"
-                                              href="#!refbooklist"/>
-                        </g:cell>
-                        <g:Label styleName="{style.titleText}">Справочник</g:Label>
-                    </g:HorizontalPanel>
-                </g:cell>
-                <g:cell height="20px">
-                    <g:Label ui:field="titleDesc" styleName="{style.titleDesc}"/>
-                </g:cell>
-                <g:cell height="45px" verticalAlignment="bottom">
-                    <g:HorizontalPanel styleName="{style.btnAddDel}" spacing="5">
-                        <g:Label>Дата актуальности: </g:Label>
-                        <date:DateBox ui:field="relevanceDate"/>
-                        <style:LinkAnchor title="Добавить строку" text="Добавить строку" ui:field="addRow"
-                                          img="resources/img/exclamation_mark.png"/>
-                        <style:LinkAnchor title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
-                                          img="resources/img/exclamation_mark.png"/>
-                    </g:HorizontalPanel>
-                </g:cell>
-            </g:VerticalPanel>
-        </g:north>
-        <g:center>
-            <g:SplitLayoutPanel>
-                <g:center>
-                    <g:DockLayoutPanel height="100%">
-                        <g:center>
-                            <g:ResizeLayoutPanel>
-                                <style:GenericDataGrid ui:field="refbookDataTable"/>
-                            </g:ResizeLayoutPanel>
-                        </g:center>
-                        <g:south size="30">
-                            <pager:FlexiblePager ui:field="pager" location="CENTER"
-                                                 showFastForwardButton="false" fastForwardRows="0"
-                                                 showLastPageButton="true" styleName="{style.pager}"/>
-                        </g:south>
-                    </g:DockLayoutPanel>
-                </g:center>
-                <g:east size="500">
-                    <style:FixedScrollPanel width="100%" height="100%" ui:field="contentPanel"/>
-                </g:east>
-            </g:SplitLayoutPanel>
-        </g:center>
 
-    </g:DockLayoutPanel>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkAnchor title="Перейти к списку справочников" text="Справочники" href="#!refbooklist" disableImage="true"
+                                              addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label ui:field="titleDesc"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+
+                <g:HorizontalPanel spacing="4" addStyleNames="{style.btnPanel}" >
+                    <style:LinkButton title="Добавить строку" text="Добавить строку" ui:field="addRow"
+                                      img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
+                    <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
+                                      img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
+                    <g:Label wordWrap="false" text="Дата актуальности: "/>
+                    <d:DateMaskBoxPicker ui:field="relevanceDate"/>
+                </g:HorizontalPanel>
+
+                <g:Label addStyleNames="{style.horSep}"/>
+
+                <g:SplitLayoutPanel addStyleNames="{style.splitter}">
+                    <g:center>
+                        <g:HTMLPanel>
+                            <style:GenericDataGrid ui:field="refbookDataTable" addStyleNames="{style.table}"/>
+                            <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
+                                                 showFastForwardButton="false" fastForwardRows="0"
+                                                 showLastPageButton="true" type="refBookData"/>
+                        </g:HTMLPanel>
+                    </g:center>
+                    <g:east size="500">
+                        <g:SimplePanel ui:field="contentPanel"/>
+                    </g:east>
+                </g:SplitLayoutPanel>
+
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>

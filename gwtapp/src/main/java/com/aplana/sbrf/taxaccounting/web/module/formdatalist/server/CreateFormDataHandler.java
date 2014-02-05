@@ -34,7 +34,12 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 	@Autowired
 	FormTemplateService formTemplateService;
 
-	public CreateFormDataHandler() {
+    private static final String ERROR_SELECT_REPORT_PERIOD = "Период не выбран!";
+    private static final String ERROR_SELECT_DEPARTMENT = "Подразделение не выбрано!";
+    private static final String ERROR_SELECT_FORM_DATA_KIND = "Тип налоговой формы не выбран!";
+    private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
+
+    public CreateFormDataHandler() {
 		super(CreateFormData.class);
 	}
 
@@ -58,26 +63,20 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 	}
 
 	private void checkAction(CreateFormData action) throws ActionException {
-		String errorMessage = "";
-
-			if (action.getFormDataTypeId() == null) {
-				errorMessage += " не указан вид формы";
-			}
-			if (action.getFormDataKindId() == null) {
-				errorMessage += ", не указан тип формы";
-			}
-			if (action.getDepartmentId() == null) {
-				errorMessage += ", не указано подразделение";
-			}
-			if (action.getReportPeriodId() == null) {
-				errorMessage += ", не указан отчетный период";
-			}
-			if (!errorMessage.isEmpty()) {
-				errorMessage = errorMessage.startsWith(",") ? errorMessage
-						.substring(1) : errorMessage;
-				throw new TaActionException(
-						"Не удалось создать налоговую форму:" + errorMessage);
-			}
+        // Проверки заполнения полей (частичное дублирование клиентского кода)
+        if (action.getReportPeriodId() == null) {
+            throw new TaActionException(ERROR_SELECT_REPORT_PERIOD);
+		}
+        if (action.getDepartmentId() == null) {
+            throw new TaActionException(ERROR_SELECT_DEPARTMENT);
+        }
+        if (action.getFormDataKindId() == null) {
+            throw new TaActionException(ERROR_SELECT_FORM_DATA_KIND);
+        }
+        if (action.getFormDataTypeId() == null) {
+            throw new TaActionException(ERROR_SELECT_FORM_DATA_TYPE);
+        }
+        // Остальные проверки реализованы в FormDataAccessService#canCreate и вызываются перед созданием формы
 	}
 
 	@Override

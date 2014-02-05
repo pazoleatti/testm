@@ -14,18 +14,18 @@ public class FormDataDaoFilter implements Serializable {
 	 * (используется, чтобы предотвратить попадание в поиск результатов, на которые у пользователя нет прав)
 	 */
 	public static enum AccessFilterType {
+        /**
+         * Все существующие формы (используется для Контролёра УНП)
+         */
+        ALL,
 		/**
-		 * Все существующие формы (используется для Контролёра УНП)
+		 * Формы, относящиеся исключительно к перечисленным подразделениям (используется для контролеров)
 		 */
-		ALL,
-		/**
-		 * Формы, относящиеся исключительно к подразделению пользователя (используется для Операторов)
-		 */
-		USER_DEPARTMENT,
-		/**
-		 * Формы, относящиеся к подразделению пользователя и источники для этих форм (используется для Контролёров)
-		 */
-		USER_DEPARTMENT_AND_SOURCES
+		AVAILABLE_DEPARTMENTS,
+        /**
+         * Формы указанных типов, относящиеся исключительно к перечисленным подразделениям (используется для операторов)
+         */
+        AVAILABLE_DEPARTMENTS_WITH_KIND
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -34,16 +34,18 @@ public class FormDataDaoFilter implements Serializable {
 
 	private List<Integer> departmentIds;
 
+    private List<Integer> availableDepartmentIds;
+
 	private List<Integer> formTypeIds;
 
 	private List<FormDataKind> formDataKinds;
 
+    private List<FormDataKind> availableFormDataKinds;
+
 	private List<WorkflowState> states;
 
 	private List<TaxType> taxTypes;
-	
-	private int userDepartmentId;
-	
+
 	private AccessFilterType accessFilterType;
 
 	private Boolean returnState;
@@ -97,25 +99,8 @@ public class FormDataDaoFilter implements Serializable {
 	}
 
 	/**
-	 * Получает идентификатор подразделения, к которому относится пользователь, выполняющий запрос
-	 * Используется совместно с {@link #accessFilterType}
-	 * @return идентификатор подразделения, к которому относится пользователь, выполняющий запрос
-	 */
-	public int getUserDepartmentId() {
-		return userDepartmentId;
-	}
-
-	/**
-	 * Задать идентификатор подразделения, к которому относится пользователь, выполняющий запрос
-	 * @param userDepartmentId идентификатор подразделения пользователя
-	 */
-	public void setUserDepartmentId(int userDepartmentId) {
-		this.userDepartmentId = userDepartmentId;
-	}
-
-	/**
 	 * Получает способ, по которому будут отбрасываться записи, недоступные пользователю
-	 * Используется совместно с {@link #userDepartmentId}
+	 * Используется совместно с {@link #availableDepartmentIds} и {@link #availableFormDataKinds}
 	 * @return способ, по которому будут отбрасываться записи, недоступные пользователю
 	 */
 	public AccessFilterType getAccessFilterType() {
@@ -137,4 +122,32 @@ public class FormDataDaoFilter implements Serializable {
 	public void setReturnState(Boolean returnState) {
 		this.returnState = returnState;
 	}
+
+    /**
+     * Подразделения, доступные пользователю (работает только с AccessFilterType.AVAILABLE_DEPARTMENTS)
+     */
+    public List<Integer> getAvailableDepartmentIds() {
+        return availableDepartmentIds;
+    }
+
+    /**
+     * Подразделения, доступные пользователю (работает только с AccessFilterType.AVAILABLE_DEPARTMENTS)
+     */
+    public void setAvailableDepartmentIds(List<Integer> availableDepartmentIds) {
+        this.availableDepartmentIds = availableDepartmentIds;
+    }
+
+    /**
+     * Типы форм, доступные пользователю (работает только с AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND для оператора)
+     */
+    public List<FormDataKind> getAvailableFormDataKinds() {
+        return availableFormDataKinds;
+    }
+
+    /**
+     * Типы форм, доступные пользователю (работает только с AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND для оператора)
+     */
+    public void setAvailableFormDataKinds(List<FormDataKind> availableFormDataKinds) {
+        this.availableFormDataKinds = availableFormDataKinds;
+    }
 }

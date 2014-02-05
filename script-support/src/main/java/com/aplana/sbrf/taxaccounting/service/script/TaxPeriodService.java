@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
+import java.util.List;
 
 /**
  * Сервис для работы с налоговыми периодами
@@ -17,7 +16,7 @@ public interface TaxPeriodService {
 	 * Получить объект налогового периода по идентификатору периода
 	 * @param taxPeriodId идентификатор налогового периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DAOException если периода с заданным идентификатором не существует 
+	 * @throws DAOException если периода с заданным идентификатором не существует
 	 */
 	TaxPeriod get(int taxPeriodId);
 	
@@ -28,15 +27,4 @@ public interface TaxPeriodService {
 	 * @return список налоговых периодов по данному виду налога, отсортированный по убыванию даты начала периодоа
 	 */
 	List<TaxPeriod> listByTaxType(TaxType taxType);
-
-	/**
-	 *
-	 */
-	List<TaxPeriod> listByTaxTypeAndDate(TaxType taxType, Date from, Date to);
-
-	/**
-	 *
-	 * @param taxPeriod
-	 */
-	int add(TaxPeriod taxPeriod);
 }

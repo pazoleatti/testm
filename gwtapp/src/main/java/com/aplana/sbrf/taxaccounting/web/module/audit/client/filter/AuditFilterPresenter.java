@@ -40,79 +40,79 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         AuditClientSearchEvent.fire(this);
     }
 
-    @Override
-    public void onPrintButtonClicked() {
-        AuditFilterPrintEvent.fire(this);
-    }
-
-    @Override
-    public void onArchiveButtonClicked() {
-        AuditClientArchiveEvent.fire(this);
-    }
-
-
-    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers>{
+    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
         void setDepartments(List<Department> list, Set<Integer> availableValues);
+
         void setFormTypeId(Map<Integer, String> formTypesMap);
+
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
+
         void setFormDataKind(List<FormDataKind> list);
+
         void setFormDataTaxType(List<TaxType> taxTypeList);
+
         void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
+
         void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
+
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
+
         LogSystemFilter getFilterData();
+
         void setVisibleTaxFields();
+
         void setVisibleDeclarationFields();
+
         void hideAll();
     }
 
-    public void initFilterData(){
+    public void initFilterData() {
 
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
-            @Override
-            public void onSuccess(GetAuditFilterDataResult result) {
-                LogSystemFilterAvailableValues auditFilterDataAvaliableValues = result.getAvailableValues();
-                getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
-                        convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
-                getView().setFormTypeId(fillFormTypesMap(auditFilterDataAvaliableValues.getFormTypes()));
-                getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
-                getView().setFormDataKind(result.getFormDataKinds());
-                getView().setFormDataTaxType(result.getTaxTypes());
-            }
-        }, this));
+                    @Override
+                    public void onSuccess(GetAuditFilterDataResult result) {
+                        LogSystemFilterAvailableValues auditFilterDataAvaliableValues = result.getAvailableValues();
+                        getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
+                                convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
+                        getView().setFormTypeId(fillFormTypesMap(auditFilterDataAvaliableValues.getFormTypes()));
+                        getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
+                        getView().setFormDataKind(result.getFormDataKinds());
+                        getView().setFormDataTaxType(result.getTaxTypes());
+                    }
+                }, this));
 
     }
 
-    private Set<Integer> convertDepartmentsToIds(List<Department> source){
+    private Set<Integer> convertDepartmentsToIds(List<Department> source) {
         Set<Integer> result = new HashSet<Integer>();
-        for(Department department : source){
+        for (Department department : source) {
             result.add(department.getId());
         }
         return result;
     }
 
-    private Map<Integer, String> fillFormTypesMap(List<FormType> source){
+    private Map<Integer, String> fillFormTypesMap(List<FormType> source) {
         Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
         formTypesMap.put(null, "");
-        for(FormType formType : source){
+        for (FormType formType : source) {
             formTypesMap.put(formType.getId(), formType.getName());
         }
         return formTypesMap;
     }
 
-    private Map<Integer, String> fillDeclarationTypeMap(List<DeclarationType> source){
+    private Map<Integer, String> fillDeclarationTypeMap(List<DeclarationType> source) {
         Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
         formTypesMap.put(null, "");
-        for(DeclarationType formType : source){
+        for (DeclarationType formType : source) {
             formTypesMap.put(formType.getId(), formType.getName());
         }
         return formTypesMap;
     }
 
-    public LogSystemFilter getLogSystemFilter(){
+    public LogSystemFilter getLogSystemFilter() {
         return getView().getFilterData();
     }
 
@@ -123,7 +123,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             @Override
             public void onValueChange(ValueChangeEvent<TaxType> event) {
                 final TaxType taxType = event.getValue();
-                if(taxType == null) {
+                if (taxType == null) {
                     getView().updateReportPeriodPicker(new ArrayList<ReportPeriod>());
                     return;
                 }

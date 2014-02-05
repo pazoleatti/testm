@@ -9,8 +9,6 @@ import java.text.SimpleDateFormat;
 
 public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchResultItem> {
 
-    private static final SimpleDateFormat YEAR_FORMATTER = new SimpleDateFormat(Formats.YYYY.getFormat());
-
 	@Override
 	public FormDataSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
 		FormDataSearchResultItem result = new FormDataSearchResultItem();
@@ -27,7 +25,7 @@ public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchR
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setState(WorkflowState.fromId(rs.getInt("state")));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-        result.setReportPeriodYear(Integer.valueOf(YEAR_FORMATTER.format(rs.getDate("start_date"))));
+        result.setReportPeriodYear(rs.getInt("year"));
         Integer reportPeriodMonth = rs.getInt("period_order");
         result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);
         Integer returnSign = rs.getInt("return_sign");

@@ -200,7 +200,7 @@ void consolidationBank() {
         }
         // графа 11, 13..16
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
         if (row.getAlias() in [firstTotalRowAlias, secondTotalRowAlias]) {
             row.incomeTaxSumS = 0
@@ -463,11 +463,12 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 3
     def int colOffset = 0
     def int maxRow = 88
-    // номера строк разбитых на несколько в файле
-    def doubleRows = [46, 80, 81, 82]
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
+    def knu
+    def group
+    def type
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -485,19 +486,37 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        if ((rowIndex - 1) in doubleRows) { // если ячейки разделены
-            doubleRows.remove(doubleRows.indexOf(rowIndex - 1))
-            continue
-        }
         def curRow = getDataRow(rows, "R" + rowIndex)
-        rowIndex++
-
-        def xmlIndexCol = 5
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
+
+        knu = normalize(curRow.incomeTypeId)
+        group = normalize(curRow.incomeGroup)
+        type = normalize(curRow.incomeTypeByOperation)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def typeImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && type == typeImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty()) &&
+                        knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport)))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 5
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
@@ -519,6 +538,9 @@ void addData(def xml, int headRowCount) {
             curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
 }

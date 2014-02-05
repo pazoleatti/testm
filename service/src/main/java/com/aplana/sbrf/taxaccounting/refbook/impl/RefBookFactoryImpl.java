@@ -5,13 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import java.util.List;
 
@@ -56,13 +53,30 @@ public class RefBookFactoryImpl implements RefBookFactory {
         } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome102", RefBookDataProvider.class);
         } else if (RefBookUser.REF_BOOK_ID.equals(refBookId)) {
-			return applicationContext.getBean("RefBookUser", RefBookDataProvider.class);
-        } else {
-			RefBookDataProvider refBookDataProvider = applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);   // Исправление Марата, надо сделать получать данные отдельно для конкретных провайдеров
-            if (refBookDataProvider instanceof RefBookUniversal) {
-                ((RefBookUniversal) refBookDataProvider).setRefBookId(refBookId);
-            }
-			return refBookDataProvider;
+			return applicationContext.getBean("refBookUser", RefBookDataProvider.class);
+        } else if (RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Виды налоговых форм"
+			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_TYPE_TABLE_NAME);
+			refBookSimple.setWhereClause("STATUS = 0");
+			return refBookSimple;
+		} else if (RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Системные роли"
+			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
+			return refBookSimple;
+        } else if(RefBookSimpleReadOnly.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+             // TODO временное решение, потом переделать на свой провайдер (http://jira.aplana.com/browse/SBRFACCTAX-5534)
+            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(refBookId);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.OKTMO_TABLE_NAME);
+            refBookSimple.setWhereClause("STATUS = 0");
+            return refBookSimple;
+		} else {
+			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
+			refBookUniversal.setRefBookId(refBookId);
+			return refBookUniversal;
         }
     }
+
 }

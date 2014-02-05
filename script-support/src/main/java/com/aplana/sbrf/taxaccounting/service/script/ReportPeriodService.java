@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
 @ScriptExposed
@@ -14,7 +15,7 @@ public interface ReportPeriodService {
 	 * Получить объект отчётного периода по идентификатору периода
 	 * @param reportPeriodId идентификатор отчётного периода
 	 * @return объект, задаваемый идентификатором
-	 * @throws DAOException если периода с заданным идентификатором не существует 
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если периода с заданным идентификатором не существует
 	 */
 	ReportPeriod get(int reportPeriodId);
 	
@@ -104,4 +105,13 @@ public interface ReportPeriodService {
      * @return
      */
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+
+    /**
+     * Список отчетных периодов за период дат по виду налога
+     * @param taxType Вид налога
+     * @param startDate Начало периода
+     * @param endDate Конец периода
+     * @return Список отчетных периодов
+     */
+    List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 }

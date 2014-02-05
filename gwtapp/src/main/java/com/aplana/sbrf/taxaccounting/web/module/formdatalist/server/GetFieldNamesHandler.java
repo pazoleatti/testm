@@ -38,7 +38,7 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 				names.put(FormDataElementName.HEADER,  "Список налоговых форм");
 				names.put(FormDataElementName.FORM_KIND, "Тип налоговой формы");
 				names.put(FormDataElementName.FORM_TYPE, "Вид налоговой формы");
-				names.put(FormDataElementName.REPORT_PERIOD, "Отчетный период");
+				names.put(FormDataElementName.REPORT_PERIOD, "Период");
 				break;
 			default:
 				break;

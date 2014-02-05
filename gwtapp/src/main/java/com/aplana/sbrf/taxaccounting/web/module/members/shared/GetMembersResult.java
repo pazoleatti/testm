@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -13,15 +12,14 @@ import java.util.List;
  */
 public class GetMembersResult implements Result {
 
-    private PagingResult<TAUserFull> taUserList;
+    private PagingResult<TAUserFullWithDepartmentPath> taUserList;
 	private int startIndex;
-	private List<Department> departments;
 
-	public PagingResult<TAUserFull> getTaUserList() {
+	public PagingResult<TAUserFullWithDepartmentPath> getTaUserList() {
 		return taUserList;
 	}
 
-	public void setTaUserList(PagingResult<TAUserFull> taUserList) {
+	public void setTaUserList(PagingResult<TAUserFullWithDepartmentPath> taUserList) {
 		this.taUserList = taUserList;
 	}
 
@@ -31,13 +29,5 @@ public class GetMembersResult implements Result {
 
 	public void setStartIndex(int startIndex) {
 		this.startIndex = startIndex;
-	}
-
-	public List<Department> getDepartments() {
-		return departments;
-	}
-
-	public void setDepartments(List<Department> departments) {
-		this.departments = departments;
 	}
 }

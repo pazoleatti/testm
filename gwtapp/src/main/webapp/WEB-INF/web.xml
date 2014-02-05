@@ -7,7 +7,6 @@
 		<param-value>
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
-			/WEB-INF/security-preauth.xml
             /WEB-INF/spring-ejb.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
@@ -24,13 +23,21 @@
     </listener>
 
     <filter>
-        <!--<filter-name>springSecurityFilterChain</filter-name>-->
-        <filter-name>filterChainProxy</filter-name>
+        <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
     <filter-mapping>
-        <!--<filter-name>springSecurityFilterChain</filter-name>-->
-        <filter-name>filterChainProxy</filter-name>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Добавляем наш фильтр для отлавливания AccessDeniedException -->
+    <filter>
+        <filter-name>errorHandlerFilter</filter-name>
+        <filter-class>com.aplana.sbrf.taxaccounting.web.module.audit.server.ErrorHandlerFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>errorHandlerFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -55,15 +62,7 @@
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 
-<!--	<servlet>
-		<servlet-name>logout</servlet-name>
-		<servlet-class>com.aplana.sbrf.taxaccounting.web.servlet.LogoutServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>logout</servlet-name>
-		<url-pattern>/logout</url-pattern>
-	</servlet-mapping>-->
-
+	<!-- Login page -->
 	<servlet>
 		<servlet-name>login</servlet-name>
 		<jsp-file>/WEB-INF/jsp/login.jsp</jsp-file>
@@ -72,6 +71,12 @@
 		<servlet-name>login</servlet-name>
 		<url-pattern>/login</url-pattern>
 	</servlet-mapping>
+
+	<!-- Error 403. Access forbidden. Unknown user. -->
+	<error-page>
+		<error-code>403</error-code>
+		<location>/WEB-INF/jsp/forbidden.jsp</location>
+	</error-page>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
@@ -189,7 +194,6 @@
 		<web-resource-collection>
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
-            <!--<url-pattern>/logout</url-pattern>-->
 			<url-pattern>/j_security_check</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>

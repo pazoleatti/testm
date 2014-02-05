@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.shared;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.gwtplatform.dispatch.shared.Result;
 
@@ -10,26 +10,14 @@ public class InitRefBookResult implements Result {
 	private static final long serialVersionUID = 1099858218534060155L;
 	
 	private long refBookId;
-	
-	private List<Date> versions;
 
-	private List<String> headers;
+	private Map<String, Integer> headers;
 
-    private Date defaultValue;
-	
-	public List<Date> getVersions() {
-		return versions;
-	}
-
-	public void setVersions(List<Date> versions) {
-		this.versions = versions;
-	}
-
-	public List<String> getHeaders() {
+	public Map<String, Integer> getHeaders() {
 		return headers;
 	}
 
-	public void setHeaders(List<String> headers) {
+	public void setHeaders(Map<String, Integer> headers) {
 		this.headers = headers;
 	}
 
@@ -40,13 +28,4 @@ public class InitRefBookResult implements Result {
 	public void setRefBookId(long refBookId) {
 		this.refBookId = refBookId;
 	}
-
-
-    public Date getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(Date defaultValue) {
-        this.defaultValue = defaultValue;
-    }
 }

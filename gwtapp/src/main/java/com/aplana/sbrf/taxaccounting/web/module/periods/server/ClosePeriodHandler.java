@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ClosePeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.ClosePeriodResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -29,10 +30,13 @@ public class ClosePeriodHandler extends AbstractActionHandler<ClosePeriodAction,
     @Autowired
     private LogEntryService logEntryService;
 
+	@Autowired
+	private SecurityService securityService;
+
 	@Override
 	public ClosePeriodResult execute(ClosePeriodAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
-		reportPeriodService.close(action.getTaxType(), action.getReportPeriodId(), action.getDepartmentId(), logs);
+		reportPeriodService.close(action.getTaxType(), action.getReportPeriodId(), action.getDepartmentId(), logs, securityService.currentUserInfo());
 		ClosePeriodResult result = new ClosePeriodResult();
         result.setUuid(logEntryService.save(logs));
 		return result;

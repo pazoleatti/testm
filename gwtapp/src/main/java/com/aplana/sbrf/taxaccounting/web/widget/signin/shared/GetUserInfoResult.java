@@ -6,6 +6,7 @@ public class GetUserInfoResult implements Result{
 	
 	private String userName;
 	private String roleAnddepartment;
+    private String hint;
 
 	public String getUserName() {
 		return userName;
@@ -22,4 +23,12 @@ public class GetUserInfoResult implements Result{
 	public void setRoleAnddepartment(String department) {
 		this.roleAnddepartment = department;
 	}
+
+    public String getHint() {
+        return hint;
+    }
+
+    public void setHint(String hint) {
+        this.hint = hint;
+    }
 }

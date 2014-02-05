@@ -39,54 +39,45 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
 	@Override
 	public GetPeriodDataResult execute(GetPeriodDataAction action, ExecutionContext executionContext) throws ActionException {
 		GetPeriodDataResult res = new GetPeriodDataResult();
-		//TODO Перенести фильтрацию по датам в сервисы
-		List<DepartmentReportPeriod> reportPeriods = periodService.listByDepartmentId(action.getDepartmentId());
 
-        //Получаем подразделение-получатель
-        //TODO заглушка. Надо получать родительское подразделение по источникам-приемникам из виджета подразделений
-        Department receiverDepartment = departmentService.getParent((int) action.getDepartmentId());
 
-        //Получаем оповещения по связке отправитель-получатель. В дальнейшем отберем по отчетному периоду
-        Map<Integer, Notification> notifications = notificationService.mapByDepartments((int) action.getDepartmentId(),
-                receiverDepartment != null ? receiverDepartment.getId() : null);
-		Collections.sort(reportPeriods, new Comparator<DepartmentReportPeriod>(){
-			@Override
-			public int compare(DepartmentReportPeriod o1,
-					DepartmentReportPeriod o2) {
-                return o1.getReportPeriod().getOrder() - o2.getReportPeriod().getOrder();
-                  }
-		});
 		Map<Integer, List<TableRow>> per = new TreeMap<Integer, List<TableRow>>();
-		for (DepartmentReportPeriod period : reportPeriods) {
-			int periodYear = period.getReportPeriod().getYear(); 
-			TaxType periodTaxType = period.getReportPeriod().getTaxType();
-			if (periodYear >= action.getFrom() && periodYear <= action.getTo() && periodTaxType == action.getTaxType()) {
-				if (per.get(periodYear) == null) {
-					List<TableRow> tableRows = new ArrayList<TableRow>();
-					per.put(periodYear, tableRows);
+		List<DepartmentReportPeriod> drp = periodService.listByDepartmentIdAndTaxType(action.getDepartmentId(), action.getTaxType());
+		List<Integer> depIds = new ArrayList<Integer>();
+		for (DepartmentReportPeriod d : drp) {
+			depIds.add(d.getDepartmentId().intValue());
+		}
+		Map<Integer, Department> departmentMap = departmentService.getDepartments(depIds);
+
+		for (DepartmentReportPeriod period : drp) {
+			int year = period.getReportPeriod().getTaxPeriod().getYear();
+			if ((action.getFrom() <= year) && (year <= action.getTo())) {
+				if (per.get(year) == null) {
+					per.put(year, new ArrayList<TableRow>());
 				}
 				TableRow row = new TableRow();
 				row.setPeriodName(period.getReportPeriod().getName());
-				row.setPeriodCondition(period.isActive());
-				row.setDepartmentId(action.getDepartmentId());
 				row.setReportPeriodId(period.getReportPeriod().getId());
-				row.setSubHeader(false);
-                row.setBalance(period.isBalance());
-                row.setCorrectPeriod(period.getCorrectPeriod());
-                row.setDeadline(notifications.containsKey(period.getReportPeriod().getId()) ?
-                        notifications.get(period.getReportPeriod().getId()).getDeadline() : null);
-				per.get(periodYear).add(row);
+				row.setDepartmentId(period.getDepartmentId());
+				row.setPeriodCondition(period.isActive());
+				row.setBalance(period.isBalance());
+				row.setYear(year);
+				row.setCorrectPeriod(period.getCorrectPeriod());
+				Department dep = departmentMap.get(period.getDepartmentId().intValue());
+				Notification notification = notificationService.get(period.getReportPeriod().getId(), dep.getId(), dep.getParentId());
+				row.setDeadline(notification != null ? notification.getDeadline() : null);
+				per.get(year).add(row);
 			}
 		}
-		List<TableRow> resultRows = new ArrayList<TableRow>();
+		List<TableRow> rows = new ArrayList<TableRow>();
 		for (Map.Entry<Integer, List<TableRow>> rec : per.entrySet()) {
 			TableRow header = new TableRow();
 			header.setPeriodName("Календарный год " + (rec.getKey()));
 			header.setSubHeader(true);
-			resultRows.add(header);
-			resultRows.addAll(rec.getValue());
+			rows.add(header);
+			rows.addAll(rec.getValue());
 		}
-		res.setRows(resultRows);
+		res.setRows(rows);
 
 		return res;
 	}

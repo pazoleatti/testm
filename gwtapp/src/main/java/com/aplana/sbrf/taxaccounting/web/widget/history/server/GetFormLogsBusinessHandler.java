@@ -45,6 +45,7 @@ public class GetFormLogsBusinessHandler extends
 		Map<Integer, String> names = new HashMap<Integer, String>();
 		Map<Integer, String> departments = new HashMap<Integer, String>();
 		for (LogBusiness log : logs) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			names.put(log.getUserId(), userService.getUser(log.getUserId()).getName());
 			departments.put(log.getDepartmentId(), departmentService.getDepartment(log.getDepartmentId()).getName());
 		}

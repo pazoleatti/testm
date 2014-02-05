@@ -92,10 +92,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         // Контролёр или Контролёр НС
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
-            if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(reportPeriod.getTaxType())).contains(declarationDepartment.getId())) {
-                return;
-            }
+			if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
+					asList(reportPeriod.getTaxPeriod().getTaxType())).contains(declarationDepartment.getId())) {
+				return;
+			}
         }
 
         // Прочие
@@ -114,12 +114,15 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			int departmentId, int reportPeriodId) {
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
+		if (!reportPeriodService.isActivePeriod(reportPeriodId, departmentId)) {
+			throw new AccessDeniedException("Выбранный период закрыт");
+		}
 		DeclarationTemplate declarationTemplate = declarationTemplateDao
 				.get(declarationTemplateId);
-		int declarationTypeId = declarationTemplate.getDeclarationType()
+		int declarationTypeId = declarationTemplate.getType()
 				.getId();
 
-		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getDeclarationType().getTaxType());
+		List<DepartmentDeclarationType> ddts = sourceService.getDDTByDepartment(departmentId, declarationTemplate.getType().getTaxType());
 		boolean found = false;
 		for (DepartmentDeclarationType ddt : ddts) {
 			if (ddt.getDeclarationTypeId() == declarationTypeId) {

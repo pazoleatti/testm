@@ -35,29 +35,17 @@ public class InitRefBookHandler extends
 	public InitRefBookResult execute(InitRefBookAction action,
 			ExecutionContext context) throws ActionException {
 		InitRefBookResult result = new InitRefBookResult();
-		List<String> headers = new ArrayList<String>();
+        Map<String, Integer> headers = new LinkedHashMap<String, Integer>();
 
 		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
 			if (refBookAttribute.isVisible()) {
-				headers.add(refBookAttribute.getName());
+				headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
 			}
 		}
 		
 		result.setRefBookId(refBook.getId());
 		result.setHeaders(headers);
-
-		List<Date> versions = new ArrayList<Date>();
-		if (action.getDate1()!=null && action.getDate2()!=null){
-			versions.addAll(refBookFactory.getDataProvider(refBook.getId()).getVersions(action.getDate1(), action.getDate2()));
-		} else {
-			versions.add(new Date());
-		}
-
-        Date defaultValue = Collections.max(versions);
-
-		result.setVersions(versions);
-        result.setDefaultValue(defaultValue);
 		
 		return result;
 	}

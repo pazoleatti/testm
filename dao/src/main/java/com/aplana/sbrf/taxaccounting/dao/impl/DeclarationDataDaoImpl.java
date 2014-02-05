@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -217,13 +219,21 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		if (filter.getDeclarationTypeId() != null) {
 			sql.append(" AND dectype.id = ").append(filter.getDeclarationTypeId());
 		}
+
+        if (filter.getFormState() != null) {
+            if (filter.getFormState() == WorkflowState.CREATED) {
+                sql.append(" AND dec.is_accepted = 0");
+            } else if (filter.getFormState() == WorkflowState.ACCEPTED) {
+                sql.append(" AND dec.is_accepted = 1");
+            }
+        }
 	}
 
 	private void appendSelectClause(StringBuilder sql) {
 		sql.append("SELECT dec.ID as declaration_data_id, dec.declaration_template_id, dec.is_accepted,")
 				.append(" dectype.ID as declaration_type_id, dectype.NAME as declaration_type_name,")
 				.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.start_date");
+				.append(" rp.ID as report_period_id, rp.NAME as report_period_name, dectype.TAX_TYPE, tp.year");
 	}
 
 	public void appendOrderByClause(StringBuilder sql, DeclarationDataSearchOrdering ordering, boolean ascSorting) {
@@ -280,6 +290,23 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         );
         if (count == 0) {
             throw new DaoException("Не удалось обновить декларацию с id = %d, так как она не существует.");
+        }
+    }
+
+    @Override
+    public List<Long> findDeclarationDataByFormTemplate(int templateId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from declaration_data where declaration_template_id = ?",
+                    new Object[] {templateId},
+                    new int[] {Types.NUMERIC},
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        } catch (DataAccessException e) {
+            logger.error(String.format("Ошибка поиска НФ для заданного шаблона %d", templateId), e);
+            throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", templateId);
         }
     }
 

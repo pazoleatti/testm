@@ -1,92 +1,92 @@
 package com.aplana.gwt.client;
 
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.*;
-
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 
 /**
  * Модальное окно.
+ *
  * @author : vpetrov
- * Date: 16.12.13
+ * @since : 16.12.13
  */
-public class ModalWindow extends DialogBox {
+public class ModalWindow extends DialogBox implements CanHide {
 
     Image close;
     HTML title;
 
-    private PopupPanel popup;
-    private Image icon = new Image();
-    private VerticalPanel rootPanel = new VerticalPanel();
-    private SimplePanel mainPanel = new SimplePanel();
+    private ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
+    private Image icon = new Image(mwRes.iconImage());
     private FlowPanel captionPanel = new FlowPanel();
     private FlowPanel captionTitlePanel = new FlowPanel();
-    private HorizontalPanel footerPanel = new HorizontalPanel();
-    private FlowPanel defaultButtonsPanel = new FlowPanel();
-    private FlowPanel additionalButtonsPanel = new FlowPanel();
-    private Button saveButton;
-    private Button cancelButton;
+
+    private OnHideHandler<CanHide> hideHandler = new OnHideHandler<CanHide>() {
+        @Override
+        public void OnHide(CanHide modalWindow) {
+            modalWindow.hide();
+        }
+    };
 
     /**
-     * @param title - заголовок окна
+     * @param title   - заголовок окна
      * @param iconUrl - url ссылка на иконку в заголовке окна
      */
+    @UiConstructor
     public ModalWindow(String title, String iconUrl) {
 
         super(false, true);
-        popup = this;
         this.addStyleName("AplanaModalWindow");
 
+        close = new Image(mwRes.closeImage());
 
-        ModalWindowResources closeImgRes = GWT.create(ModalWindowResources.class);
-        close = new Image(closeImgRes.closeImage());
-
-        if (!iconUrl.equals("")){
+        if (!iconUrl.equals("")) {
             icon.setUrl(iconUrl);
-            icon.setVisible(true);
-        }
-        else {
-            icon.setVisible(false);
         }
 
         // Переделываем стиль DialogBox
         Element td = getCellElement(0, 1);
-        Element r0c0 = getCellElement (0,0);
-        Element r0c2 = getCellElement (0,2);
-        Element r1c0 = getCellElement (1,0);
-        Element r1c2 = getCellElement (1,2);
-        Element r2c0 = getCellElement (2,0);
-        Element r2c2 = getCellElement (2,2);
+        Element r0c0 = getCellElement(0, 0);
+        Element r0c2 = getCellElement(0, 2);
+        Element r1c0 = getCellElement(1, 0);
+        Element r1c2 = getCellElement(1, 2);
+        Element r2c0 = getCellElement(2, 0);
+        Element r2c2 = getCellElement(2, 2);
 
         // Удаляем дивы у DialigBox что бы не было зазоров
-        DOM.removeChild(((Element)r0c0.getParentElement()), (Element) r0c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r0c2.getParentElement()), (Element) r0c2.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r1c0.getParentElement()), (Element) r1c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r1c2.getParentElement()), (Element) r1c2.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r2c0.getParentElement()), (Element) r2c0.getParentElement().getFirstChildElement());
-        DOM.removeChild(((Element)r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r0c0.getParentElement()), (Element) r0c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r0c2.getParentElement()), (Element) r0c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r1c0.getParentElement()), (Element) r1c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r1c2.getParentElement()), (Element) r1c2.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r2c0.getParentElement()), (Element) r2c0.getParentElement().getFirstChildElement());
+        DOM.removeChild(((Element) r2c2.getParentElement()), (Element) r2c2.getParentElement().getFirstChildElement());
 
         Element td1 = getCellElement(1, 1);
+        Element td2 = getCellElement(2, 1);
 
         // Убираем паддинги у DialigBox
         td.getParentElement().addClassName("OverrideCenter");
         td1.getParentElement().addClassName("OverrideCenter");
+        td2.getParentElement().addClassName("OverrideCenter");
 
         this.title = new HTML();
         this.title.setText(title);
         this.title.addStyleName("captionTitle");
-        if (icon.isVisible())
-            captionTitlePanel.add(icon);
 
         icon.addStyleName("icon");
+        captionTitlePanel.add(icon);
+
         close.addStyleName("closeButton");
         captionTitlePanel.addStyleName("captionTitlePanel");
 
@@ -95,149 +95,93 @@ public class ModalWindow extends DialogBox {
         captionPanel.add(close);
         captionPanel.addStyleName("caption");
 
-        saveButton = new Button("Сохранить");
-        saveButton.addStyleName("footerButton");
-        cancelButton = new Button("Отмена");
-        cancelButton.addStyleName("footerButton");
-
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                popup.hide();
-            }
-        });
-
-        additionalButtonsPanel.addStyleName("additionalButtonsPanel");
-
-        defaultButtonsPanel.add(saveButton);
-        defaultButtonsPanel.add(cancelButton);
-        defaultButtonsPanel.addStyleName("defaultButtonPanel");
-
-        footerPanel.add(additionalButtonsPanel);
-        footerPanel.add(defaultButtonsPanel);
-        footerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        footerPanel.addStyleName("footerPanel");
-
-        mainPanel.addStyleName("mainPanel");
-
-        rootPanel.addStyleName("rootPanel");
-        rootPanel.add(mainPanel);
-        rootPanel.add(footerPanel);
-
+        this.setGlassEnabled(true);
         DOM.removeChild(td, (Element) td.getFirstChildElement());
         DOM.appendChild(td, captionPanel.getElement());
+    }
 
-        super.add(rootPanel);
-
-        //super.setGlassEnabled(true);
-        super.setAnimationEnabled(true);
-        //super.center();
+    public ModalWindow(String title, OnHideHandler<CanHide> hideHandler) {
+        this(title, "");
+        this.hideHandler = hideHandler;
     }
 
     /**
      * @param title - заголовок окна
      */
-    public ModalWindow(String title)
-    {
+    public ModalWindow(String title) {
         this(title, "");
     }
 
-    public ModalWindow()
-    {
+    public ModalWindow(OnHideHandler<CanHide> hideHandler) {
+        this("");
+        this.hideHandler = hideHandler;
+    }
+
+    public ModalWindow() {
         this("");
     }
 
-    /**
-     * Добавляет дополнительные кнопки в нижнюю панель слева
-     * @param w - добовляемая кнопка
-     */
-    public  void addAdditionalButton(Widget w){
-        additionalButtonsPanel.add(w);
-    }
-
-    /**
-     * Очищает дополнительные кнопки
-     */
-    public void clearAdditionalButton(){
-        additionalButtonsPanel.clear();
-    }
-
-    /**
-     * Добавляет handler к кнопке "сохранить"
-     * @param handler - хендлер
-     */
-    public void addSaveButtonClickHandler (ClickHandler handler){
-        saveButton.addClickHandler(handler);
-    }
-
-    /**
-     * Добавляет handler к кнопке "отменить"
-     * @param handler - хендлер
-     */
-    public void addСancelButtonClickHandler(ClickHandler handler){
-        cancelButton.addClickHandler(handler);
+    @Override
+    public void setTitle(String title) {
+        this.title.setText(title);
     }
 
     @Override
-    public void add(Widget w){
-        this.mainPanel.add(w);
-    }
-
-    @Override
-    public void clear(){
-        this.mainPanel.clear();
-    }
-
-    @Override
-    public String getHTML()
-    {
-        return this.title.getHTML();
-    }
-
-    @Override
-    public String getText()
-    {
+    public String getTitle() {
         return this.title.getText();
     }
 
     @Override
-    public void setHTML(String html)
-    {
+    public String getHTML() {
+        return this.title.getHTML();
+    }
+
+    @Override
+    public String getText() {
+        return this.title.getText();
+    }
+
+    @Override
+    public void setHTML(String html) {
         this.title.setHTML(html);
     }
 
     @Override
-    public void setText(String text)
-    {
+    public void setText(String text) {
         this.title.setText(text);
     }
 
     @Override
-    protected void onPreviewNativeEvent(Event.NativePreviewEvent event)
-    {
+    protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
         NativeEvent nativeEvent = event.getNativeEvent();
-
         if ((!event.isCanceled()
                 && (event.getTypeInt() == Event.ONCLICK)
                 && isCloseEvent(nativeEvent))
-                ||(Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE))
-        {
-            this.hide();
-        }
-        if (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER){
-            saveButton.fireEvent(new ClickEvent(){});
+                || (Event.ONKEYUP == event.getTypeInt() && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE)) {
+            hideHandler.OnHide(this);
         }
         super.onPreviewNativeEvent(event);
     }
 
-    private boolean isCloseEvent(NativeEvent event)
-    {
+    private boolean isCloseEvent(NativeEvent event) {
         return event.getEventTarget().equals(close.getElement());
+    }
+
+    public void setOnHideHandler(OnHideHandler<CanHide> hideHandler) {
+        if (hideHandler != null){
+            this.hideHandler = hideHandler;
+        }
     }
 
     interface ModalWindowResources extends ClientBundle {
         @Source("close.png")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource closeImage();
+
+        @Source("icon.png")
+        @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
+        ImageResource iconImage();
+
     }
+
 }

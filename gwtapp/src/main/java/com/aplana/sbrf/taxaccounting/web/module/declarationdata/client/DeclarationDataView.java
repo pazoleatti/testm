@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.uibinder.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.inject.*;
 import com.gwtplatform.mvp.client.*;
 
@@ -37,7 +37,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	Anchor returnAnchor;
 	@UiField
-	Anchor infoAnchor;
+    LinkButton infoAnchor;
 
 	@UiField
 	Label type;
@@ -52,11 +52,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiField
 	PdfViewerView pdfViewer;
-	@UiField
-	Panel downloadXml;
 
 	@UiField
-	CustomDateBox dateBox;
+    DateMaskBoxPicker dateBox;
 
 	@Inject
 	@UiConstructor

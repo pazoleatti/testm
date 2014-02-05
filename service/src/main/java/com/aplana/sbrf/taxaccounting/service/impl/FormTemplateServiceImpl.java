@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -46,6 +43,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     private final Log logger = LogFactory.getLog(getClass());
 
+    private Calendar calendar = Calendar.getInstance();
+
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
@@ -68,9 +67,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		return formTemplateDao.get(formTemplateId);
 	}
 
+    @Transactional(readOnly = false)
 	@Override
 	public int save(FormTemplate formTemplate) {
-		return formTemplateDao.save(formTemplate);
+        if (formTemplate.getId() != null)
+		    return formTemplateDao.save(formTemplate);
+        else
+            return formTemplateDao.saveNew(formTemplate);
 	}
 
 	@Override
@@ -136,14 +139,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         if(formTemplate.getRows().isEmpty()){
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-        }else {
-            System.out.println("formTemplate: " + formTemplate.getRows().size());
         }
         if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
             FormDataUtils.setValueOners(formTemplate.getHeaders());
-        }else {
-            System.out.println("formTemplate: " + formTemplate.getHeaders().size());
         }
         return formTemplate;
     }
@@ -152,9 +151,123 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public List<FormTemplate> getByFilter(TemplateFilter filter) {
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
         for (Integer id : formTemplateDao.getByFilter(filter)) {
+            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             formTemplates.add(formTemplateDao.get(id));
         }
         return formTemplates;
+    }
+
+    @Override
+    public List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
+        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
+        for (Integer id : formTemplateIds)
+            formTemplates.add(formTemplateDao.get(id));
+        return formTemplates;
+    }
+
+    @Override
+    public List<SegmentIntersection> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+
+        int formTypeId = formTemplate.getType().getId();
+        List<SegmentIntersection> segmentIntersections = new LinkedList<SegmentIntersection>();
+
+        /*Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());*/
+        List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
+        formTemplateVersionIds.addAll(formTemplateDao.getFormTemplateVersions(formTypeId, formTemplate.getId() != null ? formTemplate.getId() : 0,
+                statusList, formTemplate.getVersion(), actualEndVersion));
+
+        if (!formTemplateVersionIds.isEmpty()){
+            for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
+                SegmentIntersection segmentIntersection = new SegmentIntersection();
+                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
+                FormTemplate beginTemplate = formTemplateDao.get(formTemplateVersionIds.get(i));
+                FormTemplate endTemplate = formTemplateDao.get(formTemplateVersionIds.get(i++));
+                segmentIntersection.setStatus(beginTemplate.getStatus());
+                segmentIntersection.setBeginDate(beginTemplate.getVersion());
+                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion().getTime()));
+                segmentIntersection.setTemplateId(beginTemplate.getId());
+
+                segmentIntersections.add(segmentIntersection);
+            }
+
+            SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
+            FormTemplate lastBeginTemplate = formTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
+            int idRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, lastBeginTemplate.getVersion());
+            lastSegmentIntersection.setStatus(lastBeginTemplate.getStatus());
+            lastSegmentIntersection.setBeginDate(lastBeginTemplate.getVersion());
+            lastSegmentIntersection.setEndDate(getFTEndDate(idRight));
+            lastSegmentIntersection.setTemplateId(lastBeginTemplate.getId());
+            segmentIntersections.add(lastSegmentIntersection);
+            return segmentIntersections;
+        }
+
+        /*if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
+            return formTemplateVersionIds;*/
+        //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
+        int idLeft = formTemplateDao.getNearestFTVersionIdLeft(formTypeId, statusList, formTemplate.getVersion());
+        if (idLeft != 0){
+            FormTemplate beginTemplate = formTemplateDao.get(idLeft);
+            int idLeftRight = formTemplateDao.getNearestFTVersionIdRight(formTypeId, statusList, beginTemplate.getVersion());
+            SegmentIntersection segmentIntersection = new SegmentIntersection();
+            segmentIntersection.setStatus(beginTemplate.getStatus());
+            segmentIntersection.setBeginDate(beginTemplate.getVersion());
+            segmentIntersection.setEndDate(getFTEndDate(idLeftRight));
+            segmentIntersection.setTemplateId(beginTemplate.getId());
+
+            segmentIntersections.add(segmentIntersection);
+        }
+        return segmentIntersections;
+    }
+
+    @Override
+    public int delete(FormTemplate formTemplate) {
+        switch (formTemplate.getStatus()){
+            case FAKE:
+                return formTemplateDao.delete(formTemplate.getId());
+            default:
+                formTemplate.setStatus(VersionedObjectStatus.DELETED);
+                return formTemplateDao.save(formTemplate);
+        }
+    }
+
+    @Override
+    public FormTemplate getNearestFTRight(int formTemplateId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+
+        //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id == 0)
+            return null;
+        return formTemplateDao.get(id);
+    }
+
+    @Override
+    public Date getFTEndDate(int formTemplateId) {
+        if (formTemplateId == 0)
+            return null;
+        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), statusList, formTemplate.getVersion());
+        if (id == 0)
+            return null;
+        FormTemplate templateEnd = formTemplateDao.get(id);
+        if (templateEnd.getStatus() == VersionedObjectStatus.FAKE){
+            return templateEnd.getVersion();
+        }else {
+            return addCalendar(Calendar.DAY_OF_YEAR, -1, templateEnd.getVersion().getTime());
+        }
+    }
+
+    @Override
+    public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
+        List<Integer> statusList = createStatusList(status);
+        return formTemplateDao.versionTemplateCount(formTypeId, statusList);
     }
 
     @Override
@@ -236,4 +349,26 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 			}
 		}
 	}
+
+    private Date addCalendar(int fieldNumber, int numberDays, long actualDate){
+        calendar.setTime(new Date(actualDate));
+        calendar.add(fieldNumber, numberDays);
+        Date time = calendar.getTime();
+        calendar.clear();
+        return time;
+    }
+
+    private List<Integer> createStatusList(VersionedObjectStatus[] status){
+        List<Integer> statusList = new ArrayList<Integer>();
+        if (status.length == 0){
+            statusList.add(VersionedObjectStatus.NORMAL.getId());
+            statusList.add(VersionedObjectStatus.FAKE.getId());
+            statusList.add(VersionedObjectStatus.DRAFT.getId());
+        }else {
+            for (VersionedObjectStatus objectStatus : status)
+                statusList.add(objectStatus.getId());
+        }
+
+        return statusList;
+    }
 }

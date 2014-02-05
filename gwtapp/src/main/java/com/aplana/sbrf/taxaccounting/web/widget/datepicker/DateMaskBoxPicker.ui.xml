@@ -1,0 +1,44 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui">
+    <ui:style>
+        .imageStyle {
+            border: 1px solid #008000;
+            border-right: 0;
+            vertical-align: text-bottom;
+            cursor: pointer;
+            float: left;
+            margin-left: -20px;
+        }
+
+        .clearBtn {
+            margin-left: -31px;
+            margin-top: 7px;
+            cursor: pointer;
+            float: left;
+        }
+
+        .textBox{
+            float: left;
+            height: 15px;
+            vertical-align: text-bottom;
+            width: 100%;
+        }
+
+        .main{
+            padding: 0;
+            min-width: 100px;
+            min-height: 21px;
+            line-height: 12px;
+        }
+    </ui:style>
+
+    <ui:with field="imageResources"
+             type="com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker.Icons"/>
+
+    <g:HTMLPanel ui:field="mainPanel" addStyleNames="{style.main}">
+        <mask:DateMaskBox ui:field="dateBox" addStyleNames="{style.textBox}"/>
+        <g:Image ui:field="clearImage" resource="{imageResources.clearBtn}" styleName="{style.clearBtn}"/>
+        <g:Image ui:field="calendarImage" resource="{imageResources.calPickerBtn}" styleName="{style.imageStyle}"/>
+    </g:HTMLPanel>
+</ui:UiBinder>

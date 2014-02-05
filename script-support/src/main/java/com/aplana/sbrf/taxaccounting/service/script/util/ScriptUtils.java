@@ -34,28 +34,28 @@ public final class ScriptUtils {
     private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %d содержит значение «%s», которое не " +
             "соответствует дате в формате «%s»!";
 
-    private static String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Ожидается «%s» вместо «%s»!";
 
-    private static String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество граф менее ожидаемого!";
 
-    private static String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
             "Количество строк в заголовке менее ожидаемого!";
 
-    private static String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
 
-    private static String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
 
-    private static String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
 
-    private static String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
 
-    private static String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
 
-    private static String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
+    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
 
-    private static String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
+    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -250,7 +250,7 @@ public final class ScriptUtils {
             for (int j = 0; j < fromRect.getWidth(); j++) {
                 Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
                 Cell cell = toRows.get(toRect.y1 + i).getCell(toCols.get(toRect.x1 + j).getAlias());
-                cell.setValue(value);
+                cell.setValue(value, null);
             }
         }
     }
@@ -653,7 +653,7 @@ public final class ScriptUtils {
                     }
                 }
             }
-            totalRow.getCell(alias).setValue(sum);
+            totalRow.getCell(alias).setValue(sum, null);
         }
     }
 
@@ -676,7 +676,7 @@ public final class ScriptUtils {
             }
             for (String alias : columns) {
                 if (!totalSums.containsKey(alias)) {
-                    totalSums.put(alias, BigDecimal.valueOf(0));
+                    totalSums.put(alias, BigDecimal.ZERO);
                 }
                 BigDecimal val = (BigDecimal) row.getCell(alias).getValue();
                 if (val != null) {
@@ -690,7 +690,7 @@ public final class ScriptUtils {
                     totalSums.put(alias, BigDecimal.valueOf(0));
                 }
                 BigDecimal value = (BigDecimal) totalRow.getCell(alias).getValue();
-                BigDecimal totalValue = (value != null ? value : new BigDecimal(0));
+                BigDecimal totalValue = (value != null ? value : BigDecimal.ZERO);
                 if (totalSums.get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_TOTAL, getColumnName(totalRow, alias));
                     if (required) {
@@ -726,7 +726,7 @@ public final class ScriptUtils {
 
                 Map<String, BigDecimal> sums = new HashMap<String, BigDecimal>();
                 for (String alias : columns) {
-                    sums.put(alias, BigDecimal.valueOf(0));
+                    sums.put(alias, BigDecimal.ZERO);
                 }
                 totalSums.put(subAlias, sums);
             }
@@ -755,7 +755,7 @@ public final class ScriptUtils {
         for (String sub : subAliases) {
             for (String alias : columns) {
                 BigDecimal value = (BigDecimal) totalRows.get(sub).getCell(alias).getValue();
-                BigDecimal totalValue = (value != null ? value : new BigDecimal(0));
+                BigDecimal totalValue = (value != null ? value : BigDecimal.ZERO);
                 if (totalSums.get(sub).get(alias).compareTo(totalValue) != 0) {
                     String msg = String.format(WRONG_SUBTOTAL, sub, getColumnName(dataRows.get(0), alias));
                     if (required) {
@@ -766,5 +766,22 @@ public final class ScriptUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Приводит текст к удобному для сравнения виду (обрезает, убирает лишние пробелы, если остается только крестик, то заменяет на пустую строку)
+     * @param value
+     * @return
+     */
+    public static String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
+        value = value.replaceAll("\n", " ");
+        value = com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
+        if (value.equals("x") || value.equals("х")) {//если x или икс
+            return "";
+        }
+        return value;
     }
 }

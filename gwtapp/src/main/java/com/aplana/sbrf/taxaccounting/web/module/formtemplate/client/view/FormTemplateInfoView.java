@@ -1,18 +1,26 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.*;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.uibinder.client.*;
-import com.google.gwt.user.client.ui.*;
-import com.google.inject.*;
-import com.gwtplatform.mvp.client.*;
+import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateInfoPresenter;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.Date;
 
 
 public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiHandlers> implements FormTemplateInfoPresenter.MyView{
 	public interface Binder extends UiBinder<Widget, FormTemplateInfoView> { }
 
-	@UiField
-	TextBox versionBox;
+    @UiField
+    DateMaskBoxAbstract versionDateBegin;
+
+    @UiField
+    DateMaskBoxAbstract versionDateEnd;
 
 	@UiField
 	CheckBox numberedColumnsBox;
@@ -35,8 +43,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(String version, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code) {
-		versionBox.setValue(version);
+	public void setViewData(Date version, Date versionEnd, boolean numberedColumns, boolean fixedRows, String name, String fullName, String code) {
+        versionDateBegin.setValue(version);
+        versionDateEnd.setValue(versionEnd);
 		numberedColumnsBox.setValue(numberedColumns);
 		fixedRowsCheckBox.setValue(fixedRows);
 		nameBox.setValue(name);
@@ -46,7 +55,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 
 	@Override
 	public void onFlush() {
-		getUiHandlers().setVersion(DateTimeFormat.getFormat("dd.MM.yyyy").parse(versionBox.getValue()));
+		getUiHandlers().setRangeRelevanceVersion(versionDateBegin.getValue(), versionDateEnd.getValue());
 		getUiHandlers().setNumberedColumns(numberedColumnsBox.getValue());
 		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
 		getUiHandlers().setName(nameBox.getValue());

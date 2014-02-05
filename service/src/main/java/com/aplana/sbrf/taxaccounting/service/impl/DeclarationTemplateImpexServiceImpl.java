@@ -57,20 +57,24 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(declarationTemplateDao.getDeclarationTemplateScript(id).getBytes(ENCODING));
+            String script = declarationTemplateDao.getDeclarationTemplateScript(id);
+            if (script != null)
+			    zos.write(script.getBytes(ENCODING));
 			zos.closeEntry();
 			
 			// JasperTemplate
 			ze = new ZipEntry(REPORT_FILE);
 			zos.putNextEntry(ze);
-			zos.write(declarationTemplateService.getJrxml(id).getBytes(ENCODING));
+            String jrxml = declarationTemplateService.getJrxml(id);
+            if (jrxml != null)
+			    zos.write(declarationTemplateService.getJrxml(id).getBytes(ENCODING));
 			zos.closeEntry();
 
 			// content
 			ze = new ZipEntry(CONTENT_FILE);
 			zos.putNextEntry(ze);
 			DeclarationTemplateContent dtc = new DeclarationTemplateContent();
-			dtc.setType(dt.getDeclarationType());
+			dtc.setType(dt.getType());
 			dtc.setVersion(dt.getVersion());
 			JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -112,7 +116,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 					dtc = (DeclarationTemplateContent) jaxbUnmarshaller.
 							unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
-					dt.setDeclarationType(dtc.getType());
+					dt.setType(dtc.getType());
 					dt.setVersion(dtc.getVersion());
 				}
 				if (files.get("script.groovy").length != 0) {

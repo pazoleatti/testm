@@ -1,69 +1,114 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:my="urn:import:com.aplana.gwt.client"
-             xmlns:f="urn:import:com.aplana.gwt.client.form"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			 xmlns:my="urn:import:com.aplana.gwt.client"
+			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
+			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+		>
     <ui:style>
-        .RefbookTextBox {
-            padding-left: 10px;
+
+        .titleText {
+            font-size: 14px;
+            color:  #636460;
         }
 
         .ms {
             padding-left: 10px;
         }
+
+        .marginRight5{
+            margin-right: 5px;
+        }
     </ui:style>
 
 
-    <f:MainContainer>
-        <f:header>
-            <f:HeaderContainer>
-                <f:right>
-                    <f:Right>
-                        <g:Label text="Режим редактирования"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
-                        <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                            text="my button hyperlink"/>
-                    </f:Right>
-                </f:right>
-                <f:resizable>
-                    <f:Resizable>
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkButton ui:field="create" text="Создать налоговую форму..."
+                                              img="resources/img/add.png" title="Создание налоговой формы"/>
+                            <g:Label text="Режим редактирования" addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
+                <fm:resizable>
+                    <fm:Resizable>
                         <g:Label
                                 text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"/>
-                    </f:Resizable>
-                </f:resizable>
-                <f:left>
-                    <f:Left>
-                        <g:Label text="Список налоговых форм"/>
-                        <g:Label text="-"/>
-                    </f:Left>
-                </f:left>
+                    </fm:Resizable>
+                </fm:resizable>
+                <fm:left>
+                    <fm:Left>
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
+                            <g:Label text="—" addStyleNames="{style.titleText}"/>
+                        </style:LeftBar>
+                    </fm:Left>
+                </fm:left>
 
-
-
-            </f:HeaderContainer>
-        </f:header>
-        <f:body>
-            <f:BodyContainer>
-                <my:LabelSeparator text="test" ui:field="sep"/>
-                <my:RefBookTextBox styleName="{style.RefbookTextBox}" ui:field="refbookTextBox" enabled="true"/>
-                <!-- <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" text="my hyperlink" />-->
-                <my:ImageButtonLink imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png"
-                                    text="my button hyperlink" ui:field="ibl"/>
-                <my:ImgBtnLnk text="my anorch" imageUrl="http://127.0.0.1:8888/resources/img/question_mark.png" href="#"
-                              ui:field="ian"/>
-                <my:SpinEdit labelText="Период, с:"/>
-                <g:HorizontalPanel addStyleNames="{style.ms}" width="400px">
-                    <!--<my:MultiListBox ui:field="mlistbox" enable="true" multiselect="false" />-->
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <style:LabelSeparator text="test dfdf dfsdf" ui:field="sep" width="500px"/>
+                <g:HorizontalPanel addStyleNames="{style.ms}" width="200px">
                     <my:MultiListBox ui:field="mlistbox"/>
-
                 </g:HorizontalPanel>
                 <g:Label ui:field="showResult"/>
+                <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
+                    <g:HorizontalPanel>
+                        <g:CheckBox ui:field="chk"/>
+                        <g:Label ui:field="lbl">
+                            TheLabelasfasdfasdfasdfkjaskfdjsadkfjasldfjalskdjflasdjflasdjfalsfjlsakdjflskjdflaskdjflksadjflk
+                        </g:Label>
+                    </g:HorizontalPanel>
+                </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
-            </f:BodyContainer>
-        </f:body>
-    </f:MainContainer>
+                <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
+                    <g:CheckBox ui:field="checkBoxNull" text="Могут принимать пустые значения"/>
+                    <g:HorizontalPanel spacing="2">
+                        <mask:DateMaskBox ui:field="boxDate"/>
+                        <g:Label ui:field="boxDateLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:MonthYearMaskBox ui:field="boxMy"/>
+                        <g:Label ui:field="boxMyLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:YearMaskBox ui:field="boxY" />
+                        <g:Label ui:field="boxYLb" width="100%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel  spacing="2">
+                        <mask:TextMaskBox mask="XXXXXX" text="1" ui:field="boxText" mayBeNull="true" />
+                        <g:Label ui:field="boxTextLb" width="100%"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel  spacing="2">
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" visible="true"/>
+                        <g:Label ui:field="boxDatePickerLb" width="80%"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <style:LinkButton ui:field="linkButton" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" />
+
+                        <style:LinkButton ui:field="linkButtonDisable" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" enabled="false" />
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <style:LinkAnchor ui:field="linkAnchor" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" />
+
+                        <style:LinkAnchor ui:field="linkAnchorDisable" text="История изменений" img="resources/img/exclamation_mark.png"
+                                          title="Отобразить историю налоговой формы" enabled="false" />
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 </ui:UiBinder>

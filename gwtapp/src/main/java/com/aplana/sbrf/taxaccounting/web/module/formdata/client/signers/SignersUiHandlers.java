@@ -8,5 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.List;
 
 public interface SignersUiHandlers extends UiHandlers {
-	void onSave(FormDataPerformer performer, List<FormDataSigner> signers);
+	void onSave(FormDataPerformer performer, List<FormDataSigner> signers, Integer departmentId);
 }

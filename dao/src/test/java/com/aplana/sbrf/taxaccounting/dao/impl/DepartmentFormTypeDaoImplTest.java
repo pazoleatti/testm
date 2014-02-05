@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -144,4 +145,12 @@ public class DepartmentFormTypeDaoImplTest {
 		assertTrue(sourceIds.contains(6l));
 		assertTrue(sourceIds.contains(22l));
 	}
+
+    /**
+     * Существование форм назначений
+     */
+    public void existAssignedForm(){
+        assertTrue("В подразделении 2 есть форма с типом 1 и видом 3", departmentFormTypeDao.existAssignedForm(2, 1, FormDataKind.SUMMARY));
+        assertFalse("В подразделении 2 есть форма с типом 1 и видом 3", departmentFormTypeDao.existAssignedForm(2, 1, FormDataKind.CONSOLIDATED));
+    }
 }

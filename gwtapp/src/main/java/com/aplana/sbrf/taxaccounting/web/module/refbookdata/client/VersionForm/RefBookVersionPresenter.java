@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -30,7 +32,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.MyView,
@@ -44,15 +45,14 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	static final Object TYPE_editFormPresenter = new Object();
 
-	private Long refBookDataId;
-    private Long refBookRecordId;
+	private Long refBookId;
+    private Long uniqueRecordId;
 
 	EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
 
-	private static final int PAGE_SIZE = 20;
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
 	public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
@@ -60,6 +60,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
+        int getPageSize();
 		void setRange(Range range);
 		void updateTable();
 		void setRefBookNameDesc(String desc);
@@ -77,7 +78,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(PAGE_SIZE, dataProvider);
+		getView().assignDataProvider(getView().getPageSize(), dataProvider);
 	}
 
 	@Override
@@ -110,9 +111,10 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	@Override
 	public void onDeleteRowClicked() {
 		DeleteRefBookRowAction action = new DeleteRefBookRowAction();
-		action.setRefBookId(refBookDataId);
+		action.setRefBookId(refBookId);
 		List<Long> rowsId = new ArrayList<Long>();
-		rowsId.add(getView().getSelectedRow().getRefBookRowId());
+        Long deletedVersion = getView().getSelectedRow().getRefBookRowId();
+		rowsId.add(deletedVersion);
 		action.setRecordsId(rowsId);
         action.setDeleteVersion(true);
 		dispatcher.execute(action,
@@ -124,7 +126,18 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
 								editFormPresenter.show(null);
 								editFormPresenter.setEnabled(false);
-								getView().updateTable();
+                                if (result.getNextVersion() != null) {
+                                    placeManager
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookVersion)
+                                                    .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
+                                                    .with(RefBookDataTokens.REFBOOK_RECORD_ID, String.valueOf(result.getNextVersion()))
+                                                    .build());
+                                } else {
+                                    placeManager
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookData)
+                                                    .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
+                                                    .build());
+                                }
 							}
 						}, this));
 	}
@@ -139,15 +152,15 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
-        refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        refBookRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+        refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+        uniqueRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
 
         editFormPresenter.setVersionMode(true);
-        editFormPresenter.setCurrentRecordId(null);
-        editFormPresenter.setRecordId(refBookRecordId);
+        editFormPresenter.setCurrentUniqueRecordId(null);
+        editFormPresenter.setRecordId(null);
 
         GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-		action.setRefBookId(refBookDataId);
+		action.setRefBookId(refBookId);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
@@ -155,15 +168,15 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
-								getView().setRange(new Range(0, PAGE_SIZE));
-                                editFormPresenter.init(refBookDataId);
+								getView().setRange(new Range(0, getView().getPageSize()));
+                                editFormPresenter.init(refBookId);
                                 getProxy().manualReveal(RefBookVersionPresenter.this);
 							}
 						}, this));
 
 		GetNameAction nameAction = new GetNameAction();
-		nameAction.setRefBookId(refBookDataId);
-        nameAction.setRecordId(refBookRecordId);
+		nameAction.setRefBookId(refBookId);
+        nameAction.setUniqueRecordId(uniqueRecordId);
 		dispatcher.execute(nameAction,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetNameResult>() {
@@ -171,7 +184,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 							public void onSuccess(GetNameResult result) {
 								getView().setRefBookNameDesc(result.getName());
                                 getView().setTitleDetails(result.getUniqueAttributeValues());
-                                getView().setBackAction("#"+RefBookDataTokens.refBookData+";id=" + refBookDataId);
+                                getView().setBackAction("#"+RefBookDataTokens.refBookData+";id=" + refBookId);
+                                editFormPresenter.setRecordId(result.getRecordId());
 							}
 						}, this));
 
@@ -187,11 +201,11 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 		@Override
 		protected void onRangeChanged(HasData<RefBookDataRow> display) {
-			if (refBookDataId == null) return;
+			if (refBookId == null) return;
 			final Range range = display.getVisibleRange();
             GetRefBookRecordVersionAction action = new GetRefBookRecordVersionAction();
-            action.setRefBookId(refBookDataId);
-            action.setRefBookRecordId(refBookRecordId);
+            action.setRefBookId(refBookId);
+            action.setRefBookRecordId(uniqueRecordId);
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(

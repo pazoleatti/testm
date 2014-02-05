@@ -5,14 +5,16 @@ import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
-
 
 /*
  * Реализация ReportPeriodService
@@ -80,12 +82,6 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
     /**
      * Возвращает дату начала отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму.
      *
      * <p>Информация о периодах в конфлюенсе
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
@@ -95,7 +91,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      */
     @Override
     public Calendar getStartDate(int reportPeriodId){
-        return reportPeriodService.getStartDate(reportPeriodId);
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(reportPeriodService.getReportPeriod(reportPeriodId).getStartDate());
+		return cal;
     }
 
     /**
@@ -108,7 +106,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
      */
     @Override
     public Calendar getEndDate(int reportPeriodId){
-       return reportPeriodService.getEndDate(reportPeriodId);
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(reportPeriodService.getReportPeriod(reportPeriodId).getEndDate());
+		return cal;
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
     @Override
     public boolean isActivePeriod(int reportPeriodId, long departmentId) {
-        return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);  //To change body of implemented methods use File | Settings | File Templates.
+        return reportPeriodService.isActivePeriod(reportPeriodId, departmentId);
     }
 
     @Override
@@ -139,5 +139,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     @Override
     public Calendar getMonthReportDate(int reportPeriodId, int periodOrder) {
         return reportPeriodService.getMonthReportDate(reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
+        return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
     }
 }

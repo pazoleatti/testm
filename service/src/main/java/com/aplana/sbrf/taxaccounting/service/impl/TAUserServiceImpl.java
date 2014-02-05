@@ -27,8 +27,22 @@ public class TAUserServiceImpl implements TAUserService {
 	DepartmentDao departmentDao;
 
     private final Log logger = LogFactory.getLog(getClass());
-	
-	
+
+	/**
+	 * Проверяет, есть ли пользователь с таким логином.
+	 *
+	 * @param login проверяемый логин пользователя
+	 * @return true если пользователь с таким логином есть, false если нет
+	 */
+	@Override
+	public boolean existsUser(String login) {
+		if (login != null) {
+			return userDao.existsUser(login.toLowerCase());
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	public TAUser getUser(String login) {
         logger.info("Получение информации пользователя по логину " + login + " getUser()");
@@ -60,7 +74,6 @@ public class TAUserServiceImpl implements TAUserService {
 			throw new WSException(WSException.SudirErrorCodes.SUDIR_001,
 					"Ошибка при модификации пользователя." + e.getLocalizedMessage());
 		}
-		
 	}
 
 	@Override
@@ -152,5 +165,4 @@ public class TAUserServiceImpl implements TAUserService {
 
 		return taUserFullList;
 	}
-
 }

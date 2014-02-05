@@ -11,10 +11,13 @@ public interface SourcesUiHandlers extends UiHandlers {
 	void updateFormSources(DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds);
 	void updateDeclarationSources(final DepartmentDeclarationType departmentDeclarationType,
 								  List<Long> sourceDepartmentFormTypeIds);
-	void getFormSources(int departmentId, TaxType taxType);
-	void getFormReceivers(int departmentId, TaxType taxType);
+	void getFormSources(Integer departmentId);
+	void getFormReceivers(Integer departmentId);
 	void getFormReceiverSources(DepartmentFormType departmentFormType);
 	void getDeclarationReceiverSources(DepartmentDeclarationType departmentDeclarationType);
-	void getDeclarationReceivers(int departmentId, TaxType taxType);
-	void showAssignErrorMessage(boolean isForm);
+	void getDeclarationReceivers(Integer departmentId);
+    TaxType getTaxType();
+	void showAssignErrorMessage();
+
+
 }

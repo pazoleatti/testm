@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class UpdateDeclarationAction extends UnsecuredActionImpl<UpdateDeclarationResult> {
-    private DeclarationTemplate declaration;
+    private DeclarationTemplateExt declarationTemplateExt;
 
-    public DeclarationTemplate getDeclarationTemplate() {
-        return declaration;
+    public DeclarationTemplateExt getDeclarationTemplateExt() {
+        return declarationTemplateExt;
     }
 
-    public void setDeclarationTemplate(DeclarationTemplate declaration) {
-        this.declaration = declaration;
+    public void setDeclarationTemplateExt(DeclarationTemplateExt declarationTemplateExt) {
+        this.declarationTemplateExt = declarationTemplateExt;
     }
 }

@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filt
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,16 +32,17 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         Editor<LogBusinessFilterValues> {
 
 
-    interface Binder extends UiBinder<Widget, HistoryBusinessFilterView> { }
+    interface Binder extends UiBinder<Widget, HistoryBusinessFilterView> {
+    }
 
     @UiField
     PeriodPicker reportPeriodIds;
 
     @UiField
-    CustomDateBox fromSearchDate;
+    DateMaskBoxPicker fromSearchDate;
 
     @UiField
-    CustomDateBox toSearchDate;
+    DateMaskBoxPicker toSearchDate;
 
     @Ignore
     @UiField
@@ -64,16 +65,13 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    Panel formKindPanel;
-
-    @UiField
-    Panel formTypePanel;
+    Panel formPanel;
 
     @UiField
     Panel declarationTypePanel;
 
     @UiField
-    RefBookPickerPopupWidget user;
+    RefBookMultiPickerModalWidget user;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;
@@ -100,7 +98,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         lbf.setFromSearchDate(fromSearchDate.getValue());
         lbf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lbf.setUserId(user.getValue());
+        lbf.setUserId(user.getSingleValue());
         lbf.setTaxType(taxType.getValue());
         return lbf;
     }
@@ -199,27 +197,25 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        user.setEndDate(new Date());
     }
 
     private void setVisibleTaxFields() {
-        formTypePanel.setVisible(true);
-        formKindPanel.setVisible(true);
+        formPanel.setVisible(true);
         declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
         formDataKind.setValue(FormDataKind.PRIMARY);
     }
 
     private void setVisibleDeclarationFields() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
+        formPanel.setVisible(false);
         formTypeId.setValue(null);
         formDataKind.setValue(null);
         declarationTypePanel.setVisible(true);
     }
 
     private void hideAll() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
+        formPanel.setVisible(false);
         formTypeId.setValue(null);
         formDataKind.setValue(null);
         declarationTypePanel.setVisible(false);
@@ -227,7 +223,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiHandler("auditFormTypeId")
-    public void onClick(ValueChangeEvent<AuditFormType> event){
+    public void onClick(ValueChangeEvent<AuditFormType> event) {
         if (event.getValue() == AuditFormType.FORM_TYPE_TAX) {
             setVisibleTaxFields();
         } else if (event.getValue() == AuditFormType.FORM_TYPE_DECLARATION) {
@@ -245,15 +241,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiHandler("taxType")
-    void onTaxTypeValueChange(ValueChangeEvent<TaxType> event){
-        if (getUiHandlers() != null){
+    void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
+        if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
         }
-    }
-
-    @UiHandler("printButton")
-    void onPrintClicked(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onPrintButtonClicked();
     }
 }

@@ -15,14 +15,11 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
@@ -33,26 +30,25 @@ import java.util.*;
 @Repository
 public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncome101Dao {
 
-	private static final String TABLE_NAME = "INCOME_101";
-
     @Autowired
     private RefBookDao refBookDao;
-
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
 
 	@Autowired
 	private RefBookUtils refBookUtils;
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute) {
-		if (filter == null || filter.isEmpty()) {
-			filter = " REPORT_PERIOD_ID = " + reportPeriodId;
-		} else {
-			filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
-		}
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute);
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        if (filter == null || filter.isEmpty()) {
+            filter = " REPORT_PERIOD_ID = " + reportPeriodId;
+        } else {
+            filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
+        }
+        return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return getRecords(reportPeriodId, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
@@ -62,15 +58,16 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                 recordId);
     }
 
+	@Override
+	public List<Date> getVersions(Date startDate, Date endDate) {
+		return getVersions(TABLE_NAME, startDate, endDate);
+	}
+
     @Override
-    public List<ReportPeriod> gerReportPeriods() {
-        String sql = "select distinct report_period_id from " + TABLE_NAME;
-        return getJdbcTemplate().query(sql, new RowMapper<ReportPeriod>() {
-            @Override
-            public ReportPeriod mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return reportPeriodDao.get(rs.getInt(1));
-            }
-        });
+    public List<Date> getVersions(String tableName, Date startDate, Date endDate) {
+		String sql = String.format("SELECT distinct rp.end_date FROM %s i JOIN report_period rp on rp.id = i.report_period_id " +
+				"where rp.end_date >= ? and rp.end_date <= ?", tableName);
+		return getJdbcTemplate().queryForList(sql, new Object[]{startDate, endDate}, new int[]{Types.DATE, Types.DATE}, Date.class);
     }
 
     @Override
@@ -101,12 +98,12 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
             delObjs.add(new Object[]{pair.getFirst(), pair.getSecond()});
         }
 
-        getJdbcTemplate().batchUpdate("delete from income_101 where report_period_id = ? and department_id = ?", delObjs,
+        getJdbcTemplate().batchUpdate(String.format("delete from %s where report_period_id = ? and department_id = ?", TABLE_NAME), delObjs,
                 new int[]{Types.NUMERIC, Types.NUMERIC});
 
         // Добавление записей
         getJdbcTemplate().batchUpdate(
-                "insert into income_101 (" +
+                String.format("insert into %s (" +
                         " ID," +
                         " REPORT_PERIOD_ID," +
                         " ACCOUNT," +
@@ -118,7 +115,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                         " OUTCOME_CREDIT_REMAINS," +
                         " ACCOUNT_NAME," +
                         " DEPARTMENT_ID)" +
-                        " values (seq_income_101.nextval,?,?,?,?,?,?,?,?,?,?)",
+                        " values (seq_income_101.nextval,?,?,?,?,?,?,?,?,?,?)", TABLE_NAME),
                 new BatchPreparedStatementSetter() {
 
                     private Iterator<Map<String, RefBookValue>> iterator = records.iterator();

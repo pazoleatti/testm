@@ -22,8 +22,6 @@ import java.util.List;
 			wsdlLocation="META-INF/wsdl/GenericAccountManagement.wsdl")
 public class GenericAccountManagementPortType extends SpringBeanAutowiringSupport{
 
-    private String LOGIN_FOR_ACTION = "controlUnp";
-	
 	@Autowired
 	private TAUserService userService;
 
@@ -65,6 +63,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public void suspendAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
 		try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, false);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -113,6 +112,7 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		
 		try {
 			TAUser user = gais.assembleUser(accountInfo);
+            validationService.validate(userService.getUser(user.getLogin()));
 			userService.updateUser(user);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -133,7 +133,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 
 	public void restoreAccount(String accountId)
 			throws GenericAccountManagementException_Exception {
-		try {
+
+        try {
+            validationService.validate(userService.getUser(accountId));
 			userService.setUserIsActive(accountId, true);
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -163,7 +165,11 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	public List<GenericAccountInfo> getAccountList()
 			throws GenericAccountManagementException_Exception {
 		try {
-			return gais.desassembleUsers(userService.listAllUsers());
+            List<GenericAccountInfo> accountInfos = gais.desassembleUsers(userService.listAllUsers());
+            TAUserInfo userInfo = getUserInfo();
+            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
+                    "Успешный обмен данными с вебсервисом СУДИР.");
+			return accountInfos;
 		} catch (Exception e) {
 			GenericAccountManagementException gam = new GenericAccountManagementException();
 			gam.setGenericSudirStatusCode(WSException.SudirErrorCodes.SUDIR_001.toString());
@@ -178,7 +184,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 		List<GenericAccountInfo> listUsersByLogin = new ArrayList<GenericAccountInfo>();
 		try {
 			List<TAUser> listTAUsersByLogin = new ArrayList<TAUser>();
-			listTAUsersByLogin.add(userService.getUser(accountId));
+			TAUser user = userService.getUser(accountId.toLowerCase());
+			validationService.validate(user);
+			listTAUsersByLogin.add(user);
 			listUsersByLogin.addAll(gais.desassembleUsers(listTAUsersByLogin));
             TAUserInfo userInfo = getUserInfo();
             auditService.add(FormDataEvent.EXTERNAL_INTERACTION, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null,
@@ -199,10 +207,9 @@ public class GenericAccountManagementPortType extends SpringBeanAutowiringSuppor
 	}
 
     private TAUserInfo getUserInfo(){
-        TAUser user = userService.getUser(LOGIN_FOR_ACTION);
         TAUserInfo userInfo = new TAUserInfo();
-        userInfo.setIp("");
-        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
         return userInfo;
     }
 

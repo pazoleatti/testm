@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.signin.server;
 
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.signin.shared.GetUserInfoResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.util.StringUtils;
 
 @Component
 public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoAction, GetUserInfoResult>{
@@ -30,14 +32,20 @@ public class GetUserInfoActionHandler extends AbstractActionHandler<GetUserInfoA
 		TAUser user = securityService.currentUserInfo().getUser();
 		Department department = departmentService.getDepartment(user.getDepartmentId());
 
-		StringBuilder roleAndDepartment = new StringBuilder(user.getName());
-		if (department != null) {
-			roleAndDepartment.append(" - ")
-				.append(department.getShortName());
-		}
 		GetUserInfoResult result = new GetUserInfoResult();
-		result.setUserName(user.getLogin());
-		result.setRoleAnddepartment(roleAndDepartment.toString());
+		result.setRoleAnddepartment(department.getName());
+		result.setUserName(user.getName());
+
+        StringBuilder roles = new StringBuilder(user.getName());
+        roles.append("\n");
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            TARole item = user.getRoles().get(i);
+            roles.append(item.getName());
+            if (i < user.getRoles().size() - 1) {
+                roles.append("; ");
+            }
+        }
+        result.setHint(roles.toString());
 		return result;
 	}
 

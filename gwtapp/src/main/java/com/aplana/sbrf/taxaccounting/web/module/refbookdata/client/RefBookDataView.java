@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.dom.client.Style;
@@ -14,10 +17,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -39,7 +44,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	Label titleDesc;
 	@UiField
-	DateBox relevanceDate;
+    DateMaskBoxPicker relevanceDate;
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -47,7 +52,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public RefBookDataView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
-		relevanceDate.setFormat(new DateBox.DefaultFormat(DateTimeFormat.getFormat("dd.MM.yyyy")));
 		relevanceDate.setValue(new Date());
 		relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
@@ -64,6 +68,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 				getUiHandlers().onSelectionChanged();
 			}
 		});
+        refbookDataTable.setPageSize(pager.getPageSize());
 		pager.setDisplay(refbookDataTable);
 	}
 
@@ -101,7 +106,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		data.addDataDisplay(refbookDataTable);
 	}
 
-	@Override
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
 	public void setRange(Range range) {
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
 	}
@@ -135,7 +145,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
 
-			if (row.getRefBookRowId() == recordId) {
+			if (row.getRefBookRowId().equals(recordId)) {
 				selectionModel.setSelected(row, true);
 				refbookDataTable.setKeyboardSelectedRow(i, true);
 				return;
@@ -164,6 +174,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
+        selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
@@ -174,12 +185,25 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-		boolean confirm = Window.confirm("Удалить выбранную запись справочника?");
-		if (confirm) {
-			if (getUiHandlers() != null) {
-				getUiHandlers().onDeleteRowClicked();
-			}
-		}
+        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onDeleteRowClicked();
+                }
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                no();
+            }
+        });
 	}
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {

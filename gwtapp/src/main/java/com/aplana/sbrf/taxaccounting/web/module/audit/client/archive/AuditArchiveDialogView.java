@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.archive;
 
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,7 +20,7 @@ import java.util.Date;
 public class AuditArchiveDialogView extends PopupViewWithUiHandlers<AuditArchiveUiHandlers> implements AuditArchiveDialogPresenter.MyView, Editor<LogSystemFilter> {
 
     @UiField
-    CustomDateBox toSearchDate;
+    DateMaskBoxPicker toSearchDate;
 
     @Inject
     protected AuditArchiveDialogView(AuditArchiveViewUiBinder uiBinder, EventBus eventBus) {

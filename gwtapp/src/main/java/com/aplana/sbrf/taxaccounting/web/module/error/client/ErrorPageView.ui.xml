@@ -1,8 +1,32 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log">
-	<g:VerticalPanel>
-		<g:Label ui:field="message" />
-		<log:ThrowableWidget ui:field="throwableView" />
-	</g:VerticalPanel>
-</ui:UiBinder> 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:log="urn:import:com.aplana.sbrf.taxaccounting.web.widget.log"
+    xmlns:fm="urn:import:com.aplana.gwt.client.form">
+
+    <ui:style>
+        .forMain {
+            margin: 10px;
+        }
+    </ui:style>
+
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label text="Ошибка"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <g:VerticalPanel addStyleNames="{style.forMain}">
+                    <g:Label ui:field="message" />
+                    <log:ThrowableWidget ui:field="throwableView" />
+                </g:VerticalPanel>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
+</ui:UiBinder>

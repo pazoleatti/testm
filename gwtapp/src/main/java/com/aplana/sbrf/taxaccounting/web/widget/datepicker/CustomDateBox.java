@@ -1,23 +1,31 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DatePicker;
 
 import java.util.Date;
 
-public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>{
+/**
+ *
+ *
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker
+ */
+@Deprecated
+public class CustomDateBox extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
     interface DateBoxUiBinder extends UiBinder<Widget, CustomDateBox> {
 	}
@@ -42,8 +50,9 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		initWidget(ourUiBinder.createAndBindUi(this));
         VerticalPanel vPanel = new VerticalPanel();
 
-		datePickerPanel.setWidth("200");
-		datePickerPanel.setHeight("200");
+//      (aivanov) 8.1.14. Убрал потому как в ие размеры не уменьшались, если что то не то сделал - сообщите
+//		datePickerPanel.setWidth("200");
+//		datePickerPanel.setHeight("200");
         vPanel.add(datePicker);
 
         clearButton.setText("Очистить");
@@ -68,6 +77,10 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 		datePickerPanel.show();
 	}
 
+    public DatePicker getDatePicker() {
+        return datePicker;
+    }
+
 	private void addDatePickerHandlers() {
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
@@ -83,9 +96,14 @@ public class CustomDateBox extends Composite implements HasEnabled, HasVisibilit
 			@Override
 			public void onBlur(BlurEvent event) {
 				try {
-					Date formattedDate = format.parseStrict(dateBox.getValue());
-					dateBox.setValue(format.format(formattedDate));
-					lastValidDate = format.format(formattedDate);
+					if (dateBox.getValue().isEmpty()) {
+						dateBox.setValue("");
+						lastValidDate = "";
+					} else {
+						Date formattedDate = format.parseStrict(dateBox.getValue());
+						dateBox.setValue(format.format(formattedDate));
+						lastValidDate = format.format(formattedDate);
+					}
 				} catch (IllegalArgumentException e) {
 					dateBox.setValue(lastValidDate);
 				}

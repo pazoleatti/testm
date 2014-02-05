@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.members.client;
 import com.aplana.gwt.client.MultiListBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,11 +33,10 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     }
 
     private final Widget widget;
-	private static final  int PAGE_SIZE = 20;
 
-	private AsyncDataProvider<TAUserFull> dataProvider = new  AsyncDataProvider<TAUserFull>() {
+	private AsyncDataProvider<TAUserFullWithDepartmentPath> dataProvider = new  AsyncDataProvider<TAUserFullWithDepartmentPath>() {
 		@Override
-		protected void onRangeChanged(HasData<TAUserFull> display) {
+		protected void onRangeChanged(HasData<TAUserFullWithDepartmentPath> display) {
 			if (getUiHandlers() != null){
 				Range range = display.getVisibleRange();
 				getUiHandlers().onRangeChange(range.getStart(), range.getLength());
@@ -49,13 +48,13 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	ValueListBox<Boolean> isActiveBox;
 
 	@UiField
-	DepartmentPickerModalWidget departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField(provided = true)
     MultiListBox<TARole> roleBox;
 
     @UiField
-    CellTable<TAUserFull> taUserFullCellTable;
+    CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
 
     @UiField
     Anchor printButton;
@@ -74,7 +73,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 			    if (object == null) {
 				    return "";
 			    }
-			    return object == true ? "Да" : "Нет";
+			    return object ? "Да" : "Нет";
 		    }
 	    });
 	    roleBox = new MultiListBox<TARole>(new AbstractRenderer<TARole>() {
@@ -85,45 +84,45 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	    }, true, true);
 
         widget = binder.createAndBindUi(this);
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().getName();
 		    }
 	    },"Полное имя пользователя");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>(){
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>(){
             @Override
-            public String getValue(TAUserFull object) {
+            public String getValue(TAUserFullWithDepartmentPath object) {
                 return object.getUser().getLogin();
             }
         },"Логин");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().getEmail();
 		    }
 	    },"Электронная почта");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
-		    public String getValue(TAUserFull object) {
+		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().isActive() ? "Да" : "Нет";
 		    }
 	    },"Признак активности");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
-            public String getValue(TAUserFull object) {
-                return object.getDepartment().getName();
+            public String getValue(TAUserFullWithDepartmentPath object) {
+                return object.getFullDepartmentPath();
             }
         },"Подразделение");
 
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFull>() {
+        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
-            public String getValue(TAUserFull object) {
+            public String getValue(TAUserFullWithDepartmentPath object) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < object.getUser().getRoles().size(); i++){
                     sb.append(object.getUser().getRoles().get(i).getName());
@@ -135,7 +134,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
         },"Роль");
 
 
-	    taUserFullCellTable.setPageSize(PAGE_SIZE);
+	    taUserFullCellTable.setPageSize(pager.getPageSize());
 	    pager.setDisplay(taUserFullCellTable);
 	    dataProvider.addDataDisplay(taUserFullCellTable);
     }
@@ -146,7 +145,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     }
 
     @Override
-    public void setTaUserFullCellTable(PagingResult<TAUserFull> userFullList, int startIndex) {
+    public void setTaUserFullCellTable(PagingResult<TAUserFullWithDepartmentPath> userFullList, int startIndex) {
 	    taUserFullCellTable.setRowCount(userFullList.getTotalCount());
         taUserFullCellTable.setRowData(startIndex, userFullList);
 
@@ -164,7 +163,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
         }
 		membersFilterData.setRoleIds(selectedRoleIds);
 		Set<Integer> depIds = new HashSet<Integer>();
-		for (DepartmentPair dep : departmentPicker.getValue()) {
+		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
 			depIds.add(dep.getDepartmentId());
 		}
 		membersFilterData.setDepartmentIds(depIds);
@@ -201,7 +200,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
         roleBox.setAvailableValues(values.getRoles());
-		departmentPicker.setAvailableValues(values.getDepartments());
+		departmentPicker.setAvalibleValues(values.getDepartments(), null);
 	}
 
 	@Override

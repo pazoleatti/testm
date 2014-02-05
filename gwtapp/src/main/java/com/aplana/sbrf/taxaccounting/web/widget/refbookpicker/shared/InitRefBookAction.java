@@ -15,29 +15,15 @@ public class InitRefBookAction extends UnsecuredActionImpl<InitRefBookResult> im
 	private static final long serialVersionUID = 3385076853496363265L;
 	
 	private long refBookAttrId;
-	private Date date1;
-	private Date date2;
 	
 	public long getRefBookAttrId() {
 		return refBookAttrId;
 	}
 	public void setRefBookAttrId(long refBookAttrId) {
 		this.refBookAttrId = refBookAttrId;
-	}	
-	public Date getDate1() {
-		return date1;
 	}
-	public void setDate1(Date date1) {
-		this.date1 = date1;
-	}
-	public Date getDate2() {
-		return date2;
-	}
-	public void setDate2(Date date2) {
-		this.date2 = date2;
-	}
-	
-	@Override
+
+    @Override
 	public String getName() {
 		return "Получение справочника";
 	}

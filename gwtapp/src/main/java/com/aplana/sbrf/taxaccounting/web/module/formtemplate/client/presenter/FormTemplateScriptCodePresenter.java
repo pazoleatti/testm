@@ -1,22 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateTestEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateScriptCodeUiHandlers;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.annotations.TabInfo;
-import com.gwtplatform.mvp.client.annotations.Title;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
@@ -29,7 +25,7 @@ public class FormTemplateScriptCodePresenter
     @Override
     public void executeScript() {
         if(formTemplate.getScript().hashCode() != getView().getScriptCode().hashCode()){
-            Window.confirm("Сначала нажмите кнопку \"Сохранить\"");
+            Dialog.warningMessage("Сначала нажмите кнопку \"Сохранить\"");
             return;
         }
         formTemplate.setScript(getView().getScriptCode());
@@ -76,7 +72,7 @@ public class FormTemplateScriptCodePresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
+		formTemplate = event.getFormTemplateExt().getFormTemplate();
 		getView().setScriptCode(formTemplate.getScript());
 	}
 

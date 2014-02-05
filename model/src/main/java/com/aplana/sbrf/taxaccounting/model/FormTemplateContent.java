@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import javax.xml.bind.annotation.*;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement
@@ -10,10 +10,6 @@ import java.util.List;
 public class FormTemplateContent {
 	@XmlElement
 	private FormType type;
-	@XmlElement
-	private Date version;
-	@XmlElement
-	private boolean active;
 	@XmlElement
 	private boolean numberedColumns;
 	@XmlElement
@@ -31,8 +27,6 @@ public class FormTemplateContent {
 
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
 		this.type = formTemplate.getType();
-		this.version = formTemplate.getVersion();
-		this.active = formTemplate.isActive();
 		this.numberedColumns = formTemplate.isNumberedColumns();
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
@@ -44,16 +38,14 @@ public class FormTemplateContent {
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
 		formTemplate.setType(type);
-		formTemplate.setVersion(version);
-		formTemplate.setActive(active);
 		formTemplate.setNumberedColumns(numberedColumns);
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
 		formTemplate.setCode(code);
 		formTemplate.getStyles().clear();
-		formTemplate.getStyles().addAll(styles);
+		formTemplate.getStyles().addAll(styles != null?styles:new ArrayList<FormStyle>());
 		formTemplate.getColumns().clear();
-		formTemplate.getColumns().addAll(columns);
+		formTemplate.getColumns().addAll(columns != null?columns:new ArrayList<Column>());
 	}
 }

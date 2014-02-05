@@ -20,7 +20,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class SaveFormDataHandler extends
-		AbstractActionHandler<SaveFormDataAction, DataRowResult> {
+        AbstractActionHandler<SaveFormDataAction, DataRowResult> {
 
 	@Autowired
 	private SecurityService securityService;

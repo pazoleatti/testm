@@ -12,6 +12,8 @@ public final class DeclarationTemplateTokens {
 	 * Имена страниц
 	 */
 	public static final String declarationTemplate = "!declarationTemplate";
+    public static final String declarationVersionList = "!declarationVersionList";
 	public static final String declarationTemplateList = "!declarationTemplateList";
 	public static final String declarationTemplateId = "declarationTemplateId";
+    public static final String declarationType = "declarationType";
 }

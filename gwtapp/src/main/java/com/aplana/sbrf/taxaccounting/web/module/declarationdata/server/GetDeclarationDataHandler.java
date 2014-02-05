@@ -1,23 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataResult;
@@ -27,6 +14,14 @@ import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -78,19 +73,17 @@ public class GetDeclarationDataHandler
 		
 		result.setTaxType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
-				.getDeclarationType().getTaxType());
+				.getType().getTaxType());
 		result.setDeclarationType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
-				.getDeclarationType().getName());
+				.getType().getName());
 		result.setDepartment(departmentService.getDepartment(
 				declaration.getDepartmentId()).getName());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());
 
-        Date reportPeriodStartDate = reportPeriod.getTaxPeriod().getStartDate();
-        String year = new SimpleDateFormat("yyyy").format(reportPeriodStartDate);
-        result.setReportPeriodYear(Integer.valueOf(year));
+        result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
 
 		result.setPdf(generatePdfViewerModel(action, userInfo));
 

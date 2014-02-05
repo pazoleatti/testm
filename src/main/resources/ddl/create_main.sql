@@ -1,3 +1,23 @@
+
+create table ref_book_oktmo (
+  id number(18) not null,
+  code varchar2(4000) not null,
+  name varchar2(4000) not null,
+  parent_id number(18),
+  version date not null,
+  status number(1) not null,
+  record_id number(9) not null
+);
+comment on table ref_book_oktmo is 'ОКТМО';
+comment on column ref_book_oktmo.id is 'Идентификатор записи';
+comment on column ref_book_oktmo.code is 'Код';
+comment on column ref_book_oktmo.name is 'Наименование';
+comment on column ref_book_oktmo.parent_id is 'Идентификатор родительской записи';
+comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
+comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
+comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+--------------------------------------------------------------------------------------------------------------
+
 create table configuration (
   code varchar2(50) not null,
   value varchar2(510)
@@ -16,20 +36,18 @@ comment on table form_type is 'Типы налоговых форм (назва�
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+
+create sequence seq_form_type;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
   tax_type char(1) not null,
-  year number(4) not null,
-  start_date date not null,
-  end_date   date not null
+  year number(4) not null
 );
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
 comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column tax_period.year is 'Год';
-comment on column tax_period.start_date is 'Дата начала (включительно)';
-comment on column tax_period.end_date is 'Дата окончания (включительно)';
 
 create sequence seq_tax_period start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -64,6 +82,8 @@ comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+
+create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_style (
   id					     number(9) not null,
@@ -107,7 +127,7 @@ create table ref_book (
   script_id varchar2(36),
   visible number(1) default 1 not null,
   type number(1) default 0 not null,
-  editable  number(1) default 1 not null
+  read_only number(1) default 0 not null
 );
 
 comment on table ref_book is 'Справочник';
@@ -116,7 +136,7 @@ comment on column ref_book.name is 'Название справочника';
 comment on column ref_book.script_id is 'Идентификатор связанного скрипта';
 comment on column ref_book.visible is 'Признак видимости';
 comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
-comment on column ref_book.editable is 'Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю)';
+comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -131,7 +151,8 @@ create table ref_book_attribute (
   precision number(2),
   width number(9) default 15 not null,
   required number(1) default 0 not null,
-  is_unique number(1) default 0 not null
+  is_unique number(1) default 0 not null,
+  sort_order number(9)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -147,6 +168,7 @@ comment on column ref_book_attribute.precision is 'Точность, колич�
 comment on column ref_book_attribute.width is 'Ширина столбца. Используется при отображении справочника в виде таблицы';
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
+comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -228,7 +250,7 @@ comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
 comment on column department.name is 'Наименование подразделения';
 comment on column department.parent_id is 'Идентификатор родительского подразделения';
-comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ГОСБ, 4- ОСБ, 5- ВСП, 6-ПВСП)';
+comment on column department.type is 'Тип подразделения (1 - Банк, 2- ТБ, 3- ЦСКО, ПЦП, 4- Управление, 5- Не передается в СУДИР)';
 comment on column department.shortname is 'Сокращенное наименование подразделения';
 comment on column department.tb_index is 'Индекс территориального банка';
 comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
@@ -241,7 +263,7 @@ create table report_period (
   dict_tax_period_id number(18) not null,
   start_date date not null,
   end_date date not null,
-  months number(2) not null
+  calendar_start_date date not null
 );
 comment on table report_period is 'Отчетные периоды';
 comment on column report_period.id is 'Первичный ключ';
@@ -251,7 +273,7 @@ comment on column report_period.ord is 'Номер отчетного перио
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 comment on column report_period.start_date is 'Дата начала отчетного периода';
 comment on column report_period.end_date is 'Дата окончания отчетного периода';
-comment on column report_period.months is 'Количество месяцев в периоде';
+comment on column report_period.calendar_start_date is 'Дата фактического начала периода';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
@@ -304,12 +326,15 @@ create sequence seq_income_102 start with 100;
 create table declaration_type (
   id       number(9) not null,
   tax_type    char(1) not null,
-  name      varchar2(80) not null
+  name      varchar2(80) not null,
+  status number(1) default 0 not null
 );
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
+
+create sequence seq_declaration_type start with 100;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
   id         number(9) not null,
@@ -326,7 +351,9 @@ create sequence seq_dept_declaration_type start with 10000;
 create table declaration_template (
   id       number(9) not null,
   edition    number(9) not null,
-  version    varchar2(20) not null,
+  status number(1) default 0 not null,
+  version date not null,
+  name varchar2(600) not null,
   is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
@@ -337,11 +364,13 @@ comment on table declaration_template is 'Шаблоны налоговых де
 comment on column declaration_template.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_template.edition is 'Номер редакции';
 comment on column declaration_template.version is 'Версия';
+comment on column declaration_template.name is 'Наименование версии макета';
 comment on column declaration_template.is_active is 'Признак активности';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';
 comment on column declaration_template.XSD is 'XSD-схема';
+comment on column declaration_template.status is 'Статус версии (значения (-1, 0, 1, 2))';
 
 create sequence seq_declaration_template start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -376,6 +405,7 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
+  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
@@ -386,6 +416,7 @@ comment on table form_data is 'Данные по налоговым формам
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
+comment on column form_data.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
@@ -488,13 +519,15 @@ create table department_form_type (
   id      number(9) not null,
   department_id number(9) not null,
   form_type_id number(9) not null,
-  kind     number(9) not null
+  kind     number(9) not null,
+  performer_dep_id number(9)
 );
 comment on table department_form_type is 'Связь подразделения банка с формой';
 comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
 comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
+comment on column department_form_type.performer_dep_id is 'Исполнитель';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -683,13 +716,18 @@ comment on column notification.text is 'текст оповещения';
 comment on column notification.create_date is 'дата создания оповещения';
 comment on column notification.deadline is 'дата сдачи отчетности';
 
+create sequence seq_notification start with 10000;
+
+--------------------------------------------------------------------------------------------------------
+
 create table template_changes (
  id number(9) not null,
- form_template_id number(9) not null,
- declaration_template_id number(9) not null,
+ form_template_id number(9),
+ declaration_template_id number(9),
  event number(1),
  author number(9) not null,
- date_event date
+ date_event date,
+ edition_number number(9)
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
@@ -698,6 +736,7 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
+comment on column template_changes.edition_number is 'Номер версии';
 
-create sequence seq_notification start with 10000;
+ create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------

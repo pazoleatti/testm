@@ -4,8 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Date;
 import java.util.List;
@@ -37,7 +39,19 @@ public interface RefBookDataProvider {
 	 * @return
 	 */
 	PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
-		String filter, RefBookAttribute sortAttribute);
+		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
+
+    /**
+     * Перегруженный метод с восходящей сортировкой по умолчанию
+     *
+     * @param version
+     * @param pagingParams
+     * @param filter
+     * @param sortAttribute
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
+                                                       String filter, RefBookAttribute sortAttribute);
 
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
@@ -59,37 +73,6 @@ public interface RefBookDataProvider {
 	 * @return
 	 */
 	Map<String, RefBookValue> getRecordData(Long recordId);
-
-	/**
-	 * Создает новые записи в справочнике
-	 * @param version дата актуальности новых записей
-	 * @param records список новых записей
-	 */
-    @Deprecated
-	void insertRecords(Date version, List<Map<String, RefBookValue>> records);
-
-	/**
-	 * Обновляет значения в справочнике
-	 * @param version задает дату актуальности
-	 * @param records список обновленных записей
-	 */
-    @Deprecated
-	void updateRecords(Date version, List<Map<String, RefBookValue>> records);
-
-	/**
-	 * Удаляет записи из справочника
-	 * @param version задает дату удаления данных
-	 * @param recordIds список кодов удаляемых записей. {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
-	 */
-    @Deprecated
-	void deleteRecords(Date version, List<Long> recordIds);
-
-    /**
-     * Удаление всех записей справочника
-     * @param version Дата удаления записей
-     */
-    @Deprecated
-    void deleteAllRecords(Date version);
 
     /**
      * Значение справочника по Id записи и Id атрибута
@@ -123,7 +106,14 @@ public interface RefBookDataProvider {
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @return
      */
-    RefBookRecordVersion getActiveRecordVersion(Long uniqueRecordId);
+    RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId);
+
+    /**
+     * Возвращает дату начала периода актуальности для указанных версий записей справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return идентификатор версии - дата начала периода актуальности
+     */
+    Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает количество существующих версий для элемента справочника
@@ -134,38 +124,96 @@ public interface RefBookDataProvider {
 
     /**
      * Создает новую версию записи справочника
-     * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @param versionFrom дата начала актуальности новый версии
-     * @param versionTo дата конца актуальности новый версии
-     * @param records список новых значений атрибутов записи справочника
+     * @param versionTo дата конца актуальности новый версии. Может быть null
+     * @param records список новых значений записи справочника
      */
-    void createRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, List<Map<String, RefBookValue>> records);
+    void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
 
     /**
-     * Возвращает значения уникальных атрибутов справочника
+     * Возвращает значения уникальных атрибутов для конкретной версии записи справочника
      * @param uniqueRecordId идентификатор версии записи
-     * @return
+     * @return not null всегда - ожидается возврат результата
      */
-    List<RefBookValue> getUniqueAttributeValues(Long uniqueRecordId);
+    List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long uniqueRecordId);
 
     /**
      * Обновляет данные версии записи справочника
      * Если был изменен период актуальности, выполняются дополнительные проверки пересечений
      * @param uniqueRecordId уникальный идентификатор версии записи справочника
-     * @param versionFrom дата начала актуальности новый версии
-     * @param versionTo дата конца актуальности новый версии
-     * @param isRelevancePeriodChanged признак того, что был изменен период актуальности
+     * @param versionFrom дата начала актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
+     * @param versionTo дата конца актуальности новый версии. Может быть null - тогда выполняется только обновление значений записи, без проверок
      * @param records список обновленных значений атрибутов записи справочника
      */
-    void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, boolean isRelevancePeriodChanged, List<Map<String, RefBookValue>> records);
+    void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
+
+    /**
+     * Устанавливает дату окончания периода актуальности для указанных версий записей справочника
+     * @param versionEnd задает дату окончания периода актуальности
+     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
+     */
+    void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
     /**
      * Удаляет все версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов записей, все версии которых будут удалены
      */
-    void deleteAllRecordVersions(Logger logger, List<Long> uniqueRecordIds);
+    void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds);
     /**
      * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены {@link com.aplana.sbrf.taxaccounting.model.refbook.RefBook#RECORD_ID_ALIAS Код записи}
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
+
+    /**
+     * Получает идентификатор записи, который имеет наименьшую дату начала актуальности для указанной версии
+     * @param uniqueRecordId идентификатор версии записи справочника
+     * @return
+     */
+    Long getFirstRecordId(Long uniqueRecordId);
+
+    /**
+     * Получает идентификатор записи без учета версии (record_id) по ее уникальному идентификатору
+     * @param uniqueRecordId идентификатор версии записи справочника
+     * @return
+     */
+    Long getRecordId(Long uniqueRecordId);
+
+    /**
+     * Создает новые записи в справочнике
+     * @param version дата актуальности новых записей
+     * @param records список новых записей
+     *
+     * Вместо этого метода надо использовать {@link RefBookDataProvider#createRecordVersion}
+     */
+    @Deprecated
+    void insertRecords(Date version, List<Map<String, RefBookValue>> records);
+
+    /**
+     * Обновляет значения в справочнике
+     * @param version задает дату актуальности
+     * @param records список обновленных записей
+     *
+     * Вместо этого метода надо использовать {@link RefBookDataProvider#updateRecordVersion}
+     */
+    @Deprecated
+    void updateRecords(Date version, List<Map<String, RefBookValue>> records);
+
+    /**
+     * Удаляет записи из справочника
+     * @param version задает дату удаления данных
+     * @param recordIds список уникальных идентификаторов версий записей справочника
+     *
+     * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteRecordVersions}
+     */
+    @Deprecated
+    void deleteRecords(Date version, List<Long> recordIds);
+
+    /**
+     * Удаление всех записей справочника
+     * @param version Дата удаления записей
+     *
+     * Вместо этого метода надо использовать {@link RefBookDataProvider#deleteAllRecords}
+     */
+    @Deprecated
+    void deleteAllRecords(Date version);
 }

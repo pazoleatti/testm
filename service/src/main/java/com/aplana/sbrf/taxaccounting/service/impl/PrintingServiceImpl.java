@@ -60,8 +60,8 @@ public class PrintingServiceImpl implements PrintingService {
     @Autowired
     RefBookFactory refBookFactory;
 
-    private static long REF_BOOK_ID = 8L;
-    private static String REF_BOOK_VALUE_NAME = "CODE";
+    private static final long REF_BOOK_ID = 8L;
+    private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
@@ -69,7 +69,7 @@ public class PrintingServiceImpl implements PrintingService {
         FormDataReport data = new FormDataReport();
         FormData formData = formDataDao.get(formDataId);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-        Department department =  departmentDao.getDepartment(formData.getDepartmentId());
+        Department department =  departmentDao.getDepartment(formData.getPrintDepartmentId());
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
         data.setData(formData);
@@ -106,7 +106,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateExcelUsers(List<TAUserFull> taUserFullList) {
+    public String generateExcelUsers(List<TAUserFullWithDepartmentPath> taUserFullList) {
         try {
             TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserFullList);
             return taBuilder.createReport();

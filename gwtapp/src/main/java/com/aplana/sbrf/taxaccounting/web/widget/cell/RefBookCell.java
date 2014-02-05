@@ -3,13 +3,14 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.closabledialog.ClosableDialogBox;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -29,6 +30,8 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+import java.util.List;
+
 /**
  * Ячейка для редактирования значений из справочника. 
  * 
@@ -44,8 +47,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-	private ClosableDialogBox panel;
-	private RefBookPicker refBookPiker = new RefBookPickerWidget();
+    private ModalWindow panel;
+	private RefBookMultiPicker refBookPiker = new RefBookMultiPickerView();
 	
 	private HandlerRegistration changeHandlerRegistration;
 
@@ -62,8 +65,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
 		// Create popup panel
-		this.panel = new ClosableDialogBox(true, true);
-        panel.setText(this.column.getName());
+        this.panel = new ModalWindow(this.column.getName());
+
 
 		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
 			public void onClose(CloseEvent<PopupPanel> event) {
@@ -95,7 +98,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
-				refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+                refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
 						columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
@@ -103,21 +106,31 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			refBookPiker.setValue(nvalue);
 			
 			// Регистрируем событие изменения значени 
-			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<Long>() {
+			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
 				@Override
-				public void onValueChange(ValueChangeEvent<Long> event) {
+				public void onValueChange(ValueChangeEvent<List<Long>> event) {
 					// Update the cell and value updater.
-					Long value = event.getValue();
+                    List<Long> values = event.getValue();
+                    Long value = (values != null && !values.isEmpty() ? values.get(0) : null);
 
 					@SuppressWarnings("unchecked")
 					DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
 					Cell cell = dataRow.getCell(RefBookCell.this.column.getAlias());
-					cell.setRefBookDereference(refBookPiker
-							.getDereferenceValue());
+					cell.setRefBookDereference(refBookPiker.getDereferenceValue());
 
 					setValue(context, parent, value);
-					
-					if (valueUpdater != null) {
+
+                    // Разыменование для зависимых ячеек
+                    List<Cell> linkedCells = dataRow.getLinkedCells(column.getId());
+                    if (linkedCells != null) {
+                        for (Cell refCell : linkedCells) {
+                            ReferenceColumn referenceColumn = (ReferenceColumn)refCell.getColumn();
+                            refCell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(
+                                    referenceColumn.getRefBookAttributeId()));
+                        }
+                    }
+
+                    if (valueUpdater != null) {
 						valueUpdater.update(value);
 					}
 					// Скрываем панель. При скрытии удаляется хендлер.
@@ -130,7 +143,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 		}
 	}
-
 
 	@Override
 	public void render(Context context, Long value, SafeHtmlBuilder sb) {

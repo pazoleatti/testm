@@ -4,6 +4,8 @@
 package refbook.okato
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
@@ -15,6 +17,7 @@ import java.text.SimpleDateFormat
  * скрипт справочника ОКАТО
  *
  * @author Stanislav Yasinskiy
+ * @author Levykin
  */
 switch (formDataEvent) {
     case FormDataEvent.IMPORT:
@@ -22,118 +25,232 @@ switch (formDataEvent) {
         break
 }
 
-void importFromXML() {
-    def dataProvider = refBookFactory.getDataProvider(3L)
-    def refBook = refBookFactory.get(3L)
-    def SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd")
-    def reader = null
-    def Date version = null  //дата актуальности
-    def Map<String, RefBookValue> recordsMap = new HashMap<String, RefBookValue>() // аттрибут и его значение
-    def List<Map<String, RefBookValue>> recordsList = new ArrayList<Map<String, RefBookValue>>() // данные для записи в бд
-    def Map<String, Model> mapper = new HashMap<String, Model>() // соответствие имён аттрибутов в бд и xml
-    def final INSERT_SIZE = 100 // размер одной порции данных // 10000 Превышает таймаут
-
-    refBook.attributes.each {
-        if (it.alias.equals("NAME")) {
-            mapper.put("NAME1", new Model(it.attributeType, "NAME"))
-        }
-        else if (it.alias.equals("OKATO")) {
-            mapper.put("KOD", new Model(it.attributeType, "OKATO"))
-        }
+// Получение строки для фильтрации записей по кодам ОКАТО
+def getFilterString(def tempList) {
+    def retVal = ''
+    tempList?.each { okato ->
+        retVal <<= "OKATO='$okato' or "
     }
+    if (tempList != null && !tempList.isEmpty()) {
+        retVal = retVal.substring(0, retVal.length() - 3)
+    }
+    return retVal
+}
 
-    // Признак обновления записей
-    def isUpdateMode = false;
+// Импорт записей из XML-файла
+void importFromXML() {
+    println("Import OKATO: Start " + System.currentTimeMillis())
+    def reader
+    def addByVersionMap = [:] // Обновляемые/Создаваемые (Версия -> Список значений)
+    def delByVersionMap = [:] // Удаляемые (Версия -> Список значений)
+    def dataProvider = refBookFactory.getDataProvider(3L)
 
+    def sdf = new SimpleDateFormat('yyyy.MM.dd')
     try {
-        def XMLInputFactory factory = XMLInputFactory.newInstance()
-        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
-        factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-        reader = factory.createXMLStreamReader(inputStream)
+        def xmlFactory = XMLInputFactory.newInstance()
+        xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
+        xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
+        reader = xmlFactory.createXMLStreamReader(inputStream)
+
+        def isTransactionStart = false // <transaction group="okato"> - событие импорта ОКАТО
+        def isReplaceStart = false // <replace> - событие замены справочника
+        def isRecordStart = false // <record> - запись
+        def rolloutQN = QName.valueOf('rollout')
+        def transactionQN = QName.valueOf('transaction')
+        def fieldQN = QName.valueOf('field')
+        def recordQN = QName.valueOf('record')
+        def replaceQN = QName.valueOf('replace')
+        def recordValueMap // Значение справочника
+        def typeAkt // Атрибут 'TYPEAKT'
+        def datAkt // Атрибут 'DATAKT'
 
         while (reader.hasNext()) {
             if (reader.startElement) {
-
-                // Версия справочника
-                if (reader.getName().equals(QName.valueOf("rollout"))) {
-                    version = sdf.parse(reader.getAttributeValue(null, "dateSet"))
-
-                    List<Date> versionList = dataProvider.getVersions(version, version)
-                    isUpdateMode = versionList.contains(version)
-
-                    // Если версии не совпадают, прежние записи отмечаются как удаленные
-                    if (!isUpdateMode) {
-                        dataProvider.deleteAllRecords(version)
+                if (isTransactionStart
+                        && isReplaceStart
+                        && isRecordStart
+                        && reader.name.equals(fieldQN)) {
+                    // Атрибуты записи
+                    def name = reader.getAttributeValue(null, 'name')
+                    if ('NAME1'.equals(name)) {
+                        def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
+                                reader.getAttributeValue(null, 'value'))
+                        recordValueMap.put('NAME', refBookValue)
+                    } else if ('KOD'.equals(name)) {
+                        def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
+                                reader.getAttributeValue(null, 'value'))
+                        recordValueMap.put('OKATO', refBookValue)
+                    } else if ('TYPEAKT'.equals(name)) {
+                        typeAkt = reader.getAttributeValue(null, 'value')
+                    } else if ('DATAKT'.equals(name)) {
+                        datAkt = sdf.parse(reader.getAttributeValue(null, 'value'))
                     }
+                } else if (reader.name.equals(recordQN)) {
+                    isRecordStart = true
+                    recordValueMap = [:]
+                    typeAkt = null
+                    datAkt = null
+                } else if (reader.name.equals(rolloutQN)) {
+                    def dateSet = sdf.parse(reader.getAttributeValue(null, 'dateSet'))
+                    println("Import OKATO: " + sdf.format(dateSet) + " " + System.currentTimeMillis())
+                } else if (reader.name.equals(transactionQN)
+                        && 'okato'.equals(reader.getAttributeValue(null, 'group'))) {
+                    isTransactionStart = true
+                } else if (reader.name.equals(replaceQN)) {
+                    isReplaceStart = true
                 }
-
-                // Список значений для вставки в бд
-                if (reader.getName().equals(QName.valueOf("field"))) {
-                    def name = reader.getAttributeValue(null, "name")
-                    def value = reader.getAttributeValue(null, "value")
-                    def map = mapper.get(name)
-                    if (map != null) {
-                        def RefBookValue refBookValue = null
-                        if (map.type.equals(RefBookAttributeType.STRING)) {
-                            refBookValue = new RefBookValue(map.type, value)
-                        } else if (map.type.equals(RefBookAttributeType.NUMBER) || map.type.equals(RefBookAttributeType.REFERENCE)) {
-                            refBookValue = new RefBookValue(map.type, value.toLong())
-                        } else if (map.type.equals(RefBookAttributeType.DATE)) {
-                            refBookValue = new RefBookValue(map.type, sdf.parse(value))
+            } else if (reader.endElement) {
+                if (reader.name.equals(recordQN)) {
+                    def activeMap
+                    if ('00'.equals(typeAkt)
+                            || '02'.equals(typeAkt)
+                            || '03'.equals(typeAkt)) {
+                        // Список на добавление/обновление/включение
+                        activeMap = addByVersionMap
+                    } else if ('01'.equals(typeAkt)) {
+                        // Список на исключение
+                        activeMap = delByVersionMap
+                    }
+                    if (activeMap != null) {
+                        if (activeMap.containsKey(datAkt)) {
+                            activeMap.get(datAkt).put(recordValueMap.OKATO, recordValueMap)
+                        } else {
+                            def recordMap = [:]
+                            recordMap.put(recordValueMap.OKATO, recordValueMap)
+                            activeMap.put(datAkt, recordMap)
                         }
-                        recordsMap.put(map.name, refBookValue)
                     }
+
+                    // recordMap.put(recordValueMap.OKATO, recordValueMap)
+                    isRecordStart = false
+                } else if (reader.name.equals(transactionQN)) {
+                    isTransactionStart = false
+                } else if (reader.name.equals(replaceQN)) {
+                    isReplaceStart = false
                 }
             }
-
-            // Запись в лист
-            if (reader.endElement && reader.getName().equals(QName.valueOf("record"))) {
-                // recordsMap.put("ID", new RefBookValue(RefBookAttributeType.NUMBER, counter++))
-                recordsList.add(recordsMap)
-                recordsMap = new HashMap<String, RefBookValue>()
-                if (recordsList.size() >= INSERT_SIZE) {
-                    writeRecords(dataProvider, isUpdateMode, version, recordsList)
-                    recordsList.clear()
-                }
-            }
-
             reader.next()
         }
     } finally {
         reader?.close()
     }
 
-    writeRecords(dataProvider, isUpdateMode, version, recordsList)
+    println("Import OKATO: Parse end " + System.currentTimeMillis())
+    println("Import OKATO: Add versions count = ${addByVersionMap.size()}, Del versions count = ${delByVersionMap.size()}")
 
-    if (isUpdateMode) {
-        refBookOkatoDao.clearParentId(version)
-    }
+    // Сортировка версий
+    def versions = []
+    versions.addAll(addByVersionMap.keySet())
+    versions.addAll(delByVersionMap.keySet())
+    Collections.sort(versions)
 
-    refBookOkatoDao.updateParentId(version)
-}
+    // По версиям
+    versions.each { version ->
+        // Добавляемые/обновляемые записи
+        def addMap = addByVersionMap.get(version)
+        // Удаляемые записи
+        def delMap = delByVersionMap.get(version)
 
-// Добавление или обновление порции записей
-private void writeRecords(def dataProvider, boolean isUpdateMode, Date version,
-                          List<Map<String, RefBookValue>> recordsList) {
-    if (!isUpdateMode) {
-        // Добавление новых записей
-        dataProvider.insertRecords(version, recordsList)
-    } else {
-        // Обновление атрибутов
-        List<Map<String, RefBookValue>> notFoundList = refBookOkatoDao.updateValueNames(version, recordsList)
-        // Добавление новых записей
-        if (!notFoundList.isEmpty()) {
-            dataProvider.insertRecords(version, notFoundList)
+        println()
+        println("Import OKATO: VERSION ${sdf.format(version)}")
+        println("Import OKATO: Add/Upd candidate record count = ${addMap == null ? 0 : addMap.size()}, " +
+                "Del candidate record count = ${delMap == null ? 0 : delMap.size()}")
+
+        // Список записей для сохранения в текущей версии
+        def addList = []
+
+        // Список id записей для удаления в текущей версии
+        def delList = []
+
+        // Коды окато, записи по которым будут изменены в текущей версии
+        def okatoSet = [] as Set
+        if (addMap != null) {
+            okatoSet.addAll(addMap.keySet())
+        }
+        if (delMap != null) {
+            okatoSet.addAll(delMap.keySet())
+        }
+
+        // Получение частями актуальных записей
+        def tempList = []
+        def actualRecordList = []
+        okatoSet.each { okato ->
+            if (tempList.size() < 500) {
+                tempList.add(okato)
+            } else {
+                actualRecordList.addAll(dataProvider.getRecords(version, null, getFilterString(tempList), null))
+                tempList.clear()
+            }
+        }
+
+        if (!tempList.isEmpty()) {
+            actualRecordList.addAll(dataProvider.getRecords(version, null, getFilterString(tempList), null))
+            tempList.clear()
+        }
+
+        println("Import OKATO: Current found record count = " + actualRecordList.size())
+
+        // Построение Map для списка актуальных записей
+        def actualRecordMap = [:]
+        actualRecordList.each { actualMap ->
+            actualRecordMap.put(actualMap.OKATO, actualMap)
+        }
+
+        // Поиск добавляемых
+        addMap?.each { okato, value ->
+            def actualValue = actualRecordMap.get(okato)
+            def actualName = actualValue?.NAME?.stringValue
+
+            if (actualName == null || !actualName.equals(value.NAME.stringValue)) {
+                // Если запись новая или отличная от имеющейся, то добавляем новую версию
+                addList.add(value)
+                if (actualName != null) {
+                    // Если такой код ОКАТО уже был, то старая запись должна отметиться как удаленная
+                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                }
+            }
+        }
+
+        // Поиск удаляемых
+        delMap?.keySet()?.each { okato ->
+            def actualValue = actualRecordMap.get(okato)
+
+            if (actualValue != null) {
+                // Запись нашлась
+                delList.add(value.get(RefBook.RECORD_ID_ALIAS).numberValue)
+            }
+        }
+
+        println("Import OKATO: Delete in version count = ${delList.size()}, Add in version count = ${addList.size()}")
+
+        // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые
+        if (!delList.isEmpty() || !addList.isEmpty()) {
+            println("Import OKATO: DB update/create begin " + System.currentTimeMillis())
+
+            if (!delList.isEmpty()) {
+                dataProvider.updateRecordsVersionEnd(logger, version, delList)
+            }
+
+            // Добавление новых или обновленных записей в текущей версии
+            if (!addList.isEmpty()) {
+                dataProvider.createRecordVersion(logger, null, version, null, addList)
+            }
+            println("Import OKATO: DB update/create end " + System.currentTimeMillis())
+
+            println("Import OKATO: DB calc parent begin " + System.currentTimeMillis())
+
+            // TODO Вопрос http://jira.aplana.com/browse/SBRFACCTAX-3295
+            // Очистка ссылки на родительскую запись для всей версии
+            refBookOkatoDao.clearParentId(version)
+
+            // Вычисление родительского кода ОКАТО и обновление записей для всей версии
+            refBookOkatoDao.updateParentId(version)
+            println("Import OKATO: DB calc parent end " + System.currentTimeMillis())
         }
     }
-}
 
-class Model {
-    RefBookAttributeType type
-    String name
-
-    Model(RefBookAttributeType type, String name) {
-        this.type = type
-        this.name = name
+    println("Import OKATO: End " + System.currentTimeMillis())
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        logger.info("Импорт успешно выполнен.")
     }
 }

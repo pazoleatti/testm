@@ -30,8 +30,6 @@ public class FormDataListPresenter extends
 		FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
 		FormDataListUiHandlers, FilterFormDataReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
 		FormDataListApplyEvent.FormDataApplyHandler {
-	
-	
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListPresenter}
 	 * 's proxy.
@@ -53,9 +51,6 @@ public class FormDataListPresenter extends
 	 * Используется при заполнении начальных значений фильтра поиска
 	 */
 	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
-
-	
-
 
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -88,13 +83,12 @@ public class FormDataListPresenter extends
 		// При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
 		// Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
 		dialogPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
-		
 	}
 
 	@Override
 	public void onClickFind(FormDataListApplyEvent event) {
 		FormDataFilter filter = filterPresenter.getFilterData();
-		saveFilterSatet(filter.getTaxType(), filter);
+		saveFilterState(filter.getTaxType(), filter);
 		getView().updateData(0);
 	}
 
@@ -111,7 +105,7 @@ public class FormDataListPresenter extends
 					getView().updateHeader("Список налоговых форм");
 				}
 				this.taxType = filter.getTaxType();
-				saveFilterSatet(filter.getTaxType(), filter);
+				saveFilterState(filter.getTaxType(), filter);
 				getView().updateData(0);
 				
 				// Презентор фильтра успешно проинициализировался - делаем ревал
@@ -127,9 +121,8 @@ public class FormDataListPresenter extends
 	public void onSortingChanged(){
 		getView().updateData();
 	}
-	
-	
-	private void saveFilterSatet(TaxType taxType, FormDataFilter filter){
+
+	private void saveFilterState(TaxType taxType, FormDataFilter filter){
 		// Это ворк эраунд.
 		// Нужно клонировать состояние т.к. в FilterFormDataPresenter 
 		// может менять значения в этом объекте, что нужно не всегда.
@@ -170,6 +163,9 @@ public class FormDataListPresenter extends
 					}
 				}, FormDataListPresenter.this));
 	}
-	
 
+    @Override
+    public void onCreateClicked() {
+        FormDataListCreateEvent.fire(this);
+    }
 }

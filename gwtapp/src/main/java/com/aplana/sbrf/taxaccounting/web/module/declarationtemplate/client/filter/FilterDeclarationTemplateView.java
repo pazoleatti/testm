@@ -67,19 +67,13 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
 
     @Override
     public TemplateFilter getDataFilter() {
-    	TemplateFilter filter = driver.flush();
-        return filter;
+    	return driver.flush();
     }
 
 	@Override
 	public void setTaxTypes(List<TaxType> taxTypes){
         taxTypes.add(0, null);
         taxType.setAcceptableValues(taxTypes);
-	}
-
-
-    @UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event) {
 	}
 
 	@UiHandler("apply")

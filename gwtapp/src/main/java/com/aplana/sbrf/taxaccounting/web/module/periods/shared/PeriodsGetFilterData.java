@@ -10,6 +10,15 @@ public class PeriodsGetFilterData extends UnsecuredActionImpl<PeriodsGetFilterDa
     }
 
 	private TaxType taxType;
+	private int departmentId;
+
+	public int getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(int departmentId) {
+		this.departmentId = departmentId;
+	}
 
 	public TaxType getTaxType() {
 		return taxType;

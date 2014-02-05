@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 
 public class DeclarationDataSearchResultItemMapper implements RowMapper<DeclarationDataSearchResultItem> {
 
-    private static final SimpleDateFormat YEAR_FORMATTER = new SimpleDateFormat(Formats.YYYY.getFormat());
 	@Override
 	public DeclarationDataSearchResultItem mapRow(ResultSet rs, int i) throws SQLException {
 		DeclarationDataSearchResultItem result = new DeclarationDataSearchResultItem();
@@ -26,7 +25,7 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 		result.setAccepted(rs.getBoolean("is_accepted"));
-        result.setReportPeriodYear(Integer.valueOf(YEAR_FORMATTER.format(rs.getDate("start_date"))));
+        result.setReportPeriodYear(rs.getInt("year"));
 		result.setDeclarationType(rs.getString("declaration_type_name"));
 
 		return result;

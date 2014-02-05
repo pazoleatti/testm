@@ -8,6 +8,9 @@ import java.util.List;
  */
 public class TAUser implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	/** Код учетной записи для пользователя "Система" */
+	public static final int SYSTEM_USER_ID = 0;
 	
 	private int id;
 	private String login;

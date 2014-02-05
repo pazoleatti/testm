@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -17,12 +13,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.annotations.TabInfo;
-import com.gwtplatform.mvp.client.annotations.Title;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FormTemplateColumnPresenter
 		extends
@@ -74,9 +70,9 @@ public class FormTemplateColumnPresenter
 	public void onSet(FormTemplateSetEvent event) {
 		boolean isFormChanged = true;
         if (formTemplate != null) {
-            isFormChanged = !formTemplate.getId().equals(event.getFormTemplate().getId());
+            isFormChanged = !formTemplate.getId().equals(event.getFormTemplateExt().getFormTemplate().getId());
         }
-        formTemplate = event.getFormTemplate();
+        formTemplate = event.getFormTemplateExt().getFormTemplate();
 
         refBookAttributeToRefBookMap.clear();
         refBookAttributeMap.clear();
@@ -121,7 +117,7 @@ public class FormTemplateColumnPresenter
 		while (aliasExists(column)) {
 			column.setAlias(oldAlias + ++i);
 		}
-		if (oldAlias != column.getAlias()) {
+		if (!oldAlias.equals(column.getAlias())) {
 			getView().setColumn(column);
 		}
 	}

@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public interface DeclarationTemplateDao {
 
     /**
      * Получение тела скрипта.
-     * @param declarationTemplateId
+     * @param declarationTemplateId идентификатор макета
      * @return тело скрипта
      */
     String getDeclarationTemplateScript(int declarationTemplateId);
@@ -68,4 +69,47 @@ public interface DeclarationTemplateDao {
      * @return список всех идентификаторов
      */
     List<Integer> listAllId();
+
+    /**
+     * Получает список id версий макета по типу шаблона и статусу версии.
+     * @param decTypeId вид шаблона
+     * @param decTemplateId идентификатор шаблона, котрый исключить из поиска, если нет такого то 0
+     * @param statusList статус формы
+     * @return список версий
+     */
+    List<Integer> getDeclarationTemplateVersions(int decTypeId, int decTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
+
+    /**
+     * Поиск версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
+     * @param typeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор "правой" версии макета
+     */
+    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
+     * @param typeId идентификатор вида налога
+     * @param statusList список статусов макатеов, которые искать
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return идентификатор версии макета "слева"
+     */
+    int getNearestDTVersionIdLeft(int typeId, List<Integer> statusList, Date actualBeginVersion);
+
+    /**
+     * Удаляет версию шаблона.
+     * По идее удалять полностью только фейковые версии шаблонов.
+     * @param declarationTemplateId идентификатор макета
+     * @return удаленный идентификатор макета
+     */
+    int delete(int declarationTemplateId);
+
+    /**
+     * Количество весий для вида шаблона
+     * @param decTypeId вид шаблона
+     * @param statusList статусы
+     * @return количество
+     */
+    int versionTemplateCount(int decTypeId, List<Integer> statusList);
 }

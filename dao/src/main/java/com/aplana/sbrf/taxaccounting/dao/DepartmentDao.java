@@ -107,4 +107,11 @@ public interface DepartmentDao {
      * @return Список id доступных подразделений
      */
     List<Integer> getDepartmentsBySourceControlNs(int userDepartmentId, List<TaxType> taxTypes);
+
+    /**
+     * Получение списка исполнителей по списку идентификаторов подразделений
+     * @param departments список id'шников подразделений
+     * @return писок id'шников подразделений (исполнителей)
+     */
+    List<Integer> getPerformers(List<Integer> departments);
 }

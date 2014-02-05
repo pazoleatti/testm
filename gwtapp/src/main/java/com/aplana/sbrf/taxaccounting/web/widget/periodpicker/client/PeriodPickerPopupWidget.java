@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.adapters.TakesValueEditor;
@@ -12,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -36,7 +39,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	Button clearButton;
 	
 	@UiField
-	PopupPanel popupPanel;
+    ModalWindow popupPanel;
 	
 	@UiField
 	Panel panel;
@@ -50,23 +53,28 @@ public class PeriodPickerPopupWidget extends Composite implements
 	private TakesValueEditor<List<Integer>> editor;
 	
 	private Map<Integer, String> dereferenceValue;
-	
+	private Map<Integer, Pair<Date, Date>> reportPeriodDates;
+
 	public PeriodPickerPopupWidget(){
 		periodPicker = new PeriodPickerWidget();
 		initWidget(binder.createAndBindUi(this));
+        periodPicker.setHeaderVisible(false);
 	}
 	
 	@UiConstructor
 	public PeriodPickerPopupWidget(boolean multiselect){
 		periodPicker = new PeriodPickerWidget(multiselect);
 		initWidget(binder.createAndBindUi(this));
+        periodPicker.setHeaderVisible(false);
 	}
 
     @Override
     public void setPeriods(List<ReportPeriod> periods) {
         dereferenceValue = new HashMap<Integer, String>();
+        reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
         for (ReportPeriod reportPeriod : periods) {
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
+            reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
         }
         periodPicker.setPeriods(periods);
     }
@@ -112,6 +120,11 @@ public class PeriodPickerPopupWidget extends Composite implements
         clearButton.setEnabled(enabled);
     }
 
+    @Override
+    public Pair<Date, Date> getPeriodDates(Integer reportPeriodId){
+        return reportPeriodDates.get(reportPeriodId);
+    }
+
     @UiHandler("okButton")
     public void onOkButtonClick(ClickEvent event){
         this.setValue(periodPicker.getValue(), true);
@@ -121,9 +134,7 @@ public class PeriodPickerPopupWidget extends Composite implements
     @UiHandler("selectButton")
     public void onSelectClick(ClickEvent event){
         periodPicker.setValue(this.value);
-        popupPanel.setPopupPosition(panel.getAbsoluteLeft(),
-                panel.getAbsoluteTop() + panel.getOffsetHeight());
-        popupPanel.show();
+        popupPanel.center();
     }
 
     @UiHandler("clearButton")
@@ -156,11 +167,11 @@ public class PeriodPickerPopupWidget extends Composite implements
         if ((strings == null) || strings.isEmpty()) {
             return "";
         }
-        StringBuilder text = new StringBuilder();
+        StringBuilder s = new StringBuilder();
         for (String name : strings) {
-            text.append(name + "; ");
+            s.append(name + "; ");
         }
-        return text.toString();
+        return s.toString();
     }
 
 	@Override

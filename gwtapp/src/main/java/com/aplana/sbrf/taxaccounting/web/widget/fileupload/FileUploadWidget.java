@@ -1,17 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,7 +26,7 @@ import com.google.gwt.user.client.ui.*;
  * Виджет для загрузки файлов.
  * Поле TextBox используется для имитации выбора файла, редиректит к <input type-"file" />.
  */
-public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>{
+public class FileUploadWidget extends Composite implements HasHandlers, HasValue<String>, LeafValueEditor<String>, HasEnabled {
 
     @UiField
     FileUpload uploader;
@@ -32,7 +35,25 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FormPanel uploadFormDataXls;
 
     @UiField
-    TextBox textBox;
+    LinkButton uploadButton;
+    @UiField
+    Button justButton;
+
+    @Override
+    public boolean isEnabled() {
+        return uploadButton.isEnabled();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        uploadButton.setEnabled(enabled);
+        justButton.setEnabled(enabled);
+    }
+
+    public static interface IconResource extends ClientBundle{
+        @Source("importIcon.png")
+        ImageResource icon();
+    }
 
     private String value;
     private static String actionUrl = "upload/uploadController/pattern/";
@@ -55,6 +76,11 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         if (fireEvents){
             ValueChangeEvent.fire(this, this.value);
         }
+    }
+
+    public void setSimpleButton(boolean simpleButton){
+        uploadButton.setVisible(!simpleButton);
+        justButton.setVisible(simpleButton);
     }
 
     @Override
@@ -85,25 +111,50 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             }
         });
         uploader.getElement().setId("uploaderWidget");
-        textBox.getElement().setId("fakeInput");
-        textBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                uploader.getElement().<InputElement>cast().click();
-            }
-        });
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                //В IE в случае скрытия поля <input type='file'/> к имени файла дополнительно добавляется fakepath
-                textBox.setValue(uploader.getFilename().replaceAll(uploadPatternIE, ""));
+                uploadFormDataXls.submit();
             }
         });
     }
 
     @UiHandler("uploadButton")
     void onUploadButtonClicked(ClickEvent event){
-        uploadFormDataXls.submit();
+        uploaderClick();
     }
+
+    @UiHandler("justButton")
+    void onJustButtonClicked(ClickEvent event){
+        uploaderClick();
+    }
+
+    private void uploaderClick(){
+        uploader.getElement().<InputElement>cast().click();
+    }
+
+    /**
+     * Метод для совместимости с прошлой версией.
+     * Сейчас используется всегда uploadAsTemporal = false
+     * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
+     */
+    public void setUploadAsTemporal(boolean asTemporal){
+        // ignore
+    }
+
+    public void setText(String text) {
+        uploadButton.setText(text);
+        justButton.setText(text);
+    }
+
+    public String getText() {
+        return uploadButton.getText();
+    }
+
+    public void setWidth(String width){
+        uploadButton.setWidth(width);
+        justButton.setWidth(width);
+    }
+
 
 }

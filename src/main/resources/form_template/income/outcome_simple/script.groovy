@@ -65,7 +65,7 @@ switch (formDataEvent) {
 def recordCache = [:]
 
 @Field
-def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
+def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'co    nsumptionAccountNumber',
         'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
         'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
@@ -238,7 +238,7 @@ def consolidationBank(def dataRows) {
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
             if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
-                row.getCell(alias).setValue(0)
+                row.getCell(alias).setValue(0, row.getIndex())
             }
         }
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
@@ -470,24 +470,21 @@ def getSumForColumn7(def form, def dataRows, def value1) {
             if (value1 == row.code && value1 == row.balance && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
-                // получить налоговые и отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
-                def List<TaxPeriod> taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, dateFrom, row.docDate)
-                taxPeriods.each { taxPeriod ->
-                    def List<ReportPeriod> reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.getId())
-                    reportPeriods.each { reportPeriod ->
-                        // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                        def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
-                        if (f != null) {
-                            def d = formDataService.getDataRowHelper(f)
-                            if (d != null) {
-                                d.allCached.each { r ->
-                                    // графа  4 - balance
-                                    // графа  5 - docNumber
-                                    // графа  6 - docDate
-                                    // графа 10 - taxAccountingRuble
-                                    if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
-                                        sum += (r.taxAccountingRuble ?: 0)
-                                    }
+                // получить отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
+                def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, row.docDate)
+                reportPeriods.each { reportPeriod ->
+                    // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
+                    def FormData f = formDataService.find(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId())
+                    if (f != null) {
+                        def d = formDataService.getDataRowHelper(f)
+                        if (d != null) {
+                            d.allCached.each { r ->
+                                // графа  4 - balance
+                                // графа  5 - docNumber
+                                // графа  6 - docDate
+                                // графа 10 - taxAccountingRuble
+                                if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
+                                    sum += (r.taxAccountingRuble ?: 0)
                                 }
                             }
                         }
@@ -554,11 +551,13 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 3
     def int colOffset = 0
     def int maxRow = 212
-    // номера строк разбитых на несколько в файле
-    def doubleRows = [3, 12, 19, 35, 35, 38, 50, 72]
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
+    def knu
+    def group
+    def type
+    def num
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -575,19 +574,42 @@ void addData(def xml, int headRowCount) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        if ((rowIndex - 1) in doubleRows) { // если ячейки разделены
-            doubleRows.remove(doubleRows.indexOf(rowIndex - 1))
-            continue
-        }
-        def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setIndex(rowIndex++)
 
-        def xmlIndexCol = 4
+        def curRow = getDataRow(rows, "R" + rowIndex)
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
+
+        knu = normalize(curRow.consumptionTypeId)
+        group = normalize(curRow.consumptionGroup)
+        type = normalize(curRow.consumptionTypeByOperation)
+        num = normalize(curRow.consumptionAccountNumber)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && type == typeImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty() || !numImport.isEmpty()) &&
+                        (knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport) && num.contains(numImport))))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 4
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
@@ -610,6 +632,9 @@ void addData(def xml, int headRowCount) {
         // графа 8
         curRow.rnu5Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
 }

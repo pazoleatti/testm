@@ -53,10 +53,25 @@ public interface PeriodService {
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
 	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection);
 
-	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs);
+	/**
+	 * Закрыть период
+	 * @param taxType тип налога
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @param departmentId идентификатор подразделения, для которого закрывается период
+	 * @param logs логер, при необходимости
+	 * @param user пользователь, который выполняет действие
+	 */
+	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
-	
+
+	/**
+	 * Получает список по подразделению и типу налога
+	 * @param departmentId подразделение
+	 * @param taxType тип налога
+	 * @return список подразделение-отчетный период
+	 */
+	List<DepartmentReportPeriod> listByDepartmentIdAndTaxType(long departmentId, TaxType taxType);
 	
 	/**
 	 * Получает список налоговых периодов по типу налога.
@@ -105,33 +120,24 @@ public interface PeriodService {
 	
     /**
      * Возвращает дату начала отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
-     * @param reportPeriodId
+	 *
+	 * <p>Информация о периодах в конфлюенсе
+	 * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
+     * @param reportPeriodId код отчетного периода
      * @return
      */
-    public Calendar getStartDate(int reportPeriodId);
+    Calendar getStartDate(int reportPeriodId);
 
     /**
      * Возвращает дату конца отчетного периода
-     * Дата высчитывается прибавлением смещения в месяцах к дате налогового периода
-     * Смещение в месяцах вычисляется путем суммирования длительности предыдущих
-     * отчетных периодов в данном налоговом периоде.
-     *
-     * Для отчетных периодов относящихся к налоговому периоду с типом "налог на прибыль"
-     * смещение считается по другому алгоритму
      *
      * <p>Информация о периодах в конфлюенсе
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>
      *
-     * @param reportPeriodId
+     * @param reportPeriodId код отчетного периода
      * @return
      */
-    public Calendar getEndDate(int reportPeriodId);
+    Calendar getEndDate(int reportPeriodId);
 
     /**
      * Возвращает "отчетную дату" если требуется в чтз
@@ -139,7 +145,8 @@ public interface PeriodService {
      * @param reportPeriodId
      * @return
      */
-    public Calendar getReportDate(int reportPeriodId);
+	// TODO: возможно имеется в виду дата сдачи отчетности. Надо проверить (Marat Fayzullin 22.01.2014)
+    Calendar getReportDate(int reportPeriodId);
 
     /**
      * Получает все отчетные периоды в отсортированном порядке.
@@ -147,7 +154,7 @@ public interface PeriodService {
      * @param taxType
      * @return
      */
-    public List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
+    List<ReportPeriod> getAllPeriodsByTaxType(TaxType taxType, boolean backOrder);
 
     /**
      * Получить дату начала месяца.
@@ -156,7 +163,7 @@ public interface PeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthStartDate(int reportPeriodId, int periodOrder);
 
     /**
      * Получить дату окончания месяца.
@@ -165,14 +172,52 @@ public interface PeriodService {
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthEndDate(int reportPeriodId, int periodOrder);
 
     /**
-     * Получить отчетную дату месяцы месяца.
+     * Получить отчетную дату месяца.
      *
      * @param reportPeriodId идентификатор отчетного период
      * @param periodOrder очередность месяца в периоде (значение из formData.periodOrder)
      * @return
      */
-    public Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+    Calendar getMonthReportDate(int reportPeriodId, int periodOrder);
+
+	/**
+	 * Удалить отчетный период
+	 * @param taxType тип налога
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @param departmentId идентификатор подразделения, для которого удаляется период
+	 * @param logs логер, при необходимости
+	 * @param user пользователь, который выполняет действие
+	 */
+	void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+
+    /**
+     * Список отчетных периодов для указанного вида налога и для указанных подразделений
+     *
+     * @param taxType Вид налога
+     * @param departmentList Список подразделений
+     * @return Список отчетных периодов
+     */
+    List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList);
+
+
+	/**
+	 * Проверяет существование периода для подразделения
+	 * @param departmentId подразделение, для которого осуществляется проверка существования периода
+	 * @return true - существует, false - не существует
+	 */
+	boolean existForDepartment(Integer departmentId, long reportPeriodId);
+
+	/**
+	 * Проверяет статус периода ОТКРЫТ, ЗАКРЫТ ИЛИ НЕСУЩЕСТВУЕТ
+	 * @param taxType
+	 * @param year
+	 * @param balancePeriod
+	 * @param departmentId
+	 * @param dictionaryTaxPeriodId
+	 * @return
+	 */
+	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
 }

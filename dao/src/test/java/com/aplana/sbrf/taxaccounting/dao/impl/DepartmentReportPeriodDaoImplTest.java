@@ -48,8 +48,6 @@ public class DepartmentReportPeriodDaoImplTest {
 	public void init() {
 
 		taxPeriod = new TaxPeriod();
-		taxPeriod.setStartDate(new Date());
-		taxPeriod.setEndDate(new Date());
 		taxPeriod.setTaxType(TaxType.TRANSPORT);
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
@@ -57,17 +55,21 @@ public class DepartmentReportPeriodDaoImplTest {
 		reportPeriod1 = new ReportPeriod();
 		reportPeriod1.setName("MyTestName1");
 		reportPeriod1.setOrder(9);
-		reportPeriod1.setMonths(3);
 		reportPeriod1.setTaxPeriod(taxPeriod);
 		reportPeriod1.setDictTaxPeriodId(21);
+		reportPeriod1.setStartDate(new Date());
+		reportPeriod1.setEndDate(new Date());
+		reportPeriod1.setCalendarStartDate(new Date());
 		reportPeriodDao.save(reportPeriod1);
 
 		reportPeriod2 = new ReportPeriod();
 		reportPeriod2.setName("MyTestName1");
 		reportPeriod2.setOrder(10);
-		reportPeriod2.setMonths(3);
 		reportPeriod2.setTaxPeriod(taxPeriod);
 		reportPeriod2.setDictTaxPeriodId(22);
+		reportPeriod2.setStartDate(new Date());
+		reportPeriod2.setEndDate(new Date());
+		reportPeriod2.setCalendarStartDate(new Date());
 		reportPeriodDao.save(reportPeriod2);
 
 	}

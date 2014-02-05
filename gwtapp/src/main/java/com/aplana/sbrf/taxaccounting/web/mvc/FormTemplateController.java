@@ -1,7 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -12,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 
@@ -37,6 +45,13 @@ public class FormTemplateController {
 	
 	@Autowired
 	FormTemplateImpexService formTemplateImpexService;
+
+    @Autowired
+    LogEntryService logEntryService;
+
+    @Autowired
+    @Qualifier("formTemplateMainOperatingService")
+    private MainOperatingService mainOperatingService;
 	
 	
 	@RequestMapping(value = "formTemplate/download/{formTemplateId}",method = RequestMethod.GET)
@@ -55,11 +70,21 @@ public class FormTemplateController {
 	@RequestMapping(value = "formTemplate/upload/{formTemplateId}",method = RequestMethod.POST)
 	public void upload(@PathVariable int formTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws FileUploadException, IOException {
-		FileItemFactory factory = new DiskFileItemFactory();
+        if (formTemplateId == 0)
+            throw new ServiceException("Сначала сохраните шаблон.");
+        Logger logger = new Logger();
+        Date endDate = formTemplateService.getFTEndDate(formTemplateId);
+        mainOperatingService.edit(formTemplateService.get(formTemplateId), endDate, logger, securityService.currentUserInfo().getUser());
+        if (logger.containsLevel(LogLevel.ERROR))
+            throw new ServiceLoggerException("Найдены пересечения.", logEntryService.save(logger.getEntries()));
+
+        FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
 		formTemplateImpexService.importFormTemplate(formTemplateId, items.get(0).getInputStream());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
+        if (!logger.getEntries().isEmpty())
+            resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(logger.getEntries()));
 	}
 
 	@ExceptionHandler(Exception.class)

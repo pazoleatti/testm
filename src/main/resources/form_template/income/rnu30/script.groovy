@@ -231,7 +231,7 @@ void calc() {
 
     def totalRow = getDataRow(dataRows, 'total')
     totalColumns1.each { alias ->
-        totalRow.getCell(alias).setValue(getSum(dataRows, alias, totalRow))
+        totalRow.getCell(alias).setValue(getSum(dataRows, alias, totalRow), null)
     }
 
     def aRow = getDataRow(dataRows, 'A')
@@ -239,8 +239,8 @@ void calc() {
     def bRow = getDataRow(dataRows, 'B')
     def totalBRow = getDataRow(dataRows, 'totalB')
     totalColumnsAB.each { alias ->
-        totalARow.getCell(alias).setValue(getSum(dataRows, alias, aRow, totalARow))
-        totalBRow.getCell(alias).setValue(getSum(dataRows, alias, bRow, totalBRow))
+        totalARow.getCell(alias).setValue(getSum(dataRows, alias, aRow, totalARow), null)
+        totalBRow.getCell(alias).setValue(getSum(dataRows, alias, bRow, totalBRow), null)
     }
 
     def totalAllRow = getDataRow(dataRows, 'totalAll')
@@ -248,7 +248,7 @@ void calc() {
         def tmp = (totalRow.getCell(alias).value ?: 0) +
                 (totalARow.getCell(alias).value ?: 0) +
                 (totalBRow.getCell(alias).value ?: 0)
-        totalAllRow.getCell(alias).setValue(tmp)
+        totalAllRow.getCell(alias).setValue(tmp, null)
     }
     dataRowHelper.save(dataRows)
 }
@@ -427,7 +427,7 @@ void migration() {
         def total = getCalcTotalRow()
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
-        dataRowHelper.insert(total, dataRows.size + 1)
+        dataRowHelper.insert(total, dataRows.size() + 1)
     }
 }
 
@@ -673,7 +673,7 @@ def getCalcTotalRow() {
     def tmp
     // задать нули
     totalColumns.each { alias ->
-        totalRow.getCell(alias).setValue(0)
+        totalRow.getCell(alias).setValue(0, null)
     }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -685,7 +685,7 @@ def getCalcTotalRow() {
         }
         totalColumns.each { alias ->
             tmp = totalRow.getCell(alias).value + (row.getCell(alias).value ?: 0)
-            totalRow.getCell(alias).setValue(tmp)
+            totalRow.getCell(alias).setValue(tmp, null)
         }
     }
     return totalRow

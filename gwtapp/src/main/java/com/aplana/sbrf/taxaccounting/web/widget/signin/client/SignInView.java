@@ -32,4 +32,10 @@ public class SignInView extends ViewImpl implements MyView{
 		this.roleAndDepartment.setText(roleAndDepartment);
 	}
 
+    @Override
+    public void setHint(String hintForDepartment, String hintForUserName) {
+        this.roleAndDepartment.setTitle(hintForDepartment);
+        this.userName.setTitle(hintForUserName);
+    }
+
 }

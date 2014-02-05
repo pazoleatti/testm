@@ -1,8 +1,13 @@
 alter table configuration add constraint configuration_pk primary key (code);
 
+alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
+alter table ref_book_oktmo add constraint ref_book_oktmo_fk_parent_id foreign key (parent_id) references ref_book_oktmo(id);
+alter table ref_book_oktmo add constraint ref_book_oktmo_chk_status check (status in (0,-1,1,2));
+create unique index i_ref_book_oktmo_record_id on ref_book_oktmo(record_id, version);
+
 alter table form_type add constraint form_type_pk primary key (id);
 alter table form_type add constraint form_type_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
-alter table form_type add constraint form_type_check_status check (status in (0, 1, 2, 3));
+alter table form_type add constraint form_type_check_status check (status in (-1, 0, 1, 2));
 
 alter table tax_period add constraint tax_period_pk primary key (id);
 alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in ('I', 'P', 'T', 'V', 'D'));
@@ -13,7 +18,7 @@ alter table form_template add constraint form_template_uniq_version unique(type_
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_num_cols check (numbered_columns in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
-alter table form_template add constraint form_template_check_status check (status in (0, 1, 2, 3));
+alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id);
@@ -29,12 +34,12 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
-alter table ref_book add constraint ref_book_chk_editable  check (editable in (0, 1));
+alter table ref_book add constraint ref_book_chk_read_only check (read_only in (0, 1));
 
 alter table ref_book_attribute add constraint ref_book_attr_pk primary key (id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_visible check (visible in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attr_chk_type check (type in (1, 2, 3, 4));
-alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (lower(alias) <> 'record_id' and lower(alias) <> 'row_number_over');
+alter table ref_book_attribute add constraint ref_book_attr_chk_alias check (not lower(alias) in ('record_id', 'row_number_over', 'record_version_from', 'record_version_to'));
 alter table ref_book_attribute add constraint ref_book_attr_chk_precision check (precision >= 0 and precision <=10);
 alter table ref_book_attribute add constraint ref_book_attr_chk_number_type check ((type <> 2 and precision is null) or (type = 2 and not (precision is null)));
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type <> 4 and reference_id is null) or (type = 4 and not (reference_id is null)));
@@ -70,12 +75,13 @@ alter table form_column add constraint form_column_chk_filt_parent check ((type=
 
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
-alter table department add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
+alter table department add constraint dept_chk_type check(type in (1, 2, 3, 4, 5));
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
+alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
 
 alter table income_101 add constraint income_101_pk primary key (id);
 alter table income_101 add constraint income_101_fk_report_period_id foreign key (report_period_id) references report_period(id);
@@ -87,6 +93,7 @@ alter table income_102 add constraint income_102_fk_department foreign key (depa
 
 alter table declaration_type add constraint declaration_type_pk primary key (id);
 alter table declaration_type add constraint declaration_type_chk_tax_type check (tax_type in ('I', 'P', 'T', 'V', 'D'));
+alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
 
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
 alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
@@ -97,6 +104,7 @@ alter table declaration_template add constraint declaration_template_pk primary 
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
 alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
+alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table declaration_data add constraint declaration_data_pk primary key (id);
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
@@ -113,6 +121,7 @@ alter table declaration_data add constraint declaration_data_uniq_template uniqu
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_id foreign key (department_id) references department(id);
+alter table form_data add constraint form_data_fk_print_dep_id foreign key (print_department_id) references department(id);
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
@@ -152,6 +161,7 @@ alter table date_value add constraint date_value_fk_column_id foreign key (colum
 alter table date_value add constraint date_value_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
+alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);
@@ -232,3 +242,4 @@ create index i_form_data_department_id on form_data(department_id);
 create index i_form_data_kind on form_data(kind);
 create index i_form_data_signer_formdataid on form_data_signer(form_data_id);
 create index i_ref_book_value_string on ref_book_value(string_value);
+create index i_ref_book_oktmo_code on ref_book_oktmo(code);

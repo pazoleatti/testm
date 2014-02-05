@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.io.InputStream;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Сервис для работы с шаблонами деклараций 
@@ -101,5 +100,47 @@ public interface DeclarationTemplateService {
      * @return отфильтрованый список шаблонов
      */
     List<DeclarationTemplate> getByFilter(TemplateFilter filter);
+
+    /**
+     * Получить версии макетов деклараций с определеннным статусом
+     * @param formTypeId тип налоговой формы
+     * @param status статус версии макета НФ
+     * @return список версий налоговых форм
+     */
+    List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
+
+    List<SegmentIntersection> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status);
+
+    /**
+     * Удаление макета.
+     * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
+     * @param declarationTemplate версия декларации
+     * @return удаленный идентфикатор
+     */
+    int delete(DeclarationTemplate declarationTemplate);
+
+    /**
+     * Возвращает версию макета ближайшую к данной спрвва.
+     * @param declarationTemplateId идентификатор версия макета
+     * @param status статус
+     * @return ближайшая правее
+     */
+    DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status);
+
+    /**
+     * Получает дату окончания макета. Расчет осуществляется путем поиска
+     * версии макета ближайшей "справа" по дате.
+     * @param declarationTemplateId идентификатор макета декларации
+     * @return дата окончания актуальности макета
+     */
+    Date getDTEndDate(int declarationTemplateId);
+
+    /**
+     * Возвращает количество версий для вида шаблона
+     * @param typeId идентификатор вида шаблона
+     * @param status статусы
+     * @return количество
+     */
+    int versionTemplateCount(int typeId, VersionedObjectStatus... status);
 
 }

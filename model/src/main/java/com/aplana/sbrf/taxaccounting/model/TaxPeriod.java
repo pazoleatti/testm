@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import java.util.Date;
-
 /**
  * Налоговый период.
  * 
@@ -10,21 +8,15 @@ import java.util.Date;
  */
 public class TaxPeriod extends IdentityObject<Integer> {
 	private static final long serialVersionUID = 1L;
-	
+
+	/** Тип налогового периода {@link TaxType}*/
 	private TaxType taxType;
-	private Date startDate;
-	private Date endDate;
 	/** Год налогового периода */
 	private int year;
 
-	
 	/**
 	 * @return вид налога
-	 * @deprecated Налоговый период скоро не будет существовать. 
-	 * Для типа налога отчетного периода используйте <code>ReportPeriod.getTaxType()</code>
-	 * 
 	 */
-	@Deprecated
 	public TaxType getTaxType() {
 		return taxType;
 	}
@@ -35,45 +27,6 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	 */
 	public void setTaxType(TaxType taxType) {
 		this.taxType = taxType;
-	}
-	
-	/**
-	 * @return дата начала периода (включительно)
-	 * 
-	 * @deprecated Налоговый период скоро не будет существовать. 
-	 * Для получения года отчетного периода используйте <code>ReportPeriod.getYear()</code>
-	 */
-	@Deprecated
-	public Date getStartDate() {
-		return startDate;
-	}
-	
-	/**
-	 * Задать дату начала периода (включительно)
-	 * @param startDate дата начала периода
-	 */
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-	
-	/**
-	 * @return дата окончания периода (включительно)
-	 * 
-	 * @deprecated Налоговый период скоро не будет существовать. 
-	 * Для получения года отчетного периода используйте <code>ReportPeriod.getYear()</code>
-	 * 
-	 */
-	@Deprecated
-	public Date getEndDate() {
-		return endDate;
-	}
-	
-	/**
-	 * Задать дату окончания периода (включительно)
-	 * @param endDate дата окончания периода
-	 */
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
 	}
 
 	/**
@@ -90,5 +43,14 @@ public class TaxPeriod extends IdentityObject<Integer> {
 	 */
 	public void setYear(int year) {
 		this.year = year;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("TaxPeriod{");
+		sb.append("taxType=").append(taxType);
+		sb.append(", year=").append(year);
+		sb.append('}');
+		return sb.toString();
 	}
 }

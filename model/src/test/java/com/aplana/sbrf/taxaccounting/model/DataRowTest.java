@@ -187,18 +187,18 @@ public class DataRowTest {
 		FormData fd = new FormData(temp);
 
 		DataRow row1 = fd.createDataRow();
-		row1.getCell(STRING_ALIAS).setValue("книга");
-		row1.getCell(NUMBER_ALIAS).setValue(1.04);
-		row1.getCell(DATE_ALIAS).setValue(new Date());
+		row1.getCell(STRING_ALIAS).setValue("книга", null);
+		row1.getCell(NUMBER_ALIAS).setValue(1.04, null);
+		row1.getCell(DATE_ALIAS).setValue(new Date(), null);
 
 		DataRow row2 = fd.createDataRow();
-		row2.getCell(STRING_ALIAS).setValue("карандаш");
-		row2.getCell(NUMBER_ALIAS).setValue(2.1);
+		row2.getCell(STRING_ALIAS).setValue("карандаш", null);
+		row2.getCell(NUMBER_ALIAS).setValue(2.1, null);
 
 		DataRow row3 = fd.createDataRow();
 		row3.setAlias(ROW_ALIAS);
-		row3.getCell(STRING_ALIAS).setValue("блокнот");
-		row3.getCell(DATE_ALIAS).setValue(new Date());
+		row3.getCell(STRING_ALIAS).setValue("блокнот", null);
+		row3.getCell(DATE_ALIAS).setValue(new Date(), null);
 		
 		List<DataRow<Cell>> result = new ArrayList<DataRow<Cell>>();
 		result.add(row1);

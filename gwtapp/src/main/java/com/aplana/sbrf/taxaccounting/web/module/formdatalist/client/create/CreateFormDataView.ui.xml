@@ -3,54 +3,75 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
+
         .content {
-            padding: 10px;
-            border: 1px solid #949494;
-            border-radius: 3px;
-            margin: 10px 0px;
+            margin: 0 5px;
         }
 
-        .buttonBar {
-            left: 25%;
+        .footerPanel {
+            margin-top: 10px;
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
+
+        .footerButton {
+            margin:  8px 10px 8px 0px !important;
+            width: 64px;
         }
     </ui:style>
 
-	<g:DialogBox height="100%" width="400px" glassEnabled="true" text="Создание налоговой формы">
-        <g:VerticalPanel height="100%" width="100%">
-            <g:FlowPanel addStyleNames="{style.content}">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание налоговой формы" >
+        <g:VerticalPanel height="100%" width="400px">
 
-                <g:FlowPanel height="60px">
-                    <g:Label text="Подразделение"/>
-                    <dep:DepartmentPickerPopupWidget width="400px" ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
-                </g:FlowPanel>
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Период:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <rep:PeriodPickerPopupWidget width="100%" ui:field="reportPeriodIds" multiselect="false"/>
+                </g:cell>
+            </g:HorizontalPanel>
 
-                <g:FlowPanel height="60px">
-                    <g:Label text="Отчетный период"/>
-                    <rep:PeriodPickerPopupWidget width="400px" ui:field="reportPeriodIds" multiselect="false"/>
-                </g:FlowPanel>
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Подразделение:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dep:DepartmentPickerPopupWidget width="100%" ui:field="departmentPicker" multiselection="false" header="Выбор подразделения" modal="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
 
-                <g:FlowPanel height="60px">
-                    <g:Label text="Тип налоговой формы"/>
-                    <g:ValueListBox width="400px" ui:field="formDataKind" />
-                </g:FlowPanel>
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <g:ValueListBox width="100%" ui:field="formDataKind" />
+                </g:cell>
+            </g:HorizontalPanel>
 
-                <g:FlowPanel height="60px">
-                    <g:Label text="Вид налоговой формы"/>
-                    <style:ListBoxWithTooltip width="400px" ui:field="formTypeId" showTooltip="true"/>
-                </g:FlowPanel>
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <style:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
 
-            </g:FlowPanel>
-
-            <style:Bar>
-                <style:RightBar addStyleNames="{style.buttonBar}">
-                    <g:Button ui:field="continueButton" text="Создать"/>
-                    <g:Button ui:field="cancelButton" text="Закрыть"/>
-                </style:RightBar>
-            </style:Bar>
+            <g:HorizontalPanel addStyleNames="{style.footerPanel}" horizontalAlignment="right">
+                <g:cell width="100%">
+                    <g:Label/>
+                </g:cell>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"/>
+            </g:HorizontalPanel>
 
         </g:VerticalPanel>
-	</g:DialogBox>
+    </dw:ModalWindow>
 
 </ui:UiBinder> 

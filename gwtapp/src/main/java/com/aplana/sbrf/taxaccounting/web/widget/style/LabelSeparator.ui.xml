@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .panel{
+            padding: 1px;
+        }
+        .sptext {
+            color: #277E55;
+            padding-left: 2px;
+        }
+
+        .sp {
+            border-bottom: #277E55 dashed 1px;
+            padding-right: 2px;
+        }
+    </ui:style>
+
+    <g:HorizontalPanel ui:field="panel" width="100%" addStyleNames="{style.panel}">
+        <g:cell width="1%">
+            <g:Label wordWrap="false" ui:field="textBox" addStyleNames="{style.sptext}"/>
+        </g:cell>
+        <g:cell width="99%" verticalAlignment="bottom">
+            <g:HTMLPanel addStyleNames="{style.sp}"/>
+        </g:cell>
+    </g:HorizontalPanel>
+
+</ui:UiBinder>

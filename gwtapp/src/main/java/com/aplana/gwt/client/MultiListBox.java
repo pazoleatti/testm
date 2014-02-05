@@ -1,6 +1,7 @@
 package com.aplana.gwt.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -22,7 +23,7 @@ import java.util.List;
  * Date: 27.11.13
  */
 
-public class MultiListBox<T> extends Composite implements HasValue<List<T>>, HasEnabled {
+public class MultiListBox<T> extends Composite implements HasValue<List<T>>, LeafValueEditor<List<T>>, HasEnabled {
 
     private static Binder uiBinder = GWT.create(Binder.class);
 
@@ -54,7 +55,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
     Button selectButton;
 
     @UiField
-    TextBox txt;
+	com.google.gwt.user.client.ui.TextBox txt;
 
     @UiField
     ScrollPanel scrollPanel;
@@ -198,9 +199,9 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Has
             if (dataItem.isChk())
                 tmpList.add(dataItem.getValue()); // Добавляем выбранные
         }
+        this.value = tmpList;                             // очищаем список значений
+        //this.value.addAll(tmpList);                     // копируем новые значения в наш список
         updateTxtValue();
-        this.value.clear();                             // очищаем список значений
-        this.value.addAll(tmpList);                     // копируем новые значения в наш список
         ValueChangeEvent.fire(this, this.value);        // Генерируем событие изменения
     }
 

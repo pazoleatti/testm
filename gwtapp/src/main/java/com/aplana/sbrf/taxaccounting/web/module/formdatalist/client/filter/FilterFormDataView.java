@@ -55,6 +55,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	PeriodPickerPopupWidget reportPeriodIds;
 
 	@UiField
+    @Path("departmentIds")
 	DepartmentPicker departmentPicker;
 
 	@Ignore
@@ -139,7 +140,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     public void setDataFilter(FormDataFilter formDataFilter) {
         driver.edit(formDataFilter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-        departmentPicker.setValue(formDataFilter.getDepartmentIds());
+        //departmentPicker.setValue(formDataFilter.getDepartmentIds());
     }
 
 
@@ -147,7 +148,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     public FormDataFilter getDataFilter() {
     	FormDataFilter filter = driver.flush();
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	filter.setDepartmentIds(departmentPicker.getValue());
+    	//filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
     }
 
@@ -179,28 +180,29 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 	@Override
 	public void setElementNames(Map<FormDataElementName, String> names) {
+        String app = ":";
 		for (Map.Entry<FormDataElementName, String> name : names.entrySet()) {
 			if (name.getValue() == null) {
 				continue;
 			}
 			switch (name.getKey()) {
 				case DEPARTMENT:
-					departmentPickerLbl.setText(name.getValue());
+					departmentPickerLbl.setText(name.getValue() + app);
 					break;
 				case FORM_KIND:
-					formDataKindLbl.setText(name.getValue());
+					formDataKindLbl.setText(name.getValue() + app);
 					break;
 				case FORM_TYPE:
-					formTypeIdLbl.setText(name.getValue());
+					formTypeIdLbl.setText(name.getValue() + app);
 					break;
 				case REPORT_PERIOD:
-					reportPeriodIdsLbl.setText(name.getValue());
+					reportPeriodIdsLbl.setText(name.getValue() + app);
 					break;
 				case RETURN:
-					returnStateLbl.setText(name.getValue());
+					returnStateLbl.setText(name.getValue() + app);
 					break;
 				case STATUS:
-					formStateLbl.setText(name.getValue());
+					formStateLbl.setText(name.getValue() + app);
 					break;
 				default:
 					break;
@@ -224,13 +226,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@Override
 	public void setDepartments(List<Department> list, Set<Integer> availableValues){
 		departmentPicker.setAvalibleValues(list, availableValues);
-	}
-
-    @UiHandler("create")
-	void onCreateButtonClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onCreateClicked();
-		}
 	}
 
 	@UiHandler("apply")

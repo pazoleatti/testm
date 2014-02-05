@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -30,17 +32,18 @@ import java.util.Map;
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
-	private Long currentRefBookId;
-	private Long currentRecordId;
 	private boolean isFormModified = false;
 	private Date relevanceDate;
 	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
 
+    /** Идентификатор справочника */
+    private Long currentRefBookId;
+    /** Уникальный идентификатор версии записи справочника */
+    private Long currentUniqueRecordId;
+    /** Идентификатор записи справочника без учета версий */
+    private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
-
-    /** Идентификатор записи справочника, версии которого отображаются в режиме версионирования */
-    private Long recordId;
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
@@ -55,7 +58,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         Date getVersionTo();
         void setVersionFrom(Date value);
         void setVersionTo(Date value);
-        boolean isRelevancePeriodChanged();
     }
 
 	@Inject
@@ -96,25 +98,39 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	public void show(final Long refBookRecordId) {
-		if (refBookRecordId != null && refBookRecordId.equals(currentRecordId)) {
+		if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
 			return;
 		}
 		if (isFormModified) {
-			boolean confirmed = Window.confirm(DIALOG_MESSAGE);
-			if (confirmed) {
-				isFormModified = false;
-				showRecord(refBookRecordId);
-			} else {
-				RollbackTableRowSelection.fire(this, currentRecordId);
-			}
+            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void yes() {
+                    isFormModified = false;
+                    showRecord(refBookRecordId);
+                }
+
+                @Override
+                public void no() {
+                    rollbackIfNo();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
 			showRecord(refBookRecordId);
 		}
 	}
 
+    private void rollbackIfNo(){
+        RollbackTableRowSelection.fire(this, currentUniqueRecordId);
+    }
+
 	private void showRecord(final Long refBookRecordId) {
 		if (refBookRecordId == null) {
-			currentRecordId = null;
+			currentUniqueRecordId = null;
 			getView().fillInputFields(null);
 			setEnabled(true);
             getView().setVersionFrom(null);
@@ -131,7 +147,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
 								getView().fillInputFields(result.getRecord());
-								currentRecordId = refBookRecordId;
+								currentUniqueRecordId = refBookRecordId;
 								setEnabled(true);
 							}
 						}, this));
@@ -141,14 +157,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Window.alert("Не указана дата начала актуальности");
+                Dialog.warningMessage("Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Window.alert("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
-			if (currentRecordId == null) {
+			if (currentUniqueRecordId == null) {
+                //Создание новой версии
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(recordId);
@@ -173,13 +190,13 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     }
                                 }, this));
 			} else {
+                //Редактирование версии
                 SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
-                action.setRecordId(currentRecordId);
+                action.setRecordId(currentUniqueRecordId);
                 action.setValueToSave(getView().getFieldsValues());
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
-                action.setRelevancePeriodChanged(getView().isRelevancePeriodChanged());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
@@ -215,7 +232,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
 		isFormModified = false;
-		showRecord(currentRecordId);
+		showRecord(currentUniqueRecordId);
 	}
 
 	@Override
@@ -236,8 +253,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().setVersionMode(versionMode);
     }
 
-    public void setCurrentRecordId(Long currentRecordId) {
-        this.currentRecordId = currentRecordId;
+    public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
+        this.currentUniqueRecordId = currentUniqueRecordId;
     }
 
     public void setRecordId(Long recordId) {

@@ -62,19 +62,19 @@ public class ScriptUtilsTest {
 
         DataRow row1 = fd.createDataRow();
         row1.setAlias(ROW1_ALIAS);
-        row1.getCell(STRING_ALIAS).setValue("книга");
-        row1.getCell(NUMBER_ALIAS).setValue(1.04);
-        row1.getCell(DATE_ALIAS).setValue(DATE_CONST);
+        row1.getCell(STRING_ALIAS).setValue("книга", null);
+        row1.getCell(NUMBER_ALIAS).setValue(1.04, null);
+        row1.getCell(DATE_ALIAS).setValue(DATE_CONST, null);
 
         DataRow row2 = fd.createDataRow();
         row2.setAlias(ROW2_ALIAS);
-        row2.getCell(STRING_ALIAS).setValue("карандаш");
-        row2.getCell(NUMBER_ALIAS).setValue(2.1);
+        row2.getCell(STRING_ALIAS).setValue("карандаш", null);
+        row2.getCell(NUMBER_ALIAS).setValue(2.1, null);
 
         DataRow row3 = fd.createDataRow();
         row3.setAlias(ROW3_ALIAS);
-        row3.getCell(STRING_ALIAS).setValue("блокнот");
-        row3.getCell(DATE_ALIAS).setValue(DATE_CONST);
+        row3.getCell(STRING_ALIAS).setValue("блокнот", null);
+        row3.getCell(DATE_ALIAS).setValue(DATE_CONST, null);
 
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
         dataRows.add(row1);
@@ -159,6 +159,25 @@ public class ScriptUtilsTest {
     @Test(expected = ServiceException.class)
     public void parseDate2() {
         ScriptUtils.parseDate("Hello", "dd.MM.yyyy", 1, 1, null, true);
+    }
+
+    @Test
+    public void normalizeTest() {
+        String str1 = null;
+        String str2 = "  ";
+        String str3 = "x";//икс
+        String str4 = "  х  ";//х
+        String str5 = "a  b  c   d";
+        String str6 = "  a  b  c ч  d";
+        String str7 = "  a\n  b  c ч  d";
+
+        Assert.assertEquals(ScriptUtils.normalize(str1), "");
+        Assert.assertEquals(ScriptUtils.normalize(str2), "");
+        Assert.assertEquals(ScriptUtils.normalize(str3), "");
+        Assert.assertEquals(ScriptUtils.normalize(str4), "");
+        Assert.assertEquals(ScriptUtils.normalize(str5), "a b c d");
+        Assert.assertEquals(ScriptUtils.normalize(str6), "a b c ч d");
+        Assert.assertEquals(ScriptUtils.normalize(str7), "a b c ч d");
     }
 
 /*

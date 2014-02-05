@@ -47,9 +47,9 @@ public class DeclarationServiceTest {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setActive(true);
         declarationTemplate.setCreateScript("script");
-        declarationTemplate.setDeclarationType(new DeclarationType());
+        declarationTemplate.setType(new DeclarationType());
         declarationTemplate.setEdition(1);
-        declarationTemplate.setVersion("1");
+        declarationTemplate.setVersion(new Date());
         declarationTemplate.setId(1);
 
         declarationData.setId(1L);

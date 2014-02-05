@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -34,13 +34,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     PeriodPicker reportPeriodIds;
 
-    interface Binder extends UiBinder<Widget, AuditFilterView> { }
+    interface Binder extends UiBinder<Widget, AuditFilterView> {
+    }
 
     @UiField
-    CustomDateBox fromSearchDate;
+    DateMaskBoxPicker fromSearchDate;
 
     @UiField
-    CustomDateBox toSearchDate;
+    DateMaskBoxPicker toSearchDate;
 
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;
@@ -61,18 +62,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    Panel formKindPanel;
-
-    @UiField
-    Panel formTypePanel;
+    RefBookMultiPickerModalWidget user;
 
     @UiField
     Panel declarationTypePanel;
 
     @UiField
-    RefBookPickerPopupWidget user;
+    Panel formPanel;
 
-	private static final int oneDayTime = 24 * 60 * 60 * 1000;
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;
@@ -86,7 +84,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     public void setFormTypeId(Map<Integer, String> formTypesMap) {
         this.formTypesMap = formTypesMap;
         formTypeId.setAcceptableValues(formTypesMap.keySet());
-
     }
 
     @Override
@@ -131,37 +128,34 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(user.getValue());
+        lsf.setUserId(user.getSingleValue());
         lsf.setTaxType(taxType.getValue());
         return lsf;
     }
 
     @Override
     public void setVisibleTaxFields() {
-        formTypePanel.setVisible(true);
-        formKindPanel.setVisible(true);
-        declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
         formKind.setValue(FormDataKind.PRIMARY);
+        formPanel.setVisible(true);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
     public void setVisibleDeclarationFields() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
         formTypeId.setValue(null);
         formKind.setValue(null);
+        formPanel.setVisible(false);
         declarationTypePanel.setVisible(true);
     }
 
     @Override
     public void hideAll() {
-        formTypePanel.setVisible(false);
-        formKindPanel.setVisible(false);
         formTypeId.setValue(null);
         formKind.setValue(null);
-        declarationTypePanel.setVisible(false);
         declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
@@ -235,23 +229,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
+        user.setEndDate(new Date());
     }
 
     @UiHandler("search")
-    void onSearchButtonClicked(ClickEvent event){
-        if(getUiHandlers() != null)
+    void onSearchButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null)
             getUiHandlers().onSearchButtonClicked();
     }
 
-    @UiHandler("printButton")
-    void onPrintButtonClicked(ClickEvent event){
-        getUiHandlers().onPrintButtonClicked();
-    }
 
-    @UiHandler("archive")
-    void onArchive(ClickEvent event){
-        if(getUiHandlers() != null){
-            getUiHandlers().onArchiveButtonClicked();
-        }
-    }
 }

@@ -1,12 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
@@ -18,13 +12,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.annotations.TabInfo;
-import com.gwtplatform.mvp.client.annotations.Title;
+import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
+
+import java.util.List;
 
 public class FormTemplateRowPresenter
 		extends
@@ -64,7 +56,7 @@ public class FormTemplateRowPresenter
 	@ProxyEvent
 	@Override
 	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplate();
+		formTemplate = event.getFormTemplateExt().getFormTemplate();
 		setViewData();
 	}
 

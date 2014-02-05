@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client;
 
 import java.util.Date;
 
+import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -11,36 +12,17 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPicker extends HasValue<Long>, IsWidget {
-	
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны для выбора все версии справочника.
-	 * 
-	 * @param refBookAttrId
-	 */
-	public void setAcceptableValues(long refBookAttrId);
+public interface RefBookPicker extends HasValue<Long>, LeafValueEditor<Long>, IsWidget {
 
 	/**
 	 * Устанавливает параметры и инициализирует компонент.
 	 * В компоненте доступны версии справочника из диапазона дат.
 	 * 
 	 * @param refBookAttrId
-	 * @param date1
-	 * @param date2
+	 * @param startDate начало ограничивающего периода
+	 * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, Date date1, Date date2);
-	
-	
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны версии справочника c учетом фильтра.
-	 * В компоненте доступны версии справочника из диапазона дат.
-	 * 
-	 * @param refBookAttrId
-	 * @param filter
-	 */
-	public void setAcceptableValues(long refBookAttrId, String filter);
+	void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate);
 	
 	
 	/**
@@ -50,14 +32,28 @@ public interface RefBookPicker extends HasValue<Long>, IsWidget {
 	 * 
 	 * @param refBookAttrId
 	 * @param filter
-	 * @param date1
-	 * @param date2
+     * @param startDate начало ограничивающего периода
+     * @param endDate начало ограничивающего периода
 	 */
-	public void setAcceptableValues(long refBookAttrId, String filter, Date date1, Date date2);
+	void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate);
 	
 	
 	/**
 	 * @return
 	 */
-	public String getDereferenceValue();
+	String getDereferenceValue();
+
+    /**
+     * Возвращает разименованное значение поля в выбранной строке по alias
+     * @param alias
+     * @return
+     */
+    String getOtherDereferenceValue(String alias);
+
+    /**
+     * Возвращает разименованное значение поля в выбранной строке по attrId
+     * @param attrId
+     * @return
+     */
+    String getOtherDereferenceValue(Long attrId);
 }

@@ -14,6 +14,23 @@ import groovy.transform.Field
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
+ *
+ * графа  1 - consumptionTypeId
+ * графа  2 - consumptionGroup
+ * графа  3 - consumptionTypeByOperation
+ * графа  4 - consumptionBuhSumAccountNumber
+ * графа  5 - consumptionBuhSumRnuSource
+ * графа  6 - consumptionBuhSumAccepted
+ * графа  7 - consumptionBuhSumPrevTaxPeriod
+ * графа  8 - consumptionTaxSumRnuSource
+ * графа  9 - consumptionTaxSumS
+ * графа 10 - rnuNo
+ * графа 11 - logicalCheck
+ * графа 12 - accountingRecords
+ * графа 13 - opuSumByEnclosure3
+ * графа 14 - opuSumByTableP
+ * графа 15 - opuSumTotal
+ * графа 16 - difference
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -48,23 +65,6 @@ switch (formDataEvent) {
         break
 }
 
-// графа  1 - consumptionTypeId
-// графа  2 - consumptionGroup
-// графа  3 - consumptionTypeByOperation
-// графа  4 - consumptionBuhSumAccountNumber
-// графа  5 - consumptionBuhSumRnuSource
-// графа  6 - consumptionBuhSumAccepted
-// графа  7 - consumptionBuhSumPrevTaxPeriod
-// графа  8 - consumptionTaxSumRnuSource
-// графа  9 - consumptionTaxSumS
-// графа 10 - rnuNo
-// графа 11 - logicalCheck
-// графа 12 - accountingRecords
-// графа 13 - opuSumByEnclosure3
-// графа 14 - opuSumByTableP
-// графа 15 - opuSumTotal
-// графа 16 - difference
-
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS']
@@ -72,11 +72,15 @@ def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPer
 //Аттрибуты, очищаемые перед импортом формы
 @Field
 def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS', 'logicalCheck',
-    'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
+        'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
-def rowsCalc = ['R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15','R16','R17','R1','R26','R27',
-        'R28','R29', 'R30','R31','R32', 'R70','R71']
+def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R1',
+        'R26', 'R27', 'R28', 'R29', 'R30', 'R31', 'R32', 'R70', 'R71']
+
+@Field
+def notImportSum = ['R1', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12', 'R13', 'R15', 'R16', 'R17', 'R27', 'R29',
+        'R67', 'R68', 'R71']
 
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
@@ -204,8 +208,8 @@ void calcTotal() {
 
     // суммы для графы 9
     ['consumptionTaxSumS'].each { alias ->
-        totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'))
-        totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'))
+        totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'), totalRow1.getIndex())
+        totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'), totalRow2.getIndex())
     }
 }
 
@@ -224,19 +228,19 @@ void consolidation() {
     dataRowHelper.getAllCached().each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
             if (row.getCell(alias).isEditable()) {
-                row.getCell(alias).setValue(0)
+                row.getCell(alias).setValue(0,  row.getIndex())
             }
         }
         // графа 11, 13..16
         ['logicalCheck', 'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null)
+            row.getCell(alias).setValue(null, row.getIndex())
         }
         if (row.getAlias() in ['R67', 'R93']) {
             row.consumptionTaxSumS = 0
         }
     }
 
-    // получить консолидированные формы из источников
+    // получить консолидированные формы из источников     .
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
@@ -247,7 +251,7 @@ void consolidation() {
                 def rowResult = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), row.getAlias())
                 ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                     if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)))
+                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
                     }
                 }
             }
@@ -424,11 +428,13 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 3
     def int colOffset = 0
     def int maxRow = 93
-    // номера строк разбитых на несколько в файле
-    def doubleRows = [18, 80]
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
+    def knu
+    def group
+    //def type
+    def num
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
@@ -445,29 +451,55 @@ void addData(def xml, int headRowCount) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        if ((rowIndex - 1) in doubleRows) { // если ячейки разделены
-            doubleRows.remove(doubleRows.indexOf(rowIndex - 1))
-            continue
-        }
-        def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setIndex(rowIndex++)
 
-        def xmlIndexCol = 5
+        def alias = "R" + rowIndex
+        def curRow = getDataRow(rows, alias)
 
         //очищаем столбцы
         resetColumns.each {
             curRow[it] = null
         }
 
+        knu = normalize(curRow.consumptionTypeId)
+        group = normalize(curRow.consumptionGroup)
+        //type = normalize(curRow.consumptionTypeByOperation)
+        num = normalize(curRow.consumptionBuhSumAccountNumber)
+
+        def xmlIndexCol = 0
+
+        def knuImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def groupImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        //def typeImport = normalize(row.cell[xmlIndexCol].text())
+        xmlIndexCol++
+
+        def numImport = normalize(row.cell[xmlIndexCol].text())
+
+        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+        //то продолжаем обработку строки иначе пропускаем строку
+        if (!((knu == knuImport && group == groupImport && num == numImport) ||
+                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !numImport.isEmpty()) &&
+                        knu.contains(knuImport) && group.contains(groupImport) && num.contains(numImport)))) {
+            continue
+        }
+        rowIndex++
+
+        xmlIndexCol = 5
+
         // графа 6
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (val.isBigDecimal()) {
+            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
         // графа 7
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (val.isBigDecimal()) {
+            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -475,10 +507,14 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.consumptionTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        val = row.cell[xmlIndexCol].text().trim()
+        if (!notImportSum.contains(alias) && val.isBigDecimal()) {
+            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
+    }
+    if (rowIndex < maxRow) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
 }

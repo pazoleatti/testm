@@ -57,7 +57,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		String createScript1 = IOUtils.toString(stream, "UTF-8");
 		when(template1.getId()).thenReturn(REPORT_TEMPLATE_ID1);
 		/*when(template1.getCreateScript()).thenReturn(createScript);*/
-		when(template1.getDeclarationType()).thenReturn(declarationType);
+		when(template1.getType()).thenReturn(declarationType);
 
 		// Этот шаблон содержит ошибку в скрипте
 		DeclarationTemplate template2 = mock(DeclarationTemplate.class);
@@ -65,7 +65,7 @@ public class DeclarationDataScriptingServiceImplTest {
         String createScript2 = IOUtils.toString(stream, "UTF-8");
 		when(template2.getId()).thenReturn(REPORT_TEMPLATE_ID2);
 		/*when(template2.getCreateScript()).thenReturn(createScript);*/
-		when(template2.getDeclarationType()).thenReturn(declarationType);
+		when(template2.getType()).thenReturn(declarationType);
 
 		DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
 		when(declarationTemplateDao.get(REPORT_TEMPLATE_ID1)).thenReturn(template1);
@@ -81,7 +81,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		dft.setKind(FormDataKind.SUMMARY);
 		dft.setDepartmentId(DEPARTMENT_ID);
 		sourcesInfo.add(dft);
-		when(departmentFormTypeDao.getDeclarationSources(DEPARTMENT_ID, template1.getDeclarationType().getId())).thenReturn(sourcesInfo);
+		when(departmentFormTypeDao.getDeclarationSources(DEPARTMENT_ID, template1.getType().getId())).thenReturn(sourcesInfo);
 		//ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao, DepartmentFormTypeDao.class);
 
 		FormDataDao formDataDao = mock(FormDataDao.class);

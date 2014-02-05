@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.CustomDateBox;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client.RefBookPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -29,6 +30,9 @@ import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
+	/** Маскимальная длина для строковых значений у справочников */
+	private static final int MAX_STRING_VALUE_LENGTH = 2000;
+
     interface Binder extends UiBinder<Widget, EditFormView> { }
 
 	Map<RefBookColumn, HasValue> widgets;
@@ -41,15 +45,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	Button cancel;
 
     @UiField
-    CustomDateBox versionStart;
+    DateMaskBoxPicker versionStart;
     @UiField
-    CustomDateBox versionEnd;
+    DateMaskBoxPicker versionEnd;
     @UiField
     LinkAnchor allVersion;
 
     private boolean isVersionMode = false;
-    private Date savedVersionFrom;
-    private Date savedVersionTo;
 
 	@Inject
 	@UiConstructor
@@ -63,14 +65,19 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (widgets != null) widgets.clear();
 		Map<RefBookColumn, HasValue> widgets = new HashMap<RefBookColumn, HasValue>();
 		for (RefBookColumn col : attributes) {
+
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
+
             Label label = getArrtibuteLabel(col);
-            label.setWordWrap(true);
-			HorizontalPanel panel = new HorizontalPanel();
-			panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-			panel.setWidth("100%");
-			oneField.add(label);
+            label.getElement().getStyle().setProperty("lineHeight", "12px");
+            label.getElement().getStyle().setProperty("minWidth", "150px");
+            label.getElement().getStyle().setProperty("maxWidth", "250px");
+            oneField.add(label);
+            oneField.setCellWidth(label, "20%");
+            oneField.setCellHorizontalAlignment(label, HasHorizontalAlignment.ALIGN_RIGHT);
+            oneField.setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
+
 			Widget widget;
 			switch (col.getAttributeType()) {
 				case NUMBER:
@@ -80,10 +87,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 				case DATE:
-					widget = new CustomDateBox();
+					widget = new DateMaskBoxPicker();
 					break;
 				case REFERENCE:
-					RefBookPickerPopupWidget refbookWidget = new RefBookPickerPopupWidget(true);
+                    RefBookMultiPickerModalWidget refbookWidget = new RefBookMultiPickerModalWidget(true, false);
+                    refbookWidget.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
 					break;
@@ -91,21 +99,34 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 			}
-            widget.setWidth("300px");
-			panel.add(widget);
-			HasValue hasValue = (HasValue)widget;
-			hasValue.addValueChangeHandler(new ValueChangeHandler() {
-				@Override
-				public void onValueChange(ValueChangeEvent event) {
-					if (event.getSource() instanceof UIObject) {
-						((UIObject) event.getSource()).setTitle(event.getValue().toString());
-					}
-					if (getUiHandlers() != null) {
-						getUiHandlers().valueChanged();
-					}
-				}
-			});
-			oneField.add(panel);
+
+            HasValue hasValue = (HasValue)widget;
+            hasValue.addValueChangeHandler(new ValueChangeHandler() {
+                @Override
+                public void onValueChange(ValueChangeEvent event) {
+                    if (event.getSource() instanceof UIObject) {
+                        ((UIObject) event.getSource()).setTitle(event.getValue().toString());
+                    }
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().valueChanged();
+                    }
+                }
+            });
+
+            widget.setWidth("100%");
+            // Устанавливаем фиксированную ширину для поля типа DATE
+            if (widget instanceof DateMaskBoxPicker) {
+                widget.getElement().getStyle().setProperty("width", "110px");
+            } else {
+                widget.getElement().getStyle().setProperty("minWidth", "100px");
+                widget.getElement().getStyle().setProperty("maxWidth", "100%");
+            }
+
+            oneField.add(widget);
+            oneField.setCellWidth(widget, "80%");
+            oneField.setCellHorizontalAlignment(widget, HasHorizontalAlignment.ALIGN_LEFT);
+            oneField.setCellVerticalAlignment(widget, HasVerticalAlignment.ALIGN_MIDDLE);
+
 			editPanel.add(oneField);
 			widgets.put(col, (HasValue)widget);
 		}
@@ -139,16 +160,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				w.setValue(null);
 				if (w instanceof UIObject) {
 					((UIObject) w).setTitle(null);
-					if (w instanceof RefBookPickerPopupWidget) {
-						((RefBookPickerPopupWidget)w).setDereferenceValue("");
+					if (w instanceof RefBookMultiPickerModalWidget) {
+						((RefBookMultiPickerModalWidget)w).setDereferenceValue("");
 					}
 				}
 			}
 		} else {
 			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
-				if (w.getValue() instanceof RefBookPickerPopupWidget) {
-					RefBookPickerPopupWidget rbw = (RefBookPickerPopupWidget) w.getValue();
+				if (w.getValue() instanceof RefBookMultiPickerModalWidget) {
+                    RefBookMultiPickerModalWidget rbw = (RefBookMultiPickerModalWidget) w.getValue();
+                    rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setValue(recordValue.getReferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
@@ -200,14 +222,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
 								null : (String)field.getValue().getValue();
 						checkRequired(field.getKey(), string);
-						if (string!= null && string.length() > 2000) {
+						if (string!= null && string.length() > MAX_STRING_VALUE_LENGTH) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("Значение более 2000 символов");
+							badValueException.setDescription("Значение более " + MAX_STRING_VALUE_LENGTH + " символов");
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
-						value.setStringValue(string);
+						value.setStringValue(StringUtils.cleanString(string));
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
@@ -271,14 +293,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     @Override
     public void fillVersionData(RefBookRecordVersionData versionData, Long refBookId, Long refBookRecordId) {
-        this.savedVersionFrom = versionData.getVersionStart();
-        this.savedVersionTo = versionData.getVersionEnd();
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode);
         versionStart.setEnabled(isVersionMode);
         versionEnd.setEnabled(isVersionMode);
-        allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
+        allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
@@ -311,13 +331,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setVersionTo(Date value) {
         versionEnd.setValue(value);
-    }
-
-    @Override
-    public boolean isRelevancePeriodChanged() {
-        return !getVersionFrom().equals(savedVersionFrom) ||
-                (getVersionTo() != null && !getVersionTo().equals(savedVersionTo)) ||
-                (savedVersionTo != null && !savedVersionTo.equals(getVersionTo()));
     }
 
     @UiHandler("save")

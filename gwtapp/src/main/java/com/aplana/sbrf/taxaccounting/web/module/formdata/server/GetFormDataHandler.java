@@ -41,9 +41,6 @@ public class GetFormDataHandler extends
 	@Autowired
 	private FormTemplateService formTemplateService;
 
-    @Autowired
-    private BlobDataService blobDataService;
-    
     @Autowired 
     private TAUserService taUserService;
 
@@ -69,7 +66,6 @@ public class GetFormDataHandler extends
 			//
 		}
 
-		
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
 			try {
@@ -89,7 +85,6 @@ public class GetFormDataHandler extends
         result.setUuid(logEntryService.save(logger.getEntries()));
 
 		return result;
-
 	}
 
 	@Override
@@ -123,12 +118,12 @@ public class GetFormDataHandler extends
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
+		result.setReportPeriodStartDate(reportPeriod.getStartDate());
+		result.setReportPeriodEndDate(reportPeriod.getEndDate());
 
-		TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
-		result.setTaxPeriodStartDate(taxPeriod.getStartDate());
-		result.setTaxPeriodEndDate(taxPeriod.getEndDate());
+		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));
 
-        result.setReportPeriodYear(reportPeriod.getYear());
+        result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
 	}
 
 	/**
@@ -151,7 +146,7 @@ public class GetFormDataHandler extends
 		} else {
 			accessParams = accessService.getFormDataAccessParams(userInfo, result
 					.getFormData().getId());
-		}
+        }
 		result.setFormDataAccessParams(accessParams);
 	}
 

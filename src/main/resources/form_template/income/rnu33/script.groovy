@@ -398,7 +398,7 @@ def getTotalRow(def currentMonthRow) {
     totalSumColumns.each { alias ->
         def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
         def tmp2 = (prevTotal != null ? (prevTotal.getCell(alias).value ?: 0) : 0)
-        newRow.getCell(alias).setValue(tmp1 + tmp2)
+        newRow.getCell(alias).setValue(tmp1 + tmp2, null)
     }
     return newRow
 }

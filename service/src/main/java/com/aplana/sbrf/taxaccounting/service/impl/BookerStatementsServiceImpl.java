@@ -153,7 +153,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
     private static String getFileExtention(String filename) {
-        int dotPos = filename.lastIndexOf(".") + 1;
+        int dotPos = filename.lastIndexOf('.') + 1;
         return filename.substring(dotPos);
     }
 

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -171,7 +172,7 @@ public class TaskView extends ViewWithUiHandlers<TaskUiHandlers>
 
     private TaskInfoItem findJndiInfo(String jndi) {
         for (TaskInfoItem info : jndiList) {
-            if (info.getJndi().equals(jndi)) {
+            if (info != null && info.getJndi()!= null && info.getJndi().equals(jndi)) {
                 return info;
             }
         }

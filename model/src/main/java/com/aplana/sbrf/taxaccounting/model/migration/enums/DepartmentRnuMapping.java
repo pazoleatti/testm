@@ -12,7 +12,7 @@ public enum DepartmentRnuMapping implements Serializable {
     DEP_3("130", "R", "02", 144),
     DEP_4("130", "Q", "01", 143),
 
-    DEP_5("220", "", "", 118),
+    DEP_5("220", "", "", 118),      // независимо от системы для этого старого значения подразделения новый ид подразделения будет один
 
     DEP_6("130", "9", "00", 126),
     DEP_7("130", "9", "01", 146),
@@ -33,10 +33,10 @@ public enum DepartmentRnuMapping implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String stringPPP;
-    private final String systemSymbol;
-    private final String subSystemString;
-    private final int department_id;
+    private final String stringPPP;         // значение подразделения в названии ТФ
+    private final String systemSymbol;      // символ системы в названии ТФ
+    private final String subSystemString;   // код подсистемы
+    private final int department_id;        // значение подразделения в новой системе
 
     private DepartmentRnuMapping(String stringPPP, String systemSymbol, String subSystemString, int department_id) {
         this.stringPPP = stringPPP;
@@ -48,6 +48,7 @@ public enum DepartmentRnuMapping implements Serializable {
     public static int getDepartmentId(String stringPPP, String systemSymbol, String subSystemString) {
         for (DepartmentRnuMapping t : values()) {
             if (DEP_5.getStringPPP().equals(stringPPP)) {
+                // независимо от системы для этого старого значения подразделения новый ид подразделения будет один
                 return DEP_5.department_id;
             } else {
                 if (subSystemString == null) {

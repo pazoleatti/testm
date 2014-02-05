@@ -5,26 +5,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.mvp.client.PopupViewCloseHandler;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView, 
@@ -39,7 +46,8 @@ Editor<FormDataFilter> {
     private final MyDriver driver;
 
 	@UiField
-	DepartmentPicker departmentPicker;
+    @Path("departmentIds")
+    DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField
 	PeriodPickerPopupWidget reportPeriodIds;
@@ -81,13 +89,44 @@ Editor<FormDataFilter> {
 				return formTypesMap.get(object);
 			}
 		});
-		
+
 		initWidget(uiBinder.createAndBindUi(this));	
         this.driver = driver;
         this.driver.initialize(this);
-	}
 
-	@Override
+        // Нельзя аннотацией, баг GWT https://code.google.com/p/google-web-toolkit/issues/detail?id=6091
+        formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                updateEnabled();
+            }
+        });
+        departmentPicker.setDoubleState(false);
+    }
+
+    @Override
+    public void init() {
+        // Сброс состояния формы
+        reportPeriodIds.setValue(null);
+        departmentPicker.setValue(null);
+        formDataKind.setValue(null);
+        formTypeId.setValue(null);
+        updateEnabled();
+    }
+
+    private void updateEnabled() {
+        // "Подразделение" недоступно если не выбран отчетный период
+        departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
+        // "Тип налоговой формы" недоступен если не выбрано подразделение
+        DOM.setElementPropertyBoolean(formDataKind.getElement(), "disabled",
+                departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty());
+        // "Вид налоговой формы" недоступен если не выбран тип НФ
+        DOM.setElementPropertyBoolean(formTypeId.getElement(), "disabled", formDataKind.getValue() == null);
+        // Кнопка "Создать" недоступна пока все не заполнено
+        continueButton.setEnabled(formTypeId.getValue() != null);
+    }
+
+    @Override
 	public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues){
 		departmentPicker.setAvalibleValues(list, availableValues);
 	}
@@ -97,14 +136,38 @@ Editor<FormDataFilter> {
 		getUiHandlers().onConfirm();
 	}
 
-	@UiHandler("cancelButton")
-	public void onCancel(ClickEvent event){
-		hide();
-	}
+    @UiHandler("cancelButton")
+    public void onCancel(ClickEvent event) {
+        Dialog.confirmMessage("Создание налоговой формы", "Хотите отменить создание налоговой формы?", new DialogHandler() {
+            @Override
+            public void yes() {
+                Dialog.hideMessage();
+                hide();
+            }
+        });
+    }
+
+    @UiHandler("reportPeriodIds")
+    public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
+        departmentPicker.setValue(null, true);
+        updateEnabled();
+    }
+
+    @UiHandler("departmentPicker")
+    public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
+        formDataKind.setValue(null, true);
+        updateEnabled();
+    }
+
+    @UiHandler("formDataKind")
+    public void onFormKindChange(ValueChangeEvent<FormDataKind> event) {
+        formTypeId.setValue(null, true);
+        updateEnabled();
+    }
 
 	@Override
 	public void setAcceptableFormKindList(List<FormDataKind> list) {
-		formDataKind.setValue(null);
+		formDataKind.setValue(null, true);
 		formDataKind.setAcceptableValues(list);
 	}
 
@@ -123,20 +186,19 @@ Editor<FormDataFilter> {
 	public FormDataFilter getFilterData(){
     	FormDataFilter filter = driver.flush();
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	filter.setDepartmentIds(departmentPicker.getValue());
+    	//filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
 	}
 
     @Override
 	public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
-		reportPeriodIds.setPeriods(reportPeriods);
+        reportPeriodIds.setPeriods(reportPeriods);
 	}
 
 	@Override
 	public void setFilterData(FormDataFilter filter) {
         driver.edit(filter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-        departmentPicker.setValue(filter.getDepartmentIds());
+        //departmentPicker.setValue(filter.getDepartmentIds());
 	}
-
 }

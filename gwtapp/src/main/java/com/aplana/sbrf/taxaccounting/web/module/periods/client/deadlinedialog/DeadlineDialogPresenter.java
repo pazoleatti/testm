@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -82,10 +83,10 @@ public class DeadlineDialogPresenter extends PresenterWidget<DeadlineDialogPrese
         action.setSenderDepartmentId(senderDepartmentId);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetDepartmentDeadlineResult>() {
-                    @Override
-                    public void onSuccess(GetDepartmentDeadlineResult result) {
-                        getView().setDeadLine(result.getDeadline());
-                    }
+	                @Override
+	                public void onSuccess(GetDepartmentDeadlineResult result) {
+		                getView().setDeadLine(result.getDeadline());
+	                }
                 }, DeadlineDialogPresenter.this)
         );
     }
@@ -114,6 +115,7 @@ public class DeadlineDialogPresenter extends PresenterWidget<DeadlineDialogPrese
                     @Override
                     public void onSuccess(UpdateDepartmentDeadlineResult result) {
                         getView().hideButtons();
+	                    UpdateForm.fire(DeadlineDialogPresenter.this);
                     }
                 }, DeadlineDialogPresenter.this)
         );

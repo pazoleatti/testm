@@ -20,9 +20,9 @@ public enum NalogFormType implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String ERROR = "Is not contained in enum NalogFormType! ";
 
-    private final int id;
-    private final int codeNew;
-    private final String codeNewXml;
+    private final int id;               // id в БД
+    private final int codeNew;          // значение в новой системе
+    private final String codeNewXml;    //
     private final String stringNNN;
 
     private NalogFormType(int id, int codeNew, String codeNewXml, String stringNNN) {

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -36,8 +38,6 @@ import java.util.ArrayList;
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers {
 
-	public static final int PAGE_SIZE = 15;
-
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -53,7 +53,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(PAGE_SIZE);
+		getView().assignDataProvider(getView().getPageSize());
 	}
 
 	@Override
@@ -81,18 +81,20 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-							if(result==null || result.getDataRows().getTotalCount() == 0) {
-								getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
-                                getView().setPagingVisible(false);
+                            if (result == null || result.getDataRows().getTotalCount() == 0) {
+                                getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
                             } else {
-								getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
-                                if (result.getDataRows().size() > PAGE_SIZE) {
-									getView().assignDataProvider(result.getDataRows().size());
-								}
-                                getView().setPagingVisible(result.getDataRows().getTotalCount() > PAGE_SIZE);
-							}
-							modifiedRows.clear();
-						}
+                                getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
+                                if (result.getDataRows().size() > getView().getPageSize()) {
+                                    getView().assignDataProvider(result.getDataRows().size());
+                                } else {
+                                    getView().assignDataProvider(getView().getPageSize());
+                                }
+                                getView().isCanEditPage(!fixedRows);
+                                //getView().setPagingVisible(result.getDataRows().getTotalCount() > getView().getPageSize());
+                            }
+                            modifiedRows.clear();
+                        }
 					}, FormDataPresenter.this));
 		}
 	}
@@ -100,7 +102,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
 		modifiedRows.add(dataRow);
-
 	}
 
     @Override
@@ -121,6 +122,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 	}
 
+	private void manageButtonsForFormInClosedPeriod(boolean isPeriodClosed) {
+		if (isPeriodClosed) {
+			getView().showSignersAnchor(false);
+			getView().showRecalculateButton(false);
+			getView().showOriginalVersionButton(false);
+			getView().showManualInputAnchor(false);
+		}
+	}
+
 	@Override
 	public void onManualInputClicked(boolean readOnlyMode) {
 		revealFormData(readOnlyMode);
@@ -134,7 +144,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onOriginalVersionClicked() {
-		Window.alert("В разработке");
+        Dialog.warningMessage("В разработке");
 	}
 
 	@Override
@@ -245,23 +255,37 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onDeleteFormClicked() {
-		boolean isOK = Window.confirm("Вы уверены, что хотите удалить налоговую форму?");
-		if (isOK) {
-			DeleteFormDataAction action = new DeleteFormDataAction();
-			action.setFormDataId(formData.getId());
-			dispatcher
-					.execute(
-							action,
-							CallbackUtils
-									.defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
-										@Override
-										public void onSuccess(
-												DeleteFormDataResult result) {
-											revealFormDataList();
-										}
+        final FormDataPresenter t = this;
+        Dialog.confirmMessage("Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
+            @Override
+            public void yes() {
+                DeleteFormDataAction action = new DeleteFormDataAction();
+                action.setFormDataId(formData.getId());
+                dispatcher
+                        .execute(
+                                action,
+                                CallbackUtils
+                                        .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
+                                            @Override
+                                            public void onSuccess(
+                                                    DeleteFormDataResult result) {
+                                                revealFormDataList();
+                                            }
 
-									}, this));
-		}
+                                        }, t));
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                Dialog.hideMessage();
+            }
+        });
 	}
 
 	@Override
@@ -336,6 +360,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         break;
                                 }
 
+	                            manageButtonsForFormInClosedPeriod(result.isFormInClosedPeriod());
+
                                 manageDeleteRowButtonEnabled();
 
                                 getView().setAdditionalFormInfo(
@@ -348,7 +374,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         buildPeriodName(result),
                                         result.getFormData().getState()
                                                 .getName(),
-		                                result.getTaxPeriodStartDate(), result.getTaxPeriodEndDate());
+		                                result.getReportPeriodStartDate(), result.getReportPeriodEndDate());
                                 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());

@@ -162,7 +162,6 @@ public class FormDataXlsxReportBuilderTestMock {
 		FormDataSigner formDataSigner1 = new FormDataSigner();
 		FormDataSigner formDataSigner2 = new FormDataSigner();
 
-        taxPeriod.setStartDate(new Date());
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		formData = new FormData();
 		formTemplate = new FormTemplate();

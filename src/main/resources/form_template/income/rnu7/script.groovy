@@ -1,4 +1,4 @@
-package form_template.income.rnu6
+package form_template.income.rnu7
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -186,7 +186,7 @@ void calc() {
         }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
+    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
     dataRowHelper.save(dataRows)
 }
 
@@ -364,7 +364,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-        def code = getKnu(row.kny)
+        def String code = row.kny
         if (sumRowsByCode[code] != null) {
             sumRowsByCode[code] += row.taxAccountingRuble ?: 0
         } else {
@@ -383,23 +383,20 @@ void logicCheck() {
             from = new GregorianCalendar()
             from.setTime(date)
             from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
-            taxPeriods = taxPeriodService.listByTaxTypeAndDate(TaxType.INCOME, from.getTime(), date)
+            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from.getTime(), date)
             isFind = false
-            for (taxPeriod in taxPeriods) {
-                reportPeriods = reportPeriodService.listByTaxPeriod(taxPeriod.id)
-                for (reportPeriod in reportPeriods) {
-                    findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                            reportPeriod.id)
-                    if (findFormData != null) {
-                        for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
-                            // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
-                            if (findRow.code == row.code && findRow.docNumber == row.docNumber
-                                    && findRow.docDate == row.docDate) {
-                                isFind = true
-                                if (!(findRow.ruble > row.ruble)) {
-                                    logger.warn(errorMsg + 'Операция в налоговом учете имеет сумму, меньше чем указано ' +
-                                            'в бухгалтерском учете! См. РНУ-6 в %s отчетном периоде.', reportPeriod.name)
-                                }
+            for (reportPeriod in reportPeriods) {
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
+                        reportPeriod.id)
+                if (findFormData != null) {
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                        // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
+                        if (findRow.code == row.code && findRow.docNumber == row.docNumber
+                                && findRow.docDate == row.docDate) {
+                            isFind = true
+                            if (!(findRow.ruble > row.ruble)) {
+                                logger.warn(errorMsg + 'Операция в налоговом учете имеет сумму, меньше чем указано ' +
+                                        'в бухгалтерском учете! См. РНУ-6 в %s отчетном периоде.', reportPeriod.name)
                             }
                         }
                     }
@@ -420,13 +417,13 @@ void logicCheck() {
 
     // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     totalRows.each { key, val ->
-        if (totalRows.get(key) != sumRowsByCode.get(key)) {
+        if (val != sumRowsByCode[key]) {
             def msg = formData.createDataRow().getCell('taxAccountingRuble').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
     totalRows2.each { key, val ->
-        if (totalRows2.get(key) != sumRowsByCode2.get(key)) {
+        if (val != sumRowsByCode2[key]) {
             def msg = formData.createDataRow().getCell('ruble').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }

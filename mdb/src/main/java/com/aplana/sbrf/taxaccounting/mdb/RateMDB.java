@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.mdb;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -42,16 +43,15 @@ public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
     private static final String RATE_ENCODING = "UTF-8";
-    private static String USER_APPENDER = "controlUnp";
 
-    private static String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
-    private static String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
-    private static String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
-    private static String ERROR_VALUE = "Сообщение не содержит значений";
-    private static String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    private static String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
-    private static String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
-    private static String ERROR_AUDIT = "Ошибка записи в журнал аудита";
+    private static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
+    private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
+    private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
+    private static final String ERROR_VALUE = "Сообщение не содержит значений";
+    private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
+    private static final String ERROR_IMPORT = "Произошли ошибки в скрипте импорта справочника id = %d";
+    private static final String SUCCESS_IMPORT = "Импорт файла из КСШ успешно произведен";
+    private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита";
 
     @Autowired
     RefBookScriptingService refBookScriptingService;
@@ -94,11 +94,7 @@ public class RateMDB implements MessageListener {
     private TAUserInfo getUser() {
         TAUserInfo userInfo = new TAUserInfo();
         if (taUserService != null) {
-            userInfo.setUser(taUserService.getUser(USER_APPENDER));
-            //TODO (alivanov 3.09.13) подставить правильного пользователя
-            // Пользователя брать с некого конфигурационного файла (его пока нет)
-            // Это будет специальный пользователь для операции миграции (импорта "старых" данных)
-            // Сейчас же пока подставлен controlUnp
+            userInfo.setUser(taUserService.getUser(TAUser.SYSTEM_USER_ID));
             userInfo.setIp("127.0.0.1");
         }
         return userInfo;

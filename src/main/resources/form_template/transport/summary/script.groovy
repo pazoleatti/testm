@@ -1,23 +1,18 @@
 package form_template.transport.summary
 
-import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
-
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
-
-import groovy.transform.Field
 
 /**
  * Расчет суммы налога по каждому транспортному средству
  * formTemplateId=200
- *
- * TODO:
- *      - при отсутствии строк форму можно принять
- *      - убрал редактирование
  *
  * графа 1  - rowNumber
  * графа 2  - okato
@@ -91,7 +86,7 @@ def sortColumns = ["okato", "tsTypeCode"]
 
 // Автозаполняемые атрибуты
 @Field
-def nonEmptyColumns = [['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase']]
+def nonEmptyColumns = ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase']
 
 @Field
 def monthCountInPeriod
@@ -165,10 +160,10 @@ def calc() {
     def dataRows = dataRowHelper?.allCached
 
     deleteAllAliased(dataRows)
-    dataRows.sort{ a,b ->
-        def tempA = getRefBookValue(3, a.okato)?.OKATO?.stringValue
-        def tempB = getRefBookValue(3, b.okato)?.OKATO?.stringValue
-        if (tempA == tempB){
+    dataRows.sort { a, b ->
+        def tempA = getRefBookValue(96, a.okato)?.CODE?.stringValue
+        def tempB = getRefBookValue(96, b.okato)?.CODE?.stringValue
+        if (tempA == tempB) {
             tempA = getRefBookValue(42, a.tsTypeCode)?.CODE?.stringValue
             tempB = getRefBookValue(42, b.tsTypeCode)?.CODE?.stringValue
         }
@@ -187,8 +182,8 @@ def calc() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // получение региона по ОКАТО
-        def region = getRegionByOkatoOrg(row.okato, errorMsg)
+        // получение региона по ОКТМО
+        def region = getRegionByOKTMO(row.okato, errorMsg)
 
         row.rowNumber = i++
 
@@ -212,18 +207,22 @@ def calc() {
             placeError(row, 'coef362', ['ownMonths'])
         }
 
+
+        def tsTypeCode
         /*
          * Графа 14 (Налоговая ставка)
          * Скрипт для вычисления налоговой ставки
          */
         row.taxRate = null
-        def tsTypeCode
         if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
             tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
+
             // запрос по выборке данных из справочника
-            def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = "+row.taxBase+"))" +
+            def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
+                    "and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = " + row.taxBase + "))" +
                     "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
-                    "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
+                    "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") " +
+                    "and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
 
             /**
              * Переберем варианты
@@ -235,34 +234,32 @@ def calc() {
 
             def regionSqlPartID = " and DICT_REGION_ID = " + region.record_id
             def regionSqlPartNull = " and DICT_REGION_ID is null"
+            def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
+            def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
 
             // вариант 1
-            def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
-            def finalQuery = queryLikeStrictly + regionSqlPartID
-            def record = getRecord(41, finalQuery, new Date())
+            def record = getRecord(41, queryLikeStrictly + regionSqlPartID, new Date())
             // вариант 2
             if (record == null) {
-                finalQuery = queryLikeStrictly + regionSqlPartNull
-                record = getRecord(41, finalQuery, new Date())
+                record = getRecord(41, queryLikeStrictly + regionSqlPartNull, new Date())
             }
-
-            def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
             // вариант 3
             if (record == null) {
-                finalQuery = queryLike + regionSqlPartID
-                record = getRecord(41, finalQuery, new Date())
+                record = getRecord(41, queryLike + regionSqlPartID, new Date())
             }
             // вариант 4
             if (record == null) {
-                finalQuery = queryLike + regionSqlPartNull
-                record = getRecord(41, finalQuery, new Date())
+                record = getRecord(41, queryLike + regionSqlPartNull, new Date())
             }
 
             if (record != null) {
                 row.taxRate = record.record_id.numberValue
+            } else {
+                logger.error("Для заданных параметров ТС («Код вида транспортного средства», «Мощность от», " +
+                        "Мощность до», «Ед. измерения мощности», «Возраст ТС (полных лет)», «Код по ОКТМО») " +
+                        "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС.")
             }
         } else {
-            row.taxRate = null
             placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'])
         }
 
@@ -347,7 +344,7 @@ def calc() {
     totalRow.setAlias('total')
     totalRow.getCell("fix").setColSpan(2)
     totalRow.fix = 'ИТОГО'
-    allColumns.each{
+    allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
@@ -416,7 +413,7 @@ void logicCheck() {
         }
 
         //Проверки НСИ
-        checkNSI(35, row, 'okato')
+        checkNSI(96, row, 'okato')
         checkNSI(42, row, 'tsTypeCode')
         checkNSI(12, row, 'taxBaseOkeiUnit')
         checkNSI(40, row, 'ecoClass')
@@ -438,7 +435,7 @@ void logicCheck() {
          * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
         if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.numberValue in [20210, 20220, 20230]) {
-            def region = getRegionByOkatoOrg(row.okato, errorMsg)
+            def region = getRegionByOKTMO(row.okato, errorMsg)
             query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
             if (getRecord(7, query, new Date()) == null) {
                 logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
@@ -448,29 +445,24 @@ void logicCheck() {
 }
 
 /**
- * Получение региона по коду ОКАТО
+ * Получение региона по коду ОКТМО
  */
-def getRegionByOkatoOrg(def okatoCell, def errorMsg) {
-    /*
-    * первые две цифры проверяемого кода ОКАТО
-    * совпадают со значением поля «Определяющая часть кода ОКАТО»
-    * справочника «Коды субъектов Российской Федерации»
-    */
-    def okato = getRefBookValue(3, okatoCell)?.OKATO?.stringValue
-
-    if (okato.substring(0, 4).equals("71140")) {
+def getRegionByOKTMO(def okatoCell, def errorMsg) {
+    def okato3 = getRefBookValue(96, okatoCell)?.CODE?.stringValue.substring(0, 2)
+    if (okato3.equals("719")) {
         return getRecord(4, 'CODE', '89', null, null, new Date());
-    } else if (okato.substring(0, 4).equals("71100")) {
+    } else if (okato3.equals("718")) {
         return getRecord(4, 'CODE', '86', null, null, new Date());
-    } else if (okato.substring(0, 3).equals("1110")) {
+    } else if (okato3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        def filter = "OKATO_DEFINITION like '" + okato.toString().substring(0, 2) + "%'"
+        // TODO заменить OKATO_DEFINITION  на "Определяющая часть кода ОКТМО"
+        def filter = "OKATO_DEFINITION like '" + okato3.substring(0, 1) + "%'"
         def record = getRecord(4, filter, new Date())
         if (record != null) {
             return record
         } else {
-            logger.error(errorMsg + "Не удалось определить регион по коду ОКАТО")
+            logger.error(errorMsg + "Не удалось определить регион по коду ОКТМО")
             return null;
         }
     }
@@ -484,7 +476,7 @@ def consolidation() {
     // очистить форму
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     List dataRows = new ArrayList<DataRow<Cell>>()
-    List<DataRow<Cell>> sourses202 = new ArrayList()
+    List<DataRow<Cell>> sources202 = new ArrayList()
     List<Department> departments = new ArrayList()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -500,7 +492,7 @@ def consolidation() {
                      * Если нашлись две строки с одинаковыми данными то ее не добавляем
                      * в общий список, и проверим остальные поля
                      */
-                    def contains = sourses202.find { el ->
+                    def contains = sources202.find { el ->
                         el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber) && el.regNumber.equals(sRow.regNumber)
                     }
                     if (contains != null) {
@@ -509,24 +501,22 @@ def consolidation() {
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
                                 row.benefitStartDate.equals(sRow.benefitStartDate) &&
                                 row.benefitEndDate.equals(sRow.benefitEndDate)) {
-                            def department = departments.get(sourses202.indexOf(row))
-                            logger.error("Обнаружены несколько разных строк, у которых совпадают Код ОКАТО = " + sRow.codeOKATO
+                            def department = departments.get(sources202.indexOf(row))
+                            logger.error("Обнаружены несколько разных строк, у которых совпадают Код ОКТМО = " + sRow.codeOKATO
                                     + ", Идентификационный номер = " + sRow.identNumber + ", Регистрационный знак=" + sRow.regNumber
                                     + " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «"
                                     + sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
-                            departments.remove(sourses202.indexOf(row))
-                            sourses202.remove(sRow)
+                            departments.remove(sources202.indexOf(row))
+                            sources202.remove(sRow)
                         }
                     } else {
-                        sourses202.add(sRow)
+                        sources202.add(sRow)
                         departments.add(sDepartment)
                     }
                 }
             } else {
                 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
                 def taxPeriod = reportPeriod.taxPeriod
-                Calendar cl = Calendar.getInstance()
-                cl.setTime(taxPeriod.startDate);
                 // дата начала отчетного периода
                 Calendar reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
                 // дата конца отчетного периода
@@ -552,138 +542,13 @@ def consolidation() {
                     newRow.taxBaseOkeiUnit = sRow.baseUnit
                     // «Графа 10» принимает значение «графы 8» формы-источника
                     newRow.ecoClass = sRow.ecoClass
-
-                    /**
-                     * «Графа 11» Рассчитывается автоматически по формуле:
-                     * Если («отчётный год YYYY» – «Графа 12» (формы-источника) – 1) <= 0
-                     * То
-                     * «Графа 11»  = 0
-                     * Иначе
-                     * «Графа 11»  = «отчётный год YYYY» – «Графа 12» (формы-источника) – 1
-                     */
-
+                    // «Графа 11»
                     Calendar cl2 = Calendar.getInstance()
                     cl2.setTime(sRow.year);
+                    newRow.years = taxPeriod.year - cl2.get(Calendar.YEAR)
+                    // «Графа 12»
+                    newRow.ownMonths = calc12(sRow, reportPeriodStartDate, reportPeriodEndDate)
 
-                    def diff = cl.get(Calendar.YEAR) - cl2.get(Calendar.YEAR) - 1
-                    if (diff <= 0) {
-                        newRow.years = 0
-                    } else {
-                        newRow.years = diff
-                    }
-
-                    /*
-                     * «Графа 12»
-                     */
-
-                    // Дугона – дата угона
-                    Calendar stealingDate = Calendar.getInstance()
-                    // Двозврата – дата возврата
-                    Calendar returnDate = Calendar.getInstance()
-                    // Дпостановки – дата постановки ТС на учет
-                    Calendar deliveryDate = Calendar.getInstance()
-                    // Дснятия – дата снятия ТС с учета
-                    Calendar removalDate = Calendar.getInstance()
-                    // владенеи в месяцах
-                    int ownMonths
-                    // Срока нахождения в угоне (Мугон)
-                    int stealingMonths
-
-                    /*
-                     * Если  [«графа 14»(источника) заполнена И «графа 14»(источника)< «Дата начала периода»]
-                     * ИЛИ [«графа 13»>«Дата окончания периода»], то
-                     * Графа 12=0
-                     */
-                    if ((sRow.regDateEnd != null && sRow.regDateEnd.compareTo(reportPeriodStartDate.time) < 0)
-                            || sRow.regDate.compareTo(reportPeriodEndDate.time) > 0) {
-                        newRow.ownMonths = 0
-                    } else { // иначе
-                        //Определяем Мугон
-                        /**
-                         * Если «графа 15» (источника) не заполнена, то Мугон = 0
-                         */
-                        if (sRow.stealDateStart == null) {
-                            stealingMonths = 0
-                        } else { // инчае
-                            /**
-                             * Если «графа 15»(источника)< «Дата начала периода», то
-                             *  Дугона = «Дата начала периода»
-                             *  Иначе
-                             *  Дугона = «графа 15»(источника)
-                             */
-                            if (sRow.stealDateStart.compareTo(reportPeriodStartDate.time) < 0) {
-                                stealingDate = reportPeriodStartDate
-                            } else {
-                                stealingDate.setTime(sRow.stealDateStart)
-                            }
-
-                            /**
-                             * Определяем Двозврат
-                             * Если [«графа 16»(источника) не заполнена] ИЛИ [«графа 16»(источника)> «Дата окончания периода»], то
-                             *  Двозврата = «Дата окончания периода»
-                             * Иначе
-                             * Двозврата = «графа 16»(источника)
-                             *
-                             */
-                            if (sRow.stealDateEnd == null || sRow.stealDateEnd.compareTo(reportPeriodEndDate.time) > 0) {
-                                returnDate = reportPeriodEndDate
-                            } else {
-                                returnDate = Calendar.getInstance()
-                                returnDate.setTime(sRow.stealDateEnd)
-                            }
-
-                            /**
-                             * Определяем Мугон
-                             * Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
-                             *  Мугон = 0
-                             * Иначе
-                             *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
-                             */
-                            def diff1 = (returnDate.time.year * 12 + returnDate.time.month) - (stealingDate.time.year * 12 + stealingDate.time.month) - 1
-                            if (diff1 < 0) {
-                                stealingMonths = 0
-                            } else {
-                                stealingMonths = diff1
-                            }
-                        }
-
-                        /**
-                         * Определяем Дснятия
-                         * Если «графа 14»(источника) не заполнена ИЛИ «графа 14»(источника)> «Дата окончания периода», то
-                         *  Дснятия = «Дата окончания периода»
-                         * Иначе
-                         *  Дснятия = «графа 14»(источника)
-                         */
-                        if (sRow.regDateEnd == null || sRow.regDateEnd.compareTo(reportPeriodEndDate.time) > 0) {
-                            removalDate = reportPeriodEndDate
-                        } else {
-                            removalDate.setTime(sRow.regDateEnd)
-                        }
-
-                        /**
-                         * Определяем Дпостановки
-                         * Если «графа 13»(источника)< «Дата начала периода», то
-                         *  Дпостановки = «Дата начала периода»
-                         * Иначе
-                         *  Дпостановки = «графа 13»(источника)
-                         */
-                        if (sRow.regDate.compareTo(reportPeriodStartDate.time) < 0) {
-                            deliveryDate = reportPeriodStartDate
-                        } else {
-                            deliveryDate.setTime(sRow.regDate)
-                        }
-
-                        /**
-                         * Определяем Мвлад
-                         * Мвлад = МЕСЯЦ[Дснятия] - МЕСЯЦ[Дпостановки]+1
-                         */
-                        ownMonths = (removalDate.get(Calendar.YEAR) * 12 + removalDate.get(Calendar.MONTH)) - (deliveryDate.get(Calendar.YEAR) * 12 + deliveryDate.get(Calendar.MONTH)) + 1
-                        /**
-                         * Определяем графу 12
-                         * Графа 12=Мвлад-Мугон
-                         */
-                        newRow.ownMonths = ownMonths - stealingMonths
-                    }
                     dataRows.add(newRow)
                 }
             }
@@ -715,15 +580,126 @@ def consolidation() {
         // если значения этой строки 202 формы не подставлялись в сводную то ругаемся
         if (!use) {
             def department = departments.get(sourses202.indexOf(v))
-            logger.warn("Для строки " + cnt + " в форме \"Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог\" подразделения "
-                    + department.name + " указана льгота для  транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по которым уплачивается транспортный налог\" . Код ОКАТО = " + v.codeOKATO
-                    + ", Идентификационный номер = " + v.identNumber + ", Регистрационный знак=" + v.regNumber + "!")
+            logger.warn("Для строки " + cnt + " в форме \"Сведения о льготируемых транспортных средствах, по которым " +
+                    "уплачивается транспортный налог\" подразделения " + department.name + " указана льгота для  " +
+                    "транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по " +
+                    "которым уплачивается транспортный налог\" . Код ОКТМО = " + v.codeOKATO + ", Идентификационный номер = "
+                    + v.identNumber + ", Регистрационный знак=" + v.regNumber + "!")
         }
     }
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
     dataRowHelper.save(dataRows)
+}
+
+// Расчет графы 12 при консолидации
+int calc12(DataRow sRow, Calendar reportPeriodStartDate, Calendar reportPeriodEndDate) {
+    // Дугона – дата угона
+    Calendar stealingDate = Calendar.getInstance()
+    // Двозврата – дата возврата
+    Calendar returnDate = Calendar.getInstance()
+    // Дпостановки – дата постановки ТС на учет
+    Calendar deliveryDate = Calendar.getInstance()
+    // Дснятия – дата снятия ТС с учета
+    Calendar removalDate = Calendar.getInstance()
+    // владенеи в месяцах
+    int ownMonths
+    // Срока нахождения в угоне (Мугон)
+    int stealingMonths
+
+    /*
+     * Если  [«графа 14»(источника) заполнена И «графа 14»(источника)< «Дата начала периода»]
+     * ИЛИ [«графа 13»>«Дата окончания периода»], то
+     * Графа 12=0
+     */
+    if ((sRow.regDateEnd != null && sRow.regDateEnd.compareTo(reportPeriodStartDate.time) < 0)
+            || sRow.regDate.compareTo(reportPeriodEndDate.time) > 0) {
+        return 0
+    } else { // иначе
+        //Определяем Мугон
+        //Если «графа 15» (источника) не заполнена, то Мугон = 0
+        if (sRow.stealDateStart == null) {
+            stealingMonths = 0
+        } else { // инчае
+            /**
+             * Если «графа 15»(источника)< «Дата начала периода», то
+             *  Дугона = «Дата начала периода»
+             *  Иначе
+             *  Дугона = «графа 15»(источника)
+             */
+            if (sRow.stealDateStart.compareTo(reportPeriodStartDate.time) < 0) {
+                stealingDate = reportPeriodStartDate
+            } else {
+                stealingDate.setTime(sRow.stealDateStart)
+            }
+
+            /**
+             * Определяем Двозврат
+             * Если [«графа 16»(источника) не заполнена] ИЛИ [«графа 16»(источника)> «Дата окончания периода»], то
+             *  Двозврата = «Дата окончания периода»
+             * Иначе
+             * Двозврата = «графа 16»(источника)
+             *
+             */
+            if (sRow.stealDateEnd == null || sRow.stealDateEnd.compareTo(reportPeriodEndDate.time) > 0) {
+                returnDate = reportPeriodEndDate
+            } else {
+                returnDate.setTime(sRow.stealDateEnd)
+            }
+
+            /**
+             * Определяем Мугон
+             * Если (МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1)<0, то
+             *  Мугон = 0
+             * Иначе
+             *  Мугон = МЕСЯЦ(Двозврата)-МЕСЯЦ(Дугона)-1
+             */
+            def diff1 = (returnDate.time.year * 12 + returnDate.time.month) - (stealingDate.time.year * 12 + stealingDate.time.month) - 1
+            if (diff1 < 0) {
+                stealingMonths = 0
+            } else {
+                stealingMonths = diff1
+            }
+        }
+
+        /**
+         * Определяем Дснятия
+         * Если «графа 14»(источника) не заполнена ИЛИ «графа 14»(источника)> «Дата окончания периода», то
+         *  Дснятия = «Дата окончания периода»
+         * Иначе
+         *  Дснятия = «графа 14»(источника)
+         */
+        if (sRow.regDateEnd == null || sRow.regDateEnd.compareTo(reportPeriodEndDate.time) > 0) {
+            removalDate = reportPeriodEndDate
+        } else {
+            removalDate.setTime(sRow.regDateEnd)
+        }
+
+        /**
+         * Определяем Дпостановки
+         * Если «графа 13»(источника)< «Дата начала периода», то
+         *  Дпостановки = «Дата начала периода»
+         * Иначе
+         *  Дпостановки = «графа 13»(источника)
+         */
+        if (sRow.regDate.compareTo(reportPeriodStartDate.time) < 0) {
+            deliveryDate = reportPeriodStartDate
+        } else {
+            deliveryDate.setTime(sRow.regDate)
+        }
+
+        /**
+         * Определяем Мвлад
+         * Мвлад = МЕСЯЦ[Дснятия] - МЕСЯЦ[Дпостановки]+1
+         */
+        ownMonths = (removalDate.get(Calendar.YEAR) * 12 + removalDate.get(Calendar.MONTH)) - (deliveryDate.get(Calendar.YEAR) * 12 + deliveryDate.get(Calendar.MONTH)) + 1
+        /**
+         * Определяем графу 12
+         * Графа 12=Мвлад-Мугон
+         */
+        return ownMonths - stealingMonths
+    }
 }
 
 /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
@@ -733,7 +709,7 @@ def getMonthCount() {
         if (period == null) {
             logger.error('Не найден отчетный период для налоговой формы.')
         } else {
-            monthCountInPeriod = period.getMonths()
+            monthCountInPeriod = period.endDate[Calendar.MONTH] - period.startDate[Calendar.MONTH]
         }
     }
     return monthCountInPeriod
@@ -747,9 +723,9 @@ def getMonthCount() {
  */
 void placeError(DataRow row, String alias, ArrayList<String> errorFields) {
     def fields = []
-    for(errAlias in errorFields){
+    for (errAlias in errorFields) {
         if (row[errAlias] == null) {
-            fields.add("\"${getColumnName(row,errAlias)}\"")
+            fields.add("\"${getColumnName(row, errAlias)}\"")
         }
     }
     logger.error(errorMsg + "\"${getColumnName(row, alias)}\" не может быть вычислена, т.к. не заполнены поля: $fields.")

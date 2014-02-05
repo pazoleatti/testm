@@ -112,9 +112,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             // подразделение с типом 1
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.ROOT_BANK.getCode()));
             // подразделения с типом 2
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERBANK.getCode()));
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.TERR_BANK.getCode()));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERBANK) {
+            if (departmentDao.getDepartment(tAUser.getDepartmentId()).getType() == DepartmentType.TERR_BANK) {
                 // поразделение пользователя
                 retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
 
@@ -177,7 +177,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
             // подразделения с типом 3
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.GOSB.getCode()));
+            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -201,12 +201,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     // http://conf.aplana.com/pages/viewpage.action?pageId=11383234
     @Override
-    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, ReportPeriod reportPeriod) {
+    public List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId) {
         List<Integer> retList = new ArrayList<Integer>();
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes);
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriod.getId(), departmentId.longValue());
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
+                    departmentId.longValue());
             if (departmentReportPeriod != null && departmentReportPeriod.isActive()) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
@@ -220,10 +221,17 @@ public class DepartmentServiceImpl implements DepartmentService {
         return retList;
     }
 
-    // TODO blocked by http://jira.aplana.com/browse/SBRFACCTAX-5397 (реализацию подразделений-исполнителей сейчас Денис Лошкарев только запускает в работу)
-    private List<Integer> getExecutorsDepartments(List<Integer> departments) {
-        List<Integer> retList = new ArrayList<Integer>();
-        // TODO все подразделения, которые назначены исполнителями для форм подразделений списка departments
-        return retList;
+	@Override
+	public Map<Integer, Department> getDepartments(List<Integer> departmentId) {
+		Map<Integer, Department> result = new HashMap<Integer, Department>();
+		for (Integer depId : departmentId) {
+			Department department = departmentDao.getDepartment(depId);
+			result.put(department.getId(), department);
+		}
+		return result;
+	}
+
+	private List<Integer> getExecutorsDepartments(List<Integer> departments) {
+        return departmentDao.getPerformers(departments);
     }
 }

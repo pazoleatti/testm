@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.configuration.client.Configurati
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListModule;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateModule;
+import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.DeclarationVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigModule;
 import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorModule;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataModule;
@@ -21,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersModule;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationModule;
+import com.aplana.sbrf.taxaccounting.web.module.testpage2.client.TestPage2Module;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListModule;
@@ -28,7 +30,7 @@ import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerModule
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageModule;
-import com.aplana.sbrf.taxaccounting.web.module.userlist.client.UserListModule;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.TemplateVersionListModule;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaClientModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.MainMenuClientModule;
@@ -84,7 +86,7 @@ public class ClientModule extends AbstractPresenterModule {
 		install(new LogAreaClientModule());
 		install(new HistoryClientModule());
 		install(new ProjectVersionModule());
-        install(new UserListModule());
+        install(new TemplateVersionListModule());
 		install(new MembersModule());
         install(new ConfigurationModule());
         install(new AuditClientUIModule());
@@ -99,5 +101,7 @@ public class ClientModule extends AbstractPresenterModule {
         install(new SchedulerModule());
         install(new HistoryBusinesstModule());
         install(new TestPageModule());
+        install(new DeclarationVersionListModule());
+        install(new TestPage2Module());
 	}
 }

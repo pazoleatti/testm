@@ -45,12 +45,15 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 	    
 	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
 			    .currentUserInfo(), action.getTaxType());
+        // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(
 				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
 
 	    res.setFilterValues(filterValues);
-	    res.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
-	    
+        // Периоды, связанные с доступными подразделениями
+        res.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
+                new ArrayList<Integer>(filterValues.getDepartmentIds())));
+
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
 	    res.setDefaultFilter(filter);

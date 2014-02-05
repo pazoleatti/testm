@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -38,6 +39,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import static java.util.Arrays.asList;
 
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		implements SourcesPresenter.MyView, ValueChangeHandler<List<Integer>> {
@@ -52,7 +55,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private boolean isForm;
 	private boolean canCancel;
 
-	private static final List<TaxType> TAX_TYPES = Arrays.asList(TaxType.values());
+	private static final List<TaxType> TAX_TYPES = asList(TaxType.values());
 
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
@@ -84,19 +87,16 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	DepartmentPickerPopupWidget departmentSourcePicker;
 
 	@UiField
-	Anchor formAnchor;
-	@UiField
-	Anchor declarationAnchor;
-	@UiField
 	Anchor assignButton;
 	@UiField
 	Anchor cancelButton;
-	@UiField
-	Label formLabel;
-	@UiField
-	Label declarationLabel;
 
-	@Inject
+    @UiField
+    LinkAnchor formDecAnchor;
+    @UiField
+    Label titleLabel;
+
+    @Inject
 	@UiConstructor
 	public SourcesView(final Binder uiBinder) {
 		taxTypePicker = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
@@ -109,16 +109,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		});
 
-		taxTypePicker.addValueChangeHandler(new ValueChangeHandler<TaxType>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<TaxType> event) {
-				setSources();
-				setReceivers();
-				currentSourcesTable.setRowCount(0);
-			}
-		});
-		taxTypePicker.setAcceptableValues(TAX_TYPES);
-
 		initWidget(uiBinder.createAndBindUi(this));
 
 		departmentReceiverPicker.addValueChangeHandler(this);
@@ -129,18 +119,33 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void init(boolean isForm) {
+	public void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
 		this.isForm = isForm;
-		formLabel.setVisible(isForm);
-		formAnchor.setVisible(!isForm);
-		declarationLabel.setVisible(!isForm);
-		declarationAnchor.setVisible(isForm);
-		formReceiversTable.setVisible(isForm);
-		declarationReceiversTable.setVisible(!isForm);
-		taxTypePicker.setValue(TaxType.INCOME);
 
-		departmentReceiverPicker.setValue(null);
-		departmentSourcePicker.setValue(null);
+        titleLabel.setText(isForm ? "Налоговые формы" : "Декларации");
+        formDecAnchor.setText("Указание источников для " + (isForm ? "деклараций" : "налоговых форм"));
+
+        formReceiversTable.setVisible(isForm);
+		declarationReceiversTable.setVisible(!isForm);
+		taxTypePicker.setValue(taxType);
+		taxTypePicker.setAcceptableValues(TAX_TYPES);
+        // Стандартного метода изменения доступности у ValueListBox нет
+        DOM.setElementPropertyBoolean(taxTypePicker.getElement(), "disabled", true);
+        // Тип налога для ссылок
+        updateLinks(taxType, selectedReceiverId, selectedSourceId);
+
+        // Подразделение-приемник
+        if (selectedReceiverId == null) {
+		    departmentReceiverPicker.setValue(null);
+        } else {
+            departmentReceiverPicker.setValue(asList(selectedReceiverId), true);
+        }
+        // Подразделение-источник
+        if (selectedSourceId == null) {
+            departmentSourcePicker.setValue(null);
+        } else {
+            departmentSourcePicker.setValue(asList(selectedSourceId), true);
+        }
 
 		enableButtonLink(assignButton, false);
 		enableButtonLink(cancelButton, false);
@@ -149,7 +154,22 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		formReceiversTable.setRowCount(0);
 		declarationReceiversTable.setRowCount(0);
 		currentSourcesTable.setRowCount(0);
+
+        // TODO Установка фокуса на departmentReceiverPicker после реализации метода в http://jira.aplana.com/browse/SBRFACCTAX-5392
 	}
+
+    /**
+     * Подготовка ссылок
+     * @param taxType
+     * @param selectedReceiverId
+     * @param selectedSourceId
+     */
+    private void updateLinks(TaxType taxType, Integer selectedReceiverId, Integer selectedSourceId) {
+        String receiverStr = selectedReceiverId == null ? "" : ";dst=" + selectedReceiverId;
+        String sourceStr = selectedSourceId == null ? "" : ";src=" + selectedSourceId;
+        String href = "#!sources;nType=" + taxType.name() + receiverStr + sourceStr + ";isForm=" + !isForm;
+        formDecAnchor.setHref(href);
+    }
 
 	@Override
 	public void setAvalibleSources(Map<Integer, FormType> formTypes, List<DepartmentFormType> departmentFormTypes) {
@@ -359,7 +379,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 		for (DepartmentFormTypeShared source : currentSourcesTable.getVisibleItems()) {
 			if (sourceId.equals(source.getId())) {
-				getUiHandlers().showAssignErrorMessage(isForm);
+				getUiHandlers().showAssignErrorMessage();
 				return;
 			}
 			sourceIds.add(source.getId());
@@ -396,45 +416,34 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	}
 
-
-	private void setSources() {
-		if (taxTypePicker.getValue() != null
-				&& departmentSourcePicker.getValue().iterator().hasNext()) {
-			getUiHandlers().getFormSources(
-					departmentSourcePicker.getValue().iterator().next(), taxTypePicker.getValue());
-		}
-	}
-
-	private void setReceivers() {
-		if (taxTypePicker.getValue() != null
-				&& departmentReceiverPicker.getValue().iterator().hasNext()) {
-			if (isForm) {
-				getUiHandlers().getFormReceivers(
-						departmentReceiverPicker.getValue().iterator().next(), taxTypePicker.getValue());
-			} else {
-				getUiHandlers().getDeclarationReceivers(
-						departmentReceiverPicker.getValue().iterator().next(), taxTypePicker.getValue());
-			}
-		}
-	}
-
 	private void enableButtonLink(Anchor anchor, boolean enabled) {
-		if (enabled) {
-			anchor.setStyleName(css.enabled());
-		} else {
-			anchor.setStyleName(css.disabled());
-		}
-
+        anchor.setStyleName(enabled ? css.enabled() : css.disabled());
 	}
 
 	@Override
 	public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-		if (departmentSourcePicker == event.getSource()) {
-			setSources();
+        Integer selectedReceiverId = null;
+        Integer selectedSourceId = null;
+
+        if (departmentReceiverPicker.getValue() != null && departmentReceiverPicker.getValue().iterator().hasNext()) {
+            selectedReceiverId = departmentReceiverPicker.getValue().iterator().next();
+        }
+
+        if (departmentSourcePicker.getValue() != null && departmentSourcePicker.getValue().iterator().hasNext()) {
+            selectedSourceId = departmentSourcePicker.getValue().iterator().next();
+        }
+
+        updateLinks(getUiHandlers().getTaxType(), selectedReceiverId, selectedSourceId);
+
+        if (departmentSourcePicker == event.getSource()) {
+            getUiHandlers().getFormSources(selectedSourceId);
 		} else if (departmentReceiverPicker == event.getSource()) {
-			setReceivers();
+            if (isForm) {
+				getUiHandlers().getFormReceivers(selectedReceiverId);
+			} else {
+				getUiHandlers().getDeclarationReceivers(selectedReceiverId);
+			}
 			currentSourcesTable.setRowCount(0);
 		}
 	}
-
 }

@@ -1,12 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -15,25 +20,82 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
-import com.gwtplatform.mvp.client.*;
-import com.gwtplatform.mvp.client.annotations.*;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
+import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.*;
 
-public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
-		implements DeclarationTemplateUiHandlers {
+import java.util.Date;
 
-	@ProxyCodeSplit
+public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
+		implements DeclarationTemplateUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
+
+
+    @Override
+    @ProxyEvent
+    public void onCreateVersion(CreateNewDTVersionEvent event) {
+        GetDeclarationTypeAction action = new GetDeclarationTypeAction();
+        action.setDeclarationTypeId(event.getTypeId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
+            @Override
+            public void onSuccess(GetDeclarationTypeResult result) {
+                declarationTemplateExt = new DeclarationTemplateExt();
+                declarationTemplate = new DeclarationTemplate();
+                declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+                declarationTemplate.setVersion(new Date());
+                declarationTemplate.setType(result.getDeclarationType());
+                getView().setDeclarationTemplate(declarationTemplateExt);
+                placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                        with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
+                TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+
+            }
+        }, this).addCallback(new ManualRevealCallback<GetDeclarationTypeResult>(DeclarationTemplatePresenter.this)));
+    }
+
+    @Override
+    @ProxyEvent
+    public void onCreateDTType(final DTCreateNewTypeEvent event) {
+        CreateNewDTTypeAction action = new CreateNewDTTypeAction();
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreateNewDTTypeResult>() {
+                    @Override
+                    public void onSuccess(CreateNewDTTypeResult result) {
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                                with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
+                        declarationTemplateExt = new DeclarationTemplateExt();
+                        declarationTemplate = new DeclarationTemplate();
+                        declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+                        declarationTemplate.setVersion(new Date());
+                        DeclarationType declarationType = new DeclarationType();
+                        declarationType.setId(0);
+                        declarationType.setName("");
+                        declarationType.setStatus(VersionedObjectStatus.DRAFT);
+                        declarationType.setTaxType(event.getTaxType());
+                        declarationTemplate.setType(declarationType);
+                        getView().setDeclarationTemplate(declarationTemplateExt);
+                        TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+                    }
+                }, this).addCallback(new ManualRevealCallback<CreateNewDTTypeResult>(DeclarationTemplatePresenter.this)));
+    }
+
+    @ProxyCodeSplit
 	@NameToken(DeclarationTemplateTokens.declarationTemplate)
 	public interface MyProxy extends ProxyPlace<DeclarationTemplatePresenter>, Place {
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-		void setDeclarationTemplate(DeclarationTemplate declaration);
+		void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
+        void activateButtonName(String name);
 	}
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
+    private DeclarationTemplateExt declarationTemplateExt;
 	private DeclarationTemplate declarationTemplate;
 	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
 
@@ -69,8 +131,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void onHide() {
 		super.onHide();
-        unlockForm(declarationTemplate.getId());
-		closeDeclarationTemplateHandlerRegistration.removeHandler();
+        unlockForm(declarationTemplate.getId() != null?declarationTemplate.getId():0);
+		if (closeDeclarationTemplateHandlerRegistration != null)
+            closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
 
 	/**
@@ -79,27 +142,61 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	 */
 	@Override
 	public void save() {
-		UpdateDeclarationAction action = new UpdateDeclarationAction();
-		action.setDeclarationTemplate(declarationTemplate);
-		dispatcher.execute(action, CallbackUtils
+        if (declarationTemplateExt.getEndDate() != null &&
+                declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >=0 ){
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            return;
+        }
+        if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Введите имя декларации");
+            return;
+        }
+
+        UpdateDeclarationAction action = new UpdateDeclarationAction();
+		action.setDeclarationTemplateExt(declarationTemplateExt);
+        dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
 					@Override
 					public void onSuccess(UpdateDeclarationResult result) {
+                        if (result.getLogUuid() != null)
+                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
-						setDeclarationTemplate();
+                        declarationTemplate.setId(result.getDeclarationTemplateId());
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                                with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
 					}
 				}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
 	}
 
 	/**
-	 * Закрыть декларацию редактирования и вернуться на форму администрирования со списком шаблонов деклараций.
+	 * Закрыть декларацию редактирования и вернуться на форму администрирования со списком версий шаблонов деклараций.
 	 */
 	@Override
 	public void close() {
-		placeManager.revealPlace(new PlaceRequest(DeclarationTemplateTokens.declarationTemplateList));
+        if (declarationTemplate.getType().getId() == 0)
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplateList).build());
+        else
+            placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList).
+                with(DeclarationTemplateTokens.declarationType, String.valueOf(declarationTemplate.getType().getId())).build());
 	}
 
-	@Override
+    @Override
+    public void activate() {
+        if (declarationTemplate.getId() == null)
+            return;
+        SetActiveAction action = new SetActiveAction();
+        action.setDtId(declarationTemplate.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetActiveResult>() {
+            @Override
+            public void onSuccess(SetActiveResult result) {
+                if (result.getUuid() != null)
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                setDeclarationTemplate();
+            }
+        }, this));
+    }
+
+    @Override
 	public void downloadJrxml() {
 		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
 	}
@@ -132,16 +229,22 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 					.defaultCallback(new AbstractCallback<GetDeclarationResult>() {
 						@Override
 						public void onSuccess(GetDeclarationResult result) {
+                            declarationTemplateExt = new DeclarationTemplateExt();
 							declarationTemplate = result.getDeclarationTemplate();
-							getView().setDeclarationTemplate(declarationTemplate);
-							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getDeclarationType().getName());
+                            getView().activateButtonName(declarationTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
+                            declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+                            declarationTemplateExt.setEndDate(result.getEndDate());
+							getView().setDeclarationTemplate(declarationTemplateExt);
+							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
 						}
 					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
         }
 	}
 
 	private void unlockForm(int declarationId){
-		UnlockDeclarationAction action = new UnlockDeclarationAction();
+        if (declarationId == 0)
+            return;
+        UnlockDeclarationAction action = new UnlockDeclarationAction();
 		action.setDeclarationId(declarationId);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}

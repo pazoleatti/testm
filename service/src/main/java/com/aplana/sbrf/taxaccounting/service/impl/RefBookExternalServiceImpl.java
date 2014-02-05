@@ -4,12 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
@@ -20,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedInputStream;
@@ -31,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RefBookExternalServiceImpl implements RefBookExternalService {
 
     private Log log = LogFactory.getLog(getClass());
@@ -39,46 +38,28 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     private ConfigurationService configurationService;
 
     @Autowired
-    private RefBookScriptingService refBookScriptingService;
-
-    @Autowired
     private AuditService auditService;
 
     @Autowired
-    private LogEntryService logEntryService;
+    private RefBookScriptingService refBookScriptingService;
 
-    @Override
-    @Transactional
-    public void importRefBook(TAUserInfo userInfo, Logger logger, Long refBookId, InputStream is) throws ServiceLoggerException {
-        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("inputStream", is);
-        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Произошли ошибки в скрипте импорта справочника", logEntryService.save(logger.getEntries()));
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.aplana.sbrf.taxaccounting.service.RefBookExternalService#importRefBook(com.aplana.sbrf.taxaccounting.model.TAUserInfo, com.aplana.sbrf.taxaccounting.model.log.Logger)
-     */
     @Override
     public void importRefBook(TAUserInfo userInfo, Logger logger) {
-        System.out.println("importRefBook started");
-
-        // регулярка файла/архива  - true/false  - id
+        // регулярка файла/архива - true/false - id
         Map<String, Pair<Boolean, Long>> map = new HashMap<String, Pair<Boolean, Long>>();
-        // файл для загр. спр. "Коды ОКАТО"
-        map.put("payments.OKATO..*", new Pair<Boolean, Long>(true, 3L));
         // архив для загр. спр. "Коды ОКАТО"
         map.put("OKA.*", new Pair<Boolean, Long>(false, 3L));
+        // архив для загр. спр. "Коды ОКАТО"
+        map.put("payments.*", new Pair<Boolean, Long>(false, 3L));
         // файл для загр. спр. "Организации-участники контролируемых сделок"
         map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
         // файл для загр. спр. "Коды субъектов Российской Федерации"
-        map.put("generaluse.AS_RNU.???.??", new Pair<Boolean, Long>(true, 4L));
+        map.put("generaluse.AS_RNU.*", new Pair<Boolean, Long>(true, 4L));
 
         //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
         String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
+        //String refBookDirectory = "file://c:/okato/";
 
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {
@@ -93,7 +74,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // Признак наличия ошибок при импорте
         boolean withError = false;
         try {
-            //SmbFile folder = new SmbFile(refBookDirectory);
+            // SmbFile folder = new SmbFile(refBookDirectory);
             FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
             for (String fileName : folder.list()) {
                 FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
@@ -119,7 +100,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                             }
                             log.debug("Import RefBook file = " + refBookDirectory + fileName);
                             // Обращение к скрипту
-                            importRefBook(userInfo, logger, refBookId, is);
+                            Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                            additionalParameters.put("inputStream", is);
+                            refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
                         } catch (Exception e) {
                             withError = true;
                             // Журнал аудита

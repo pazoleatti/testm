@@ -140,8 +140,15 @@ public interface DepartmentService {
      *
      * @param tAUser пользователь
      * @param taxTypes Типы налога
-     * @param reportPeriod открытый период
+     * @param reportPeriodId id периода
      * @return
      */
-    List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, ReportPeriod reportPeriod);
+    List<Integer> getOpenPeriodDepartments(TAUser tAUser, List<TaxType> taxTypes, int reportPeriodId);
+
+	/**
+	 * Получить подразделения по списку идентификаторов
+	 * @param departmentId список идентификаторов
+	 * @return набор сочетаний идентификатор-подразделение
+	 */
+	Map<Integer, Department> getDepartments(List<Integer> departmentId);
 }

@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>taxaccounting</artifactId>
 		<groupId>com.aplana.taxaccounting</groupId>
-        <version>0.3.5</version>
+        <version>0.3.7</version>
 	</parent>
 
 	<artifactId>taxaccounting-ear</artifactId>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-core</artifactId>
-            <version>0.3.5</version>
+            <version>0.3.7</version>
             <type>ejb</type>
             <exclusions>
                 <exclusion>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-task</artifactId>
-            <version>0.3.5</version>
+            <version>0.3.7</version>
             <type>ejb</type>
         </dependency>
 	</dependencies>

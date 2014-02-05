@@ -78,7 +78,7 @@ void calc() {
 void logicCheck() {
     def dataRows32_1 = getDataRowsRNU32_1()
     if (dataRows32_1 == null) {
-        logger.error("Не найдены экземпляры «${formTemplateService.get(330).fullName}» за прошлый отчетный период!")
+        logger.error("Не найдены экземпляры «${formTypeService.get(330).name}» за прошлый отчетный период!")
         return
     }
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
@@ -105,7 +105,7 @@ void logicCheck() {
             logger.error("Неверно рассчитаны значения графов для раздела $number")
             continue
         }
-        if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
+            if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
         }
         for (def row : rows32_2) {
@@ -120,7 +120,7 @@ void logicCheck() {
 void checkCreation() {
     // форма должна создаваться только при принятии рну 32.1
     if (formData.kind == FormDataKind.PRIMARY && getFormDataRNU32_1() == null) {
-        logger.error("Отсутствует или не находится в статусе «принята» форма «${formTemplateService.get(330).fullName}» за текущий отчетный период!")
+        logger.error("Отсутствует или не находится в статусе «принята» форма «${formTypeService.get(330).name}» за текущий отчетный период!")
         return
     }
     formDataService.checkUnique(formData, logger)

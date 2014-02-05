@@ -3,29 +3,31 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -52,9 +54,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Autowired
     private TaxPeriodDao taxPeriodDao;
 
-    private static final String[] months = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август",
-            "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
-
     private static class RowMapperResult {
 		FormData formData;
 	}
@@ -71,6 +70,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
+            fd.setPrintDepartmentId(rs.getInt("print_department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -92,6 +92,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			FormData result = new FormData();
 			result.setId(rs.getLong("id"));
 			result.setDepartmentId(rs.getInt("department_id"));
+            result.setPrintDepartmentId(rs.getInt("print_department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -146,10 +147,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign, period_order)" +
-							" values (?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, print_department_id, kind, state, report_period_id, return_sign, period_order)" +
+							" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
-					formData.getDepartmentId(), formData.getKind().getId(),
+					formData.getDepartmentId(), formData.getPrintDepartmentId(), formData.getKind().getId(),
 					formData.getState().getId(), formData.getReportPeriodId(), 0, formData.getPeriodOrder());
 			formData.setId(formDataId);
 		} else {
@@ -227,6 +228,37 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	}
 
     @Override
+    public List<Long> findFormDataByFormTemplate(int formTemplateId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select fd.id from form_data fd where fd.form_template_id = ?",
+                    new Object[] {formTemplateId},
+                    new int[] {Types.NUMERIC},
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        } catch (DataAccessException e) {
+            throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", formTemplateId);
+        }
+    }
+
+	@Override
+	public List<FormData> find(int departmentId, int reportPeriodId) {
+		List<Long> formsId = getJdbcTemplate().queryForList(
+			"select id from form_data where department_id = ? and report_period_id = ?",
+			new Object[] {departmentId, reportPeriodId},
+			new int[] {Types.NUMERIC, Types.NUMERIC},
+			Long.class
+		);
+		List<FormData> forms = new ArrayList<FormData>();
+		for (Long id : formsId) {
+			forms.add(getWithoutRows(id));
+		}
+		return forms;
+	}
+
+	@Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         try {
             Long formDataId = getJdbcTemplate().queryForLong(
@@ -252,15 +284,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return null;
         } catch (IncorrectResultSizeDataAccessException e) {
             TaxPeriod taxPeriod = taxPeriodDao.get(taxPeriodId);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(taxPeriod.getStartDate());
             throw new DaoException(
                     "Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", налоговый период \"%s\", месяц \"%s\"",
                     formTypeDao.get(formTypeId).getName(),
                     kind.getName(),
                     departmentDao.getDepartment(departmentId).getName(),
-                    cal.get(Calendar.YEAR),
-                    periodOrder <= 12 && periodOrder >= 1 ? months[periodOrder] : periodOrder
+					taxPeriod.getYear(),
+                    periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder
             );
         }
     }
@@ -270,7 +300,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
+					"SELECT fd.id, fd.department_id, fd.print_department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },

@@ -70,10 +70,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartmentCombined(DepartmentCombined combinedDepartmentParam);
 
         /**
-         * Установка доступных типов налога
-         * @param types
+         * Устанавливаем всем справочникам на форме "ограничивающий период"
+         * @param reportPeriodId идентификатор отчетного периода
          */
-        void setTaxTypes(List<TaxType> types);
+        void resetRefBookWidgetsDatePeriod(Integer reportPeriodId);
+
+        /**
+         * Установка типа налога
+         * @param type
+         */
+        void setTaxType(TaxType type);
 
         /**
          * Перезагрузка параметров подразделения
@@ -100,6 +106,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @param reportPeriodActive
          */
         void setReportPeriodActive(boolean reportPeriodActive);
+
+        TaxType getTaxType();
     }
 
     @Inject
@@ -119,6 +127,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
         action.setDepartmentCombined(combinedDepartmentParam);
         action.setReportPeriodId(period);
+        action.setTaxType(getView().getTaxType());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
@@ -206,6 +215,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+
+        String value = request.getParameter("nType", "");
+        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+        getView().setTaxType(nType);
+
         dispatcher.execute(new GetUserDepartmentAction(),
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetUserDepartmentResult>() {
@@ -217,8 +231,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 }
                                 // Текущее подразделение пользователя
                                 userDepartment = result.getDepartment();
-                                // Доступные типы налогов
-                                getView().setTaxTypes(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL));
                             }
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }

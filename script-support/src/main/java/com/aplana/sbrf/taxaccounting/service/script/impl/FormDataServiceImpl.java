@@ -487,7 +487,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             if (formData.getPeriodOrder() == 1) {
                 // Переход через год
                 month = 12;
-                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxType());
+                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(currentPeriod.getTaxPeriod().getTaxType());
                 int currentIndex = -1;
                 for (int i = 0; i < taxPeriodList.size(); i++) {
                     if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {

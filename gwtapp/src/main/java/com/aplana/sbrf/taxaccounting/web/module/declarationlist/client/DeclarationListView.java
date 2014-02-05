@@ -5,11 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -31,8 +34,6 @@ public class DeclarationListView extends
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
 
-    private static final int PAGE_SIZE = 20;
-
 	private DeclarationDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
@@ -48,6 +49,8 @@ public class DeclarationListView extends
 
 	@UiField
 	Label titleDesc;
+    @UiField
+    LinkButton create;
 
     private final AsyncDataProvider<DeclarationDataSearchResultItem> dataProvider = new AsyncDataProvider<DeclarationDataSearchResultItem>() {
         @Override
@@ -130,7 +133,7 @@ public class DeclarationListView extends
 		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
-        declarationTable.setPageSize(PAGE_SIZE);
+        declarationTable.setPageSize(pager.getPageSize());
         dataProvider.addDataDisplay(declarationTable);
 
 		pager.setDisplay(declarationTable);
@@ -187,6 +190,13 @@ public class DeclarationListView extends
 		titleDesc.setText(title);
 	}
 
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
+
 	private Header<String> getHeader(final String columnName){
 		Header<String> columnHeader = new Header<String>(new SortingHeaderCell()) {
 			@Override
@@ -211,7 +221,7 @@ public class DeclarationListView extends
 	private void setSortByColumn(String sortByColumn){
 		if ("Подразделение".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DEPARTMENT_NAME;
-		} else if ("Отчетный период".equals(sortByColumn)){
+		} else if ("Период".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
 		} else if("Вид декларации".equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;

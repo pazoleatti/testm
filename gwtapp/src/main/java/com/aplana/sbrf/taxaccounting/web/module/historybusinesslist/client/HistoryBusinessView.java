@@ -5,9 +5,11 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -51,8 +53,6 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
-    private static final int PAGE_SIZE = 20;
-
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
     private static final String noteColumnHeader = "Текст события";
@@ -94,7 +94,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         TextColumn<LogSearchResultItem> reportPeriodColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
+                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getTaxPeriod().getYear()
                         : "";
             }
         };
@@ -161,7 +161,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
             }
         };
 
-        logBusinessTable.setPageSize(PAGE_SIZE);
+        logBusinessTable.setPageSize(pager.getPageSize());
         logBusinessTable.addColumn(dateColumn, dateColumnHeader);
         logBusinessTable.addColumn(eventColumn, eventColumnHeader);
         logBusinessTable.addColumn(noteColumn, noteColumnHeader);
@@ -222,4 +222,9 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 
+    @UiHandler("printButton")
+    void onPrintClicked(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().onPrintButtonClicked();
+    }
 }

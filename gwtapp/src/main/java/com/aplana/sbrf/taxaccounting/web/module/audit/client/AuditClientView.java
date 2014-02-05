@@ -3,12 +3,15 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -40,6 +43,12 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @UiField
     FlexiblePager pager;
 
+    @UiField
+    LinkAnchor printButton;
+
+    @UiField
+    LinkAnchor archive;
+
     private final AsyncDataProvider<LogSearchResultItem> dataProvider = new AsyncDataProvider<LogSearchResultItem>() {
         @Override
         protected void onRangeChanged(HasData<LogSearchResultItem> display) {
@@ -51,8 +60,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     };
 
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
-
-    private static final int PAGE_SIZE = 20;
 
     private static final String dateColumnHeader = "Дата-время";
     private static final String eventColumnHeader = "Событие";
@@ -97,7 +104,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> reportPeriodColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getYear()
+                return object.getReportPeriod()!=null?object.getReportPeriod().getName() + " " + object.getReportPeriod().getTaxPeriod().getYear()
                         : "";
             }
         };
@@ -164,7 +171,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             }
         };
 
-        auditTable.setPageSize(PAGE_SIZE);
         dataProvider.addDataDisplay(auditTable);
 
         auditTable.addColumn(dateColumn, dateColumnHeader);
@@ -193,6 +199,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 		    }
 	    });
 
+        auditTable.setPageSize(pager.getPageSize());
         pager.setDisplay(auditTable);
     }
 
@@ -228,4 +235,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
             pager.setPage(pageNumber);
         }
     }
+
+    @UiHandler("printButton")
+    void onPrintButtonClicked(ClickEvent event){
+        getUiHandlers().onPrintButtonClicked();
+    }
+
+    @UiHandler("archive")
+    void onArchive(ClickEvent event){
+        if(getUiHandlers() != null){
+            getUiHandlers().onArchiveButtonClicked();
+        }
+    }
+
 }

@@ -89,8 +89,14 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void saveDFT(Long departmentId, int typeId, int formId, Integer performerId) {
+        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId, performerId);
+    }
+
+    @Override
     public void deleteDFT(Collection<Long> ids) {
     	for (Long id : ids) {
+            //TODO dloshkarev: можно переделать на in запрос
     		departmentFormTypeDao.delete(id);
     	}
     }
@@ -103,6 +109,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void deleteDDT(Collection<Long> ids) {
     	for (Long id : ids) {
+            //TODO dloshkarev: можно переделать на in запрос
     		departmentDeclarationTypeDao.delete(id);
 		}
     }
@@ -126,4 +133,19 @@ public class SourceServiceImpl implements SourceService {
 	public DeclarationType getDeclarationType(int declarationTypeId) {
 		return declarationTypeDao.get(declarationTypeId);
 	}
+
+    @Override
+    public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind) {
+        return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
+    }
+
+	@Override
+	public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
+		return declarationTypeDao.listAllByTaxType(taxType);
+	}
+
+    @Override
+    public void updatePerformer(int id, int performerId){
+        departmentFormTypeDao.updatePerformer(id, performerId);
+    }
 }

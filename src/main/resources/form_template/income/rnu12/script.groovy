@@ -175,7 +175,7 @@ void calc() {
         }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size + 1)
+    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
     dataRowHelper.save(dataRows)
 
 }
@@ -190,7 +190,7 @@ def calcTotalRow(def dataRows) {
 def getNewRow(def alias, def sums) {
     def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + alias)
     totalColumns.each {
-        newRow.getCell(it).setValue(sums[it])
+        newRow.getCell(it).setValue(sums[it], null)
     }
     return newRow
 }

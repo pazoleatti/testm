@@ -1,21 +1,24 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminUIHandlers;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewImpl;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
 
@@ -25,7 +28,7 @@ import java.util.List;
  * @author Vitalii Samolovskikh
  * @author Eugene Stetsenko
  */
-public class AdminView extends ViewImpl implements AdminPresenter.MyView {
+public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements AdminPresenter.MyView {
 	interface Binder extends UiBinder<Widget, AdminView> {
 	}
 
@@ -33,50 +36,54 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     Panel filterContentPanel;
 
 	@UiField
-	CellTable<FormTemplate> formTemplateTable;
+	CellTable<FormTypeTemplate> formTemplateTable;
+
+    private NoSelectionModel<FormTypeTemplate> selectionModel;
 
 	@Inject
 	public AdminView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
+        selectionModel = new NoSelectionModel<FormTypeTemplate>();
+
 		// колонка Наименование декларации
-		Column<FormTemplate, FormTemplate> linkColumn = new Column<FormTemplate, FormTemplate>(
-				new AbstractCell<FormTemplate>() {
+		Column<FormTypeTemplate, FormTypeTemplate> linkColumn = new Column<FormTypeTemplate, FormTypeTemplate>(
+				new AbstractCell<FormTypeTemplate>() {
 					@Override
 					public void render(Context context,
-									   FormTemplate formTemplate,
+                                       FormTypeTemplate formTypeTemplate,
 									   SafeHtmlBuilder sb) {
-						if (formTemplate == null) {
+						if (formTypeTemplate == null) {
 							return;
 						}
 						sb.appendHtmlConstant("<a href=\"#"
-								+ AdminConstants.NameTokens.formTemplateInfoPage + ";"
-								+ AdminConstants.NameTokens.formTemplateId + "="
-								+ formTemplate.getId() + "\">"
-								+ formTemplate.getType().getName() + "</a>");
+								+ AdminConstants.NameTokens.formTemplateVersionList + ";"
+								+ AdminConstants.NameTokens.formTypeId + "="
+								+ formTypeTemplate.getFormTypeId() + "\">"
+								+ formTypeTemplate.getFormTypeName() + "</a>");
 					}
 				}) {
 			@Override
-			public FormTemplate getValue(FormTemplate object) {
+			public FormTypeTemplate getValue(FormTypeTemplate object) {
 				return object;
 			}
 		};
+        formTemplateTable.setSelectionModel(selectionModel);
 		formTemplateTable.addColumn(linkColumn, "Наименование");
 
-		formTemplateTable.addColumn(new Column<FormTemplate, Boolean>(
-				new CheckboxCell()) {
-			@Override
-			public Boolean getValue(FormTemplate formTemplate) {
-				return formTemplate.isActive();
-			}
-		}, "Активен");
+        formTemplateTable.addColumn(new TextColumn<FormTypeTemplate>() {
+            @Override
+            public String getValue(FormTypeTemplate formTypeTemplate) {
+                return formTypeTemplate.getTaxType().getName();
+            }
+        }, "Вид налога");
 
-		formTemplateTable.addColumn(new TextColumn<FormTemplate>() {
+		formTemplateTable.addColumn(new TextColumn<FormTypeTemplate>() {
 			@Override
-			public String getValue(FormTemplate formTemplate) {
-				return String.valueOf(formTemplate.getEdition());
+			public String getValue(FormTypeTemplate formTypeTemplate) {
+				return String.valueOf(formTypeTemplate.getVersionCount());
 			}
-		}, "Версия");
+		}, "Версий");
 	}
 
     @Override
@@ -92,8 +99,25 @@ public class AdminView extends ViewImpl implements AdminPresenter.MyView {
     }
 
 	@Override
-	public void setFormTemplateTable(List<FormTemplate> formTemplates) {
-		formTemplateTable.setRowData(formTemplates);
+	public void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates) {
+		formTemplateTable.setRowData(formTypeTemplates);
 	}
 
+    @Override
+    public FormTypeTemplate getSelectedElement() {
+        return selectionModel.getLastSelectedObject();
+    }
+
+    @UiHandler("delete")
+    void onDeleteTemplate(ClickEvent event){
+        if (getUiHandlers() != null)
+            getUiHandlers().onDeleteClick();
+    }
+
+    @UiHandler("create")
+    void onCreateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateClicked();
+        }
+    }
 }

@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.ListBox;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Deprecated
 public class ListBoxEditor extends ListBox implements LeafValueEditor<List<Long>> {
 
     @Override
