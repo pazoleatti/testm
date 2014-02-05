@@ -1,5 +1,6 @@
 /*
     blob_data.id = '99462c1e-1376-4fbe-8e31-eceb4ca470af'
+    Коды ОКАТО
  */
 package refbook.okato
 
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
 import javax.xml.namespace.QName
@@ -53,10 +55,12 @@ void importFromXML() {
         reader = xmlFactory.createXMLStreamReader(inputStream)
 
         def isTransactionStart = false // <transaction group="okato"> - событие импорта ОКАТО
+        def isTableStart = false // <table name="OKATO"> - начало таблицы
         def isReplaceStart = false // <replace> - событие замены справочника
         def isRecordStart = false // <record> - запись
         def rolloutQN = QName.valueOf('rollout')
         def transactionQN = QName.valueOf('transaction')
+        def tableQN = QName.valueOf('table')
         def fieldQN = QName.valueOf('field')
         def recordQN = QName.valueOf('record')
         def replaceQN = QName.valueOf('replace')
@@ -67,6 +71,7 @@ void importFromXML() {
         while (reader.hasNext()) {
             if (reader.startElement) {
                 if (isTransactionStart
+                        && isTableStart
                         && isReplaceStart
                         && isRecordStart
                         && reader.name.equals(fieldQN)) {
@@ -75,11 +80,11 @@ void importFromXML() {
                     if ('NAME1'.equals(name)) {
                         def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
                                 reader.getAttributeValue(null, 'value'))
-                        recordValueMap.put('NAME', refBookValue)
+                        recordValueMap.NAME = refBookValue
                     } else if ('KOD'.equals(name)) {
                         def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
                                 reader.getAttributeValue(null, 'value'))
-                        recordValueMap.put('OKATO', refBookValue)
+                        recordValueMap.OKATO = refBookValue
                     } else if ('TYPEAKT'.equals(name)) {
                         typeAkt = reader.getAttributeValue(null, 'value')
                     } else if ('DATAKT'.equals(name)) {
@@ -94,8 +99,11 @@ void importFromXML() {
                     def dateSet = sdf.parse(reader.getAttributeValue(null, 'dateSet'))
                     println("Import OKATO: " + sdf.format(dateSet) + " " + System.currentTimeMillis())
                 } else if (reader.name.equals(transactionQN)
-                        && 'okato'.equals(reader.getAttributeValue(null, 'group'))) {
+                        && 'okato'.equalsIgnoreCase(reader.getAttributeValue(null, 'group'))) {
                     isTransactionStart = true
+                } else if (reader.name.equals(tableQN)
+                        && 'okato'.equalsIgnoreCase(reader.getAttributeValue(null, 'name'))) {
+                    isTableStart = true
                 } else if (reader.name.equals(replaceQN)) {
                     isReplaceStart = true
                 }
@@ -113,18 +121,18 @@ void importFromXML() {
                     }
                     if (activeMap != null) {
                         if (activeMap.containsKey(datAkt)) {
-                            activeMap.get(datAkt).put(recordValueMap.OKATO, recordValueMap)
+                            activeMap.get(datAkt).put(recordValueMap.OKATO.stringValue, recordValueMap)
                         } else {
                             def recordMap = [:]
-                            recordMap.put(recordValueMap.OKATO, recordValueMap)
+                            recordMap.put(recordValueMap.OKATO.stringValue, recordValueMap)
                             activeMap.put(datAkt, recordMap)
                         }
                     }
-
-                    // recordMap.put(recordValueMap.OKATO, recordValueMap)
                     isRecordStart = false
                 } else if (reader.name.equals(transactionQN)) {
                     isTransactionStart = false
+                } else if (reader.name.equals(tableQN)) {
+                    isTableStart = false
                 } else if (reader.name.equals(replaceQN)) {
                     isReplaceStart = false
                 }
@@ -162,6 +170,9 @@ void importFromXML() {
         // Список id записей для удаления в текущей версии
         def delList = []
 
+        // Список id записей для изменения в текущей версии
+        def updList = []
+
         // Коды окато, записи по которым будут изменены в текущей версии
         def okatoSet = [] as Set
         if (addMap != null) {
@@ -182,7 +193,6 @@ void importFromXML() {
                 tempList.clear()
             }
         }
-
         if (!tempList.isEmpty()) {
             actualRecordList.addAll(dataProvider.getRecords(version, null, getFilterString(tempList), null))
             tempList.clear()
@@ -193,22 +203,60 @@ void importFromXML() {
         // Построение Map для списка актуальных записей
         def actualRecordMap = [:]
         actualRecordList.each { actualMap ->
-            actualRecordMap.put(actualMap.OKATO, actualMap)
+            actualRecordMap.put(actualMap.OKATO.stringValue, actualMap)
         }
 
-        // Поиск добавляемых
+        // ОКАТО -> RECORD_ID
+        def recIdMap = [:]
+
+        // Поиск добавляемых и поиск обновляемых среди добавляемых (при совпадении версий)
         addMap?.each { okato, value ->
             def actualValue = actualRecordMap.get(okato)
             def actualName = actualValue?.NAME?.stringValue
-
             if (actualName == null || !actualName.equals(value.NAME.stringValue)) {
                 // Если запись новая или отличная от имеющейся, то добавляем новую версию
+                //println(" actualName = " + actualName + " value.NAME.stringValue = " + value.NAME.stringValue)
                 addList.add(value)
                 if (actualName != null) {
-                    // Если такой код ОКАТО уже был, то старая запись должна отметиться как удаленная
-                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                    recIdMap.put(okato, actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                    //value.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, ))
+//                    // Если такой код ОКАТО уже был, то старая запись должна отметиться как удаленная
+//                    println("delete OKATO " + okato)
+//                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
             }
+        }
+
+        // Проверка добавляемых на совпадение версий
+        def checkIds = []
+        addList.each { map ->
+            def okato = map.OKATO.stringValue
+            def actualValue = actualRecordMap.get(okato)
+            if (actualValue != null) {
+                checkIds.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+            }
+        }
+
+        if (!checkIds.isEmpty()) {
+            // Получение версий для проверяемых записей
+            def versionMap = dataProvider.getRecordsVersionStart(checkIds)
+            addList.each { map ->
+                def okato = map.OKATO.stringValue
+                def actualValue = actualRecordMap.get(okato)
+                if (actualValue != null) {
+                    def recordId = actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue
+                    def recVersion = versionMap.get(recordId)
+                    if (recVersion.equals(version)) {
+                        println("Import OKATO: Found update okato = " + okato)
+                        updList.add(map)
+                        // Обновляемые не должны удаляться
+//                        println("Remove from delList " + okato)
+//                        delList.remove(recordId)
+                    }
+                }
+            }
+            // Обновляемые не должны добавляться
+            addList.removeAll(updList)
         }
 
         // Поиск удаляемых
@@ -221,31 +269,55 @@ void importFromXML() {
             }
         }
 
-        println("Import OKATO: Delete in version count = ${delList.size()}, Add in version count = ${addList.size()}")
+        println("Import OKATO: Delete in version count = ${delList.size()}, Add in version count = ${addList.size()}, " +
+                "Upd in version count = ${updList.size()}")
 
-        // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые
-        if (!delList.isEmpty() || !addList.isEmpty()) {
+        if (!delList.isEmpty() || !addList.isEmpty() || !updList.isEmpty()) {
             println("Import OKATO: DB update/create begin " + System.currentTimeMillis())
 
+            // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые
             if (!delList.isEmpty()) {
+
                 dataProvider.updateRecordsVersionEnd(logger, version, delList)
+            }
+
+            // Обновление записей, которые изменились, но дата совпадает с датой создания
+            if (!updList.isEmpty()) {
+                refBookOkatoDao.updateValueNames(version, updList)
             }
 
             // Добавление новых или обновленных записей в текущей версии
             if (!addList.isEmpty()) {
-                dataProvider.createRecordVersion(logger, null, version, null, addList)
+                if (addList.size() < 10) {
+                    println("addList = " + addList)
+                }
+                // Добавление порциями
+                tempList = []
+                addList.each { record ->
+                    if (tempList.size() < 500) {
+                        def rbRecord = new RefBookRecord()
+                        rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
+                        rbRecord.setValues(record)
+                        tempList.add(rbRecord)
+                    } else {
+                        dataProvider.createRecordVersion(logger, version, null, tempList)
+                        tempList.clear()
+                    }
+                }
+                if (!tempList.isEmpty()) {
+                    dataProvider.createRecordVersion(logger, version, null, tempList)
+                    tempList.clear()
+                }
+//                addList.each { record ->
+//                    dataProvider.createRecordVersion(logger, /*recIdMap.get(record.OKATO.stringValue)*/null, version, null,
+//                            asList(record))
+//                }
+
             }
             println("Import OKATO: DB update/create end " + System.currentTimeMillis())
-
-            println("Import OKATO: DB calc parent begin " + System.currentTimeMillis())
-
-            // TODO Вопрос http://jira.aplana.com/browse/SBRFACCTAX-3295
-            // Очистка ссылки на родительскую запись для всей версии
-            refBookOkatoDao.clearParentId(version)
-
-            // Вычисление родительского кода ОКАТО и обновление записей для всей версии
-            refBookOkatoDao.updateParentId(version)
-            println("Import OKATO: DB calc parent end " + System.currentTimeMillis())
+        }
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return
         }
     }
 
