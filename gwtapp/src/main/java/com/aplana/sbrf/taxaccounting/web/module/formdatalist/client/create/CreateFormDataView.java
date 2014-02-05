@@ -31,63 +31,63 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView, 
-Editor<FormDataFilter> {
+public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
+        Editor<FormDataFilter> {
 
-	public interface Binder extends UiBinder<PopupPanel, CreateFormDataView> {
-	}
-	
-    interface MyDriver extends SimpleBeanEditorDriver<FormDataFilter, CreateFormDataView>{
+    public interface Binder extends UiBinder<PopupPanel, CreateFormDataView> {
+    }
+
+    interface MyDriver extends SimpleBeanEditorDriver<FormDataFilter, CreateFormDataView> {
     }
 
     private final MyDriver driver;
 
-	@UiField
+    @UiField
     @Path("departmentIds")
     DepartmentPickerPopupWidget departmentPicker;
 
-	@UiField
-	PeriodPickerPopupWidget reportPeriodIds;
+    @UiField
+    PeriodPickerPopupWidget reportPeriodIds;
 
-	@UiField(provided = true)
-	ValueListBox<FormDataKind> formDataKind;
+    @UiField(provided = true)
+    ValueListBox<FormDataKind> formDataKind;
 
-	@UiField(provided = true)
+    @UiField(provided = true)
     ListBoxWithTooltipWidget<Integer> formTypeId;
 
-	@UiField
-	Button continueButton;
+    @UiField
+    Button continueButton;
 
-	@UiField
-	Button cancelButton;	
-	
-	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
+    @UiField
+    Button cancelButton;
 
-	@Inject
-	public CreateFormDataView(Binder uiBinder, final MyDriver driver, EventBus eventBus) {
-		super(eventBus);
+    private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
 
-		formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
-			@Override
-			public String render(FormDataKind object) {
-				if (object == null) {
-					return "";
-				}
-				return object.getName();
-			}
-		});
+    @Inject
+    public CreateFormDataView(Binder uiBinder, final MyDriver driver, EventBus eventBus) {
+        super(eventBus);
 
-		formTypeId = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return formTypesMap.get(object);
-			}
-		});
+        formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
+            @Override
+            public String render(FormDataKind object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.getName();
+            }
+        });
 
-		initWidget(uiBinder.createAndBindUi(this));	
+        formTypeId = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
+            @Override
+            public String render(Integer object) {
+                if (object == null) {
+                    return "";
+                }
+                return formTypesMap.get(object);
+            }
+        });
+
+        initWidget(uiBinder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
 
@@ -98,7 +98,6 @@ Editor<FormDataFilter> {
                 updateEnabled();
             }
         });
-        departmentPicker.setDoubleState(false);
     }
 
     @Override
@@ -117,20 +116,20 @@ Editor<FormDataFilter> {
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
-        formTypeId.setEnabled(formDataKind.getValue() != null );
+        formTypeId.setEnabled(formDataKind.getValue() != null);
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formTypeId.getValue() != null);
     }
 
     @Override
-	public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues){
-		departmentPicker.setAvalibleValues(list, availableValues);
-	}
+    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
+        departmentPicker.setAvalibleValues(list, availableValues);
+    }
 
-	@UiHandler("continueButton")
-	public void onSave(ClickEvent event){
-		getUiHandlers().onConfirm();
-	}
+    @UiHandler("continueButton")
+    public void onSave(ClickEvent event) {
+        getUiHandlers().onConfirm();
+    }
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
@@ -167,40 +166,40 @@ Editor<FormDataFilter> {
         updateEnabled();
     }
 
-	@Override
-	public void setAcceptableFormKindList(List<FormDataKind> list) {
-		formDataKind.setValue(null, true);
-		formDataKind.setAcceptableValues(list);
-	}
-
-	@Override
-	public void setAcceptableFormTypeList(List<FormType> formTypes) {
-		formTypesMap.clear();
-		for (FormType formType : formTypes) {
-			formTypesMap.put(formType.getId(), formType.getName());
-		}
-		
-		formTypeId.setValue(null);
-		formTypeId.setAcceptableValues(formTypesMap.keySet());
-	}
-
-	@Override
-	public FormDataFilter getFilterData(){
-    	FormDataFilter filter = driver.flush();
-        // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
-    	//filter.setDepartmentIds(departmentPicker.getValue());
-        return filter;
-	}
+    @Override
+    public void setAcceptableFormKindList(List<FormDataKind> list) {
+        formDataKind.setValue(null, true);
+        formDataKind.setAcceptableValues(list);
+    }
 
     @Override
-	public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
-        reportPeriodIds.setPeriods(reportPeriods);
-	}
+    public void setAcceptableFormTypeList(List<FormType> formTypes) {
+        formTypesMap.clear();
+        for (FormType formType : formTypes) {
+            formTypesMap.put(formType.getId(), formType.getName());
+        }
 
-	@Override
-	public void setFilterData(FormDataFilter filter) {
+        formTypeId.setValue(null);
+        formTypeId.setAcceptableValues(formTypesMap.keySet());
+    }
+
+    @Override
+    public FormDataFilter getFilterData() {
+        FormDataFilter filter = driver.flush();
+        // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
+        //filter.setDepartmentIds(departmentPicker.getValue());
+        return filter;
+    }
+
+    @Override
+    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
+        reportPeriodIds.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public void setFilterData(FormDataFilter filter) {
         driver.edit(filter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
         //departmentPicker.setValue(filter.getDepartmentIds());
-	}
+    }
 }
