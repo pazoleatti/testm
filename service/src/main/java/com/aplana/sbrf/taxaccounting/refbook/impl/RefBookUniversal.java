@@ -109,8 +109,21 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         try {
+            long allTime = System.nanoTime();
             List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+            List<Long> recordIds = new ArrayList<Long>();
+
+            long countIds = 0;
+            for (RefBookRecord record : records) {
+                if (record.getRecordId() == null) {
+                    countIds++;
+                } else {
+                    recordIds.add(record.getRecordId());
+                }
+            }
+
             List<String> errors;
+            long time = System.nanoTime();
 
             //Проверка обязательности заполнения записей справочника
             errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
@@ -126,35 +139,47 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 throw new ServiceException("Обнаружено некорректное значение атрибута");
             }
+            System.out.println("check values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+            time = System.nanoTime();
 
 
             //Проверка корректности
             List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
+            System.out.println("getMatchedRecordsByUniqueAttributes: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+            time = System.nanoTime();
             if (matchedRecords == null || matchedRecords.size() == 0) {
                 //Проверка ссылочных значений
                 boolean isReferencesOk = refBookDao.isReferenceValuesCorrect(versionFrom, attributes, records);
+                System.out.println("isReferenceValuesCorrect: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+                time = System.nanoTime();
                 if (!isReferencesOk) {
                     throw new ServiceException("Период актуальности выбранного значения меньше периода актуальности версии");
                 }
             } else {
                 //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
                 refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+                System.out.println("checkConflictValuesVersions: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+                time = System.nanoTime();
+            }
+
+            if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
+                throw new ServiceException("Версия с указанной датой актуальности уже существует");
             }
 
             for (RefBookRecord record : records) {
-                if (!refBookDao.isVersionExist(refBookId, record.getRecordId(), versionFrom)) {
-                    //Проверка пересечения версий
-                    if (record.getRecordId() != null) {
-                        crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
-                                versionFrom, versionTo, logger);
-                    }
-                } else {
-                    throw new ServiceException("Версия с указанной датой актуальности уже существует");
+                //Проверка пересечения версий
+                if (record.getRecordId() != null) {
+                    crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
+                            versionFrom, versionTo, logger);
                 }
             }
+            System.out.println("check cross: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+            time = System.nanoTime();
 
             //Создание настоящей и фиктивной версии
-            createVersions(versionFrom, versionTo, records, logger);
+            createVersions(versionFrom, versionTo, records, countIds, logger);
+            System.out.println("createVersions: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
+            System.out.println("all: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
@@ -167,14 +192,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     }
 
-    private void createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, Logger logger) {
+    private void createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
-        long countIds = 0;
-        for (RefBookRecord record : records) {
-            if (record.getRecordId() == null) {
-                countIds++;
-            }
-        }
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
 
         int counter = 0;
