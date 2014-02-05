@@ -559,7 +559,7 @@ public final class ScriptUtils {
             if (currentString.toString().trim().equalsIgnoreCase(referenceString.trim())) {
                 continue;
             }
-            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString));
+            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString.toString()));
         }
     }
 
