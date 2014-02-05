@@ -1,25 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
-
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ColumnDaoTest.xml"})
@@ -34,25 +28,10 @@ public class ColumnDaoTest {
     private static final int FIRST_COLUMN = 0;
     private static final int SECOND_COLUMN = 1;
     private static final int THIRD_COLUMN = 2;
-    // Иммитация Sequence
-    private static long cnt = 100;
 
     @Before
     public void init() {
-        BDUtils bdUtils = mock(BDUtils.class);
-        when(bdUtils.getNextIds(any(BDUtils.Sequence.class), anyLong())).thenAnswer(new Answer<List<Long>>() {
-            @Override
-            public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                List<Long> ids = new ArrayList<Long>();
-                Object[] args = invocationOnMock.getArguments();
-                int count = ((Long) args[1]).intValue();
-                for (int i = 0; i < count; i++) {
-                    ids.add(cnt++);
-                }
-                return ids;
-            }
-        });
-        ReflectionTestUtils.setField(columnDao, "bdUtils", bdUtils);
+        ReflectionTestUtils.setField(columnDao, "bdUtils", BDUtilsMock.getBDUtils());
     }
 
     @Test
@@ -132,7 +111,7 @@ public class ColumnDaoTest {
         columnList.add(refBookColumn);
 
         ReferenceColumn referenceColumn = new ReferenceColumn();
-        referenceColumn.setParentId((int) cnt);
+        referenceColumn.setParentId((int) BDUtilsMock.getIteratorValue());
         referenceColumn.setRefBookAttributeId(5);
         referenceColumn.setAlias("referenceColumn");
         referenceColumn.setName("Зависимая графа");
@@ -155,7 +134,7 @@ public class ColumnDaoTest {
         Assert.assertEquals("Зависимая графа", referenceColumn.getName());
         Assert.assertEquals(5, referenceColumn.getOrder());
         Assert.assertEquals(false, referenceColumn.isChecking());
-        Assert.assertEquals((int) cnt - 2, referenceColumn.getParentId());
+        Assert.assertEquals((int) BDUtilsMock.getIteratorValue() - 2, referenceColumn.getParentId());
         Assert.assertEquals(5, referenceColumn.getRefBookAttributeId());
     }
 }

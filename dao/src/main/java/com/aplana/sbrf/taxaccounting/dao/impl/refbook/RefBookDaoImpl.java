@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
@@ -14,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,11 +67,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-	 public List<RefBook> getAll(Integer typeId) {
+	public List<RefBook> getAll(Integer typeId) {
         return getAll(getJdbcTemplate().queryForList("select id from ref_book where (? is null or type = ?) order by name",
                             new Object[] {typeId, typeId},
                             Long.class));
-     }
+    }
 
     private List<RefBook> getAll(List<Long> ids) {
         List<RefBook> refBookList= new ArrayList();
@@ -208,8 +208,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @param refBookId     код справочника
      * @param recordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
      * @param version       дата актуальности данных справочника. Если = null, то версионирование не учитывается
+	 * @param filter		строка фильтрации
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @param pagingParams  параметры для постраничной навигации. Может быть null, тогда возвращается весь набор данных по текущему срезу
+	 * @param isSortAscending порядок сортировки, по умолчанию используется сортировка по возрастанию
      * @return
      */
     private PreparedStatementData getRefBookSql(Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, boolean isSortAscending) {
@@ -385,9 +387,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return sql.toString();
     }
 
+	/**
+	 * Модифицирует фильтр, добавляя в него условие фильтрации по родителю
+	 * @param filter исходная строка фильтра
+	 * @param parentRecordId код родительской записи
+	 * @return фильтр с учетом условия по родительской записи
+	 */
+	static String getParentFilter(final String filter, final Long parentRecordId) {
+		String parentFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
+		return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
+	}
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
+    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
+			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute);
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
