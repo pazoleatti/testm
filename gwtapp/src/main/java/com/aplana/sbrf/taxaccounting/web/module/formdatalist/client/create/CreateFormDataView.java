@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -14,24 +15,20 @@ import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.aplana.gwt.client.ValueListBox;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.mvp.client.PopupViewCloseHandler;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView, 
@@ -56,7 +53,7 @@ Editor<FormDataFilter> {
 	ValueListBox<FormDataKind> formDataKind;
 
 	@UiField(provided = true)
-	ListBoxWithTooltip<Integer> formTypeId;
+    ListBoxWithTooltipWidget<Integer> formTypeId;
 
 	@UiField
 	Button continueButton;
@@ -80,7 +77,7 @@ Editor<FormDataFilter> {
 			}
 		});
 
-		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
+		formTypeId = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
 			@Override
 			public String render(Integer object) {
 				if (object == null) {
@@ -118,10 +115,9 @@ Editor<FormDataFilter> {
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
         // "Тип налоговой формы" недоступен если не выбрано подразделение
-        DOM.setElementPropertyBoolean(formDataKind.getElement(), "disabled",
-                departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty());
+        formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
-        DOM.setElementPropertyBoolean(formTypeId.getElement(), "disabled", formDataKind.getValue() == null);
+        formTypeId.setEnabled(formDataKind.getValue() != null );
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formTypeId.getValue() != null);
     }
@@ -162,6 +158,12 @@ Editor<FormDataFilter> {
     @UiHandler("formDataKind")
     public void onFormKindChange(ValueChangeEvent<FormDataKind> event) {
         formTypeId.setValue(null, true);
+        updateEnabled();
+    }
+
+    @UiHandler("formTypeId")
+    public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
+//        continueButton.setEnabled(t);
         updateEnabled();
     }
 
