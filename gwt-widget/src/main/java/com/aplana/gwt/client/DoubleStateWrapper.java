@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Vitaliy Samolovskikh
  */
-public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposite implements HasValue<T>, HasName, IsEditor<ValueBoxEditor<T>>, LeafValueEditor<T> {
+public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposite implements HasValue<T>, HasName, LeafValueEditor<T> {
 	/**
 	 * Исходный виджет, к нему будут делегироваться все обращения.
 	 */
@@ -72,9 +72,10 @@ public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposit
 		if(widget instanceof ValueChangeHandler){
 			return ((HasValueChangeHandlers)widget).addValueChangeHandler(handler);
 		} else {
-			throw new UnsupportedOperationException("The widget is not instance of HasValueChangeHandlers.");
-		}
-	}
+            //throw new UnsupportedOperationException("The widget is not instance of HasValueChangeHandlers.");
+            return null;
+        }
+    }
 
 	@Override
 	public void setEnabled(boolean enabled) {
@@ -92,15 +93,5 @@ public class DoubleStateWrapper<W extends Widget, T> extends DoubleStateComposit
 	@Override
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public ValueBoxEditor<T> asEditor() {
-		if(widget instanceof IsEditor){
-			return ((IsEditor<ValueBoxEditor<T>>) widget).asEditor();
-		} else {
-			throw new UnsupportedOperationException("The widget is not IsEditor.");
-		}
 	}
 }

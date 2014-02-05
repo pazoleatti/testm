@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 import com.aplana.sbrf.taxaccounting.model.TaskParamModel;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskInfoResult;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.TaskInfoItem;
-import com.aplana.sbrf.taxaccounting.web.widget.style.ListBoxWithTooltip;
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

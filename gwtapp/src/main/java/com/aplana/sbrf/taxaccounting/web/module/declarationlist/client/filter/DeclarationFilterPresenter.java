@@ -59,6 +59,12 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
 		GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(taxType);
+
+        // выставляем фильтр по умолчанию, иначе при задании размера пейджинга после получения nType
+        // происходит обращение к driver.flush(), а driver.edit еще не выполнился т.к не отработал асинхронный вызов
+        DeclarationDataFilter defaultFilter = new DeclarationDataFilter();
+        defaultFilter.setTaxType(taxType);
+        getView().setDataFilter(defaultFilter);
         dispatchAsync.execute(action, CallbackUtils
 				        .defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
 						@Override

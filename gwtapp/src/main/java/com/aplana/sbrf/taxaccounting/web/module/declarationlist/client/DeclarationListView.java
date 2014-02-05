@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -233,4 +234,10 @@ public class DeclarationListView extends
 	private void setAscSorting(boolean ascSorting){
 		this.isAscSorting = ascSorting;
 	}
+
+    @Override
+    public void updatePageSize(TaxType taxType) {
+        pager.setType("declarationList" + taxType.getCode());
+        declarationTable.setPageSize(pager.getPageSize());
+    }
 }

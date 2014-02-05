@@ -53,13 +53,16 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         map.put("payments.*", new Pair<Boolean, Long>(false, 3L));
         // файл для загр. спр. "Организации-участники контролируемых сделок"
         map.put("organization.xls", new Pair<Boolean, Long>(true, 9L));
-        // файл для загр. спр. "Коды субъектов Российской Федерации"
-        map.put("generaluse.AS_RNU.*", new Pair<Boolean, Long>(true, 4L));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        map.put("RNU.*", new Pair<Boolean, Long>(false, 4L));
+        // архив для загр. спр. "Коды субъектов Российской Федерации" (Регионы)
+        map.put("generaluse.AS_RNU.*.*", new Pair<Boolean, Long>(false, 4L));
 
         //TODO добавить проверку ЭЦП (Marat Fayzullin 2013-10-19)
         Map<ConfigurationParam, String> params = configurationService.getAllConfig(userInfo);
         String refBookDirectory = params.get(ConfigurationParam.REF_BOOK_DIRECTORY);
-        //String refBookDirectory = "file://c:/okato/";
+        // String refBookDirectory = "file://c:/okato/";
+        // String refBookDirectory = "file://c:/region/";
 
         BufferedReader reader = null;
         if (log.isDebugEnabled()) {

@@ -17,8 +17,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -344,7 +342,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		this.isEditMode = isEditMode;
 		editModeLabel.setVisible(isEditMode);
 		editButton.setVisible(!isEditMode);
-		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
+		editButton.setEnabled(currentDepartmentId !=null && currentReportPeriodId != null && isReportPeriodActive);
 		saveButton.setVisible(isEditMode);
 		cancelButton.setVisible(isEditMode);
 		enableAllChildren(isEditMode, formPanel);

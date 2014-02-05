@@ -462,8 +462,8 @@ public class RefBookDaoTest {
 
     @Test
     public void isVersionExist() {
-        assertTrue(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2013)));
-        assertFalse(refBookDao.isVersionExist(1L, 1L, getDate(1, 1, 2014)));
+        assertTrue(refBookDao.isVersionsExist(1L, Arrays.asList(1L), getDate(1, 1, 2013)));
+        assertFalse(refBookDao.isVersionsExist(1L, Arrays.asList(1L), getDate(1, 1, 2014)));
     }
 
     @Test
