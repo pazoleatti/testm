@@ -19,7 +19,6 @@ import java.util.Map;
 public abstract class AbstractReportBuilder {
 
     protected final Log logger = LogFactory.getLog(getClass());
-    private long debugTime;
 
     protected Workbook workBook;
 
@@ -47,30 +46,12 @@ public abstract class AbstractReportBuilder {
      * @throws IOException
      */
     public final String createReport() throws IOException {
-        debugTime = System.currentTimeMillis();
         fillHeader();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer fillHeader: " + debugTime);
-        debugTime = System.currentTimeMillis();
         createTableHeaders();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer createTableHeaders: " + debugTime);
-        debugTime = System.currentTimeMillis();
         createDataForTable();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer createDataForTable: " + debugTime);
-        debugTime = System.currentTimeMillis();
         cellAlignment();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer cellAlignment: " + debugTime);
-        debugTime = System.currentTimeMillis();
         fillFooter();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer fillFooter: " + debugTime);
-        debugTime = System.currentTimeMillis();
         setPrintSetup();
-        debugTime = System.currentTimeMillis() - debugTime;
-        logger.info("Timer setPrintSetup: " + debugTime);
         return flush();
     }
 
