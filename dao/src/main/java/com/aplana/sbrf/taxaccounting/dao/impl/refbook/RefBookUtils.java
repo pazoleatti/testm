@@ -8,15 +8,15 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -237,4 +237,15 @@ public class RefBookUtils extends AbstractDao {
 		return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
 	}
 
+    public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
+
+        @Override
+        public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RefBookRecordVersion result = new RefBookRecordVersion();
+            result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
+            result.setVersionStart(rs.getDate("versionStart"));
+            result.setVersionEnd(rs.getDate("versionEnd"));
+            return result;
+        }
+    }
 }

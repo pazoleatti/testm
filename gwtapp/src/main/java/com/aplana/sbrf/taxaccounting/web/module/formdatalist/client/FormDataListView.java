@@ -5,6 +5,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -288,4 +289,9 @@ public class FormDataListView extends
         }
     }
 
+    @Override
+    public void updatePageSize(TaxType taxType) {
+        pager.setType("formDataList" + taxType.getCode());
+        formDataTable.setPageSize(pager.getPageSize());
+    }
 }

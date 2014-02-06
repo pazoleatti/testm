@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
@@ -124,7 +124,7 @@
                                                     addStyleNames="{style.labelBlockMargin}"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <style:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
+                                    <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
@@ -135,7 +135,7 @@
                             <g:Label width="180px" addStyleNames="{style.labelBlockMargin}" text="Вид декларации:"/>
                         </g:cell>
                         <g:cell height="26px" width="100%">
-                            <style:ListBoxWithTooltip width="100%" ui:field="declarationTypeIds" showTooltip="true"/>
+                            <dw:ListBoxWithTooltip width="100%" ui:field="declarationTypeIds" showTooltip="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

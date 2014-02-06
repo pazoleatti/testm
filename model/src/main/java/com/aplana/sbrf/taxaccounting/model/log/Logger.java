@@ -18,6 +18,10 @@ public class Logger {
 	private LogMessageDecorator messageDecorator;
 	
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
+
+    // Ограничение по длине для каждого сообщения об ошибке из Exception
+    private static int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;
+
 	/**
 	 * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя) 
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)} 
@@ -49,8 +53,12 @@ public class Logger {
 	 * @param e исключение
 	 */
 	public void error(Exception e) {
-		log(LogLevel.ERROR, "Необработанная ошибка: %s", e.getMessage());
-		logger.error("Unhandled exception: " + e.getMessage(), e);
+        String msg = e.getMessage();
+        if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
+            msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
+        }
+        log(LogLevel.ERROR, "Необработанная ошибка: %s", msg);
+		logger.error("Unhandled exception: " + msg, e);
 	}
 
 	private void log(LogLevel level, String message, Object...args) {
