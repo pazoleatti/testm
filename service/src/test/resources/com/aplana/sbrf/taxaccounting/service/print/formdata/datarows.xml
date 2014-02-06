@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="total">
-        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="number" colSpan="1" rowSpan="2" value="№ пп"/>
         <cell alias="contract" colSpan="2" rowSpan="1" value="Номер договора"/>
         <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="Сумма гарантии"/>
