@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,17 +120,18 @@ public class RefBook implements Serializable {
 	}
 
 	/**
-	 * Возвращает атрибут по его псевдониму
+	 * Возвращает атрибут по его псевдониму. Регистронезависимый поиск
 	 * @param alias
+	 * @throws IllegalArgumentException в случае, если искомого атрибута нет в справочнике
 	 * @return
 	 */
-	public RefBookAttribute getAttribute(String alias) {
+	public RefBookAttribute getAttribute(final String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Attribute alias must be defined");
 		}
 
 		for(RefBookAttribute attribute : attributes) {
-			if (alias.equals(attribute.getAlias())) {
+			if (StringUtils.equalsIgnoreCase(alias, attribute.getAlias())) {
 				return attribute;
 			}
 		}

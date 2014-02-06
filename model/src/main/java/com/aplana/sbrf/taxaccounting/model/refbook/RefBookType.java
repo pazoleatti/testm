@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import java.util.NoSuchElementException;
+
 /**
  * Типы справочников
  *
@@ -7,27 +9,39 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
  */
 public enum RefBookType {
 
-    INTERNAL(0, "Внутренний справочник"),
-    EXTERNAL(1, "Внешний справочник");
+	LINEAR ("Линейный"),
+	HIERARCHICAL ("Иерархический");
 
-    private final Integer id;
-    private final String title;
+	private String title;
 
-    private RefBookType(Integer id, String title) {
-        this.id = id;
-        this.title = title;
-    }
+	RefBookType(String title) {
+		this.title = title;
+	}
 
-    public Integer getId() {
-        return id;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	/** Возвращает код типа*/
+	public int getId() {
+		for(int i=0; i<values().length; i++) {
+			if (this.equals(values()[i])) {
+				return i;
+			}
+		}
+		throw new NoSuchElementException("Id not found");
+	}
 
-    @Override
-    public String toString() {
-        return title;
-    }
+	/** Возвращает элемент по коду */
+	public static RefBookType get(int id) {
+		switch (id) {
+			case 0:
+				return LINEAR;
+			case 1:
+				return HIERARCHICAL;
+			default:
+				throw new IllegalArgumentException("Id not found");
+		}
+	}
+
 }
