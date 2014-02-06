@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -131,7 +129,7 @@ public class RefBook implements Serializable {
 		}
 
 		for(RefBookAttribute attribute : attributes) {
-			if (StringUtils.equalsIgnoreCase(alias, attribute.getAlias())) {
+			if (alias.toLowerCase().equals(attribute.getAlias().toLowerCase())) {
 				return attribute;
 			}
 		}
