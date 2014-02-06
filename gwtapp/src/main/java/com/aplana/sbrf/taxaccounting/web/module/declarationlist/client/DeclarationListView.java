@@ -89,21 +89,7 @@ public class DeclarationListView extends
 			}
 		};
 
-		TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.getDeclarationType();
-			}
-		};
-
-		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.isAccepted() ? "Принята" : "Создана";
-			}
-		};
-
-		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> linkColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> declarationTypeColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
 				new AbstractCell<DeclarationDataSearchResultItem>() {
 
 					@Override
@@ -117,7 +103,7 @@ public class DeclarationListView extends
 								+ DeclarationDataTokens.declarationData + ";"
 								+ DeclarationDataTokens.declarationId + "="
 								+ declaration.getDeclarationDataId() + "\">"
-								+ declaration.getTaxType().getName() + "</a>");
+								+ declaration.getDeclarationType() + "</a>");
 					}
 				}) {
 			@Override
@@ -127,11 +113,17 @@ public class DeclarationListView extends
 			}
 		};
 
+		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+			@Override
+			public String getValue(DeclarationDataSearchResultItem object) {
+				return object.isAccepted() ? "Принята" : "Создана";
+			}
+		};
+
+		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение"));
-		declarationTable.addColumn(linkColumn, getHeader("Вид налога"));
 		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год"));
 		declarationTable.addColumn(reportPeriodColumn, getHeader("Период"));
-		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
         declarationTable.setPageSize(pager.getPageSize());

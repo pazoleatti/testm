@@ -230,25 +230,25 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                 performer = new FormDataPerformer();
                 performer.setName(name.getText());
             }else{
-                Dialog.warningMessage("Необходимо ввести ФИО исполнителя");
+                Dialog.warningMessage("Внимание!", "Необходимо ввести ФИО исполнителя");
                 return;
             }
             if(!phone.getText().isEmpty()){
                 performer.setPhone(phone.getText());
             } else{
-                Dialog.warningMessage("Необходимо ввести телефон исполнителя");
+                Dialog.warningMessage("Внимание!", "Необходимо ввести телефон исполнителя");
                 return;
             }
 
         }else{
             if(name.getText().isEmpty() && performer.getName().isEmpty()){
-                Dialog.warningMessage("Необходимо ввести ФИО исполнителя");
+                Dialog.warningMessage("Внимание!", "Необходимо ввести ФИО исполнителя");
                 return;
             }else if(!name.getText().isEmpty()){
                 performer.setName(name.getText());
             }
             if(phone.getText().isEmpty() && performer.getPhone().isEmpty()){
-                Dialog.warningMessage("Необходимо ввести телефон исполнителя");
+                Dialog.warningMessage("Внимание!", "Необходимо ввести телефон исполнителя");
                 return;
             }else if(!phone.getText().isEmpty()){
                 performer.setPhone(phone.getText());
@@ -267,7 +267,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 		}
 
         if(departmentPicker.getValue().isEmpty()){
-            Dialog.warningMessage("Не указано подразделение-исполнитель!");
+            Dialog.warningMessage("Внимание!", "Не указано подразделение-исполнитель!");
             return;
         }
 
@@ -277,7 +277,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	private boolean validateSigners() {
 		for (FormDataSigner signer : clonedSigners) {
 			if (signer.getName().isEmpty() || signer.getPosition().isEmpty()) {
-                Dialog.warningMessage("Необходимо ввести ФИО подписанта и должность");
+                Dialog.warningMessage("Внимание!", "Необходимо ввести ФИО подписанта и должность");
 				return false;
 			}
 		}
@@ -289,7 +289,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 	public void onCancel(ClickEvent event){
         final SignersView t = this;
 		if (!readOnlyMode && !isEqualClonedAndCurrentSignersAndReporter()) {
-            Dialog.confirmMessage("Первоначальные данные изменились, хотите применить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Подтверждение", "Первоначальные данные изменились, хотите применить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     t.onSave();
@@ -354,7 +354,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 					signer.setName(value);
 				} else {
 					signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Количество символов для ФИО подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Внимание!", "Количество символов для ФИО подписанта превысило допустимое значение 100");
 				}
 			}
 		});
@@ -373,7 +373,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 					signer.setPosition(value);
 				} else {
 					signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Количество символов для должности подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Внимание!", "Количество символов для должности подписанта превысило допустимое значение 100");
 				}
 			}
 		});

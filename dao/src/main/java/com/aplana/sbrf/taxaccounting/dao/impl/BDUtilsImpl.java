@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.stereotype.Repository;
 
+import javax.sound.midi.Sequence;
 import java.util.List;
 
 /**

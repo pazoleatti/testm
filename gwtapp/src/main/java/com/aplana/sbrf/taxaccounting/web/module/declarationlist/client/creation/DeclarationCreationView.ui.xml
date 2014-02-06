@@ -1,13 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
     xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
     xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
     xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
-            margin: 10px;
+            margin: 0 5px;
         }
 
         .footerPanel {
@@ -17,39 +16,50 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
-            width: 64px;
+            margin:  8px 10px 8px 0 !important;
+            width: 75px;
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="" title="Создание декларации">
-        <g:VerticalPanel height="100%" width="250px">
-            <g:FlowPanel styleName="{style.content}">
-            
-                <g:FlowPanel height="60px">
-                    <g:Label text="Подразделение" />
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" width="400px" multiselection="false" header="Выбор подразделения" modal="true"/>
-                </g:FlowPanel>
-                
-                <g:FlowPanel height="60px">
-                    <g:Label text="Период" />
-                     <rep:PeriodPickerPopupWidget width="400px" ui:field="periodPicker" multiselect="false"/>
-                </g:FlowPanel>
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание декларации">
+        <g:VerticalPanel height="100%" width="400px">
 
-                <g:FlowPanel height="60px">
-                    <g:Label text="Вид декларации" />
-                    <dw:ListBoxWithTooltip width="400px" ui:field="declarationTypeBox" showTooltip="true"/>
-                </g:FlowPanel>
-            </g:FlowPanel>
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Период:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <rep:PeriodPickerPopupWidget width="100%" ui:field="periodPicker" multiselect="false"/>
+                </g:cell>
+            </g:HorizontalPanel>
 
-            <style:Bar addStyleNames="{style.footerPanel}">
-                <style:RightBar >
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
-                </style:RightBar>
-            </style:Bar>
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Подразделение:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" width="100%" multiselection="false" header="Выбор подразделения" modal="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Вид декларации:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="declarationTypeBox" showTooltip="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel addStyleNames="{style.footerPanel}" horizontalAlignment="right">
+                <g:cell width="100%">
+                    <g:Label/>
+                </g:cell>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
+            </g:HorizontalPanel>
 
         </g:VerticalPanel>
     </dw:ModalWindow>
 
-</ui:UiBinder> 
+</ui:UiBinder>
