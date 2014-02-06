@@ -62,37 +62,36 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                 case TRANSPORT:
                     res.setCanChangeDepartment(true);
 	                departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
+	                Set<Integer> depIds = new HashSet<Integer>();
+	                for (Department dep : departments) {
+		                depIds.add(dep.getId());
+	                }
+	                res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
                     break;
                 case INCOME:
                 case DEAL:
                 case VAT:
                     res.setCanChangeDepartment(false);
-                    departments.add(departmentService.getBankDepartment());
+	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
                     break;
                 default:
                     break;
             }
         } else { // Контролер НС
 	        res.setCanChangeDepartment(false);
+	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser()));
 	        switch (taxType) {
 		        case PROPERTY:
 		        case TRANSPORT:
 			        res.setCanEdit(true);
-			        departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
 			        break;
 		        case INCOME:
 		        case DEAL:
 		        case VAT:
 			        res.setCanEdit(false);
-			        departments.add(departmentService.getBankDepartment());
 			        break;
 	        }
         }
-	    Set<Integer> depIds = new HashSet<Integer>();
-	    for (Department dep : departments) {
-		    depIds.add(dep.getId());
-	    }
-	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 	    Set<Integer> ad = new HashSet<Integer>();
 	    for (Department dep : res.getDepartments()) {
 		    ad.add(dep.getId());
