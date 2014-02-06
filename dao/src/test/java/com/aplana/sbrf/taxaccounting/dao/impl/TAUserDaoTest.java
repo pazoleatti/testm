@@ -157,7 +157,7 @@ public class TAUserDaoTest {
 		filter.setActive(false);
 		Assert.assertEquals(1, userDao.getByFilter(filter).size());
 
-		filter.setRoleIds(Arrays.asList(new Integer[]{1}));
+		filter.setRoleIds(Arrays.asList(new Long[]{Long.valueOf(1)}));
 		filter.setDepartmentIds(null);
 		filter.setActive(null);
 		Assert.assertEquals(3, userDao.getByFilter(filter).size());
