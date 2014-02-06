@@ -20,6 +20,7 @@ public class PeriodsGetFilterDataResult implements Result {
 	private Set<Integer> avalDepartments;
 	private DepartmentPair selectedDepartment;
     private boolean canChangeDepartment;
+	private boolean canEdit;
 
     public PeriodsGetFilterDataResult(){
 
@@ -91,5 +92,13 @@ public class PeriodsGetFilterDataResult implements Result {
 
 	public void setCurrentYear(int currentYear) {
 		this.currentYear = currentYear;
+	}
+
+	public boolean isCanEdit() {
+		return canEdit;
+	}
+
+	public void setCanEdit(boolean canEdit) {
+		this.canEdit = canEdit;
 	}
 }
