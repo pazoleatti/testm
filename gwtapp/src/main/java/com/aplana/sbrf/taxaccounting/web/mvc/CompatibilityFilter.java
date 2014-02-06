@@ -13,7 +13,7 @@ public class CompatibilityFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		response.addHeader("X-UA-Compatible","IE=8");
+		response.addHeader("X-UA-Compatible","IE=edge,chrome=1");
 		filterChain.doFilter(servletRequest, response);
 	}
 
