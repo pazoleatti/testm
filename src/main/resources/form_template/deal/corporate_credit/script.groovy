@@ -67,7 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'count', 'price', 'cos
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'inn', 'countryName', 'sum', 'docNumber', 'docDate', 'count',
+def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'countryName', 'sum', 'docNumber', 'docDate', 'count',
         'price', 'cost', 'dealDate']
 
 // Дата окончания отчетного периода
@@ -182,10 +182,6 @@ void logicCheck() {
             def msg2 = docDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-
-        //Проверки соответствия НСИ
-        checkNSI(9, row, "fullNamePerson")
-        checkNSI(10, row, "countryName")
     }
 }
 
@@ -205,9 +201,7 @@ void calc() {
         row.cost = row.sum
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullNamePerson)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryName = map?.COUNTRY?.referenceValue
+        row.countryName = getRefBookValue(9, row.fullNamePerson)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
@@ -294,7 +288,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
             }
         }
         xmlIndexCol++
@@ -305,7 +299,7 @@ void addData(def xml, int headRowCount) {
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
             }
         }
         xmlIndexCol++
