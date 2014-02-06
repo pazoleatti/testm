@@ -12,7 +12,7 @@ public class MembersFilterData implements Serializable{
 
 	Boolean active;
 	String userName;
-	List<Integer> roleIds;
+	List<Long> roleIds;
 	Set<Integer> departmentIds;
 
 	Integer countOfRecords;
@@ -50,11 +50,11 @@ public class MembersFilterData implements Serializable{
 		this.startIndex = startIndex;
 	}
 
-	public List<Integer> getRoleIds() {
+	public List<Long> getRoleIds() {
 		return roleIds;
 	}
 
-	public void setRoleIds(List<Integer> roleIds) {
+	public void setRoleIds(List<Long> roleIds) {
 		this.roleIds = roleIds;
 	}
 
