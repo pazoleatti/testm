@@ -56,6 +56,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();
         if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
+	        res.setCanEdit(true);
             switch (taxType) {
                 case PROPERTY:
                 case TRANSPORT:
@@ -72,14 +73,17 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                     break;
             }
         } else { // Контролер НС
+	        res.setCanChangeDepartment(false);
 	        switch (taxType) {
 		        case PROPERTY:
 		        case TRANSPORT:
+			        res.setCanEdit(true);
 			        departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
 			        break;
 		        case INCOME:
 		        case DEAL:
 		        case VAT:
+			        res.setCanEdit(false);
 			        departments.add(departmentService.getBankDepartment());
 			        break;
 	        }
