@@ -641,8 +641,7 @@ public class FormDataServiceImpl implements FormDataService {
                             "принята декларация";
                     throw new ServiceException("Переход невозможен, т.к. уже " + str + ".");
                 }
-                assert declaration != null;
-                if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
+                if (declaration != null && !reportPeriodService.isActivePeriod(formData.getReportPeriodId(), declaration.getDepartmentId())) {
                     throw new ServiceException(ERROR_PERIOD);
                 }
             }
