@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -50,8 +51,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@UiField
     DepartmentPickerPopupWidget departmentPicker;
 
-	@UiField(provided = true)
-    MultiListBox<TARole> roleBox;
+    @UiField
+    RefBookMultiPickerModalWidget role;
 
     @UiField
     CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
@@ -76,12 +77,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 			    return object ? "Да" : "Нет";
 		    }
 	    });
-	    roleBox = new MultiListBox<TARole>(new AbstractRenderer<TARole>() {
-		    @Override
-		    public String render(TARole object) {
-			    return object == null ? "" : object.getName();
-		    }
-	    }, true, true);
 
         widget = binder.createAndBindUi(this);
 	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
@@ -157,10 +152,11 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		MembersFilterData membersFilterData = new MembersFilterData();
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
-		List<Integer> selectedRoleIds = new ArrayList<Integer>();
-        for (TARole selectedRole : roleBox.getValue()) {
+		//List<Integer> selectedRoleIds = new ArrayList<Integer>();
+        List<Long> selectedRoleIds = new ArrayList<Long>(role.getValue());
+        /*for (TARole selectedRole : roleBox.getValue()) {
             selectedRoleIds.add(selectedRole.getId());
-        }
+        }*/
 		membersFilterData.setRoleIds(selectedRoleIds);
 		Set<Integer> depIds = new HashSet<Integer>();
 		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
@@ -199,7 +195,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@Override
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
-        roleBox.setAvailableValues(values.getRoles());
 		departmentPicker.setAvalibleValues(values.getDepartments(), null);
 	}
 

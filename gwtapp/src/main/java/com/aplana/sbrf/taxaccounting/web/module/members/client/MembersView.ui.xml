@@ -5,7 +5,8 @@
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-             xmlns:fm="urn:import:com.aplana.gwt.client.form">
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'>
 
     <ui:style>
         .header {
@@ -102,7 +103,10 @@
                         <g:Label width="40px" text="Роль:"/>
                     </g:cell>
                     <g:cell width="25%">
-                        <w:MultiListBox width="100%" ui:field="roleBox"/>
+                        <g:VerticalPanel>
+                            <r:RefBookMultiPickerModalWidget ui:field="role" attributeIdInt="838" modal="true" width="100%"
+                                                             multiSelect="true"/>
+                        </g:VerticalPanel>
                     </g:cell>
                     <g:cell horizontalAlignment="right">
                         <g:Label width="135px" wordWrap="false" text="Признак активности:"/>
