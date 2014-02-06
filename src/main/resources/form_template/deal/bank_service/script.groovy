@@ -65,8 +65,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode', 'price', 'c
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'country', 'countryCode', 'serviceName', 'bankIncomeSum',
-        'contractNum', 'contractDate', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'jurName', 'country', 'serviceName', 'bankIncomeSum', 'contractNum', 'contractDate',
+        'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -180,12 +180,6 @@ void logicCheck() {
             def msg2 = row.getCell('contractDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-
-        //Проверки соответствия НСИ
-        checkNSI(9, row, "jurName")
-        checkNSI(10, row, "country")
-        checkNSI(10, row, "countryCode")
-        checkNSI(13, row, "serviceName")
     }
 }
 
@@ -208,10 +202,7 @@ void calc() {
         row.cost = row.bankIncomeSum
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.jurName)
-        row.innKio = map?.INN_KIO?.stringValue
-        row.country = map?.COUNTRY?.referenceValue
-        row.countryCode = map?.COUNTRY?.referenceValue
+        row.country = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
@@ -300,7 +291,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
             }
         }
         xmlIndexCol++
@@ -311,7 +302,7 @@ void addData(def xml, int headRowCount) {
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map?.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.FULLNAME?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
             }
         }
         xmlIndexCol++
@@ -321,7 +312,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
             }
         }
         xmlIndexCol++

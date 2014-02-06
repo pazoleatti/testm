@@ -73,7 +73,7 @@ def groupColumns = ['fullName', 'docNum', 'docDate', 'currencyCode', 'countryDea
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNum', 'docDate', 'dealNumber',
         'dealDate', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -191,13 +191,6 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "fullName")
-        checkNSI(10, row, "countryName")
-        checkNSI(10, row, "countryCode")
-        checkNSI(10, row, "countryDealCode")
-        checkNSI(15, row, "currencyCode")
     }
 
     checkItog(dataRows)
@@ -266,10 +259,7 @@ void calc() {
         row.total = row.price
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullName)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryCode = map?.COUNTRY?.referenceValue
-        row.countryName = map?.COUNTRY?.referenceValue
+        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов
