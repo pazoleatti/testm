@@ -22,6 +22,7 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String name;
     private String fullName;
     private String code;
+    private boolean monthly;
 
     private VersionedObjectStatus status;
 
@@ -337,5 +338,17 @@ public class FormTemplate extends IdentityObject<Integer> {
      */
     public void setFixedRows(boolean fixedRows) {
         this.fixedRows = fixedRows;
+    }
+
+    /**
+     * Определяет признак ежемесячности налоговой формы
+     * @return
+     */
+    public boolean isMonthly() {
+        return monthly;
+    }
+
+    public void setMonthly(boolean monthly) {
+        this.monthly = monthly;
     }
 }

@@ -18,7 +18,7 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin:  8px 10px 8px 0 !important;
             width: 75px;
         }
     </ui:style>
@@ -59,6 +59,15 @@
                 </g:cell>
                 <g:cell width="100%">
                     <dw:ListBoxWithTooltipWidget width="100%" ui:field="formTypeId" showTooltip="true"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Месяц:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dw:ValueListBox width="100%" ui:field="formMonth"/>
                 </g:cell>
             </g:HorizontalPanel>
 

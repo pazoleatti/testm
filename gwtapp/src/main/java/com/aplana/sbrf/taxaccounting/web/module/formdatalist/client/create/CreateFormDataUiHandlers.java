@@ -5,4 +5,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface CreateFormDataUiHandlers extends UiHandlers {
 	void onConfirm();
+
+    boolean isMonthly();
 }

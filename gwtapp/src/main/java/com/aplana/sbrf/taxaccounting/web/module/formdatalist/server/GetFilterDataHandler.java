@@ -54,6 +54,12 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
         res.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
                 new ArrayList<Integer>(filterValues.getDepartmentIds())));
 
+        /*
+         * Месяцы, зависящие от периода. В качестве параметра нужно передавать идентификатор периода.
+         * Пока не реализовано
+         */
+        res.setMonthsList(periodService.getMonthList(0));
+
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
 	    res.setDefaultFilter(filter);

@@ -220,4 +220,12 @@ public interface PeriodService {
 	 * @return
 	 */
 	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
+
+    /**
+     * Получает список месяцев, в зависимости от выбранного периода
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @return
+     */
+    List<Months> getMonthList(int reportPeriodId);
 }

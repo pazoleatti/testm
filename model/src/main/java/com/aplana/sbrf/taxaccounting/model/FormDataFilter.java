@@ -37,6 +37,8 @@ public class FormDataFilter implements Serializable{
 
 	private Boolean returnState;
 
+    // месяцы
+    private Months formMonth;
 
 	public List<Integer> getDepartmentIds() {
 		return departmentIds;
@@ -125,5 +127,12 @@ public class FormDataFilter implements Serializable{
 	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
 		this.reportPeriodIds = reportPeriodIds;
 	}
-	
+
+    public Months getFormMonth() {
+        return formMonth;
+    }
+
+    public void setFormMonth(Months formMonth) {
+        this.formMonth = formMonth;
+    }
 }

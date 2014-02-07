@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -24,31 +21,38 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
-	private final PlaceManager placeManager;
-	private final DispatchAsync dispatchAsync;
+    private final PlaceManager placeManager;
+    private final DispatchAsync dispatchAsync;
 
-	public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
-		void init();
-		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-		void setAcceptableFormKindList(List<FormDataKind> list);
-		void setAcceptableFormTypeList(List<FormType> list);
-		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+    public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
+        void init();
 
-		FormDataFilter getFilterData();
-		void setFilterData(FormDataFilter filter);
-	}
+        void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
 
-	@Inject
-	public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
-		super(eventBus, view);
-		this.placeManager = placeManager;
-		this.dispatchAsync = dispatchAsync;
-		getView().setUiHandlers(this);
-	}
+        void setAcceptableFormKindList(List<FormDataKind> list);
 
-	@Override
-	public void onConfirm() {
-		FormDataFilter filterFormData = getView().getFilterData();
+        void setAcceptableFormTypeList(List<FormType> list);
+
+        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+
+        void setAcceptableMonthList(List<Months> monthList);
+
+        FormDataFilter getFilterData();
+
+        void setFilterData(FormDataFilter filter);
+    }
+
+    @Inject
+    public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+        super(eventBus, view);
+        this.placeManager = placeManager;
+        this.dispatchAsync = dispatchAsync;
+        getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void onConfirm() {
+        FormDataFilter filterFormData = getView().getFilterData();
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
@@ -70,29 +74,46 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         );
     }
 
-	public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
-		final GetFilterData action = new GetFilterData();
-		action.setTaxType(filter.getTaxType());
-		dispatchAsync.execute(action, CallbackUtils
-				.wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
-					@Override
-					public void onSuccess(GetFilterDataResult result) {
+    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe) {
+        final GetFilterData action = new GetFilterData();
+        action.setTaxType(filter.getTaxType());
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
+                    @Override
+                    public void onSuccess(GetFilterDataResult result) {
                         getView().init();
-						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setAcceptableFormKindList(filterValues.getKinds());
-						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
-						getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        FormDataFilterAvailableValues filterValues = result.getFilterValues();
+                        getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
+                        getView().setAcceptableFormKindList(filterValues.getKinds());
+                        getView().setAcceptableFormTypeList(filterValues.getFormTypes());
+                        getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        getView().setAcceptableMonthList(result.getMonthsList());
 
-						// setSelectedFilterValues(filter);
+                        // setSelectedFilterValues(filter);
 
                         // в текущей постановке фильтры не передаются
                         getView().setFilterData(new FormDataFilter());
 
-						slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
-					}
-				}, this));
-	}
+                        slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
+                    }
+                }, this)
+        );
+    }
+
+    @Override
+    public boolean isMonthly() {
+//        GetMonthlyState action = new GetMonthlyState();
+//        dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthlyStateResult>() {
+//            @Override
+//            public void onSuccess(GetMonthlyStateResult result) {
+//
+//            }
+//
+//        }));
+
+        return false;
+
+    }
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
 //		FormDataFilter filter = new FormDataFilter();

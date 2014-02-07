@@ -8,11 +8,7 @@ import java.util.Set;
 import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.gwt.client.ValueListBox;
@@ -20,7 +16,6 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -55,6 +50,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiField(provided = true)
     ListBoxWithTooltipWidget<Integer> formTypeId;
 
+    @UiField(provided = true)
+    ValueListBox<Months> formMonth;
+
     @UiField
     Button continueButton;
 
@@ -87,17 +85,28 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
             }
         });
 
+        formMonth = new ValueListBox<Months>(new AbstractRenderer<Months>() {
+            @Override
+            public String render(Months object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.getName();
+            }
+        });
+
         initWidget(uiBinder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
 
         // Нельзя аннотацией, баг GWT https://code.google.com/p/google-web-toolkit/issues/detail?id=6091
-        formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Integer> event) {
-                updateEnabled();
-            }
-        });
+        // Пока закоментил, нужно разобраться
+//        formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+//            @Override
+//            public void onValueChange(ValueChangeEvent<Integer> event) {
+//                updateEnabled();
+//            }
+//        });
     }
 
     @Override
@@ -107,23 +116,21 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         departmentPicker.setValue(null);
         formDataKind.setValue(null);
         formTypeId.setValue(null);
-        updateEnabled();
+        formMonth.setValue(null);
+        updateEnabled(false);
     }
 
-    private void updateEnabled() {
+    private void updateEnabled(boolean isMonthly) {
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
         formTypeId.setEnabled(formDataKind.getValue() != null);
+        // "Месяц" недоступен если не выбран "Вид налоговой формы"
+        formMonth.setEnabled(formTypeId.getValue() != null && isMonthly);
         // Кнопка "Создать" недоступна пока все не заполнено
-        continueButton.setEnabled(formTypeId.getValue() != null);
-    }
-
-    @Override
-    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentPicker.setAvalibleValues(list, availableValues);
+        continueButton.setEnabled(formMonth.getValue() != null || (formTypeId.getValue() != null && !isMonthly));
     }
 
     @UiHandler("continueButton")
@@ -145,24 +152,40 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiHandler("reportPeriodIds")
     public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
         departmentPicker.setValue(null, true);
-        updateEnabled();
+        updateEnabled(false);
     }
 
     @UiHandler("departmentPicker")
     public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
         formDataKind.setValue(null, true);
-        updateEnabled();
+        updateEnabled(false);
     }
 
     @UiHandler("formDataKind")
     public void onFormKindChange(ValueChangeEvent<FormDataKind> event) {
         formTypeId.setValue(null, true);
-        updateEnabled();
+        updateEnabled(false);
     }
 
     @UiHandler("formTypeId")
     public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
-        updateEnabled();
+        formMonth.setValue(null, true);
+        updateEnabled(getUiHandlers().isMonthly());
+    }
+
+    @UiHandler("formMonth")
+    public void onChangeFormMonth(ValueChangeEvent<Months> event) {
+        updateEnabled(getUiHandlers().isMonthly());
+    }
+
+    @Override
+    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
+        reportPeriodIds.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
+        departmentPicker.setAvalibleValues(list, availableValues);
     }
 
     @Override
@@ -183,16 +206,17 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
+    public void setAcceptableMonthList(List<Months> monthList) {
+        formMonth.setValue(null, true);
+        formMonth.setAcceptableValues(monthList);
+    }
+
+    @Override
     public FormDataFilter getFilterData() {
         FormDataFilter filter = driver.flush();
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
         //filter.setDepartmentIds(departmentPicker.getValue());
         return filter;
-    }
-
-    @Override
-    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
-        reportPeriodIds.setPeriods(reportPeriods);
     }
 
     @Override

@@ -525,4 +525,25 @@ public class PeriodServiceImpl implements PeriodService{
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
         return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
     }
+
+    @Override
+    public List<Months> getMonthList(int reportPeriodId) {
+
+        List<Months> monthsList = new ArrayList<Months>();
+        monthsList.add(null);
+        monthsList.add(Months.JANUARY);
+        monthsList.add(Months.FEBRUARY);
+        monthsList.add(Months.MARCH);
+        monthsList.add(Months.APRIL);
+        monthsList.add(Months.MAY);
+        monthsList.add(Months.JUNE);
+        monthsList.add(Months.JULY);
+        monthsList.add(Months.AUGUST);
+        monthsList.add(Months.SEPTEMBER);
+        monthsList.add(Months.OCTOBER);
+        monthsList.add(Months.NOVEMBER);
+        monthsList.add(Months.DECEMBER);
+
+        return monthsList;
+    }
 }
