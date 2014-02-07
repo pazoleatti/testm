@@ -1,21 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.gwt.client.ValueListBox;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,6 +24,8 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
+
+import java.util.*;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
@@ -49,8 +45,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiField
     PeriodPickerPopupWidget reportPeriodIds;
 
-    @UiField(provided = true)
-    ValueListBox<FormDataKind> formDataKind;
+    @UiField
+    RefBookMultiPickerModalWidget formDataKind;
 
     @UiField(provided = true)
     ListBoxWithTooltipWidget<Integer> formTypeId;
@@ -66,16 +62,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Inject
     public CreateFormDataView(Binder uiBinder, final MyDriver driver, EventBus eventBus) {
         super(eventBus);
-
-        formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
-            @Override
-            public String render(FormDataKind object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
 
         formTypeId = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
             @Override
@@ -98,6 +84,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
                 updateEnabled();
             }
         });
+
+        // т.к. справочник не версионный, а дату выставлять обязательно
+        formDataKind.setPeriodDates(new Date(), new Date());
     }
 
     @Override
@@ -105,7 +94,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // Сброс состояния формы
         reportPeriodIds.setValue(null);
         departmentPicker.setValue(null);
-        formDataKind.setValue(null);
+        formDataKind.setValue(new ArrayList<Long>());
         formTypeId.setValue(null);
         updateEnabled();
     }
@@ -116,7 +105,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
-        formTypeId.setEnabled(formDataKind.getValue() != null);
+        formTypeId.setEnabled(formDataKind.getValue().size() != 0);
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formTypeId.getValue() != null);
     }
@@ -155,7 +144,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @UiHandler("formDataKind")
-    public void onFormKindChange(ValueChangeEvent<FormDataKind> event) {
+    public void onFormKindChange(ValueChangeEvent<List<Long>> event) {
         formTypeId.setValue(null, true);
         updateEnabled();
     }
@@ -164,12 +153,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
 //        continueButton.setEnabled(t);
         updateEnabled();
-    }
-
-    @Override
-    public void setAcceptableFormKindList(List<FormDataKind> list) {
-        formDataKind.setValue(null, true);
-        formDataKind.setAcceptableValues(list);
     }
 
     @Override

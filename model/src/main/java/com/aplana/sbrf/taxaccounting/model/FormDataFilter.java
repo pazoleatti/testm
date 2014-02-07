@@ -18,7 +18,7 @@ public class FormDataFilter implements Serializable{
 	private Integer formTypeId;
 
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
-    private FormDataKind formDataKind;
+    private List<Long> formDataKind;
 
 	private TaxType taxType;
 
@@ -54,15 +54,15 @@ public class FormDataFilter implements Serializable{
 		this.formTypeId = formTypeId;
 	}
 
-	public FormDataKind getFormDataKind() {
-		return formDataKind;
-	}
+    public List<Long> getFormDataKind() {
+        return formDataKind;
+    }
 
-	public void setFormDataKind(FormDataKind formDataKind) {
-		this.formDataKind = formDataKind;
-	}
+    public void setFormDataKind(List<Long> formDataKind) {
+        this.formDataKind = formDataKind;
+    }
 
-	public TaxType getTaxType() {
+    public TaxType getTaxType() {
 		return taxType;
 	}
 

@@ -102,7 +102,11 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
         if (formDataFilter.getFormDataKind() != null) {
-            formDataDaoFilter.setFormDataKind(asList(formDataFilter.getFormDataKind()));
+            List<FormDataKind> list = new ArrayList<FormDataKind>(FormDataKind.values().length);
+            for(Long id: formDataFilter.getFormDataKind()){
+                list.add(FormDataKind.fromId(id.intValue()));
+            }
+            formDataDaoFilter.setFormDataKind(list);
         } else {
             formDataDaoFilter.setFormDataKind(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
         }

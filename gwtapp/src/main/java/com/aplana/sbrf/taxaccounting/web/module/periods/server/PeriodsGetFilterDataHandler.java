@@ -67,12 +67,19 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		                depIds.add(dep.getId());
 	                }
 	                res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
+	                Department bank = departmentService.getBankDepartment();
+	                res.setSelectedDepartment(new DepartmentPair(bank.getId(), bank.getParentId(), bank.getName()));
                     break;
                 case INCOME:
                 case DEAL:
                 case VAT:
                     res.setCanChangeDepartment(false);
 	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
+	                res.setSelectedDepartment(
+			                new DepartmentPair(res.getDepartments().get(0).getId(),
+					                res.getDepartments().get(0).getParentId(),
+					                res.getDepartments().get(0).getName())
+	                );
                     break;
                 default:
                     break;
@@ -80,6 +87,11 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         } else { // Контролер НС
 	        res.setCanChangeDepartment(false);
 	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser()));
+	        res.setSelectedDepartment(
+			        new DepartmentPair(res.getDepartments().get(0).getId(),
+					        res.getDepartments().get(0).getParentId(),
+					        res.getDepartments().get(0).getName())
+	        );
 	        switch (taxType) {
 		        case PROPERTY:
 		        case TRANSPORT:
@@ -97,7 +109,6 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		    ad.add(dep.getId());
 	    }
 	    res.setAvalDepartments(ad);
-	    res.setSelectedDepartment(new DepartmentPair(res.getDepartments().get(0).getId(), res.getDepartments().get(0).getParentId(), res.getDepartments().get(0).getName()));
 
 	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());
 	    Calendar current = Calendar.getInstance();

@@ -1,18 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
@@ -22,6 +10,11 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPresenter.MyView> implements FilterFormDataUIHandlers {
 
@@ -34,8 +27,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		FormDataFilter getDataFilter();
 		
 		// Установка доступных значений
-
-		void setKindList(List<FormDataKind> list);
 
 		void setFormStateList(List<WorkflowState> list);
 
@@ -77,7 +68,6 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setKindList(filterValues.getKinds());
 						getView().setFormTypesMap(filterValues.getFormTypes());
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(Arrays.asList(WorkflowState.values()));

@@ -12,7 +12,7 @@ public class LogBusinessFilterValues implements Serializable {
 
     private Long userId;
     private List<Integer> reportPeriodIds;
-    private FormDataKind formKind;
+    private List<Long> formKind;
     private TaxType taxType;
     private Integer declarationTypeId;
     private Integer auditFormTypeId;
@@ -51,11 +51,11 @@ public class LogBusinessFilterValues implements Serializable {
         this.userId = userId;
     }
 
-    public FormDataKind getFormKind() {
+    public List<Long> getFormKind() {
         return formKind;
     }
 
-    public void setFormKind(FormDataKind formKind) {
+    public void setFormKind(List<Long> formKind) {
         this.formKind = formKind;
     }
 

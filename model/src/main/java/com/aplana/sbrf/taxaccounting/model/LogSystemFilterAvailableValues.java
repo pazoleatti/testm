@@ -26,7 +26,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
      */
     private List<DeclarationType> declarationTypes;
 
-    private List<FormDataKind> formDataKinds;
     private List<TaxType> taxTypes;
 
     public List<Department> getDepartments() {
@@ -77,12 +76,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
             formTypesMap.put(formType.getId(), formType.getName());
         }
         return formTypesMap;
-    }
-
-    public List<FormDataKind> getFormDataKinds() {
-        formDataKinds = new LinkedList<FormDataKind>();
-        Collections.addAll(formDataKinds, FormDataKind.values());
-        return formDataKinds;
     }
 
     public List<TaxType> getTaxTypes() {
