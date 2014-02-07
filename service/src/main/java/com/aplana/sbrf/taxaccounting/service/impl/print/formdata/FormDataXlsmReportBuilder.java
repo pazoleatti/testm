@@ -239,12 +239,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     continue;
                 }
                 if (column.getWidth() == 0){
-                    mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, true);//иначе следующая колонка тоже скрывается, т.к. нет lastCell
+                    mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);//иначе следующая колонка тоже скрывается, т.к. нет lastCell
                     /*sheet.setColumnHidden(i, true);*/
                     continue;
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
-                Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, true);
+                Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
                 workBookcell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header"));
                 workBookcell.setCellValue(String.valueOf(headerCell.getValue()));
                 if(headerCell.getColSpan() > 1){
@@ -261,7 +261,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         rowNumber = (rowNumber > sheet.getLastRowNum()?sheet.getLastRowNum():rowNumber);//if we have empty strings
         sheet.shiftRows(rowNumber, sheet.getLastRowNum(), dataRows.size() + 2);
         for (DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow : dataRows) {
-            Row row = sheet.createRow(rowNumber++);
+            Row row = sheet.getRow(rowNumber) != null?sheet.getRow(rowNumber++) : sheet.createRow(rowNumber++);
 
             for (int i = 0; i < formTemplate.getColumns().size(); i++) {
                 Column column = formTemplate.getColumns().get(i);
@@ -271,7 +271,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 if (column.getWidth() == 0 && column.getAlias() != null) {
                     if (formTemplate.getColumns().size() == i + 1)
                         continue;
-                    Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
+                    Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
                     cell.setCellStyle(cellStyle);
                     cell.setCellValue((String) dataRow.get(column.getAlias()));
@@ -280,7 +280,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     continue;
                 }
                 Object obj = dataRow.get(column.getAlias());
-                Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, false);
+                Cell cell = mergedDataCells(dataRow.getCell(column.getAlias()), row, i, false);
                 if (column instanceof StringColumn) {
                     String str = (String) obj;
                     CellStyle cellStyle = cellStyleBuilder.createCellStyle(CellType.STRING, column.getAlias());
@@ -369,7 +369,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 columnBreaks++;
             }
         }
-        workBook.setPrintArea(0, 0, formTemplate.getHeaders().get(0).size() - columnBreaks, 0,
+        workBook.setPrintArea(0, 0, (!formTemplate.getHeaders().isEmpty()?formTemplate.getHeaders().get(0).size() - columnBreaks : 0) , 0,
                 (dataRows != null ? dataRows.size() : 0) + data.getSigners().size() + formTemplate.getHeaders().size() + 15);
         sheet.setFitToPage(true);
         sheet.setAutobreaks(true);
@@ -383,9 +383,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     /*
     * Merge rows with data. Depend on fields from com.aplana.sbrf.taxaccounting.model.Cell rowSpan and colSpan.
     */
-    private Cell mergedDataCells(AbstractCell cell,Row currRow, boolean isHeader){
-        int currColumn = currRow.getLastCellNum()!=-1?currRow.getLastCellNum():0;
-        Cell currCell = currRow.createCell(currColumn);
+    private Cell mergedDataCells(AbstractCell cell,Row currRow, int currColumn, boolean isHeader){
+        Cell currCell;
         if(cell != null && (cell.getColSpan() > 1 || cell.getRowSpan() > 1)){
             if(currColumn + cell.getColSpan() > formTemplate.getColumns().size()){
                 tableBorders(currColumn, formTemplate.getColumns().size(), currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
@@ -395,6 +394,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             else{
                 tableBorders(currColumn, currColumn + cell.getColSpan() - 1, currRow.getRowNum(), currRow.getRowNum() + cell.getRowSpan() - 1, isHeader);
             }
+            currCell = currRow.getCell(currColumn) != null ? currRow.getCell(currColumn) : currRow.createCell(currColumn);
+        } else {
+            currCell = currRow.createCell(currColumn);
         }
         return currCell;
     }

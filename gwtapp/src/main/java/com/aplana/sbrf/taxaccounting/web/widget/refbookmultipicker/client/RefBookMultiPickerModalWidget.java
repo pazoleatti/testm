@@ -208,6 +208,9 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
             }
         }
         label.setText(stringValue);
-        label.setTitle(stringValue);
+        if (stringValue.equals(EMPTY_STRING_VALUE))
+            label.setTitle(EMPTY_STRING_TITLE);
+        else
+            label.setTitle(stringValue);
     }
 }
