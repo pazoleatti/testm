@@ -64,7 +64,8 @@ create table form_template (
   code varchar2(600) not null,
   script clob,
   data_headers clob,
-  status number(1) default 0 not null
+  status number(1) default 0 not null,
+  monthly number(1) default 0 not null
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -80,6 +81,7 @@ comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
