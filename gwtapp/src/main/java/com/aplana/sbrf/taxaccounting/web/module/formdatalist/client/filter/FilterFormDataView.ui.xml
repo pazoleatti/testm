@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:per="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
 
 
@@ -36,7 +37,7 @@
                     </g:cell>
                     <g:cell width="25%">
                         <g:VerticalPanel width="100%">
-                            <g:ValueListBox width="100%" ui:field="formDataKind"/>
+                            <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="true" width="100%"/>
                             <dw:ListBoxWithTooltip width="100%"
                                                       ui:field="formTypeId" showTooltip="true"/>
                         </g:VerticalPanel>

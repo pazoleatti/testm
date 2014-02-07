@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -23,6 +20,9 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
+import java.util.List;
+import java.util.Set;
+
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
@@ -30,7 +30,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 	public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
 		void init();
 		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-		void setAcceptableFormKindList(List<FormDataKind> list);
 		void setAcceptableFormTypeList(List<FormType> list);
 		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
 
@@ -53,7 +52,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
         action.setDepartmentId(filterFormData.getDepartmentIds().iterator().next());
-        action.setFormDataKindId(filterFormData.getFormDataKind().getId());
+        action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
         dispatchAsync.execute(action, CallbackUtils
@@ -80,7 +79,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().init();
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
 						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setAcceptableFormKindList(filterValues.getKinds());
 						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
 						getView().setAcceptableReportPeriods(result.getReportPeriods());
 
