@@ -44,7 +44,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
-    @Autowired
+	public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
+
+	@Autowired
     private RefBookUtils refBookUtils;
 
     @Autowired
@@ -398,9 +400,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
 	}
 
+	static boolean checkHierarchical(final RefBook refBook) {
+		try {
+			RefBookAttribute attr = refBook.getAttribute(RefBook.RECORD_PARENT_ID_ALIAS);
+			return attr != null;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		RefBook refBook = get(refBookId);
+		if (!checkHierarchical(refBook)) {
+			throw new IllegalArgumentException(String.format(NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
+		}
 		return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute);
     }
 

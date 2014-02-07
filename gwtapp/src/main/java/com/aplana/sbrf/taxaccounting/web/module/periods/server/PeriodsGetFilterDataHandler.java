@@ -56,39 +56,42 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();
         if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
+	        res.setCanEdit(true);
             switch (taxType) {
                 case PROPERTY:
                 case TRANSPORT:
                     res.setCanChangeDepartment(true);
 	                departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
+	                Set<Integer> depIds = new HashSet<Integer>();
+	                for (Department dep : departments) {
+		                depIds.add(dep.getId());
+	                }
+	                res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
                     break;
                 case INCOME:
                 case DEAL:
                 case VAT:
                     res.setCanChangeDepartment(false);
-                    departments.add(departmentService.getBankDepartment());
+	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
                     break;
                 default:
                     break;
             }
         } else { // Контролер НС
+	        res.setCanChangeDepartment(false);
+	        res.setDepartments(departmentService.getTBDepartments(userInfo.getUser()));
 	        switch (taxType) {
 		        case PROPERTY:
 		        case TRANSPORT:
-			        departments.addAll(departmentService.getTBDepartments(userInfo.getUser()));
+			        res.setCanEdit(true);
 			        break;
 		        case INCOME:
 		        case DEAL:
 		        case VAT:
-			        departments.add(departmentService.getBankDepartment());
+			        res.setCanEdit(false);
 			        break;
 	        }
         }
-	    Set<Integer> depIds = new HashSet<Integer>();
-	    for (Department dep : departments) {
-		    depIds.add(dep.getId());
-	    }
-	    res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 	    Set<Integer> ad = new HashSet<Integer>();
 	    for (Department dep : res.getDepartments()) {
 		    ad.add(dep.getId());

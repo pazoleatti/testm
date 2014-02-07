@@ -57,6 +57,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		TableRow getSelectedRow();
         void setCanChangeDepartment(boolean canChange);
 		void setCanChangeDeadline(boolean canChangeDeadline);
+		void setCanEdit(boolean canEdit);
 	}
 
 	private final TaPlaceManager placeManager;
@@ -218,6 +219,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
                         getView().setCanChangeDepartment(result.canChangeDepartment());
+						getView().setCanEdit(result.isCanEdit());
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
 						openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
 						find();

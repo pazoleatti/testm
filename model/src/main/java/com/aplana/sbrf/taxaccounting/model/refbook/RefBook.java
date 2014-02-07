@@ -118,17 +118,18 @@ public class RefBook implements Serializable {
 	}
 
 	/**
-	 * Возвращает атрибут по его псевдониму
+	 * Возвращает атрибут по его псевдониму. Регистронезависимый поиск
 	 * @param alias
+	 * @throws IllegalArgumentException в случае, если искомого атрибута нет в справочнике
 	 * @return
 	 */
-	public RefBookAttribute getAttribute(String alias) {
+	public RefBookAttribute getAttribute(final String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Attribute alias must be defined");
 		}
 
 		for(RefBookAttribute attribute : attributes) {
-			if (alias.equals(attribute.getAlias())) {
+			if (alias.toLowerCase().equals(attribute.getAlias().toLowerCase())) {
 				return attribute;
 			}
 		}

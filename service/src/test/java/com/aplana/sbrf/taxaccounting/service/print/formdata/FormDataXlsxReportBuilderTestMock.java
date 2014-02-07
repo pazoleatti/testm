@@ -102,7 +102,7 @@ public class FormDataXlsxReportBuilderTestMock {
         colDate12.setChecking(true);
 
         //set width
-        colNum.setWidth(0);
+        colNum.setWidth(10);
         colNum1.setWidth(0);
         colNum2.setWidth(10);
         colNum3.setWidth(10);
