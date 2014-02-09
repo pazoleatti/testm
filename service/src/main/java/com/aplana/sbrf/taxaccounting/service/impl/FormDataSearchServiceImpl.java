@@ -187,7 +187,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS);
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(formDataFilter.getTaxType())));
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values())));
         } else {
             throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
         }
