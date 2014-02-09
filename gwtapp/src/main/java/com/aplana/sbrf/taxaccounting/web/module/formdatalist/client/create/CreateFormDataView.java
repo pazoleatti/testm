@@ -174,7 +174,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @Override
     public void setAcceptableFormKindList(List<FormDataKind> list) {
-        formDataKind.setValue(null, true);
+        /*formDataKind.setValue(null, true);*/
         List<Long> longs = new ArrayList<Long>();
         for (FormDataKind kind : list){
             longs.add((long) kind.getId());
