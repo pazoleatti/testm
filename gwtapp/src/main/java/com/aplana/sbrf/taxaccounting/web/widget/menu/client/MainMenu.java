@@ -7,7 +7,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -37,6 +36,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
     MenuBar menu;
 
     private Timer timer;
+
+	private NotificationMenuItem notificationMenuItem;
 
 	@Inject
 	public MainMenu(final Binder binder) {
@@ -73,6 +74,17 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			menu.addItem(item.getName() + " " + getArrowSymbol(), subMenuBar);
 			menu.addSeparator().getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
 		}
+	}
+
+	@Override
+	public void setNotificationMenuItem(NotificationMenuItem item) {
+		notificationMenuItem = item;
+		menu.addItem(item);
+	}
+
+	@Override
+	public void updateNotificationCount(int count) {
+		notificationMenuItem.setCount(count);
 	}
 
 	private void addSubMenu(MenuItem menuItem, MenuBar menu) {

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,4 +111,34 @@ public class NotificationDaoTest {
         result = notificationDao.get(1, 3, 1);
         isNull(result);
     }
+
+	@Test
+	public void listForDepartmentTest() {
+		assertEquals(3, notificationDao.listForDepartment(1).size());
+	}
+
+	@Test
+	public void getForReceiverTest() {
+		Notification notification = notificationDao.get(1);
+		assertEquals(1, notification.getId());
+		assertEquals(1, notification.getReceiverDepartmentId().intValue());
+		assertEquals(2, notification.getSenderDepartmentId().intValue());
+	}
+
+	@Test
+	public void getByFilterTest() {
+		NotificationsFilterData filter = new NotificationsFilterData();
+		filter.setReceiverDepartmentId(1);
+		assertEquals(3, notificationDao.getByFilter(filter).size());
+		filter.setStartIndex(0);
+		filter.setCountOfRecords(2);
+		assertEquals(2, notificationDao.getByFilter(filter).size());
+	}
+
+	@Test
+	public void getCountByFilterTest() {
+		NotificationsFilterData filter = new NotificationsFilterData();
+		filter.setReceiverDepartmentId(1);
+		assertEquals(3, notificationDao.getCountByFilter(filter));
+	}
 }
