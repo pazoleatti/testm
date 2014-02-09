@@ -179,7 +179,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // периодом ИЛИ пересекается, но его STATUS не равен 0, то система выводит сообщение в панель уведомления:
         // "Выбранный вид налоговой формы не существует в выбранном периоде"
         boolean intersect = isTemplateIntesectReportPeriod(formTemplate, reportPeriodId);
-        if (!intersect || intersect && formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
+        if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
             logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), reportPeriodId));
             throw new AccessDeniedException(FORM_TEMPLATE_WRONG_STATUS);
         }
@@ -597,8 +597,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
         //Сказали что дату окончания не обязательно сравнивать, т.к. она при сохранении макета должна быть кратна отчетному периоду
         if (templateEndDate != null)
-            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0
-                    && templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0;
+            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) >= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0
+                    || templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) <= 0;
         else
             return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
                     || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0;
