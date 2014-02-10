@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -15,6 +17,8 @@ import java.util.Map;
  * Date: 20.05.13
  */
 public abstract class AbstractReportBuilder {
+
+    protected final Log logger = LogFactory.getLog(getClass());
 
     protected Workbook workBook;
 
@@ -38,7 +42,7 @@ public abstract class AbstractReportBuilder {
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
      * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
-     * @return
+     * @return пуьь до сфориирвванного файла
      * @throws IOException
      */
     public final String createReport() throws IOException {
@@ -54,7 +58,7 @@ public abstract class AbstractReportBuilder {
     protected void cellAlignment() {
         for (Map.Entry<Integer, Integer> width : widthCellsMap.entrySet()) {
             //logger.debug("----n" + width.getKey() + ":" + width.getValue());
-            sheet.setColumnWidth(width.getKey(), width.getValue() *256);
+            sheet.setColumnWidth(width.getKey(), width.getValue() *256 *2);
         }
     }
 
@@ -96,8 +100,8 @@ public abstract class AbstractReportBuilder {
 
     /**
      * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
-     * @param cellNumber
-     * @param length
+     * @param cellNumber номер ячейки
+     * @param length иирнна
      */
     protected final void fillWidth(Integer cellNumber,Integer length){
 

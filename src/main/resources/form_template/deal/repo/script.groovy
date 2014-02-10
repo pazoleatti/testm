@@ -69,7 +69,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'country', 'countryCode', 'contractNum', 'contractDate',
+def nonEmptyColumns = ['rowNum', 'jurName', 'country', 'contractNum', 'contractDate',
         'transactionNum', 'transactionDeliveryDate', 'dealsMode', 'date1', 'date2', 'priceFirstCurrency',
         'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
 
@@ -82,11 +82,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -202,13 +197,6 @@ void logicCheck() {
             def msg2 = row.getCell('transactionDeliveryDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "jurName")
-        checkNSI(10, row, "country")
-        checkNSI(10, row, "countryCode")
-        checkNSI(14, row, "dealsMode")
-        checkNSI(15, row, "currencyCode")
     }
 }
 
@@ -225,10 +213,7 @@ void calc() {
         // Порядковый номер строки
         row.rowNum = index++
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.jurName)
-        row.innKio = map?.INN_KIO?.stringValue
-        row.country = map?.COUNTRY?.referenceValue
-        row.countryCode = map?.COUNTRY?.referenceValue
+        row.country = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows);
 }
@@ -248,8 +233,8 @@ void importData() {
             (xml.row[0].cell[6]): 'Номер сделки',
             (xml.row[0].cell[7]): 'Дата (заключения) сделки',
             (xml.row[0].cell[8]): 'Режим переговорных сделок',
-            (xml.row[0].cell[9]): 'Дата исполнения  1-ой части сделки',
-            (xml.row[0].cell[10]): 'Дата исполнения  2-ой части сделки',
+            (xml.row[0].cell[9]): 'Дата исполнения 1-ой части сделки',
+            (xml.row[0].cell[10]): 'Дата исполнения 2-ой части сделки',
             (xml.row[0].cell[11]): 'Сумма процентного дохода (руб.)',
             (xml.row[0].cell[12]): 'Сумма процентного расхода (руб.)',
             (xml.row[0].cell[13]): 'Цена 1-ой части сделки, ед. валюты',

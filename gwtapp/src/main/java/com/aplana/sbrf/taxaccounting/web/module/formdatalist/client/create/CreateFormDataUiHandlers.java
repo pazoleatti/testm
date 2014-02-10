@@ -5,4 +5,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface CreateFormDataUiHandlers extends UiHandlers {
 	void onConfirm();
+    void onReportPeriodChange();
+    void onDepartmentChange();
+    void onFormKindChange();
 }

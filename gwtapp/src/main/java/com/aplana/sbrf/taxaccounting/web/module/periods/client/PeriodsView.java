@@ -62,6 +62,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     Button setDeadlineButton;
 
 	@UiField
+	Button removePeriod;
+
+	@UiField
     DepartmentPickerPopupWidget departmentPicker;
 
 	private SingleSelectionModel<TableRow> selectionModel = new SingleSelectionModel<TableRow>();
@@ -174,6 +177,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
         departmentPicker.setValueByDepartmentPair(selectedDepartments, false);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
+		setDeadlineButton.setVisible(false);
 	}
 
 	@Override
@@ -246,5 +250,12 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	@Override
 	public void setCanChangeDeadline(boolean canChangeDeadline) {
 		setDeadlineButton.setVisible(canChangeDeadline);
+	}
+
+	@Override
+	public void setCanEdit(boolean canEdit) {
+		closePeriod.setVisible(canEdit);
+		openPeriod.setVisible(canEdit);
+		removePeriod.setVisible(canEdit);
 	}
 }

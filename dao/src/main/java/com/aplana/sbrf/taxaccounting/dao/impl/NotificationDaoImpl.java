@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -149,4 +151,77 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 new Object[]{reportPeriodId},
                 new int[]{Types.NUMERIC});
     }
+
+	@Override
+	public List<Integer> listForDepartment(int departmentId) {
+		try {
+			String query = "select id from notification where RECEIVER_DEPARTMENT_ID = :rdid";
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("rdid", departmentId);
+			return getNamedParameterJdbcTemplate().queryForList(query, params, Integer.class);
+		} catch (EmptyResultDataAccessException e) {
+			return Collections.EMPTY_LIST;
+		}
+	}
+
+	@Override
+	public Notification get(int id) {
+		try {
+			String query = "select * from notification where id = :id";
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("id", id);
+			return getNamedParameterJdbcTemplate().queryForObject(query, params, new NotificationMapper());
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public List<Integer> getByFilter(NotificationsFilterData filter) {
+		try {
+//			select * from (select rownum as rn, id, create_date from (select nt.id, nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1
+//					order by nt.create_date desc)) where rn between 1 and 20;
+			StringBuilder query = new StringBuilder("select id from ( select rownum as rn, id from (select nt.id, " +
+					"nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1 ");
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			if (filter.getReceiverDepartmentId() != null) {
+				params.addValue("rdid", filter.getReceiverDepartmentId());
+				query.append( " and nt.RECEIVER_DEPARTMENT_ID = :rdid");
+			}
+			if (filter.getSenderDepartmentId() != null) {
+				params.addValue("sdid", filter.getSenderDepartmentId());
+				query.append(" and nt.SENDER_DEPARTMENT_ID = :sdid");
+			}
+			query.append(" order by nt.create_date desc ");
+			query.append("))");
+			if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
+				params.addValue("start", filter.getStartIndex() + 1);
+				params.addValue("end", filter.getStartIndex() + filter.getCountOfRecords());
+				query.append(" where rn between :start and :end");
+			}
+
+			return getNamedParameterJdbcTemplate().queryForList(query.toString(), params, Integer.class);
+		} catch (EmptyResultDataAccessException e) {
+			return Collections.EMPTY_LIST;
+		}
+	}
+
+	@Override
+	public int getCountByFilter(NotificationsFilterData filter) {
+		try {
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			StringBuilder query = new StringBuilder("select count(*) from notification where 1=1");
+			if (filter.getReceiverDepartmentId() != null) {
+				params.addValue("rdid", filter.getReceiverDepartmentId());
+				query.append( " and RECEIVER_DEPARTMENT_ID = :rdid");
+			}
+			if (filter.getSenderDepartmentId() != null) {
+				params.addValue("sdid", filter.getSenderDepartmentId());
+				query.append(" and SENDER_DEPARTMENT_ID = :sdid");
+			}
+			return getNamedParameterJdbcTemplate().queryForInt(query.toString(), params);
+		} catch (EmptyResultDataAccessException e) {
+			return 0;
+		}
+	}
 }

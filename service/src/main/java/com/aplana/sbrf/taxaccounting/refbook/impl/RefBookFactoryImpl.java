@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookFormDataKind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -72,7 +73,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 dataProvider.setTableName(RefBookSimpleReadOnly.OKTMO_TABLE_NAME);
             }
             return dataProvider;
-		} else {
+		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) {
+            return (RefBookFormDataKind) applicationContext.getBean("refBookFormDataKind", RefBookFormDataKind.class);
+        } else{
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
 			return refBookUniversal;

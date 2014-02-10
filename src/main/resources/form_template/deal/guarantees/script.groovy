@@ -72,7 +72,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNumber', 'docDate', 'dealNumber',
         'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -84,11 +84,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -189,9 +184,6 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "fullName")
-        checkNSI(10, row, "countryName")
     }
 
     checkItog(dataRows)
@@ -257,9 +249,7 @@ void calc() {
         row.total = row.sum
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullName)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryName = map?.COUNTRY?.referenceValue
+        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов

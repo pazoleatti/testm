@@ -69,8 +69,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'innKio', 'contraCountry',
-        'contraCountryCode', 'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub', 'contractNum',
+def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
+        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub', 'contractNum',
         'contractDate', 'transactionDate', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
@@ -82,11 +82,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -203,13 +198,6 @@ void logicCheck() {
             def msg3 = row.getCell('bondCount').column.name
             logger.warn("Строка $rowNum: «$msg1» не равно отношению «$msg2» и «$msg3»!")
         }
-
-        //Проверки соответствия НСИ
-        checkNSI(9, row, "contraName")
-        checkNSI(10, row, "contraCountry")
-        checkNSI(10, row, "contraCountryCode")
-        checkNSI(14, row, "transactionMode")
-        checkNSI(16, row, "transactionType")
     }
 }
 
@@ -230,10 +218,7 @@ void calc() {
         }
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.contraName)
-        row.innKio = map?.INN_KIO?.stringValue
-        row.contraCountry = map?.COUNTRY?.referenceValue
-        row.contraCountryCode = map?.COUNTRY?.referenceValue
+        row.contraCountry = getRefBookValue(9, row.contraName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
@@ -256,8 +241,8 @@ void importData() {
             (xml.row[1].cell[1]): 'Наименование контрагента и ОПФ',
             (xml.row[1].cell[2]): 'Режим переговорных сделок',
             (xml.row[1].cell[3]): 'ИНН/ КИО контрагента',
-            (xml.row[1].cell[4]): 'Страна местонахождения  контрагента',
-            (xml.row[1].cell[5]): 'Код страны местонахождения  контрагента',
+            (xml.row[1].cell[4]): 'Страна местонахождения контрагента',
+            (xml.row[1].cell[5]): 'Код страны местонахождения контрагента',
             (xml.row[1].cell[6]): 'Сумма сделки (с учетом НКД), в валюте расчетов',
             (xml.row[1].cell[7]): 'Валюта расчетов по сделке',
             (xml.row[1].cell[8]): 'Курс ЦБ РФ',

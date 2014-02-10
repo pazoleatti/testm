@@ -73,7 +73,7 @@ def groupColumns = ['fullName', 'docNum', 'docDate', 'currencyCode', 'countryDea
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'inn', 'countryName', 'countryCode', 'docNum', 'docDate', 'dealNumber',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNum', 'docDate', 'dealNumber',
         'dealDate', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -85,11 +85,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -184,20 +179,13 @@ void logicCheck() {
             def msg2 = row.getCell('total').column.name
             logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
         }
-        // Корректность дат сделки  dealDate - 9гр, dealDoneDate - 16гр
+        // Корректность дат сделки dealDate - 9гр, dealDoneDate - 16гр
         def dealDoneDate = row.getCell('dealDoneDate')
         if (dealDateCell.value > dealDoneDate.value) {
             def msg1 = dealDoneDate.column.name
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "fullName")
-        checkNSI(10, row, "countryName")
-        checkNSI(10, row, "countryCode")
-        checkNSI(10, row, "countryDealCode")
-        checkNSI(15, row, "currencyCode")
     }
 
     checkItog(dataRows)
@@ -266,10 +254,7 @@ void calc() {
         row.total = row.price
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullName)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryCode = map?.COUNTRY?.referenceValue
-        row.countryName = map?.COUNTRY?.referenceValue
+        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов
@@ -345,7 +330,7 @@ void importData() {
             (xml.row[0].cell[4]): 'Номер договора',
             (xml.row[0].cell[5]): 'Дата договора',
             (xml.row[0].cell[6]): 'Номер сделки',
-            (xml.row[0].cell[7]): 'Дата  заключения сделки',
+            (xml.row[0].cell[7]): 'Дата заключения сделки',
             (xml.row[0].cell[8]): 'Код валюты по сделке',
             (xml.row[0].cell[9]): 'Код страны происхождения предмета сделки по классификатору ОКСМ',
             (xml.row[0].cell[10]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',

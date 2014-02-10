@@ -1,9 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
-             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
 
@@ -20,7 +20,7 @@
 
         .footerButton {
             margin:  8px 10px 8px 0px !important;
-            width: 64px;
+            width: 75px;
         }
     </ui:style>
 
@@ -50,7 +50,7 @@
                     <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <g:ValueListBox width="100%" ui:field="formDataKind" />
+                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -59,7 +59,7 @@
                     <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <style:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
+                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="formTypeId" showTooltip="true"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -68,7 +68,7 @@
                     <g:Label/>
                 </g:cell>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>

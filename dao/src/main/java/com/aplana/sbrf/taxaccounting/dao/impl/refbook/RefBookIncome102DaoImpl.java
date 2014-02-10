@@ -46,7 +46,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 		} else {
 			filter += " AND REPORT_PERIOD_ID = " + reportPeriodId;
 		}
-		return refBookUtils.getRecords(TABLE_NAME, REF_BOOK_ID, null, pagingParams, filter, sortAttribute, isSortAscending, null);
+		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override

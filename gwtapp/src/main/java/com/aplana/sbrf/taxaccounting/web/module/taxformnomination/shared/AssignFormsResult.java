@@ -4,6 +4,8 @@ import com.gwtplatform.dispatch.shared.Result;
 
 public class AssignFormsResult implements Result {
 
+    private static final long serialVersionUID = 3146133889534657644L;
+
     private boolean issetRelations;
     private String uuid;
 

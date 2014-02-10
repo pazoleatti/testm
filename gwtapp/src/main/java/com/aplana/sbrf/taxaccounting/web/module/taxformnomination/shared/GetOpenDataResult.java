@@ -11,6 +11,8 @@ import java.util.Set;
  */
 public class GetOpenDataResult implements Result {
 
+    private static final long serialVersionUID = 5064068510380161280L;
+
     // Признак контролера УНП
     // true - контролера УНП, false - контролер, null - не контролер
     private Boolean isControlUNP;

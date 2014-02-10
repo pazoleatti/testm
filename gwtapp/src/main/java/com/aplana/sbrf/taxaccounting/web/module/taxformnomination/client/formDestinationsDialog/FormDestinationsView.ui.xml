@@ -64,7 +64,7 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Тип налоговой формы" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox ui:field="formDataKind" width="300px"/>
+                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="false" width="300px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">

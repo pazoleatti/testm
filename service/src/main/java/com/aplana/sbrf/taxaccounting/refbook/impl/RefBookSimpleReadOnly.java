@@ -45,7 +45,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	@Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
 			RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(getTableName(), getRefBookId(), version, pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+		return refBookUtils.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
     }
 
     @Override

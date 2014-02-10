@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
@@ -8,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -28,7 +28,7 @@ import java.util.*;
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
     @Autowired
-    BDUtils dbUtils;
+	BDUtils dbUtils;
 
 	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отсутствует во временном срезе формы formDataId=%s";
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";

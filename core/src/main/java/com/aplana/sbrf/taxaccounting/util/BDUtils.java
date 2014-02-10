@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.dao;
+package com.aplana.sbrf.taxaccounting.util;
 
 import java.util.List;
 

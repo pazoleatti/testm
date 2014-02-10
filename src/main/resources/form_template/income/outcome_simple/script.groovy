@@ -157,7 +157,7 @@ void calculationBasicSum(def dataRows) {
         row50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
     }
     def formDataRNU14 = getFormDataRNU14()
-    def dataRowsRNU14 = formDataService.getDataRowHelper(formDataRNU14)?.allCached
+    def dataRowsRNU14 = (formDataRNU14 ? formDataService.getDataRowHelper(formDataRNU14)?.allCached : null)
     ['R213', 'R214', 'R215', 'R216', 'R217'].each { alias ->
         def row = getDataRow(dataRows, alias)
         if (!isBank()) {
@@ -255,7 +255,7 @@ def consolidationBank(def dataRows) {
                 if (row.getAlias() == null) {
                     continue
                 }
-                DataRow<Cell> rowResult = dataRowHelper.getDataRow(dataRows, row.getAlias())
+                DataRow<Cell> rowResult = getDataRow(dataRows, row.getAlias())
                 for (alias in ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']) {
                     if (row[alias] != null) {
                         rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))

@@ -33,8 +33,8 @@ public interface RefBookDao {
 	 * Загружает список всех справочников
 	 * @return
      * @param typeId тип справочника
-     *               0 - внутренний
-     *               1 - внешний
+     *               0 - линейный
+     *               1 - иерархический
      *               null - все
 	 */
 	List<RefBook> getAll(Integer typeId);
@@ -43,8 +43,8 @@ public interface RefBookDao {
 	 * Загружает список всех справочников
 	 * @return
      * @param typeId тип справочника
-     *               0 - внутренний
-     *               1 - внешний
+	 *               0 - линейный
+	 *               1 - иерархический
      *               null - все
 	 */
 	List<RefBook> getAllVisible(Integer typeId);
@@ -54,7 +54,7 @@ public interface RefBookDao {
 	 * @param attributeId код атрибута, входящего в справочник
 	 * @return
 	 */
-	RefBook getByAttribute(long attributeId);
+	RefBook getByAttribute(Long attributeId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности

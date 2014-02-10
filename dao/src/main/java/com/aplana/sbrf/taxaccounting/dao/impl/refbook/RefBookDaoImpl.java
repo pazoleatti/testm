@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
@@ -14,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,8 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
@@ -44,7 +46,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
-    @Autowired
+	public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
+
+	@Autowired
     private RefBookUtils refBookUtils;
 
     @Autowired
@@ -57,7 +61,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
-    public RefBook get(Long refBookId) {
+    public RefBook get(@NotNull Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, script_id, visible, type, read_only from ref_book where id = ?",
@@ -69,11 +73,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-	 public List<RefBook> getAll(Integer typeId) {
+	public List<RefBook> getAll(Integer typeId) {
         return getAll(getJdbcTemplate().queryForList("select id from ref_book where (? is null or type = ?) order by name",
                             new Object[] {typeId, typeId},
                             Long.class));
-     }
+    }
 
     private List<RefBook> getAll(List<Long> ids) {
         List<RefBook> refBookList= new ArrayList();
@@ -94,7 +98,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
-    public RefBook getByAttribute(long attributeId) {
+    public RefBook getByAttribute(@NotNull Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForLong(
                     "select r.id from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
@@ -122,7 +126,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<RefBookAttribute> getAttributes(Long refBookId) {
+    public List<RefBookAttribute> getAttributes(@NotNull Long refBookId) {
         try {
             return getJdbcTemplate().query(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
@@ -158,8 +162,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
-                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
+    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
@@ -171,13 +175,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return result;
     }
 
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
-                                                              String filter, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version,
+			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
     @Override
-    public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
+    public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
         String sql = getRefBookRecordSql(refBookId, recordId);
         RefBook refBook = get(refBookId);
 		try {
@@ -208,11 +212,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @param refBookId     код справочника
      * @param uniqueRecordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
      * @param version       дата актуальности данных справочника. Если = null, то версионирование не учитывается
+	 * @param filter		строка фильтрации
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @param pagingParams  параметры для постраничной навигации. Может быть null, тогда возвращается весь набор данных по текущему срезу
+	 * @param isSortAscending порядок сортировки, по умолчанию используется сортировка по возрастанию
      * @return
      */
-    private PreparedStatementData getRefBookSql(Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, boolean isSortAscending) {
+    private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+			String filter, PagingParams pagingParams, boolean isSortAscending) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -335,13 +342,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     /**
-     * Динамически формирует запрос для справочника
+     * Динамически формирует запрос для элемента справочника
      *
      * @param refBookId код справочника
      * @param recordId  код строки справочника
      * @return
      */
-    private String getRefBookRecordSql(Long refBookId, Long recordId) {
+    private String getRefBookRecordSql(@NotNull Long refBookId, @NotNull Long recordId) {
         RefBook refBook = get(refBookId);
         StringBuilder fromSql = new StringBuilder("\nfrom\n");
         fromSql.append("  ref_book_record r\n");
@@ -385,9 +392,34 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return sql.toString();
     }
 
+	/**
+	 * Модифицирует фильтр, добавляя в него условие фильтрации по родителю
+	 * @param filter исходная строка фильтра
+	 * @param parentRecordId код родительской записи
+	 * @return фильтр с учетом условия по родительской записи
+	 */
+	static String getParentFilter(final String filter, final Long parentRecordId) {
+		String parentFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
+		return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
+	}
+
+	static boolean checkHierarchical(@NotNull final RefBook refBook) {
+		try {
+			RefBookAttribute attr = refBook.getAttribute(RefBook.RECORD_PARENT_ID_ALIAS);
+			return attr != null;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long refBookId, Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return null; //TODO: не реализовано (Marat Fayzullin 2013-07-10)
+    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(@NotNull Long refBookId, Long parentRecordId, @NotNull Date version,
+			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+		RefBook refBook = get(refBookId);
+		if (!checkHierarchical(refBook)) {
+			throw new IllegalArgumentException(String.format(NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
+		}
+		return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute);
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
@@ -396,7 +428,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public void createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, final List<RefBookRecord> records) {
+    public void createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
+			final List<RefBookRecord> records) {
         List<Object[]> listValues = new ArrayList<Object[]>();
 
         if (records == null || records.isEmpty()) {
@@ -476,18 +509,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "status) values (seq_ref_book_record.nextval, ?, ?, ?, 2)";
 
     @Override
-    public void createFakeRecordVersion(Long refBookId, Long recordId, Date version) {
-        getJdbcTemplate().update(INSERT_FAKE_REF_BOOK_RECORD_SQL,
-                recordId, refBookId, version);
+    public void createFakeRecordVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date version) {
+        getJdbcTemplate().update(INSERT_FAKE_REF_BOOK_RECORD_SQL, recordId, refBookId, version);
     }
 
     private static final String DELETE_REF_BOOK_VALUE_SQL = "delete from ref_book_value where record_id = ?";
 
     @Override
-    public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
-        if (uniqueRecordId == null || records == null) {
-            throw new IllegalArgumentException("uniqueRecordId: " + uniqueRecordId + "; records: " + records);
-        }
+    public void updateRecordVersion(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Map<String, RefBookValue> records) {
         try {
             // нет данных - нет работы
             if (records.size() == 0) {
@@ -541,7 +570,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
+    public boolean isVersionsExist(@NotNull Long refBookId, @NotNull List<Long> recordIds, @NotNull Date version) {
         String sql = "select count(*) from ref_book_record where ref_book_id = ? and record_id in %s and version = trunc(?, 'DD')";
         return getJdbcTemplate().queryForInt(String.format(sql, SqlUtils.transformToSqlInStatement(recordIds)), refBookId, version) != 0;
     }
@@ -550,7 +579,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?";
 
 
-    private void checkFillRequiredFields(Map<String, RefBookValue> record, RefBook refBook){
+    private void checkFillRequiredFields(Map<String, RefBookValue> record, @NotNull RefBook refBook){
         List<RefBookAttribute> attributes = refBook.getAttributes();
         List<String> errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
 
@@ -570,10 +599,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public Long checkRecordUnique(Long refBookId, Date version, Long rowId) {
-		if (refBookId == null || version == null || rowId == null) {
-			throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; rowId: " + rowId);
-		}
+    public Long checkRecordUnique(@NotNull Long refBookId, @NotNull Date version, @NotNull Long rowId) {
         try {
 			if (logger.isDebugEnabled()) {
 				logger.trace(String.format("refBookId: %d; version: %s; rowId: %s", refBookId, version.toString(), rowId));
@@ -642,7 +668,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select cr.id as %s, cr.version as versionStart, nv.version as versionEnd from currentRecord cr, nextVersion nv";
 
     @Override
-    public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
+    public RefBookRecordVersion getRecordVersionInfo(@NotNull Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
                     RefBook.RECORD_ID_ALIAS);
@@ -657,7 +683,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public int getRecordVersionsCount(Long refBookId, Long uniqueRecordId) {
+    public int getRecordVersionsCount(@NotNull Long refBookId, @NotNull Long uniqueRecordId) {
         return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
                 "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from REF_BOOK_RECORD where ID=?)",
                 new Object[]{refBookId, uniqueRecordId});
@@ -687,9 +713,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "  version";
 
     @Override
-    public List<Date> getVersions(Long refBookId, Date startDate, Date endDate) {
+    public List<Date> getVersions(@NotNull Long refBookId, @NotNull Date startDate, @NotNull Date endDate) {
         return getJdbcTemplate().query(RECORD_VERSION, new RowMapper<Date>() {
-
             @Override
             public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return rs.getDate(1);
@@ -701,7 +726,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     @Override
-    public Long getFirstRecordId(Long refBookId, Long uniqueRecordId) {
+    public Long getFirstRecordId(@NotNull Long refBookId, @NotNull Long uniqueRecordId) {
         try {
             return getJdbcTemplate().queryForLong(GET_FIRST_RECORD_ID, uniqueRecordId, refBookId, uniqueRecordId);
         } catch (EmptyResultDataAccessException e) {
@@ -710,7 +735,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
+    public Map<Long, Date> getRecordsVersionStart(@NotNull @Size(min=1) List<Long> uniqueRecordIds) {
         final Map<Long, Date> result = new HashMap<Long, Date>();
         getJdbcTemplate().query(String.format("select id, version from ref_book_record where id in %s",
                 SqlUtils.transformToSqlInStatement(uniqueRecordIds)), new RowCallbackHandler() {
@@ -723,7 +748,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
+			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams, true);
         RefBook refBook = get(refBookId);
         refBook.getAttributes().add(RefBook.getVersionFromAttribute());
@@ -737,7 +763,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(Long refBookId, Long uniqueRecordId) {
+    public List<Pair<RefBookAttribute, RefBookValue>> getUniqueAttributeValues(@NotNull Long refBookId, @NotNull Long uniqueRecordId) {
         List<Pair<RefBookAttribute, RefBookValue>> values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
         List<RefBookAttribute> attributes = getAttributes(refBookId);
         for (RefBookAttribute attribute : attributes) {
@@ -773,7 +799,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "from versionInfo";
 
     @Override
-    public List<CheckCrossVersionsResult> checkCrossVersions(Long refBookId, Long recordId, Date versionFrom, Date versionTo, Long excludedRecordId) {
+    public List<CheckCrossVersionsResult> checkCrossVersions(@NotNull Long refBookId, @NotNull Long recordId,
+			@NotNull Date versionFrom, @NotNull Date versionTo, Long excludedRecordId) {
+        String sVersionFrom = sdf.format(versionFrom);
+        String sVersionTo = versionTo != null ? "'"+sdf.format(versionTo)+"'" : null;
+
         return getJdbcTemplate().query(CHECK_CROSS_VERSIONS, new RowMapper<CheckCrossVersionsResult>() {
             @Override
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -796,7 +826,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
     @Override
-    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull List<RefBookAttribute> attributes,
+			@NotNull List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
         List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
@@ -885,8 +916,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
+        String sql = String.format("update ref_book_record set version=to_date('%s', 'DD.MM.YYYY') where id=?", sdf.format(version));
+        getJdbcTemplate().update(sql, uniqueRecordId);
+    }
+
     @Override
-    public boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom) {
+    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom) {
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
         return getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
@@ -899,8 +935,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value " +
             "where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and record_id in %s)) and value in %s";
 
-    @Override
-    public boolean isVersionUsed(Long refBookId, List<Long> uniqueRecordIds) {
+    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
         //Проверка использования в справочниках и настройках подразделений
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
@@ -916,7 +951,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select nv.id as %s, nv.version as versionStart, nve.versionEnd from nextVersion nv, nextVersionEnd nve";
 
     @Override
-    public RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom) {
+    public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {
         String sql = String.format(GET_NEXT_RECORD_VERSION, RefBook.RECORD_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
@@ -930,7 +965,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public Long getRecordId(Long uniqueRecordId) {
+    public Long getRecordId(@NotNull Long uniqueRecordId) {
         try {
             return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id=?", uniqueRecordId);
         } catch (EmptyResultDataAccessException e) {
@@ -941,7 +976,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where id in %s)";
 
     @Override
-    public void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds) {
+    public void deleteAllRecordVersions(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
         String sql = String.format(DELETE_ALL_VERSIONS, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
         getJdbcTemplate().update(sql, refBookId);
     }
@@ -951,7 +986,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%d";
 
     @Override
-    public List<Long> getRelatedVersions(List<Long> uniqueRecordIds) {
+    public List<Long> getRelatedVersions(@NotNull List<Long> uniqueRecordIds) {
         try {
             String sql = String.format(GET_RELATED_VERSIONS,
                     SqlUtils.transformToSqlInStatement(uniqueRecordIds), VersionedObjectStatus.FAKE.getId());
@@ -973,7 +1008,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
+    public void createRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Map<String, RefBookValue>> records) {
         // нет данных - нет работы
         if (records.size() == 0) {
             return;
@@ -1006,7 +1041,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * @param refBookRecordIds идентификаторы новых строк
 	 * @return данные в формате batchUpdate
 	 */
-	private List<Object[]> getListValuesForBatch(Long refBookId, List<Map<String, RefBookValue>> records, final List<Long> refBookRecordIds) {
+	private List<Object[]> getListValuesForBatch(@NotNull Long refBookId, @NotNull List<Map<String, RefBookValue>> records,
+			@NotNull final List<Long> refBookRecordIds) {
 		RefBook refBook = get(refBookId);
 		List<Object[]> listValues = new ArrayList<Object[]>();
 		for (int i = 0; i < records.size(); i++) {
@@ -1070,15 +1106,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "(select id from ref_book_record where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?)";
 
 
-    private Long getRowId(Long recordId) {
+    private Long getRowId(@NotNull Long recordId) {
         return getJdbcTemplate().queryForLong("select record_id from ref_book_record where id = ?", new Object[]{recordId});
     }
 
     @Override
-    public void updateRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
-        if (refBookId == null || version == null || records == null) {
-            throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; records: " + records);
-        }
+    public void updateRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Map<String, RefBookValue>> records) {
         try {
             //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
             // нет данных - нет работы
@@ -1187,7 +1220,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String DELETE_REF_BOOK_RECORD_SQL_D_OLD = "delete from ref_book_record where id = ?";
 
     @Override
-    public void deleteRecords(Long refBookId, Date version, List<Long> recordIds) {
+    public void deleteRecords(@NotNull Long refBookId, @NotNull Date version, @NotNull List<Long> recordIds) {
         //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
         if (refBookId == null || version == null || recordIds == null) {
             throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; recordIds: " + recordIds);
@@ -1226,7 +1259,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "and ref_book_id = ?";
 
     @Override
-    public void deleteAllRecords(Long refBookId, Date version) {
+    public void deleteAllRecords(@NotNull Long refBookId, @NotNull Date version) {
         if (refBookId == null || version == null) {
             return;
         }

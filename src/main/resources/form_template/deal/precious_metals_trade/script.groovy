@@ -74,7 +74,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySi
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'inn', 'countryName', 'countryCode', 'docNumber',
+def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'docNumber',
         'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'count',
         'price', 'total', 'dealDoneDate']
 
@@ -87,11 +87,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -305,18 +300,6 @@ void logicCheck() {
                         "указан код, отличный от 643!")
             }
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "fullName")
-        checkNSI(10, row, "countryCode")
-        checkNSI(10, row, "countryCodeNumeric")
-        checkNSI(10, row, "countryCodeNumeric2")
-        checkNSI(4, row, "regionCode")
-        checkNSI(4, row, "region2")
-        checkNSI(17, row, "metalName")
-        checkNSI(18, row, "deliverySign")
-        checkNSI(63, row, "deliveryCode")
-        checkNSI(20, row, "dealFocus")
     }
 
     checkItog(dataRows)
@@ -389,10 +372,7 @@ void calc() {
         row.count = 1
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullName)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryCode = map?.COUNTRY?.referenceValue
-        row.countryName = map?.COUNTRY?.referenceValue
+        row.countryName = getRefBookValue(9, row.fullName)?.COUNTRY?.referenceValue
 
         // Признак физической поставки
         def Boolean deliveryPhis = null

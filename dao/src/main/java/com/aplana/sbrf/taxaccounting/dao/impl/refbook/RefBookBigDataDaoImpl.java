@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookBigDataDao;
@@ -13,7 +14,9 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
@@ -43,11 +46,22 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
     @Autowired
     private BDUtils dbUtils;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        return refBookUtils.getRecords(tableName, refBookId, version, pagingParams, filter, sortAttribute, isSortAscending, null);
+        RefBook refBook = refBookDao.get(refBookId);
+        // получаем страницу с данными
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, null);
+        List<Map<String, RefBookValue>> records = refBookUtils.getRecordsData(ps, refBook);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // получаем информацию о количестве всех записей с текущим фильтром
+        ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, null);
+        result.setTotalCount(refBookUtils.getRecordsCount(ps));
+        return result;
     }
 
     @Override
@@ -63,7 +77,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         refBook.setAttributes(new ArrayList<RefBookAttribute>());
         refBook.getAttributes().addAll(oldRefBook.getAttributes());
         // получаем страницу с данными
-        PreparedStatementData ps = refBookUtils.getSimpleQuery(tableName, refBook, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null);
+        PreparedStatementData ps = getSimpleQuery(tableName, refBook, uniqueRecordId, null, sortAttribute, filter, pagingParams, isSortAscending, null);
 
         //Добавляем атрибуты версии, т.к они не хранятся в бд
         refBook.getAttributes().add(RefBook.getVersionFromAttribute());
@@ -73,6 +87,124 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         // получаем информацию о количестве версий
         result.setTotalCount(getRecordVersionsCount(tableName, uniqueRecordId));
         return result;
+    }
+
+    private static final String WITH_STATEMENT =
+            "with t as (select\n" +
+                    "  max(version) version, record_id\n" +
+                    "from\n" +
+                    "  %s\n" +
+                    "where\n" +
+                    "  status = 0 and version <= ?\n" +
+                    "group by\n" +
+                    "  record_id)\n";
+
+    private static final String RECORD_VERSIONS_STATEMENT =
+            "with currentRecord as (select id, record_id, version from %s where id=?),\n" +
+                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.RECORD_ID=cr.RECORD_ID), \n" +
+                    "t as (select rv.rn as row_number_over, rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+
+
+    /**
+     * Формирует простой sql-запрос по принципу: один справочник - одна таблица
+     * @param tableName название таблицы для которой формируется запрос
+     * @param refBook справочник
+     * @param uniqueRecordId уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
+     * @param version дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
+     *                Если = null, значит будет выполняться получение всех версий записи
+     *                Иначе выполняется получение всех записей справочника, активных на указанную дату
+     * @param sortAttribute
+     * @param filter
+     * @param pagingParams
+     * @param isSortAscending
+     * @param whereClause
+     * @return
+     */
+    private PreparedStatementData getSimpleQuery(String tableName, RefBook refBook, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
+        PreparedStatementData ps = new PreparedStatementData();
+
+        if (version != null) {
+            ps.appendQuery(String.format(WITH_STATEMENT, tableName));
+            ps.addParam(version);
+        } else {
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, tableName, tableName));
+            ps.addParam(uniqueRecordId);
+            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+        }
+
+        ps.appendQuery("SELECT ");
+        ps.appendQuery("r.id ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+
+        if (version == null) {
+            ps.appendQuery(",\n");
+            ps.appendQuery("  t.version as ");
+            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+            ps.appendQuery(",\n");
+
+            ps.appendQuery("  t.versionEnd as ");
+            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+        }
+
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            ps.appendQuery(", ");
+            ps.appendQuery(attribute.getAlias());
+        }
+
+        if (version != null) {
+            ps.appendQuery(" FROM t, (SELECT ");
+            if (isSupportOver()) {
+                RefBookAttribute defaultSort = refBook.getSortAttribute();
+                String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
+                String sortDirection = isSortAscending ? "ASC" : "DESC";
+                ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
+            } else {
+                ps.appendQuery("rownum row_number_over");
+            }
+            ps.appendQuery(", t.* FROM ");
+            ps.appendQuery(tableName);
+            ps.appendQuery(" t ) r");
+        } else {
+            ps.appendQuery(" FROM t, ");
+            ps.appendQuery(tableName);
+            ps.appendQuery(" r");
+        }
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+        simpleFilterTreeListener.setPs(filterPS);
+
+        Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (filterPS.getParams().size() > 0) {
+                ps.addParam(filterPS.getParams());
+            }
+        }
+        if (whereClause != null && whereClause.trim().length() > 0) {
+            if (filterPS.getQuery().length() > 0) {
+                ps.appendQuery(" AND ");
+            } else {
+                ps.appendQuery(" WHERE ");
+            }
+            ps.appendQuery(whereClause);
+        }
+
+        ps.appendQuery(" WHERE (r.version = t.version and r.record_id = t.record_id)");
+
+        if (pagingParams != null) {
+            ps.appendQuery(" and row_number_over BETWEEN ? AND ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
+        }
+
+        if (version == null) {
+            ps.appendQuery(" order by t.version\n");
+        }
+        return ps;
     }
 
     @Override
@@ -110,7 +242,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         } else {
             filter += " AND parent_id = " + parentRecordId;
         }
-        return refBookUtils.getRecords(tableName, refBookId, version, pagingParams, filter, sortAttribute, null);
+        return getRecords(tableName, refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
     private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.record_id, r.version from %s r where r.id=?),\n" +

@@ -34,7 +34,7 @@ public class FormDataXlsxReportBuilderTestMock {
             .classPackageAsResourcePath(getClass())
             + "/datarows.xml";
 	
-	
+
 	@Before
 	public void init() throws IOException {
 		
@@ -193,6 +193,9 @@ public class FormDataXlsxReportBuilderTestMock {
         dataRows.addAll(
                 xmlSerializationUtils.deserialize(builder.toString(), formTemplate.getColumns(), formTemplate.getStyles(), Cell.class)
         );
+
+        for (int i = 0; i < 100; i++)
+            dataRows.add(dataRows.get(0));
 		
 		department = new Department();
         department.setId(1);
