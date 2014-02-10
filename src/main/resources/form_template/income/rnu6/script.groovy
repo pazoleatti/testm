@@ -415,7 +415,7 @@ void logicCheck() {
                                 && findRow.docDate == row.docDate) {
                             isFind = true
                             if (!(findRow.ruble > row.ruble)) {
-                                logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
+                                logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} года.")
                             }
                         }
                     }
