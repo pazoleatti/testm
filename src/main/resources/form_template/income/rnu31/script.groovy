@@ -142,7 +142,7 @@ void consolidation() {
     // занулить данные и просуммировать из источников
     def row = getDataRow(dataRows, 'total')
     editableColumns.each { alias ->
-        row.getCell(alias).value = 0
+        row.getCell(alias).setValue(0, row.getIndex())
     }
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -152,7 +152,7 @@ void consolidation() {
                 def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
                 def sourceRow = getDataRow(sourceDataRows, 'total')
                 editableColumns.each { alias ->
-                    row.getCell(alias).value = sourceRow.getCell(alias).value
+                    row.getCell(alias).setValue(sourceRow.getCell(alias).value, row.getIndex())
                 }
             }
         }

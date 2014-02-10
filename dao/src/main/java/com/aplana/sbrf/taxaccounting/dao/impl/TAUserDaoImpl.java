@@ -281,7 +281,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		if (filter == null) {
 			return getUserIds();
 		}
-		StringBuilder sql = new StringBuilder("select id from (select u.id, u.is_active, u.name, u.department_id, rownum r " +
+		StringBuilder sql = new StringBuilder("select id from ( select id, rownum r from (select u.id, u.is_active, u.name, u.department_id " +
 				"from sec_user u where 1=1 ");
 		if (filter.getActive() != null) {
 			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
@@ -296,9 +296,9 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id in " + SqlUtils.transformToSqlInStatement(filter.getRoleIds()) +")") ;
 		}
 		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
-			sql.append(") where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+			sql.append(" order by name)) where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
 		} else {
-			sql.append(")");
+			sql.append(" order by name))");
 		}
 		try {
 			return getJdbcTemplate().queryForList(sql.toString(), Integer.class);

@@ -153,11 +153,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -337,14 +332,6 @@ def logicCheck() {
                 ]
                 checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
             }
-
-            // Проверки НСИ
-            checkNSI(15, row, "currency")
-            checkNSI(62, row, "signSecurity")
-/*          RefBook rb = refBookFactory.get(15);
-            if (row.currency != null && getCourse(row.currency, reportDate) == null){
-                logger.warn(errorMsg + "В справочнике «" + rb.getName() + "» не найдено значение «" + row.rubCourse + "», соответствующее атрибуту «" + rb.getAttribute("RATE").getName() + "»!")
-            } */
         }
 
         // LC 20
@@ -506,7 +493,7 @@ def calcItogIssuer(int i) {
     newRow.issuer = tIssuer?.concat(' Итог')
 
     for (column in totalColumns) {
-        newRow.getCell(column).value = new BigDecimal(0)
+        newRow.getCell(column).setValue(new BigDecimal(0), null)
     }
 
     for (int j = i; j >= 0; j--) {
@@ -519,7 +506,7 @@ def calcItogIssuer(int i) {
 
             for (column in totalColumns) {
                 if (srow.get(column) != null) {
-                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                    newRow.getCell(column).setValue(newRow.getCell(column).value + (BigDecimal) srow.get(column), null)
                 }
             }
         }
@@ -550,7 +537,7 @@ def calcItogRegNumber(int i) {
     newRow.regNumber = tRegNumber?.concat(' Итог')
 
     for (column in totalColumns) {
-        newRow.getCell(column).value = new BigDecimal(0)
+        newRow.getCell(column).setValue(new BigDecimal(0), null)
     }
 
     // идем от текущей позиции вверх и ищем нужные строки
@@ -564,7 +551,7 @@ def calcItogRegNumber(int i) {
 
             for (column in totalColumns) {
                 if (srow.get(column) != null) {
-                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                    newRow.getCell(column).setValue(newRow.getCell(column).value + (BigDecimal) srow.get(column), null)
                 }
             }
         }
