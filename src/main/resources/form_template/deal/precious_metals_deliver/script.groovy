@@ -74,7 +74,7 @@ def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'innKio', 'country', 'countryCode1', 'contractNum',
+def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'country', 'contractNum',
         'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode', 'unitCountryCode', 'signPhis',
         'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
 
@@ -87,11 +87,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -175,7 +170,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
 
         // Проверка зависимости от признака физической поставки
-        if (getRefBookValue(18, signPhis)?.CODE?.numberValue == 1) {
+        if (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1) {
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
@@ -310,19 +305,6 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "name")
-        checkNSI(10, row, "countryCode1")
-        checkNSI(10, row, "unitCountryCode")
-        checkNSI(10, row, "country")
-        checkNSI(10, row, "countryCode3")
-        checkNSI(4, row, "region1")
-        checkNSI(4, row, "region2")
-        checkNSI(18, row, "signPhis")
-        checkNSI(63, row, "conditionCode")
-        checkNSI(38, row, "dependence")
-        checkNSI(85, row, "dealType")
     }
 
     checkItog(dataRows)
@@ -406,14 +388,11 @@ void calc() {
         row.totalNds = row.priceOne
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.name)
-        row.innKio = map?.INN_KIO?.stringValue
-        row.country = map?.COUNTRY?.referenceValue
-        row.countryCode1 = map?.COUNTRY?.referenceValue
+        row.country = getRefBookValue(9, row.name)?.COUNTRY?.referenceValue
 
         // Признак физической поставки
         def Boolean deliveryPhis = null
-        if (row.deliverySign != null) {
+        if (row.signPhis != null) {
             deliveryPhis = getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1
         }
         if (deliveryPhis != null && deliveryPhis) {
@@ -493,11 +472,11 @@ String getValuesByGroupColumn(DataRow row) {
     if (dependence != null)
         builder.append(dependence).append(sep)
 
-    country = getRefBookValue(38, row.country)?.NAME?.stringValue
+    country = getRefBookValue(10, row.country)?.NAME?.stringValue
     if (country != null)
         builder.append(country).append(sep)
 
-    countryCode1 = getRefBookValue(10, row.countryCode1)?.CODE?.stringValue
+    countryCode1 = getRefBookValue(10, row.country)?.CODE?.stringValue
     if (countryCode1 != null)
         builder.append(countryCode1).append(sep)
 
