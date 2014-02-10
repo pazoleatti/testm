@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 /**
@@ -7,4 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface AuditFilterUIHandlers extends UiHandlers {
     void onSearchButtonClicked();
+    void getReportPeriods(TaxType value);
 }

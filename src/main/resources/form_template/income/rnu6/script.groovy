@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat
 @Field
 def Boolean isBalancePeriod = null
 
-def getBalancePeriod(){
+def getBalancePeriod() {
     if (isBalancePeriod == null){
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
@@ -107,7 +107,7 @@ def currentDate = new Date()
 
 // дата начала периода
 @Field
-def startDate = null
+def start = null
 
 //// Обертки методов
 
@@ -449,8 +449,8 @@ void loggerError(def msg, Object...args) {
 }
 
 def getStartDate() {
-    if (!startDate) {
-        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    if (!start) {
+        start = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
-    return startDate
+    return start
 }

@@ -4,7 +4,7 @@ import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,7 +32,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiField
-    PeriodPicker reportPeriodIds;
+    PeriodPickerPopupWidget reportPeriodIds;
 
     @UiField
     DateMaskBoxPicker fromSearchDate;
@@ -181,6 +181,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         user.setEndDate(new Date());
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
+        reportPeriodIds.setEnabled(false);
     }
 
     private void setVisibleTaxFields() {
@@ -228,10 +229,13 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
+            reportPeriodIds.setEnabled(false);
             reportPeriodIds.setPeriods(new ArrayList<ReportPeriod>());
+            return;
         }
         if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
+            reportPeriodIds.setEnabled(true);
         }
     }
 }

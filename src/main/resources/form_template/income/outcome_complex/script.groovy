@@ -146,7 +146,7 @@ void calc() {
             }
             tmp = round(row.consumptionTaxSumS - (sum6 - sum7), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
-            row.logicalCheck = (tmp < 0 ? message : value.toString())
+            row.getCell('logicalCheck').setValue((tmp < 0 ? message : value.toString()), row.getIndex())
         }
 
         if (!isEmpty(row.consumptionBuhSumAccepted) && !isEmpty(row.consumptionBuhSumPrevTaxPeriod)) {
@@ -156,11 +156,11 @@ void calc() {
             } else {
                 tmp = row.consumptionBuhSumAccepted
             }
-            row.opuSumByEnclosure3 = tmp
+            row.getCell('opuSumByEnclosure3').setValue(tmp, row.getIndex())
 
             // графа 14
-            row.opuSumByTableP = getSumFromSimple(formDataSimple, 'consumptionAccountNumber',
-                    'rnu5Field5Accepted', row.consumptionBuhSumAccountNumber)
+            row.getCell('opuSumByTableP').setValue(getSumFromSimple(formDataSimple, 'consumptionAccountNumber',
+                    'rnu5Field5Accepted', row.consumptionBuhSumAccountNumber), row.getIndex())
 
             // графа 15
             def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
@@ -170,10 +170,10 @@ void calc() {
             } else {
                 tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
             }
-            row.opuSumTotal = tmp
+            row.getCell('opuSumTotal').setValue(tmp, row.getIndex())
 
             // графа 16
-            row.difference = (getValue(row.opuSumByEnclosure3) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal)
+            row.getCell('difference').setValue((getValue(row.opuSumByEnclosure3) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal), row.getIndex())
         }
     }
 
@@ -236,7 +236,7 @@ void consolidation() {
             row.getCell(alias).setValue(null, row.getIndex())
         }
         if (row.getAlias() in ['R67', 'R93']) {
-            row.consumptionTaxSumS = 0
+            row.getCell('consumptionTaxSumS').setValue(0, row.getIndex())
         }
     }
 
@@ -492,14 +492,14 @@ void addData(def xml, int headRowCount) {
         // графа 6
         val = row.cell[xmlIndexCol].text().trim()
         if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.getCell('consumptionBuhSumAccepted').setValue(parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false), curRow.getIndex())
         }
         xmlIndexCol++
 
         // графа 7
         val = row.cell[xmlIndexCol].text().trim()
         if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.getCell('consumptionBuhSumPrevTaxPeriod').setValue(parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false), curRow.getIndex())
         }
         xmlIndexCol++
 
@@ -509,7 +509,7 @@ void addData(def xml, int headRowCount) {
         // графа 9
         val = row.cell[xmlIndexCol].text().trim()
         if (!notImportSum.contains(alias) && val.isBigDecimal()) {
-            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.getCell('consumptionTaxSumS').setValue(parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false), curRow.getIndex())
         }
 
     }

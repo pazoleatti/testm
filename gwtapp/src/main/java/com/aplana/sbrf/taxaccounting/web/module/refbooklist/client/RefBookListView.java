@@ -66,8 +66,8 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
 
         TextColumn<TableModel> typeColumn = new TextColumn<TableModel>() {
             @Override
-            public String getValue(TableModel object) {
-                return object.getType().toString();
+            public String getValue(TableModel tableModel) {
+                return tableModel.isReadOnly() ? "Не редактируемый" : "Редактируемый";
             }
         };
 

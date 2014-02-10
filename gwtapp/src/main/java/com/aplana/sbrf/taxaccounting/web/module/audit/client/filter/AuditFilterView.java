@@ -1,12 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
-import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -19,10 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -32,7 +30,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         implements AuditFilterPresenter.MyView {
 
     @UiField
-    PeriodPicker reportPeriodIds;
+    PeriodPickerPopupWidget reportPeriodIds;
 
     interface Binder extends UiBinder<Widget, AuditFilterView> {
     }
@@ -159,11 +157,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void setValueListBoxHandler(ValueChangeHandler<TaxType> handler) {
-        taxType.addValueChangeHandler(handler);
-    }
-
-    @Override
     public void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler) {
         auditFormTypeId.addValueChangeHandler(handler);
     }
@@ -230,6 +223,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         user.setEndDate(new Date());
+        reportPeriodIds.setEnabled(false);
     }
 
     @UiHandler("search")
@@ -238,5 +232,17 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             getUiHandlers().onSearchButtonClicked();
     }
 
+    @UiHandler("taxType")
+    void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
+        if (taxType.getValue() == null){
+            reportPeriodIds.setEnabled(false);
+            reportPeriodIds.setPeriods(new ArrayList<ReportPeriod>());
+            return;
+        }
+        if (getUiHandlers() != null) {
+            getUiHandlers().getReportPeriods(event.getValue());
+            reportPeriodIds.setEnabled(true);
+        }
+    }
 
 }

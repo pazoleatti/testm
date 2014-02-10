@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientArchiveEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
@@ -40,6 +39,22 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         AuditClientSearchEvent.fire(this);
     }
 
+    @Override
+    public void getReportPeriods(TaxType taxType) {
+        if (taxType == null) {
+            getView().updateReportPeriodPicker(new ArrayList<ReportPeriod>());
+            return;
+        }
+        GetReportPeriodsAction action = new GetReportPeriodsAction();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, new AbstractCallback<GetReportPeriodsResult>() {
+            @Override
+            public void onSuccess(GetReportPeriodsResult result) {
+                getView().updateReportPeriodPicker(result.getReportPeriods());
+            }
+        });
+    }
+
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
@@ -50,8 +65,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void setFormDataKind(List<FormDataKind> list);
 
         void setFormDataTaxType(List<TaxType> taxTypeList);
-
-        void setValueListBoxHandler(ValueChangeHandler<TaxType> handler);
 
         void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
 
@@ -119,26 +132,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     @Override
     protected void onBind() {
         super.onBind();
-        final ValueChangeHandler<TaxType> taxTypeValueChangeHandler = new ValueChangeHandler<TaxType>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<TaxType> event) {
-                final TaxType taxType = event.getValue();
-                if (taxType == null) {
-                    getView().updateReportPeriodPicker(new ArrayList<ReportPeriod>());
-                    return;
-                }
-                GetReportPeriodsAction action = new GetReportPeriodsAction();
-                action.setTaxType(taxType);
-                dispatchAsync.execute(action, new AbstractCallback<GetReportPeriodsResult>() {
-                    @Override
-                    public void onSuccess(GetReportPeriodsResult result) {
-                        getView().updateReportPeriodPicker(result.getReportPeriods());
-                    }
-                });
-
-            }
-        };
-        getView().setValueListBoxHandler(taxTypeValueChangeHandler);
 
         ValueChangeHandler<AuditFormType> formTypeValueChangeHandler = new ValueChangeHandler<AuditFormType>() {
             @Override
