@@ -126,11 +126,6 @@ def dataRowHelperPrev = null
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -442,10 +437,6 @@ void logicCheck() {
             needValue['excessSalePriceTax'] = calc22(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
         }
-
-        // Проверки НСИ
-        checkNSI(61, row, 'tradeNumber')
-        checkNSI(62, row, 'singSecurirty')
     }
 
     // 11. Проверка корректности расчета итоговых значений за текущий квартал

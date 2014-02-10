@@ -366,9 +366,6 @@ void logicCheck() {
         if (row.regNumber != null && !totalGroupsName.contains(row.regNumber)) {
             totalGroupsName.add(row.regNumber)
         }
-
-        // Проверки соответствия НСИ
-        formDataService.checkNSI(62, refBookCache, row, 'signSecurity', logger, false)
     }
 
     if (prevDataRows != null) {
