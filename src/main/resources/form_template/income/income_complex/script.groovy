@@ -66,7 +66,6 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE :
         calc()
         logicCheck()
-
         break
     case FormDataEvent.CHECK :
         logicCheck()
@@ -195,7 +194,7 @@ void consolidationBank() {
     dataRows.each { row ->
         editableColumns.each { alias ->
             if (row.getCell(alias).isEditable()) {
-                row.getCell(alias).value = 0
+                row.getCell(alias).setValue(0, row.getIndex())
             }
         }
         // графа 11, 13..16
@@ -218,7 +217,7 @@ void consolidationBank() {
                 def rowResult = getDataRow(dataRows, row.getAlias())
                 editableColumns.each {
                     if (row.getCell(it).value != null) {
-                        rowResult.getCell(it).value = summ(rowResult.getCell(it), row.getCell(it))
+                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
                     }
                 }
             }
@@ -241,7 +240,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each { column ->
         def cell = row.getCell(column)
-        if (cell.isEditable() && !cell.value) {
+        if (cell.isEditable() && cell.value == null) {
             def name = getColumnName(row, column)
             colNames.add('«' + name + '»')
         }
