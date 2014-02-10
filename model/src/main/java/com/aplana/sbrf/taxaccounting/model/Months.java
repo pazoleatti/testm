@@ -35,11 +35,9 @@ public enum Months {
     }
 
     public static Months fromId(int monthId) {
-        for (Months month : values()) {
-            if (month.id == monthId) {
-                return month;
-            }
+        if (monthId < 1 || monthId > 12) {
+            throw new IllegalArgumentException("Wrong Month id: " + monthId);
         }
-        throw new IllegalArgumentException("Wrong Month id: " + monthId);
+        return values()[monthId];
     }
 }

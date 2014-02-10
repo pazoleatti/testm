@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -133,4 +132,11 @@ public interface FormTemplateService {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, VersionedObjectStatus... status);
+
+    /**
+     * Является ли форма ежемесячной.
+     * @param formId идентификатор формы
+     * @return
+     */
+    boolean isMonthly(int formId);
 }

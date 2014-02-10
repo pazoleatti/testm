@@ -117,10 +117,10 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         formDataKind.setValue(null);
         formTypeId.setValue(null);
         formMonth.setValue(null);
-        updateEnabled(false);
+        updateEnabled();
     }
 
-    private void updateEnabled(boolean isMonthly) {
+    public void updateEnabled() {
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
         // "Тип налоговой формы" недоступен если не выбрано подразделение
@@ -128,9 +128,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // "Вид налоговой формы" недоступен если не выбран тип НФ
         formTypeId.setEnabled(formDataKind.getValue() != null);
         // "Месяц" недоступен если не выбран "Вид налоговой формы"
-        formMonth.setEnabled(formTypeId.getValue() != null && isMonthly);
+        formMonth.setEnabled(formTypeId.getValue() != null);
         // Кнопка "Создать" недоступна пока все не заполнено
-        continueButton.setEnabled(formMonth.getValue() != null || (formTypeId.getValue() != null && !isMonthly));
+        continueButton.setEnabled(formMonth.getValue() != null);
     }
 
     @UiHandler("continueButton")
@@ -152,30 +152,30 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiHandler("reportPeriodIds")
     public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
         departmentPicker.setValue(null, true);
-        updateEnabled(false);
+        updateEnabled();
     }
 
     @UiHandler("departmentPicker")
     public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
         formDataKind.setValue(null, true);
-        updateEnabled(false);
+        updateEnabled();
     }
 
     @UiHandler("formDataKind")
     public void onFormKindChange(ValueChangeEvent<FormDataKind> event) {
         formTypeId.setValue(null, true);
-        updateEnabled(false);
+        updateEnabled();
     }
 
     @UiHandler("formTypeId")
     public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
         formMonth.setValue(null, true);
-        updateEnabled(getUiHandlers().isMonthly());
+        getUiHandlers().isMonthly(formTypeId.getValue(), reportPeriodIds.getValue().iterator().next());
     }
 
     @UiHandler("formMonth")
     public void onChangeFormMonth(ValueChangeEvent<Months> event) {
-        updateEnabled(getUiHandlers().isMonthly());
+        updateEnabled();
     }
 
     @Override
@@ -224,5 +224,18 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         driver.edit(filter);
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
         //departmentPicker.setValue(filter.getDepartmentIds());
+    }
+
+    @Override
+    public void setFormMonthEnabled(boolean isMonthly) {
+        // Если ежемесячный, то устанавливается formMonth = true
+        formMonth.setEnabled(isMonthly);
+        // Кнопка "Создать" пока неактивна
+        if (isMonthly) {
+            continueButton.setEnabled(false);
+        // Иначе, кнопка активна
+        } else {
+            continueButton.setEnabled(true);
+        }
     }
 }

@@ -529,21 +529,103 @@ public class PeriodServiceImpl implements PeriodService{
     @Override
     public List<Months> getMonthList(int reportPeriodId) {
 
+        ReportPeriod reportPeriod = getReportPeriod(reportPeriodId);
+
         List<Months> monthsList = new ArrayList<Months>();
         monthsList.add(null);
-        monthsList.add(Months.JANUARY);
-        monthsList.add(Months.FEBRUARY);
-        monthsList.add(Months.MARCH);
-        monthsList.add(Months.APRIL);
-        monthsList.add(Months.MAY);
-        monthsList.add(Months.JUNE);
-        monthsList.add(Months.JULY);
-        monthsList.add(Months.AUGUST);
-        monthsList.add(Months.SEPTEMBER);
-        monthsList.add(Months.OCTOBER);
-        monthsList.add(Months.NOVEMBER);
-        monthsList.add(Months.DECEMBER);
 
+        if (reportPeriodId != 0) {
+            Calendar startDate = getStartDate(reportPeriodId);
+            Calendar endDate = getEndDate(reportPeriodId);
+
+            int startMonth = startDate.get(Calendar.MONTH);
+            int endMonth = endDate.get(Calendar.MONTH);
+
+            switch (reportPeriod.getTaxPeriod().getTaxType()) {
+                case INCOME: {
+                    // Первый квартал
+                    if (startMonth == 0 && endMonth == 2) {
+                        monthsList.add(Months.JANUARY);
+                        monthsList.add(Months.FEBRUARY);
+                        monthsList.add(Months.MARCH);
+                        // Второй квартал
+                    } else if (startMonth == 3 && startMonth == 5) {
+                        monthsList.add(Months.APRIL);
+                        monthsList.add(Months.MAY);
+                        monthsList.add(Months.JUNE);
+                        // Третий квартал
+                    } else if (startMonth == 6 && endMonth == 8) {
+                        monthsList.add(Months.JULY);
+                        monthsList.add(Months.AUGUST);
+                        monthsList.add(Months.SEPTEMBER);
+                        // Четвертый квартал
+                    } else if (startMonth == 9 && endMonth == 11) {
+                        monthsList.add(Months.OCTOBER);
+                        monthsList.add(Months.NOVEMBER);
+                        monthsList.add(Months.DECEMBER);
+                        // Полугодие
+                    } else if (startMonth == 0 && endMonth == 5) {
+                        monthsList.add(Months.JANUARY);
+                        monthsList.add(Months.FEBRUARY);
+                        monthsList.add(Months.MARCH);
+                        monthsList.add(Months.APRIL);
+                        monthsList.add(Months.MAY);
+                        monthsList.add(Months.JUNE);
+                        // 9 месяцев
+                    } else if (startMonth == 0 && endMonth == 8) {
+                        monthsList.add(Months.JANUARY);
+                        monthsList.add(Months.FEBRUARY);
+                        monthsList.add(Months.MARCH);
+                        monthsList.add(Months.APRIL);
+                        monthsList.add(Months.MAY);
+                        monthsList.add(Months.JUNE);
+                        monthsList.add(Months.JULY);
+                        monthsList.add(Months.AUGUST);
+                        monthsList.add(Months.SEPTEMBER);
+                        // Год
+                    } else if (startMonth == 0 && endMonth == 11) {
+                        monthsList.add(Months.JANUARY);
+                        monthsList.add(Months.FEBRUARY);
+                        monthsList.add(Months.MARCH);
+                        monthsList.add(Months.APRIL);
+                        monthsList.add(Months.MAY);
+                        monthsList.add(Months.JUNE);
+                        monthsList.add(Months.JULY);
+                        monthsList.add(Months.AUGUST);
+                        monthsList.add(Months.SEPTEMBER);
+                        monthsList.add(Months.OCTOBER);
+                        monthsList.add(Months.NOVEMBER);
+                        monthsList.add(Months.DECEMBER);
+                    }
+                    break;
+                }
+
+                case TRANSPORT: {
+                    // Первый квартал
+                    if (startMonth == 0 && endMonth == 2) {
+                        monthsList.add(Months.JANUARY);
+                        monthsList.add(Months.FEBRUARY);
+                        monthsList.add(Months.MARCH);
+                        // Второй квартал
+                    } else if (startMonth == 3 && startMonth == 5) {
+                        monthsList.add(Months.APRIL);
+                        monthsList.add(Months.MAY);
+                        monthsList.add(Months.JUNE);
+                        // Третий квартал
+                    } else if (startMonth == 6 && endMonth == 8) {
+                        monthsList.add(Months.JULY);
+                        monthsList.add(Months.AUGUST);
+                        monthsList.add(Months.SEPTEMBER);
+                        // Четвертый квартал
+                    } else if (startMonth == 9 && endMonth == 11) {
+                        monthsList.add(Months.OCTOBER);
+                        monthsList.add(Months.NOVEMBER);
+                        monthsList.add(Months.DECEMBER);
+                        // Полугодие
+                    }
+                }
+            }
+        }
         return monthsList;
     }
 }

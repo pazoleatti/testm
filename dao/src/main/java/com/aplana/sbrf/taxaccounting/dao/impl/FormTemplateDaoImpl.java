@@ -56,6 +56,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setCode(rs.getString("code"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            formTemplate.setMonthly(rs.getBoolean("monthly"));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
@@ -84,7 +85,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status " +
+					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status, monthly " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -157,7 +158,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status, monthly" +
                 " from form_template where status = 0", new FormTemplateMapper(false));
 	}
 

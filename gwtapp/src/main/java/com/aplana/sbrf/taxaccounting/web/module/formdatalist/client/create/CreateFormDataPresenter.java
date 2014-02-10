@@ -40,6 +40,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         FormDataFilter getFilterData();
 
         void setFilterData(FormDataFilter filter);
+
+        /**
+         * Устанавливаем в enabled/disabled ежемесячность
+         * @param isMonthly
+         */
+        void setFormMonthEnabled(boolean isMonthly);
     }
 
     @Inject
@@ -60,6 +66,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setFormDataKindId(filterFormData.getFormDataKind().getId());
         action.setFormDataTypeId(filterFormData.getFormTypeId());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
+        if (filterFormData.getFormMonth() != null) {
+            action.setMonthId(filterFormData.getFormMonth().getId());
+        }
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateFormDataResult>() {
                     @Override
@@ -101,18 +110,20 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     @Override
-    public boolean isMonthly() {
-//        GetMonthlyState action = new GetMonthlyState();
-//        dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthlyStateResult>() {
-//            @Override
-//            public void onSuccess(GetMonthlyStateResult result) {
-//
-//            }
-//
-//        }));
+    public void isMonthly(Integer formId, Integer reportPeriodId) {
+        GetMonthData action = new GetMonthData();
+        action.setTypeId(formId);
+        action.setPeriodId(reportPeriodId);
 
-        return false;
-
+        dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthDataResult>() {
+            @Override
+            public void onSuccess(GetMonthDataResult result) {
+                getView().setFormMonthEnabled(result.isMonthly());
+                if (result.isMonthly()) {
+                    getView().setAcceptableMonthList(result.getMonthsList());
+                }
+            }
+        }));
     }
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){

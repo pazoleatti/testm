@@ -371,4 +371,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         return statusList;
     }
+
+    @Override
+    public boolean isMonthly(int formId) {
+        FormTemplate formTemplate = formTemplateDao.get(formId);
+        return formTemplate.isMonthly();
+    }
 }
