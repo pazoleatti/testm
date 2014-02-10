@@ -60,6 +60,9 @@ public class DeclarationTemplateController {
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
+
+        if (items.get(0) != null && items.get(0).getSize() == 0)
+            exceptionHandler(new ServiceException("Файл jrxml пустой."), resp);
 		declarationTemplateImpexService.importDeclarationTemplate
 				(securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
@@ -90,10 +93,15 @@ public class DeclarationTemplateController {
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
+
         try {
+            if (items.get(0) != null && items.get(0).getSize() == 0)
+                throw new ServiceException("Файл jrxml пустой.");
             InputStream inputStream = items.get(0).getInputStream();
             declarationTemplateService.setJrxml(declarationTemplateId, inputStream);
             inputStream.close();
+        } catch (ServiceException e){
+            exceptionHandler(e, resp);
         } catch (IOException e) {
             exceptionHandler(e, resp);
         }
