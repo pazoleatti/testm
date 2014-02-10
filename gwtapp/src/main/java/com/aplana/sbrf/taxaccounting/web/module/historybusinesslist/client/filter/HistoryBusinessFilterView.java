@@ -227,6 +227,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
+        if (taxType.getValue() == null){
+            reportPeriodIds.setPeriods(new ArrayList<ReportPeriod>());
+        }
         if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
         }
