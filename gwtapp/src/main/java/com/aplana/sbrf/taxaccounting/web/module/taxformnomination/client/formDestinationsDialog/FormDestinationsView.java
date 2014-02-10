@@ -69,6 +69,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
         initWidget(uiBinder.createAndBindUi(this));
         formTypeId.setPeriodDates(new Date(), new Date());
+        formDataKind.setPeriodDates(new Date(), new Date());
 	}
 
 	@UiHandler("createButton")
@@ -172,7 +173,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         }
 
         // Тип налоговой формы
-        if (formDataKind.getValue() == null){
+        if (formDataKind.getValue().size() == 0){
             emptyFields.add("Тип налоговой формы");
         }
 
