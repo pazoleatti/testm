@@ -219,7 +219,7 @@ public interface SourceService {
     /**
      * Обновление исполнителя для назначенной формы
      */
-    void updatePerformer(int id, int performerId);
+    void updatePerformer(int id, Integer performerId);
 
 	List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
 }

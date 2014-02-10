@@ -75,6 +75,11 @@ public class TaxFormNominationPresenter
          * Обновление линков редактировать/отменить назначение
          */
         void updatePanelAnchors();
+
+        /**
+         * Обновление страницы
+         */
+        void onReveal();
     }
 
     private TaxType taxType;
@@ -265,5 +270,11 @@ public class TaxFormNominationPresenter
                                 reloadFormTableData();
                             }
                         }, this));
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().onReveal();
     }
 }

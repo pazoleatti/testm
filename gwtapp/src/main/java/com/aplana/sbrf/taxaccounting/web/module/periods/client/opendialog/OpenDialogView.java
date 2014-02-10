@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -140,6 +141,8 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
         departmentPicker.setValue(null);
         period.setValue(null, true);
         period.setDereferenceValue(null);
+	    Date current = new Date();
+	    period.setPeriodDates(current, current);
         balancePeriod.setValue(false);
         correctPeriod.setValue(false, true);
         onCorrectPeriodButton();

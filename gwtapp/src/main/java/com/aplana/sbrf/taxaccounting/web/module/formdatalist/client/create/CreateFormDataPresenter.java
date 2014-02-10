@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -11,8 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -23,11 +20,16 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
+import java.util.List;
+import java.util.Set;
+
+
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
+    private TaxType taxType;
 
-	public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
+    public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
 		void init();
 		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
 		void setAcceptableFormKindList(List<FormDataKind> list);
@@ -53,7 +55,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
         action.setDepartmentId(filterFormData.getDepartmentIds().iterator().next());
-        action.setFormDataKindId(filterFormData.getFormDataKind().getId());
+        action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
         dispatchAsync.execute(action, CallbackUtils
@@ -70,28 +72,74 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         );
     }
 
-	public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
-		final GetFilterData action = new GetFilterData();
-		action.setTaxType(filter.getTaxType());
-		dispatchAsync.execute(action, CallbackUtils
-				.wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
-					@Override
-					public void onSuccess(GetFilterDataResult result) {
+    @Override
+    public void onReportPeriodChange() {
+        List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
+        if (reportIds == null || reportIds.isEmpty())
+            return;
+
+        FillFormFieldsAction action = new FillFormFieldsAction();
+        action.setFieldId(reportIds.get(0));
+        action.setFieldsNum(FillFormFieldsAction.FieldsNum.SECOND);
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+                    @Override
+                    public void onSuccess(FillFormFieldsResult result) {
+                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
+                    }
+                }, this));
+    }
+
+    @Override
+    public void onDepartmentChange() {
+        if (getView().getFilterData().getDepartmentIds() == null)
+            return;
+        FillFormFieldsAction action = new FillFormFieldsAction();
+        action.setFieldsNum(FillFormFieldsAction.FieldsNum.THIRD);
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+                    @Override
+                    public void onSuccess(FillFormFieldsResult result) {
+                        getView().setAcceptableFormKindList(result.getDataKinds());
+                    }
+                }, this));
+    }
+
+    @Override
+    public void onFormKindChange() {
+        FillFormFieldsAction action = new FillFormFieldsAction();
+        action.setFieldsNum(FillFormFieldsAction.FieldsNum.FORTH);
+        action.setTaxType(taxType);
+        action.setFieldId(getView().getFilterData().getReportPeriodIds().get(0));
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+                    @Override
+                    public void onSuccess(FillFormFieldsResult result) {
+                        getView().setAcceptableFormTypeList(result.getFormTypes());
+                    }
+                }, this));
+    }
+
+    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
+        taxType = filter.getTaxType();
+        FillFormFieldsAction action = new FillFormFieldsAction();
+        action.setFieldsNum(FillFormFieldsAction.FieldsNum.FIRST);
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+                    @Override
+                    public void onSuccess(FillFormFieldsResult result) {
                         getView().init();
-						FormDataFilterAvailableValues filterValues = result.getFilterValues();
-						getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setAcceptableFormKindList(filterValues.getKinds());
-						getView().setAcceptableFormTypeList(filterValues.getFormTypes());
-						getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        getView().setAcceptableReportPeriods(result.getReportPeriods());
 
-						// setSelectedFilterValues(filter);
-
+                        // setSelectedFilterValues(filter);
                         // в текущей постановке фильтры не передаются
                         getView().setFilterData(new FormDataFilter());
 
-						slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
-					}
-				}, this));
+                        slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
+                    }
+                }, this));
 	}
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){

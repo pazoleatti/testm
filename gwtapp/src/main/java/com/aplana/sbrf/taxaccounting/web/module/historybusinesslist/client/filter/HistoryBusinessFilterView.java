@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filter;
 
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.LogBusinessFilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
-import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -20,10 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -54,8 +50,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> declarationTypeIds;
 
-    @UiField(provided = true)
-    ValueListBox<FormDataKind> formDataKind;
+    @UiField
+    RefBookMultiPickerModalWidget formDataKind;
 
     @UiField(provided = true)
     ValueListBox<TaxType> taxType;
@@ -122,11 +118,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @Override
-    public void setFormDataKind(List<FormDataKind> list) {
-        formDataKind.setAcceptableValues(list);
-    }
-
-    @Override
     public void setFormDataTaxType(List<TaxType> taxTypeList) {
         taxType.setAcceptableValues(taxTypeList);
     }
@@ -152,16 +143,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         auditFormTypeId.setValue(AuditFormType.FORM_TYPE_TAX);
         auditFormTypeId.setValue(AuditFormType.FORM_TYPE_DECLARATION);
         auditFormTypeId.setValue(null);
-
-        formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
-            @Override
-            public String render(FormDataKind object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
 
         taxType = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
             @Override
@@ -198,26 +179,30 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         user.setEndDate(new Date());
+        // т.к. справочник не версионный, а дату выставлять обязательно
+        formDataKind.setPeriodDates(new Date(), new Date());
     }
 
     private void setVisibleTaxFields() {
         formPanel.setVisible(true);
         declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
-        formDataKind.setValue(FormDataKind.PRIMARY);
+        List<Long> ids = new ArrayList<Long>();
+        ids.add((long) FormDataKind.PRIMARY.getId());
+        formDataKind.setValue(ids);
     }
 
     private void setVisibleDeclarationFields() {
         formPanel.setVisible(false);
         formTypeId.setValue(null);
-        formDataKind.setValue(null);
+        formDataKind.setValue(new ArrayList<Long>());
         declarationTypePanel.setVisible(true);
     }
 
     private void hideAll() {
         formPanel.setVisible(false);
         formTypeId.setValue(null);
-        formDataKind.setValue(null);
+        formDataKind.setValue(new ArrayList<Long>());
         declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
     }
@@ -242,6 +227,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
+        if (taxType.getValue() == null){
+            reportPeriodIds.setPeriods(new ArrayList<ReportPeriod>());
+        }
         if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
         }

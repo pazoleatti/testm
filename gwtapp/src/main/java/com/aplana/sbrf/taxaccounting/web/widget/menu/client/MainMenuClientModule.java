@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client.DialogView;
 import com.google.inject.Singleton;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
@@ -16,6 +18,7 @@ public class MainMenuClientModule extends AbstractPresenterModule {
 		// куда бы небыл помещен виджет
 		bind(MainMenu.Binder.class).in(Singleton.class);
 
+		bindSingletonPresenterWidget(DialogPresenter.class, DialogPresenter.MyView.class, DialogView.class);
 	}
 
 }

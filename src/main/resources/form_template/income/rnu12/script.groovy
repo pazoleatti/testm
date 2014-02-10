@@ -70,12 +70,12 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['code', 'numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber', 'date',
+def editableColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber', 'date',
         'periodCounts', 'advancePayment', 'outcomeInBuh']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'code', 'numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
+def nonEmptyColumns = ['rowNumber', 'numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
         'date', 'periodCounts', 'advancePayment', 'outcomeInBuh']
 
 // Сумируемые колонки в фиксированной с троке
@@ -87,11 +87,6 @@ def totalColumns = ['advancePayment', 'outcomeInNalog', 'outcomeInBuh']
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -118,7 +113,7 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.code) })
+        dataRowHelper.save(dataRows.sort { getKnu(it.opy) })
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
@@ -138,12 +133,13 @@ void calc() {
         }
 
         dataRows.eachWithIndex { row, i ->
+            def knu = getKnu(row.opy)
             if (tmp == null) {
-                tmp = row.code
+                tmp = knu
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                totalRows.put(i, getNewRow(getKnu(tmp), sums))
+            if (tmp != knu) {
+                totalRows.put(i, getNewRow(tmp, sums))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -155,7 +151,7 @@ void calc() {
                     if (val != null)
                         sums[it] += val
                 }
-                totalRows.put(i + 1, getNewRow(getKnu(row.code), sums))
+                totalRows.put(i + 1, getNewRow(knu, sums))
                 totalColumns.each {
                     sums[it] = 0
                 }
@@ -165,7 +161,7 @@ void calc() {
                 if (val != null)
                     sums[it] += val
             }
-            tmp = row.code
+            tmp = knu
         }
 
         // добавить "итого по коду" в таблицу
@@ -273,10 +269,6 @@ void logicCheck() {
 
         needValue['outcomeInNalog'] = calc11(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        // Проверки соответствия НСИ
-        checkNSI(27, row, "code")
-        checkNSI(27, row, "opy")
     }
 
     // Арифметическая проверка итоговых значений строк «Итого по КНУ»

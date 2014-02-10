@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat
  */
 
 // графа 1  - incomeTypeId              - КНУ
-// графа 2  - incomeGroup               - Группа доходов
+// графа 2  - incomeGroup               - Группа дохода
 // графа 3  - incomeTypeByOperation     - Вид дохода по операции
 // графа 4  - accountNo                 - Балансовый счёт по учёту дохода
 // графа 5  - rnu6Field10Sum            - РНУ-6 (графа 10) cумма

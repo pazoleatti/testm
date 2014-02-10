@@ -29,8 +29,6 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     public interface MyView extends PopupView, HasUiHandlers<FormDestinationsUiHandlers> {
         // установка данных в поле "подразделения"
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
-        // загрузка данных для поля "Тип налоговой формы"
-        void setFormDataKinds(List<FormDataKind> formDataKinds);
         // установка данных в поле "исполнители"
         void setPerformers(List<Department> performers, Set<Integer> availablePerformers);
         // подготовить форму для создания
@@ -42,7 +40,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
          // получить список исполнителей
         Integer getPerformer();
         // получить тип формы
-        FormDataKind getFormDataKind();
+        List<Long> getFormDataKind();
         // получить вид формы
         List<Long> getFormTypes();
         // установить фильтр для справочника
@@ -71,8 +69,6 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                     public void onSuccess(GetDestanationPopupDataResult result) {
                         // установка данных в поле "подразделения"
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        // загрузка данных для поля "Тип налоговой формы"
-                        getView().setFormDataKinds(result.getFormDataKinds());
                         // установка данных в поле "исполнители"
                         getView().setPerformers(result.getPerformers(), result.getAvailablePerformers());
                         // установить фильтр для видов нф
@@ -91,7 +87,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     public void onConfirm() {
         AssignFormsAction action = new AssignFormsAction();
         action.setDepartments(getView().getDepartments());
-        action.setFormDataKind(getView().getFormDataKind());
+        action.setFormDataKind(FormDataKind.fromId(getView().getFormDataKind().iterator().next().intValue()));
         action.setFormTypes(getView().getFormTypes());
         action.setPerformer(getView().getPerformer());
 

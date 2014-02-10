@@ -44,7 +44,7 @@
         }*/
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Редактирование назначения налоговых форм" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций" >
         <g:VerticalPanel height="100%" >
 
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
@@ -59,7 +59,7 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true" width="250px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
@@ -71,8 +71,8 @@
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Изменить"/>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
                 </style:RightBar>
             </style:Bar>
 

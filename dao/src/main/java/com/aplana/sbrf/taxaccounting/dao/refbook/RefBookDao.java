@@ -54,7 +54,7 @@ public interface RefBookDao {
 	 * @param attributeId код атрибута, входящего в справочник
 	 * @return
 	 */
-	RefBook getByAttribute(long attributeId);
+	RefBook getByAttribute(Long attributeId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -209,15 +209,6 @@ public interface RefBookDao {
     List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
-     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
-     * @param versionFrom дата актуальности новой версии
-     * @param attributes атрибуты справочника
-     * @param records новые значения полей элемента справочника
-     * @return ссылочные атрибуты в порядке?
-     */
-    boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
      * @param refBookId идентификатор справочника
      * @param recordId идентификатор записи справочника (без учета версий)
@@ -237,26 +228,13 @@ public interface RefBookDao {
     void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
 
     /**
-     * Изменение периода актуальности для указанной версии
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     * @param version новая дата начала актуальности
-     */
-    void updateVersionRelevancePeriod(Long uniqueRecordId, Date version);
-
-    /**
-     * Удаление версии
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     */
-    void deleteVersion(Long uniqueRecordId);
-
-    /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordId уникальный идентификатор версии записи
      * @param versionFrom дата начала актуальности новой версии
      * @return есть ссылки на версию?
      */
-    boolean isVersionUsed(Long uniqueRecordId, Date versionFrom);
+    boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
@@ -264,7 +242,7 @@ public interface RefBookDao {
      * @param uniqueRecordIds список идентификаторов версий записей
      * @return есть ссылки на версию?
      */
-    boolean isVersionUsed(List<Long> uniqueRecordIds);
+    boolean isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной
@@ -281,11 +259,6 @@ public interface RefBookDao {
      * @return
      */
     Long getRecordId(Long uniqueRecordId);
-    /**
-     * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
-     */
-    void deleteRecordVersions(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии

@@ -120,8 +120,7 @@
                         <g:cell width="100%">
                             <g:VerticalPanel verticalAlignment="middle">
                                 <g:cell height="26px">
-                                    <g:ValueListBox ui:field="formDataKind" width="100%"
-                                                    addStyleNames="{style.labelBlockMargin}"/>
+                                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="true" width="100%"/>
                                 </g:cell>
                                 <g:cell height="26px">
                                     <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>

@@ -45,7 +45,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Редактирование назначения налоговых форм" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения налоговых форм" >
         <g:VerticalPanel height="100%" >
 
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
@@ -64,7 +64,7 @@
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
                     <g:Label text="Тип налоговой формы" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox ui:field="formDataKind" width="300px"/>
+                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="false" width="300px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
@@ -80,9 +80,9 @@
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="editButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="editButton" text="Сохранить"/>
                     <g:Button addStyleNames="{style.footerButton}"  ui:field="createButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Закрыть"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Отменить"/>
                 </style:RightBar>
             </style:Bar>
 

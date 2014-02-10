@@ -43,13 +43,14 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
 		Set<Integer> depIds = new HashSet<Integer>();
 
-		if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+		if (currentUser.hasRole(TARole.ROLE_ADMIN) ) {
 			for (Department dep : departmentService.listAll()) {
 				depIds.add(dep.getId());
 			}
-		} else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            // Обработка иерархии и связй по всем типам налогов
-            depIds.addAll(departmentService.getTaxFormDepartments(currentUser, asList(TaxType.values())));
+		} else if (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+			for (Department dep : departmentService.getBADepartments(currentUser)) {
+				depIds.add(dep.getId());
+			}
 		}
 		result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
 		return result;

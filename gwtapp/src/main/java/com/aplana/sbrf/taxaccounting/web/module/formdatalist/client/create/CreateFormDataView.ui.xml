@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
 
@@ -49,7 +50,7 @@
                     <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ValueListBox width="100%" ui:field="formDataKind" />
+                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 

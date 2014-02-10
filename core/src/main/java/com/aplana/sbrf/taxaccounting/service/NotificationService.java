@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.List;
 import java.util.Map;
@@ -41,4 +43,25 @@ public interface NotificationService {
      * @return карта оповещений с ключом по идентификатору отчетного периода
      */
     Map<Integer, Notification> mapByDepartments(int senderDepartmentId, Integer receiverDepartmentId);
+
+	/**
+	 * Получить список оповещений для подразделения - получателя
+	 * @param departmentId подразделение - получатель
+	 * @return список оповещений
+	 */
+	List<Notification> notificationsForDepartment(int departmentId);
+
+	/**
+	 * Получить страницу с оповещениями
+	 * @param filter фильтр
+	 * @return страница с оповещениями
+	 */
+	PagingResult<Notification> getByFilter(NotificationsFilterData filter);
+
+	/**
+	 * Получить количество оповещений для подразделения - получателя
+	 * @param receiverDepartmentId идентификатор подразделения - получателя
+	 * @return количество оповещений
+	 */
+	int getCount(int receiverDepartmentId);
 }
