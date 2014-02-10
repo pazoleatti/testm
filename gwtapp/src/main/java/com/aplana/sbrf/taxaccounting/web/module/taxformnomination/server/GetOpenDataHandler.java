@@ -1,14 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -19,6 +10,15 @@ import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetOpen
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Stanislav Yasinskiy
@@ -59,6 +59,7 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();
+        List<Department> departmentList = new ArrayList<Department>();
 
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
         if (currUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -71,9 +72,10 @@ public class GetOpenDataHandler extends AbstractActionHandler<GetOpenDataAction,
         } else if (currUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             for (Department dep : departmentService.getBADepartments(currUser)) {
                 avSet.add(dep.getId());
+                departmentList.add(dep);
             }
             // Необходимые для дерева подразделения
-            result.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(avSet).values()));
+            result.setDepartments(departmentList);
         }
         result.setAvailableDepartments(avSet);
 

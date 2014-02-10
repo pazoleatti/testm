@@ -2,20 +2,20 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDe
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -30,8 +30,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     private boolean isEditForm = false;
 
-    @UiField(provided = true)
-    ValueListBox<FormDataKind> formDataKind;
+    @UiField
+    RefBookMultiPickerModalWidget formDataKind;
 
     @UiField
     RefBookMultiPickerModalWidget formTypeId;
@@ -67,16 +67,6 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	public FormDestinationsView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 
-        formDataKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
-            @Override
-            public String render(FormDataKind object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
-
         initWidget(uiBinder.createAndBindUi(this));
         formTypeId.setPeriodDates(new Date(), new Date());
 	}
@@ -84,10 +74,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	@UiHandler("createButton")
 	public void onSave(ClickEvent event){
         // проверка заполненности полей
-        if (!checkRequiredFieldsOnCreate()){
+        if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNamesOnCeate().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
             );
         } else {
             getUiHandlers().onConfirm();
@@ -96,10 +86,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event){
-        if (!checkRequiredFieldsOnEdit()){
+        if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNamesOnEdit().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
             );
         } else {
             getUiHandlers().onEdit(selectedDFT);
@@ -137,7 +127,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             * Если хотя бы одно значение было установлено пользователем: Система выводит Диалог - вопрос:
             *
             */
-            if (getEmptyFieldsNamesOnCeate().size() != REQUIDED_FIELDS_COUNT){
+            if (getEmptyFieldsNames().size() != REQUIDED_FIELDS_COUNT){
                 Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
                     @Override
                     public void yes() {
@@ -170,19 +160,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
      * Проверка заполненности полей, при создании назначений
      * @return true - если заполнены все требуемые поля, false в обратном случае
      */
-    private boolean checkRequiredFieldsOnCreate(){
-        return getEmptyFieldsNamesOnCeate().size() == 0;
+    private boolean checkRequiredFields(){
+        return getEmptyFieldsNames().size() == 0;
     }
 
-    /**
-     * Проверка заполненности полей, при редактировании назначений
-     * @return true - если заполнены все требуемые поля, false в обратном случае
-     */
-    private boolean checkRequiredFieldsOnEdit(){
-        return getEmptyFieldsNamesOnEdit().size() == 0;
-    }
-
-    private List<String> getEmptyFieldsNamesOnCeate(){
+    private List<String> getEmptyFieldsNames(){
         List<String> emptyFields = new ArrayList<String>();
         // Подразделение
         if (departmentPicker.getValue().size() == 0){
@@ -202,24 +184,9 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         return emptyFields;
     }
 
-    private List<String> getEmptyFieldsNamesOnEdit(){
-        List<String> emptyFields = getEmptyFieldsNamesOnCeate();
-        // Исполнитель
-        if (performersPickerWidget.getValue().size() == 0){
-            emptyFields.add("Исполнитель");
-        }
-
-        return emptyFields;
-    }
-
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartment) {
         departmentPicker.setAvalibleValues(departments, availableDepartment);
-    }
-
-    @Override
-    public void setFormDataKinds(List<FormDataKind> formDataKinds) {
-        formDataKind.setAcceptableValues(formDataKinds);
     }
 
     @Override
@@ -230,8 +197,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     private void resetForm(){
         performersPickerWidget.setValue(null);
         departmentPicker.setValue(null);
-        formTypeId.setValue(new ArrayList<Long>());
-        formDataKind.setValue(null);
+        formTypeId.setValue(null, false);
+        formDataKind.setValue(null, false);
     }
 
     @Override
@@ -248,6 +215,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         // Вид налоговой формы
         formTypeId.setEnabled(true);
         formTypeId.setValue(new ArrayList<Long>());
+        // тип налоговой формы
+        formDataKind.setEnabled(true);
+        formDataKind.setValue(null, false);
+        // TODO нужно отключать мультиселект, сейчас это еще не предусмотрено
+        //formDataKind.setM
     }
 
     @Override
@@ -262,7 +234,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     }
 
     @Override
-    public FormDataKind getFormDataKind() {
+    public List<Long> getFormDataKind() {
         return formDataKind.getValue();
     }
 
@@ -284,11 +256,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         selectedDFT = formTypeKinds;
 
         List<Integer> departmens = new ArrayList<Integer>();
-        List<FormDataKind> kinds = new ArrayList<FormDataKind>();
-        List<Long> types = new ArrayList<Long>();
+        Set<Long> kinds = new HashSet<Long>(formTypeKinds.size(), 1.1f);
+        Set<Long> types = new HashSet<Long>(formTypeKinds.size(), 1.1f);
         for (FormTypeKind f: formTypeKinds){
             departmens.add(f.getDepartment().getId());
-            kinds.add(f.getKind());
+            kinds.add((long) f.getKind().getId());
             types.add(f.getFormTypeId());
         }
         // кнопки "создать" и "изменить"
@@ -298,13 +270,18 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         departmentPicker.setEnabled(false);
         departmentPicker.setValue(departmens);
 
-        // "Тип налоговой формы" недоступен если не выбрано подразделение
-        DOM.setElementPropertyBoolean(formDataKind.getElement(), "disabled", true);
-        // TODO установить множественно
-        formDataKind.setValue(kinds.iterator().next());
-
         // Вид налоговой формы
+        // TODO да пребудет время когда люди будут использвать List и Set по назначениею
+        formTypeId.setValue(new ArrayList<Long>(types));
         formTypeId.setEnabled(false);
-        formTypeId.setValue(types);
+
+
+        // тип налоговой формы
+        // TODO да пребудет время когда люди будут использвать List и Set по назначениею
+        formDataKind.setValue(new ArrayList<Long>(kinds));
+        formDataKind.setEnabled(false);
+
+        // TODO нужно включать мультиселект, сейчас это еще не предусмотрено
+        //formDataKind.setM
     }
 }

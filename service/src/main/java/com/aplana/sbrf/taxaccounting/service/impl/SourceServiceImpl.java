@@ -145,7 +145,7 @@ public class SourceServiceImpl implements SourceService {
 	}
 
     @Override
-    public void updatePerformer(int id, int performerId){
+    public void updatePerformer(int id, Integer performerId){
         departmentFormTypeDao.updatePerformer(id, performerId);
     }
 }
