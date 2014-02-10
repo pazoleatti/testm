@@ -3,11 +3,13 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +17,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,89 +39,97 @@ public class RefBookUtils extends AbstractDao {
     @Autowired
     private ApplicationContext applicationContext;
 
-	/**
-	 * Формирует простой sql-запрос по принципу: один справочник - одна таблица
-	 */
-	public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
-			String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
-		PreparedStatementData ps = new PreparedStatementData();
-		ps.appendQuery("SELECT ");
-		ps.appendQuery("id ");
-		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-		for (RefBookAttribute attribute : refBook.getAttributes()) {
-			ps.appendQuery(", ");
-			ps.appendQuery(attribute.getAlias());
-		}
-		ps.appendQuery(" FROM (SELECT ");
-		if (isSupportOver()) {
-			RefBookAttribute defaultSort = refBook.getSortAttribute();
-			String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
+    /**
+     * Формирует простой sql-запрос по принципу: один справочник - одна таблица
+     * @param tableName название таблицы для которой формируется запрос
+     * @param refBook справочник
+     * @param sortAttribute
+     * @param filter
+     * @param pagingParams
+     * @param isSortAscending
+     * @param whereClause
+     * @return
+     */
+    public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
+                                                String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("SELECT ");
+        ps.appendQuery("id ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            ps.appendQuery(", ");
+            ps.appendQuery(attribute.getAlias());
+        }
+        ps.appendQuery(" FROM (SELECT ");
+        if (isSupportOver()) {
+            RefBookAttribute defaultSort = refBook.getSortAttribute();
+            String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
             String sortDirection = isSortAscending ? "ASC" : "DESC";
-			ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
-		} else {
-			ps.appendQuery("rownum row_number_over");
-		}
-		ps.appendQuery(", t.* FROM ");
-		ps.appendQuery(tableName);
-		ps.appendQuery(" t");
+            ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
+        } else {
+            ps.appendQuery("rownum row_number_over");
+        }
+        ps.appendQuery(", t.* FROM ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" t");
 
-		PreparedStatementData filterPS = new PreparedStatementData();
+        PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
         simpleFilterTreeListener.setPs(filterPS);
 
-		Filter.getFilterQuery(filter, simpleFilterTreeListener);
-		if (filterPS.getQuery().length() > 0) {
-			ps.appendQuery(" WHERE ");
-			ps.appendQuery(filterPS.getQuery().toString());
-			if (filterPS.getParams().size() > 0) {
-				ps.addParam(filterPS.getParams());
-			}
-		}
-		if (whereClause != null && whereClause.trim().length() > 0) {
-			if (filterPS.getQuery().length() > 0) {
-				ps.appendQuery(" AND ");
-			} else {
-				ps.appendQuery(" WHERE ");
-			}
-			ps.appendQuery(whereClause);
-		}
+        Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (filterPS.getParams().size() > 0) {
+                ps.addParam(filterPS.getParams());
+            }
+        }
+        if (whereClause != null && whereClause.trim().length() > 0) {
+            if (filterPS.getQuery().length() > 0) {
+                ps.appendQuery(" AND ");
+            } else {
+                ps.appendQuery(" WHERE ");
+            }
+            ps.appendQuery(whereClause);
+        }
 
-		ps.appendQuery(")");
-		if (pagingParams != null) {
-			ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
-			ps.addParam(pagingParams.getStartIndex());
-			ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
-		}
-		return ps;
-	}
+        ps.appendQuery(")");
+        if (pagingParams != null) {
+            ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
+        }
+        return ps;
+    }
 
     public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause) {
         return getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, true, whereClause);
     }
 
-	/**
-	 * Возвращает элементы справочника в формате для пейджинга. Является реализацией метода {@link RefBookDataProvider#getRecords}
-	 * @param refBookId
-	 * @param tableName
-	 * @param pagingParams
-	 * @param filter
-	 * @param sortAttribute
-	 * @param whereClause дополнительный фильтр для секции WHERE
-	 * @return
-	 */
-	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
-		RefBook refBook = refBookDao.get(refBookId);
-		// получаем страницу с данными
-		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
-		List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
-		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-		// получаем информацию о количестве всех записей с текущим фильтром
-		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
-		result.setTotalCount(getRecordsCount(ps));
-		return result;
-	}
+    /**
+     * Загружает данные справочника на определенную дату актуальности
+     * @param tableName название таблицы
+     * @param refBookId код справочника
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param whereClause дополнительный фильтр для секции WHERE
+     * @return
+     */
+    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+                                                              String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
+        RefBook refBook = refBookDao.get(refBookId);
+        // получаем страницу с данными
+        PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
+        List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // получаем информацию о количестве всех записей с текущим фильтром
+        ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
+        result.setTotalCount(getRecordsCount(ps));
+        return result;
+    }
 
     /**
      * Перегруженная функция с восходящей сортировкой по умолчанию
@@ -135,7 +143,7 @@ public class RefBookUtils extends AbstractDao {
      * @return
      */
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
-			String filter, RefBookAttribute sortAttribute, String whereClause) {
+                                                              String filter, RefBookAttribute sortAttribute, String whereClause) {
         return getRecords(refBookId, tableName, pagingParams, filter, sortAttribute, true, whereClause);
     }
 
@@ -145,7 +153,7 @@ public class RefBookUtils extends AbstractDao {
 	 * @param refBook
 	 * @return
 	 */
-	private List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
+	public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
 		if (ps.getParams().size() > 0) {
 			return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
 		} else {
@@ -158,13 +166,55 @@ public class RefBookUtils extends AbstractDao {
 	 * @param ps
 	 * @return
 	 */
-	private Integer getRecordsCount(PreparedStatementData ps) {
+	public Integer getRecordsCount(PreparedStatementData ps) {
 		if (ps.getParams().size() > 0) {
 			return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray());
 		} else {
 			return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")");
 		}
 	}
+
+    /**
+     * Изменение периода актуальности для указанной версии
+     * @param tableName название таблицы
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     * @param version новая дата начала актуальности
+     */
+    public void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version){
+        getJdbcTemplate().update(String.format("update %s set version=? where id=?", tableName), version, uniqueRecordId);
+    }
+
+    private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from %s where VERSION < ? and ID in (%s)";
+
+    /**
+     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
+     * @param versionFrom дата актуальности новой версии
+     * @param attributes атрибуты справочника
+     * @param records новые значения полей элемента справочника
+     * @return ссылочные атрибуты в порядке?
+     */
+    public boolean isReferenceValuesCorrect(String tableName, @NotNull Date versionFrom, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        if (attributes.size() > 0) {
+            StringBuilder in = new StringBuilder();
+            for (RefBookRecord record : records) {
+                Map<String, RefBookValue> values = record.getValues();
+                for (RefBookAttribute attribute : attributes) {
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
+                            values.get(attribute.getAlias()) != null) {
+                        in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
+                    }
+                }
+            }
+
+            if (in.length() != 0) {
+                in.deleteCharAt(in.length()-1);
+                String sql = String.format(CHECK_REFERENCE_VERSIONS, tableName, in);
+                System.out.println("sql: "+sql);
+                return getJdbcTemplate().queryForInt(sql, versionFrom) == 0;
+            }
+        }
+        return true;
+    }
 
     /**
      *
@@ -236,6 +286,26 @@ public class RefBookUtils extends AbstractDao {
 		params.put("id", recordId);
 		return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
 	}
+
+
+    /**
+     * Удаление версии
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     */
+    public void deleteVersion(String tableName, @NotNull Long uniqueRecordId) {
+        getJdbcTemplate().update(String.format("delete from %s where id=?", tableName), uniqueRecordId);
+    }
+
+    private static final String DELETE_VERSION = "delete from %s where id in %s";
+
+    /**
+     * Удаляет указанные версии записи из справочника
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     */
+    public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
+        String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        getJdbcTemplate().update(sql);
+    }
 
     public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 

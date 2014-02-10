@@ -23,10 +23,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -199,7 +196,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			try {
-				switch (field.getKey().getAttributeType()) {
+                switch (field.getKey().getAttributeType()) {
 					case NUMBER:
 						Number number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
 								? null : new BigDecimal((String)field.getValue().getValue());
@@ -238,7 +235,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
-						Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+                        //TODO так не работало к окато и октмо
+                        //Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+                        Long longValue = field.getValue().getValue() == null ? null : ((ArrayList<Long>)field.getValue().getValue()).get(0);
 						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
@@ -249,10 +248,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 				fieldsValues.put(field.getKey().getAlias(), value);
 			} catch (NumberFormatException nfe) {
+                nfe.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
 				throw badValueException;
 			} catch (ClassCastException cce) {
+                cce.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
 				throw badValueException;

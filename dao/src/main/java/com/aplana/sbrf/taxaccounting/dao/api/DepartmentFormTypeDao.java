@@ -137,7 +137,7 @@ public interface DepartmentFormTypeDao {
     /**
      * Обновление исполнителя для назначенной формы
      */
-    void updatePerformer(int id, int performerId);
+    void updatePerformer(int id, Integer performerId);
 
     /**
      * Удаляет назначение НФ

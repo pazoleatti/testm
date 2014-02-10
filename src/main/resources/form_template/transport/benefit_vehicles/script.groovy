@@ -187,7 +187,7 @@ def logicCheck() {
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
         if (formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id) == null) {
-            return reportPeriod.name + " " + reportPeriod.getYear() + ", "
+            return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
     return ''

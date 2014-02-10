@@ -129,93 +129,18 @@ void checkCreation() {
     }
 }
 
-void addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def row = formData.createDataRow()
-    def dataRows = dataRowHelper.getAllCached()
-    def size = dataRows.size()
-    def index = currentDataRow != null ? currentDataRow.getIndex() : size
-
-    dataRowHelper.insert(row, index + 1)
-}
-
-void deleteRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.delete(currentDataRow)
-    dataRowHelper.save(dataRowHelper.getAllCached())
-}
-
 /**
  * Логические проверки
  */
 void logicCheck() {
-    def String YES_NO = "Да/Нет"
-    def String OKSM = "ОКСМ"
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     for (row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
         }
-
         // 1. Обязательные поля
         // [13/09/13] Евгений Ломоносов: пока нет, Матрица сейчас должна формироваться только автоматически,
         // поэтому нет смысл проверять обязательные поля
-
-        // 2. Проверка наличия элемента справочника «Да/Нет» (графы 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15)
-        checkNSI(row, "f121", YES_NO, 38)
-        checkNSI(row, "f122", YES_NO, 38)
-        checkNSI(row, "f123", YES_NO, 38)
-        checkNSI(row, "f124", YES_NO, 38)
-        checkNSI(row, "f131", YES_NO, 38)
-        checkNSI(row, "f132", YES_NO, 38)
-        checkNSI(row, "f133", YES_NO, 38)
-        checkNSI(row, "f134", YES_NO, 38)
-        checkNSI(row, "f135", YES_NO, 38)
-        checkNSI(row, "similarDealGroup", YES_NO, 38)
-        checkNSI(row, "dealPriceSign", YES_NO, 38)
-
-        //Проверка наличия элемента справочника "Коды наименования сделки" (графа 13)
-        checkNSI(row, "dealNameCode", "Коды наименования сделки", 67)
-
-        // 3. Проверка наличия элемента справочника «Коды сторон сделки» (графа 14)
-        checkNSI(row, "taxpayerSideCode", "Коды стороны сделки", 65)
-
-        // 4. Проверка наличия элемента справочника «Коды типов предмета сделки» (графа 23)
-        checkNSI(row, "dealType", "Коды типов предмета сделки", 64)
-
-        // 5. Проверка наличия элемента справочника «Коды ОКП на основании общероссийского классификатора продукции (ОКП)» (графа  26)
-        checkNSI(row, "dealSubjectCode2", "Коды ОКП на основании общероссийского классификатора продукции (ОКП)", 68)
-
-        // 6. Проверка наличия элемента справочника «ОКСМ» (графы 31, 32, 36, 49)
-        checkNSI(row, "countryCode", OKSM, 10)
-        checkNSI(row, "countryCode1", OKSM, 10)
-        checkNSI(row, "countryCode2", OKSM, 10)
-        checkNSI(row, "countryCode3", OKSM, 10)
-
-        // 7 и 8. Проверка наличия элемента справочника «Коды субъектов Российской Федерации» (графы 33, 37)
-        checkNSI(row, "region1", "Коды субъектов Российской Федерации", 4)
-        checkNSI(row, "region2", "Коды субъектов Российской Федерации", 4)
-
-        // 9. Проверка наличия элемента справочника «Коды условий поставки»  в графе 40)
-        checkNSI(row, "deliveryCode", "Коды условий поставки", 63)
-
-        // 10. Проверка наличия элемента справочника «Коды единиц измерения на основании ОКЕИ»  (графа 41)
-        checkNSI(row, "okeiCode", "Коды единиц измерения на основании ОКЕИ", 12)
-
-        // 11. Проверка наличия элемента справочника «Сведения об организации» (графа 48)
-        checkNSI(row, "organInfo", "Сведения об организации", 70)
-    }
-}
-
-/**
- * Проверка соответствия НСИ
- */
-void checkNSI(DataRow<Cell> row, String alias, String msg, Long id) {
-    def cell = row.getCell(alias)
-    if (cell.value != null && getRefBookValue(id, cell.value) == null) {
-        def msg2 = cell.column.name
-        def rowNum = row.getIndex()
-        logger.warn("В справочнике «$msg» не найден элемент графы «$msg2», указанный в строке $rowNum!")
     }
 }
 
@@ -1008,7 +933,11 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
     // Графа 49
     switch (type.id) {
+        case 382:
+        case 383:
         case 385:
+        case 392:
+        case 393:
             row.countryCode3 = srcRow.country
             break
         case 375:
@@ -1017,24 +946,18 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 379:
         case 380:
         case 381:
-        case 382:
-        case 383:
         case 386:
-        case 389:
-        case 390:
-        case 391:
-        case 392:
-        case 394:
             row.countryCode3 = srcRow.countryCode
-            break
-        case 393:
-            row.countryCode3 = srcRow.countryCode1
             break
         case 384:
             row.countryCode3 = srcRow.contraCountryCode
             break
         case 387:
         case 388:
+        case 389:
+        case 390:
+        case 391:
+        case 394:
             row.countryCode3 = srcRow.countryName
             break
     }

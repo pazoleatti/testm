@@ -111,7 +111,7 @@
                 </g:ResizeLayoutPanel>
 
                 <g:ResizeLayoutPanel ui:field="declarationGridWrapper" addStyleNames="{style.table}">
-                    <style:GenericDataGrid ui:field="declarationGrid" width="100%" height="100%" visible="false"/>
+                    <style:GenericDataGrid ui:field="declarationGrid" width="100%" height="100%"/>
                 </g:ResizeLayoutPanel>
 
             </fm:BodyContainer>

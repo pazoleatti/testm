@@ -25,7 +25,7 @@ import java.math.RoundingMode
  * ********** 6.1.2 Сводная форма "Доходы, учитываемые в простых РНУ" уровня обособленного подразделения **********
  *
  * 1    incomeTypeId                КНУ
- * 2    incomeGroup                 Группа доходов
+ * 2    incomeGroup                 Группа дохода
  * 3    incomeTypeByOperation       Вид дохода по операции
  * 4    accountNo                   Балансовый счёт по учёту дохода
  * 5    rnu6Field10Sum              РНУ-6 (графа 10) cумма
@@ -42,7 +42,7 @@ import java.math.RoundingMode
  * ********** 6.1.1	Сводная форма начисленных доходов уровня обособленного подразделения **********
  *
  * 1   incomeTypeId                 КНУ
- * 2   incomeGroup                  Группа доходов
+ * 2   incomeGroup                  Группа дохода
  * 3   incomeTypeByOperation        Вид дохода по операциям
  * 4   incomeBuhSumAccountNumber    балансовый счёт по учёту дохода
  * 5   incomeBuhSumRnuSource        источник информации в РНУ
