@@ -35,9 +35,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public List<RefBook> getAll(boolean onlyVisible, RefBookType type) {
-        Integer typeId = type == null ? null : type.getId();
-        return onlyVisible ? refBookDao.getAllVisible(typeId) : refBookDao.getAll(typeId);
+    public List<RefBook> getAll(boolean onlyVisible) {
+		//TODO: избавиться от лишнего аргумента null (Marat Fayzullin 10.02.2014)
+        return onlyVisible ? refBookDao.getAllVisible(null) : refBookDao.getAll(null);
     }
 
     @Override
