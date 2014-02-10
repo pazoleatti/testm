@@ -1,5 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.junit.Assert;
@@ -9,11 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormTypeDaoTest.xml"})
@@ -63,6 +62,11 @@ public class FormTypeDaoTest {
         formTypeDao.delete(type.getId());
         type = formTypeDao.get(1);
         Assert.assertEquals(-1, type.getStatus().getId());
+    }
+
+    @Test
+    public void testGetByTaxType(){
+        Assert.assertEquals(1, formTypeDao.getByTaxType(TaxType.TRANSPORT).size());
     }
 
     @Test

@@ -23,4 +23,15 @@ public class TemplateFilter implements Serializable {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TemplateFilter filter = (TemplateFilter) o;
+
+        return active == filter.active && taxType == filter.taxType;
+
+    }
 }

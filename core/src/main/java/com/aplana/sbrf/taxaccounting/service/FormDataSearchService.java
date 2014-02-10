@@ -51,4 +51,12 @@ public interface FormDataSearchService {
 	 * @throws AccessDeniedException если у пользователя нет роли, разрешающей поиск по налоговым формам 
 	 */
 	FormDataFilterAvailableValues getAvailableFilterValues(TAUserInfo userInfo, TaxType taxType);
+
+    /**
+     * Получает активные виды НФ в данном отчетном периоде. Активным считается тот, у которого есть хотя бы один
+     * шаблон НФ в этом отчетном периоде
+     * @param reportPeriodId идентификатор периода
+     * @return активные виды НФ
+     */
+    List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType);
 }

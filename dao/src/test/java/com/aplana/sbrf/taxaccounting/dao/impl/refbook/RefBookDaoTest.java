@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.AssertTrue;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -184,17 +185,17 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetByAttribute1() {
-		assertEquals(2, refBookDao.getByAttribute(4).getId().longValue());
+		assertEquals(2, refBookDao.getByAttribute(4L).getId().longValue());
 	}
 
 	@Test
 	public void testGetByAttribute2() {
-		assertEquals(1, refBookDao.getByAttribute(3).getId().longValue());
+		assertEquals(1, refBookDao.getByAttribute(3L).getId().longValue());
 	}
 
 	@Test(expected = DaoException.class)
 	public void testGetByAttribute3() {
-		refBookDao.getByAttribute(-123123);
+		refBookDao.getByAttribute(-123123L);
 	}
 
 	@Test
@@ -434,18 +435,18 @@ public class RefBookDaoTest {
             records.add(record);
         }
         boolean isOk = refBookDao.isReferenceValuesCorrect(getDate(1, 1, 2013), refBook.getAttributes(), records);
-        assertEquals(true, isOk);
+        assertTrue(isOk);
         isOk = refBookDao.isReferenceValuesCorrect(new Date(), refBook.getAttributes(), records);
-        assertEquals(false, isOk);
+        assertFalse(isOk);
     }
 
     @Test
     public void checkVersionUsages() {
         boolean isOk = !refBookDao.isVersionUsed(Arrays.asList(1L));
-        assertEquals(true, isOk);
+		assertTrue(isOk);
 
         isOk = !refBookDao.isVersionUsed(1L, getDate(1, 1, 2013));
-        assertEquals(true, isOk);
+		assertTrue(isOk);
     }
 
     @Test

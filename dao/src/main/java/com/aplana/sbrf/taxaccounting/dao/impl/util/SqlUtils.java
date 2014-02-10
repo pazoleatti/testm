@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.util;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.util.List;
 
@@ -25,54 +26,71 @@ public final class SqlUtils {
 	private SqlUtils() {
 	}
 
+	static void checkListSize(List<?> list) {
+		if (list == null) {
+			throw new IllegalArgumentException("List parameter must be defined");
+		}
+		if (list.size() < 1) {
+			throw new IllegalArgumentException("List must not be empty");
+		}
+	}
+
 	/**
 	 * Функция преобразует список (например, содержащий элементы 1,2,3,4) в
 	 * строку вида "(1,2,3,4)", которая бдует использоваться в SQL запросах вида
 	 * "...where param in (1,2,3,4)";
 	 */
-	public static String transformToSqlInStatement(List<?> list) {
-		StringBuffer stringBuffer = new StringBuffer(list.toString());
-		return '(' + (stringBuffer.substring(1, stringBuffer.length() - 1)) + ')';
+	public static String transformToSqlInStatement(List<? extends Number> list) {
+		checkListSize(list);
+		return '(' + StringUtils.join(list.toArray(), ',') + ')';
 	}
 
-	public static String transformFormStatesToSqlInStatement(
-			List<WorkflowState> source) {
-		StringBuffer result = new StringBuffer("");
+	public static String transformFormStatesToSqlInStatement(List<WorkflowState> source) {
+		checkListSize(source);
+		StringBuilder result = new StringBuilder();
+		result.append('(');
 		for (WorkflowState workflowState : source) {
 			result.append(workflowState.getId()).append(',');
 		}
-		return '(' + result.substring(0, result.length() - 1) + ')';
+		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
 
 	public static String transformTaxTypeToSqlInStatement(List<TaxType> source) {
-		StringBuffer result = new StringBuffer("");
+		checkListSize(source);
+		StringBuilder result = new StringBuilder();
+		result.append('(');
 		for (TaxType taxType : source) {
 			result.append('\'').append(taxType.getCode()).append('\'')
 					.append(',');
 		}
-		return '(' + result.substring(0, result.length() - 1) + ')';
+		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
 
-	public static String transformFormKindsToSqlInStatement(
-			List<FormDataKind> source) {
-		StringBuffer result = new StringBuffer("");
+	public static String transformFormKindsToSqlInStatement(List<FormDataKind> source) {
+		checkListSize(source);
+		StringBuilder result = new StringBuilder();
+		result.append('(');
 		for (FormDataKind formDataKind : source) {
 			result.append(formDataKind.getId()).append(',');
 		}
-		return '(' + result.substring(0, result.length() - 1) + ')';
+		return result.deleteCharAt(result.length() - 1).append(')').toString();
 	}
 
     /**
      * Подготовка строки вида "?,?,?,..."
      */
     public static String preparePlaceHolders(int length) {
-        StringBuilder builder = new StringBuilder();
+		if (length <= 0) {
+			throw new IllegalArgumentException("Parameter 'length' must be positive integer number");
+		}
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < length;) {
-            builder.append("?");
-            if (++i < length) {
-                builder.append(",");
-            }
+			result.append('?');
+			if (++i == length) {
+				return result.toString();
+			}
+			result.append(',');
         }
-        return builder.toString();
+	    return null; // недостижимый код
     }
 }
