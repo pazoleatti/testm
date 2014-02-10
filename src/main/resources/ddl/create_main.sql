@@ -16,6 +16,8 @@ comment on column ref_book_oktmo.parent_id is 'Идентификатор род
 comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+
+create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 --------------------------------------------------------------------------------------------------------------
 
 create table configuration (

@@ -57,6 +57,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Autowired
     private BDUtils dbUtils;
 
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
     @Override
     @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(@NotNull Long refBookId) {
@@ -189,8 +191,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		}
     }
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
     private static final String WITH_STATEMENT =
             "with t as (select\n" +
                     "  max(version) version, record_id\n" +
@@ -210,7 +210,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * Динамически формирует запрос для справочника
      *
      * @param refBookId     код справочника
-     * @param recordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
+     * @param uniqueRecordId      идентификатор записи справочника. Если = null, то получаем все записи справочника, иначе - получаем все версии записи справочника
      * @param version       дата актуальности данных справочника. Если = null, то версионирование не учитывается
 	 * @param filter		строка фильтрации
      * @param sortAttribute сортируемый столбец. Может быть не задан
@@ -218,7 +218,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * @param isSortAscending порядок сортировки, по умолчанию используется сортировка по возрастанию
      * @return
      */
-    private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long recordId, Date version, RefBookAttribute sortAttribute,
+    private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
 			String filter, PagingParams pagingParams, boolean isSortAscending) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
@@ -245,7 +245,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			ps.addParam(refBookId);
 			ps.addParam(version);
         } else {
-            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, recordId, refBookId));
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
@@ -506,12 +506,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String INSERT_FAKE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
-            "status) values (seq_ref_book_record.nextval, ?, ?, to_date('%s', 'DD.MM.YYYY'), 2)";
+            "status) values (seq_ref_book_record.nextval, ?, ?, ?, 2)";
 
     @Override
     public void createFakeRecordVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date version) {
-        getJdbcTemplate().update(String.format(INSERT_FAKE_REF_BOOK_RECORD_SQL, sdf.format(version)),
-                recordId, refBookId);
+        getJdbcTemplate().update(INSERT_FAKE_REF_BOOK_RECORD_SQL, recordId, refBookId, version);
     }
 
     private static final String DELETE_REF_BOOK_VALUE_SQL = "delete from ref_book_value where record_id = ?";
@@ -696,17 +695,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "from\n" +
                     "  ref_book_record\n" +
                     "where\n" +
-                    "  ref_book_id = %d and\n" +
-                    "version <= to_date('%s', 'DD.MM.YYYY')\n" +
+                    "  ref_book_id = ? and\n" +
+                    "version <= ? \n" +
                     "union\n" +
                     "select\n" +
                     "  version\n" +
                     "from\n" +
                     "  ref_book_record\n" +
                     "where\n" +
-                    "  ref_book_id = %d and\n" +
-                    "  version >= to_date('%s', 'DD.MM.YYYY') and\n" +
-                    "  version <= to_date('%s', 'DD.MM.YYYY') and" +
+                    "  ref_book_id = ? and\n" +
+                    "  version >= ? and\n" +
+                    "  version <= ? and" +
                     "  status = 0\n" +
                     "group by\n" +
                     "  version\n" +
@@ -715,14 +714,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<Date> getVersions(@NotNull Long refBookId, @NotNull Date startDate, @NotNull Date endDate) {
-        String sql = String.format(RECORD_VERSION, refBookId, sdf.format(startDate), refBookId, sdf.format(startDate), sdf.format(endDate));
-        return getJdbcTemplate().query(sql, new RowMapper<Date>() {
-
+        return getJdbcTemplate().query(RECORD_VERSION, new RowMapper<Date>() {
             @Override
             public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return rs.getDate(1);
             }
-        });
+        }, refBookId, startDate, refBookId, startDate, endDate);
     }
 
     private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ?)\n" +
@@ -783,19 +780,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select num, id, version, status, nextversion, nextstatus, \n" +
             "case\n" +
             "  when (status=0 and (\n" +
-            "  \t(%s is null and (\n" +
-            "  \t\t(nextversion is not null and nextversion > to_date('%s', 'DD.MM.YYYY')) or \n" +
-            "\t\t(nextversion is null and version > to_date('%s', 'DD.MM.YYYY'))\n" +
-            "  \t)) or (%s is not null and (\n" +
-            "  \t\t(version < to_date('%s', 'DD.MM.YYYY') and nextversion > to_date('%s', 'DD.MM.YYYY')) or \n" +
-            "  \t\t(version > to_date('%s', 'DD.MM.YYYY') and version < to_date(%s, 'DD.MM.YYYY'))\n" +
+            "  \t(? is null and (\n" +
+            "  \t\t(nextversion is not null and nextversion > ?) or \n" +
+            "\t\t(nextversion is null and version > ?)\n" +
+            "  \t)) or (? is not null and (\n" +
+            "  \t\t(version < ? and nextversion > ?) or \n" +
+            "  \t\t(version > ? and version < ?)\n" +
             "  \t))\n" +
             "  )) then 1\n" +
-            "  when (status=0 and nextversion is null and version < to_date('%s', 'DD.MM.YYYY')) then 2\n" +
-            "  when (status=2 and (%s is not null and version > to_date('%s', 'DD.MM.YYYY') and version < to_date(%s, 'DD.MM.YYYY') and nextversion > to_date(%s, 'DD.MM.YYYY'))) then 3\n" +
+            "  when (status=0 and nextversion is null and version < ?) then 2\n" +
+            "  when (status=2 and (? is not null and version > ? and version < ? and nextversion > ?)) then 3\n" +
             "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and %s is null and version > to_date('%s', 'DD.MM.YYYY')) or \n" +
-            "  \t(nextversion is null and version > to_date('%s', 'DD.MM.YYYY'))\n" +
+            "  \t(nextversion is not null and ? is null and version > ?) or \n" +
+            "  \t(nextversion is null and version > ?)\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -806,11 +803,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			@NotNull Date versionFrom, @NotNull Date versionTo, Long excludedRecordId) {
         String sVersionFrom = sdf.format(versionFrom);
         String sVersionTo = versionTo != null ? "'"+sdf.format(versionTo)+"'" : null;
-        String sql = String.format(CHECK_CROSS_VERSIONS,
-                sVersionTo, sVersionFrom, sVersionFrom, sVersionTo, sVersionFrom, sVersionFrom, sVersionFrom, sVersionTo,
-                sVersionFrom, sVersionTo, sVersionFrom, sVersionTo, sVersionTo, sVersionTo, sVersionFrom, sVersionFrom);
 
-        return getJdbcTemplate().query(sql, new RowMapper<CheckCrossVersionsResult>() {
+        return getJdbcTemplate().query(CHECK_CROSS_VERSIONS, new RowMapper<CheckCrossVersionsResult>() {
             @Override
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 CheckCrossVersionsResult result = new CheckCrossVersionsResult();
@@ -823,7 +817,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 result.setResult(CrossResult.getResultById(rs.getInt("RESULT")));
                 return result;
             }
-        }, refBookId, recordId, excludedRecordId, excludedRecordId);
+        }, refBookId, recordId, excludedRecordId, excludedRecordId,
+                versionTo, versionFrom, versionFrom, versionTo, versionFrom, versionFrom, versionFrom, versionTo,
+                versionFrom, versionTo, versionFrom, versionTo, versionTo, versionTo, versionFrom, versionFrom);
     }
 
     private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
@@ -886,39 +882,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < to_date('%s', 'DD.MM.YYYY') and ID in (%s)";
-
-    @Override
-    public boolean isReferenceValuesCorrect(@NotNull Date versionFrom, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        if (attributes.size() > 0) {
-            StringBuilder in = new StringBuilder();
-            for (RefBookRecord record : records) {
-                Map<String, RefBookValue> values = record.getValues();
-                for (RefBookAttribute attribute : attributes) {
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
-                            values.get(attribute.getAlias()) != null) {
-                        in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
-                    }
-                }
-            }
-
-            if (in.length() != 0) {
-                in.deleteCharAt(in.length()-1);
-                String sql = String.format(CHECK_REFERENCE_VERSIONS, sdf.format(versionFrom), in);
-                return getJdbcTemplate().queryForInt(sql) == 0;
-            }
-        }
-        return true;
-    }
-
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
             "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
-            "\tversionTo IS NOT NULL and (versionFrom <= to_date('%s', 'DD.MM.YYYY') and versionTo >= to_date('%s', 'DD.MM.YYYY'))\n" +
+            "\tversionTo IS NOT NULL and (versionFrom <= ? and versionTo >= ?)\n" +
             ") or (\n" +
-            "\t\t(versionFrom >= to_date('%s', 'DD.MM.YYYY') and (%s IS NULL or versionFrom <= to_date('%s', 'DD.MM.YYYY')))\n" +
+            "\t\t(versionFrom >= ? and (? IS NULL or versionFrom <= ?))\n" +
             ")";
 
     @Override
@@ -928,13 +899,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             recordIds.add(pair.getFirst());
         }
 
-        String sVersionFrom = sdf.format(versionFrom);
-        String sVersionTo = versionTo != null ? "'"+sdf.format(versionTo)+"'" : null;
-
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
-                SqlUtils.transformToSqlInStatement(recordIds),
-                sVersionFrom, sVersionFrom, sVersionFrom, sVersionTo, sVersionTo);
-        List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class);
+                SqlUtils.transformToSqlInStatement(recordIds));
+        List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
         if (conflictedIds.size() > 0) {
             StringBuilder attrNames = new StringBuilder();
             for (Long id : conflictedIds) {
@@ -949,55 +916,47 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    @Override
     public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
         String sql = String.format("update ref_book_record set version=to_date('%s', 'DD.MM.YYYY') where id=?", sdf.format(version));
         getJdbcTemplate().update(sql, uniqueRecordId);
     }
 
     @Override
-    public void deleteVersion(@NotNull Long uniqueRecordId) {
-        getJdbcTemplate().update("delete from ref_book_record where id=?", uniqueRecordId);
-    }
-
-    @Override
-    public boolean isVersionUsed(@NotNull Long uniqueRecordId, @NotNull Date versionFrom) {
+    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom) {
         //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
-        String sql = String.format("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and r.version >= to_date('%s', 'DD.MM.YYYY') and v.REFERENCE_VALUE=?",
-                sdf.format(versionFrom));
-        return getJdbcTemplate().queryForInt(sql, uniqueRecordId) != 0;
+        return getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
+                refBookId, versionFrom, uniqueRecordId) != 0;
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from ref_book_record where id in %s)\n" +
-            "select count(r.id) from ref_book_record r, ref_book_value v, checkRecords cr where r.id=v.record_id and r.version >= cr.version and v.REFERENCE_VALUE=cr.id";
+            "select count(r.id) from ref_book_record r, ref_book_value v, checkRecords cr where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= cr.version and v.REFERENCE_VALUE=cr.id";
 
-    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where record_id in %s)) and value in %s";
+    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value " +
+            "where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and record_id in %s)) and value in %s";
 
-    @Override
-    public boolean isVersionUsed(@NotNull List<Long> uniqueRecordIds) {
+    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
         //Проверка использования в справочниках и настройках подразделений
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
-        boolean hasReferences = getJdbcTemplate().queryForInt(sql) != 0;
+        boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         if (!hasReferences) {
             sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
-            return getJdbcTemplate().queryForInt(sql) != 0;
+            return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         } else return true;
     }
 
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > to_date('%s', 'DD.MM.YYYY')),\n" +
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.versionEnd from nextVersion nv, nextVersionEnd nve";
 
     @Override
     public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {
-        String sql = String.format(GET_NEXT_RECORD_VERSION,
-                sdf.format(versionFrom), RefBook.RECORD_ID_ALIAS);
+        String sql = String.format(GET_NEXT_RECORD_VERSION, RefBook.RECORD_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {
-                            refBookId, recordId
+                            refBookId, recordId, versionFrom
                     },
                     new RefBookUtils.RecordVersionMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -1020,14 +979,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public void deleteAllRecordVersions(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
         String sql = String.format(DELETE_ALL_VERSIONS, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
         getJdbcTemplate().update(sql, refBookId);
-    }
-
-    private static final String DELETE_VERSION = "delete from ref_book_record where id in %s";
-
-    @Override
-    public void deleteRecordVersions(@NotNull List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_VERSION, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
-        getJdbcTemplate().update(sql);
     }
 
     private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id, ref_book_id from REF_BOOK_RECORD where id in %s),\n" +

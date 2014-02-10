@@ -49,17 +49,24 @@
                         <g:Label width="100px" text="Телефон:"/>
                         <g:TextBox maxLength="20" width="300px" ui:field="phone"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel height="350px" width="100%" spacing="3">
-                        <g:cell width="100%" height="100%">
-                            <t:GenericDataGrid ui:field="signersTable" height="350px" width="100%" addStyleNames="{style.table}"/>
+                    <g:VerticalPanel width="100%">
+                        <g:cell>
+                            <g:Label width="100px" text="Подписанты:"/>
                         </g:cell>
-                        <g:cell verticalAlignment="middle" horizontalAlignment="center">
-                            <g:VerticalPanel ui:field="directionPanel" spacing="3">
-                                <g:Button text="↑" ui:field="upSigner" addStyleNames="{style.btns}"/>
-                                <g:Button text="↓" ui:field="downSigner"  addStyleNames="{style.btns}"/>
-                            </g:VerticalPanel>
+                        <g:cell>
+                            <g:HorizontalPanel height="350px" width="100%" spacing="3">
+                                <g:cell width="100%" height="100%">
+                                    <t:GenericDataGrid ui:field="signersTable" height="350px" width="100%" addStyleNames="{style.table}"/>
+                                </g:cell>
+                                <g:cell verticalAlignment="middle" horizontalAlignment="center">
+                                    <g:VerticalPanel ui:field="directionPanel" spacing="3">
+                                        <g:Button text="↑" ui:field="upSigner" addStyleNames="{style.btns}"/>
+                                        <g:Button text="↓" ui:field="downSigner"  addStyleNames="{style.btns}"/>
+                                    </g:VerticalPanel>
+                                </g:cell>
+                            </g:HorizontalPanel>
                         </g:cell>
-                    </g:HorizontalPanel>
+                    </g:VerticalPanel>
                     <g:HorizontalPanel ui:field="buttonPanel" spacing="3" verticalAlignment="middle">
                         <t:LinkButton text="Добавить" ui:field="addSigner" img="resources/img/row-add.png"/>
                         <t:LinkButton text="Удалить" ui:field="removeSigner" img="resources/img/row-delete.png"/>
