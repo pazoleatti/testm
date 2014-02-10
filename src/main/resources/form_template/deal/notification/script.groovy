@@ -101,7 +101,7 @@ void generateXML() {
                 // Дата формирования документа
                 ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Отчетный год
-                ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).year,
+                ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
                 // Код налогового органа
                 КодНО: departmentParam.TAX_ORGAN_CODE.stringValue,
                 // Номер корректировки
