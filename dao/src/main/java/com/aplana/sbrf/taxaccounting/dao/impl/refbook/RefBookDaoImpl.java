@@ -748,6 +748,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    public boolean hasChildren(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
+        String sql = String.format("select count(*) from ref_book_value where attribute_id = (select id from ref_book_attribute where ref_book_id=? and alias='%s') and reference_value in %s",
+                RefBook.RECORD_PARENT_ID_ALIAS, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams, true);

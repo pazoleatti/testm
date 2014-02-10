@@ -20,7 +20,7 @@ public class RefBook implements Serializable {
 
     public final static String RECORD_ID_ALIAS = "record_id";
 
-	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
+	public final static String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
 
     public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";

@@ -388,7 +388,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             RefBook refBook = refBookDao.get(refBookId);
             if (refBook.isHierarchic()) {
-                //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
+                //Если есть дочерние элементы - удалять нельзя
+                refBookDao.hasChildren(refBookId, uniqueRecordIds);
             }
             refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
@@ -411,7 +412,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             RefBook refBook = refBookDao.get(refBookId);
             if (refBook.isHierarchic()) {
-                //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
+                //Если есть дочерние элементы - удалять нельзя
+                refBookDao.hasChildren(refBookId, uniqueRecordIds);
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);
