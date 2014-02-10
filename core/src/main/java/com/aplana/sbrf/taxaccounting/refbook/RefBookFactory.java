@@ -27,10 +27,9 @@ public interface RefBookFactory {
 	 * Загружает список всех справочников
 	 *
      * @param onlyVisible true - только видимые; false - весь список
-     * @param type тип справочника внутренний/внешний
      * @return
 	 */
-	List<RefBook> getAll(boolean onlyVisible, RefBookType type);
+	List<RefBook> getAll(boolean onlyVisible);
 
 	/**
 	 * Ищет справочник по коду атрибута
