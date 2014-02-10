@@ -43,17 +43,18 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 					@Override
 					public void onSuccess(GetMainMenuResult result) {
 						getView().setMenuItems(result.getMenuItems());
-						getView().setNotificationMenuItem(new NotificationMenuItem(result.getNotificationMenuItemName(), MainMenuPresenter.this));
+						if (result.getNotificationMenuItemName() != null) {
+							getView().setNotificationMenuItem(new NotificationMenuItem(result.getNotificationMenuItemName(), MainMenuPresenter.this));
+							refreshTimer = new Timer() {
+								@Override
+								public void run() {
+									updateNotificationCount();
+								}
+							};
+							refreshTimer.scheduleRepeating(NOTIFICATION_UPDATE_TIME);
 
-						refreshTimer = new Timer() {
-							@Override
-							public void run() {
-								updateNotificationCount();
-							}
-						};
-						refreshTimer.scheduleRepeating(NOTIFICATION_UPDATE_TIME);
-
-						updateNotificationCount();
+							updateNotificationCount();
+						}
 					}
 				}, this));
 
