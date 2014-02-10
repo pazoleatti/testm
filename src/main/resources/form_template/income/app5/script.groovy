@@ -139,7 +139,7 @@ void logicCheckBeforeCalc() {
         def incomeParam
         if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
         if (incomeParam == null || incomeParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдены настройки подразделения!")
+            logger.error("Не найдены настройки подразделения!")
         } else {
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
@@ -257,7 +257,7 @@ def getTotalRow(def dataRows) {
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 4
     allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+        totalRow.getCell(it).setStyleAlias('Итоговая')
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow

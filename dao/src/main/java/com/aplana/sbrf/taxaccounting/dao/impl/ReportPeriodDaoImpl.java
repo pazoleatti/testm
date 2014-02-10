@@ -167,9 +167,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 					new ReportPeriodMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(String.format("Не найден отчетный период с типом = \"%1\" на дату \"%2\"", taxType.getCode(), date));
+			throw new DaoException(String.format("Не найден отчетный период с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
 		} catch (IncorrectResultSizeDataAccessException e) {
-			throw new DaoException(String.format("Найдено более одного отчетного периода с типом = \"%1\" на дату \"%2\"", taxType.getCode(), date));
+			throw new DaoException(String.format("Найдено более одного отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
 		}
 	}
 
