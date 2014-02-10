@@ -52,9 +52,9 @@ public class FormDataFilterAvailableValues implements Serializable {
 	
 	/**
 	 * Задать набор видов налоговых форм
-	 * @param formTypeIds набор видов налоговых форм
+	 * @param formTypes набор видов налоговых форм
 	 */
-	public void setFormTypeIds(List<FormType> formTypes) {
+	public void setFormType(List<FormType> formTypes) {
 		this.formTypes = formTypes;
 	}
 

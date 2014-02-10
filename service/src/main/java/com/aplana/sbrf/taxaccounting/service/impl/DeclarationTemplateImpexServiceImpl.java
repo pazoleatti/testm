@@ -57,17 +57,18 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-            String script = declarationTemplateDao.getDeclarationTemplateScript(id);
-            if (script != null)
-			    zos.write(script.getBytes(ENCODING));
+            declarationTemplateDao.getDeclarationTemplateScript(id);
+            String dtScript = declarationTemplateDao.getDeclarationTemplateScript(id);
+            if (dtScript != null)
+			    zos.write(dtScript.getBytes(ENCODING));
 			zos.closeEntry();
 			
 			// JasperTemplate
 			ze = new ZipEntry(REPORT_FILE);
 			zos.putNextEntry(ze);
-            String jrxml = declarationTemplateService.getJrxml(id);
-            if (jrxml != null)
-			    zos.write(declarationTemplateService.getJrxml(id).getBytes(ENCODING));
+            String dtJrxm = declarationTemplateService.getJrxml(id);
+            if (dtJrxm != null)
+			    zos.write(dtJrxm.getBytes(ENCODING));
 			zos.closeEntry();
 
 			// content

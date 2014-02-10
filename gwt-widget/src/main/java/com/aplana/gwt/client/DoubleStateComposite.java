@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.*;
  */
 public abstract class DoubleStateComposite extends Composite implements HasEnabled {
 	public static final String EMPTY_STRING_VALUE = "-";
+    public static final String EMPTY_STRING_TITLE = "В данном поле значение не было задано";
 	/**
 	 * Эта панель показывает только один виджет, из всех, которые в неё помещены. У нас она будет показывать либо сам
 	 * виджет, либо Label со значением.
@@ -88,7 +89,12 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 			}
 		}
 		label.setText(stringValue);
-		label.setTitle(stringValue);
+        if (stringValue.equals(EMPTY_STRING_VALUE)){
+            label.setTitle(EMPTY_STRING_TITLE);
+        }
+        else{
+		    label.setTitle(stringValue);
+        }
 	}
 
 	/**

@@ -79,7 +79,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	public String getJrxml(int declarationTemplateId) {
         BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
         if (jrxmlBlobData == null)
-            return null;
+            return "";
         try {
             StringWriter writer = new StringWriter();
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);

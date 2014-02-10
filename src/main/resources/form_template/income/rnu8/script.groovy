@@ -60,11 +60,11 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['code', 'income', 'outcome']
+def editableColumns = ['balance', 'income', 'outcome']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'code', 'balance', 'name', 'income', 'outcome']
+def nonEmptyColumns = ['number', 'balance', 'income', 'outcome']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -75,11 +75,6 @@ def totalColumns = ['income', 'outcome']
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -106,15 +101,13 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.code) })
+        dataRowHelper.save(dataRows.sort { getKnu(it.balance) })
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (row in dataRows) {
             row.number = ++number
-            row.balance = row.code
-            row.name = row.code
         }
 
         // посчитать "итого по коду"
@@ -123,10 +116,10 @@ void calc() {
         def sum = 0, sum2 = 0
         dataRows.eachWithIndex { row, i ->
             if (tmp == null) {
-                tmp = row.code
+                tmp = row.balance
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
+            if (tmp != row.balance) {
                 totalRows.put(i, getNewRow(getKnu(tmp), sum, sum2))
                 sum = 0
                 sum2 = 0
@@ -135,14 +128,14 @@ void calc() {
             if (i == dataRows.size() - 1) {
                 sum += (row.income ?: 0)
                 sum2 += (row.outcome ?: 0)
-                def totalRowCode = getNewRow(getKnu(row.code), sum, sum2)
+                def totalRowCode = getNewRow(getKnu(row.balance), sum, sum2)
                 totalRows.put(i + 1, totalRowCode)
                 sum = 0
                 sum2 = 0
             }
             sum += (row.income ?: 0)
             sum2 += (row.outcome ?: 0)
-            tmp = row.code
+            tmp = row.balance
         }
 
         // добавить "итого по коду" в таблицу
@@ -216,18 +209,8 @@ void logicCheck() {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
-        // 3. Проверка соответствия балансового счета коду налогового учета
-        if (row.code != row.name) {
-            logger.error(errorMsg + "Балансовый счет не соответствует коду налогового учета!")
-        }
-
-        // Проверки соответствия НСИ
-        checkNSI(28, row, 'code')
-        checkNSI(28, row, 'balance')
-        checkNSI(28, row, 'name')
-
-        // 4. Арифметическая проверка итоговых значений строк «Итого по КНУ»
-        def code = getKnu(row.code)
+        // 3. Арифметическая проверка итоговых значений строк «Итого по КНУ»
+        def code = getKnu(row.balance)
         if (sum1[code] != null) {
             sum1[code] += row.income ?: 0
         } else {
@@ -240,7 +223,7 @@ void logicCheck() {
         }
     }
 
-    // 4. Арифметическая проверка итоговых значений строк «Итого по КНУ»
+    // 3. Арифметическая проверка итоговых значений строк «Итого по КНУ»
     totalRows.each { key, val ->
         if (totalRows.get(key) != sum1.get(key)) {
             def msg = formData.createDataRow().getCell('income').column.name
@@ -254,7 +237,7 @@ void logicCheck() {
         }
     }
 
-    // 5. Арифметическая проверка итогового значения по всем строкам
+    // 4. Арифметическая проверка итогового значения по всем строкам
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 

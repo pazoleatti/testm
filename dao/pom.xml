@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>taxaccounting</artifactId>
-        <version>0.3.7</version>
+        <version>0.3.5</version>
 	</parent>
 
 	<artifactId>dao</artifactId>
@@ -46,6 +46,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
 
 		<!-- Зависимости для юнит-тестов -->

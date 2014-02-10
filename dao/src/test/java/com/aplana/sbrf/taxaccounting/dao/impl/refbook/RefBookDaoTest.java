@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.AssertTrue;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -154,13 +155,19 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetAll() {
-		List<RefBook> refBooks = refBookDao.getAll(0);
+		List<RefBook> refBooks = refBookDao.getAll(RefBookType.LINEAR.getId());
 		assertEquals(3, refBooks.size());
+		refBooks = refBookDao.getAll(RefBookType.HIERARCHICAL.getId());
+		assertEquals(1, refBooks.size());
+		refBooks = refBookDao.getAll(null);
+		assertEquals(4, refBooks.size());
 	}
 
 	@Test
 	public void testGetAllVisible() {
-		assertEquals(2, refBookDao.getAllVisible(0).size());
+		assertEquals(2, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
+		assertEquals(1, refBookDao.getAllVisible(RefBookType.HIERARCHICAL.getId()).size());
+		assertEquals(3, refBookDao.getAllVisible(null).size());
 	}
 
 	@Test
@@ -178,17 +185,17 @@ public class RefBookDaoTest {
 
 	@Test
 	public void testGetByAttribute1() {
-		assertEquals(2, refBookDao.getByAttribute(4).getId().longValue());
+		assertEquals(2, refBookDao.getByAttribute(4L).getId().longValue());
 	}
 
 	@Test
 	public void testGetByAttribute2() {
-		assertEquals(1, refBookDao.getByAttribute(3).getId().longValue());
+		assertEquals(1, refBookDao.getByAttribute(3L).getId().longValue());
 	}
 
 	@Test(expected = DaoException.class)
 	public void testGetByAttribute3() {
-		refBookDao.getByAttribute(-123123);
+		refBookDao.getByAttribute(-123123L);
 	}
 
 	@Test
@@ -377,7 +384,7 @@ public class RefBookDaoTest {
 
     @Test(expected = DaoException.class)
     public void getActiveRecordVersion(){
-        refBookDao.getRecordVersionInfo(10L);
+        refBookDao.getRecordVersionInfo(-1L);
     }
 
     @Test
@@ -428,18 +435,18 @@ public class RefBookDaoTest {
             records.add(record);
         }
         boolean isOk = refBookDao.isReferenceValuesCorrect(getDate(1, 1, 2013), refBook.getAttributes(), records);
-        assertEquals(true, isOk);
+        assertTrue(isOk);
         isOk = refBookDao.isReferenceValuesCorrect(new Date(), refBook.getAttributes(), records);
-        assertEquals(false, isOk);
+        assertFalse(isOk);
     }
 
     @Test
     public void checkVersionUsages() {
         boolean isOk = !refBookDao.isVersionUsed(Arrays.asList(1L));
-        assertEquals(true, isOk);
+		assertTrue(isOk);
 
         isOk = !refBookDao.isVersionUsed(1L, getDate(1, 1, 2013));
-        assertEquals(true, isOk);
+		assertTrue(isOk);
     }
 
     @Test
@@ -502,4 +509,40 @@ public class RefBookDaoTest {
 		final String filter = "NAME = 'sample'";
 		Assert.assertEquals(filter + " AND " + PARENT_FILTER_NULL, RefBookDaoImpl.getParentFilter(filter, null));
 	}
+
+	private static final Long OKATO_REF_BOOK_ID = 4L;
+
+	@Test
+	public void checkHierarchicalTest1() {
+		RefBook refBook = refBookDao.get(OKATO_REF_BOOK_ID);
+		Assert.assertTrue(RefBookDaoImpl.checkHierarchical(refBook));
+	}
+
+	@Test
+	public void checkHierarchicalTest2() {
+		Assert.assertFalse(RefBookDaoImpl.checkHierarchical(refBookDao.get(1L)));
+		Assert.assertFalse(RefBookDaoImpl.checkHierarchical(refBookDao.get(2L)));
+		Assert.assertFalse(RefBookDaoImpl.checkHierarchical(refBookDao.get(3L)));
+	}
+
+	private void checkChildrenCount(Long parentId, int expectedCount) {
+		List<Map<String, RefBookValue>> data = refBookDao.getChildrenRecords(OKATO_REF_BOOK_ID, parentId, getDate(1, 1, 2013), null, null, null);
+		Assert.assertEquals(expectedCount, data.size());
+	}
+
+	@Test
+	public void getChildrenRecordsTest() {
+		checkChildrenCount(null, 4);
+		checkChildrenCount(8L, 2);
+		checkChildrenCount(9L, 0);
+		checkChildrenCount(10L, 1);
+		checkChildrenCount(11L, 0);
+		checkChildrenCount(12L, 3);
+		checkChildrenCount(13L, 0);
+		checkChildrenCount(14L, 0);
+		checkChildrenCount(15L, 0);
+		checkChildrenCount(16L, 0);
+		checkChildrenCount(17L, 0);
+	}
+
 }

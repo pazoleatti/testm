@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filt
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessPrintEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessSearchEvent;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterAction;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterResult;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessReportPeriodsAction;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessReportPeriodsResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -58,8 +60,6 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
 
-        void setFormDataKind(List<FormDataKind> list);
-
         void setFormDataTaxType(List<TaxType> taxTypeList);
 
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
@@ -77,7 +77,6 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
                         getView().setDepartments(avaliableValues.getDepartments(), avaliableValues.getDepartmentIds());
                         getView().setFormTypeId(avaliableValues.getFormTypeMapIds());
                         getView().setDeclarationType(avaliableValues.getDeclarationMapIds());
-                        getView().setFormDataKind(avaliableValues.getFormDataKinds());
                         getView().setFormDataTaxType(avaliableValues.getTaxTypes());
                     }
                 }, this));

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,4 +51,31 @@ public class NotificationServiceImpl implements NotificationService {
         }
         return notificationMap;
     }
+
+	@Override
+	public List<Notification> notificationsForDepartment(int departmentId) {
+		List<Notification> notifications = new ArrayList<Notification>();
+		for (Integer id : notificationDao.listForDepartment(departmentId)) {
+			notifications.add(notificationDao.get(id));
+		}
+		return notifications;
+	}
+
+	@Override
+	public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
+		List<Notification> notifications = new ArrayList<Notification>();
+		for (Integer id : notificationDao.getByFilter(filter)) {
+			notifications.add(notificationDao.get(id));
+		}
+		int totalCount = notificationDao.getCountByFilter(filter);
+		PagingResult<Notification> result = new PagingResult<Notification>(notifications, totalCount);
+		return result;
+	}
+
+	@Override
+	public int getCount(int receiverDepartmentId) {
+		NotificationsFilterData filter = new NotificationsFilterData();
+		filter.setReceiverDepartmentId(receiverDepartmentId);
+		return notificationDao.getCountByFilter(filter);
+	}
 }
