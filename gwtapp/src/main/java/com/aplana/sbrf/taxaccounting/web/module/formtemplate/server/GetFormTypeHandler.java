@@ -32,7 +32,7 @@ public class GetFormTypeHandler extends AbstractActionHandler<GetFormTypeAction,
     public GetFormTypeResult execute(GetFormTypeAction action, ExecutionContext context) throws ActionException {
         GetFormTypeResult result = new GetFormTypeResult();
         result.setFormType(formTypeService.get(action.getFormTypeId()));
-        result.setRefBookList(refBookFactory.getAll(false, null));
+        result.setRefBookList(refBookFactory.getAll(false));
         return result;
     }
 

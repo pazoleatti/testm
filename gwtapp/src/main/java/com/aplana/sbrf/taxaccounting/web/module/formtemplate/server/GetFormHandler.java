@@ -47,7 +47,7 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 		formTemplateService.lock(action.getId(), userInfo);
         formTemplateExt.setFormTemplate(formTemplate);
 		result.setForm(formTemplateExt);
-        result.setRefBookList(refBookFactory.getAll(false, null));
+        result.setRefBookList(refBookFactory.getAll(false));
         return result;
     }
 

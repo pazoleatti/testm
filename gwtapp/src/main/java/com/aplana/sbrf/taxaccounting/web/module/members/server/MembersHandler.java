@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * User: Eugene Stetsenko
  * Date: 2013
@@ -38,8 +40,9 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
         GetMembersResult result = new GetMembersResult();
 		result.setStartIndex(action.getMembersFilterData().getStartIndex());
 
+        PagingResult<TAUserFull> taUserFulls = taUserService.getByFilter(action.getMembersFilterData());
 	    PagingResult<TAUserFullWithDepartmentPath> page = new PagingResult<TAUserFullWithDepartmentPath>();
-	    for (TAUserFull user : taUserService.getByFilter(action.getMembersFilterData())) {
+	    for (TAUserFull user : taUserFulls) {
 		    TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
 		    fullUser.setDepartment(user.getDepartment());
 		    fullUser.setUser(user.getUser());
@@ -48,7 +51,7 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
 		    fullUser.setFullDepartmentPath(fullDepartment);
 		    page.add(fullUser);
 	    }
-
+        page.setTotalCount(taUserFulls.getTotalCount());
 	    result.setTaUserList(page);
         return result;
     }
