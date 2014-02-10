@@ -37,9 +37,13 @@ public class RefBookDaoTest {
 	public static final String ATTRIBUTE_AUTHOR = "author";
 	public static final String ATTRIBUTE_NAME = "name";
     public static final String ATTRIBUTE_WEIGHT = "weight";
+    private static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
 	@Autowired
     RefBookDao refBookDao;
+
+    @Autowired
+    private RefBookUtils refBookUtils;
 
     static Long cnt = 8L;
 
@@ -304,7 +308,7 @@ public class RefBookDaoTest {
 		record.get(ATTRIBUTE_AUTHOR).setValue(null);
 		// сохраняем изменения
         refBookDao.updateRecordVersion(refBook.getId(), record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
-        refBookDao.updateVersionRelevancePeriod(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
+        refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), version2);
 		// проверяем изменения
 		data = refBookDao.getRecords(refBook.getId(), version2, new PagingParams(), null, refBook.getAttribute(ATTRIBUTE_NAME));
         assertEquals(data.size(), 2);
@@ -450,18 +454,18 @@ public class RefBookDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        boolean isOk = refBookDao.isReferenceValuesCorrect(getDate(1, 1, 2013), refBook.getAttributes(), records);
-        assertEquals(true, isOk);
-        isOk = refBookDao.isReferenceValuesCorrect(new Date(), refBook.getAttributes(), records);
-        assertEquals(false, isOk);
+        boolean isOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2013), refBook.getAttributes(), records);
+        assertTrue(isOk);
+        isOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, new Date(), refBook.getAttributes(), records);
+        assertFalse(isOk);
     }
 
     @Test
     public void checkVersionUsages() {
-        boolean isOk = !refBookDao.isVersionUsed(Arrays.asList(1L));
+        boolean isOk = !refBookDao.isVersionUsed(1L, Arrays.asList(1L));
         assertEquals(true, isOk);
 
-        isOk = !refBookDao.isVersionUsed(1L, getDate(1, 1, 2013));
+        isOk = !refBookDao.isVersionUsed(1L, 1L, getDate(1, 1, 2013));
         assertEquals(true, isOk);
     }
 
@@ -478,7 +482,7 @@ public class RefBookDaoTest {
     public void deleteRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(2, records.size());
-        refBookDao.deleteRecordVersions(Arrays.asList(1L));
+        refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(1L));
         records = refBookDao.getRecords(1L, getDate(1, 1, 2013), null, null, null);
         assertEquals(1, records.size());
     }

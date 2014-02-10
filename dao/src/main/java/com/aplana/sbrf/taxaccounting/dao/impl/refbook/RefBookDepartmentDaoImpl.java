@@ -28,7 +28,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-		return refBookUtils.getRecords(REF_BOOK_ID, TABLE_NAME, pagingParams, filter, sortAttribute, isSortAscending, null);
+		return refBookUtils.getRecords(TABLE_NAME, REF_BOOK_ID, null, pagingParams, filter, sortAttribute, isSortAscending, null);
     }
 
     @Override

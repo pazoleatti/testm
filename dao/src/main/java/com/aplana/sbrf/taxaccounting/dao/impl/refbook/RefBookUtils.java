@@ -3,11 +3,13 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.Filter;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.SimpleFilterTreeListener;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,31 +38,86 @@ public class RefBookUtils extends AbstractDao {
     @Autowired
     private ApplicationContext applicationContext;
 
-	/**
-	 * Формирует простой sql-запрос по принципу: один справочник - одна таблица
-	 */
-	public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
+    private static final String WITH_STATEMENT =
+            "with t as (select\n" +
+                    "  max(version) version, record_id\n" +
+                    "from\n" +
+                    "  %s\n" +
+                    "where\n" +
+                    "  status = 0 and version <= ?\n" +
+                    "group by\n" +
+                    "  record_id)\n";
+
+    private static final String RECORD_VERSIONS_STATEMENT =
+            "with currentRecord as (select id, record_id, version from %s where id=?),\n" +
+                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.RECORD_ID=cr.RECORD_ID), \n" +
+                    "t as (select rv.rn as row_number_over, rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+
+    /**
+     * Формирует простой sql-запрос по принципу: один справочник - одна таблица
+     * @param tableName название таблицы для которой формируется запрос
+     * @param refBook справочник
+     * @param uniqueRecordId уникальный идентификатор версии записи справочника (фактически поле ID). Используется только при получении всех версий записи
+     * @param version дата актуальности, по которой определяется период актуальности и соответственно версия записи, которая в нем действует
+     *                Если = null, значит будет выполняться получение всех версий записи
+     *                Иначе выполняется получение всех записей справочника, активных на указанную дату
+     * @param sortAttribute
+     * @param filter
+     * @param pagingParams
+     * @param isSortAscending
+     * @param whereClause
+     * @return
+     */
+	public PreparedStatementData getSimpleQuery(String tableName, RefBook refBook, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
 			String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
-		PreparedStatementData ps = new PreparedStatementData();
+        PreparedStatementData ps = new PreparedStatementData();
+
+        if (version != null) {
+            ps.appendQuery(String.format(WITH_STATEMENT, tableName));
+            ps.addParam(version);
+        } else {
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, tableName, tableName));
+            ps.addParam(uniqueRecordId);
+            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+        }
+
 		ps.appendQuery("SELECT ");
-		ps.appendQuery("id ");
+		ps.appendQuery("r.id ");
 		ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+
+        if (version == null) {
+            ps.appendQuery(",\n");
+            ps.appendQuery("  t.version as ");
+            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+            ps.appendQuery(",\n");
+
+            ps.appendQuery("  t.versionEnd as ");
+            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+        }
+
 		for (RefBookAttribute attribute : refBook.getAttributes()) {
 			ps.appendQuery(", ");
 			ps.appendQuery(attribute.getAlias());
 		}
-		ps.appendQuery(" FROM (SELECT ");
-		if (isSupportOver()) {
-			RefBookAttribute defaultSort = refBook.getSortAttribute();
-			String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
-            String sortDirection = isSortAscending ? "ASC" : "DESC";
-			ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
-		} else {
-			ps.appendQuery("rownum row_number_over");
-		}
-		ps.appendQuery(", t.* FROM ");
-		ps.appendQuery(tableName);
-		ps.appendQuery(" t");
+
+        if (version != null) {
+            ps.appendQuery(" FROM t, (SELECT ");
+            if (isSupportOver()) {
+                RefBookAttribute defaultSort = refBook.getSortAttribute();
+                String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
+                String sortDirection = isSortAscending ? "ASC" : "DESC";
+                ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
+            } else {
+                ps.appendQuery("rownum row_number_over");
+            }
+            ps.appendQuery(", t.* FROM ");
+            ps.appendQuery(tableName);
+            ps.appendQuery(" t ) r");
+        } else {
+            ps.appendQuery(" FROM t, ");
+            ps.appendQuery(tableName);
+            ps.appendQuery(" r");
+        }
 
 		PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -72,7 +126,7 @@ public class RefBookUtils extends AbstractDao {
 
 		Filter.getFilterQuery(filter, simpleFilterTreeListener);
 		if (filterPS.getQuery().length() > 0) {
-			ps.appendQuery(" WHERE ");
+            ps.appendQuery(" WHERE ");
 			ps.appendQuery(filterPS.getQuery().toString());
 			if (filterPS.getParams().size() > 0) {
 				ps.addParam(filterPS.getParams());
@@ -87,40 +141,46 @@ public class RefBookUtils extends AbstractDao {
 			ps.appendQuery(whereClause);
 		}
 
-		ps.appendQuery(")");
+        ps.appendQuery(" WHERE (r.version = t.version and r.record_id = t.record_id)");
+
 		if (pagingParams != null) {
-			ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
+            ps.appendQuery(" and row_number_over BETWEEN ? AND ?");
 			ps.addParam(pagingParams.getStartIndex());
 			ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
 		}
+
+        if (version == null) {
+            ps.appendQuery(" order by t.version\n");
+        }
 		return ps;
 	}
 
-    public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause) {
-        return getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, true, whereClause);
+    public PreparedStatementData getSimpleQuery(String tableName, RefBook refBook, Date version, Long uniqueRecordId, RefBookAttribute sortAttribute, String filter, PagingParams pagingParams, String whereClause) {
+        return getSimpleQuery(tableName, refBook, uniqueRecordId, version, sortAttribute, filter, pagingParams, true, whereClause);
     }
 
-	/**
-	 * Возвращает элементы справочника в формате для пейджинга. Является реализацией метода {@link RefBookDataProvider#getRecords}
-	 * @param refBookId
-	 * @param tableName
-	 * @param pagingParams
-	 * @param filter
-	 * @param sortAttribute
-	 * @param whereClause дополнительный фильтр для секции WHERE
-	 * @return
-	 */
-	public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+    /**
+     * Загружает данные справочника на определенную дату актуальности
+     * @param tableName название таблицы
+     * @param refBookId код справочника
+     * @param version дата актуальности
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @param whereClause дополнительный фильтр для секции WHERE
+     * @return
+     */
+	public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending, String whereClause) {
 		RefBook refBook = refBookDao.get(refBookId);
 		// получаем страницу с данными
-		PreparedStatementData ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
-		List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
+		PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, whereClause);
+        List<Map<String, RefBookValue>> records = getRecordsData(ps, refBook);
 		PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-		// получаем информацию о количестве всех записей с текущим фильтром
-		ps = getSimpleQuery(refBook, tableName, sortAttribute, filter, null, isSortAscending, whereClause);
-		result.setTotalCount(getRecordsCount(ps));
-		return result;
+        // получаем информацию о количестве всех записей с текущим фильтром
+        ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, null, isSortAscending, whereClause);
+        result.setTotalCount(getRecordsCount(ps));
+        return result;
 	}
 
     /**
@@ -134,9 +194,9 @@ public class RefBookUtils extends AbstractDao {
 	 * @param whereClause
      * @return
      */
-    public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, String tableName, PagingParams pagingParams,
+    public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, String whereClause) {
-        return getRecords(refBookId, tableName, pagingParams, filter, sortAttribute, true, whereClause);
+        return getRecords(tableName, refBookId, version, pagingParams, filter, sortAttribute, true, whereClause);
     }
 
 	/**
@@ -165,6 +225,48 @@ public class RefBookUtils extends AbstractDao {
 			return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")");
 		}
 	}
+
+    /**
+     * Изменение периода актуальности для указанной версии
+     * @param tableName название таблицы
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     * @param version новая дата начала актуальности
+     */
+    public void updateVersionRelevancePeriod(String tableName, Long uniqueRecordId, Date version){
+        getJdbcTemplate().update(String.format("update %s set version=? where id=?", tableName), version, uniqueRecordId);
+    }
+
+    private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from ref_book_record where VERSION < ? and ID in (%s)";
+
+    /**
+     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
+     * @param versionFrom дата актуальности новой версии
+     * @param attributes атрибуты справочника
+     * @param records новые значения полей элемента справочника
+     * @return ссылочные атрибуты в порядке?
+     */
+    public boolean isReferenceValuesCorrect(String tableName, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        if (attributes.size() > 0) {
+            StringBuilder in = new StringBuilder();
+            for (RefBookRecord record : records) {
+                Map<String, RefBookValue> values = record.getValues();
+                for (RefBookAttribute attribute : attributes) {
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
+                            values.get(attribute.getAlias()) != null) {
+                        in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
+                    }
+                }
+            }
+
+            if (in.length() != 0) {
+                in.deleteCharAt(in.length()-1);
+                String sql = String.format(CHECK_REFERENCE_VERSIONS, in);
+                System.out.println("sql: "+sql);
+                return getJdbcTemplate().queryForInt(sql, versionFrom) == 0;
+            }
+        }
+        return true;
+    }
 
     /**
      *
@@ -236,6 +338,26 @@ public class RefBookUtils extends AbstractDao {
 		params.put("id", recordId);
 		return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
 	}
+
+
+    /**
+     * Удаление версии
+     * @param uniqueRecordId уникальный идентификатор версии записи
+     */
+    public void deleteVersion(String tableName, Long uniqueRecordId) {
+        getJdbcTemplate().update(String.format("delete from %s where id=?", tableName), uniqueRecordId);
+    }
+
+    private static final String DELETE_VERSION = "delete from %s where id in %s";
+
+    /**
+     * Удаляет указанные версии записи из справочника
+     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
+     */
+    public void deleteRecordVersions(String tableName, List<Long> uniqueRecordIds) {
+        String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        getJdbcTemplate().update(sql);
+    }
 
     public static class RecordVersionMapper implements RowMapper<RefBookRecordVersion> {
 

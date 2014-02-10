@@ -14,7 +14,8 @@ public interface BDUtils {
         DATA_ROW("seq_data_row"),
         FORM_COLUMN("seq_form_column"),
         REF_BOOK_RECORD("seq_ref_book_record"),
-        REF_BOOK_RECORD_ROW("seq_ref_book_record_row_id");
+        REF_BOOK_RECORD_ROW("seq_ref_book_record_row_id"),
+        REF_BOOK_OKTMO("seq_ref_book_oktmo");
 
         private Sequence(String name) {
             this.name = name;
