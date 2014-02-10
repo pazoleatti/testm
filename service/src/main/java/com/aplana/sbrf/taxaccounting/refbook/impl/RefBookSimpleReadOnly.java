@@ -32,6 +32,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     // Справочник "ОКТМО"
     public static final Long OKTMO_REF_BOOK_ID = 96L;
     public static final String OKTMO_TABLE_NAME = "REF_BOOK_OKTMO";
+    // Справочник "Подразделения"
+    public static final Long DEPARTMENT_REF_BOOK_ID = 30L;
+    public static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
 
 	@Autowired
 	private RefBookUtils refBookUtils;
