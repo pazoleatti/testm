@@ -551,4 +551,9 @@ public class RefBookDaoTest {
 		checkChildrenCount(17L, 0);
 	}
 
+    @Test
+    public void hasChildren() {
+        Assert.assertTrue(refBookDao.hasChildren(4L, Arrays.asList(8L)));
+    }
+
 }
