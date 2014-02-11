@@ -13,7 +13,7 @@ import groovy.transform.Field
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  *
  * графа 1  - число  number                 № пп
- * графа 2  - строка issuer                 эмитит
+ * графа 2  - строка issuer                 эмитент
  * графа 3  - строка regNumber              гос номер
  * графа 4  - строка tradeNumber            Номер сделки
  * графа 5  - строка currency               Валюта выпуска облигации (справочник)
@@ -88,7 +88,7 @@ switch (formDataEvent) {
         importData()
         if (!hasError()) {
             calcAfterImport()
-            addAllStatic()
+            addAllStatic(null)
         }
         break
     case FormDataEvent.MIGRATION:
@@ -126,7 +126,7 @@ def autoFillColumns = ['number']
 
 // Группируемые атрибуты
 @Field
-def groupColumns = ['regNumber', 'tradeNumber']
+def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -447,23 +447,26 @@ void importData() {
 }
 
 /**
- * Проставляет статические строки
+ * Проставляет статические строки.
+ * Добавить промежуточные итоги (по графе 2 - эмитент, а внутри этой группы по графе 3 - грн)
  */
-void addAllStatic() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
+void addAllStatic(def dataRows) {
+    if (dataRows == null) {
+        dataRows = formDataService.getDataRowHelper(formData)?.getAllCached()
+    }
     for (int i = 0; i < dataRows.size(); i++) {
         DataRow<Cell> row = getRow(i, dataRows)
         DataRow<Cell> nextRow = getRow(i + 1, dataRows)
         int j = 0
 
+        // графа 3 - грн - regNumber
         if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
             def itogRegNumberRow = calcItogRegNumber(i)
             dataRows.add(i + 1, itogRegNumberRow)
             j++
         }
 
+        // графа 2 - эмитент - issuer
         if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
             def itogIssuerRow = calcItogIssuer(i)
             dataRows.add(i + 2, itogIssuerRow)
@@ -482,7 +485,7 @@ def calcItogIssuer(int i) {
     newRow.getCell('issuer').colSpan = 2
     newRow.setAlias('itogoIssuer#'.concat(i ? i.toString() : ""))
 
-    String tIssuer = 'Эмитет'
+    String tIssuer = 'Эмитент'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
             tIssuer = getRow(j).issuer
@@ -513,7 +516,7 @@ def calcItogIssuer(int i) {
 
     }
     setTotalStyle(newRow)
-    newRow
+    return newRow
 }
 
 /**
@@ -606,7 +609,8 @@ void calc() {
         }
     }
 
-    addAllStatic()
+    // добавить промежуточные итоги (по графе 2 - эмитент, а внутри этой группы по графе 3 - грн)
+    addAllStatic(dataRows)
 
     // добавить строку "итого"
     dataRows.add(getCalcTotalRow(dataRows))
