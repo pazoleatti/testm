@@ -79,7 +79,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (92, 'Виды 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (93, 'Виды налоговых форм', 0, 1, 1);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (94, 'Типы налоговых форм', 0, 1, 1);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (95, 'Системные роли', 0, 1, 1);
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (96, 'Общероссийский классификатор территорий муниципальных образований (ОКТМО)', 1, 1, 0);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (96, 'Общероссийский классификатор территорий муниципальных образований (ОКТМО)', 1, 1, 1);
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE,ORD,REFERENCE_ID, ATTRIBUTE_ID,VISIBLE,PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (0, 0, 'Тестовое наименование', 'NAME', 1, 1, null, null, 1, null, 10, 0);
 
