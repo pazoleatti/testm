@@ -613,4 +613,20 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             return null;
         }
     }
+
+    @Override
+    public List<Date> hasChildren(String tableName, List<Long> uniqueRecordIds) {
+        String sql = String.format("select distinct version from %s where parent_id in %s",
+                tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        try {
+            return getJdbcTemplate().query(sql, new RowMapper<Date>() {
+                @Override
+                public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getDate(1);
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }
