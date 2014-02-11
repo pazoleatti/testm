@@ -326,17 +326,16 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 /**
  * Получение региона по коду ОКТМО
  */
-def getRegionByOKTMO(def okato) {
-    def okato3 = getRefBookValue(96, okato)?.CODE?.stringValue.substring(0, 2)
-    if (okato3.equals("719")) {
+def getRegionByOKTMO(def oktmo) {
+    def oktmo3 = getRefBookValue(96, oktmo)?.CODE?.stringValue.substring(0, 2)
+    if (oktmo3.equals("719")) {
         return getRecord(4, 'CODE', '89', null, null, new Date());
-    } else if (okato3.equals("718")) {
+    } else if (oktmo3.equals("718")) {
         return getRecord(4, 'CODE', '86', null, null, new Date());
-    } else if (okato3.equals("118")) {
+    } else if (oktmo3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        // TODO заменить OKATO_DEFINITION  на "Определяющая часть кода ОКТМО"
-        def filter = "OKATO_DEFINITION like '" + okato3.substring(0, 1) + "%'"
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 1) + "%'"
         def record = getRecord(4, filter, new Date())
         if (record != null) {
             return record
@@ -435,10 +434,10 @@ def getRefBookValue(refBookID, recordId, alias) {
 * соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
 */
 
-def getParam(taxBenefitCode, okato) {
+def getParam(taxBenefitCode, oktmo) {
     if (taxBenefitCode != null) {
         // получения региона по коду ОКТМО по справочнику Регионов
-        def region = getRegionByOKTMO(okato);
+        def region = getRegionByOKTMO(oktmo);
 
         def refBookProvider = refBookFactory.getDataProvider(7)
 
@@ -472,9 +471,8 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    // TODO вместо аттрибута OKATO будет ОКТМО
-    if (record.OKATO == null || record.OKATO.referenceValue == null) {
-        errorList.add("«Код по ОКАТО»")
+    if (record.OKTMO == null || record.OKTMO.referenceValue == null) {
+        errorList.add("«Код по ОКТМО»")
     }
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
