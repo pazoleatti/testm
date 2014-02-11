@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -35,13 +37,47 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             for (Integer depoId: action.getDepartmentsIds()){
                 data.addAll(departmentFormTypeService.getFormAssigned(depoId.longValue(), taxType));
             }
+
+            // sort
+            Collections.sort(data, new Comparator<FormTypeKind>() {
+                /**
+                 * Порядок сортировки записей при отображении:
+                 * - Подразделение
+                 * - Тип налоговой формы
+                 * - Вид налоговой формы
+                 *
+                 * @param o1
+                 * @param o2
+                 * @return
+                 */
+                public int compare(FormTypeKind o1, FormTypeKind o2) {
+                    int result = o1.getDepartment().getName().compareTo(o2.getDepartment().getName());
+                    if (result == 0) {
+                        result = o1.getKind().getName().compareTo(o2.getKind().getName());
+                        if (result == 0) {
+                            result = o1.getName().compareTo(o2.getName());
+                        }
+                    }
+
+                    return result;
+                }
+            });
         }
         else {
             for (Integer depoId: action.getDepartmentsIds()){
                 data.addAll(departmentFormTypeService.getDeclarationAssigned(depoId.longValue(), taxType));
             }
         }
-        result.setTableData(data);
+
+
+        if (action.getCount() != 0){
+            int toIndex = action.getStartIndex()+action.getCount() > data.size() ?
+                        data.size()-1 : action.getStartIndex()+action.getCount();
+            result.setTableData(new ArrayList<FormTypeKind>(data.subList(action.getStartIndex(), toIndex)));
+        } else {
+            result.setTableData(data);
+        }
+
         return result;
     }
 

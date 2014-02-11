@@ -1,4 +1,4 @@
-package form_template.income.rnu60
+package form_template.income.rnu60.v19700101
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
