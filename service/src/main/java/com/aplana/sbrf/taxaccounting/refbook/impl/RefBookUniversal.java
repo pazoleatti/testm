@@ -382,7 +382,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     private void checkChildren(List<Long> uniqueRecordIds) {
         //Если есть дочерние элементы - удалять нельзя
         List<Date> parentVersions = refBookDao.hasChildren(refBookId, uniqueRecordIds);
-        if (parentVersions != null) {
+        if (parentVersions != null && !parentVersions.isEmpty()) {
             StringBuilder versions = new StringBuilder();
             for (int i=0; i<parentVersions.size(); i++) {
                 versions.append(sdf.format(parentVersions));
