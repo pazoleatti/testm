@@ -49,6 +49,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     LinkAnchor allVersion;
 
     private boolean isVersionMode = false;
+    private boolean readOnly;
 
 	@Inject
 	@UiConstructor
@@ -159,6 +160,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					((UIObject) w).setTitle(null);
 					if (w instanceof RefBookMultiPickerModalWidget) {
 						((RefBookMultiPickerModalWidget)w).setDereferenceValue("");
+                        ((RefBookMultiPickerModalWidget)w).setEnabled(!readOnly);
 					}
 				}
 			}
@@ -297,8 +299,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode);
-        versionStart.setEnabled(isVersionMode);
-        versionEnd.setEnabled(isVersionMode);
+        versionStart.setEnabled(isVersionMode && !readOnly);
+        versionEnd.setEnabled(isVersionMode && !readOnly);
         allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
@@ -332,6 +334,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setVersionTo(Date value) {
         versionEnd.setValue(value);
+    }
+
+    @Override
+    public void setReadOnlyMode(boolean readOnly) {
+        this.readOnly = readOnly;
+        save.setVisible(!readOnly);
+        cancel.setVisible(!readOnly);
     }
 
     @UiHandler("save")
