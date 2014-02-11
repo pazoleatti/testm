@@ -21,7 +21,7 @@
 
         .labelBlockMargin{
             margin-right: 5px;
-            width: 140px;
+            width: 180px;
         }
 
     </ui:style>
