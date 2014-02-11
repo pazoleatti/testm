@@ -81,7 +81,7 @@
             <g:cell horizontalAlignment="left" width="40%">
                 <g:VerticalPanel verticalAlignment="middle" width="100%">
                     <g:cell height="26px">
-                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
+                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
                     </g:cell>
                     <g:cell height="26px">
                         <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
@@ -99,7 +99,7 @@
                 <g:VerticalPanel width="100%">
                     <g:HorizontalPanel width="100%" verticalAlignment="middle">
                         <g:cell horizontalAlignment="right" height="26px">
-                            <g:Label width="180px" text="Категория формы:" addStyleNames="{style.labelBlockMargin}"/>
+                            <g:Label width="180px" text="Тип формы:" addStyleNames="{style.labelBlockMargin}"/>
                         </g:cell>
                         <g:cell width="100%" height="26px">
                             <g:ValueListBox ui:field="auditFormTypeId" width="100%"/>
@@ -110,21 +110,20 @@
                             <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
                                              addStyleNames="{style.labelBlockMargin}">
                                 <g:cell height="26px">
-                                    <g:Label width="180px" text="Вид налоговой формы:"/>
+                                    <g:Label width="180px" text="Тип налоговой формы:"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <g:Label width="180px" text="Тип налоговой формы:"/>
+                                    <g:Label width="180px" text="Вид налоговой формы:"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="100%">
-                            <g:VerticalPanel verticalAlignment="middle">
+                            <g:VerticalPanel verticalAlignment="middle" width="100%">
                                 <g:cell height="26px">
-                                    <g:ValueListBox ui:field="formKind" width="100%"
-                                                    addStyleNames="{style.labelBlockMargin}"/>
+                                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="true" width="100%"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
+                                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="836" modal="true" multiSelect="true" width="100%"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
