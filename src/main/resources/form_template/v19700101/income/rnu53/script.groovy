@@ -26,11 +26,11 @@ switch (formDataEvent) {
         checkCreation()
         break
     case FormDataEvent.CHECK:
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
     case FormDataEvent.CALCULATE:
         calc()
-        !hasError() && logicalCheck() && checkNSI()
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -44,16 +44,16 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 // обобщить
     case FormDataEvent.COMPOSE:
         consolidation()
-        !hasError() && logicalCheck() && checkNSI()
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -423,45 +423,6 @@ def logicalCheck() {
         return false
     }
 
-    return true
-}
-
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def data = getData(formData)
-    if (!getRows(data).isEmpty()) {
-        /** Последний день отчетного периода */
-        def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
-        for (def row : getRows(data)) {
-            if (isTotal(row)) {
-                continue
-            }
-
-            def index = row.tadeNumber
-            def errorMsg
-            if (index != null && index != '') {
-                errorMsg = "В строке \"Номер сделки\" равной $index "
-            } else {
-                index = row.getIndex()
-                errorMsg = "В строке $index "
-            }
-
-            // 1. Проверка кода валюты со справочным (графа 3)
-            if (row.currencyCode != null && getCurrency(row.currencyCode) == null) {
-                logger.warn(errorMsg + 'неверный код валюты!')
-            }
-
-            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calc11(row, lastDayReportPeriod))
-            if (col11 != null && col11 != row.rateBR) {
-                loggerError(errorMsg + 'неверно указана ставка Банка России!')//TODO вернуть error
-                return false
-            }
-        }
-    }
     return true
 }
 
@@ -1122,7 +1083,7 @@ def getCalcTotalRow() {
     totalRow.getCell('tadeNumber').colSpan = 2
     setTotalStyle(totalRow)
     ['nominalPriceSecurities', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
+        totalRow.getCell(alias).setValue(getSum(alias), null)
     }
     return totalRow
 }
