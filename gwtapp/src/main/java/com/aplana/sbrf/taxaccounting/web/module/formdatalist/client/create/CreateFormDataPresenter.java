@@ -43,7 +43,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
         /**
          * Устанавливаем в enabled/disabled ежемесячность
-         * @param isMonthly
+         * @param isMonthly true - ежемесячный, false - неежемесячный
          */
         void setFormMonthEnabled(boolean isMonthly);
     }
@@ -96,7 +96,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableFormKindList(filterValues.getKinds());
                         getView().setAcceptableFormTypeList(filterValues.getFormTypes());
                         getView().setAcceptableReportPeriods(result.getReportPeriods());
-                        getView().setAcceptableMonthList(result.getMonthsList());
 
                         // setSelectedFilterValues(filter);
 
@@ -113,15 +112,13 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     public void isMonthly(Integer formId, Integer reportPeriodId) {
         GetMonthData action = new GetMonthData();
         action.setTypeId(formId);
-        action.setPeriodId(reportPeriodId);
+        action.setReportPeriodId(reportPeriodId);
 
         dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthDataResult>() {
             @Override
             public void onSuccess(GetMonthDataResult result) {
                 getView().setFormMonthEnabled(result.isMonthly());
-                if (result.isMonthly()) {
-                    getView().setAcceptableMonthList(result.getMonthsList());
-                }
+                getView().setAcceptableMonthList(result.getMonthsList());
             }
         }));
     }

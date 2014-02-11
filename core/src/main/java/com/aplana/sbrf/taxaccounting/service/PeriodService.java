@@ -102,7 +102,7 @@ public interface PeriodService {
 	/**
 	 * Получает последний заведенный налоговый период для типа налога
 	 * 
-	 * @param taxPeriodId
+	 * @param taxType
 	 * @return
 	 */
 	TaxPeriod getLastTaxPeriod(TaxType taxType);
@@ -227,5 +227,5 @@ public interface PeriodService {
      * @param reportPeriodId идентификатор отчетного период
      * @return
      */
-    List<Months> getMonthList(int reportPeriodId);
+    List<Months> getAvailableMonthList(int reportPeriodId);
 }
