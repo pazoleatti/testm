@@ -151,9 +151,9 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
             cell.setCellStyle(cs);
 	        StringBuilder roles = new StringBuilder();
             for (TARole role : user.getUser().getRoles()){
-                roles.append(role.getName() + ";");
+                roles.append(role.getName() + ", ");
             }
-	        cell.setCellValue(roles.toString());
+	        cell.setCellValue(roles.delete((roles.length()-2), roles.length()-1).toString());
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 

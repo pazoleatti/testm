@@ -1,4 +1,4 @@
-package form_template.income.rnu60
+package form_template.income.rnu60.v19700101
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -93,7 +93,7 @@ switch (formDataEvent) {
  */
 
 def allCheck() {
-    return !hasError() && logicalCheck() && checkNSI()
+    return !hasError() && logicalCheck()
 }
 
 /**
@@ -243,34 +243,6 @@ def getColumnName(def row, def alias) {
     return ''
 }
 
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def data = getData(formData)
-    if (!getRows(data).isEmpty()) {
-
-        for (def row : getRows(data)) {
-            if (isItogoRow(row)) {
-                continue
-            }
-
-            // 1. Проверка кода валюты со справочным (графа 3)
-            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
-                logger.warn('Неверный код валюты!')
-            }
-
-            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calc11(row, row.part2REPODate))
-            if (col11!=null && col11!=row.rateBR) {
-                loggerError('Неверно указана ставка Банка России!')//TODO вернуть error
-                return false
-            }
-        }
-    }
-    return true
-}
-
 Calendar getReportDate() {
     Calendar periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
     Calendar reportingDate = periodEndDate
@@ -298,12 +270,13 @@ DataRow<Cell> getItogo() {
     itogo.securityName = "Итого"
     List itogoSum = ['nominalPrice', 'salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
     itogoSum.each { name ->
-        itogo.getCell(name).value = 0
+        itogo.getCell(name).setValue(0, itogo.getIndex())
     }
     for (DataRow row in getRows(getData(formData))) {
         if (row.getAlias() == null) {
             for (String name in itogoSum) {
-                itogo.getCell(name).value += row.getCell(name).value ?: 0
+                def value = itogo.getCell(name).value + (row.getCell(name).value ?: 0)
+                itogo.getCell(name).setValue(value, itogo.getIndex())
             }
         }
     }

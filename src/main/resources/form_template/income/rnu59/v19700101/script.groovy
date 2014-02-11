@@ -1,4 +1,4 @@
-package form_template.income.rnu59
+package form_template.income.rnu59.v19700101
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -12,7 +12,9 @@ import java.text.SimpleDateFormat
  * @author auldanov
  * @version 55
  *
- * TODO убрать loggerError и заменить на logger.error
+ * TODO:
+ *      - убрать loggerError и заменить на logger.error
+ *      - это формы нет в базе
  *
  * Столбцы
  * 1. Номер сделки первая часть / вторая часть - tradeNumber
@@ -39,7 +41,7 @@ switch (formDataEvent){
     case FormDataEvent.CHECK:
         //1. Логические проверки значений налоговой формы
         //2. Проверки соответствия НСИ
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 // Инициирование Пользователем создания формы
     case FormDataEvent.CREATE:
@@ -55,14 +57,14 @@ switch (formDataEvent){
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
         //2.    Логические проверки значений налоговой формы.
         //3.    Проверки соответствия НСИ.
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 // Инициирование Пользователем выполнения перехода «Отменить принятие»
     case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED:
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе «Отменить принятие».
         //2.    Логические проверки значений налоговой формы.
         //3.    Проверки соответствия НСИ.
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 
 // Событие добавить строку
@@ -77,17 +79,17 @@ switch (formDataEvent){
 
     case FormDataEvent.CALCULATE:
         fillForm()
-        !hasError() && logicalCheck() && checkNSI()
+        !hasError() && logicalCheck()
         break
 // после принятия из подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
-        logicalCheck() && checkNSI()
+        logicalCheck()
         break
 // обобщить
     case FormDataEvent.COMPOSE :
         consolidation()
         fillForm()
-        !hasError() && logicalCheck() && checkNSI()
+        !hasError() && logicalCheck()
         break
     case FormDataEvent.IMPORT :
         importData()
@@ -155,34 +157,6 @@ def deleteRow(){
 //    getData(formData).getAllCached().each{rowItem->
 //        rowItem.rowNumber = i++
 //    }
-}
-
-/**
- * Проверки соответствия НСИ.
- */
-def checkNSI() {
-    def data = getData(formData)
-    if (!getRows(data).isEmpty()) {
-
-        for (DataRow row : getRows(data)) {
-            if (isTotalRow(row)) {
-                continue
-            }
-
-            // 1. Проверка кода валюты со справочным (графа 3)
-            if (row.currencyCode!=null && getCurrency(row.currencyCode)==null) {
-                logger.warn('Неверный код валюты!')
-            }
-
-            // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calculateColumn11(row, row.part2REPODate))
-            if (col11!=null && col11!=row.rateBR) {
-                loggerError('Неверно указана ставка Банка России!')//TODO вернуть error
-                return false
-            }
-        }
-    }
-    return true
 }
 
 /**

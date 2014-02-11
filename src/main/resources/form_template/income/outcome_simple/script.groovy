@@ -65,7 +65,7 @@ switch (formDataEvent) {
 def recordCache = [:]
 
 @Field
-def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'co    nsumptionAccountNumber',
+def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
         'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
         'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
@@ -184,7 +184,8 @@ void calculationControlGraphs(def dataRows) {
     def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
     def tmp
     def value
-    def dataRowsComplex = formDataService.getDataRowHelper(getFormDataComplex())?.allCached
+    def formDataComplex = getFormDataComplex()
+    def dataRowsComplex = formDataComplex != null ? formDataService.getDataRowHelper(formDataComplex)?.allCached : null
     def income102NotFound = []
     for (def row : dataRows) {
         // исключить итоговые строки и пять конечных
@@ -422,7 +423,7 @@ def getSumFromComplex(dataRowsComplex, columnAliasCheck, columnAliasSum, value) 
  */
 def calcSum6(def dataRows, def aliasRows) {
     return aliasRows.sum { alias ->
-        getDataRow(dataRows, alias).rnu7Field12Accepted
+        (getDataRow(dataRows, alias).rnu7Field12Accepted)?:0
     }
 }
 

@@ -44,7 +44,7 @@ public final class AdminConstants {
 	 * Имена табов в таб панели
 	 */
 	public static final class TabLabels {
-		public static final String formTemplateInfoLabel = "Основая информация";
+		public static final String formTemplateInfoLabel = "Основная информация";
 		public static final String formTemplateScriptCodeLabel = "Скрипт";
 		public static final String formTemplateColumnLabel = "Описание граф";
 		public static final String formTemplateStyleLabel = "Наборы стилей";

@@ -551,4 +551,11 @@ public class RefBookDaoTest {
 		checkChildrenCount(17L, 0);
 	}
 
+    @Test
+    public void hasChildren() {
+        List<Date> versions = refBookDao.hasChildren(4L, Arrays.asList(8L));
+        assertEquals(1, versions.size());
+        assertEquals(getZeroTimeDate(getDate(1,1,2013)), getZeroTimeDate(versions.get(0)));
+    }
+
 }

@@ -54,6 +54,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	
 	private Map<Integer, String> dereferenceValue;
 	private Map<Integer, Pair<Date, Date>> reportPeriodDates;
+	private Map<Integer, Integer> reportPeriodYears;
 
 	public PeriodPickerPopupWidget(){
 		periodPicker = new PeriodPickerWidget();
@@ -72,9 +73,11 @@ public class PeriodPickerPopupWidget extends Composite implements
     public void setPeriods(List<ReportPeriod> periods) {
         dereferenceValue = new HashMap<Integer, String>();
         reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
+	    reportPeriodYears = new HashMap<Integer, Integer>();
         for (ReportPeriod reportPeriod : periods) {
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
             reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
+	        reportPeriodYears.put(reportPeriod.getId(), reportPeriod.getTaxPeriod().getYear());
         }
         periodPicker.setPeriods(periods);
     }
@@ -154,7 +157,7 @@ public class PeriodPickerPopupWidget extends Composite implements
             for (Integer val : value) {
                 String name = dereferenceValue.get(val);
                 if (name != null){
-                    strings.add(name);
+                    strings.add(reportPeriodYears.get(val) + ":" + name);
                 }
             }
         }

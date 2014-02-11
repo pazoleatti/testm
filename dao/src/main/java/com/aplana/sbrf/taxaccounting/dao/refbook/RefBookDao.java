@@ -299,6 +299,14 @@ public interface RefBookDao {
     Map<Long,Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
 
     /**
+     * Проверяет есть ли дочерние элементы для указанных версий записей
+     * @param refBookId код справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
+     */
+    List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей
