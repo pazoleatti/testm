@@ -49,11 +49,15 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
@@ -72,7 +76,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -791,11 +797,12 @@ def getXML() {
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
-void prevPeriodCheck() {
+boolean prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.formType.name
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return false
     }
+    return true
 }
 
 def loggerError(def msg) {
