@@ -159,10 +159,6 @@ def logicCheck() {
             }
         }
         checkedRows.add(row)
-
-        // Проверки соответствия НСИ
-        checkNSI(96, row, "codeOKATO")
-        checkNSI(6, row, "taxBenefitCode")
     }
 
     // 6. Проверка наличия формы предыдущего периода
@@ -221,7 +217,7 @@ def copyRow(def row) {
         newRow.getCell(alias).setStyleAlias("Редактируемая")
     }
     copyColumns.each { alias ->
-        newRow.getCell(alias).value = row.getCell(alias).value
+        newRow.getCell(alias).setValue(row.getCell(alias).value, row.getIndex())
     }
     return newRow
 }
