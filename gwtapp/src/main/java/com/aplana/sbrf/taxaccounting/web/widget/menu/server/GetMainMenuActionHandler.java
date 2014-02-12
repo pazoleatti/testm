@@ -114,7 +114,7 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                     menu.getSubMenu().add(
-                            new MenuItem("Назначение форм и деклараций",
+                            new MenuItem("Назначение форм и уведомлений",
                                     NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
                                             + TYPE + "=" + menu.getMeta() + ";"
                                             + TaxFormNominationToken.isForm + "=" + true));
