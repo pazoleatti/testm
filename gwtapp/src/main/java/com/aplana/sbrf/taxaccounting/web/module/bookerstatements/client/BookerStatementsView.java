@@ -52,6 +52,12 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         initListeners();
     }
 
+    @Override
+    public void init() {
+        periodPickerPopup.setValue(null);
+        departmentPicker.setValue(null);
+    }
+
     private void initListeners() {
         // Подразделение
         departmentPicker.addValueChangeHandler(

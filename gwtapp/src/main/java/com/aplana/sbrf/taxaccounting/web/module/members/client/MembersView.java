@@ -131,6 +131,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	    taUserFullCellTable.setPageSize(pager.getPageSize());
 	    pager.setDisplay(taUserFullCellTable);
 	    dataProvider.addDataDisplay(taUserFullCellTable);
+	    Date current = new Date();
+	    role.setPeriodDates(current, current);
     }
 
     @Override

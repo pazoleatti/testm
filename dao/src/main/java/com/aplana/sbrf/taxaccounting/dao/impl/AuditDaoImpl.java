@@ -187,7 +187,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filter.getTaxType() != null){
-            sql.append(String.format(" AND %stax_type = ", prefix.equals("")?"":"tp.")).append("'" + filter.getTaxType().getCode() + "'");
+            sql.append(String.format(" AND %stax_type = ", prefix.equals("") ? "" : "tp.")).append("'").append(filter.getTaxType().getCode()).append("'");
         }
 
 		if (filter.getDepartmentId() != null) {

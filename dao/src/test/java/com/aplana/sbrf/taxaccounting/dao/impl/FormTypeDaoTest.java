@@ -78,4 +78,9 @@ public class FormTypeDaoTest {
         filter.setActive(false);
         Assert.assertEquals(0, formTypeDao.getByFilter(filter).size());
     }
+
+    @Test
+    public void testGetAll() {
+        Assert.assertEquals(4, formTypeDao.getAll().size());
+    }
 }

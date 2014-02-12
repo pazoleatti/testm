@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataA
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsResult;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -56,32 +54,34 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
+
+        void init();
+
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
-        void setFormTypeId(Map<Integer, String> formTypesMap);
+        /*void setFormTypeId(List<Long> formTypes);*/
 
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
 
-        void setFormDataKind(List<FormDataKind> list);
 
         void setFormDataTaxType(List<TaxType> taxTypeList);
 
-        void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);
+        /*void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);*/
 
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
 
         LogSystemFilter getFilterData();
 
-        void setVisibleTaxFields();
+        /*void setVisibleTaxFields();
 
         void setVisibleDeclarationFields();
 
-        void hideAll();
+        void hideAll();*/
     }
 
     public void initFilterData() {
-
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
+        getView().init();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
@@ -90,9 +90,17 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                         LogSystemFilterAvailableValues auditFilterDataAvaliableValues = result.getAvailableValues();
                         getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
                                 convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
-                        getView().setFormTypeId(fillFormTypesMap(auditFilterDataAvaliableValues.getFormTypes()));
+                        /*getView().setFormTypeId(Lists.transform(auditFilterDataAvaliableValues.getFormTypeIds(), new com.google.common.base.Function<Integer, Long>() {
+                            @Override
+                            public Long apply(@Nullable Integer integer) {
+                                System.out.println("Integer ids: " + integer);
+                                if (integer == null)
+                                    return null;
+                                return Long.valueOf(integer);
+                            }
+                        }));*/
                         getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
-                        getView().setFormDataKind(result.getFormDataKinds());
+                        /*getView().setFormDataKind(result.getFormDataKinds());*/
                         getView().setFormDataTaxType(result.getTaxTypes());
                     }
                 }, this));
@@ -105,15 +113,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             result.add(department.getId());
         }
         return result;
-    }
-
-    private Map<Integer, String> fillFormTypesMap(List<FormType> source) {
-        Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-        formTypesMap.put(null, "");
-        for (FormType formType : source) {
-            formTypesMap.put(formType.getId(), formType.getName());
-        }
-        return formTypesMap;
     }
 
     private Map<Integer, String> fillDeclarationTypeMap(List<DeclarationType> source) {
@@ -129,7 +128,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         return getView().getFilterData();
     }
 
-    @Override
+    /*@Override
     protected void onBind() {
         super.onBind();
 
@@ -146,5 +145,5 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
             }
         };
         getView().setFormTypeHandler(formTypeValueChangeHandler);
-    }
+    }*/
 }

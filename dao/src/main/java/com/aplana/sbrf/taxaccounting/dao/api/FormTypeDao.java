@@ -25,7 +25,7 @@ public interface FormTypeDao {
      * Список только активных версий с полем status = 0
 	 * @return список видов налоговых форм
 	 */
-    List<FormType> getAll();
+    List<Integer> getAll();
 
     /**
      * Получить все существующие виды налоговых форм по виду налога

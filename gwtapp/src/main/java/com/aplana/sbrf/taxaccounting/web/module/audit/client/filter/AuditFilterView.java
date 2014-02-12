@@ -2,13 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -20,7 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: avanteev
@@ -44,14 +47,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<Integer> formTypeId;
+    @UiField
+    RefBookMultiPickerModalWidget formTypeId;
 
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> declarationTypeId;
 
-    @UiField(provided = true)
-    ValueListBox<FormDataKind> formKind;
+    @UiField
+    RefBookMultiPickerModalWidget formDataKind;
 
     @UiField(provided = true)
     ValueListBox<TaxType> taxType;
@@ -70,7 +73,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
-    private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;
 
     @Override
@@ -79,20 +81,9 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public void setFormTypeId(Map<Integer, String> formTypesMap) {
-        this.formTypesMap = formTypesMap;
-        formTypeId.setAcceptableValues(formTypesMap.keySet());
-    }
-
-    @Override
     public void setDeclarationType(Map<Integer, String> declarationTypesMap) {
         this.declarationTypesMap = declarationTypesMap;
         declarationTypeId.setAcceptableValues(declarationTypesMap.keySet());
-    }
-
-    @Override
-    public void setFormDataKind(List<FormDataKind> list) {
-        formKind.setAcceptableValues(list);
     }
 
     @Override
@@ -117,48 +108,38 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         // Тип формы
         lsf.setAuditFormTypeId(auditFormTypeId.getValue() == null ? null : auditFormTypeId.getValue().getId());
         // Вид налоговой формы
-        lsf.setFormTypeId(formTypeId.getValue());
+        lsf.setFormTypeId(formTypeId.getValue().isEmpty()? null : Integer.valueOf(String.valueOf(formTypeId.getValue().get(0))));
         // Вид декларации
         lsf.setDeclarationTypeId(declarationTypeId.getValue());
         // Тип налоговой формы
-        lsf.setFormKind(formKind.getValue());
+        lsf.setFormKind(formDataKind.getValue().isEmpty()? null :FormDataKind.fromId(Integer.valueOf(String.valueOf(formDataKind.getValue().get(0)))));
         // Период
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
         lsf.setUserId(user.getSingleValue());
         lsf.setTaxType(taxType.getValue());
+
         return lsf;
     }
 
-    @Override
-    public void setVisibleTaxFields() {
-        declarationTypeId.setValue(null);
-        formKind.setValue(FormDataKind.PRIMARY);
-        formPanel.setVisible(true);
-        declarationTypePanel.setVisible(false);
-    }
-
-    @Override
-    public void setVisibleDeclarationFields() {
-        formTypeId.setValue(null);
-        formKind.setValue(null);
-        formPanel.setVisible(false);
-        declarationTypePanel.setVisible(true);
-    }
-
-    @Override
-    public void hideAll() {
-        formTypeId.setValue(null);
-        formKind.setValue(null);
-        declarationTypeId.setValue(null);
-        formPanel.setVisible(false);
-        declarationTypePanel.setVisible(false);
-    }
-
-    @Override
+    /*@Override
     public void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler) {
         auditFormTypeId.addValueChangeHandler(handler);
+    }*/
+
+    @Override
+    public void init() {
+        departmentSelectionTree.setValue(null, true);
+        reportPeriodIds.setValue(null, true);
+        taxType.setValue(null, true);
+        auditFormTypeId.setValue(null, true);
+        user.setValue(null, true);
+        user.setDereferenceValue(null);
+        formDataKind.setValue(null, true);
+        formDataKind.setDereferenceValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
     }
 
     @Inject
@@ -179,16 +160,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         auditFormTypeId.setValue(AuditFormType.FORM_TYPE_DECLARATION);
         auditFormTypeId.setValue(null);
 
-        formKind = new ValueListBox<FormDataKind>(new AbstractRenderer<FormDataKind>() {
-            @Override
-            public String render(FormDataKind object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
-
         taxType = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
             @Override
             public String render(TaxType object) {
@@ -196,16 +167,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                     return "";
                 }
                 return object.getName();
-            }
-        });
-
-        formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-            @Override
-            public String render(Integer object) {
-                if (object == null) {
-                    return "";
-                }
-                return formTypesMap.get(object);
             }
         });
 
@@ -218,12 +179,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 return declarationTypesMap.get(object);
             }
         });
+        declarationTypeId.setEnabled(false);
 
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         user.setEndDate(new Date());
         reportPeriodIds.setEnabled(false);
+        formDataKind.setPeriodDates(new Date(), new Date());
+        formTypeId.setEnabled(false);
     }
 
     @UiHandler("search")
@@ -236,7 +200,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
             reportPeriodIds.setEnabled(false);
-            reportPeriodIds.setPeriods(new ArrayList<ReportPeriod>());
+            reportPeriodIds.setValue(null, true);
             return;
         }
         if (getUiHandlers() != null) {
@@ -245,4 +209,77 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         }
     }
 
+    @UiHandler("reportPeriodIds")
+    public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event){
+
+        if (event.getValue() != null && !event.getValue().isEmpty() && auditFormTypeId.getValue() != null){
+            if (event.getValue() != null && !event.getValue().isEmpty()){
+                Pair<Date, Date> datePair = reportPeriodIds.getPeriodDates(event.getValue().get(0));
+                switch (auditFormTypeId.getValue()){
+                    case FORM_TYPE_TAX:
+                        formTypeId.setPeriodDates(datePair.getFirst(), datePair.getSecond());
+                        formTypeId.setEnabled(true);
+                        break;
+                    case FORM_TYPE_DECLARATION:
+                        declarationTypeId.setValue(null);
+                        declarationTypeId.setEnabled(true);
+                        break;
+                }
+            }
+        } else {
+            formTypeId.setValue(null, true);
+            formTypeId.setEnabled(false);
+            declarationTypeId.setValue(null);
+            declarationTypeId.setEnabled(false);
+        }
+    }
+
+    @UiHandler("auditFormTypeId")
+    public void onAuditFormTypeChange(ValueChangeEvent<AuditFormType> event){
+        if (event.getValue() == null){
+            hideAll();
+            return;
+        }
+        switch (event.getValue()){
+            case FORM_TYPE_TAX:
+                if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
+                    setVisibleTaxFields();
+                    return;
+                }
+                Pair<Date, Date> datePair = reportPeriodIds.getPeriodDates(reportPeriodIds.getValue().get(0));
+                formTypeId.setPeriodDates(datePair.getFirst(), datePair.getSecond());
+                formTypeId.setEnabled(true);
+                setVisibleTaxFields();
+                break;
+            case FORM_TYPE_DECLARATION:
+                if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
+                    setVisibleDeclarationFields();
+                    return;
+                }
+                declarationTypeId.setEnabled(true);
+                setVisibleDeclarationFields();
+                break;
+        }
+    }
+
+    private void setVisibleTaxFields() {
+        declarationTypeId.setValue(null);
+        formPanel.setVisible(true);
+        declarationTypePanel.setVisible(false);
+    }
+
+    private void setVisibleDeclarationFields() {
+        /*formTypeId.setValue(new ArrayList<Long>());*/
+        formDataKind.setValue(null, true);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(true);
+    }
+
+    private void hideAll() {
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(null, true);
+        declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
+    }
 }

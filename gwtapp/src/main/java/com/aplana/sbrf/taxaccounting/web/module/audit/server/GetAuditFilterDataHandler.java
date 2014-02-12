@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -13,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * User: avanteev
@@ -27,16 +25,6 @@ public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFil
     @Autowired
     AuditService auditService;
 
-    private static final List<FormDataKind> FORM_DATA_KINDS = new LinkedList<FormDataKind>();
-    private static final List<TaxType> TAX_TYPES = new LinkedList<TaxType>();
-
-    static {
-        for (FormDataKind dataKind : FormDataKind.values())
-            FORM_DATA_KINDS.add(dataKind);
-        for (TaxType taxType : TaxType.values())
-            TAX_TYPES.add(taxType);
-    }
-
     public GetAuditFilterDataHandler() {
         super(GetAuditFilterDataAction.class);
     }
@@ -46,8 +34,7 @@ public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFil
         GetAuditFilterDataResult result = new GetAuditFilterDataResult();
 
         LogSystemFilterAvailableValues avaliableValues = auditService.getFilterAvailableValues();
-        result.setFormDataKinds(FORM_DATA_KINDS);
-        result.setTaxTypes(TAX_TYPES);
+        result.setTaxTypes(Arrays.asList(TaxType.values()));
         result.setAvailableValues(avaliableValues);
         return result;
     }

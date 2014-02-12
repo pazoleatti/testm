@@ -68,21 +68,18 @@
                 <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
                                  addStyleNames="{style.labelBlockMargin}">
                     <g:cell height="26px">
-                        <g:Label width="130px" text="Период:"/>
-                    </g:cell>
-                    <g:cell height="26px">
                         <g:Label width="130px" text="Подразделение:"/>
                     </g:cell>
                     <g:cell height="26px">
                         <g:Label width="130px" text="Пользователь:"/>
                     </g:cell>
+                    <g:cell height="26px">
+                        <g:Label width="130px" text="Период:"/>
+                    </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="40%">
                 <g:VerticalPanel verticalAlignment="middle" width="100%">
-                    <g:cell height="26px">
-                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
-                    </g:cell>
                     <g:cell height="26px">
                         <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
                                                        header="Выберите подразделение" multiselection="false"
@@ -92,7 +89,9 @@
                         <r:RefBookPickerWidget ui:field="user" width="100%" attributeIdInt="652" isHierarchical="false"
                                                     multiSelect="false"/>
                     </g:cell>
-
+                    <g:cell height="26px">
+                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
+                    </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="60%">
@@ -110,20 +109,20 @@
                             <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
                                              addStyleNames="{style.labelBlockMargin}">
                                 <g:cell height="26px">
-                                    <g:Label width="180px" text="Вид налоговой формы:"/>
+                                    <g:Label width="180px" text="Тип налоговой формы:"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <g:Label width="180px" text="Тип налоговой формы:"/>
+                                    <g:Label width="180px" text="Вид налоговой формы:"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
                         <g:cell width="100%">
-                            <g:VerticalPanel verticalAlignment="middle">
+                            <g:VerticalPanel verticalAlignment="middle" width="100%">
                                 <g:cell height="26px">
                                     <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" isHierarchical="false" multiSelect="true" width="100%"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
+                                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="836" modal="true" multiSelect="true" width="100%"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>
