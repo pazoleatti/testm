@@ -68,6 +68,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		RefBookDataRow getSelectedRow();
         void setTitleDetails(String uniqueAttrValues);
         void setBackAction(String url);
+        void setReadOnlyMode(boolean readOnly);
     }
 
 	@Inject
@@ -169,7 +170,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                editFormPresenter.init(refBookId);
+                                getView().setReadOnlyMode(result.isReadOnly());
+                                editFormPresenter.init(refBookId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookVersionPresenter.this);
 							}
 						}, this));

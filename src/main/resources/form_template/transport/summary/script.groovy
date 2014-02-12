@@ -204,7 +204,7 @@ def calc() {
             row.coef362 = (row.ownMonths / monthCountInPeriod).setScale(4, BigDecimal.ROUND_HALF_UP)
         } else {
             row.coef362 = null
-            placeError(row, 'coef362', ['ownMonths'])
+            placeError(row, 'coef362', ['ownMonths'], errorMsg)
         }
 
 
@@ -260,7 +260,7 @@ def calc() {
                         "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС.")
             }
         } else {
-            placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'])
+            placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
         }
 
         /*
@@ -272,7 +272,7 @@ def calc() {
             row.calculatedTaxSum = (row.taxBase * row.coef362 * taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
-            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate'])
+            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate'], errorMsg)
         }
 
         /*
@@ -333,7 +333,7 @@ def calc() {
             row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.taxSumToPay = null
-            placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'])
+            placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'], errorMsg)
         }
     }
     // добавление строки ИТОГО
@@ -699,7 +699,7 @@ def getMonthCount() {
  * @param alias рассчитываемое поле
  * @param errorFields поля от которых оно зависит
  */
-void placeError(DataRow row, String alias, ArrayList<String> errorFields) {
+void placeError(DataRow row, String alias, ArrayList<String> errorFields, String errorMsg) {
     def fields = []
     for (errAlias in errorFields) {
         if (row[errAlias] == null) {

@@ -209,7 +209,6 @@ public class RefBookUtils extends AbstractDao {
             if (in.length() != 0) {
                 in.deleteCharAt(in.length()-1);
                 String sql = String.format(CHECK_REFERENCE_VERSIONS, tableName, in);
-                System.out.println("sql: "+sql);
                 return getJdbcTemplate().queryForInt(sql, versionFrom) == 0;
             }
         }
@@ -284,7 +283,7 @@ public class RefBookUtils extends AbstractDao {
 		sql.append(" WHERE id = :id");
 		Map<String, Long> params = new HashMap<String, Long>();
 		params.put("id", recordId);
-		return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
 	}
 
 
