@@ -56,7 +56,7 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
-        void setFormTypeId(Map<Integer, String> formTypesMap);
+        /*void setFormTypeId(List<Long> formTypeIds);*/
 
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
 
@@ -75,7 +75,14 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
                     public void onSuccess(GetHistoryBusinessFilterResult result) {
                         LogSystemFilterAvailableValues avaliableValues = result.getAvailableValues();
                         getView().setDepartments(avaliableValues.getDepartments(), avaliableValues.getDepartmentIds());
-                        getView().setFormTypeId(avaliableValues.getFormTypeMapIds());
+                        /*getView().setFormTypeId(Lists.transform(avaliableValues.getFormTypeIds(), new Function<Integer, Long>() {
+                            @Override
+                            public Long apply(@Nullable Integer integer) {
+                                if (integer == null)
+                                    return null;
+                                return Long.valueOf(integer);
+                            }
+                        }));*/
                         getView().setDeclarationType(avaliableValues.getDeclarationMapIds());
                         getView().setFormDataTaxType(avaliableValues.getTaxTypes());
                     }

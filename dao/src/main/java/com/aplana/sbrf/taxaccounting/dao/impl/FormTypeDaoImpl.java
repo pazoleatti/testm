@@ -53,8 +53,8 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	}
 
 	@Override
-    public List<FormType> getAll(){
-        return getJdbcTemplate().query("select * from form_type where status = 0", new FormTypeMapper());
+    public List<Integer> getAll(){
+        return getJdbcTemplate().queryForList("select id from form_type where status = 0", Integer.class);
     }
 
     @Override

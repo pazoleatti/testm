@@ -1,7 +1,7 @@
 package form_template.income.app5
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -10,6 +10,16 @@ import groovy.transform.Field
  *
  * @author Lenar Haziev
  */
+
+// графа 1  - number
+// графа -  - fix
+// графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
+// графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
+// графа 4  - kpp                       атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
+// графа 5  - avepropertyPricerageCost
+// графа 6  - workersCount
+// графа 7  - subjectTaxCredit
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -51,7 +61,6 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-
 // Все атрибуты
 @Field
 def allColumns = ['fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
@@ -80,18 +89,17 @@ def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredi
 @Field
 def currentDate = new Date()
 
-//// Обертки методов
+// отчетная дата
+@Field
+def reportD = null
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
-}
+//// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -120,30 +128,35 @@ void logicCheckBeforeCalc() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
+        // 1. Проверка наличия значения «Наименование подразделения» в справочнике «Подразделения»
         def departmentParam
-        if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) {
+            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        }
         if (departmentParam == null || departmentParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
-            return
+            throw new ServiceException(errorMsg + "Не найдено подразделение территориального банка!")
         } else {
             long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
-                if (departmentParam.get('PARENT_ID')?.getReferenceValue()==null) {
-                    logger.error(errorMsg + "Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
+                if (departmentParam.get('PARENT_ID')?.getReferenceValue() == null) {
+                    throw new ServiceException(errorMsg + "Для подразделения территориального банка «${departmentParam.NAME.stringValue}» в справочнике «Подразделения» отсутствует значение наименования родительского подразделения!")
                 }
             }
         }
 
+        // 2. Проверка наличия значения «КПП» в форме настроек подразделения
         def incomeParam
-        if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) {
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        }
         if (incomeParam == null || incomeParam.isEmpty()) {
-            logger.error("Не найдены настройки подразделения!")
+            throw new ServiceException("Не найдены настройки подразделения!")
         } else {
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
-                logger.error(errorMsg+"Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
+                throw new ServiceException(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «КПП»!")
             }
         }
     }
@@ -172,11 +185,6 @@ void logicCheck() {
         if (rowNumber != row.number) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(30, row, "regionBank")
-        checkNSI(30, row, "regionBankDivision")
-        checkNSI(33, row, "kpp")
     }
 
     checkTotalSum(dataRows, totalColumns, logger, true)
@@ -225,7 +233,9 @@ void calc() {
 // графа 2 - название подразделения
 def calc2(def row) {
     def departmentParam
-    if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (row.regionBankDivision != null) {
+        departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportDate(), -1, null, false)
+    }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
     }
@@ -240,13 +250,14 @@ def calc2(def row) {
 }
 
 // графа 4 - кпп
-def calc4(def row){
+def calc4(def row) {
     def incomeParam
-    if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (row.regionBankDivision != null) {
+        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportDate(), -1, null, false)
+    }
     if (incomeParam == null || incomeParam.isEmpty()) {
         return null
     }
-
     return incomeParam.get('record_id').getNumberValue()
 }
 
@@ -257,8 +268,16 @@ def getTotalRow(def dataRows) {
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 4
     allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Итоговая')
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
+}
+
+// Дата окончания отчетного периода
+def getReportDate() {
+    if (reportD == null) {
+        reportD = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    }
+    return reportD
 }

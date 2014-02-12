@@ -48,7 +48,9 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
@@ -126,10 +128,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //// Кастомные методы
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
+boolean prevPeriodCheck() {
     // Проверка только для первичных
     if (formData.kind != FormDataKind.PRIMARY) {
-        return
+        return true
     }
     // 3. Проверка наличия экземпляров форм за 3 года (В текущем подразделении созданы формы РНУ-6
     // за последние три года. Все формы в статусе «Принята»
@@ -148,15 +150,16 @@ void prevPeriodCheck() {
         }
     }
     if (!lostReportPeriods.isEmpty()) {
-        def formName = formData.formType.name
         def periods = lostReportPeriods.join(', ')
-        def msg = "Не найдены экземпляры «$formName» за: $periods!"
+        def msg = "Не найдены экземпляры РНУ-6 за $periods!"
         if (getBalancePeriod()) {
             logger.warn(msg)
         } else {
-            throw new ServiceException(msg)
+            logger.error(msg)
+            return false
         }
     }
+    return true
 }
 
 // Алгоритмы заполнения полей формы

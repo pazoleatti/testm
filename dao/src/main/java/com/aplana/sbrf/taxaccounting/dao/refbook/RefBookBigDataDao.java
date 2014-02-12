@@ -212,4 +212,12 @@ public interface RefBookBigDataDao {
      * @return
      */
     Long getFirstRecordId(String tableName, Long refBookId, Long uniqueRecordId);
+
+    /**
+     * Проверяет есть ли дочерние элементы для указанных версий записей
+     * @param tableName название таблицы
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
+     */
+    List<Date> hasChildren(String tableName, List<Long> uniqueRecordIds);
 }

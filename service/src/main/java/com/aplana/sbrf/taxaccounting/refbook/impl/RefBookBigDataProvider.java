@@ -27,7 +27,7 @@ import java.util.*;
 
 /**
  * Провайдер для больших справочников, которые хранятся в отдельных таблицах
- * Например: ОКАТО, ОКТМО
+ * Например: ОКТМО (в будущем окато)
  *
  * @author dloshkarev
  */
@@ -88,7 +88,6 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
 
     @Override
     public List<Date> getVersions(Date startDate, Date endDate) {
-        //TODO проверить
         return dao.getVersions(getTableName(), startDate, endDate);
     }
 
@@ -373,8 +372,24 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
         }
     }
 
+    private void checkChildren(List<Long> uniqueRecordIds) {
+        //Если есть дочерние элементы - удалять нельзя
+        List<Date> parentVersions = dao.hasChildren(getTableName(), uniqueRecordIds);
+        if (parentVersions != null && !parentVersions.isEmpty()) {
+            StringBuilder versions = new StringBuilder();
+            for (int i=0; i<parentVersions.size(); i++) {
+                versions.append(sdf.format(parentVersions));
+                if (i < parentVersions.size() - 1) {
+                    versions.append(", ");
+                }
+            }
+            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
+        }
+    }
+
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
+        //TODO реализовать когда нужен будет импорт
         throw new UnsupportedOperationException();
     }
 
@@ -387,7 +402,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             }
             RefBook refBook = rbDao.get(refBookId);
             if (refBook.isHierarchic()) {
-                //TODO существует ли версия, период актуальности которой пересекается с периодом актуальности удаляемой версии и для которой удаляемая версия является родительским элементом.
+                checkChildren(uniqueRecordIds);
             }
             List<Long> fakeVersionIds = dao.getRelatedVersions(getTableName(), uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);

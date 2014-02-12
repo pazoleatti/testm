@@ -17,11 +17,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
     private List<Department> departments;
 
     /**
-     * Набор видов налоговых форм
-     */
-    private List<FormType> formTypes;
-
-    /**
      * Набор видов деклараций
      */
     private List<DeclarationType> declarationTypes;
@@ -34,14 +29,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
 
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
-    }
-
-    public List<FormType> getFormTypes() {
-        return formTypes;
-    }
-
-    public void setFormTypes(List<FormType> formTypes) {
-        this.formTypes = formTypes;
     }
 
     public List<DeclarationType> getDeclarationTypes() {
@@ -58,15 +45,6 @@ public class LogSystemFilterAvailableValues implements Serializable {
             result.add(department.getId());
         }
         return result;
-    }
-
-    public Map<Integer, String> getFormTypeMapIds(){
-        Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-        formTypesMap.put(null, "");
-        for(FormType formType : formTypes){
-            formTypesMap.put(formType.getId(), formType.getName());
-        }
-        return formTypesMap;
     }
 
     public Map<Integer, String> getDeclarationMapIds(){
