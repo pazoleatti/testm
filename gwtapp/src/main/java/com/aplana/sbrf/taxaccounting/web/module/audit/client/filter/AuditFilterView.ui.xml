@@ -86,7 +86,7 @@
                                                        modal="true" width="100%"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <r:RefBookMultiPickerModalWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"
+                        <r:RefBookPickerWidget ui:field="user" width="100%" attributeIdInt="652" isHierarchical="false"
                                                     multiSelect="true"/>
                     </g:cell>
                     <g:cell height="26px">

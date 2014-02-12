@@ -8,7 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -88,7 +88,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new DateMaskBoxPicker();
 					break;
 				case REFERENCE:
-                    RefBookMultiPickerModalWidget refbookWidget = new RefBookMultiPickerModalWidget(true, false);
+                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(false, false);
                     refbookWidget.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
@@ -158,17 +158,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				w.setValue(null);
 				if (w instanceof UIObject) {
 					((UIObject) w).setTitle(null);
-					if (w instanceof RefBookMultiPickerModalWidget) {
-						((RefBookMultiPickerModalWidget)w).setDereferenceValue("");
-                        ((RefBookMultiPickerModalWidget)w).setEnabled(!readOnly);
+					if (w instanceof RefBookPickerWidget) {
+						((RefBookPickerWidget)w).setDereferenceValue("");
+                        ((RefBookPickerWidget)w).setEnabled(!readOnly);
 					}
 				}
 			}
 		} else {
 			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
-				if (w.getValue() instanceof RefBookMultiPickerModalWidget) {
-                    RefBookMultiPickerModalWidget rbw = (RefBookMultiPickerModalWidget) w.getValue();
+				if (w.getValue() instanceof RefBookPickerWidget) {
+                    RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setValue(recordValue.getReferenceValue());

@@ -12,8 +12,10 @@ import com.google.gwt.user.client.ui.IsWidget;
  * Интерфейс компонента выбора значений из справочника
  * 
  * @author sgoryachkin
- * 
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker
  */
+@Deprecated
 public interface RefBookPickerPopup extends HasValue<Long>, IsWidget, HasEnabled, LeafValueEditor<Long> {
 	
 	public void setDereferenceValue(String value);

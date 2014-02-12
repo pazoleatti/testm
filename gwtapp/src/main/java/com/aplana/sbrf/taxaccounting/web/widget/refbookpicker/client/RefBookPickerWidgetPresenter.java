@@ -18,6 +18,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
+@Deprecated
 public class RefBookPickerWidgetPresenter extends PresenterWidget<RefBookPickerWidgetPresenter.MyView> implements RefBookPickerWidgetUiHandlers{
 	
 	private final DispatchAsync dispatcher;

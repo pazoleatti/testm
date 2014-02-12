@@ -8,14 +8,13 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
-
 /**
  * Интерфейс компонента выбора значений из справочника
  * 
  * @author sgoryachkin
  * 
  */
-public interface RefBookMultiPickerModal extends HasValue<List<Long>>, IsWidget, HasEnabled, LeafValueEditor<List<Long>> {
+public interface RefBookPicker extends HasValue<List<Long>>, IsWidget, HasEnabled, LeafValueEditor<List<Long>> {
 	
 	public void setDereferenceValue(String value);
 

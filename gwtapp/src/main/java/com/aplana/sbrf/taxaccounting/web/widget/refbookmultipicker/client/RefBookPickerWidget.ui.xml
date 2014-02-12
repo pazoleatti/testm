@@ -8,17 +8,22 @@
             border-style: solid;
             border-width: 1px;
             vertical-align: middle;
+            cursor: pointer;
+            display: block;
         }
 
         .selected{
             color: #000000;
         }
     </ui:style>
+
+
+
     <g:HorizontalPanel verticalAlignment="middle">
         <g:cell width="100%">
             <g:TextBox readOnly="true" addStyleNames="{style.selected}"  ui:field="text" width="100%"/>
         </g:cell>
-        <g:cell verticalAlignment="middle" horizontalAlignment="center">
+        <g:cell>
         	<g:Image ui:field="selectButton" styleName="{style.selectButton}" url="resources/img/reference-16.gif"/>
         </g:cell>
     </g:HorizontalPanel>

@@ -6,7 +6,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,7 +43,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     PeriodPickerPopupWidget reportPeriodIds;
 
     @UiField
-    RefBookMultiPickerModalWidget formDataKind;
+    RefBookPickerWidget formDataKind;
 
     @UiField(provided = true)
     ListBoxWithTooltipWidget<Integer> formTypeId;

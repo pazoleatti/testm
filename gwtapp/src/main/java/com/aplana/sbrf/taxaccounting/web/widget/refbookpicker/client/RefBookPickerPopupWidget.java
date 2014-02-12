@@ -19,7 +19,10 @@ import com.google.gwt.user.client.ui.*;
 /**
  * Версионный справочник с выбором значения из выпадающего списка с пагинацией
  * @author Dmitriy Levykin
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker
  */
+@Deprecated
 public class RefBookPickerPopupWidget extends DoubleStateComposite implements RefBookPickerPopup {
 
     interface Binder extends UiBinder<Widget, RefBookPickerPopupWidget> {

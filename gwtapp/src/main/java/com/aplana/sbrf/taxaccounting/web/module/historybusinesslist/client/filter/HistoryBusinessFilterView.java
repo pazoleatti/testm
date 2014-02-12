@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -51,7 +51,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     ListBoxWithTooltip<Integer> declarationTypeIds;
 
     @UiField
-    RefBookMultiPickerModalWidget formDataKind;
+    RefBookPickerWidget formDataKind;
 
     @UiField(provided = true)
     ValueListBox<TaxType> taxType;
@@ -67,7 +67,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     Panel declarationTypePanel;
 
     @UiField
-    RefBookMultiPickerModalWidget user;
+    RefBookPickerWidget user;
 
     private Map<Integer, String> formTypesMap;
     private Map<Integer, String> declarationTypesMap;

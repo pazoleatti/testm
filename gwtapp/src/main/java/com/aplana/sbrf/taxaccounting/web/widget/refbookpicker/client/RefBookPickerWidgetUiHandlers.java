@@ -5,6 +5,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.Date;
 
+@Deprecated
 public interface RefBookPickerWidgetUiHandlers extends UiHandlers, HasValue<Long>{
 	
 	void init(long refBookAttrId, String filter, Date relevanceDate);

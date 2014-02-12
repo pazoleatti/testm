@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.client;
 
-import com.aplana.gwt.client.MultiListBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -52,7 +51,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
-    RefBookMultiPickerModalWidget role;
+    RefBookPickerWidget role;
 
     @UiField
     CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
