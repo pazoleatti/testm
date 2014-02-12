@@ -56,6 +56,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными
         PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, null);
+        System.out.println("ps: "+ps);
         List<Map<String, RefBookValue>> records = refBookUtils.getRecordsData(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
@@ -178,11 +179,12 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
         if (filterPS.getQuery().length() > 0) {
-            ps.appendQuery(" WHERE ");
+            ps.appendQuery(" WHERE (");
             ps.appendQuery(filterPS.getQuery().toString());
             if (filterPS.getParams().size() > 0) {
                 ps.addParam(filterPS.getParams());
             }
+            ps.appendQuery(") ");
         }
         if (whereClause != null && whereClause.trim().length() > 0) {
             if (filterPS.getQuery().length() > 0) {
@@ -193,7 +195,13 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             ps.appendQuery(whereClause);
         }
 
-        ps.appendQuery(" WHERE (r.version = t.version and r.record_id = t.record_id)");
+        if (filterPS.getQuery().length() > 0 ||
+                (whereClause != null && whereClause.trim().length() > 0 && filterPS.getQuery().length() == 0)) {
+            ps.appendQuery(" and ");
+        } else {
+            ps.appendQuery(" where ");
+        }
+        ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
 
         if (pagingParams != null) {
             ps.appendQuery(" and row_number_over BETWEEN ? AND ?");
