@@ -41,7 +41,7 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img align=\"right\" src=\"resources/img/reference-16.gif\"/>")
+		@Template("<img align=\"right\" src=\"resources/img/dot.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
@@ -154,8 +154,5 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
-        if (cell.isEditable()) {
-            sb.append(template.referenceIcon());
-        }
     }
 }
