@@ -204,7 +204,7 @@ def calc() {
             row.coef362 = (row.ownMonths / monthCountInPeriod).setScale(4, BigDecimal.ROUND_HALF_UP)
         } else {
             row.coef362 = null
-            placeError(row, 'coef362', ['ownMonths'])
+            placeError(row, 'coef362', ['ownMonths'], errorMsg)
         }
 
 
@@ -260,7 +260,7 @@ def calc() {
                         "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС.")
             }
         } else {
-            placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'])
+            placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
         }
 
         /*
@@ -272,7 +272,7 @@ def calc() {
             row.calculatedTaxSum = (row.taxBase * row.coef362 * taxRate).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
-            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate'])
+            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate'], errorMsg)
         }
 
         /*
@@ -333,10 +333,7 @@ def calc() {
             row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.taxSumToPay = null
-            placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'])
-        }
-        if (tsTypeCode != null) {
-            row.tsType = getRecord(42, 'CODE', tsTypeCode, index, getColumnName(row, 'tsType'), new Date())?.record_id?.numberValue
+            placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'], errorMsg)
         }
     }
     // добавление строки ИТОГО
@@ -412,24 +409,6 @@ void logicCheck() {
             logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
         }
 
-        //Проверки НСИ
-        checkNSI(96, row, 'okato')
-        checkNSI(42, row, 'tsTypeCode')
-        checkNSI(12, row, 'taxBaseOkeiUnit')
-        checkNSI(40, row, 'ecoClass')
-
-        /**
-         * Проверка наименования вида ТС коду вида ТС
-         *
-         * Значение «графы 4» (поле «Вид транспортного средства») совпадает со значение поля «Наименование вида транспортного средства» строки справочника «Коды видов транспортных средств»,  для которой
-         * «графа 3» (поле «Код вида транспортного средства (ТС)») текущей строки формы = «графа 2» (поле  «Код вида ТС») строки справочника
-         */
-        def tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
-        def tsType = getRefBookValue(42, row.tsType)?.NAME?.stringValue
-        if (row.tsType != null && row.tsTypeCode != null && (tsTypeCode == null || tsType == null || getRecord(42, "CODE like '" + tsTypeCode + "' and NAME LIKE '" + tsType + "'", new Date()) == null)) {
-            logger.error(errorMsg + 'Название вида ТС не совпадает с Кодом вида ТС')
-        }
-
         /**
          * Проверка льготы
          * Проверка осуществляется только для кодов 20210, 20220, 20230
@@ -447,17 +426,16 @@ void logicCheck() {
 /**
  * Получение региона по коду ОКТМО
  */
-def getRegionByOKTMO(def okatoCell, def errorMsg) {
-    def okato3 = getRefBookValue(96, okatoCell)?.CODE?.stringValue.substring(0, 2)
-    if (okato3.equals("719")) {
+def getRegionByOKTMO(def oktmoCell, def errorMsg) {
+    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue.substring(0, 2)
+    if (oktmo3.equals("719")) {
         return getRecord(4, 'CODE', '89', null, null, new Date());
-    } else if (okato3.equals("718")) {
+    } else if (oktmo3.equals("718")) {
         return getRecord(4, 'CODE', '86', null, null, new Date());
-    } else if (okato3.equals("118")) {
+    } else if (oktmo3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        // TODO заменить OKATO_DEFINITION  на "Определяющая часть кода ОКТМО"
-        def filter = "OKATO_DEFINITION like '" + okato3.substring(0, 1) + "%'"
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 1) + "%'"
         def record = getRecord(4, filter, new Date())
         if (record != null) {
             return record
@@ -529,7 +507,7 @@ def consolidation() {
                     // «Графа 3» принимает значение «графы 4» формы-источника
                     newRow.tsTypeCode = sRow.tsTypeCode
                     // «Графа 4» принимает значение «графы 5» формы-источника
-                    newRow.tsType = sRow.tsType
+                    // newRow.tsType = sRow.tsType
                     // «Графа 5» принимает значение «графы 6» формы-источника
                     newRow.vi = sRow.identNumber
                     // «Графа 6» принимает значение «графы 7» формы-источника
@@ -559,7 +537,7 @@ def consolidation() {
      * Расставим соответствия для формы с 202
      */
     int cnt = 0
-    sourses202.each { v ->
+    sources202.each { v ->
         cnt++
         // признак подстаноки текущей строки в сводную
         boolean use = false
@@ -579,7 +557,7 @@ def consolidation() {
 
         // если значения этой строки 202 формы не подставлялись в сводную то ругаемся
         if (!use) {
-            def department = departments.get(sourses202.indexOf(v))
+            def department = departments.get(sources202.indexOf(v))
             logger.warn("Для строки " + cnt + " в форме \"Сведения о льготируемых транспортных средствах, по которым " +
                     "уплачивается транспортный налог\" подразделения " + department.name + " указана льгота для  " +
                     "транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по " +
@@ -721,7 +699,7 @@ def getMonthCount() {
  * @param alias рассчитываемое поле
  * @param errorFields поля от которых оно зависит
  */
-void placeError(DataRow row, String alias, ArrayList<String> errorFields) {
+void placeError(DataRow row, String alias, ArrayList<String> errorFields, String errorMsg) {
     def fields = []
     for (errAlias in errorFields) {
         if (row[errAlias] == null) {

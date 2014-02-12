@@ -23,10 +23,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -52,6 +49,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     LinkAnchor allVersion;
 
     private boolean isVersionMode = false;
+    private boolean readOnly;
 
 	@Inject
 	@UiConstructor
@@ -162,6 +160,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					((UIObject) w).setTitle(null);
 					if (w instanceof RefBookMultiPickerModalWidget) {
 						((RefBookMultiPickerModalWidget)w).setDereferenceValue("");
+                        ((RefBookMultiPickerModalWidget)w).setEnabled(!readOnly);
 					}
 				}
 			}
@@ -199,7 +198,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
 			RefBookValueSerializable value = new RefBookValueSerializable();
 			try {
-				switch (field.getKey().getAttributeType()) {
+                switch (field.getKey().getAttributeType()) {
 					case NUMBER:
 						Number number = (field.getValue().getValue() == null || field.getValue().getValue().toString().trim().isEmpty())
 								? null : new BigDecimal((String)field.getValue().getValue());
@@ -238,7 +237,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
-						Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+                        //TODO так не работало к окато и октмо
+                        //Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
+                        Long longValue = field.getValue().getValue() == null ? null : ((ArrayList<Long>)field.getValue().getValue()).get(0);
 						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
@@ -249,10 +250,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 				fieldsValues.put(field.getKey().getAlias(), value);
 			} catch (NumberFormatException nfe) {
+                nfe.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
 				throw badValueException;
 			} catch (ClassCastException cce) {
+                cce.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
 				throw badValueException;
@@ -296,8 +299,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode);
-        versionStart.setEnabled(isVersionMode);
-        versionEnd.setEnabled(isVersionMode);
+        versionStart.setEnabled(isVersionMode && !readOnly);
+        versionEnd.setEnabled(isVersionMode && !readOnly);
         allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
@@ -331,6 +334,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setVersionTo(Date value) {
         versionEnd.setValue(value);
+    }
+
+    @Override
+    public void setReadOnlyMode(boolean readOnly) {
+        this.readOnly = readOnly;
+        save.setVisible(!readOnly);
+        cancel.setVisible(!readOnly);
     }
 
     @UiHandler("save")

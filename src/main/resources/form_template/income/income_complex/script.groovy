@@ -25,7 +25,7 @@ import java.math.RoundingMode
  * ********** 6.1.2 Сводная форма "Доходы, учитываемые в простых РНУ" уровня обособленного подразделения **********
  *
  * 1    incomeTypeId                КНУ
- * 2    incomeGroup                 Группа доходов
+ * 2    incomeGroup                 Группа дохода
  * 3    incomeTypeByOperation       Вид дохода по операции
  * 4    accountNo                   Балансовый счёт по учёту дохода
  * 5    rnu6Field10Sum              РНУ-6 (графа 10) cумма
@@ -42,7 +42,7 @@ import java.math.RoundingMode
  * ********** 6.1.1	Сводная форма начисленных доходов уровня обособленного подразделения **********
  *
  * 1   incomeTypeId                 КНУ
- * 2   incomeGroup                  Группа доходов
+ * 2   incomeGroup                  Группа дохода
  * 3   incomeTypeByOperation        Вид дохода по операциям
  * 4   incomeBuhSumAccountNumber    балансовый счёт по учёту дохода
  * 5   incomeBuhSumRnuSource        источник информации в РНУ
@@ -66,7 +66,6 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE :
         calc()
         logicCheck()
-
         break
     case FormDataEvent.CHECK :
         logicCheck()
@@ -195,7 +194,7 @@ void consolidationBank() {
     dataRows.each { row ->
         editableColumns.each { alias ->
             if (row.getCell(alias).isEditable()) {
-                row.getCell(alias).value = 0
+                row.getCell(alias).setValue(0, row.getIndex())
             }
         }
         // графа 11, 13..16
@@ -218,7 +217,7 @@ void consolidationBank() {
                 def rowResult = getDataRow(dataRows, row.getAlias())
                 editableColumns.each {
                     if (row.getCell(it).value != null) {
-                        rowResult.getCell(it).value = summ(rowResult.getCell(it), row.getCell(it))
+                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
                     }
                 }
             }
@@ -241,7 +240,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each { column ->
         def cell = row.getCell(column)
-        if (cell.isEditable() && !cell.value) {
+        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
             def name = getColumnName(row, column)
             colNames.add('«' + name + '»')
         }

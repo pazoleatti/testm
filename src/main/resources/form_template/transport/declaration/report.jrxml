@@ -27,15 +27,18 @@
 		<field name="ОКАТО" class="java.lang.String">
 			<fieldDescription><![CDATA[@ОКАТО]]></fieldDescription>
 		</field>
-		<variable name="OKATO" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОКАТО}.length() < 11 ?
-($F{ОКАТО}+"00000000000").substring(0,11)
+		<field name="ОКТМО" class="java.lang.String">
+			<fieldDescription><![CDATA[@ОКТМО]]></fieldDescription>
+		</field>
+		<variable name="ОКТМО" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
+($F{ОКТМО}+"00000000000").substring(0,11)
 :
-$F{ОКАТО}]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОКАТО}.length() < 11 ?
-($F{ОКАТО}+"00000000000").substring(0,11)
+$F{ОКТМО}]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОКТМО}.length() < 11 ?
+($F{ОКТМО}+"00000000000").substring(0,11)
 :
-$F{ОКАТО}]]></initialValueExpression>
+$F{ОКТМО}]]></initialValueExpression>
 		</variable>
 		<variable name="NalIsch" class="java.lang.String">
 			<variableExpression><![CDATA[$F{НалИсчисл} == null ?
@@ -168,15 +171,18 @@ $F{ОКАТО}]]></initialValueExpression>
 		<field name="СумУменСум" class="java.lang.String">
 			<fieldDescription><![CDATA[ЛьготУменСум/@СумУменСум]]></fieldDescription>
 		</field>
-		<variable name="OKATO" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ОКАТО} == null ?
+		<field name="ОКТМО" class="java.lang.String">
+			<fieldDescription><![CDATA[ancestor::СумПУ/@ОКТМО]]></fieldDescription>
+		</field>
+		<variable name="ОКТМО" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ОКТМО} == null ?
 "-----------"
 :
-($F{ОКАТО}+"00000000000").substring(0,11)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ОКАТО} == null ?
+($F{ОКТМО}+"00000000000").substring(0,11)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ОКТМО} == null ?
 "-----------"
 :
-($F{ОКАТО}+"00000000000").substring(0,11)]]></initialValueExpression>
+($F{ОКТМО}+"00000000000").substring(0,11)]]></initialValueExpression>
 		</variable>
 		<variable name="KodVidTS" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КодВидТС} == null ?
@@ -656,13 +662,13 @@ $F{ДатаДок}]]></initialValueExpression>
 ($F{КБК}+"--------------------").substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage" class="java.lang.String">
-		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF AAAAAgQLBQkNCQQBDQkFDQ0OBQsUChIbFgcDFRENGxIMFRIQERYbFhodGhURHh0dCxYjEhsnFBww GiIrGSc4JBMFIBULJRgOLRwMIRYRJRoUIx4ZKRwRMB8UIyAdLCEWKyEaNSYZJCMjISguKSUiLygi KysrJi02JCs5KSwwKzQ9NSsjNDAsMjExMzg8Ozc0Ozg0Ozs7HS1AJzZGMDxIL0BROUJKNkZWO01h QjAeSDYlSTwzUD0sSUE4Vkc3YE48YlA+RkZGQkdMQkhNTkZDTU1NQk9cVEtDWVFKUFBQUFRYWlpa RFRmTV1zU15oTWFyW2JqVGZ5ZVRDZFVIaFZDa1lHbFxMY1tUcF5NaGNdcmBOe2lXYmJia2tra3B0 a3R+d29lc3Nze3t7X2+CXXCBYnSGZXmMaXuMbH2QdXyDboKTfYWMdoaXfI6gf5Cig3Bdi3lni310 kHprjYJ5koBtloRykId+loh6mYZ2m4l2nYt5oI57oZF+goKChYmNiYmJhY2WiY6Rh5KckYmBmI6C mpGJlJSUkJefmpaSn5mTnJycgpOlhZeoiZemi5uniJqsjZ6xkpykj6K0lqKtlKOzlae5lqu9nqu2 mKq8n7C9pZOCopiLqpeFqpiHrJqJpJuTqJ2SsZ2LqaSdsaCPuKeVpKSko6aqrqihqamppK23p7G5 tK+rua2jvrGis7OzsLS4na/An7LEwaybAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4bGi2wAAAQB0Uk5T//////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// ////////////AFP3ByUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAadEVYdFNvZnR3YXJlAFBhaW50 Lk5FVCB2My41LjEwMPRyoQAACqZJREFUeF7tmvtjHUUVxyckTUOEYKy0KNXYYqtSfGvRqgHxgRhU LFgeTdXGt/ioVkRbNShatL7fWlGxtFpF6uMfXM9rzu7dmbmZJDX7y/fzQ+6Zs7Nndz93d2Z3b0ID BgPyBwTyBwTyB2R98ldWVnqBQxnmojTOrKxckmDV0tJwLq+srGqULDqr/QvVvehlCSgjn5mAiRtn fL8cSShxMe1Xb9Ho7njA6AJFM7Q9DTyzBuuTH4L19yByljLMu6T12hCWJdhraWk4x0PYKwGvJYFD awrWjFh2SRr7QzguAWXkk4MzMZBP4TpexfA1Hf3+mJUQ7pLgmC2ShvB2y8iXc4kCyQrbdIlwVjK0 PZVOGflci7peEa+alId8yPcMA/mKNBzIV+p6RbxqUh7yId8zDOQr0nAgX6nrFfGqSXnIh3zPMJCv SMOBfKWuV8SrJuUhH/I9w0C+Ig0H8pW6XhGvmpSHfMj3DAP5ijQcyFfqekW8alIe8iHfMwzkK9Jw IF+p6xXxqkl5yId8zzCQr0jDgXylrlfEqyblIR/yPcNAviINB/KVul4Rr5qUh3zI9wwD+Yo0HMhX 6npFvGpSHvIh3zMM5CvScCBfqesV8apJeciHfM8wkK9Iw4F8pa5XxKsm5SEf8j3DQL4iDQfylbpe Ea+alId8yPcMA/mKNBzIV+p6RbxqUh7yId8zDOQr0nAgX6nrFfGqSXnIh3zPMJCvSMOBfKWuV8Sr JuUhH/I9w0C+Ig0H8pW6XhGvmpSHfMj3DAP5ijQcyFfqekW8alIe8iHfMwzkK9JwIF+p6xXxqkl5 yId8zzCQr0jDgXylrlfEqyblIR/yPcNAviINB/KVul4Rr5qUh3zI9wwD+Yo0HMhX6npFvGpSHvIh 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"]]></variableExpression>
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACiCAYAAABCpHYhAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAE1dJREFUeF7tnefPFFUUh63YY+yKFWzErtjFkqgUNfaCSsRC7B1jg2iIQkCiWGIDSxQESyRK/P/WezY5y+zdc++d3Z097PvO8+Ex7rm/OTOz7+zD7tT9Op0OAAC0ALM4LXz++edhCffrce+994Zyf6Y6fuyxxw6M16XaxyLOC/Pnzy9mFi5c2JexiKepy5IlS3o9Xn755VAazDz66KN989q4cWMoD+ZKrFmzpq9PzOLFi0PMnjZH3Ccmzgtz584tZi688MJiZtGiRb3xd955J5QGM8K8efOyvVauXNk3vm7duoHMqKxevbqvdx1WrFgRJrX7Kf/991/fNBdddFEoD+a+//77vlzMggULQmxwuph4upg5c+aEWP80p5xyipmtEk+zbNkyM6e8++67A9OkuPnmm/um/fXXX0N57/jatWv7xletWtU3Po2YxWkB4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG4edB+OkMwrf7KQi/DMJ3BuHnQfjpDMK3+ykIvwzCdwbh50H46QzCt/spCL8MwncG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"]]></variableExpression>
 	</variable>
 	<variable name="BarcodeImage2" class="java.lang.String">
-		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF AAAAAgQKBQkMCQQCDQgEDAwMAAYWBAsTAgsaCQ0SCA8ZCxEaEAYAEgkEEw0JGwoGGA4IFhAKGhEK FhYWHR0dCRcmEhcgEhokER0qGh4jFiEtGic4JhcLIRcRJBoTIR0ZLR4TIyEfLCAVLCIaNycXISEh ISUsIiguLSgkKysrJSYxIiszJjA6LDA0KjU+NCwkMi8qOCshNTAqPjAlNTU1NDc4NDo/OzczOTk2 Hi9AKTZDKzZILTlJMjtGLUFTOEJKM0NTNkpaP0lVOkpcPk9gP1BhQTAeRjYmRj01S0I6UkIuU0Ex UUU5VUg7WEY2XEw9YlA/RkNAREpPSEVDSkpKRE5YWU1DV1FMVVVVWVVSWFhYRVdoTV5wUVlgT2By VmBsXGBkWWBqVWd4aFdHcF5NbmNYcmFOdGNTdGZYemhWfGtZYGBgZ2ptbGxsY211bHR9eG5mdnZ2 f3hxfX19XG6AX3CCZ3iKbX6QdHuBboCSdICKeYWOcIKUdomYeoudgG5cgHFdh3VkhX52kH5ukX5x jYN2koBumol3oI18gYGBhIaJi4mGi4uLgoyVjJOal42Dko2InJKHmpKNlZWVmJSRnJmUnZ2dgpSk hZaohpqripysjZ6wlp2mjqCxnqSpl6i5pJOCqZaEqpqHrZ2LsJ6Mr6COpaGerqCTsaCOuqiXoqKi qqqqpqqwobC+q7G5sayns6yosLS4m67AwK6bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtuKZ7wAAAQB0Uk5T//////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// ////////////AFP3ByUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAadEVYdFNvZnR3YXJlAFBhaW50 Lk5FVCB2My41LjEwMPRyoQAACihJREFUeF7tmv1jHEUZxycNp0ZNoMG3ChQs4UWroqD4ilVRE0WM isBZfEGrVBuD1PiCrzVFDKcVkGp9x2JVWuK7f+D5vO3uzM7s3F4u3vaH7+eHzDPPzk52Pzc7O7t3 bgg6A/I7BPI7BPI7ZDz56+vHi2BdgxLKMFoZFIFl48YbtaDgVNMOXtbvXYPjUYbZkH0UzRS9M5ph Tq+vn5HgTLDJKttaYyyjja3i9UO9axBkM4wl/7RzPY2cq+24QRlmILVXO6efkmVrjQfOXSfBKecu l6DkTckdin7i3qUc9pw7zeV2mWGuk30U3aHonZGE8AnnDkvQDzZZpfLIvTN9qVnF64d6f06CIJuh XSsD8gXIZygjJeQrkE8E2QztWhmQL0A+QxkpIV+BfCLIZmjXyoB8AfIZykgJ+QrkE0E2Q7tWBuQL kM9QRkrIVyCfCLIZ2rUyIF+AfIYyUkK+AvlEkM3QrpUB+QLkM5SREvIVyCeCbIZ2rQzIFyCfoYyU kK9APhFkM7RrZUC+APkMZaSEfAXyiSCboV0rA/IFyGcoIyXkK5BPBNkM7VoZkC9APkMZKSFfgXwi yGZo18qAfAHyGcpICfkK5BNBNkO7VgbkC5DPUEZKyFcgnwiyGdq1MiBfgHyGMlJCvgL5RJDN0K6V AfkC5DOUkRLyFcgngmyGdq0MyBcgn6GMlJCvQD4RZDO0a2VAvgD5DGWkhHwF8okgm6FdKwPyBchn KCMl5CuQTwTZDO1aGZAvQD5DGSkhX4F8IshmaNfKgHwB8hnKSAn5CuQTQTZDu1YG5AuQz1BGSshX IJ8IshnatTIgX4B8hjJSQr4C+USQzdCulQH5AuQzlJES8hXIJ4JshnatDMgXIJ+hjJSQr0A+EWQz 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 R4d0BOuNAAAAAElFTkSuQmCC"]]></variableExpression>
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGx0dHR4eHh8fHyEhISMjIyQkJCUlJSYmJicnJygoKCkpKSoqKiwsLC0tLS8vLzAwMDExMTMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0FBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUtLS0xMTE1NTU5OTk9PT1BQUFFRUVNTU1RUVFdXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2FhYWNjY2RkZGZmZmdnZ2lpaWpqamxsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHZ2dnh4eHl5eXp6ent7e3x8fH19fX9/f4GBgYKCgoODg4WFhYaGhoeHh4iIiImJiYyMjI2NjY+Pj5CQkJKSkpOTk5SUlJWVlZaWlpiYmJmZmZubm5ycnJ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq62tra6urq+vr7CwsLGxsbKysrOzswAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAqXa4sAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGnRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuNS4xMDD0cqEAAAkCSURBVHhe7Zz9fxTVFYdP3mBLQgxCaCpqwBahjY2KBYJGEC1hadC2Ft+tUF8iBpRUKSigRmwtihoRmn93es695+7cuTN3MtldneTz+T4/cL5z7s7s7LO787YTKAG1Afk1Avk1Ull+s9l8R2vTNFqckpbrLnBYlnDVNpvNJdN3LDWbb9jEQ+dsctjHB4s/p80bMnGDw1UJyxwWJPBMJ01NW1y1lYHbKdqzi7fpDTuSXftLZkjQhsEunoOpFulLfSfbLqWq/G+I6FEJXIN5tkuL+UYmZjh8LOEl2ySyjhwLRHtNWOShaZNa2McHi5/W5lmZOMvhJQkfc5iRwOs1KNVrcdVWBm6naM8uftGkvXYku/bPmSFBGwa7eA6mWqQv9VGuxkQFApFRIN8D8iFfgHxB+lIhH/IVyI8SiIwC+R6QD/kC5AvSlwr5kK9AfpRAZBTI94B8yBcgX5C+VMiHfAXyowQio0C+B+RDvgD5gvSlQj7kK5AfJRAZBfI9IB/yBcgXpC8V8iFfgfwogcgokO8B+ZAvQL4gfamQD/kK5EcJREaBfA/Ih3wB8gXpS4V8yFcgP0ogMgrke0A+5AuQL0hfKuRDvgL5UQKRUSDfA/IhX4B8QfpSIR/yFciPEoiMAvkekA/5AuQL0pcK+ZCvQH6UQGQUyPeAfMgXIF+QvlTIh3wF8qMEIqNAvgfkQ74A+YL0pUI+5CuQHyUQGQXyPSAf8gXIF6QvFfIhX4H8KIHIKJDvAfmQL0C+IH2pkA/5CuRHCURGgXwPyId8AfIF6UuFfMhXID9KIDIK5HtAPuQLkC9IXyrkQ74C+VECkVEg3wPyIV+AfEH6UiEf8hXIjxKIjAL5HpAP+QLkC9KXCvmQr0B+lEBkFMj3gHzIFyBfkL5UyId8BfKjBCKjQL4H5EO+APmC9KVCPuQrkB8lEBkF8j0gH/IFyBekLxXyIV+B/CiByCiQ77GG5B+etJiJNznclHDBNicnr5u+4/rk5EkTfuShV01qYR+vC3K8qs1rMnGNwwUJBfJv8tibErgeNJ0sspAW2rOL/9Gkk3Yku/bmLTdow2AXz8FUi/PyM8uvgwL5NeO8QH4NOC+QXwPOC+TXgPMC+TXgvEB+DTgvkF8Dzgvk14DzAvk14LxAfg04L5BfA84L5NeA8wL5NeC8/BTywU8A5NcI5NcI5NcI5NcI5NdId+QvGXQixA4atJMnOrbCfGUsl81ZulgzWDqqsUO6Il+OuvUwN4/cceDQVp7YmNzjUDZfGeauCs0h9lYFc+JSgBm090vkkTMeewtFx7T3ugJ+Z1aWDs9e1oZPFfmHY2O/t/M9/ppOV2d2dqPM2ZwtOuO5fJdZ7N2zOu1zffaPZpB2zxYM/2NWzqJovGhs1XRD/r1Eff39/T1Ew59pK2X3VjNo0V7IMXk9mn2m76dema2XBoK7TFZi9xiRzMnrtPV/2kv5dNgM9hP9Ujsp326xc/b38Tod02aLt/gdlVXqjX9tVkEX5N9NoxNS5xpEr5uOT7HWLLuK5R9ic19LeH8THTKdyhDtMOv0/MR4fsn8ZL8x4QGiz03wINr5hE0T/DakN01ZjhJt+YLrrYmJ/kdsqwM6lz9NY/+1aY6/r3dsTKkg/zFxn38Ub6+2yQtlzvfHtsDFjNIuTckdog81KoNEBzTuK3pnNCTJc0SPaVQWiEauat5OpzW1TTfkp3f9tSN/boroTER+66s9uCr5M3SvJuapcNEs3+0HeH+uSbn4N29Tc+fD8GbHKTqjH4ck+efal8+bjnMaI7D3q4VvUSfy/Q3y8rIGpUw+b6TMvZpKIJ+/RZoEGtfQNp3LP9TzjKYkadB3mhxsNfdlyELUMA/TyZS3adPjGnk78ramKsz0tGYsYJA2fK/x3wPB0+4dGjI3hSrl8vUO2/bpWP5p2q6J4WNgTY4V5f/CfA4L5GeXVf0iOXOw7BI/Hyqm36LM2udZ//Jfv8b/ED1YuKqsQg5Luir/rPy+srg4LM96Lfesq5C/SDs1Wdah/BZPas/j27Gt5sSMR820R2fyn7RPyTysXUd1+Xy0kz3UXGfyzR8ZmCPRpQIPya0dutfiQVM9OpHf9zDZc+IHecHBjJXlfz0W7lJZ/r7WhYWZNS//4LZtH2hMLuQFD9OIDV2WT/2vaE7+457CUVX+0hBR+EcW7/LWU+NxPsld65sdj9aP3imth3dbfnqomd1UMFXl8yrl1olPsuw+2F7wW0fykz2h/L+3Hs6vRFOLTuQP/Esjs89zLVSUz56P5C+WPMAreuzKlSt/5t3B+pLPOwBf/uVTRH/V3GX5/qEmW9RkqSb/4gAd1ZjhHvnEC2d4ldaxfPlDwF0HDA9xnDzwkQ5YapX/0WbarzHkPK/rHglrQP75jRn5WzUVUSA/Q/YXitubM/I339a0MhcbZfKP9WTk/1aTz8jIhu0rXzGmoeqfh2I6lp9Me0cTc+Hp7F7/HDGQP3e0xX5WP3U0+CnmLH2pKUm+Cjbc5cw0NAih/GSQntWUJM2i1z/i/la4lLV/VZPlP61RvvCns3+Um8LyNaV06cLa03RKk1J2YU3YRfdFLiRljpzWiPxfmV88kuS94zn5t9mqa/GhpqY8Efmj+mZ9sNrr+W7G5BXeuGl0sPwpjX8oeNo9NKwpz5/o+HsaLzbMhr8juiHffQTkV+nwKlpn8t1uILOTrMB4a//Bpgvku1bB0/KXIXIAxPAmzG2Q/C98u8R9VGaU+ho/cD3RQ0Of2FbKfUQbtpjUGIi/qEL5yTNEfecl/KV3YHW3CxzSGZNHiLbcMsmDn2yjCRtom6k+A9T6uSTPp0PUc4LrD41Gb9/zttcBXZD/LL8Yy/AlbXk0f62DwRXCLDysyWNhk52ReVFbVZnS+YjGbmgrpclne5b7g99ZeGuiI47MJeUkuWQulQr7gz1JO3RBfjJ/xK7Py7nPvWGejx6IBud1shB+gCafS/P84Rde0EZ15vkzLzPO590z86NmdIf9Ly88xk3fI5CffDJ/QtoTpa+mKt2QnyQ3DTqRY1kGc68zQ3RumTW+5DLKZ4yMmlX10b5PpN0G3ZEP2iBJ/g8POMdPp38SAAAAAABJRU5ErkJggg=="]]></variableExpression>
 	</variable>
 	<variable name="BarcodeImage3" class="java.lang.String">
-		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAMAAADNnpJgAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF AAAAAgUKBQgMCgUBDQkFDg0NBQsVBBIfDREVChIcFAsGFRAMGRELEhYbEhgdGhURHBgUGxsbAxMi BhgnChQiDhopFRwlFyEsGSY2Ig4JJBYLJhwVMh4UJSEeLCIbMSAPNSIUMiUaNSgbPCscJCQkISYr KyYiLCopJCo0IS06KCwxJDA9LTAxKzQ8NCsjOiwjOC8pPDUsNTU1MTg9PTcxPT09KDdHLz9RMjpB Mj9OL0FSO0JJNkhYPU5gQC0eRTUoSDwySUE5WUc2YE48Y1I+QEBAQEZLT0lDTU1NRkxSSlNbU0xG VVFOVFRUUVdcXFtbR1ZnTV1wVFxlTWByVmZ3ZFNDZlNJaVdFbVxKZVxTcV9PcWBOeGZWZWVlZGhr ampqYmx2dW5lfHFocXFxfHdwe3t7XG6AXnCCZXeIbX+Rcn2KbYGReYSMcYKUdIaYd4ibfIaSfomV eoqbfo+gfpGjgG1diHZlhHlwiH51jYZ+kYBumId2oI99opF+goKCgYeLiISAioqKhIuTjJGXlYuD nZCEkZGRk5aakZiempaTn5qTm5ubhpanjZ2ylJukkJ6tmZ2hj6GvjqCxl6i5n7C/qJaFsJ2MtJ+Q qaGYsqGPuamYpKSko6erpamvrqqmqKiopq2zpbO/rbG1q7O5tqyjvrGjsrKyna7An7PDwa+cwrCd xbSiwLSpyLSkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKvxuSgAAAQB0Uk5T//////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////////////////// ////////////AFP3ByUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAadEVYdFNvZnR3YXJlAFBhaW50 Lk5FVCB2My41LjEwMPRyoQAACvxJREFUeF7tm/tjHUUVxydJieWm0tZH1EYqtVRRKZHiGzUQX9QY qWiltY0VY31gfUu01lYvhCjUt1ZrUKMI9QH+jev3nDl7dmd3djrJrVl/OJ8fmO+eO/u4n53dnb0p rjB6w+T3iMnvEZPfI5uTv7S01AglG6gQz/DSsAxSPcMLyuWlpTWflpaWfShZkzVksSSo1rfObT3U tneW1/Fc48qyLBFcYHR7+BKXOIRoZ78iI7tB8oHA1n0Iqgk2Jf+ac76/BmUZFcJrfnsZpHoTLygP OvcAh6FzezkoD8gasihsSPUyL9W3zi2FDWrXgu3dzut4hlzZK0sEF5gPOedl4Usc4RBSdsbWFdkN kg8Etu53E1QT5PUSTL5i8lHhloLJN/kcgmqCvF6CyVdMPircUjD5Jp9DUE2Q10sw+YrJR4VbCibf 5HMIqgnyegkmXzH5qHBLweSbfA5BNUFeL8HkKyYfFW4pmHyTzyGoJsjrJZh8xeSjwi0Fk2/yOQTV BHm9BJOvmHxUuKVg8k0+h6CaIK+XYPIVk48KtxRMvsnnEFQT5PUSTL5i8lHhloLJN/kcgmqCvF6C yVdMPircUjD5Jp9DUE2Q10sw+YrJR4VbCibf5HMIqgnyegkmXzH5qHBLweSbfA5BNUFeL8HkKyYf FW4pmHyTzyGoJsjrJZh8xeSjwi0Fk2/yOQTVBHm9BJOvmHxUuKVg8k0+h6CaIK+XYPIVk48KtxRM vsnnEFQT5PUSTL5i8lHhloLJN/kcgmqCvF6CyVdMPircUjD5Jp9DUE2Q10sw+YrJR4VbCibf5HMI qgnyegkmXzH5qHBLweSbfA5BNUFeL8HkKyYfFW4pmHyTzyGoJsjrJZh8xeSjwi0Fk2/yOQTVBHm9 BJOvmHxUuKVg8k0+h6CaIK+XYPIVk48KtxRMvsnnEFQT5PUSTL5i8lHhloLJN/kcgmqCvF6CyVdM PircUjD5Jp9DUE2Q10sw+YrJR4VbCibf5HMIqgnyegkmXzH5qHBLweSbfA5BNUFeL8HkKyYfFW4p mHyTzyGoJsjrJZh8xeSjwi0Fk2/yOQTVBHm9BJOvmHxUuKVg8k0+h6CaIK+XYPIVk48KtxRMvsnn EFQT5PUSTL5i8lHhloLJN/kcgmqCvF6CyVdMPircUjD5Jp9DUE2Q10sw+YrJR4VbCibf5HMIqgny egkmX/m/kn9t2cMOirUySPUsLyjPLC97jfj8kg8ll2UNWSwJqrp1PQqEcn+1XV2StYiuCqHbw5dY 4xCinf2KjBw2kg9Eb/J7oS2/V0x+j5j8HjH5PWLye8Tk94jJ7xGT3yN9yR/GXk42xdAfd4y/DH8l qcFW5T81fFZSjLXhTyTFGQ7/JKlBL/Kf3O3uvNW9S5banEJvjxQiHO/88PM7xo/sdh+VpQDdIkJN /ut5X+AVUgi53+09MrHzW7LU4MW7eM07ZLHF96bGjtzq4ofTh/wFdxj/fX4w/lu/3GKCvg7xXim0 uYJPJTaYdcfw31V3i18M0JUQKvnrtCvma1Kpsz4Y+xma+fjBXJA13Vj8y8y6T1Gz393MiyE9yD/u prldd+PctjhNX4aRQoSprk9n3Tu4XZG9BOhKCJX8OdoVMSmFgAlH7skfndQG6+7QuaL4wu6ulcV9 UczEPt9++Riz/tvgS0f8gMGxDU/3jZZ9SQ7AiZM0cO+WVKErIaj8dfeo7E8KAfvcm3z4vR53jZnP +XYWG/yyj3VO6Y0MV9erJVZsv/xdOgYuunJcBJwek9DNBXe243idDPyiOOHcbyQquhKCqp5rW6nA yfyOxEH71rGix7+j2nEN5z4hqTjg3NclKtsuf6V2J49fq4PYGQmZONZxvPPVAIyNNV0JoZS/3j5H NfD4kUQrNQf3qrS847Z8nH+9WPC9W4/zbZe/r/ZYQ26NhmLl+gP/wKu6jjd01eqhJYRS/hw21skP nHulRFqpyk3gtj1m8P3+IZF3WS14tl0+gs4LosNlMPnZjll6Cd+XosdLcw+J/NWbPupHIfJfcNPL f/YxwsH6EUZ3KUC+pBrBChgXzcPZbvk4yGoLuKG2hjl1cO6eX8hihHW++uvbUXA2qxsZHsrN+46u hCDy+dE9ftQvtIAxvWvTSl+V2GI+NhfCCtUEFGOhOdK2Wz70VFsIBqowQI04JMttZvg7oAsvBeAL VjeRD7ZPra6E4OW/QPsi7uXFBvRpdZ/HmYgY9gxkTlTnP1j7u5KL4jbXmtxtt3zoqcYmvSk1pm8v PvjGPagSj0qpwbxfHx24DYCeanTR64LEEq0gePmrH7udXhnA5F+5EECjozpAjIuuidGJ6Bsu1q7u NK91rdnSdsvHF3g5BwJT5+iFfPV+fBCdONMJ8225wQAUq/fQLPnMKv9EEHlHfQzlqvoa514mscHp 6JyZxkJ1tjDs+pYfHM8fUI0aLoq34qPa964YyJVfbjAAxerGEJpjdCWEmnyc7vg7KuaKtb1Afmxq XDxH5+7myMHS80QiD7u+bztoQ/nRIQNO4rPI7yFz5RcoN1jnXyhWz0eS/3PJgq6EEMgvirtRav16 g8dGbS9x+StQyPxaChV/RFVvg8jvkVjSq3y653eMfD/qqseVsKK7LzdY598oVvLptpM78gENX4lK KB9jNzryi/P70a89cfPTCxlddHL7nmoGtx2S3zl5oxfy1lCc0HMVPV4Uq9sOyf+nZEFXQmjKp18I viKxJLztQH7HPb+4gJVr512hG8/hJzZ+/LZb3oDUvDNtt/xgxhBOJpqst98oD7xFQsfxoljJP97u ohWElnycrOZMkl46fieZz0517A3oZ+nYXwO+Tw8T9+bH6XWtddn8b+UH/3COW8x2q9ETvHG12dc8 3Mfc4UXhI1j1w4uL8qNiCa6r6mIJXik8rcMJaL8FXcQmql9+gq03iZxqYYPnsPj4k7xY41LycCJs Tn6LD9TvjZ/pPGBm3r1EkkA6QxojcaZewViL/2Wqi31tt9jFNyTywhclRsCnkmLgsoo8EzbLiPKD l1rI7P6pin4Nb7i9rvyH69cVJifdAzXGbe2pF+6SWqPHeWzyK2AeLylGfUNbZ0T5NED0x73XRS7F Gg8njvcqttN+XNDcTiLvqfuBEmOm7Ran+50Six+mB+/7o38pFDDw43842hyjysfzPz1jqTiY+jS+ 7q7a4OyaGHYy0baHs6lFTH1SV9LB1Kd4XEgaiVE3gmlB+VjDddx8wgW490mIEZePF6vyasHTPHVZ tbngvi2pBp4ikmiuICnKIPEp3gPKv4eNxKjyi1m9eE+lv81s4jLuko+hXz5FDm524A9iIwGvIuVD Nj3wryQ+xc0rcl63wMjycQl+yYdB5BfaPWMPSbov7a5DPmTJfSfrC6/vmCx/PJ2J/0VrrrzvnIic zKvVDHGq+57+aTf+S4kjMrr8i/JPRu6L3HRoMvTSxxHO77nOA6pDPi4nv+JM1uyC5k930B/OHtnR dQec8UPkihv/Gy/XwdqH/07huV2dr1/4np3/omqzjC6/eHJi8lzx9H5XjvE6eGJ6rqcOXSQ1OO2m f1qcnxo7J8tJnvc7c27nN6XS5i539NniZO2vNBX0o4KbXlycGWu87VU8chMPphvDDZBfFCf3uJ0f l9zgJB5xO+/9kSx1c+aM/x8MIywM3HSnjCYLU9B3NPFXy6JYvdu5e56QhZAF+svPoaMdelcXZu58 KPI3mi1zQ+QbW8Pk94jJ7xGT3yMmv0dMfo+Y/B4x+T1i8nujKP4LZal9C3XbJpsAAAAASUVORK5C YII="]]></variableExpression>
+		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAXwAAAChCAMAAADz7vS9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ8PDxAQEBERERISEhMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKiwsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkREREVFRUZGRkdHR0hISElJSUpKSkxMTE1NTU5OTk9PT1BQUFFRUVJSUlRUVFVVVVZWVldXV1hYWFlZWVtbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2VlZWZmZmdnZ2hoaGpqam1tbW9vb3FxcXJycnR0dHV1dXZ2dnd3d3l5eXt7e3x8fH19fX9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4mJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6mpqaqqqqurq6ysrK2tra6urrCwsLGxsbKysrOzs7S0tAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEYwu2kAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGnRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuNS4xMDD0cqEAAAkISURBVHhe7Zz7exTlFcdPhAKxNK0xqAiaQg1yMfRCrTalAl7bSilSiZi0GEvtTUUEaVokKlhTSSltwWLl1j91+n3PObNz3eFNdvMMfZ7v55c57zln3n33k8nuzM4mkpDWoPwWiZV/HITtX3ybcSOUwBUdIZhPA+UDHXVAxoJTnSjlb9pfznrSsu+mwVwaLHT6z6cpbG9qUATpDu97zrKdyIICl9I0tpc9OKHbEqi/E7Zn6+epJVa+gLDdie3nmkmZCSXw0zC4guC7mrakyGYddUDGgi93opS92i/yex8bnrTe1WmwKQ12i/xGg2QHUtew/S22M5bK8w+kOzzkyex55VZW4FmkP8Z2DtufhMS/RVaHbRnUV4btw/Xz1BLbiCm1lfIpn/INyldQp3zKB5ak/CZiGzGltlI+5VO+QfkK6pRP+cCSlN9EbCOm1FbKp3zKNyhfQZ3yKR9YkvKbiG3ElNpK+ZRP+QblK6hTPuUDS1J+E7GNmFJbKZ/yKd+gfAV1yqd8YEnKbyK2EVNqK+VTPuUblK+gTvmUDyxJ+U3ENmJKbaV8yqd8g/IV1Cmf8oElKb+J2EZMqa2UT/mUb1C+gjrlUz6wJOU3EduIKbWV8imf8g3KV1CnfMoHlqT8JmIbMaW2Uj7lU75B+QrqlE/5wJKU30RsI6bUVsqnfMo3KF9BnfIpH1iS8puIbcSU2kr5lE/5BuUrqFM+5QNLUn4TsY2YUlspn/Ip36B8BXXKp3xgScpvIrYRU2or5VM+5RuUr6BO+ZQPLEn5TcQ2YkptpXzKp3yD8hXUKZ/ygSUpv4nYRkyprZRP+ZRvUL6COuVTPrAk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"]]></variableExpression>
 	</variable>
 	<detail>
 		<band height="842">
@@ -9259,7 +9265,7 @@ $F{ДатаДок}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Код по ОКАТО]]></text>
+					<text><![CDATA[Код по ОКТMО]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="2c157254-7084-4422-95b2-f13f9a7e6e6f" x="17" y="55" width="250" height="24"/>
@@ -10783,7 +10789,7 @@ $F{ДатаДок}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Код по ОКАТО]]></text>
+					<text><![CDATA[Код по ОКТMО]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="bed5cb63-3055-4405-9163-fddebcc8d49c" x="17" y="55" width="250" height="24"/>
@@ -12693,7 +12699,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Код по ОКАТО]]></text>
+							<text><![CDATA[Код по ОКТМО]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="ae82ef64-4648-47fc-b98f-cea9731d4ab4" x="265" y="153" width="30" height="24"/>
@@ -12778,7 +12784,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="1d8dde56-1244-4e5a-a4d0-7d7ed5cc3f01" x="312" y="1" width="15" height="20"/>
@@ -12792,7 +12798,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a377ef2f-59d8-4d36-b994-8f2ceb7725f2" x="327" y="1" width="15" height="20"/>
@@ -12806,7 +12812,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (2)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="9c8854f0-aad1-4fa4-9304-cbe6d0e53b53" x="342" y="1" width="15" height="20"/>
@@ -12820,7 +12826,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="0d5b1c1f-e229-47ca-88c7-0745af038b5e" x="357" y="1" width="15" height="20"/>
@@ -12834,7 +12840,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="afad4ba1-a0f8-4642-a5e7-f0e5675ec83a" x="372" y="1" width="15" height="20"/>
@@ -12848,7 +12854,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (5)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (5)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="a712916e-4678-4401-b6b7-e5075e2c00a4" x="387" y="1" width="15" height="20"/>
@@ -12862,7 +12868,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="8e35c4b4-84e2-4d84-b55f-5f6fcbc2b976" x="402" y="1" width="15" height="20"/>
@@ -12876,7 +12882,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="75150ff1-fe43-472e-b136-1847aaf77dd6" x="417" y="1" width="15" height="20"/>
@@ -12890,7 +12896,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="86b2a87e-cd5e-4c3a-b9aa-59b6d9fb5e4c" x="432" y="1" width="15" height="20"/>
@@ -12904,7 +12910,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="c6064e75-1144-4659-908b-ded1d720a64d" x="447" y="1" width="15" height="20"/>
@@ -12918,7 +12924,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (10)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (10)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="5276a6e7-cf2a-4361-adfa-1eb4660c6b1c" x="432" y="30" width="15" height="20"/>
@@ -14616,7 +14622,7 @@ $F{ДатаДок}]]></initialValueExpression>
 							<textElement verticalAlignment="Middle">
 								<font fontName="Arial" size="8" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<text><![CDATA[Код по ОКАТО]]></text>
+							<text><![CDATA[Код по ОКТМО]]></text>
 						</staticText>
 						<staticText>
 							<reportElement uuid="1c4edc32-f741-465c-98c2-918ee555515a" x="1" y="102" width="138" height="24"/>
@@ -14955,7 +14961,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (7)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (7)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="7262c4b9-9b22-4fad-831f-c2c7fc14e7ba" x="296" y="79" width="15" height="20"/>
@@ -14969,7 +14975,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (9)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (9)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="892c4164-7c47-4159-9f6b-0c4a8447f0ef" x="281" y="79" width="15" height="20"/>
@@ -14983,7 +14989,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (8)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (8)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="b1fe5cab-69ea-4d9a-b98b-b5b321372ea8" x="236" y="79" width="15" height="20"/>
@@ -14997,7 +15003,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (5)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (5)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="101cd2ad-8432-42d1-9265-bce7d54986c6" x="311" y="79" width="15" height="20"/>
@@ -15011,7 +15017,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (10)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (10)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="91ae8d51-7d67-470a-85d0-ace413cbcc53" x="161" y="79" width="15" height="20"/>
@@ -15025,7 +15031,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (0)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (0)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="05dad12b-4803-4365-b233-afdd92bf87c1" x="176" y="79" width="15" height="20"/>
@@ -15039,7 +15045,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="1366055f-1df1-4670-ba99-c94022d87100" x="221" y="79" width="15" height="20"/>
@@ -15053,7 +15059,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (4)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (4)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="0123af7b-aca3-443f-a29b-ce69da809a50" x="191" y="79" width="15" height="20"/>
@@ -15067,7 +15073,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (2)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (2)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="64fb2653-063b-4206-98a8-a7905e877e89" x="251" y="79" width="15" height="20"/>
@@ -15081,7 +15087,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (6)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (6)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="3cdbfabc-5567-4fe5-a33a-c8c8b8ac0191" x="206" y="79" width="15" height="20"/>
@@ -15095,7 +15101,7 @@ $F{ЭкологКл}]]></textFieldExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{OKATO}.charAt (3)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОКТМО}.charAt (3)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="c738716c-48ee-45b7-907b-a3e21b276bc6" x="176" y="104" width="15" height="20"/>

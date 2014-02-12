@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat
 @Field
 def Boolean isBalancePeriod = null
 
-def getBalancePeriod(){
+def getBalancePeriod() {
     if (isBalancePeriod == null){
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
@@ -48,7 +48,9 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
@@ -107,7 +109,7 @@ def currentDate = new Date()
 
 // дата начала периода
 @Field
-def startDate = null
+def start = null
 
 //// Обертки методов
 
@@ -126,10 +128,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //// Кастомные методы
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
+boolean prevPeriodCheck() {
     // Проверка только для первичных
     if (formData.kind != FormDataKind.PRIMARY) {
-        return
+        return true
     }
     // 3. Проверка наличия экземпляров форм за 3 года (В текущем подразделении созданы формы РНУ-6
     // за последние три года. Все формы в статусе «Принята»
@@ -148,15 +150,16 @@ void prevPeriodCheck() {
         }
     }
     if (!lostReportPeriods.isEmpty()) {
-        def formName = formData.formType.name
         def periods = lostReportPeriods.join(', ')
-        def msg = "Не найдены экземпляры «$formName» за: $periods!"
+        def msg = "Не найдены экземпляры РНУ-6 за $periods!"
         if (getBalancePeriod()) {
             logger.warn(msg)
         } else {
-            throw new ServiceException(msg)
+            logger.error(msg)
+            return false
         }
     }
+    return true
 }
 
 // Алгоритмы заполнения полей формы
@@ -415,7 +418,7 @@ void logicCheck() {
                                 && findRow.docDate == row.docDate) {
                             isFind = true
                             if (!(findRow.ruble > row.ruble)) {
-                                logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.getYear()} года.")
+                                logger.warn(errorMsg + "Операция, указанная в строке ${row.number}, в налоговом учете имеет сумму, меньше чем указано в бухгалтерском учете! См. РНУ-6 за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} года.")
                             }
                         }
                     }
@@ -449,8 +452,8 @@ void loggerError(def msg, Object...args) {
 }
 
 def getStartDate() {
-    if (!startDate) {
-        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    if (!start) {
+        start = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
-    return startDate
+    return start
 }

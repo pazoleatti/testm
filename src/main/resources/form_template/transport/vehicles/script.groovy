@@ -69,7 +69,7 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def copyColumns = ['codeOKATO', 'regionName', 'tsTypeCode', 'tsType', 'identNumber', 'model', 'ecoClass', 'regNumber',
+def copyColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber',
         'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
 
 @Field
@@ -78,15 +78,10 @@ def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoCl
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'regionName', 'tsTypeCode', 'tsType', 'identNumber', 'model',
+def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'tsTypeCode', 'identNumber', 'model',
         'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate']
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -105,10 +100,6 @@ void calc() {
         def i = 1
         for (def row in dataRows) {
             row.rowNumber = i++
-            // заполнение графы 3 на основе графы 2
-            row.regionName = row.codeOKATO
-            // заполнение графы 5 на основе графы 4
-            row.tsType = row.tsTypeCode
         }
         dataRowHelper.update(dataRows);
     }
@@ -183,12 +174,6 @@ def logicCheck() {
                     ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                     '), за который сформирована налоговая форма!')
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(96, row, "codeOKATO")
-        checkNSI(42, row, "tsTypeCode")
-        checkNSI(40, row, "ecoClass")
-        checkNSI(12, row, "baseUnit")
     }
 
     // 6. Проверка наличия формы предыдущего периода
@@ -213,7 +198,7 @@ def logicCheck() {
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
         if (formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id) == null) {
-            return reportPeriod.name + " " + reportPeriod.getYear() + ", "
+            return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
     return ''
@@ -247,7 +232,7 @@ def copyRow(def row) {
         newRow.getCell(alias).setStyleAlias("Редактируемая")
     }
     copyColumns.each { alias ->
-        newRow.getCell(alias).value = row.getCell(alias).value
+        newRow.getCell(alias).setValue(row.getCell(alias).value, null)
     }
     return newRow
 }

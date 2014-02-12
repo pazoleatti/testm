@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -24,9 +23,7 @@ public class AuditServiceImpl implements AuditService {
 	private AuditDao auditDao;
 	@Autowired
 	private DepartmentService departmentService;
-	@Autowired
-	private FormTypeDao formTypeDao;
-	@Autowired
+    @Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
 	@Override
@@ -72,7 +69,7 @@ public class AuditServiceImpl implements AuditService {
 	public LogSystemFilterAvailableValues getFilterAvailableValues() {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
 		values.setDepartments(departmentService.listDepartments());
-		values.setFormTypes(formTypeDao.getAll());
+		/*values.setFormTypeIds(formTypeDao.getAll());*/
 		values.setDeclarationTypes(declarationTypeDao.listAll());
 		return values;
 	}

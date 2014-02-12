@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -16,9 +15,6 @@ public class GetDestanationPopupDataResult implements Result {
 
     // Список id подразделений, доступных пользователю
     private Set<Integer> availableDepartments;
-
-    // типы форм
-    private List<FormDataKind> formDataKinds;
 
     private List<Department> performers;
 
@@ -38,14 +34,6 @@ public class GetDestanationPopupDataResult implements Result {
 
     public void setAvailablePerformers(Set<Integer> availablePerformers) {
         this.availablePerformers = availablePerformers;
-    }
-
-    public List<FormDataKind> getFormDataKinds() {
-        return formDataKinds;
-    }
-
-    public void setFormDataKinds(List<FormDataKind> formDataKinds) {
-        this.formDataKinds = formDataKinds;
     }
 
     public List<Department> getDepartments() {

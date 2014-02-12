@@ -62,6 +62,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
+        void setReadOnlyMode(boolean readOnly);
     }
 
 	@Inject
@@ -156,7 +157,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-								editFormPresenter.init(refBookDataId);
+                                getView().setReadOnlyMode(result.isReadOnly());
+								editFormPresenter.init(refBookDataId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}
 						}, this));

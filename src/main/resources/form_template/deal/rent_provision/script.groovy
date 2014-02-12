@@ -68,7 +68,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'innKio', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
+def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
         'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
@@ -80,11 +80,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -237,12 +232,6 @@ void logicCheck() {
                 logger.warn("Строка $rowNum: «$regionName» не должен быть заполнен, т.к. в «$countryName» указан код, отличный от 643!")
             }
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "jurName")
-        checkNSI(10, row, "countryCode")
-        checkNSI(10, row, "country")
-        checkNSI(4, row, "region")
     }
 }
 
@@ -275,9 +264,7 @@ void calc() {
         row.cost = bankSum
 
         // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.jurName)
-        row.innKio = map?.INN_KIO?.stringValue
-        row.countryCode = map?.COUNTRY?.referenceValue
+        row.countryCode = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }

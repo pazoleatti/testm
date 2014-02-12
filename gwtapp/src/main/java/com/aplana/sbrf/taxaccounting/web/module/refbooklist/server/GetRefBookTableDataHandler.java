@@ -35,13 +35,13 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
 
-        List<RefBook> list = refBookFactory.getAll(true, action.getType()); // запросить все видимые справочники
+        List<RefBook> list = refBookFactory.getAll(true);
 
         List<TableModel> returnList = new ArrayList<TableModel>();
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();
-        for (RefBook model : list) {
-            if (!isFiltered || model.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
-                returnList.add(new TableModel(model.getId(), model.getName(), RefBookType.get(model.getType())));
+        for (RefBook refBook : list) {
+            if (!isFiltered || refBook.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
+                returnList.add(new TableModel(refBook.getId(), refBook.getName(), RefBookType.get(refBook.getType()), refBook.isReadOnly()));
             }
         }
 

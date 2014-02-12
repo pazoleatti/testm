@@ -1,14 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.tausers;
 
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUserFullWithDepartmentPath;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -83,11 +82,23 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
         cs.setFont(font);
+	    cs.setAlignment(CellStyle.ALIGN_CENTER);
 
         Row row = sheet.createRow(0);
         Cell cell = row.createCell(3);
-        cell.setCellValue("Пользователи АС Учет налогов");
+        cell.setCellValue("Список пользователей");
         cell.setCellStyle(cs);
+
+	    CellStyle dateStyle = workBook.createCellStyle();
+	    dateStyle.setFont(font);
+	    dateStyle.setAlignment(CellStyle.ALIGN_CENTER);
+	    DataFormat format = workBook.createDataFormat();
+	    dateStyle.setDataFormat(format.getFormat("dd.MM.yyyy"));
+	    Row rowDate = sheet.createRow(1);
+	    Cell cellDate = rowDate.createCell(3);
+	    cellDate.setCellValue(Calendar.getInstance());
+
+	    cellDate.setCellStyle(dateStyle);
 
         rowNumber = sheet.getLastRowNum() + 2;
     }
@@ -126,7 +137,7 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
 
 	        cell = row.createCell(cellNumber);
 	        cell.setCellStyle(cs);
-	        cell.setCellValue(user.getUser().isActive()?"активный":"отключеный");
+	        cell.setCellValue(user.getUser().isActive()?"Да":"Нет");
 	        fillWidth(cellNumber, cell.getStringCellValue().length());
 	        cellNumber++;
 
@@ -138,15 +149,13 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            for (int j = 0; j < user.getUser().getRoles().size(); j++){
-                cell.setCellValue(user.getUser().getRoles().get(j).getName());
-                fillWidth(cellNumber, cell.getStringCellValue().length());
-                if(j < user.getUser().getRoles().size() - 1){
-                    row = sheet.createRow(sheet.getLastRowNum() + 1);
-                    cell = row.createCell(cellNumber);
-                    cell.setCellStyle(cs);
-                }
+	        StringBuilder roles = new StringBuilder();
+            for (TARole role : user.getUser().getRoles()){
+                roles.append(role.getName() + ", ");
             }
+	        cell.setCellValue(roles.delete((roles.length()-2), roles.length()-1).toString());
+	        fillWidth(cellNumber, cell.getStringCellValue().length());
+	        cellNumber++;
 
             cellNumber = 0;
             rowNumber = sheet.getLastRowNum();

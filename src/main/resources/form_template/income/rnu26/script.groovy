@@ -34,11 +34,15 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
@@ -56,7 +60,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -140,11 +146,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -264,8 +265,9 @@ void calc() {
     // добавить "итого по Эмитенту:..." в таблицу
     def i = 1
     totalRows.each { index, row ->
-        dataRowHelper.insert(row, index + i++)
+        dataRows.add(index + i++, row)
     }
+    dataRowHelper.save(dataRows)
 }
 
 // Логические проверки
@@ -448,10 +450,6 @@ void logicCheck() {
             }
         }
     }
-
-    // Проверки соответствия НСИ
-    checkNSI(15, row, 'currency')
-    checkNSI(62, row, 'signSecurity')
 }
 
 /**
@@ -932,11 +930,12 @@ void loggerError(def msg) {
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
-void prevPeriodCheck() {
+boolean prevPeriodCheck() {
     if (!getBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return false
     }
+    return true
 }
 
 void migration() {

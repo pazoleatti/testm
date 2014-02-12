@@ -146,7 +146,7 @@ void calc() {
             }
             tmp = round(row.consumptionTaxSumS - (sum6 - sum7), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
-            row.logicalCheck = (tmp < 0 ? message : value.toString())
+            row.logicalCheck = ((tmp < 0) ? message : value.toString())
         }
 
         if (!isEmpty(row.consumptionBuhSumAccepted) && !isEmpty(row.consumptionBuhSumPrevTaxPeriod)) {
@@ -168,7 +168,7 @@ void calc() {
                 income102NotFound += getIndex(row)
                 tmp = 0
             } else {
-                tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
+                tmp = ((income102[0] != null) ? income102[0].getTotalSum() : 0)
             }
             row.opuSumTotal = tmp
 

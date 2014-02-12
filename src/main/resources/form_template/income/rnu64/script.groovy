@@ -3,6 +3,7 @@ package form_template.income.rnu64
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -22,14 +23,20 @@ import groovy.transform.Field
  * 5. costs - Затраты (руб.коп.)
  */
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -113,10 +120,6 @@ def getDate(def value, def indexRow, def indexCol) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def dataRowsPrev
-    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
-        dataRowsPrev = getDataRowsPrev()
-    }
 
     if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
         sortRows(dataRows, sortColumns)
@@ -135,6 +138,7 @@ void calc() {
     if (formData.kind == FormDataKind.PRIMARY) {
         // строка Итого за текущий отчетный (налоговый) период
         def total =  getDataRow(dataRows, 'total')
+        def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
 
@@ -142,12 +146,12 @@ void calc() {
 }
 
 def getDataRowsPrev() {
-    def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
-    formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
-    if (formDataPrev == null) {
-        logger.error("Не найдены экземпляры РНУ-64 за прошлый отчетный период!")
-    } else {
-        return formDataService.getDataRowHelper(formDataPrev)?.allCached
+    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
+        if (formDataPrev != null) {
+            return formDataService.getDataRowHelper(formDataPrev)?.allCached
+        }
     }
     return null
 }
@@ -159,10 +163,6 @@ void logicCheck() {
     def totalQuarterRow = null
     def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     def dTo = getEndDate()
-    def dataRowsPrev
-    if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
-        dataRowsPrev = getDataRowsPrev()
-    }
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         // 1. Проверка на заполнение поля
@@ -187,8 +187,6 @@ void logicCheck() {
             if (row.costs == 0) {
                 loggerError(errorMsg + "Все суммы по операции нулевые!")
             }
-
-            formDataService.checkNSI(60, refBookCache, row, 'part', logger, false)
         } else if (row.getAlias() == 'total') {
             totalRow = row
         } else if (row.getAlias() == 'totalQuarter') {
@@ -205,6 +203,7 @@ void logicCheck() {
             loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
         }
         // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
+        def dataRowsPrev = getDataRowsPrev()
         if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
             loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
         }
@@ -459,4 +458,12 @@ void consolidation() {
     rows.add(totalRow)
 
     formDataService.getDataRowHelper(formData).save(rows)
+}
+
+/** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
+void prevPeriodCheck() {
+    if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        def formName = formData.formType.name
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    }
 }

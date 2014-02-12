@@ -53,7 +53,7 @@ public class TaxFormNominationPresenter
         void setTaxFormKind(List<FormType> formTypes);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(List<FormTypeKind> departmentFormTypes);
+        void setDataToFormTable(int start, List<FormTypeKind> departmentFormTypes);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
         void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
 
@@ -75,6 +75,11 @@ public class TaxFormNominationPresenter
          * Обновление линков редактировать/отменить назначение
          */
         void updatePanelAnchors();
+
+        /**
+         * Обновление страницы
+         */
+        void onReveal();
     }
 
     private TaxType taxType;
@@ -157,7 +162,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(result.getTableData());
+                        getView().setDataToFormTable(0, result.getTableData());
                         getView().updatePanelAnchors();
                     }
                 }, this));
@@ -202,7 +207,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getTableData() != null)
-                            getView().setDataToFormTable(result.getTableData());
+                            getView().setDataToFormTable(0, result.getTableData());
                         // ??
                     }
                 }, this));
@@ -265,5 +270,27 @@ public class TaxFormNominationPresenter
                                 reloadFormTableData();
                             }
                         }, this));
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().onReveal();
+    }
+
+    @Override
+    public void onRangeChange(final int start, int length) {
+        GetTableDataAction action = getTableDataAction();
+        action.setCount(length);
+        action.setStartIndex(start);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToFormTable(start, result.getTableData());
+                        getView().updatePanelAnchors();
+                    }
+                }, this));
     }
 }
