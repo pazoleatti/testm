@@ -544,4 +544,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     public void onReveal() {
         departmentPicker.setValue(null, false);
     }
+
+    @Override
+    public void setDepartments(List<Integer> department){
+        departmentPicker.setValue(department);
+    }
 }
