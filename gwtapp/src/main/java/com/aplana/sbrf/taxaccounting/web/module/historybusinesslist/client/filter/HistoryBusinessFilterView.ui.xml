@@ -68,21 +68,18 @@
                 <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
                                  addStyleNames="{style.labelBlockMargin}">
                     <g:cell height="26px">
-                        <g:Label width="130px" text="Период:"/>
-                    </g:cell>
-                    <g:cell height="26px">
                         <g:Label width="130px" text="Подразделение:"/>
                     </g:cell>
                     <g:cell height="26px">
                         <g:Label width="130px" text="Пользователь:"/>
                     </g:cell>
+                    <g:cell height="26px">
+                        <g:Label width="130px" text="Период:"/>
+                    </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="40%">
                 <g:VerticalPanel verticalAlignment="middle" width="100%">
-                    <g:cell height="26px">
-                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
-                    </g:cell>
                     <g:cell height="26px">
                         <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
                                                        header="Выберите подразделение" multiselection="false"
@@ -92,7 +89,9 @@
                         <r:RefBookMultiPickerModalWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"
                                                     multiSelect="false"/>
                     </g:cell>
-
+                    <g:cell height="26px">
+                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
+                    </g:cell>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="60%">
