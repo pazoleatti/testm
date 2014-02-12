@@ -31,7 +31,7 @@ public class GetMonthDataHandler extends AbstractActionHandler<GetMonthData, Get
     public GetMonthDataResult execute(GetMonthData action, ExecutionContext executionContext) throws ActionException {
         GetMonthDataResult result = new GetMonthDataResult();
         result.setMonthly(formTemplateService.isMonthly(action.getTypeId()));
-        result.setMonthsList(periodService.getMonthList(action.getPeriodId()));
+        result.setMonthsList(periodService.getAvailableMonthList(action.getReportPeriodId()));
         return result;
     }
 

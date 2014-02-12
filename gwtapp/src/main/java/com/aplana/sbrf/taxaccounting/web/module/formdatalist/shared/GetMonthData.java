@@ -9,7 +9,7 @@ public class GetMonthData extends UnsecuredActionImpl<GetMonthDataResult> {
 
     private Integer typeId;
 
-    private Integer periodId;
+    private Integer reportPeriodId;
 
     public Integer getTypeId() {
         return typeId;
@@ -19,11 +19,11 @@ public class GetMonthData extends UnsecuredActionImpl<GetMonthDataResult> {
         this.typeId = typeId;
     }
 
-    public Integer getPeriodId() {
-        return periodId;
+    public Integer getReportPeriodId() {
+        return reportPeriodId;
     }
 
-    public void setPeriodId(Integer periodId) {
-        this.periodId = periodId;
+    public void setReportPeriodId(Integer reportPeriodId) {
+        this.reportPeriodId = reportPeriodId;
     }
 }

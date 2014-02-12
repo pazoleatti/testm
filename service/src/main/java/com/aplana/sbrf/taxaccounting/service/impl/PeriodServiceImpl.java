@@ -526,106 +526,84 @@ public class PeriodServiceImpl implements PeriodService{
         return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
     }
 
+    /**
+     * Возвращает список доступных месяцев для указанного отчетного периода.
+     * @param reportPeriodId идентификатор отчетного период
+     * @return
+     */
     @Override
-    public List<Months> getMonthList(int reportPeriodId) {
+    public List<Months> getAvailableMonthList(int reportPeriodId) {
+
+        RefBookDataProvider dataProvider = rbFactory.getDataProvider(8L);
 
         ReportPeriod reportPeriod = getReportPeriod(reportPeriodId);
 
         List<Months> monthsList = new ArrayList<Months>();
         monthsList.add(null);
 
-        if (reportPeriodId != 0) {
-            Calendar startDate = getStartDate(reportPeriodId);
-            Calendar endDate = getEndDate(reportPeriodId);
+        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(Long.valueOf(reportPeriod.getDictTaxPeriodId()));
+        // Код налогового периода
+        Integer code = Integer.parseInt(refBookValueMap.get("CODE").getStringValue());
 
-            int startMonth = startDate.get(Calendar.MONTH);
-            int endMonth = endDate.get(Calendar.MONTH);
+        monthsList.addAll(getReportPeriodMonthList(code));
 
-            switch (reportPeriod.getTaxPeriod().getTaxType()) {
-                case INCOME: {
-                    // Первый квартал
-                    if (startMonth == 0 && endMonth == 2) {
-                        monthsList.add(Months.JANUARY);
-                        monthsList.add(Months.FEBRUARY);
-                        monthsList.add(Months.MARCH);
-                        // Второй квартал
-                    } else if (startMonth == 3 && startMonth == 5) {
-                        monthsList.add(Months.APRIL);
-                        monthsList.add(Months.MAY);
-                        monthsList.add(Months.JUNE);
-                        // Третий квартал
-                    } else if (startMonth == 6 && endMonth == 8) {
-                        monthsList.add(Months.JULY);
-                        monthsList.add(Months.AUGUST);
-                        monthsList.add(Months.SEPTEMBER);
-                        // Четвертый квартал
-                    } else if (startMonth == 9 && endMonth == 11) {
-                        monthsList.add(Months.OCTOBER);
-                        monthsList.add(Months.NOVEMBER);
-                        monthsList.add(Months.DECEMBER);
-                        // Полугодие
-                    } else if (startMonth == 0 && endMonth == 5) {
-                        monthsList.add(Months.JANUARY);
-                        monthsList.add(Months.FEBRUARY);
-                        monthsList.add(Months.MARCH);
-                        monthsList.add(Months.APRIL);
-                        monthsList.add(Months.MAY);
-                        monthsList.add(Months.JUNE);
-                        // 9 месяцев
-                    } else if (startMonth == 0 && endMonth == 8) {
-                        monthsList.add(Months.JANUARY);
-                        monthsList.add(Months.FEBRUARY);
-                        monthsList.add(Months.MARCH);
-                        monthsList.add(Months.APRIL);
-                        monthsList.add(Months.MAY);
-                        monthsList.add(Months.JUNE);
-                        monthsList.add(Months.JULY);
-                        monthsList.add(Months.AUGUST);
-                        monthsList.add(Months.SEPTEMBER);
-                        // Год
-                    } else if (startMonth == 0 && endMonth == 11) {
-                        monthsList.add(Months.JANUARY);
-                        monthsList.add(Months.FEBRUARY);
-                        monthsList.add(Months.MARCH);
-                        monthsList.add(Months.APRIL);
-                        monthsList.add(Months.MAY);
-                        monthsList.add(Months.JUNE);
-                        monthsList.add(Months.JULY);
-                        monthsList.add(Months.AUGUST);
-                        monthsList.add(Months.SEPTEMBER);
-                        monthsList.add(Months.OCTOBER);
-                        monthsList.add(Months.NOVEMBER);
-                        monthsList.add(Months.DECEMBER);
-                    }
-                    break;
-                }
-
-                case TRANSPORT: {
-                    // Первый квартал
-                    if (startMonth == 0 && endMonth == 2) {
-                        monthsList.add(Months.JANUARY);
-                        monthsList.add(Months.FEBRUARY);
-                        monthsList.add(Months.MARCH);
-                        // Второй квартал
-                    } else if (startMonth == 3 && startMonth == 5) {
-                        monthsList.add(Months.APRIL);
-                        monthsList.add(Months.MAY);
-                        monthsList.add(Months.JUNE);
-                        // Третий квартал
-                    } else if (startMonth == 6 && endMonth == 8) {
-                        monthsList.add(Months.JULY);
-                        monthsList.add(Months.AUGUST);
-                        monthsList.add(Months.SEPTEMBER);
-                        // Четвертый квартал
-                    } else if (startMonth == 9 && endMonth == 11) {
-                        monthsList.add(Months.OCTOBER);
-                        monthsList.add(Months.NOVEMBER);
-                        monthsList.add(Months.DECEMBER);
-                        // Полугодие
-                    }
-                }
-            }
-        }
         return monthsList;
+    }
+
+    /**
+     * Получить упорядоченный список месяцев соответствующий налоговому периоду с кодом code.
+     * @param code код налогового периода
+     * @return список месяцев в налоговом периоде.
+     */
+    List<Months> getReportPeriodMonthList(int code) {
+
+        int start = 0;
+        int end = 0;
+
+        List<Months> list = new ArrayList<Months>();
+
+        switch (code) {
+            // Первый квартал
+            case 21:
+                start = 0;
+                end = 2;
+                break;
+            // Второй квартал
+            case 22:
+                start = 3;
+                end = 5;
+                break;
+            // Третий квартал
+            case 23:
+                start = 6;
+                end = 8;
+                break;
+            // Четвертый квартал
+            case 24:
+                start = 9;
+                end = 11;
+                break;
+            // Полугодие
+            case 31:
+                start = 0;
+                end = 5;
+                break;
+            // 9 месяцев
+            case 33:
+                start = 0;
+                end = 8;
+                break;
+            // Год
+            case 34:
+                start = 0;
+                end = 11;
+                break;
+        }
+
+        for (int i = start; i <= end; ++i) {
+            list.add(Months.values()[i]);
+        }
+
+        return list;
     }
 }
