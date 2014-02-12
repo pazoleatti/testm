@@ -27,6 +27,30 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     @Autowired
     private SourceService departmentFormTypeService;
 
+    static final Comparator<FormTypeKind> comparator =  new Comparator<FormTypeKind>() {
+        /**
+         * Порядок сортировки записей при отображении:
+         * - Подразделение
+         * - Тип налоговой формы
+         * - Вид налоговой формы
+         *
+         * @param o1
+         * @param o2
+         * @return
+         */
+        public int compare(FormTypeKind o1, FormTypeKind o2) {
+            int result = o1.getDepartment().getName().compareTo(o2.getDepartment().getName());
+            if (result == 0) {
+                result = o1.getKind().getName().compareTo(o2.getKind().getName());
+                if (result == 0) {
+                    result = o1.getName().compareTo(o2.getName());
+                }
+            }
+
+            return result;
+        }
+    };
+
     @Override
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
@@ -39,29 +63,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
             }
 
             // sort
-            Collections.sort(data, new Comparator<FormTypeKind>() {
-                /**
-                 * Порядок сортировки записей при отображении:
-                 * - Подразделение
-                 * - Тип налоговой формы
-                 * - Вид налоговой формы
-                 *
-                 * @param o1
-                 * @param o2
-                 * @return
-                 */
-                public int compare(FormTypeKind o1, FormTypeKind o2) {
-                    int result = o1.getDepartment().getName().compareTo(o2.getDepartment().getName());
-                    if (result == 0) {
-                        result = o1.getKind().getName().compareTo(o2.getKind().getName());
-                        if (result == 0) {
-                            result = o1.getName().compareTo(o2.getName());
-                        }
-                    }
-
-                    return result;
-                }
-            });
+            Collections.sort(data, comparator);
         }
         else {
             for (Integer depoId: action.getDepartmentsIds()){
@@ -77,6 +79,8 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
         } else {
             result.setTableData(data);
         }
+
+        result.setTotalCount(data.size());
 
         return result;
     }

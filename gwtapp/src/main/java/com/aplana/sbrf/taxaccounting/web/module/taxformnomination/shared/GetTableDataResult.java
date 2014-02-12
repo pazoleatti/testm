@@ -10,6 +10,15 @@ public class GetTableDataResult implements Result {
 	private static final long serialVersionUID = -6048041608774139006L;
 	
 	private List<FormTypeKind> tableData;
+	private int totalCount;
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
+    }
 
     public List<FormTypeKind> getTableData() {
         return tableData;

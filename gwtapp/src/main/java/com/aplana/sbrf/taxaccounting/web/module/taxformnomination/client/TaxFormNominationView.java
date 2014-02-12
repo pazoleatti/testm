@@ -426,7 +426,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     @Override
-    public void setDataToFormTable(int start, List<FormTypeKind> departmentFormTypes) {
+    public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         List<TableModel> types = new ArrayList<TableModel>();
 
         int index = start + 1;
@@ -440,6 +440,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             types.add(model);
         }
 
+        formGrid.setRowCount(totalCount);
         formGrid.setRowData(start, types);
     }
 
@@ -492,6 +493,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         //setDepoId(departmentPicker.getValue());
         if (isForm) {
             reloadFormGrid();
+            pager.firstPage();
         } else {
             reloadDeclarationGrid();
         }
