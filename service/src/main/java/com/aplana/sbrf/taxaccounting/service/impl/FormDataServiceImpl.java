@@ -232,23 +232,33 @@ public class FormDataServiceImpl implements FormDataService {
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
-
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
                     logEntryService.save(logger.getEntries()));
 		}
+		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
 		formDataDao.save(formData);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
-		dataRowDao.commit(formData.getId());
-		
-		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getId(), formData.getKind().getId(), null);
+		if (!importFormData) {
+			// Execute scripts for the form event AFTER_CREATE
+			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Произошли ошибки в скрипте создания налоговой формы",
+						logEntryService.save(logger.getEntries()));
+			}
+			logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.AFTER_CREATE, null);
+			auditService.add(FormDataEvent.AFTER_CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+					null, formData.getFormType().getId(), formData.getKind().getId(), null);
+		}
 
+		dataRowDao.commit(formData.getId());
 		return formData.getId();
 	}
 

@@ -106,7 +106,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                             Dialog.infoMessage("Сообщение", "Назначения налоговых форм подразделениям выполнены успешно.");
                         }
                         getView().hide();
-                        UpdateTable.fire(FormDestinationsPresenter.this);
+                        UpdateTable.fire(FormDestinationsPresenter.this, getView().getDepartments());
                     }
                 }, this));
     }

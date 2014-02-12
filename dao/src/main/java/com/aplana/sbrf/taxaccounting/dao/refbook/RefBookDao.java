@@ -99,6 +99,7 @@ public interface RefBookDao {
 	 * @param refBookId код справочника
 	 * @param recordId код строки справочника
 	 * @return
+	 * @throws org.springframework.dao.EmptyResultDataAccessException если строка не найдена
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 

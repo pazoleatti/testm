@@ -56,7 +56,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         result.setAvailableDepartments(availableDepartmentSet);
 
         // Все подразделения
-        result.setDepartments(departmentService.listAll());
+        result.setDepartments(availableDepartmentList);
 
         // Исполнители доступные пользователю
         Set<Integer> availablePerformersSet = new HashSet<Integer>();
@@ -67,7 +67,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         result.setAvailablePerformers(availablePerformersSet);
 
         // Все подразделения
-        result.setPerformers(departmentService.listAll());
+        result.setPerformers(availablePerformersList);
 
         return result;
     }

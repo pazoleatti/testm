@@ -72,12 +72,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         prevPeriodCheck()
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
@@ -96,8 +94,10 @@ switch (formDataEvent) {
         if (!hasError()) {
             def data = formDataService.getDataRowHelper(formData)
             def dataRows = data.getAllCached()
+            addAllStatic(dataRows)
             def total = getCalcTotalRow(dataRows)
-            data.insert(total, dataRows.size() + 1)
+            dataRows.add(total)
+            data.save(dataRows)
         }
         break
 }

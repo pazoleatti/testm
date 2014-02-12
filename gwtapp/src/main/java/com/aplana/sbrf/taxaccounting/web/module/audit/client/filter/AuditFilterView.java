@@ -128,6 +128,20 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         auditFormTypeId.addValueChangeHandler(handler);
     }*/
 
+    @Override
+    public void init() {
+        departmentSelectionTree.setValue(null, true);
+        reportPeriodIds.setValue(null, true);
+        taxType.setValue(null, true);
+        auditFormTypeId.setValue(null, true);
+        user.setValue(null, true);
+        user.setDereferenceValue(null);
+        formDataKind.setValue(null, true);
+        formDataKind.setDereferenceValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
+    }
+
     @Inject
     @UiConstructor
     public AuditFilterView(final Binder uiBinder) {
