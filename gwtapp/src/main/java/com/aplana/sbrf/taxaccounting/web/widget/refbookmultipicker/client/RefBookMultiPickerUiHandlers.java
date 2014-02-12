@@ -6,7 +6,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.Date;
 import java.util.List;
 
-public interface RefBookMultiPickerViewUiHandlers extends UiHandlers {
+public interface RefBookMultiPickerUiHandlers extends UiHandlers {
 	
 	void init(long refBookAttrId, String filter, Date relevanceDate);
 	

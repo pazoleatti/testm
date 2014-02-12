@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
 
 /**
  * Универсальная реализация лиснера для обхода дерева запроса

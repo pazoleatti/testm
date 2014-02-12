@@ -6,6 +6,7 @@ import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -16,7 +17,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import javax.annotation.Untainted;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -84,6 +83,9 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     @UiField
     LinkAnchor linkAnchorDisable;
+
+    @UiField
+    RefBookPickerWidget fpicker;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -177,6 +179,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 }
             }
         });
+
+        fpicker.setEndDate(new Date());
 
         testMaskBox();
 

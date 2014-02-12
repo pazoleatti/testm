@@ -10,8 +10,10 @@ import com.google.gwt.user.client.ui.IsWidget;
  * Интерфейс компонента выбора значений из справочника
  * 
  * @author sgoryachkin
- * 
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker
  */
+@Deprecated
 public interface RefBookPicker extends HasValue<Long>, LeafValueEditor<Long>, IsWidget {
 
 	/**

@@ -384,8 +384,8 @@ public class RefBookDaoTest {
     public void getRecordVersion(){
         RefBookRecordVersion info = refBookDao.getRecordVersionInfo(1L);
         assertEquals(info.getRecordId().longValue(), 1L);
-        assertEquals(getZeroTimeDate(info.getVersionStart()), getZeroTimeDate(getDate(1, 1, 2013)));
-        assertEquals(getZeroTimeDate(info.getVersionEnd()), getZeroTimeDate(getDate(1, 2, 2013)));
+        assertEquals(getZeroTimeDate(getDate(1, 1, 2013)), getZeroTimeDate(info.getVersionStart()));
+        assertEquals(getZeroTimeDate(getDate(31, 1, 2013)), getZeroTimeDate(info.getVersionEnd()));
     }
 
     @Test(expected = DaoException.class)
