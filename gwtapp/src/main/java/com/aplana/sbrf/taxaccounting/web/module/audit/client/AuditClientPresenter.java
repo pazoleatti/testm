@@ -64,7 +64,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetAuditDataListResult>() {
             @Override
             public void onSuccess(GetAuditDataListResult result) {
-                if(result==null || result.getTotalCountOfRecords() == 0)
+                if(result.getTotalCountOfRecords() == 0)
                     getView().setAuditTableData(start, 0, new ArrayList<LogSearchResultItem>());
                 else
                     getView().setAuditTableData(start, result.getTotalCountOfRecords(), result.getRecords());

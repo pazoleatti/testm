@@ -45,6 +45,12 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     public interface MyView extends View, HasUiHandlers<BookerStatementsUiHandlers> {
 
         /**
+         * Инициализация.
+         * Требуется для обнуления параметров загрузки после перехода по главному меню
+         */
+        void init();
+
+        /**
          * Данные справочника "Подразделения"
          *
          * @param departments         Список подразделений дерева справочника
@@ -129,6 +135,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        getView().init();
 
         dispatcher.execute(new GetBSOpenDataAction(),
                 CallbackUtils.defaultCallback(

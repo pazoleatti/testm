@@ -379,6 +379,21 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
 
+    private void checkChildren(List<Long> uniqueRecordIds) {
+        //Если есть дочерние элементы - удалять нельзя
+        List<Date> parentVersions = refBookDao.hasChildren(refBookId, uniqueRecordIds);
+        if (parentVersions != null && !parentVersions.isEmpty()) {
+            StringBuilder versions = new StringBuilder();
+            for (int i=0; i<parentVersions.size(); i++) {
+                versions.append(sdf.format(parentVersions));
+                if (i < parentVersions.size() - 1) {
+                    versions.append(", ");
+                }
+            }
+            throw new ServiceException("Удаление версии от "+ versions +" невозможно, существует дочерние элементы!");
+        }
+    }
+
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
@@ -388,8 +403,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             RefBook refBook = refBookDao.get(refBookId);
             if (refBook.isHierarchic()) {
-                //Если есть дочерние элементы - удалять нельзя
-                refBookDao.hasChildren(refBookId, uniqueRecordIds);
+                checkChildren(uniqueRecordIds);
             }
             refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
@@ -412,8 +426,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             RefBook refBook = refBookDao.get(refBookId);
             if (refBook.isHierarchic()) {
-                //Если есть дочерние элементы - удалять нельзя
-                refBookDao.hasChildren(refBookId, uniqueRecordIds);
+                checkChildren(uniqueRecordIds);
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);

@@ -99,6 +99,7 @@ public interface RefBookDao {
 	 * @param refBookId код справочника
 	 * @param recordId код строки справочника
 	 * @return
+	 * @throws org.springframework.dao.EmptyResultDataAccessException если строка не найдена
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
@@ -302,9 +303,9 @@ public interface RefBookDao {
      * Проверяет есть ли дочерние элементы для указанных версий записей
      * @param refBookId код справочника
      * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @return есть дочерние элементы?
+     * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
      */
-    boolean hasChildren(Long refBookId, List<Long> uniqueRecordIds);
+    List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Создает новые записи в справочнике

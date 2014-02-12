@@ -44,6 +44,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
+    private boolean readOnly;
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
@@ -58,6 +59,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         Date getVersionTo();
         void setVersionFrom(Date value);
         void setVersionTo(Date value);
+        void setReadOnlyMode(boolean readOnly);
     }
 
 	@Inject
@@ -68,7 +70,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		getView().setUiHandlers(this);
 	}
 
-	public void init(final Long refbookId) {
+	public void init(final Long refbookId, final boolean readOnly) {
 
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		action.setRefBookId(refbookId);
@@ -77,6 +79,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 						new AbstractCallback<GetRefBookAttributesResult>() {
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
+                                EditFormPresenter.this.readOnly = readOnly;
+                                getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;
 								isFormModified = false;
@@ -148,7 +152,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
 								getView().fillInputFields(result.getRecord());
 								currentUniqueRecordId = refBookRecordId;
-								setEnabled(true);
+								setEnabled(!readOnly);
 							}
 						}, this));
 	}

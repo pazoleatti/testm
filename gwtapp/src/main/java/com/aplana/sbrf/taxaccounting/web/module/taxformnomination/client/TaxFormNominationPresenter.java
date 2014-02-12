@@ -45,6 +45,8 @@ public class TaxFormNominationPresenter
         // загрузка подразделений
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
+        void setDepartments(List<Integer> department);
+
         // Инициализация
         void init(TaxType nType, boolean isForm);
 
@@ -53,7 +55,7 @@ public class TaxFormNominationPresenter
         void setTaxFormKind(List<FormType> formTypes);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(int start, List<FormTypeKind> departmentFormTypes);
+        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
         void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
 
@@ -162,7 +164,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(0, result.getTableData());
+                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
                         getView().updatePanelAnchors();
                     }
                 }, this));
@@ -207,7 +209,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getTableData() != null)
-                            getView().setDataToFormTable(0, result.getTableData());
+                            getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
                         // ??
                     }
                 }, this));
@@ -250,6 +252,7 @@ public class TaxFormNominationPresenter
 	@Override
 	public void onUpdateTable(UpdateTable event) {
         if (getView().isForm()){
+            getView().setDepartments(event.getDepartments());
             reloadFormTableData();
         } else {
             reloadDeclarationTableData();
@@ -288,7 +291,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(start, result.getTableData());
+                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData());
                         getView().updatePanelAnchors();
                     }
                 }, this));

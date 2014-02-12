@@ -113,11 +113,20 @@ public class GetMainMenuActionHandler extends
                 // настройки форм и подразделений, назначение источников-приемников
                 if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    menu.getSubMenu().add(
-                            new MenuItem("Назначение форм и деклараций",
-                                    NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                            + TYPE + "=" + menu.getMeta() + ";"
-                                            + TaxFormNominationToken.isForm + "=" + true));
+                    if (isDeal) {
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм и уведомлений",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
+                    } else {
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм и деклараций",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
+                    }
+
                     menu.getSubMenu().add(
                             new MenuItem("Назначение источников-приёмников",
                                     NUMBER_SIGN + SourcesTokens.SOURCES + ";"
@@ -207,6 +216,7 @@ public class GetMainMenuActionHandler extends
 		GetMainMenuResult result = new GetMainMenuResult();
 		if (currentUser.hasRole(TARole.ROLE_CONTROL)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+				|| currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setNotificationMenuItemName("Оповещения");
 		}

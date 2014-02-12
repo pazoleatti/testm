@@ -179,8 +179,6 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	@Override
 	public List<Integer> getByFilter(NotificationsFilterData filter) {
 		try {
-//			select * from (select rownum as rn, id, create_date from (select nt.id, nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1
-//					order by nt.create_date desc)) where rn between 1 and 20;
 			StringBuilder query = new StringBuilder("select id from ( select rownum as rn, id from (select nt.id, " +
 					"nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1 ");
 			MapSqlParameterSource params = new MapSqlParameterSource();
