@@ -54,6 +54,9 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
+
+        void init();
+
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
         /*void setFormTypeId(List<Long> formTypes);*/
@@ -77,8 +80,8 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public void initFilterData() {
-
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
+        getView().init();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
