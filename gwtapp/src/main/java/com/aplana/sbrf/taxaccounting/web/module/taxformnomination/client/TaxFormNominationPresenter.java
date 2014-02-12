@@ -45,6 +45,8 @@ public class TaxFormNominationPresenter
         // загрузка подразделений
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
+        void setDepartments(List<Integer> department);
+
         // Инициализация
         void init(TaxType nType, boolean isForm);
 
@@ -250,6 +252,7 @@ public class TaxFormNominationPresenter
 	@Override
 	public void onUpdateTable(UpdateTable event) {
         if (getView().isForm()){
+            getView().setDepartments(event.getDepartments());
             reloadFormTableData();
         } else {
             reloadDeclarationTableData();

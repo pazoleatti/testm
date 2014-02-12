@@ -216,6 +216,7 @@ public class GetMainMenuActionHandler extends
 		GetMainMenuResult result = new GetMainMenuResult();
 		if (currentUser.hasRole(TARole.ROLE_CONTROL)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+				|| currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setNotificationMenuItemName("Оповещения");
 		}
