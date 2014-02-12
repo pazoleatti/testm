@@ -237,11 +237,12 @@ public class FormDataServiceImpl implements FormDataService {
 					"Произошли ошибки в скрипте создания налоговой формы",
                     logEntryService.save(logger.getEntries()));
 		}
+		formDataDao.save(formData);
+
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
 		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 
-		formDataDao.save(formData);
+				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 

@@ -217,7 +217,7 @@ create table form_column (
   attribute_id number(18),
   format number(2),
   filter varchar2(1000),
-  parent_column_id number(9)
+  parent_column_id number(9),
   attribute_id2 number(18)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
