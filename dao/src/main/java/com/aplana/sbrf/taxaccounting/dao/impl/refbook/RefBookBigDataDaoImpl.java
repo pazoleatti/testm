@@ -56,7 +56,6 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         RefBook refBook = refBookDao.get(refBookId);
         // получаем страницу с данными
         PreparedStatementData ps = getSimpleQuery(tableName, refBook, null, version, sortAttribute, filter, pagingParams, isSortAscending, null);
-        System.out.println("ps: "+ps);
         List<Map<String, RefBookValue>> records = refBookUtils.getRecordsData(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // получаем информацию о количестве всех записей с текущим фильтром
@@ -127,18 +126,31 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
-        ps.appendQuery("SELECT ");
-        ps.appendQuery("r.id ");
+        ps.appendQuery("SELECT * FROM ");
+        ps.appendQuery("(select\n");
+        ps.appendQuery("  r.id as \"");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery("\",\n");
 
         if (version == null) {
-            ps.appendQuery(",\n");
-            ps.appendQuery("  t.version as ");
+            ps.appendQuery("  t.version as \"");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
-            ps.appendQuery(",\n");
+            ps.appendQuery("\",\n");
 
-            ps.appendQuery("  t.versionEnd as ");
+            ps.appendQuery("  t.versionEnd as \"");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+            ps.appendQuery("\",\n");
+        }
+
+        if (sortAttribute != null) {
+            ps.appendQuery("row_number()");
+            // Надо делать сортировку
+            ps.appendQuery(" over (order by '");
+            ps.appendQuery(sortAttribute.getAlias());
+            ps.appendQuery("'");
+            ps.appendQuery(isSortAscending ? "ASC":"DESC");
+            ps.appendQuery(")");
+            ps.appendQuery(" as row_number_over\n");
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
@@ -146,24 +158,9 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             ps.appendQuery(attribute.getAlias());
         }
 
-        if (version != null) {
-            ps.appendQuery(" FROM t, (SELECT ");
-            if (isSupportOver()) {
-                RefBookAttribute defaultSort = refBook.getSortAttribute();
-                String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
-                String sortDirection = isSortAscending ? "ASC" : "DESC";
-                ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
-            } else {
-                ps.appendQuery("rownum row_number_over");
-            }
-            ps.appendQuery(", t.* FROM ");
-            ps.appendQuery(tableName);
-            ps.appendQuery(" t ) r");
-        } else {
-            ps.appendQuery(" FROM t, ");
-            ps.appendQuery(tableName);
-            ps.appendQuery(" r");
-        }
+        ps.appendQuery(" FROM t, ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" r");
 
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
@@ -196,14 +193,16 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         }
         ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
 
-        if (pagingParams != null) {
-            ps.appendQuery(" and row_number_over BETWEEN ? AND ?");
-            ps.addParam(pagingParams.getStartIndex());
-            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
-        }
-
         if (version == null) {
             ps.appendQuery(" order by t.version\n");
+        }
+
+        ps.appendQuery(")");
+
+        if (pagingParams != null) {
+            ps.appendQuery(" where row_number_over BETWEEN ? AND ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
         return ps;
     }
