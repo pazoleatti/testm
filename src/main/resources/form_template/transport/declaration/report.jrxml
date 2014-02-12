@@ -9265,7 +9265,7 @@ $F{ДатаДок}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Код по ОКАТО]]></text>
+					<text><![CDATA[Код по ОКТMО]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="2c157254-7084-4422-95b2-f13f9a7e6e6f" x="17" y="55" width="250" height="24"/>
@@ -10789,7 +10789,7 @@ $F{ДатаДок}]]></initialValueExpression>
 					<textElement verticalAlignment="Middle">
 						<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 					</textElement>
-					<text><![CDATA[Код по ОКАТО]]></text>
+					<text><![CDATA[Код по ОКТMО]]></text>
 				</staticText>
 				<staticText>
 					<reportElement uuid="bed5cb63-3055-4405-9163-fddebcc8d49c" x="17" y="55" width="250" height="24"/>
