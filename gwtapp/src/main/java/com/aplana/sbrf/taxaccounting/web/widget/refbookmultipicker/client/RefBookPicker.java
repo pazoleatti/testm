@@ -43,4 +43,6 @@ public interface RefBookPicker extends HasValue<List<Long>>, IsWidget, HasEnable
     public Long getSingleValue();
 
     public void setValue(Long value);
+
+    void setPeriodDates(Date startDate, Date endDate);
 }

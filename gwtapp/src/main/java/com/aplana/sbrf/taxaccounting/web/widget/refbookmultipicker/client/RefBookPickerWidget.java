@@ -163,6 +163,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         this.filter = filter;
     }
 
+    @Override
     public void setPeriodDates(Date startDate, Date endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
