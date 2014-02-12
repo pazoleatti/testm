@@ -204,7 +204,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String RECORD_VERSIONS_STATEMENT =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
             "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID), \n" +
-            "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+            "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     /**
      * Динамически формирует запрос для справочника
@@ -665,7 +665,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.ref_book_id, r.record_id, r.version from ref_book_record r where r.id=?),\n" +
             "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id)\n" +
-            "select cr.id as %s, cr.version as versionStart, nv.version as versionEnd from currentRecord cr, nextVersion nv";
+            "select cr.id as %s, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv";
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(@NotNull Long uniqueRecordId) {
@@ -901,7 +901,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
             "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
-            "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
+            "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
             "\tversionTo IS NOT NULL and (versionFrom <= ? and versionTo >= ?)\n" +
             ") or (\n" +
@@ -964,7 +964,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
-            "select nv.id as %s, nv.version as versionStart, nve.versionEnd from nextVersion nv, nextVersionEnd nve";
+            "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day from nextVersion nv, nextVersionEnd nve";
 
     @Override
     public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {

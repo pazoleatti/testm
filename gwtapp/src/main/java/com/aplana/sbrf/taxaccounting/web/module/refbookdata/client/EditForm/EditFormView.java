@@ -237,9 +237,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
-                        //TODO так не работало к окато и октмо
+                        //dloshkarev: так не работало для окато и октмо
                         //Long longValue = field.getValue().getValue() == null ? null : (Long)field.getValue().getValue();
-                        Long longValue = field.getValue().getValue() == null ? null : ((ArrayList<Long>)field.getValue().getValue()).get(0);
+                        Long longValue = (field.getValue().getValue() == null || ((ArrayList<Long>) field.getValue().getValue()).isEmpty()) ? null : ((ArrayList<Long>)field.getValue().getValue()).get(0);
 						checkRequired(field.getKey(), longValue);
 						value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
