@@ -78,7 +78,6 @@
                 </g:cell>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
-                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>

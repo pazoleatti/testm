@@ -6,10 +6,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormData;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,36 +24,22 @@ import java.util.Set;
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
     private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
-	private final PlaceManager placeManager;
-	private final DispatchAsync dispatchAsync;
     private TaxType taxType;
 
     public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
         void init();
-    public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
-		void init();
-		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-		void setAcceptableFormKindList(List<FormDataKind> list);
-		void setAcceptableFormTypeList(List<FormType> list);
-		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
-
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-
         void setAcceptableFormKindList(List<FormDataKind> list);
-
         void setAcceptableFormTypeList(List<FormType> list);
-
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
-
         void setAcceptableMonthList(List<Months> monthList);
 
         FormDataFilter getFilterData();
-
         void setFilterData(FormDataFilter filter);
 
         /**
          * Устанавливаем в enabled/disabled ежемесячность
-         * @param isMonthly
+         * @param isMonthly true - ежемесячный, false - неежемесячный
          */
         void setFormMonthEnabled(boolean isMonthly);
     }
@@ -80,9 +62,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
-        if (filterFormData.getFormMonth() != null) {
-            action.setMonthId(filterFormData.getFormMonth().getId());
-        }
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateFormDataResult>() {
                     @Override
@@ -97,20 +76,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         );
     }
 
-    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe) {
-        final GetFilterData action = new GetFilterData();
-        action.setTaxType(filter.getTaxType());
-        dispatchAsync.execute(action, CallbackUtils
-                .wrongStateCallback(new AbstractCallback<GetFilterDataResult>() {
-                    @Override
-                    public void onSuccess(GetFilterDataResult result) {
-                        getView().init();
-                        FormDataFilterAvailableValues filterValues = result.getFilterValues();
-                        getView().setAcceptableDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-                        getView().setAcceptableFormKindList(filterValues.getKinds());
-                        getView().setAcceptableFormTypeList(filterValues.getFormTypes());
-                        getView().setAcceptableReportPeriods(result.getReportPeriods());
-                        getView().setAcceptableMonthList(result.getMonthsList());
     @Override
     public void onReportPeriodChange() {
         List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
@@ -129,7 +94,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     }
                 }, this));
     }
-                        // setSelectedFilterValues(filter);
 
     @Override
     public void onDepartmentChange() {
@@ -179,30 +143,23 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
                     }
-                }, this)
-        );
+                }, this));
     }
 
     @Override
     public void isMonthly(Integer formId, Integer reportPeriodId) {
         GetMonthData action = new GetMonthData();
         action.setTypeId(formId);
-        action.setPeriodId(reportPeriodId);
+        action.setReportPeriodId(reportPeriodId);
 
         dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthDataResult>() {
             @Override
             public void onSuccess(GetMonthDataResult result) {
                 getView().setFormMonthEnabled(result.isMonthly());
-                if (result.isMonthly()) {
-                    getView().setAcceptableMonthList(result.getMonthsList());
-                }
+                getView().setAcceptableMonthList(result.getMonthsList());
             }
         }));
     }
-                        slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
-                    }
-                }, this));
-	}
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
 //		FormDataFilter filter = new FormDataFilter();

@@ -92,7 +92,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         formTypeId.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
             public void onValueChange(ValueChangeEvent<Integer> event) {
-                updateEnabled();
+                formMonth.setValue(null, true);
+                getUiHandlers().isMonthly(formTypeId.getValue(), reportPeriodIds.getValue().iterator().next());
             }
         });
 
@@ -113,6 +114,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
+
     }
 
     @Override
@@ -126,14 +128,13 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         updateEnabled();
     }
 
-    public void updateEnabled() {
+    private void updateEnabled() {
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
         formTypeId.setEnabled(formDataKind.getValue().size() != 0);
-        formTypeId.setEnabled(formDataKind.getValue() != null);
         // "Месяц" недоступен если не выбран "Вид налоговой формы"
         formMonth.setEnabled(formTypeId.getValue() != null);
         // Кнопка "Создать" недоступна пока все не заполнено
@@ -184,25 +185,15 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         }
     }
 
-    @UiHandler("formTypeId")
-    public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
-        formMonth.setValue(null, true);
-        getUiHandlers().isMonthly(formTypeId.getValue(), reportPeriodIds.getValue().iterator().next());
-    }
+//    @UiHandler("formTypeId")
+//    public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
+//        formMonth.setValue(null, true);
+//        getUiHandlers().isMonthly(formTypeId.getValue(), reportPeriodIds.getValue().iterator().next());
+//    }
 
     @UiHandler("formMonth")
     public void onChangeFormMonth(ValueChangeEvent<Months> event) {
         updateEnabled();
-    }
-
-    @Override
-    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
-        reportPeriodIds.setPeriods(reportPeriods);
-    }
-
-    @Override
-    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentPicker.setAvalibleValues(list, availableValues);
     }
 
     @Override
@@ -227,16 +218,15 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
-    public void setAcceptableMonthList(List<Months> monthList) {
-        formMonth.setValue(null, true);
-        formMonth.setAcceptableValues(monthList);
-    }
-
-    @Override
     public FormDataFilter getFilterData() {
         // DepartmentPiker не реализует asEditor, поэтому сетим значение руками.
         //filter.setDepartmentIds(departmentPicker.getValue());
         return driver.flush();
+    }
+
+    @Override
+    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
+        reportPeriodIds.setPeriods(reportPeriods);
     }
 
     @Override
@@ -247,13 +237,20 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
+    public void setAcceptableMonthList(List<Months> monthList) {
+        formMonth.setValue(null, true);
+        formMonth.setAcceptableValues(monthList);
+
+    }
+
+    @Override
     public void setFormMonthEnabled(boolean isMonthly) {
         // Если ежемесячный, то устанавливается formMonth = true
         formMonth.setEnabled(isMonthly);
         // Кнопка "Создать" пока неактивна
         if (isMonthly) {
             continueButton.setEnabled(false);
-        // Иначе, кнопка активна
+            // Иначе, кнопка активна
         } else {
             continueButton.setEnabled(true);
         }
