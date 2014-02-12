@@ -14,21 +14,21 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 /**
- * Версионный справочник с выбором значения из выпадающего списка с пагинацией
+ * Версионный справочник с выбором значения из линейного или иерархичного опредставления
+ *
  * @author Dmitriy Levykin
  */
-public class RefBookMultiPickerModalWidget extends DoubleStateComposite implements RefBookMultiPickerModal {
+public class RefBookPickerWidget extends DoubleStateComposite implements RefBookPicker {
 
-    interface Binder extends UiBinder<Widget, RefBookMultiPickerModalWidget> {
+    interface Binder extends UiBinder<Widget, RefBookPickerWidget> {
     }
 
-	private Long attributeId;
+    private Long attributeId;
 
-	private Date startDate;
+    private Date startDate;
     private Date endDate;
     private String filter;
 
@@ -36,7 +36,7 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
 
     private PopupPanel popupPanel;
 
-    private RefBookMultiPicker refBookPiker;
+    private RefBookView refBookPiker;
 
     @UiField
     TextBox text;
@@ -44,19 +44,19 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
     @UiField
     Image selectButton;
 
-    /** Признак модальности окна */
-    private boolean modal;
+    /**
+     * Признак иерархичности окна
+     */
+    private boolean isHierarchical;
 
     @UiConstructor
-    public RefBookMultiPickerModalWidget(boolean modal, boolean multiSelect) {
+    public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
         initWidget(binder.createAndBindUi(this));
-        this.modal = modal;
-        if (modal) {
-            popupPanel = new ModalWindow();
-        } else {
-            popupPanel = new PopupPanel(true, true);
-        }
-        refBookPiker = new RefBookMultiPickerView(multiSelect);
+        this.isHierarchical = isHierarchical;
+        popupPanel = new ModalWindow("Выбор значения из справочника");
+
+        refBookPiker = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
+
         popupPanel.add(refBookPiker);
         refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
@@ -70,30 +70,9 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
     }
 
     @UiHandler("selectButton")
-    void onSelectButtonClicked(ClickEvent event){
+    void onSelectButtonClicked(ClickEvent event) {
         refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.startDate, this.endDate);
-	    popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-		    public void setPosition(int offsetWidth, int offsetHeight) {
-			    int windowHeight = Window.getClientHeight();
-			    int windowWidth = Window.getClientWidth();
-
-			    int exceedOffsetX = text.getAbsoluteLeft();
-			    int exceedOffsetY = text.getAbsoluteTop()+text.getOffsetHeight();
-			    // Сдвигаем попап, если он не помещается в окно
-			    if ((text.getAbsoluteLeft() + popupPanel.getOffsetWidth()) > windowWidth) {
-				    exceedOffsetX -= popupPanel.getOffsetWidth();
-			    }
-
-			    if ((text.getAbsoluteTop() + popupPanel.getOffsetHeight()) > windowHeight) {
-				    exceedOffsetY -= popupPanel.getOffsetHeight() + text.getOffsetHeight();
-			    }
-                if (!modal) {
-                    popupPanel.setPopupPosition(exceedOffsetX, exceedOffsetY);
-                } else {
-                    popupPanel.center();
-                }
-		    }
-	    });
+        popupPanel.center();
     }
 
     @Override
@@ -109,7 +88,7 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
     @Override
     public void setValue(List<Long> value, boolean fireEvents) {
         refBookPiker.setValue(value);
-        if (fireEvents){
+        if (fireEvents) {
             ValueChangeEvent.fire(this, value);
         }
     }
@@ -129,16 +108,16 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
         return refBookPiker.addValueChangeHandler(handler);
     }
 
-	@Override
-	public String getDereferenceValue() {
-		return text.getValue();
-	}
+    @Override
+    public String getDereferenceValue() {
+        return text.getValue();
+    }
 
-	@Override
-	public void setDereferenceValue(String value) {
-		text.setValue(value);
-		setLabelValue(value);
-	}
+    @Override
+    public void setDereferenceValue(String value) {
+        text.setValue(value);
+        setLabelValue(value);
+    }
 
     /**
      * @return Id отображаемого атрибута
@@ -146,10 +125,10 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
     public Long getAttributeId() {
         return attributeId;
     }
-    
+
     public void setAttributeId(long attributeId) {
-		this.attributeId = attributeId;
-	}
+        this.attributeId = attributeId;
+    }
 
     public Date getEndDate() {
         return endDate;
@@ -169,22 +148,23 @@ public class RefBookMultiPickerModalWidget extends DoubleStateComposite implemen
 
     /**
      * Для совместимости с UiBinder
-     * 
+     *
      * @param attributeId
      */
     public void setAttributeIdInt(int attributeId) {
-		this.attributeId = Long.valueOf(attributeId);
-	}
+        this.attributeId = Long.valueOf(attributeId);
+    }
 
-	public String getFilter() {
-		return filter;
-	}
+    public String getFilter() {
+        return filter;
+    }
 
-	public void setFilter(String filter) {
-		this.filter = filter;
-	}
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
 
-    public void setPeriodDates(Date startDate, Date endDate){
+    @Override
+    public void setPeriodDates(Date startDate, Date endDate) {
         this.startDate = startDate;
         this.endDate = endDate;
     }

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerViewPresenter.MyView;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -35,7 +35,7 @@ import java.util.*;
  * @author sgoryachkin
  *
  */
-public class RefBookMultiPickerView extends Composite implements RefBookMultiPicker, MyView {
+public class RefBookMultiPickerView extends Composite implements RefBookView, MyView {
 
     private final SetSelectionModel<RefBookItem> selectionModel;
     private Boolean multiSelect = false;
@@ -43,7 +43,7 @@ public class RefBookMultiPickerView extends Composite implements RefBookMultiPic
     private List<Long> valuesId = new ArrayList<Long>();
     private Map<Long, RefBookItem> itemsMap = new HashMap<Long, RefBookItem>();
 
-    private RefBookMultiPickerViewUiHandlers uiHandlers;
+    private RefBookMultiPickerUiHandlers uiHandlers;
 
     interface Binder extends UiBinder<Widget, RefBookMultiPickerView> {
     }
@@ -93,7 +93,7 @@ public class RefBookMultiPickerView extends Composite implements RefBookMultiPic
                 new MultiSelectionModel<RefBookItem>() : new SingleSelectionModel<RefBookItem>());
         sortableColumns= new HashMap<RefBookItemTextColumn, Integer>();
         initWidget(binder.createAndBindUi(this));
-        new RefBookMultiPickerViewPresenter(this);
+        new RefBookMultiPickerPresenter(this);
 
         version.addValueChangeHandler(new ValueChangeHandler<Date>()
         {
@@ -319,7 +319,7 @@ public class RefBookMultiPickerView extends Composite implements RefBookMultiPic
     }
 
     @Override
-    public void setUiHandlers(RefBookMultiPickerViewUiHandlers uiHandlers) {
+    public void setUiHandlers(RefBookMultiPickerUiHandlers uiHandlers) {
         this.uiHandlers = uiHandlers;
     }
 

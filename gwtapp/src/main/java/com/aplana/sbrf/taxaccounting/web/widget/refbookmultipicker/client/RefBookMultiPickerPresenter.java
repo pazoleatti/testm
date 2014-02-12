@@ -18,8 +18,8 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-public class RefBookMultiPickerViewPresenter extends PresenterWidget<RefBookMultiPickerViewPresenter.MyView>
-        implements RefBookMultiPickerViewUiHandlers {
+public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPickerPresenter.MyView>
+        implements RefBookMultiPickerUiHandlers {
 	
 	private final DispatchAsync dispatcher;
 
@@ -50,13 +50,13 @@ public class RefBookMultiPickerViewPresenter extends PresenterWidget<RefBookMult
 	}
 
 	
-	public RefBookMultiPickerViewPresenter(MyView view) {
+	public RefBookMultiPickerPresenter(MyView view) {
 		super(GINContextHolder.getEventBus(), view);
 		dispatcher = GINContextHolder.getDispatchAsync();
 		getView().setUiHandlers(this);
 	}
 
-	interface MyView extends View, HasValue<List<Long>>, HasUiHandlers<RefBookMultiPickerViewUiHandlers>{
+	interface MyView extends View, HasValue<List<Long>>, HasUiHandlers<RefBookMultiPickerUiHandlers>{
 		void setHeaders(Map<String, Integer> headers);
 		
 		void setVersion(Date version);

@@ -1,12 +1,13 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-			 xmlns:g="urn:import:com.google.gwt.user.client.ui"
-			 xmlns:my="urn:import:com.aplana.gwt.client"
-			 xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
-			 xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:my="urn:import:com.aplana.gwt.client"
+             xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-		>
+             xmlns:refbookmultipicker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
+        >
     <ui:style>
 
         .titleText {
@@ -20,6 +21,10 @@
 
         .marginRight5{
             margin-right: 5px;
+        }
+
+        .margin5{
+            margin: 5px;
         }
     </ui:style>
 
@@ -69,6 +74,9 @@
                     </g:HorizontalPanel>
                 </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
+
+                <refbookmultipicker:RefBookPickerWidget ui:field="fpicker" width="300px" multiSelect="true" isHierarchical="true" attributeIdInt="423" addStyleNames="{style.margin5}"/>
+
                 <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
                     <g:CheckBox ui:field="checkBoxNull" text="Могут принимать пустые значения"/>
                     <g:HorizontalPanel spacing="2">

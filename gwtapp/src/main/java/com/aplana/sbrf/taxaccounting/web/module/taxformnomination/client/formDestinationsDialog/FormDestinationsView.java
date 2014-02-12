@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,10 +31,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     private boolean isEditForm = false;
 
     @UiField
-    RefBookMultiPickerModalWidget formDataKind;
+    RefBookPickerWidget formDataKind;
 
     @UiField
-    RefBookMultiPickerModalWidget formTypeId;
+    RefBookPickerWidget formTypeId;
 
 	@UiField
 	Button createButton;
