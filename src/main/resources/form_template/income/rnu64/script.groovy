@@ -21,6 +21,8 @@ import groovy.transform.Field
  * 4. dealingNumber - Номер сделки
  * -5. bondKind - Вид ценных бумаг //графу удалили
  * 5. costs - Затраты (руб.коп.)
+ *
+ * !!! bondKind выпилена из РНУ, а из файла для импорта/миграции нет
  */
 
 @Field
@@ -69,9 +71,6 @@ switch (formDataEvent) {
         }
         break
 }
-
-@Field
-def refBookCache = [:]
 
 @Field
 def recordCache = [:]
@@ -218,7 +217,7 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
         prevQuarterTotalRow = getDataRow(dataRowsPrev, "total")
     }
     if (prevQuarterTotalRow != null) {
-        return (quarterRow.costs ?: 0) + prevQuarterTotalRow.costs ?: 0
+        return (quarterRow.costs ?: 0) + (prevQuarterTotalRow.costs ?: 0)
     } else {
         return quarterRow.costs ?: 0
     }
@@ -232,14 +231,12 @@ void importData() {
         return
     }
     String charset = ""
-    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
-    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
-            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+    if (formDataEvent == FormDataEvent.MIGRATION) {
         if (!fileName.contains('.xml')) {
             logger.error('Формат файла должен быть *.xml')
             return
         }
-    } else {
+    } else if (formDataEvent == FormDataEvent.IMPORT){
         if (!fileName.contains('.r')) {
             logger.error('Формат файла должен быть *.rnu')
             return
@@ -331,25 +328,26 @@ def addData(def xml, def fileName) {
         indexCol++
 
         // графа 5
-        // TODO bondKind выпилена из РНУ, а из файла для импорта?
+        // !!! bondKind выпилена из РНУ, а из файла для импорта/миграции нет
         indexCol++
 
         // графа 6
         newRow.costs = getNumber(getCellValue(row, indexCol, type), indexRow, indexCol)
         newRows.add(newRow)
     }
-    dataRowHelper.save(newRows)
+    def totalRow = null
 
     // итоговая строка
     if (totalRecords.size() >= 1) {
         def row = totalRecords[0]
-        def totalRow = formData.createDataRow()
+        totalRow = getCleanTotalRow(true)
         // графа 5
-        totalRow.costs = getNumber(getCellValue(row, 5, type), indexRow, 5)
-        return totalRow
-    } else {
-        return null
+        totalRow.costs = getNumber(getCellValue(row, 6, type), indexRow, 6)
+        newRows.add(totalRow)
+        newRows.add(getCleanTotalRow(false))
     }
+    dataRowHelper.save(newRows)
+    return totalRow
 }
 
 /** Для получения данных из RNU или XML */
@@ -390,22 +388,27 @@ void checkTotalRow(def totalRow) {
 
 /** Получить итоговую строку с суммами. */
 def getCalcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.getCell("fix").setColSpan(4)
-    totalRow.fix = "Итоги"
-    totalRow.setAlias("total")
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
+    def totalRow = getCleanTotalRow(true)
     def from = 0
-    def to = dataRows.size() - 1
-    def sum
+    def to = dataRows.size() - 2
+    def BigDecimal sum
     if (from > to) {
         sum = 0
     } else {
         sum = summ(formData, dataRows, new ColumnRange('costs', from, to))
     }
-    totalRow.costs = sum
+    totalRow.costs = sum?.setScale(2, BigDecimal.ROUND_HALF_UP)
+    return totalRow
+}
+
+def getCleanTotalRow(boolean isQuarter) {
+    def totalRow = formData.createDataRow()
+    totalRow.getCell("fix").setColSpan(4)
+    totalRow.fix = isQuarter ? "Итого за текущий квартал" : "Итого за текущий отчетный (налоговый) период"
+    totalRow.setAlias(isQuarter ? "totalQuarter" : "total")
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
     return totalRow
 }
 
