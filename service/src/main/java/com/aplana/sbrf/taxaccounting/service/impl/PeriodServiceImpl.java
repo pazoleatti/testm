@@ -529,7 +529,7 @@ public class PeriodServiceImpl implements PeriodService{
     /**
      * Возвращает список доступных месяцев для указанного отчетного периода.
      * @param reportPeriodId идентификатор отчетного период
-     * @return
+     * @return список доступных месяцев
      */
     @Override
     public List<Months> getAvailableMonthList(int reportPeriodId) {
@@ -543,7 +543,7 @@ public class PeriodServiceImpl implements PeriodService{
 
         Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(Long.valueOf(reportPeriod.getDictTaxPeriodId()));
         // Код налогового периода
-        Integer code = Integer.parseInt(refBookValueMap.get("CODE").getStringValue());
+        String code = refBookValueMap.get("CODE").getStringValue();
 
         monthsList.addAll(getReportPeriodMonthList(code));
 
@@ -555,49 +555,34 @@ public class PeriodServiceImpl implements PeriodService{
      * @param code код налогового периода
      * @return список месяцев в налоговом периоде.
      */
-    List<Months> getReportPeriodMonthList(int code) {
+    List<Months> getReportPeriodMonthList(String code) {
 
         int start = 0;
         int end = 0;
 
         List<Months> list = new ArrayList<Months>();
 
-        switch (code) {
-            // Первый квартал
-            case 21:
-                start = 0;
-                end = 2;
-                break;
-            // Второй квартал
-            case 22:
-                start = 3;
-                end = 5;
-                break;
-            // Третий квартал
-            case 23:
-                start = 6;
-                end = 8;
-                break;
-            // Четвертый квартал
-            case 24:
-                start = 9;
-                end = 11;
-                break;
-            // Полугодие
-            case 31:
-                start = 0;
-                end = 5;
-                break;
-            // 9 месяцев
-            case 33:
-                start = 0;
-                end = 8;
-                break;
-            // Год
-            case 34:
-                start = 0;
-                end = 11;
-                break;
+        if (code.equals("21")) {
+            start = 0;
+            end = 2;
+        } else if (code.equals("22")) {
+            start = 3;
+            end = 5;
+        } else if (code.equals("23")) {
+            start = 6;
+            end = 8;
+        } else if (code.equals("24")) {
+            start = 9;
+            end = 11;
+        } else if (code.equals("31")) {
+            start = 0;
+            end = 5;
+        } else if (code.equals("33")) {
+            start = 0;
+            end = 8;
+        } else if (code.equals("34")) {
+            start = 0;
+            end = 11;
         }
 
         for (int i = start; i <= end; ++i) {

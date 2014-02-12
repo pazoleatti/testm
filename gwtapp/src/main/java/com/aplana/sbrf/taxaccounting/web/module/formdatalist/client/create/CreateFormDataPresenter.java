@@ -62,6 +62,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
+        if (filterFormData.getFormMonth() != null) {
+            action.setMonthId(filterFormData.getFormMonth().getId());
+        }
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateFormDataResult>() {
                     @Override
@@ -152,13 +155,14 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setTypeId(formId);
         action.setReportPeriodId(reportPeriodId);
 
-        dispatchAsync.execute(action, CallbackUtils.simpleCallback(new AbstractCallback<GetMonthDataResult>() {
+        dispatchAsync.execute(action, CallbackUtils
+                .wrongStateCallback(new AbstractCallback<GetMonthDataResult>() {
             @Override
             public void onSuccess(GetMonthDataResult result) {
                 getView().setFormMonthEnabled(result.isMonthly());
                 getView().setAcceptableMonthList(result.getMonthsList());
             }
-        }));
+        }, this));
     }
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
