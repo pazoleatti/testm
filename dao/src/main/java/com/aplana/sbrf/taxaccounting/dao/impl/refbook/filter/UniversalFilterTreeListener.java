@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
 
 /**
  * Универсальная реализация лиснера для обхода дерева запроса
@@ -124,7 +125,8 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     public void enterString(@NotNull FilterTreeParser.StringContext ctx) {
         ps.appendQuery("?");
         // Строка по умолчанию содерижт символы кавычек. Пример " 'Текст' "
-        ps.addParam(ctx.getText().substring(1, ctx.getText().length() - 1));
+        String param = ctx.getText().substring(1, ctx.getText().length() - 1);
+        ps.addParam(new String(param.getBytes(Charset.forName("UTF-8")), Charset.forName("windows-1251")));
     }
 
     @Override
