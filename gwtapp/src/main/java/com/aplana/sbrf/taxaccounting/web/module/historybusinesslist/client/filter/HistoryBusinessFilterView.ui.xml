@@ -87,7 +87,7 @@
                     </g:cell>
                     <g:cell height="26px">
                         <r:RefBookPickerWidget ui:field="user" width="100%" attributeIdInt="652" isHierarchical="false"
-                                                    multiSelect="false"/>
+                                                    multiSelect="true"/>
                     </g:cell>
                     <g:cell height="26px">
                         <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>

@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -118,7 +117,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(user.getSingleValue());
+        lsf.setUserIds(user.getValue());
         lsf.setTaxType(taxType.getValue());
 
         return lsf;
