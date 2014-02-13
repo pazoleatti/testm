@@ -195,7 +195,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
                 }
                 return stringBuilder.toString();
             }
-        });
+        }, userRolesColumnHeader);
         auditTable.addColumn(userIpColumn, userIpColumnHeader);
 	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
 		    @Override
