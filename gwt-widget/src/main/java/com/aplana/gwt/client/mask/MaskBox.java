@@ -61,7 +61,7 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
                     try {
                         setValue(parser.parse(getText()), true);
                     } catch (ParseException e) {
-                        if (textPicture == null || !textPicture.equals(getText())) {
+                        if (textPicture == null || !textPicture.equals(getText()) || textPicture.equals(maskListener.getMaskPicture())) {
                             addExceptionStyle();
                         }
                     }
