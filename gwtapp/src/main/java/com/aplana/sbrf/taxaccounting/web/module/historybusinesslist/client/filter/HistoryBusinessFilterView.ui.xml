@@ -86,8 +86,8 @@
                                                        modal="true" width="100%"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <r:RefBookMultiPickerModalWidget ui:field="user" width="100%" attributeIdInt="652" modal="true"
-                                                    multiSelect="false"/>
+                        <r:RefBookPickerWidget ui:field="user" width="100%" attributeIdInt="652" isHierarchical="false"
+                                                    multiSelect="true"/>
                     </g:cell>
                     <g:cell height="26px">
                         <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
@@ -119,10 +119,10 @@
                         <g:cell width="100%">
                             <g:VerticalPanel verticalAlignment="middle" width="100%">
                                 <g:cell height="26px">
-                                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="true" width="100%"/>
+                                    <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" isHierarchical="false" multiSelect="true" width="100%"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="836" modal="true" multiSelect="true" width="100%"/>
+                                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="836" isHierarchical="false" multiSelect="true" width="100%"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>

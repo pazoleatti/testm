@@ -34,8 +34,10 @@ import java.util.Map;
 
 /**
  * @author sgoryachkin
- *
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker
  */
+@Deprecated
 public class RefBookPickerWidget extends Composite implements RefBookPicker, MyView {
 	
 	private final NoSelectionModel<RefBookItem> selectionModel = new NoSelectionModel<RefBookItem>();

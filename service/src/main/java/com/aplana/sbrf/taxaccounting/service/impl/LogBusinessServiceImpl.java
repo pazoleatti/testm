@@ -89,7 +89,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         filterValuesDao.setFromSearchDate(filter.getFromSearchDate());
         filterValuesDao.setStartIndex(filter.getStartIndex());
         filterValuesDao.setDepartmentId(filter.getDepartmentId());
-        filterValuesDao.setUserId(filter.getUserId());
+        filterValuesDao.setUserIds(filter.getUserIds());
 
         return logBusinessDao.getLogsBusiness(formDataIds, declarationDataIds, filterValuesDao);
     }

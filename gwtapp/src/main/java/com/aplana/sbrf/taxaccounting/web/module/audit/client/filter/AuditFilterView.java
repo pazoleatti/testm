@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -48,13 +48,13 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     DepartmentPickerPopupWidget departmentSelectionTree;
 
     @UiField
-    RefBookMultiPickerModalWidget formTypeId;
+    RefBookPicker formTypeId;
 
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> declarationTypeId;
 
     @UiField
-    RefBookMultiPickerModalWidget formDataKind;
+    RefBookPicker formDataKind;
 
     @UiField(provided = true)
     ValueListBox<TaxType> taxType;
@@ -63,7 +63,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     ValueListBox<AuditFormType> auditFormTypeId;
 
     @UiField
-    RefBookMultiPickerModalWidget user;
+    RefBookPicker user;
 
     @UiField
     Panel declarationTypePanel;
@@ -117,7 +117,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(user.getSingleValue());
+        lsf.setUserIds(user.getValue());
         lsf.setTaxType(taxType.getValue());
 
         return lsf;

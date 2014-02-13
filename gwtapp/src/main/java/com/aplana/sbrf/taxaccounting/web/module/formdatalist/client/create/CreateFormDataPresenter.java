@@ -25,32 +25,35 @@ import java.util.Set;
 
 
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
-	private final PlaceManager placeManager;
-	private final DispatchAsync dispatchAsync;
+    private final PlaceManager placeManager;
+    private final DispatchAsync dispatchAsync;
     private TaxType taxType;
 
     public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
-		void init();
-		void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-		void setAcceptableFormKindList(List<FormDataKind> list);
-		void setAcceptableFormTypeList(List<FormType> list);
-		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+        void init();
 
-		FormDataFilter getFilterData();
-		void setFilterData(FormDataFilter filter);
-	}
+        void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
 
-	@Inject
-	public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
-		super(eventBus, view);
-		this.placeManager = placeManager;
-		this.dispatchAsync = dispatchAsync;
-		getView().setUiHandlers(this);
-	}
+        void setAcceptableFormTypeList(List<FormType> list);
 
-	@Override
-	public void onConfirm() {
-		FormDataFilter filterFormData = getView().getFilterData();
+        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+
+        FormDataFilter getFilterData();
+
+        void setFilterData(FormDataFilter filter);
+    }
+
+    @Inject
+    public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+        super(eventBus, view);
+        this.placeManager = placeManager;
+        this.dispatchAsync = dispatchAsync;
+        getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void onConfirm() {
+        FormDataFilter filterFormData = getView().getFilterData();
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         CreateFormData action = new CreateFormData();
@@ -92,21 +95,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     @Override
-    public void onDepartmentChange() {
-        if (getView().getFilterData().getDepartmentIds() == null)
-            return;
-        FillFormFieldsAction action = new FillFormFieldsAction();
-        action.setFieldsNum(FillFormFieldsAction.FieldsNum.THIRD);
-        dispatchAsync.execute(action, CallbackUtils
-                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
-                    @Override
-                    public void onSuccess(FillFormFieldsResult result) {
-                        getView().setAcceptableFormKindList(result.getDataKinds());
-                    }
-                }, this));
-    }
-
-    @Override
     public void onFormKindChange() {
         FillFormFieldsAction action = new FillFormFieldsAction();
         action.setFieldsNum(FillFormFieldsAction.FieldsNum.FORTH);
@@ -121,7 +109,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                 }, this));
     }
 
-    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
+    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe) {
         taxType = filter.getTaxType();
         FillFormFieldsAction action = new FillFormFieldsAction();
         action.setFieldsNum(FillFormFieldsAction.FieldsNum.FIRST);
@@ -140,7 +128,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
                     }
                 }, this));
-	}
+    }
 
 //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
 //		FormDataFilter filter = new FormDataFilter();

@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -48,7 +48,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
     private ModalWindow panel;
-	private RefBookMultiPicker refBookPiker = new RefBookMultiPickerView();
+	private RefBookView refBookPiker = new RefBookMultiPickerView();
 	
 	private HandlerRegistration changeHandlerRegistration;
 

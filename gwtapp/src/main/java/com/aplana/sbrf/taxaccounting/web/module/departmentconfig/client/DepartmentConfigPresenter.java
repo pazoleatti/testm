@@ -136,7 +136,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
                     public void onSuccess(SaveDepartmentCombinedResult result) {
-                        MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                        if (result.getUuid() != null) {
+                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                        }
+                        if(!result.isHasError()){
+                            MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                        }
                     }
                 }, this));
     }

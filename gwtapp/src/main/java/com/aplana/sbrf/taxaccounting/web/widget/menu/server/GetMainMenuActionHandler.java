@@ -183,8 +183,14 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
                 }
-                if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)){
+                /*
+                Если пользователю назначено несколько ролей, включая роль Администратор,
+                то права доступа должны браться как для Администратора
+                http://jira.aplana.com/browse/SBRFACCTAX-5687
+                 */
+                if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
+                        && !currentUser.hasRole(TARole.ROLE_ADMIN)){
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
                 }
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN

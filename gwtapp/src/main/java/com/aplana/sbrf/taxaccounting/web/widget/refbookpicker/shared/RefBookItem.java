@@ -7,7 +7,10 @@ import java.util.List;
  * GUI модель для строки справочника
  * 
  * @author sgoryachkin
+ * @deprecated
+ * @see com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem
  */
+@Deprecated
 public class RefBookItem implements Serializable{
 	private static final long serialVersionUID = 6686089751137927944L;
 	
