@@ -190,7 +190,7 @@
                                             <g:Label text="ОКАТО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="okato" attributeIdInt="7" modal="true" width="150px"
+                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="7" isHierarchical="false" width="150px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -215,7 +215,7 @@
                                             <g:Label text="ОКВЭД:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="okvedCode" attributeIdInt="210" modal="true" width="150px"
+                                            <r:RefBookPickerWidget ui:field="okvedCode" attributeIdInt="210" isHierarchical="false" width="150px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -227,7 +227,7 @@
                                             <g:Label text="Код формы реорганизации и ликвидации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="reorgFormCode" attributeIdInt="13" modal="true" width="150px"
+                                            <r:RefBookPickerWidget ui:field="reorgFormCode" attributeIdInt="13" isHierarchical="false" width="150px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -259,7 +259,7 @@
                                             <g:Label text="Признак лица подписавшего документ:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="signatoryId" attributeIdInt="213" modal="true" addStyleNames="{style.fixRelativeWidth}"
+                                            <r:RefBookPickerWidget ui:field="signatoryId" attributeIdInt="213" isHierarchical="false" addStyleNames="{style.fixRelativeWidth}"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -314,7 +314,7 @@
                                             <g:Label text="Код места, по которому представляется документ:" addStyleNames="{style.rightLabels},{style.toLongLabel}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="taxPlaceTypeCode" attributeIdInt="3" modal="true" width="200px"
+                                            <r:RefBookPickerWidget ui:field="taxPlaceTypeCode" attributeIdInt="3" isHierarchical="false" width="200px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -343,12 +343,21 @@
                                             <aplana:TextBox ui:field="formatVersion" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
+                                    <!-- TODO "Обязанность по уплате авансовых платежей"-->
+                                    <g:HorizontalPanel ui:field="payPanelPrepayment" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
+                                        <g:cell width="1%">
+                                            <g:Label text="Обязанность по уплате авансовых платежей:" addStyleNames="{style.rightLabels}" />
+                                        </g:cell>
+                                        <g:cell width="99%">
+                                            <g:CheckBox ui:field="prepayment" text="" width="200px"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="payPanelObligation" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
                                         <g:cell width="1%">
                                             <g:Label text="Обязанность по уплате налога:" addStyleNames="{style.rightLabels}" />
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="obligation" attributeIdInt="110" modal="true" width="200px"
+                                            <r:RefBookPickerWidget ui:field="obligation" attributeIdInt="110" isHierarchical="false" width="200px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -358,7 +367,7 @@
                                             <g:Label text="Признак расчёта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookMultiPickerModalWidget ui:field="type" attributeIdInt="120" modal="true" width="200px"
+                                            <r:RefBookPickerWidget ui:field="type" attributeIdInt="120" isHierarchical="false" width="200px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
