@@ -154,7 +154,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 				(formatter.format(filter.getToSearchDate()))
 				.append("', '").append(dbDateFormat).append("')");
 
-		if (!filter.getUserIds().isEmpty()) {
+		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
             List<Long> userList = filter.getUserIds();
             String userSql = "";
             for(Long temp : userList){
