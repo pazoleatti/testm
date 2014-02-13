@@ -34,7 +34,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private final DispatchAsync dispatchAsync;
 	private boolean isFormModified = false;
 	private Date relevanceDate;
-	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
+	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
 
     /** Идентификатор справочника */
     private Long currentRefBookId;
@@ -106,7 +106,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		if (isFormModified) {
-            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+            Dialog.confirmMessage("Вопрос", DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
                     isFormModified = false;
