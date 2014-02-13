@@ -49,7 +49,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));//TODO убрать преобразование типов
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
                 break;
@@ -67,7 +67,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setFormTypeId(Arrays.asList(filter.getFormTypeId().longValue()));//TODO убрать преобразование типов
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
 
