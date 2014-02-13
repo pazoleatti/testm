@@ -8,12 +8,11 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
- * Интерфейс компонента выбора значений из справочника
+ * Интерфейс представления для компонента выбора значений из справочника
  * 
  * @author sgoryachkin
- * 
  */
-public interface RefBookMultiPicker extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, IsWidget {
+public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, IsWidget {
 
 	/**
 	 * Устанавливает параметры и инициализирует компонент.
@@ -46,19 +45,26 @@ public interface RefBookMultiPicker extends HasValue<List<Long>>, LeafValueEdito
 
     /**
      * Возвращает разименованное значение поля в выбранной строке по alias
-     * @param alias
-     * @return
+     *
+     * !!!!! Не предназначен для мультиселекта
+     *
+     * @param alias наименование атрибута
+     * @return строку с единичным значением(даже если выбрано куча)
      */
     String getOtherDereferenceValue(String alias);
 
     /**
      * Возвращает разименованное значение поля в выбранной строке по attrId
-     * @param attrId
-     * @return
+     *
+     * !!!!! Не предназначен для мультиселекта
+     *
+     * @param attrId индентификатор атрибута
+     * @return строку с единичным значением(даже если выбрано куча)
      */
     String getOtherDereferenceValue(Long attrId);
 
     Long getSingleValue();
 
+    @Deprecated
     void setValue(Long value);
 }

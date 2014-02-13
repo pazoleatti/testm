@@ -9,7 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -41,14 +41,14 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img align=\"right\" src=\"resources/img/reference-16.gif\"/>")
+		@Template("<img align=\"right\" src=\"resources/img/dot.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
     private ModalWindow panel;
-	private RefBookMultiPicker refBookPiker = new RefBookMultiPickerView();
+	private RefBookView refBookPiker = new RefBookMultiPickerView();
 	
 	private HandlerRegistration changeHandlerRegistration;
 
@@ -154,8 +154,5 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
-        if (cell.isEditable()) {
-            sb.append(template.referenceIcon());
-        }
     }
 }

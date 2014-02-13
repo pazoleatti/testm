@@ -37,9 +37,9 @@
                     </g:cell>
                     <g:cell width="25%">
                         <g:VerticalPanel width="100%">
-                            <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="true" width="100%"/>
-                            <dw:ListBoxWithTooltip width="100%"
-                                                      ui:field="formTypeId" showTooltip="true"/>
+                            <r:RefBookPickerWidget ui:field="formDataKind" width="100%"
+                                                   attributeIdInt="837" isHierarchical="false" multiSelect="true" />
+                            <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
                         </g:VerticalPanel>
                     </g:cell>
 

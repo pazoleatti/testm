@@ -11,7 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,7 +50,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
     DateMaskBoxPicker term;
 
 	@UiField
-    RefBookMultiPickerModalWidget period;
+    RefBookPickerWidget period;
 
     @UiField
     CheckBox correctPeriod;

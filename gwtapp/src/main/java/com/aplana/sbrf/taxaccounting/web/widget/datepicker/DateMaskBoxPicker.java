@@ -13,6 +13,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
@@ -58,6 +59,9 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     Icons iconsRecources = GWT.create(Icons.class);
 
+    protected static int POPUP_PANEL_WIDTH_CHECK = 160;
+    protected static int POPUP_PANEL_HEIDHT_CHECK = 166;
+
     private final DatePickerWithYearSelector datePicker = new DatePickerWithYearSelector();
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);
     private boolean widgetEnabled = true;
@@ -76,7 +80,25 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     @UiHandler("calendarImage")
     public void onDateImage(ClickEvent event) {
         if (widgetEnabled) {
-            datePickerPanel.setPopupPosition(event.getClientX(), event.getClientY() + 10);
+            //Window.alert("Window.getClientWidth() = "+String.valueOf(Window.getClientWidth()) + "; event.getClientX() = " + String.valueOf(event.getClientX())+ "; datePickerPanel.getOffsetWidth() = " + String.valueOf(datePickerPanel.getOffsetWidth()));
+
+            // Проверяем помещаеться ли календарь в окно, если нет корректируем координаты
+            int leftPosition = 0;
+            int topPosition = 0;
+            if (Window.getClientWidth() - (event.getClientX() + POPUP_PANEL_WIDTH_CHECK) < 0){
+                leftPosition = Window.getClientWidth()-POPUP_PANEL_WIDTH_CHECK - 10;
+            }
+            else{
+                leftPosition = event.getClientX();
+            }
+            if (Window.getClientHeight() - (event.getClientY() + POPUP_PANEL_HEIDHT_CHECK + 10) < 0){
+                topPosition = Window.getClientHeight() - POPUP_PANEL_HEIDHT_CHECK - 10;
+            }
+            else{
+                topPosition = event.getClientY() + 10;
+            }
+
+            datePickerPanel.setPopupPosition(leftPosition, topPosition);
             datePickerPanel.show();
         }
     }
@@ -159,7 +181,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		dateBox.setEnabled(enabled);
         calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
-        clearImage.setVisible(getValue()!= null && enabled);
+        clearImage.setVisible(getValue()!= null && enabled && canBeEmpty);
         clearImage.setResource(enabled ? iconsRecources.clearBtn() : iconsRecources.clearBtnDisable());
         clearImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
 	}
