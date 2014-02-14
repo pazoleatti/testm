@@ -76,6 +76,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @Override
     public void init() {
+        fromSearchDate.setValue(new Date());
+        toSearchDate.setValue(new Date());
         departmentSelectionTree.setValue(null, true);
         reportPeriodIds.setValue(null, true);
         taxType.setValue(null, true);
