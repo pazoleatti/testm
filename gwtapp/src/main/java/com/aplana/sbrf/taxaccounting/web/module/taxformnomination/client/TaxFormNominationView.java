@@ -446,6 +446,10 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
     @Override
     public void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes) {
+	    if (departmentFormTypes.isEmpty()) {
+		    declarationGrid.setRowCount(0);
+		    return;
+	    }
         List<TableModel> types = new ArrayList<TableModel>();
 
         Collections.sort(departmentFormTypes, new Comparator<FormTypeKind>() {
@@ -496,6 +500,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             pager.firstPage();
         } else {
             reloadDeclarationGrid();
+	        pager.firstPage();
         }
     }
 

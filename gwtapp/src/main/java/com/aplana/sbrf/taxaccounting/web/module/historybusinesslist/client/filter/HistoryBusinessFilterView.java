@@ -74,6 +74,20 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     @Override
+    public void init() {
+        departmentSelectionTree.setValue(null, true);
+        reportPeriodIds.setValue(null, true);
+        taxType.setValue(null, true);
+        auditFormTypeId.setValue(null, true);
+        user.setValue(null, true);
+        user.setDereferenceValue(null);
+        formDataKind.setValue(null, true);
+        formDataKind.setDereferenceValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
+    }
+
+    @Override
     public LogBusinessFilterValues getDataFilter() {
         LogBusinessFilterValues lbf = new LogBusinessFilterValues();
         // Отчетные периоды

@@ -59,7 +59,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         CreateFormData action = new CreateFormData();
         action.setDepartmentId(filterFormData.getDepartmentIds().iterator().next());
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
-        action.setFormDataTypeId(filterFormData.getFormTypeId());
+        action.setFormDataTypeId(filterFormData.getFormTypeId().get(0).intValue());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateFormDataResult>() {

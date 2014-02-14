@@ -58,7 +58,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 					    new AbstractCallback<AddDeclarationSourceResult>() {
 						    @Override
 						    public void onSuccess(AddDeclarationSourceResult result) {
-								UpdateTable.fire(DeclarationDestinationsPresenter.this);
+								UpdateTable.fire(DeclarationDestinationsPresenter.this, getView().getSelectedDepartments());
 							    LogAddEvent.fire(DeclarationDestinationsPresenter.this, result.getUuid());
 							    getView().hide();
 						    }
