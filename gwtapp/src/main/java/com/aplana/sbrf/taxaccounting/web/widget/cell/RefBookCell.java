@@ -28,6 +28,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img align=\"right\" src=\"resources/img/dot.png\"/>")
+		@Template("<img style=\"margin: 4px 2px;\" align=\"right\" src=\"resources/img/dot.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
@@ -150,9 +151,14 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
 		Cell cell = dataRow.getCell(column.getAlias());
 		String rendValue = cell.getRefBookDereference();
+
 		if (rendValue == null) {
 			rendValue = "";
 		}
 		sb.append(renderer.render(rendValue));
+        if (cell.isEditable()) {
+            sb.append(template.referenceIcon());
+        }
     }
 }
+
