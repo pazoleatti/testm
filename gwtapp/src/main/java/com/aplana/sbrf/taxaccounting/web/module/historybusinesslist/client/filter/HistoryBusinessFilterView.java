@@ -140,22 +140,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         reportPeriodIds.setPeriods(reportPeriods);
     }
 
-    @Override
-    public void clearFilter() {
-        formTypeId.setValue(null, false);
-        formTypeId.setDereferenceValue(null);
-        reportPeriodIds.setValue(null);
-        taxType.setValue(null, true);
-        departmentSelectionTree.setValue(null, true);
-        declarationTypeIds.setValue(null);
-        auditFormTypeId.setValue(null, true);
-        user.setValue(null, false);
-        user.setDereferenceValue(null);
-        formDataKind.setValue(null, false);
-        formDataKind.setDereferenceValue(null);
-    }
-
-
     @Inject
     public HistoryBusinessFilterView(Binder binder) {
         auditFormTypeId = new ValueListBox<AuditFormType>(new AbstractRenderer<AuditFormType>() {
