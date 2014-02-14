@@ -203,7 +203,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
         if (fromDate != null && toDate != null) {
             if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
-                Dialog.errorMessage("Ошибка", "Дата \"От\" должна быть меньше или равна дате \"До\"");
+                Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
                 return;
             }
         }
