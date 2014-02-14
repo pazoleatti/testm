@@ -122,7 +122,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
     @UiHandler("activateVersion")
     void onActiveClick(ClickEvent event){
         if(getUiHandlers()!=null){
-            getUiHandlers().activate();
+            getUiHandlers().activate(false);
         }
     }
 

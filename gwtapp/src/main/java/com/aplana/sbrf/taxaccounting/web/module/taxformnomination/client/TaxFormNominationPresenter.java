@@ -252,7 +252,9 @@ public class TaxFormNominationPresenter
 	@Override
 	public void onUpdateTable(UpdateTable event) {
         if (getView().isForm()){
-            getView().setDepartments(event.getDepartments());
+            if (event.getDepartments() != null){
+                getView().setDepartments(event.getDepartments());
+            }
             reloadFormTableData();
         } else {
 	        getView().setDepartments(event.getDepartments());
