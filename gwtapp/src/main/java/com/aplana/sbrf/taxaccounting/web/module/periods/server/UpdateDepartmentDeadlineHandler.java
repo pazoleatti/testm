@@ -50,16 +50,16 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         for (DepartmentPair pair : action.getDepartments()) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             Department receiver =
-		            pair.getParentDepartmentId() == null
+		            pair.getDepartmentId() == null
 		            ? null
-		            : departmentService.getDepartment(pair.getParentDepartmentId());
+		            : departmentService.getDepartment(pair.getDepartmentId());
 
             Notification notification = new Notification();
             notification.setCreateDate(new Date());
             notification.setDeadline(action.getDeadline());
             notification.setReportPeriodId(action.getReportPeriodId());
-            notification.setSenderDepartmentId(pair.getDepartmentId());
-            notification.setReceiverDepartmentId(pair.getParentDepartmentId());
+            notification.setSenderDepartmentId(userInfo.getUser().getDepartmentId());
+            notification.setReceiverDepartmentId(pair.getDepartmentId());
             notification.setText(String.format(text,
                     userInfo.getUser().getName(), receiver == null ? "" : receiver.getName(), action.getTaxType().getName(),
                     action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
