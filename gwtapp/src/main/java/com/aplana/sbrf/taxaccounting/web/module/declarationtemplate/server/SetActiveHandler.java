@@ -39,7 +39,7 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
     public SetActiveResult execute(SetActiveAction action, ExecutionContext context) throws ActionException {
         SetActiveResult result = new SetActiveResult();
         Logger logger = new Logger();
-        mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser());
+        result.setIsSetActiveSuccessfully(mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser(), action.getForce()));
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
         /*if (logger.containsLevel(LogLevel.ERROR)){
