@@ -14,8 +14,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
-        // TODO пока нет возможности добавлять строки при создании: http://jira.aplana.com/browse/SBRFACCTAX-5219
-        // copyData()
+        break
+    case FormDataEvent.AFTER_CREATE:
+        copyData()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -232,7 +233,7 @@ def getPrevRowsForCopy(def reportPeriod) {
             def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
             def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
             for (def row in dataRowsOld) {
-                if (row.regDate == null || row.regDateEnd == null || row.regDate > dTo || row.regDateEnd < dFrom) {
+                if (row.benefitStartDate == null || row.benefitEndDate == null || row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
                     continue
                 }
                 rows.add(copyRow(row))
