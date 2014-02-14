@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -75,6 +74,20 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     @Override
+    public void init() {
+        departmentSelectionTree.setValue(null, true);
+        reportPeriodIds.setValue(null, true);
+        taxType.setValue(null, true);
+        auditFormTypeId.setValue(null, true);
+        user.setValue(null, true);
+        user.setDereferenceValue(null);
+        formDataKind.setValue(null, true);
+        formDataKind.setDereferenceValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
+    }
+
+    @Override
     public LogBusinessFilterValues getDataFilter() {
         LogBusinessFilterValues lbf = new LogBusinessFilterValues();
         // Отчетные периоды
@@ -95,7 +108,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         lbf.setFromSearchDate(fromSearchDate.getValue());
         lbf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lbf.setUserId(user.getSingleValue());
+        lbf.setUserIds(user.getValue());
         lbf.setTaxType(taxType.getValue());
         return lbf;
     }

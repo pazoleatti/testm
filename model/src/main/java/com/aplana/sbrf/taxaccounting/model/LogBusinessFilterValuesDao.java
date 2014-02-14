@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -9,7 +10,7 @@ public class LogBusinessFilterValuesDao {
     private Integer departmentId;
     private Date fromSearchDate;
     private Date toSearchDate;
-    private Long userId;
+    private List<Long> userIds;
 
     /*Стартовый индекс списка записей */
     private int startIndex;
@@ -17,12 +18,12 @@ public class LogBusinessFilterValuesDao {
     /*Количество записей, которые нужно вернуть*/
     private int countOfRecords;
 
-    public Long getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 
     public int getStartIndex() {

@@ -48,7 +48,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));//TODO убрать преобразование типов
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
                 if(formDataIds.isEmpty())
@@ -70,7 +70,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(filter.getFormTypeId());
+                formDataFilter.setFormTypeId(Arrays.asList(filter.getFormTypeId().longValue()));//TODO убрать преобразование типов
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
 
@@ -92,7 +92,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         filterValuesDao.setFromSearchDate(filter.getFromSearchDate());
         filterValuesDao.setStartIndex(filter.getStartIndex());
         filterValuesDao.setDepartmentId(filter.getDepartmentId());
-        filterValuesDao.setUserId(filter.getUserId());
+        filterValuesDao.setUserIds(filter.getUserIds());
 
         return logBusinessDao.getLogsBusiness(formDataIds, declarationDataIds, filterValuesDao);
     }
@@ -110,10 +110,14 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 		log.setDepartmentId(userInfo.getUser().getDepartmentId());
 
 		StringBuilder roles = new StringBuilder();
-		for (TARole role : userInfo.getUser().getRoles()) {
-			roles.append(role.getName());
-		}
-		log.setRoles(roles.toString());
+        List<TARole> taRoles = userInfo.getUser().getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
+            }
+        }
+        log.setRoles(roles.toString());
 
 		logBusinessDao.add(log);
 	}

@@ -51,6 +51,8 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
     }
 
     public interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler> {
+
+        void init();
         // Получение значений фильтра
         LogBusinessFilterValues getDataFilter();
 
@@ -63,12 +65,10 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         void setFormDataTaxType(List<TaxType> taxTypeList);
 
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
-        void clearFilter();
     }
 
     public void initFilterData() {
-
-        getView().clearFilter();
+        getView().init();
         GetHistoryBusinessFilterAction action = new GetHistoryBusinessFilterAction();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetHistoryBusinessFilterResult>() {

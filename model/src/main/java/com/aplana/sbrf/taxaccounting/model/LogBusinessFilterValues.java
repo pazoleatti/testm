@@ -10,7 +10,7 @@ import java.util.List;
 public class LogBusinessFilterValues implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Long userId;
+    private List<Long> userIds;
     private List<Integer> reportPeriodIds;
     private List<Long> formKind;
     private TaxType taxType;
@@ -43,12 +43,12 @@ public class LogBusinessFilterValues implements Serializable {
         this.countOfRecords = countOfRecords;
     }
 
-    public Long getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 
     public List<Long> getFormKind() {

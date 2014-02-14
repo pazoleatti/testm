@@ -32,8 +32,8 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     private final MyDriver driver;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<Integer> formTypeId;
+    @UiField
+    RefBookPickerWidget formTypeId;
 
     @UiField
     RefBookPickerWidget formDataKind;
@@ -91,16 +91,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 			}
 		});
 
-		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return formTypesMap.get(object);
-			}
-		});
-
 	    returnState = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
 		    @Override
 		    public String render(Boolean object) {
@@ -121,6 +111,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
+        formTypeId.setPeriodDates(new Date(), new Date());
     }
 
     @Override
@@ -198,8 +189,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-		formTypeId.setValue(null);
-		formTypeId.setAcceptableValues(formTypesMap.keySet());
+		formTypeId.setValue(null, true);
 	}
 
 	@Override
