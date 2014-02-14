@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -192,8 +193,24 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @UiHandler("search")
     void onSearchButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null)
+        Date fromDate = fromSearchDate.getDateBox().getRawValue();
+        Date toDate = toSearchDate.getDateBox().getRawValue();
+
+        if (fromDate == null || toDate == null) {
+            Dialog.errorMessage("Ошибка", "Укажите корректную дату");
+            return;
+        }
+
+        if (fromDate != null && toDate != null) {
+            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+                Dialog.errorMessage("Ошибка", "Дата \"От\" должна быть меньше или равна дате \"До\"");
+                return;
+            }
+        }
+
+        if (getUiHandlers() != null) {
             getUiHandlers().onSearchButtonClicked();
+        }
     }
 
     @UiHandler("taxType")

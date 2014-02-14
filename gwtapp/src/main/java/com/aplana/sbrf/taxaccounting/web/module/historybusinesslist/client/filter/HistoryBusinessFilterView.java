@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -225,7 +226,22 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     }
 
     @UiHandler("search")
-    void onAppyButtonClicked(ClickEvent event) {
+    void onSearchButtonClicked(ClickEvent event) {
+        Date fromDate = fromSearchDate.getDateBox().getRawValue();
+        Date toDate = toSearchDate.getDateBox().getRawValue();
+
+        if (fromDate == null || toDate == null) {
+            Dialog.errorMessage("Ошибка", "Укажите корректную дату");
+            return;
+        }
+
+        if (fromDate !=null && toDate != null) {
+            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+                Dialog.errorMessage("Ошибка", "Дата \"От\" должна быть меньше или равна дате \"До\"");
+                return;
+            }
+        }
+
         if (getUiHandlers() != null) {
             getUiHandlers().onSearchClicked();
         }
