@@ -114,7 +114,7 @@ void checkCreation() {
  */
 def logicalCheck() {
     def data = getData(formData)
-    def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dateStart = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def reportDate = getReportDate().time
     for (row in getRows(data)) {
@@ -477,7 +477,7 @@ void calcAfterImport() {
  * @return
  */
 int getCountDaysInYear() {
-    Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
 }
 

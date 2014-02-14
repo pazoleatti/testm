@@ -273,7 +273,7 @@ def logicalCheck(){
     def outcome269st = 0
     def outcomeTax = 0
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).getTime()
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
 
     def Calendar endDate = reportPeriodService.getEndDate(formData.reportPeriodId)
@@ -425,7 +425,7 @@ def calculateColumn11(DataRow row, def rateDate){
  * @return
  */
 int getCountDaysOfYear() {
-    Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
 }
 

@@ -160,7 +160,7 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
     def totalRow = null
     def totalQuarterRow = null
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
     def dTo = getEndDate()
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
