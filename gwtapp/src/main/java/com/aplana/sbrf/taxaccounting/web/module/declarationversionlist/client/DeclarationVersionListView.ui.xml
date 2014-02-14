@@ -61,7 +61,7 @@
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <style:LinkButton text="Создать версию" ui:field="createVersion" />
-                    <style:LinkButton text="Удалить версию" ui:field="deleteVersion"/>
+                    <style:LinkButton text="Удалить версию" ui:field="deleteVersion" enabled="false"/>
                     <style:LinkButton text="История изменений" ui:field="historyVersion" />
                 </g:HorizontalPanel>
                 <g:ScrollPanel addStyleNames="{style.table}">
