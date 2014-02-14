@@ -1,14 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -42,17 +41,18 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
 	    GetFilterDataResult res = new GetFilterDataResult();
-	    
-	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
-			    .currentUserInfo(), action.getTaxType());
+	    TAUserInfo currentUser = securityService.currentUserInfo();
+	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(currentUser, action.getTaxType());
         // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(
 				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
 
 	    res.setFilterValues(filterValues);
         // Периоды, связанные с доступными подразделениями
-        res.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
-                new ArrayList<Integer>(filterValues.getDepartmentIds())));
+	    periodService.getOpenForUser(currentUser.getUser(), action.getTaxType());
+	    List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
+	    periodList.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
+	    res.setReportPeriods(periodList);
 
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
