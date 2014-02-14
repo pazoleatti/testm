@@ -171,19 +171,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         logBusinessTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
         logBusinessTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
         logBusinessTable.addColumn(userLoginColumn, userLoginColumnHeader);
-        logBusinessTable.addColumn(new TextColumn<LogSearchResultItem>() {
-            @Override
-            public String getValue(LogSearchResultItem object) {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < object.getUser().getRoles().size(); i++) {
-                    stringBuilder.append(object.getUser().getRoles().get(i).getName());
-                    if (i != object.getUser().getRoles().size() - 1) {
-                        stringBuilder.append(", ");
-                    }
-                }
-                return stringBuilder.toString();
-            }
-        }, userRolesColumnHeader);
+        logBusinessTable.addColumn(userRolesColumn, userRolesColumnHeader);
         logBusinessTable.addColumn(userIpColumn, userIpColumnHeader);
         logBusinessTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override

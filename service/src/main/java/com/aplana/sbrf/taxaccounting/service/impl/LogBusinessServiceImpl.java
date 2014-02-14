@@ -107,10 +107,14 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 		log.setDepartmentId(userInfo.getUser().getDepartmentId());
 
 		StringBuilder roles = new StringBuilder();
-		for (TARole role : userInfo.getUser().getRoles()) {
-			roles.append(role.getName());
-		}
-		log.setRoles(roles.toString());
+        List<TARole> taRoles = userInfo.getUser().getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
+            }
+        }
+        log.setRoles(roles.toString());
 
 		logBusinessDao.add(log);
 	}
