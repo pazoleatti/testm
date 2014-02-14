@@ -197,7 +197,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiHandler("activateVersion")
     public void onActivatetButton(ClickEvent event){
         if (getUiHandlers() != null)
-            getUiHandlers().activate();
+            getUiHandlers().activate(false);
     }
 
 }

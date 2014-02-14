@@ -62,6 +62,7 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
 		} else {
 			// Show the label
 			updateLabelValue();
+            label.setWidth(deckPanel.getWidget(0).getElement().getStyle().getWidth());
 			deckPanel.showWidget(1);
 		}
 
