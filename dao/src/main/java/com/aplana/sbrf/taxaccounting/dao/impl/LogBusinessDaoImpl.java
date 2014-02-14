@@ -127,7 +127,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
         names.put("departmentId", filter.getDepartmentId());
-        names.put("userId", filter.getUserId());
+        names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
         names.put("toDate", filter.getToSearchDate());
         names.put("startIndex", filter.getStartIndex() + 1);
@@ -151,7 +151,20 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                 (formatter.format(filter.getToSearchDate()))
                 .append("', '").append(dbDateFormat).append("')");
         sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
-        sql.append(filter.getUserId() == null ? "" : " and lb.user_id = :userId");
+        if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
+
+            List<Long> userList = filter.getUserIds();
+            String userSql = "";
+            for(Long temp : userList){
+                if (userSql.equals("")){
+                    userSql = temp.toString();
+                }
+                else{
+                    userSql = userSql + ", " + temp.toString();
+                }
+            }
+            sql.append(" AND user_id in ").append("(" + userSql + ")");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())
@@ -243,7 +256,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
         sql.append(" log_date between :fromDate and :toDate");
         sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
-        sql.append(names.get("userId") == null ? "" : " and user_id = :userId");
+        if (((List<Long>)names.get("userId"))!=null&&!((List<Long>)names.get("userId")).isEmpty()){
+            sql.append(" and user_id in (:userId)");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())

@@ -47,8 +47,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiField
     RefBookPickerWidget formDataKind;
 
-    @UiField(provided = true)
-    ListBoxWithTooltipWidget<Integer> formTypeId;
+    @UiField
+    RefBookPickerWidget formTypeId;
 
     @UiField
     Button continueButton;
@@ -61,16 +61,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Inject
     public CreateFormDataView(Binder uiBinder, final MyDriver driver, EventBus eventBus) {
         super(eventBus);
-
-        formTypeId = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
-            @Override
-            public String render(Integer object) {
-                if (object == null) {
-                    return "";
-                }
-                return formTypesMap.get(object);
-            }
-        });
 
         initWidget(uiBinder.createAndBindUi(this));
         this.driver = driver;
@@ -101,6 +91,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
+        formTypeId.setPeriodDates(new Date(), new Date());
     }
 
     @Override
@@ -109,7 +100,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         reportPeriodIds.setValue(null);
         departmentPicker.setValue(null);
         formDataKind.setValue(null, true);
-        formTypeId.setValue(null);
+        formTypeId.setValue(null, true);
         updateEnabled();
     }
 
@@ -135,19 +126,21 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
         formDataKind.setValue(null, true);
         formDataKind.setDereferenceValue(null);
-        formTypeId.setValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
         updateEnabled();
     }
 
     @UiHandler("formDataKind")
     public void onDataKindChange(ValueChangeEvent<List<Long>> event) {
-        formTypeId.setValue(null);
+        formTypeId.setValue(null, true);
+        formTypeId.setDereferenceValue(null);
         getUiHandlers().onFormKindChange();
         updateEnabled();
     }
 
     @UiHandler("formTypeId")
-    public void onFormTypeIdChange(ValueChangeEvent<Integer> event) {
+    public void onFormTypeIdChange(ValueChangeEvent<List<Long>> event) {
         updateEnabled();
     }
 
@@ -184,8 +177,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
             formTypesMap.put(formType.getId(), formType.getName());
         }
 
-        formTypeId.setValue(null);
-        formTypeId.setAcceptableValues(formTypesMap.keySet());
+        formTypeId.setValue(null, true);
     }
 
 

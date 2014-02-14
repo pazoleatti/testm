@@ -255,6 +255,7 @@ public class TaxFormNominationPresenter
             getView().setDepartments(event.getDepartments());
             reloadFormTableData();
         } else {
+	        getView().setDepartments(event.getDepartments());
             reloadDeclarationTableData();
         }
 	}

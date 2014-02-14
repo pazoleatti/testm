@@ -15,8 +15,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
-        // TODO пока нет возможности добавлять строки при создании: http://jira.aplana.com/browse/SBRFACCTAX-5219
-        // copyData()
+        break
+    case FormDataEvent.AFTER_CREATE:
+        copyData()
         break
     case FormDataEvent.CALCULATE:
         calc()
