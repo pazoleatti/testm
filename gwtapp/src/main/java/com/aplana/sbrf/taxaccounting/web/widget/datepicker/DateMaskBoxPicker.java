@@ -195,4 +195,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 	public void setVisible(boolean visible) {
         mainPanel.setVisible(visible);
 	}
+
+    public DateMaskBox getDateBox() {
+        return dateBox;
+    }
 }

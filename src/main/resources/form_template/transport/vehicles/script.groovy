@@ -15,8 +15,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
-        // TODO пока нет возможности добавлять строки при создании: http://jira.aplana.com/browse/SBRFACCTAX-5219
-        // copyData()
+        break
+    case FormDataEvent.AFTER_CREATE:
+        copyData()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -137,7 +138,7 @@ def logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index?:0, nonEmptyColumns, logger, true)
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
         if (!(row.regDateEnd == null || row.regDateEnd.compareTo(row.regDate) > 0)) {
@@ -153,16 +154,18 @@ def logicCheck() {
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
-                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO)
-                        && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
+                if (!checkedRows.contains(rowIn) && row != rowIn && isEquals(row, rowIn)) {
                     checkedRows.add(rowIn)
                     errorRows = ', ' + rowIn.getIndex()
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКТМО = ${getRefBookValue(96, row.codeOKATO).CODE.stringValue}, " +
+                logger.error("Обнаружены строки $index$errorRows, у которых " +
+                        "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
-                        "Регистрационный знак = $row.regNumber совпадают!")
+                        "Мощность (величина) = $row.powerVal), " +
+                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}) " +
+                        "совпадают!")
             }
         }
         checkedRows.add(row)
@@ -206,17 +209,17 @@ def String checkPrevPeriod(def reportPeriod) {
 
 // Алгоритм копирования данных из форм предыдущего периода при создании формы
 def copyData() {
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (reportPeriod.order == 4) {
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows += getPrevRowsForCopy(prevReportPeriod, [])
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows += getPrevRowsForCopy(prevReportPeriod, rows)
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows += getPrevRowsForCopy(prevReportPeriod, rows)
     } else {
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows += getPrevRowsForCopy(prevReportPeriod, [])
     }
 
     if (rows.size() > 0) {
@@ -238,8 +241,8 @@ def copyRow(def row) {
 }
 
 //Получить строки для копирования за предыдущий отчетный период
-def getPrevRowsForCopy(def reportPeriod) {
-    def rows = new LinkedList<DataRow<Cell>>()
+def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
+    def rows = []
     if (reportPeriod != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
@@ -250,9 +253,28 @@ def getPrevRowsForCopy(def reportPeriod) {
                 if (row.regDate == null || row.regDateEnd == null || row.regDate > dTo || row.regDateEnd < dFrom) {
                     continue
                 }
-                rows.add(copyRow(row))
+                def need = true
+                for (def rowOld in rowsOld) {
+                    if (isEquals(row, rowOld)) {
+                        need = false
+                        break
+                    }
+                }
+                if (need) {
+                    row.setIndex(rowsOld.size())
+                    rows.add(copyRow(row))
+                    rowsOld.add(copyRow(row))
+                }
             }
         }
     }
     return rows
+}
+
+def isEquals(def row1, def row2) {
+    if (row1.codeOKATO== null || row1.identNumber== null || row1.powerVal == null || row1.baseUnit == null){
+        return true
+    }
+    return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)
+            && row1.powerVal.equals(row2.powerVal) && row1.baseUnit.equals(row2.baseUnit))
 }

@@ -41,10 +41,10 @@
                 <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
                                  addStyleNames="{style.FirstlabelBlockMargin}">
                     <g:cell height="26px">
-                        <g:Label text="С:" width="70px"/>
+                        <g:Label text="От:" width="70px"/>
                     </g:cell>
                     <g:cell height="26px">
-                        <g:Label text="По:" width="70px"/>
+                        <g:Label text="До:" width="70px"/>
                     </g:cell>
                     <g:cell height="26px">
                         <g:Label text="Вид налога:" width="70px"/>

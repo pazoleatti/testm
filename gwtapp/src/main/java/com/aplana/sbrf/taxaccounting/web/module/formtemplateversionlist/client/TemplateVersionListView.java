@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -14,7 +15,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -28,7 +30,7 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     interface Binder extends UiBinder<Widget, TemplateVersionListView> {
     }
-    private NoSelectionModel<FormTemplateVersion> selectionModel;
+    private SingleSelectionModel<FormTemplateVersion> selectionModel;
 
 
     @UiField
@@ -40,10 +42,19 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
     @UiField
     Label versionLabel;
 
+    @UiField
+    LinkButton deleteVersion;
+
     @Inject
     public TemplateVersionListView(Binder binder) {
         initWidget(binder.createAndBindUi(this));
-        selectionModel = new NoSelectionModel<FormTemplateVersion>();
+        selectionModel = new SingleSelectionModel<FormTemplateVersion>();
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updateDeleteVersionLinkButton();
+            }
+        });
         ftVersionCellTable.setSelectionModel(selectionModel);
 
         // колонка Наименование декларации
@@ -100,13 +111,18 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @Override
     public FormTemplateVersion getSelectedElement() {
-        return selectionModel.getLastSelectedObject();
+        return selectionModel.getSelectedObject();
     }
 
     @Override
     public void setLabelName(String labelName) {
         versionLabel.setTitle(labelName);
         versionLabel.setText(labelName);
+    }
+
+    @Override
+    public void resetSelectedLine() {
+        selectionModel.clear();
     }
 
     @UiHandler("createVersion")
@@ -135,5 +151,9 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             event.stopPropagation();
         }
 
+    }
+
+    public void updateDeleteVersionLinkButton() {
+        deleteVersion.setEnabled(getSelectedElement() != null);
     }
 }

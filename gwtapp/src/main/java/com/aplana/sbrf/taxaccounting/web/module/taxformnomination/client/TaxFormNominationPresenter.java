@@ -252,7 +252,9 @@ public class TaxFormNominationPresenter
 	@Override
 	public void onUpdateTable(UpdateTable event) {
         if (getView().isForm()){
-            getView().setDepartments(event.getDepartments());
+            if (event.getDepartments() != null){
+                getView().setDepartments(event.getDepartments());
+            }
             reloadFormTableData();
         } else {
 	        getView().setDepartments(event.getDepartments());
@@ -271,6 +273,9 @@ public class TaxFormNominationPresenter
                             @Override
                             public void onSuccess(DeleteFormsSourceResult result) {
                                 LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+                                if (result.getUuid() != null){
+                                    Dialog.errorMessage("Ошибка", "Невозможно снять назначение налоговой формы, т. к. назначение является приемником данных / назначение является источником данных");
+                                }
                                 reloadFormTableData();
                             }
                         }, this));

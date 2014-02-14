@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -211,17 +213,34 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
 	}
 
+    /**
+     * Изменение статуса у макета
+     * @param force true - принудительно вызвает изменение статуса у макета,
+     *              false - не меняет статус при наличии ошибок
+     */
     @Override
-    public void activate() {
+    public void activate(boolean force) {
         SetStatusFormAction action = new SetStatusFormAction();
         action.setFormTemplateId(formTemplate.getId());
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetStatusFormResult>() {
             @Override
             public void onSuccess(SetStatusFormResult result) {
                 if (result.getUuid() != null)
                     LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
-                /*getView().activateVersionName(result.getStatus() == 0? "Вывести из действия" : "Ввести в действие");*/
-                setFormTemplate();
+                if (!result.isSetStatusSuccessfully()) { //
+                    Dialog.confirmMessage("Информация",
+                            "Найдены экземпляры налоговых форм, использующие версию макета",
+                            new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    activate(true);
+                                    super.yes();
+                                }
+                            });
+                } else {
+                    setFormTemplate();
+                }
             }
         }, this));
     }

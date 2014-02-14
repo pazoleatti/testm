@@ -132,7 +132,7 @@ void prevPeriodCheck() {
             continue
         }
         if (findFormData == null || findFormData.state != WorkflowState.ACCEPTED) {
-            lostReportPeriods.add(reportPeriod.name + ' ' + reportPeriod.startDate.format('yyyy'))
+            lostReportPeriods.add(reportPeriod.name + ' ' + reportPeriod.calendarStartDate.format('yyyy'))
         }
     }
     if (!lostReportPeriods.isEmpty()) {
@@ -457,7 +457,7 @@ def String getKnu(def code) {
 
 def getStartDate() {
     if (!start) {
-        start = reportPeriodService.getStartDate(formData.reportPeriodId).time
+        start = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     }
     return start
 }
