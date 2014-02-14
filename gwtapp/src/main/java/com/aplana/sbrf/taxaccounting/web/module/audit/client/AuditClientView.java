@@ -160,8 +160,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> userRolesColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                String role = object.getRoles() + " ";
-                return role;
+                return object.getRoles();
             }
         };
 
@@ -183,19 +182,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         auditTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
         auditTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
         auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
-        auditTable.addColumn(new TextColumn<LogSearchResultItem>() {
-            @Override
-            public String getValue(LogSearchResultItem object) {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < object.getUser().getRoles().size(); i++) {
-                    stringBuilder.append(object.getUser().getRoles().get(i).getName());
-                    if (i != object.getUser().getRoles().size() - 1) {
-                        stringBuilder.append(", ");
-                    }
-                }
-                return stringBuilder.toString();
-            }
-        }, userRolesColumnHeader);
+        auditTable.addColumn(userRolesColumn, userRolesColumnHeader);
         auditTable.addColumn(userIpColumn, userIpColumnHeader);
 	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
 		    @Override
