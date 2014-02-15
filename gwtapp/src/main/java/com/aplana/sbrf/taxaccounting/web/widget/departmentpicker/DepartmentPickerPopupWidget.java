@@ -4,6 +4,7 @@ import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -28,7 +29,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     FlowPanel wrappingPanel;
 
     @UiField
-    HasText selected;
+    TextBox selected;
 
     @UiField
     Button selectButton;
@@ -135,17 +136,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         this.setValue(null, true);
     }
 
-    private String joinListToString(Collection<String> strings) {
-        if ((strings == null) || strings.isEmpty()) {
-            return "";
-        }
-        StringBuilder text = new StringBuilder();
-        for (String name : strings) {
-            text.append(name).append("; ");
-        }
-        return text.toString();
-    }
-
     @Override
     public List<Integer> getValue() {
         return value;
@@ -164,8 +154,10 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         }
         setValueById(this.value);
 
-		String text = joinListToString(valueDereference);
+		String text = TextUtils.joinListToString(valueDereference);
 		selected.setText(text);
+        selected.setTitle(TextUtils.generateTextBoxTitle(text));
+
 		setLabelValue(text);
 
         if (fireEvents) {
@@ -178,7 +170,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 	 */
 	@Override
 	protected void updateLabelValue() {
-		setLabelValue(joinListToString(valueDereference));
+		setLabelValue(TextUtils.joinListToString(valueDereference));
 	}
 
 	/** Установить выбранными узлы дерева для указанных подразделений. */
@@ -246,8 +238,9 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         }
         ValueChangeEvent.fire(this, this.value);
 
-		String text = joinListToString(valueDereference);
+		String text = TextUtils.joinListToString(valueDereference);
 		selected.setText(text);
+        selected.setTitle(TextUtils.generateTextBoxTitle(text));
 		this.setLabelValue(text);
 
         popupPanel.hide();

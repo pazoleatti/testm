@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.adapters.TakesValueEditor;
@@ -45,7 +46,7 @@ public class PeriodPickerPopupWidget extends Composite implements
 	Panel panel;
 	
 	@UiField
-	HasText text;
+    TextBox text;
 	 
 	
 	private List<Integer> value;
@@ -161,20 +162,9 @@ public class PeriodPickerPopupWidget extends Composite implements
                 }
             }
         }
-        String txt = joinListToString(strings);
+        String txt = TextUtils.joinListToString(strings);
         this.text.setText(txt);
-        ((UIObject) this.text).setTitle(txt);
-    }
-
-    private String joinListToString(Collection<String> strings) {
-        if ((strings == null) || strings.isEmpty()) {
-            return "";
-        }
-        StringBuilder s = new StringBuilder();
-        for (String name : strings) {
-            s.append(name + "; ");
-        }
-        return s.toString();
+        this.text.setTitle(TextUtils.generateTextBoxTitle(txt));
     }
 
 	@Override

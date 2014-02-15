@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -70,8 +71,9 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
-                text.setText(refBookPiker.getDereferenceValue());
-                text.setTitle(refBookPiker.getDereferenceValue());
+                String defValue = refBookPiker.getDereferenceValue();
+                text.setText(defValue);
+                text.setTitle(TextUtils.generateTextBoxTitle(defValue));
                 updateLabelValue();
                 if (fireEvents) {
                     ValueChangeEvent.fire(RefBookPickerWidget.this, event.getValue());

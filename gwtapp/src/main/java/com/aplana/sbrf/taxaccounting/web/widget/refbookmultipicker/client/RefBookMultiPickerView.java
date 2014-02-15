@@ -101,8 +101,23 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         }
 
         selectionModel = multiSelect ?
-                new MultiSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER) :
-                new SingleSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER);
+                new MultiSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER){
+                    protected boolean isEventScheduled() {
+                        return false;
+                    }
+                    protected void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                } :
+                new SingleSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER){
+                    protected boolean isEventScheduled() {
+                        return false;
+                    }
+
+                    protected void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                };
 
         initWidget(binder.createAndBindUi(this));
         new RefBookMultiPickerPresenter(this);
@@ -270,6 +285,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 selectionModel.setSelected(item, true);
             }
         }
+
         widgetFireChangeEvent(getSelectedIds());
     }
 
@@ -308,7 +324,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         for (RefBookItem item : selectionModel.getSelectedSet()) {
             longs.add(item.getId());
         }
-        System.out.println("getSelectedIds " + longs);
         return longs;
     }
 

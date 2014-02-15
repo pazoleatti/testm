@@ -151,7 +151,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		driver.initialize(this);
+        driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
 	}
@@ -248,14 +248,14 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		if (dereferenceValues != null) {
 			dereferenceValues.clear();
 		}
-		dictRegionId.setDereferenceValue(null);
-		reorgFormCode.setDereferenceValue(null);
-		signatoryId.setDereferenceValue(null);
-		taxPlaceTypeCode.setDereferenceValue(null);
-		obligation.setDereferenceValue(null);
-		oktmo.setDereferenceValue(null);
-		okvedCode.setDereferenceValue(null);
-		type.setDereferenceValue(null);
+//		dictRegionId.setDereferenceValue(null);
+//		reorgFormCode.setDereferenceValue(null);
+//		signatoryId.setDereferenceValue(null);
+//		taxPlaceTypeCode.setDereferenceValue(null);
+//		obligation.setDereferenceValue(null);
+//		oktmo.setDereferenceValue(null);
+//		okvedCode.setDereferenceValue(null);
+//		type.setDereferenceValue(null);
 
 		driver.edit(new DepartmentCombined());
 	}
