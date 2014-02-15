@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -118,7 +118,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
         // Пользователь
-        lsf.setUserId(user.getSingleValue());
+        lsf.setUserIds(user.getValue());
         lsf.setTaxType(taxType.getValue());
 
         return lsf;
@@ -131,6 +131,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Override
     public void init() {
+        fromSearchDate.setValue(new Date());
+        toSearchDate.setValue(new Date());
         departmentSelectionTree.setValue(null, true);
         reportPeriodIds.setValue(null, true);
         taxType.setValue(null, true);
@@ -193,8 +195,24 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @UiHandler("search")
     void onSearchButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null)
+        Date fromDate = fromSearchDate.getDateBox().getRawValue();
+        Date toDate = toSearchDate.getDateBox().getRawValue();
+
+        if (fromDate == null || toDate == null) {
+            Dialog.errorMessage("Ошибка", "Укажите корректную дату");
+            return;
+        }
+
+        if (fromDate != null && toDate != null) {
+            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+                Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+                return;
+            }
+        }
+
+        if (getUiHandlers() != null) {
             getUiHandlers().onSearchButtonClicked();
+        }
     }
 
     @UiHandler("taxType")

@@ -65,6 +65,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     LogAddEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList)
                         .with(AdminConstants.NameTokens.formTypeId, placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")).build());
+                getView().resetSelectedLine();
             }
         }, this));
 
@@ -98,6 +99,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         void setFTVersionTable(List<FormTemplateVersion> userFullList);
         FormTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
+        void resetSelectedLine();
     }
 
     @Override
@@ -114,5 +116,11 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     }
                 }, this)
         );
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().resetSelectedLine();
     }
 }

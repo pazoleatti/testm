@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,11 +32,11 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     private final MyDriver driver;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<Integer> formTypeId;
+    @UiField
+    RefBookPickerWidget formTypeId;
 
     @UiField
-    RefBookPicker formDataKind;
+    RefBookPickerWidget formDataKind;
 
 	@UiField(provided = true)
 	ValueListBox<WorkflowState> formState;
@@ -91,16 +91,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 			}
 		});
 
-		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return formTypesMap.get(object);
-			}
-		});
-
 	    returnState = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
 		    @Override
 		    public String render(Boolean object) {
@@ -117,10 +107,11 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
+        this.driver.initialize(this);
 
         // т.к. справочник не версионный, а дату выставлять обязательно
-        formDataKind.setPeriodDates(null, new Date());
-        this.driver.initialize(this);
+        formDataKind.setPeriodDates(new Date(), new Date());
+        formTypeId.setPeriodDates(new Date(), new Date());
     }
 
     @Override
@@ -198,8 +189,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		
 		/** .setValue(null) see
 		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-		formTypeId.setValue(null);
-		formTypeId.setAcceptableValues(formTypesMap.keySet());
+		formTypeId.setValue(null, true);
 	}
 
 	@Override

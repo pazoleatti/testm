@@ -98,9 +98,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			signatoryId,
 			taxPlaceTypeCode,
 			obligation,
-			okato,
+            oktmo,// TODO
 			okvedCode,
 			type;
+
+    @UiField
+    CheckBox prepayment;
 
 	@UiField
 	TextArea name;
@@ -114,7 +117,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@Ignore
 	HorizontalPanel sumTaxPanel,
 			sumDividendsPanel,
-			payPanelObligation,
+            payPanelObligation,
+            payPanelPrepayment,
 			payPanelType,
 			taxRatePanel;
 
@@ -249,7 +253,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		signatoryId.setDereferenceValue(null);
 		taxPlaceTypeCode.setDereferenceValue(null);
 		obligation.setDereferenceValue(null);
-		okato.setDereferenceValue(null);
+		oktmo.setDereferenceValue(null);
 		okvedCode.setDereferenceValue(null);
 		type.setDereferenceValue(null);
 
@@ -271,6 +275,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		boolean isPayPanelVisible = currentDepartmentId != null && !isUnp && currentTaxType == TaxType.INCOME;
 		payPanelObligation.setVisible(isPayPanelVisible);
 		payPanelType.setVisible(isPayPanelVisible);
+        payPanelPrepayment.setVisible(currentTaxType == TaxType.TRANSPORT);
 	}
 
 	@UiHandler("findButton")
@@ -291,7 +296,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
 			dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
 			dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-			dereferenceValues.put(okato.getAttributeId(), okato.getDereferenceValue());
+			dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
 			dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
 			dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
 		}
@@ -459,8 +464,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			taxPlaceTypeCode.setPeriodDates(period.first, period.second);
 			obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
 			obligation.setPeriodDates(period.first, period.second);
-			okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
-			okato.setPeriodDates(period.first, period.second);
+			oktmo.setDereferenceValue(rbTextValues.get(oktmo.getAttributeId()));
+			oktmo.setPeriodDates(period.first, period.second);
 			okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
 			okvedCode.setPeriodDates(period.first, period.second);
 			type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
@@ -482,7 +487,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		signatoryId.setPeriodDates(startDate, endDate);
 		taxPlaceTypeCode.setPeriodDates(startDate, endDate);
 		obligation.setPeriodDates(startDate, endDate);
-		okato.setPeriodDates(startDate, endDate);
+		oktmo.setPeriodDates(startDate, endDate);
 		okvedCode.setPeriodDates(startDate, endDate);
 		type.setPeriodDates(startDate, endDate);
 	}

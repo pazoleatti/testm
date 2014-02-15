@@ -78,7 +78,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
         if (parentRefBookId != null) {
-             provider = rbFactory.getDataProvider(parentRefBookId);
+            provider = rbFactory.getDataProvider(parentRefBookId);
         }
 
         Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
@@ -89,10 +89,10 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         if (params.size() != 0) {
             Map<String, RefBookValue> paramsMap = params.get(0);
-             if (params.size() != 1) {
-                 throw new ActionException("Miltiple RefBook records (version = "+
-                         new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
-             }
+            if (params.size() != 1) {
+                throw new ActionException("Miltiple RefBook records (version = " +
+                        new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
+            }
 
             // Id записи
             depCombined.setRecordId(paramsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
@@ -100,7 +100,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             // Общая часть
             depCombined.setDepartmentId(getList(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue()));
             depCombined.setDictRegionId(getList(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue()));
-            depCombined.setOkato(getList(paramsMap.get(DepartmentParamAliases.OKATO.name()).getReferenceValue()));
+            depCombined.setOktmo(getList(paramsMap.get(DepartmentParamAliases.OKTMO.name()).getReferenceValue()));
             depCombined.setInn(paramsMap.get(DepartmentParamAliases.INN.name()).getStringValue());
             depCombined.setKpp(paramsMap.get(DepartmentParamAliases.KPP.name()).getStringValue());
             depCombined.setTaxOrganCode(paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE.name()).getStringValue());
@@ -133,6 +133,13 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 depCombined.setTaxRate(taxRate == null ? null : taxRate.doubleValue());
                 depCombined.setType(getList(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue()));
             }
+
+            // Транспортный налог
+            if (action.getTaxType() == TaxType.TRANSPORT) {
+                // TODO   http://jira.aplana.com/browse/SBRFACCTAX-5658
+                Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
+                depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue()==1L);
+            }
         }
 
         GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
@@ -154,8 +161,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         if (depCombined.getDictRegionId() != null && !depCombined.getDictRegionId().isEmpty()) {
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
         }
-        if (depCombined.getOkato() != null && !depCombined.getOkato().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 3L, 7L, depCombined.getOkato().get(0), logger);
+        if (depCombined.getOktmo() != null && !depCombined.getOktmo().isEmpty()) {
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 3L, 7L, depCombined.getOktmo().get(0), logger);
         }
         if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 34L, 210L, depCombined.getOkvedCode().get(0), logger);
@@ -188,12 +195,13 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
     /**
      * Разыменование значения справочника с обработкой исключения, возникающего при отсутствии записи
-     * @param map Id атрибута -> Разыменованное значение
+     *
+     * @param map             Id атрибута -> Разыменованное значение
      * @param parentRefBookId Id справочника формы настроек
-     * @param refBookId Id справочника
-     * @param attributeId Id атрибута
-     * @param recordId Id записи
-     * @param logger Логгер для передачи клиенту
+     * @param refBookId       Id справочника
+     * @param attributeId     Id атрибута
+     * @param recordId        Id записи
+     * @param logger          Логгер для передачи клиенту
      */
     private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
         try {

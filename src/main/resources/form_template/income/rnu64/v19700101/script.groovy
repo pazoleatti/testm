@@ -235,7 +235,7 @@ def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
-    reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
 
     for (def row : getRows(data)) {

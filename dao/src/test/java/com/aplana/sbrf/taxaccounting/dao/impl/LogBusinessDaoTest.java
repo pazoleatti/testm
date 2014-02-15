@@ -113,7 +113,9 @@ public class LogBusinessDaoTest {
         filterValuesDao.setStartIndex(0);
         filterValuesDao.setCountOfRecords(1);
         filterValuesDao.setDepartmentId(1);
-        filterValuesDao.setUserId(1l);
+        List<Long> userList = new ArrayList<Long>();
+        userList.add(1l);
+        filterValuesDao.setUserIds(userList);
         List<Long> formDataIds = new ArrayList<Long>();
         formDataIds.add(1l);
         List<Long> declarationIds = new ArrayList<Long>();

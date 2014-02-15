@@ -181,7 +181,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		dateBox.setEnabled(enabled);
         calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
-        clearImage.setVisible(getValue()!= null && enabled);
+        clearImage.setVisible(getValue()!= null && enabled && canBeEmpty);
         clearImage.setResource(enabled ? iconsRecources.clearBtn() : iconsRecources.clearBtnDisable());
         clearImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
 	}
@@ -195,4 +195,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 	public void setVisible(boolean visible) {
         mainPanel.setVisible(visible);
 	}
+
+    public DateMaskBox getDateBox() {
+        return dateBox;
+    }
 }

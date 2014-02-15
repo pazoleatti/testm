@@ -51,6 +51,8 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
     }
 
     public interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler> {
+
+        void init();
         // Получение значений фильтра
         LogBusinessFilterValues getDataFilter();
 
@@ -66,7 +68,7 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
     }
 
     public void initFilterData() {
-
+        getView().init();
         GetHistoryBusinessFilterAction action = new GetHistoryBusinessFilterAction();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetHistoryBusinessFilterResult>() {

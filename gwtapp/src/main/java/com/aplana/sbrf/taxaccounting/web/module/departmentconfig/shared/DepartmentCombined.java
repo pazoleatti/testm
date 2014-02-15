@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,7 +19,7 @@ public class DepartmentCombined implements Serializable {
     // Общие параметры
     private List<Long> departmentId;
     private List<Long> dictRegionId;
-    private List<Long> okato;
+    private List<Long> oktmo; // TODO
     private String inn;
     private String kpp;
     private String taxOrganCode;
@@ -52,6 +50,9 @@ public class DepartmentCombined implements Serializable {
     private Double taxRate;
     private List<Long> type;
 
+    // Транспортный налог
+    private boolean prepayment;
+
     public Long getRecordId() {
         return recordId;
     }
@@ -80,12 +81,12 @@ public class DepartmentCombined implements Serializable {
         this.dictRegionId = dictRegionId;
     }
 
-    public List<Long> getOkato() {
-        return okato;
+    public List<Long> getOktmo() {
+        return oktmo;
     }
 
-    public void setOkato(List<Long> okato) {
-        this.okato = okato;
+    public void setOktmo(List<Long> oktmo) {
+        this.oktmo = oktmo;
     }
 
     public String getInn() {
@@ -270,5 +271,13 @@ public class DepartmentCombined implements Serializable {
 
     public void setSumDividends(Long sumDividends) {
         this.sumDividends = sumDividends;
+    }
+
+    public boolean getPrepayment() {
+        return prepayment;
+    }
+
+    public void setPrepayment(boolean prepayment) {
+        this.prepayment = prepayment;
     }
 }

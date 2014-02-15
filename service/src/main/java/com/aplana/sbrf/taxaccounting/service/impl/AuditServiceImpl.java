@@ -48,11 +48,14 @@ public class AuditServiceImpl implements AuditService {
 		log.setUserId(userInfo.getUser().getId());
 
 		StringBuilder roles = new StringBuilder();
-		for (TARole role : userInfo.getUser().getRoles()) {
-			roles.append(role.getName());
-            roles.append(",");
-		}
-		log.setRoles(roles.toString().substring(0,roles.toString().length() - 1));
+        List<TARole> taRoles = userInfo.getUser().getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
+            }
+        }
+		log.setRoles(roles.toString());
 
 		log.setDepartmentId(departmentId);
 		log.setReportPeriodId(reportPeriodId);

@@ -78,7 +78,9 @@ public class AuditDaoTest {
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
         filter.setFormTypeId(1);
-        filter.setUserId(1L);
+        List<Long> userList = new ArrayList<Long>();
+        userList.add(1L);
+        filter.setUserIds(userList);
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 

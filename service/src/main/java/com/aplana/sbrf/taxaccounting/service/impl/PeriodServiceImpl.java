@@ -376,6 +376,22 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	@Override
+	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
+		List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType));
+		getPeriodsByTaxTypeAndDepartments(taxType, departments);
+		if (user.hasRole(TARole.ROLE_CONTROL_UNP)
+				|| user.hasRole(TARole.ROLE_CONTROL_NS)
+				|| user.hasRole(TARole.ROLE_CONTROL)
+				) {
+			return new HashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+		} else if (user.hasRole(TARole.ROLE_OPER)) {
+			return new HashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+		} else {
+			return Collections.EMPTY_SET;
+		}
+	}
+
+	@Override
 	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
 		List<Integer> departments = new ArrayList<Integer>();
 		List<Department> avalDeps = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, (int) departmentId);
@@ -525,4 +541,9 @@ public class PeriodServiceImpl implements PeriodService{
     public List<ReportPeriod> getPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList) {
         return reportPeriodDao.getPeriodsByTaxTypeAndDepartments(taxType, departmentList);
     }
+
+	@Override
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
+		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
+	}
 }
