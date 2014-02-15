@@ -14,8 +14,9 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author sgoryachkin
  * 
  */
-public interface RefBookPicker extends HasValue<List<Long>>, IsWidget, HasEnabled, LeafValueEditor<List<Long>> {
-	
+public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, HasEnabled, IsWidget{
+
+    @Deprecated
 	public void setDereferenceValue(String value);
 
 	public String getDereferenceValue();
@@ -30,19 +31,17 @@ public interface RefBookPicker extends HasValue<List<Long>>, IsWidget, HasEnable
 
 	public Date getStartDate();
 
-	public void setStartDate(Date date1);
-
 	public Date getEndDate();
-
-	public void setEndDate(Date date2);
 
 	public String getFilter();
 
 	public void setFilter(String filter);
 
+    void setPeriodDates(Date startDate, Date endDate);
+
     public Long getSingleValue();
 
     public void setValue(Long value);
 
-    void setPeriodDates(Date startDate, Date endDate);
+
 }

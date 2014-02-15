@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.google.gwt.core.client.GWT;
@@ -50,9 +49,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     private Boolean multiSelect = false;
 
-    /**
-     * Параметры инициализации
-     */
+    private Long refBookAttrId;
+    private String filter;
     private Date startDate;
     private Date endDate;
 
@@ -93,7 +91,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             @Override
             public void onValueChange(final ValueChangeEvent<Date> dateValueChangeEvent) {
                 Date d = dateValueChangeEvent.getValue();
-                if (isCorrectDate(d)) {
+                if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
                     version.setValue(startDate, false);
                 }
                 getUiHandlers().reload();
@@ -105,7 +103,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
                 Date d = new Date(dateShowRangeEvent.getStart().getTime());
                 while (d.before(dateShowRangeEvent.getEnd())) {
-                    if (isCorrectDate(d)) {
+                    if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
                         version.getDatePicker().setTransientEnabledOnDates(false, d);
                     }
                     CalendarUtil.addDaysToDate(d, 1);
@@ -178,10 +176,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         widgetFireChangeEvent(new ArrayList<Long>());
     }
 
-    private Boolean isCorrectDate(Date d) {
-        return (startDate != null && d.before(startDate)) || (endDate != null && d.after(endDate));
-    }
-
     @Override
     public List<RefBookTreeItem> getSelectionValues() {
         List<RefBookTreeItem> refBookTreeItems = new ArrayList<RefBookTreeItem>();
@@ -246,19 +240,19 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate) {
-        setInitValues(refBookAttrId, null, startDate, endDate);
+    public void load() {
+        getUiHandlers().init(refBookAttrId, filter, version.getValue());
     }
 
     @Override
-    public void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate) {
-        setInitValues(refBookAttrId, filter, startDate, endDate);
-    }
-
-    private void setInitValues(long refBookAttrId, String filter, Date startDate, Date endDate) {
+    public void load(long refBookAttrId, String filter, Date startDate, Date endDate) {
+        this.refBookAttrId = refBookAttrId;
+        this.filter = filter;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.version.setValue(endDate != null ? endDate : startDate);
+        if (!RefBookPickerUtils.isCorrectDate(startDate, endDate, version.getValue())) {
+            this.version.setValue(endDate != null ? endDate : startDate);
+        }
         getUiHandlers().init(refBookAttrId, filter, version.getValue());
     }
 
@@ -279,13 +273,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public String getOtherDereferenceValue(String alias) {
         List<RefBookTreeItem> selectedItems = getSelectionValues();
-        if (selectedItems != null && !selectedItems.isEmpty() && alias != null && !alias.isEmpty()) {
-            for (RefBookRecordDereferenceValue value : selectedItems.get(0).getRefBookRecordDereferenceValues()) {
-                if (value.getValueAttrAlias() != null &&
-                        alias.toLowerCase().equals(value.getValueAttrAlias().toLowerCase())) {
-                    return value.getDereferenceValue();
-                }
-            }
+        if (selectedItems != null && !selectedItems.isEmpty()) {
+            return RefBookPickerUtils.getDereferenceValue(selectedItems.get(0).getRefBookRecordDereferenceValues(), alias);
         }
         return null;
     }
@@ -293,12 +282,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public String getOtherDereferenceValue(Long attrId) {
         List<RefBookTreeItem> selectedItems = getSelectionValues();
-        if (selectedItems != null && !selectedItems.isEmpty() && attrId != null) {
-            for (RefBookRecordDereferenceValue value : selectedItems.get(0).getRefBookRecordDereferenceValues()) {
-                if (attrId.equals(value.getValueAttrId())) {
-                    return value.getDereferenceValue();
-                }
-            }
+        if (selectedItems != null && !selectedItems.isEmpty()) {
+            return RefBookPickerUtils.getDereferenceValue(selectedItems.get(0).getRefBookRecordDereferenceValues(), attrId);
         }
         return null;
     }
@@ -320,5 +305,42 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void fireEvent(GwtEvent<?> event) {
         asWidget().fireEvent(event);
+    }
+
+    @Override
+    public Long getAttributeId() {
+        return refBookAttrId;
+    }
+
+    @Override
+    public void setAttributeId(long refBookAttrId) {
+        this.refBookAttrId = refBookAttrId;
+    }
+
+    @Override
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    @Override
+    public void setPeriodDates(Date startDate, Date endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
+    public Date getEndDate() {
+        return endDate;
+    }
+
+
+    @Override
+    public String getFilter() {
+        return filter;
+    }
+
+    @Override
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 }

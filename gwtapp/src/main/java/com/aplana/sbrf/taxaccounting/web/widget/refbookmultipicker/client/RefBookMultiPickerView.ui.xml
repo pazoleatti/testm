@@ -80,13 +80,9 @@
             margin-right: 10px;
         }
 
-        .forButtons {
-            width: 70px;
-        }
-
     </ui:style>
 
-	<g:VerticalPanel addStyleNames="{style.mainPanel}">
+    <g:VerticalPanel addStyleNames="{style.mainPanel}">
         <g:HorizontalPanel spacing="10" width="100%">
             <g:cell width="99%">
                 <g:VerticalPanel width="100%">
@@ -95,14 +91,14 @@
                         <g:cell horizontalAlignment="right">
                             <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{style.forVersion}"/>
                         </g:cell>
-                        <g:cell horizontalAlignment="left" >
+                        <g:cell horizontalAlignment="left">
                             <d:DateMaskBoxPicker ui:field="version"/>
                         </g:cell>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell width="1%">
-                <g:Button ui:field="searchButton" text="Найти" addStyleNames="{style.forButtons}"/>
+                <g:Button ui:field="searchButton" text="Найти" width="70px"/>
             </g:cell>
         </g:HorizontalPanel>
 
@@ -113,19 +109,24 @@
 
         <g:HorizontalPanel addStyleNames="{style.pagerPanel}">
             <g:cell horizontalAlignment="left" width="100%" verticalAlignment="middle">
-                <g:Label />
+                <g:Label/>
             </g:cell>
             <g:cell width="1%" horizontalAlignment="right" verticalAlignment="middle">
                 <pager:FlexiblePager ui:field='pager' location='CENTER'
-                    showFastForwardButton="false" fastForwardRows="0"
-                    showLastPageButton="true" addStyleNames="{style.pager}" type="refBookPicker"/>
+                                     showFastForwardButton="false" fastForwardRows="0"
+                                     showLastPageButton="true" addStyleNames="{style.pager}" type="refBookPicker"/>
             </g:cell>
         </g:HorizontalPanel>
 
-        <g:HorizontalPanel addStyleNames="{style.footerPanel}" spacing="10">
-            <g:Button ui:field="clearButton" text="Очистить" addStyleNames="{style.forButtons}"/>
-            <g:Button ui:field="ok" text="Выбрать" addStyleNames="{style.forButtons}"/>
-            <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forButtons}"/>
+        <g:HorizontalPanel addStyleNames="{style.footerPanel}" spacing="10"
+                           horizontalAlignment="right" verticalAlignment="middle">
+            <g:cell horizontalAlignment="left" width="100%">
+                <g:Label ui:field="selectionCountLabel" text="Выбрано: 0"/>
+            </g:cell>
+            <g:Button ui:field="clearButton" text="Очистить" width="70px"/>
+            <g:Button ui:field="okButton" text="Выбрать" width="70px"/>
+            <g:Button ui:field="cancelButton" text="Отмена" width="70px"/>
         </g:HorizontalPanel>
-	</g:VerticalPanel>
+
+    </g:VerticalPanel>
 </ui:UiBinder>

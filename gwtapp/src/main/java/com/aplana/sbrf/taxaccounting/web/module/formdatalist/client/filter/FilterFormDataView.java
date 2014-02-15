@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,7 +36,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     ListBoxWithTooltip<Integer> formTypeId;
 
     @UiField
-    RefBookPickerWidget formDataKind;
+    RefBookPicker formDataKind;
 
 	@UiField(provided = true)
 	ValueListBox<WorkflowState> formState;
@@ -117,10 +117,10 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
-        this.driver.initialize(this);
 
         // т.к. справочник не версионный, а дату выставлять обязательно
-        formDataKind.setPeriodDates(new Date(), new Date());
+        formDataKind.setPeriodDates(null, new Date());
+        this.driver.initialize(this);
     }
 
     @Override

@@ -45,17 +45,13 @@ public class GetRefBookTreeValuesHandler extends
     public GetRefBookTreeValuesResult execute(GetRefBookTreeValuesAction action, ExecutionContext context) throws ActionException {
 
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
-        System.out.println("refBook " + refBook);
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
-        System.out.println("refBookDataProvider " + refBookDataProvider);
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook);
-        System.out.println("filter " + filter);
 
         RefBookTreeItem item = action.getParent();
         PagingResult<Map<String, RefBookValue>> refBookPage =
                 refBookDataProvider.getChildrenRecords(item != null ? item.getId() : null, action.getVersion(), null, filter, null);
 
-        System.out.println("refBookPage " + refBookPage);
         GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
 
         result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
@@ -78,14 +74,14 @@ public class GetRefBookTreeValuesHandler extends
         return null;
     }
 
-    private static String buildFilter(String filter, String serachPattern, RefBook refBook) {
+    private static String buildFilter(String filter, String searchPattern, RefBook refBook) {
         StringBuilder resultFilter = new StringBuilder();
         if (filter != null && !filter.trim().isEmpty()) {
             resultFilter.append(filter.trim());
         }
 
         StringBuilder resultSearch = new StringBuilder();
-        if (serachPattern != null && !serachPattern.trim().isEmpty()) {
+        if (searchPattern != null && !searchPattern.trim().isEmpty()) {
 
             for (RefBookAttribute attribute : refBook.getAttributes()) {
                 if (RefBookAttributeType.STRING.equals(attribute.getAttributeType())) {
@@ -93,14 +89,14 @@ public class GetRefBookTreeValuesHandler extends
                         resultSearch.append(" or ");
                     }
                     resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
-                            .append("'%" + serachPattern.trim().toLowerCase() + "%'");
+                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
                 }/*
                  * else if
 				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType
-				 * ()) && isNumeric(serachPattern)){ if (resultSearch.length() >
+				 * ()) && isNumeric(searchPattern)){ if (resultSearch.length() >
 				 * 0){ resultSearch.append(" or "); }
 				 * resultSearch.append(attribute
-				 * .getAlias()).append("=").append("\"" + serachPattern + "\"");
+				 * .getAlias()).append("=").append("\"" + searchPattern + "\"");
 				 * }
 				 */
             }
@@ -119,13 +115,6 @@ public class GetRefBookTreeValuesHandler extends
 
     }
 
-    public static boolean isNumeric(String str) {
-        NumberFormat formatter = NumberFormat.getInstance();
-        ParsePosition pos = new ParsePosition(0);
-        formatter.parse(str, pos);
-        return str.length() == pos.getIndex();
-    }
-
     // Преобразуем в гуи модельку
     private PagingResult<RefBookTreeItem> asseblRefBookPage(GetRefBookTreeValuesAction action, RefBookDataProvider provider,
                                                             PagingResult<Map<String, RefBookValue>> refBookPage, RefBook refBook) {
@@ -135,12 +124,10 @@ public class GetRefBookTreeValuesHandler extends
         for (Map<String, RefBookValue> record : refBookPage) {
 
             RefBookTreeItem item = new RefBookTreeItem();
-            // соответсвие гарантируется LinkedList'ом
 
             List<RefBookRecordDereferenceValue> refBookDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-            //item.setParentId(record.get(RefBook.RECORD_PARENT_ID_ALIAS).getNumberValue().longValue());
             List<RefBookAttribute> attribute = refBook.getAttributes();
 
             Map<String, String> dereferenceRecord =

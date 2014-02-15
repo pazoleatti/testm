@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -26,23 +27,19 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     interface Binder extends UiBinder<Widget, RefBookPickerWidget> {
     }
 
-    private Long attributeId;
-
-    private Date startDate;
-    private Date endDate;
-    private String filter;
-
     private static Binder binder = GWT.create(Binder.class);
-
-    private PopupPanel popupPanel;
-
-    private RefBookView refBookPiker;
 
     @UiField
     TextBox text;
 
     @UiField
     Image selectButton;
+
+    private ModalWindow popupPanel;
+
+    private RefBookView refBookPiker;
+
+    private boolean fireEvents = true;
 
     /**
      * Признак иерархичности окна
@@ -55,6 +52,18 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         this.isHierarchical = isHierarchical;
         popupPanel = new ModalWindow("Выбор значения из справочника");
 
+
+        // пример внедрения своего датапровайдера
+//        List<RefBookItem> refBookItems = new ArrayList<RefBookItem>();
+//        for(long i=1; i< 20;i++){
+//            List<RefBookRecordDereferenceValue>  values = new ArrayList<RefBookRecordDereferenceValue>();
+//            values.add(new RefBookRecordDereferenceValue(835L, "NAME", "NAME"+i));
+//            values.add(new RefBookRecordDereferenceValue(836L, "TAX_TYPE", "TAX_TYPE"+i));
+//            refBookItems.add(new RefBookItem(i, String.valueOf(i), values));
+//        }
+//        ListDataProvider<RefBookItem> listDataProvider = new ListDataProvider<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER);
+//        listDataProvider.setList(refBookItems);
+
         refBookPiker = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
 
         popupPanel.add(refBookPiker);
@@ -63,7 +72,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
                 text.setText(refBookPiker.getDereferenceValue());
                 text.setTitle(refBookPiker.getDereferenceValue());
-                setValue(event.getValue(), true);
+                updateLabelValue();
+                if (fireEvents) {
+                    ValueChangeEvent.fire(RefBookPickerWidget.this, event.getValue());
+                } else {
+                    fireEvents = true;
+                }
                 popupPanel.hide();
             }
         });
@@ -71,7 +85,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event) {
-        refBookPiker.setAcceptableValues(this.attributeId, this.filter, this.startDate, this.endDate);
+        refBookPiker.load();
         popupPanel.center();
     }
 
@@ -82,15 +96,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public void setValue(List<Long> value) {
-        refBookPiker.setValue(value);
+        setValue(value, false);
     }
 
     @Override
     public void setValue(List<Long> value, boolean fireEvents) {
+        this.fireEvents = fireEvents;
         refBookPiker.setValue(value);
-        if (fireEvents) {
-            ValueChangeEvent.fire(this, value);
-        }
     }
 
     @Override
@@ -100,12 +112,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public void setValue(Long value) {
-        refBookPiker.setValue(value);
+        setValue(Arrays.asList(value), false);
     }
 
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Long>> handler) {
-        return refBookPiker.addValueChangeHandler(handler);
+        return asWidget().addHandler(handler, ValueChangeEvent.getType());
     }
 
     @Override
@@ -119,61 +131,55 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         setLabelValue(value);
     }
 
-    /**
-     * @return Id отображаемого атрибута
-     */
+    @Override
     public Long getAttributeId() {
-        return attributeId;
+        return refBookPiker.getAttributeId();
     }
 
+    @Override
     public void setAttributeId(long attributeId) {
-        this.attributeId = attributeId;
+        refBookPiker.setAttributeId(attributeId);
     }
 
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    /**
-     * Для совместимости с UiBinder
-     *
-     * @param attributeId
-     */
+    /*Для совместимости с UiBinder */
     public void setAttributeIdInt(int attributeId) {
-        this.attributeId = Long.valueOf(attributeId);
+        refBookPiker.setAttributeId(Long.valueOf(attributeId));
     }
 
+    @Override
     public String getFilter() {
-        return filter;
+        return refBookPiker.getFilter();
     }
 
+    @Override
     public void setFilter(String filter) {
-        this.filter = filter;
+        refBookPiker.setFilter(filter);
+    }
+
+    @Override
+    public Date getEndDate() {
+        return refBookPiker.getEndDate();
+    }
+
+    @Override
+    public Date getStartDate() {
+        return refBookPiker.getStartDate();
     }
 
     @Override
     public void setPeriodDates(Date startDate, Date endDate) {
-        this.startDate = startDate;
-        this.endDate = endDate;
+        refBookPiker.setPeriodDates(startDate, endDate);
     }
 
     @Override
     public void setTitle(String title) {
-        if (popupPanel instanceof ModalWindow) {
-            ((ModalWindow) popupPanel).setText(title);
+        if (popupPanel != null) {
+            popupPanel.setText(title);
         }
+    }
+
+    protected void updateLabelValue() {
+        setLabelValue(getDereferenceValue());
     }
 
     @Override

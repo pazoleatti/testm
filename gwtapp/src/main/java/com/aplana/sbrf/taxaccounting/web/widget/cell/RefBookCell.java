@@ -98,7 +98,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
-                refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+                refBookPiker.load(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
 						columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
