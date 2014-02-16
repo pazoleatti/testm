@@ -14,32 +14,14 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, IsWidget {
 
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны версии справочника из диапазона дат.
-	 * 
-	 * @param refBookAttrId
-	 * @param startDate начало ограничивающего периода
-	 * @param endDate начало ограничивающего периода
-	 */
-	void setAcceptableValues(long refBookAttrId, Date startDate, Date endDate);
-	
-	
-	/**
-	 * Устанавливает параметры и инициализирует компонент.
-	 * В компоненте доступны версии справочника c учетом фильтра.
-	 * 
-	 * 
-	 * @param refBookAttrId
-	 * @param filter
-     * @param startDate начало ограничивающего периода
-     * @param endDate начало ограничивающего периода
-	 */
-	void setAcceptableValues(long refBookAttrId, String filter, Date startDate, Date endDate);
-	
-	
-	/**
-	 * @return
+    void load();
+
+
+    void load(long refBookAttrId, String filter, Date startDate, Date endDate);
+
+    /**
+     * Разименновванное значение
+	 * @return строка из одного или нескольких значений через ";"
 	 */
 	String getDereferenceValue();
 
@@ -63,8 +45,30 @@ public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<
      */
     String getOtherDereferenceValue(Long attrId);
 
+    /**
+     * Первый выделнный объект
+     * обчно используется для одинарного режима выбора
+     * @return ид объекта выбранной строки
+     */
     Long getSingleValue();
 
-    @Deprecated
+    /**
+     * Установка выделенной строки
+     * @param value id объекта в строке
+     */
     void setValue(Long value);
+
+    public Long getAttributeId();
+
+    public void setAttributeId(long attributeId);
+
+    public Date getStartDate();
+
+    public Date getEndDate();
+
+    void setPeriodDates(Date startDate, Date endDate);
+
+    public String getFilter();
+
+    public void setFilter(String filter);
 }

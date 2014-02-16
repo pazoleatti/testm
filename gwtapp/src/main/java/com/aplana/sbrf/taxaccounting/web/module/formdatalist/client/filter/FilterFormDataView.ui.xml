@@ -19,7 +19,7 @@
             margin-right: 15px;
         }
 
-        .labelBlockMargin{
+        .labelBlockMargin {
             margin-right: 5px;
             width: 180px;
         }
@@ -27,53 +27,50 @@
     </ui:style>
 
     <g:HorizontalPanel width="100%">
-        <g:VerticalPanel>
-                <g:HorizontalPanel>
-                    <g:cell>
-                        <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                            <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl"/>
-                            <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl"/>
-                        </g:VerticalPanel>
-                    </g:cell>
-                    <g:cell width="25%">
-                        <g:VerticalPanel width="100%">
-                            <r:RefBookPickerWidget ui:field="formDataKind" width="100%"
-                                                   attributeIdInt="837" isHierarchical="false" multiSelect="true" />
-                            <dw:ListBoxWithTooltip width="100%" ui:field="formTypeId" showTooltip="true"/>
-                        </g:VerticalPanel>
-                    </g:cell>
+        <g:HorizontalPanel>
+            <g:cell>
+                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
+                    <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl"/>
+                    <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl"/>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell width="33%">
+                <g:VerticalPanel width="100%">
+                    <r:RefBookPickerWidget ui:field="formDataKind" width="100%"
+                                           attributeIdInt="837" isHierarchical="false" multiSelect="true"/>
+                    <r:RefBookPickerWidget ui:field="formTypeId" width="100%"
+                                           attributeIdInt="835" isHierarchical="false" multiSelect="true"/>
+                </g:VerticalPanel>
+            </g:cell>
 
-                    <g:cell>
-                        <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                            <g:Label text="Подразделение: " ui:field="departmentPickerLbl"/>
-                            <g:Label text="Период: " ui:field="reportPeriodIdsLbl"/>
-                        </g:VerticalPanel>
-                    </g:cell>
-                    <g:cell width="25%">
-                        <g:VerticalPanel width="100%">
-                            <dep:DepartmentPickerPopupWidget width="100%" ui:field="departmentPicker"
-                                                             multiselection="true" header="Выберите подразделение"
-                                                             modal="true"/>
-                            <per:PeriodPickerPopupWidget multiselect="true" ui:field="reportPeriodIds" width="100%"/>
-                        </g:VerticalPanel>
-                    </g:cell>
+            <g:cell>
+                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
+                    <g:Label text="Подразделение: " ui:field="departmentPickerLbl"/>
+                    <g:Label text="Период: " ui:field="reportPeriodIdsLbl"/>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell width="33%">
+                <g:VerticalPanel width="100%">
+                    <dep:DepartmentPickerPopupWidget width="100%" ui:field="departmentPicker"
+                                                     multiselection="true" header="Выберите подразделение"
+                                                     modal="true"/>
+                    <per:PeriodPickerPopupWidget multiselect="true" ui:field="reportPeriodIds" width="100%"/>
+                </g:VerticalPanel>
+            </g:cell>
 
-                    <g:cell>
-                        <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                            <g:Label text="Состояние: " ui:field="formStateLbl"/>
-                            <g:Label text="Признак возврата: " ui:field="returnStateLbl"/>
-                        </g:VerticalPanel>
-                    </g:cell>
-                    <g:cell width="25%">
-                        <g:VerticalPanel width="100%">
-                            <g:ValueListBox width="100%" ui:field="formState"/>
-                            <g:ValueListBox width="100%" ui:field="returnState"/>
-                        </g:VerticalPanel>
-                    </g:cell>
-
-
-                </g:HorizontalPanel>
-        </g:VerticalPanel>
+            <g:cell>
+                <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
+                    <g:Label text="Состояние: " ui:field="formStateLbl"/>
+                    <g:Label text="Признак возврата: " ui:field="returnStateLbl"/>
+                </g:VerticalPanel>
+            </g:cell>
+            <g:cell width="33%">
+                <g:VerticalPanel width="100%">
+                    <g:ValueListBox width="100%" ui:field="formState"/>
+                    <g:ValueListBox width="100%" ui:field="returnState"/>
+                </g:VerticalPanel>
+            </g:cell>
+        </g:HorizontalPanel>
 
 
         <g:cell verticalAlignment="middle" horizontalAlignment="right">

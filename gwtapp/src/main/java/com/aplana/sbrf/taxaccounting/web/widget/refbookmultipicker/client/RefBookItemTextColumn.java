@@ -4,17 +4,23 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBoo
 import com.google.gwt.user.cellview.client.TextColumn;
 
 public class RefBookItemTextColumn extends TextColumn<RefBookItem> {
-	
-	private final int valueIndex;
 
-	RefBookItemTextColumn(int valueIndex){
-		this.valueIndex = valueIndex;
-	}
+    private final int valueIndex;
 
-	@Override
-	public String getValue(RefBookItem object) {
-		return object.getValues().get(valueIndex);
-	}
+    RefBookItemTextColumn(int valueIndex) {
+        this.valueIndex = valueIndex;
+    }
+
+    RefBookItemTextColumn(int valueIndex, Boolean sortable) {
+        this.valueIndex = valueIndex;
+        super.setSortable(sortable);
+    }
+
+
+    @Override
+    public String getValue(RefBookItem object) {
+        return object.getRefBookRecordDereferenceValues().get(valueIndex).getDereferenceValue();
+    }
 
     @Override
     public int hashCode() {

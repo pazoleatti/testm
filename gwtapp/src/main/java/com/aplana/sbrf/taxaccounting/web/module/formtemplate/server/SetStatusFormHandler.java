@@ -43,7 +43,7 @@ public class SetStatusFormHandler extends AbstractActionHandler<SetStatusFormAct
     public SetStatusFormResult execute(SetStatusFormAction action, ExecutionContext context) throws ActionException {
         SetStatusFormResult result = new SetStatusFormResult();
         Logger logger =  new Logger();
-        mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser());
+        result.setIsSetStatusSuccessfully(mainOperatingService.setStatusTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo().getUser(), action.getForce()));
         result.setStatus(formTemplateService.get(action.getFormTemplateId()).getStatus().getId());
         if (!logger.getEntries().isEmpty()){
             result.setUuid(logEntryService.save(logger.getEntries()));

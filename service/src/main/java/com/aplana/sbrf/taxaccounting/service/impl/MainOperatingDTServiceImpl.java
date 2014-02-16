@@ -133,11 +133,12 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public void setStatusTemplate(int templateId, Logger logger, TAUser user) {
+    public boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
 
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(declarationTemplate, null, logger);
+            if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.save(declarationTemplate);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
@@ -146,6 +147,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             declarationTemplateService.save(declarationTemplate);
             logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
+        return true;
     }
 
     private void checkError(Logger logger){

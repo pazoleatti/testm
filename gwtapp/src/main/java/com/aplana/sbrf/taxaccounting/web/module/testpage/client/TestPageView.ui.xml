@@ -75,7 +75,27 @@
                 </g:ScrollPanel>
                 <g:Button ui:field="showDialog">Показать окно</g:Button>
 
-                <refbookmultipicker:RefBookPickerWidget ui:field="fpicker" width="300px" multiSelect="true" isHierarchical="true" attributeIdInt="423" addStyleNames="{style.margin5}"/>
+                <g:Label text="Иерархический справочник"/>
+
+                <g:HorizontalPanel>
+                    <refbookmultipicker:RefBookPickerWidget ui:field="fpicker" width="300px"
+                                                            multiSelect="true" isHierarchical="true"
+                                                            attributeIdInt="423" addStyleNames="{style.margin5}"/>
+                    <g:Label ui:field="fpickerList" text="Лист: " addStyleNames="{style.margin5}"/>
+                </g:HorizontalPanel>
+
+                <g:Label ui:field="fPickerLabel" text="Выбрано: "/>
+
+                <g:Label text="Линейный справочник"/>
+                <g:HorizontalPanel>
+                    <refbookmultipicker:RefBookPickerWidget ui:field="flatPicker" width="300px"
+                                                            multiSelect="true" isHierarchical="false"
+                                                            attributeIdInt="835" addStyleNames="{style.margin5}"/>
+                    <g:Label ui:field="flatPickerList" text="Лист: " addStyleNames="{style.margin5}"/>
+                </g:HorizontalPanel>
+                <g:Label ui:field="flatPickerLabel" text="ВЫбрано:"/>
+
+
 
                 <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
                     <g:CheckBox ui:field="checkBoxNull" text="Могут принимать пустые значения"/>
@@ -97,7 +117,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel  spacing="2">
-                        <d:DateMaskBoxPicker ui:field="boxDatePicker" canBeEmpty="true" width="200px" visible="true"/>
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" width="200px" visible="true"/>
                         <g:Label ui:field="boxDatePickerLb" width="80%"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel>

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.aplana.gwt.client.ListBoxWithTooltipWidget;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -107,7 +109,13 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        hide();
+        Dialog.confirmMessage("Создание декларации", "Хотите отменить создание декларации?", new DialogHandler() {
+            @Override
+            public void yes() {
+                Dialog.hideMessage();
+                hide();
+            }
+        });
     }
 
     @UiHandler("periodPicker")

@@ -59,7 +59,7 @@
                     <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="formTypeId" showTooltip="true"/>
+                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 

@@ -190,7 +190,7 @@
                                             <g:Label text="ОКАТО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="okato" attributeIdInt="7" isHierarchical="false" width="150px"
+                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="7" isHierarchical="false" width="150px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
@@ -341,6 +341,15 @@
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:TextBox ui:field="formatVersion" width="200px"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                    <!-- TODO "Обязанность по уплате авансовых платежей"-->
+                                    <g:HorizontalPanel ui:field="payPanelPrepayment" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
+                                        <g:cell width="1%">
+                                            <g:Label text="Обязанность по уплате авансовых платежей:" addStyleNames="{style.rightLabels}" />
+                                        </g:cell>
+                                        <g:cell width="99%">
+                                            <g:CheckBox ui:field="prepayment" text="" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="payPanelObligation" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">

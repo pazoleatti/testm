@@ -52,6 +52,7 @@ public class RefBookUtils extends AbstractDao {
      */
     public PreparedStatementData getSimpleQuery(RefBook refBook, String tableName, RefBookAttribute sortAttribute,
                                                 String filter, PagingParams pagingParams, boolean isSortAscending, String whereClause) {
+        String orderBy = "";
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT ");
         ps.appendQuery("id ");
@@ -65,7 +66,8 @@ public class RefBookUtils extends AbstractDao {
             RefBookAttribute defaultSort = refBook.getSortAttribute();
             String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
             String sortDirection = isSortAscending ? "ASC" : "DESC";
-            ps.appendQuery("row_number() over (order by '" + sortColumn + "' "+sortDirection+") as row_number_over");
+            orderBy = " order by " + sortColumn + " " + sortDirection;
+            ps.appendQuery("row_number() over (" + orderBy + ") as row_number_over");
         } else {
             ps.appendQuery("rownum row_number_over");
         }
@@ -93,6 +95,7 @@ public class RefBookUtils extends AbstractDao {
                 ps.appendQuery(" WHERE ");
             }
             ps.appendQuery(whereClause);
+            ps.appendQuery(orderBy);
         }
 
         ps.appendQuery(")");
@@ -101,6 +104,9 @@ public class RefBookUtils extends AbstractDao {
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
+
+        ps.appendQuery(orderBy);
+        System.out.println(ps.getQuery().toString());
         return ps;
     }
 
