@@ -397,15 +397,18 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
-            boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
-            if (isReferenceToVersionExists) {
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            if (usagesResult != null && !usagesResult.isEmpty()) {
+                for (String error: usagesResult) {
+                    logger.error(error);
+                }
                 throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
             }
             RefBook refBook = refBookDao.get(refBookId);
             if (refBook.isHierarchic()) {
                 checkChildren(uniqueRecordIds);
             }
-            refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
+            //refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
@@ -420,8 +423,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         try {
-            boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
-            if (isReferenceToVersionExists) {
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            if (usagesResult != null && !usagesResult.isEmpty()) {
+                for (String error: usagesResult) {
+                    logger.error(error);
+                }
                 throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
             }
             RefBook refBook = refBookDao.get(refBookId);
@@ -430,7 +436,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);
-            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            //refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);

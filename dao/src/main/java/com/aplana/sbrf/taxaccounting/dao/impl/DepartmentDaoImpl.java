@@ -85,6 +85,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	}
 
     @Override
+    public List<Department> getParentsHierarchy(int departmentId) {
+        try {
+            return getJdbcTemplate().query(
+                    "SELECT * FROM department START WITH id = ? CONNECT BY PRIOR parent_id = id",
+                    new DepartmentJdbcMapper(),
+                    departmentId
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public List<Department> listDepartments(){
         try {
             return getJdbcTemplate().query(

@@ -7,10 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTree
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
@@ -939,27 +936,78 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom) {
-        //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
-        return getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
+        boolean hasUsages = getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v " +
+                "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
                 refBookId, versionFrom, uniqueRecordId) != 0;
+        if (!hasUsages) {
+            //Проверка использования в налоговых формах
+            return getJdbcTemplate().queryForInt("select count(*) from report_period where id in \n" +
+                    "(select report_period_id from form_data where id in \n" +
+                    "(select form_data_id from data_row where id in \n" +
+                    "(select row_id from numeric_value where column_id in \n" +
+                    "(select id from form_column where attribute_id in \n" +
+                    "(select id from ref_book_attribute where ref_book_id = ?)) and value = ?))) and start_date > ?",
+                    refBookId, uniqueRecordId, versionFrom) != 0;
+        } else {
+            return hasUsages;
+        }
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from ref_book_record where id in %s)\n" +
             "select count(r.id) from ref_book_record r, ref_book_value v, checkRecords cr where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= cr.version and v.REFERENCE_VALUE=cr.id";
 
-    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value " +
-            "where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and record_id in %s)) and value in %s";
+    private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
+            "\tselect * from form_data where id in\n" +
+            "\t(select form_data_id from data_row where id in\n" +
+            "\t(select row_id from numeric_value where column_id in\n" +
+            "\t(select id from form_column where attribute_id in\n" +
+            "\t(select id from ref_book_attribute where ref_book_id = ?)) and value in %s))\n" +
+            ")\n" +
+            "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, rp.name as reportPeriodName, tp.year as year from forms f \n" +
+            "join (select department_id, path from (SELECT f.department_id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
+            "\t\tFROM department d, forms f where d.type != 1 START \n" +
+            "\t\tWITH d.id = f.department_id \n" +
+            "\t\tCONNECT BY PRIOR d.parent_id = d.id order by lvl desc) \n" +
+            "\twhere ROWNUM = 1 ) d on d.department_id=f.department_id\n" +
+            "join form_type t on t.id in (select t.type_id from form_template t, forms f where t.id = f.form_template_id)\n" +
+            "join report_period rp on rp.id = f.report_period_id\n" +
+            "join tax_period tp on tp.id = rp.tax_period_id";
 
-    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
-        //Проверка использования в справочниках и настройках подразделений
+    public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
+        List<String> results = new ArrayList<String>();
+        //Проверка использования в справочниках
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
         boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
-        if (!hasReferences) {
-            sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
-            return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
-        } else return true;
+
+        //Проверка использования в налоговых формах
+        sql = String.format(CHECK_USAGES_IN_FORMS, in);
+        results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                StringBuilder result = new StringBuilder();
+                result.append("Существует экземпляр налоговой формы \"");
+                result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
+                result.append(rs.getString("formType")).append("\" в подразделении \"");
+                result.append(reverseDepartmentPath(rs.getString("departmentPath"))).append("\" периоде \"");
+                result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
+                return result.toString();
+            }
+        }, refBookId));
+        return results;
+    }
+
+    private String reverseDepartmentPath(String departmentPath) {
+        String[] pathParts = departmentPath.substring(1).split("/");
+        StringBuilder result = new StringBuilder();
+        for (int i = pathParts.length - 1; i > -1; i--) {
+            result.append(pathParts[i]);
+            if (i != 0) {
+                result.append("/");
+            }
+        }
+        return result.toString();
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +

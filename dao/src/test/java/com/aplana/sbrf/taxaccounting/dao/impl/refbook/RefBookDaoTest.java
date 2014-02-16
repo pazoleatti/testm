@@ -448,10 +448,10 @@ public class RefBookDaoTest {
 
     @Test
     public void checkVersionUsages() {
-        boolean isOk = !refBookDao.isVersionUsed(1L, Arrays.asList(1L));
-        assertEquals(true, isOk);
+        List<String> results = refBookDao.isVersionUsed(1L, Arrays.asList(1L));
+        assertEquals(true, !results.isEmpty());
 
-        isOk = !refBookDao.isVersionUsed(1L, 1L, getDate(1, 1, 2013));
+        boolean isOk = !refBookDao.isVersionUsed(1L, 1L, getDate(1, 1, 2013));
         assertEquals(true, isOk);
     }
 
