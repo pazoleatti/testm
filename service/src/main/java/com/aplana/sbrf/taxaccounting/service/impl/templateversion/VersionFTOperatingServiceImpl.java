@@ -24,7 +24,7 @@ import java.util.List;
 @Transactional
 public class VersionFTOperatingServiceImpl implements VersionOperatingService<FormTemplate> {
 
-    public static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа '%s' в подразделении '%s' периоде '%s' для макета!";
+    public static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
 
     @Autowired
     private FormDataDao formDataDao;

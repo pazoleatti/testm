@@ -22,7 +22,7 @@ import java.util.List;
 @Transactional
 public class VersionDTOperatingServiceImpl implements VersionOperatingService<DeclarationTemplate> {
 
-    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении '%s' периоде '%s' для макета!";
+    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" периоде %s для макета!";
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
