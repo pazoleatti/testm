@@ -998,53 +998,65 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         //Проверка использования в справочниках
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
-        results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return "Существует запись справочника "+rs.getString("refBookName")+", которая содержит ссылку на версию!";
-            }
-        }, refBookId));
+        try {
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return "Существует запись справочника "+rs.getString("refBookName")+", которая содержит ссылку на версию!";
+                }
+            }, refBookId));
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
+        }
 
-        //Проверка использования в налоговых формах
-        sql = String.format(CHECK_USAGES_IN_FORMS, in);
-        results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                StringBuilder result = new StringBuilder();
-                result.append("Существует экземпляр налоговой формы \"");
-                result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
-                result.append(rs.getString("formType")).append("\" в подразделении \"");
-                result.append(reverseDepartmentPath(rs.getString("departmentPath"))).append("\" периоде \"");
-                result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
-                return result.toString();
-            }
-        }, refBookId));
-
-        //Проверка использования в настройках подразделений
-        sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
-        results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                boolean isT = rs.getBoolean("isT");
-                boolean isI = rs.getBoolean("isI");
-                boolean isD = rs.getBoolean("isD");
-                String taxCode = rs.getString("taxCode");
-
-                if (taxCode != null && ((taxCode.equals("T") && isT)
-                        || (taxCode.equals("I") && isI)
-                        || (taxCode.equals("D") && isD))) {
+        try {
+            //Проверка использования в налоговых формах
+            sql = String.format(CHECK_USAGES_IN_FORMS, in);
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     StringBuilder result = new StringBuilder();
-                    result.append("В настройке подразделения \"");
-                    result.append(rs.getString("departmentName")).append("\" для налога \"");
-                    result.append(TaxType.fromCode(taxCode.charAt(0)).getName()).append("\" в периоде \"");
-                    result.append(rs.getString("periodName")).append("\" указана ссылка на версию!");
+                    result.append("Существует экземпляр налоговой формы \"");
+                    result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
+                    result.append(rs.getString("formType")).append("\" в подразделении \"");
+                    result.append(reverseDepartmentPath(rs.getString("departmentPath"))).append("\" периоде \"");
+                    result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
                     return result.toString();
                 }
-                return null;
+            }, refBookId));
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
+        }
+
+        try {
+            //Проверка использования в настройках подразделений
+            sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    boolean isT = rs.getBoolean("isT");
+                    boolean isI = rs.getBoolean("isI");
+                    boolean isD = rs.getBoolean("isD");
+                    String taxCode = rs.getString("taxCode");
+
+                    if (taxCode != null && ((taxCode.equals("T") && isT)
+                            || (taxCode.equals("I") && isI)
+                            || (taxCode.equals("D") && isD))) {
+                        StringBuilder result = new StringBuilder();
+                        result.append("В настройке подразделения \"");
+                        result.append(rs.getString("departmentName")).append("\" для налога \"");
+                        result.append(TaxType.fromCode(taxCode.charAt(0)).getName()).append("\" в периоде \"");
+                        result.append(rs.getString("periodName")).append("\" указана ссылка на версию!");
+                        return result.toString();
+                    }
+                    return null;
+                }
+            }));
+            if (!results.isEmpty()) {
+                while (results.remove(null));
             }
-        }, refBookId));
-        if (!results.isEmpty()) {
-            while (results.remove(null));
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
         }
         return results;
     }
