@@ -43,7 +43,7 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img style=\"margin: 4px 2px;\" align=\"right\" src=\"resources/img/dot.png\"/>")
+		@Template("<img style=\"margin: 3px 2px;\" align=\"right\" src=\"resources/img/circle.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
