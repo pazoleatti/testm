@@ -152,7 +152,7 @@ create table ref_book_attribute (
   width number(9) default 15 not null,
   required number(1) default 0 not null,
   is_unique number(1) default 0 not null,
-  sort_order number(9)
+  sort_order number(9),
   format number(2)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
