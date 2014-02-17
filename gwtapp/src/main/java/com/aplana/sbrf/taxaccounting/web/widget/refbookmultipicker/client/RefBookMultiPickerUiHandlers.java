@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface RefBookMultiPickerUiHandlers extends UiHandlers {
 
-    void init(long refBookAttrId, String filter, Date relevanceDate);
+    void init(long refBookAttrId, String filter, Date relevanceDate, Boolean multiSelect);
 
     void reload(Date relevanceDate);
 

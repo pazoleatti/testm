@@ -39,6 +39,10 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void setPeriodDates(Date startDate, Date endDate);
 
+    void setMultiSelect(boolean multiSelect);
+
+    Boolean isMultiSelect();
+
     public Long getSingleValue();
 
     public void setValue(Long value);

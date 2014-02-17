@@ -66,6 +66,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Boolean isClearEvent = false;
     private Boolean isFireChangeEvent = true;
 
+    private HandlerRegistration selectHandlerRegistration;
+
     private Long refBookAttrId;
     private String filter;
     private Date startDate;
@@ -75,7 +77,17 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Set<RefBookItem> prevSelectedItems = new HashSet<RefBookItem>();
 
     private AbstractDataProvider<RefBookItem> dataProvider;
-    private final SetSelectionModel<RefBookItem> selectionModel;
+    private SetSelectionModel<RefBookItem> selectionModel;
+    private DefaultSelectionEventManager<RefBookItem> multiSelectManager = DefaultSelectionEventManager.createCustomManager(
+            new DefaultSelectionEventManager.CheckboxEventTranslator<RefBookItem>(0) {
+                public boolean clearCurrentSelection(CellPreviewEvent<RefBookItem> event) {
+                    return false;
+                }
+
+                public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<RefBookItem> event) {
+                    return DefaultSelectionEventManager.SelectAction.TOGGLE;
+                }
+            });
 
     public RefBookMultiPickerView() {
         this(false, null);
@@ -101,24 +113,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             };
         }
 
-        selectionModel = multiSelect ?
-                new MultiSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER){
-                    protected boolean isEventScheduled() {
-                        return false;
-                    }
-                    protected void scheduleSelectionChangeEvent() {
-                        fireSelectionChangeEvent();
-                    }
-                } :
-                new SingleSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER){
-                    protected boolean isEventScheduled() {
-                        return false;
-                    }
-
-                    protected void scheduleSelectionChangeEvent() {
-                        fireSelectionChangeEvent();
-                    }
-                };
+        selectionModel = getSelectionModel(multiSelect);
 
         initWidget(binder.createAndBindUi(this));
         new RefBookMultiPickerPresenter(this);
@@ -147,17 +142,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             }
         });
 
-        DefaultSelectionEventManager<RefBookItem> multiSelectManager = DefaultSelectionEventManager.createCustomManager(
-                new DefaultSelectionEventManager.CheckboxEventTranslator<RefBookItem>(0) {
-                    public boolean clearCurrentSelection(CellPreviewEvent<RefBookItem> event) {
-                        return false;
-                    }
-
-                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<RefBookItem> event) {
-                        return DefaultSelectionEventManager.SelectAction.TOGGLE;
-                    }
-                });
-
         if (multiSelect) {
             cellTable.setSelectionModel(selectionModel, multiSelectManager);
         } else {
@@ -174,15 +158,10 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             }
         });
 
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        selectHandlerRegistration = selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                if (isClearEvent) {
-                    isClearEvent = false;
-                    widgetFireChangeEvent(getSelectedIds());
-                }
-                selectionCountLabel.setText("Выбрано: " + selectionModel.getSelectedSet().size());
-                okButton.setEnabled(!selectionModel.getSelectedSet().isEmpty());
+                onSelection();
             }
         });
 
@@ -308,6 +287,16 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         }
     }
 
+    private void onSelection(){
+        System.out.println("444");
+        if (isClearEvent) {
+            isClearEvent = false;
+            widgetFireChangeEvent(getSelectedIds());
+        }
+        selectionCountLabel.setText("Выбрано: " + selectionModel.getSelectedSet().size());
+        okButton.setEnabled(!selectionModel.getSelectedSet().isEmpty());
+    }
+
     public void clear() {
         txtFind.setValue("");
     }
@@ -356,7 +345,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         if (version.getValue() == null) {
             this.version.setValue(endDate != null ? endDate : startDate);
         }
-        getUiHandlers().init(refBookAttrId, filter, version.getValue());
+        getUiHandlers().init(refBookAttrId, filter, version.getValue(), multiSelect);
     }
 
     @Override
@@ -366,8 +355,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         this.startDate = startDate;
         this.endDate = endDate;
         this.version.setValue(endDate != null ? endDate : startDate);
-        System.out.println(version.getValue());
-        getUiHandlers().init(refBookAttrId, filter, version.getValue());
+        getUiHandlers().init(refBookAttrId, filter, version.getValue(), multiSelect);
     }
 
     @Override
@@ -445,6 +433,28 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         return null;
     }
 
+    private SetSelectionModel<RefBookItem> getSelectionModel(boolean multiSelect) {
+        return multiSelect ?
+                new MultiSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER) {
+                    protected boolean isEventScheduled() {
+                        return false;
+                    }
+
+                    protected void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                } :
+                new SingleSelectionModel<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER) {
+                    protected boolean isEventScheduled() {
+                        return false;
+                    }
+
+                    protected void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                };
+    }
+
 //    /**
 //     * Получить разименованные значения выбранных строк в виде строки через ";".
 //     *
@@ -517,5 +527,33 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void setFilter(String filter) {
         this.filter = filter;
+    }
+
+    @Override
+    public Boolean getMultiSelect() {
+        return multiSelect;
+    }
+
+    @Override
+    public void setMultiSelect(Boolean multiSelect) {
+        this.multiSelect = multiSelect;
+
+        clearSelected(true);
+
+        selectionModel = getSelectionModel(multiSelect);
+        if (multiSelect) {
+            cellTable.setSelectionModel(selectionModel, multiSelectManager);
+        } else {
+            DefaultSelectionEventManager<RefBookItem> defaultSelectionEventManager = DefaultSelectionEventManager.createDefaultManager();
+            cellTable.setSelectionModel(selectionModel, defaultSelectionEventManager);
+        }
+        // удаляем регистрацию на уничтоженый менеджер выделений
+        selectHandlerRegistration.removeHandler();
+        selectHandlerRegistration = selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                onSelection();
+            }
+        });
     }
 }

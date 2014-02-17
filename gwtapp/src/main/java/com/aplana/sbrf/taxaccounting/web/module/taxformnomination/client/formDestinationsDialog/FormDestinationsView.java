@@ -215,7 +215,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         DOM.setElementPropertyBoolean(formDataKind.getElement(), "disabled", false);
         // Вид налоговой формы
         formTypeId.setEnabled(true);
-        formTypeId.setValue(new ArrayList<Long>());
+        formTypeId.setValue(null, true);
         // тип налоговой формы
         formDataKind.setEnabled(true);
         formDataKind.setValue(null, false);

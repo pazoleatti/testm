@@ -41,6 +41,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     private RefBookView refBookPiker;
 
     private boolean fireEvents = true;
+    private boolean multiSelect;
 
     /**
      * Признак иерархичности окна
@@ -49,6 +50,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiConstructor
     public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
+        this.multiSelect = multiSelect;
         initWidget(binder.createAndBindUi(this));
         this.isHierarchical = isHierarchical;
         popupPanel = new ModalWindow("Выбор значения из справочника");
@@ -89,6 +91,17 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     void onSelectButtonClicked(ClickEvent event) {
         refBookPiker.load();
         popupPanel.center();
+    }
+
+    @Override
+    public void setMultiSelect(boolean multiSelect){
+        this.multiSelect = multiSelect;
+        refBookPiker.setMultiSelect(multiSelect);
+    }
+
+    @Override
+    public Boolean isMultiSelect(){
+        return this.multiSelect;
     }
 
     @Override

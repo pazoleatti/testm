@@ -71,4 +71,11 @@ public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<
     public String getFilter();
 
     public void setFilter(String filter);
+
+    /**
+     * Смена режима выбора значений.
+     * При смене происходит очищение ранее выделенных значений
+     * @param multiSelect true - множественный выбор
+     */
+    void setMultiSelect(Boolean multiSelect);
 }

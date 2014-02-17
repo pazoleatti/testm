@@ -30,6 +30,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     private Long refBookAttrId;
     private String filter;
     private Date relevanceDate;
+    private Boolean multiSelect;
     private Integer sortColumnIndex;
     private boolean isSortAscending = true;
 
@@ -39,6 +40,8 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         void setVersion(Date version);
 
         Date getVersion();
+
+        Boolean getMultiSelect();
 
         String getSearchPattern();
 
@@ -61,10 +64,11 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         super(GINContextHolder.getEventBus(), view);
         dispatcher = GINContextHolder.getDispatchAsync();
         getView().setUiHandlers(this);
+        this.multiSelect = getView().getMultiSelect();
     }
 
     @Override
-    public void init(final long refBookAttrId, final String filter, Date relevanceDate) {
+    public void init(final long refBookAttrId, final String filter, Date relevanceDate, Boolean multiSelect) {
         if (isNewParams()) {
             if (getView().getAttributeId() == null) {
                 return;
@@ -88,7 +92,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     @Override
     public void reload(Date relevanceDate) {
-        init(getView().getAttributeId(), getView().getFilter(), relevanceDate);
+        init(getView().getAttributeId(), getView().getFilter(), relevanceDate, multiSelect);
     }
 
     @Override
@@ -144,8 +148,6 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         action.setVersion(getView().getVersion());
         action.setIdsTofind(idToFinds);
 
-        System.out.println(action);
-
         return action;
     }
 
@@ -174,22 +176,25 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         Long refBookAttrId = getView().getAttributeId();
         String filter = getView().getFilter();
         Date relevanceDate = getView().getVersion();
-        System.out.println(" " + refBookAttrId + " " + filter + " " +  relevanceDate);
-        System.out.println(" " + this.refBookAttrId + " " + this.filter + " " +  this.relevanceDate);
+        Boolean multiSelect = getView().getMultiSelect();
+
         Boolean hasChange = (refBookAttrId == null && this.refBookAttrId != null)
                 || (refBookAttrId != null && this.refBookAttrId == null)
                 || (refBookAttrId != null && this.refBookAttrId != null && !refBookAttrId.equals(this.refBookAttrId))
                 || (filter == null && this.filter != null)
                 || (filter != null && this.filter == null)
                 || (filter != null && this.filter != null && !filter.equals(this.filter))
+                || (multiSelect == null && this.multiSelect != null)
+                || (multiSelect != null && this.multiSelect == null)
+                || (multiSelect != null && this.multiSelect != null && !multiSelect.equals(this.multiSelect))
                 || (relevanceDate == null && this.relevanceDate != null)
                 || (relevanceDate != null && this.relevanceDate == null)
                 || (relevanceDate != null && this.relevanceDate != null && relevanceDate.compareTo(this.relevanceDate) != 0);
-        System.out.println(hasChange);
         if(hasChange){
             this.refBookAttrId = refBookAttrId;
             this.filter = filter;
             this.relevanceDate = relevanceDate;
+            this.multiSelect = multiSelect;
         }
 
 

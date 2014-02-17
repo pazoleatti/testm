@@ -343,4 +343,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void setFilter(String filter) {
         this.filter = filter;
     }
+
+    @Override
+    public void setMultiSelect(Boolean multiSelect) {
+        //заглушка
+    }
 }
