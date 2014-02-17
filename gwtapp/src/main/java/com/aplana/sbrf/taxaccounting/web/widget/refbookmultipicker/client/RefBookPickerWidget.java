@@ -104,7 +104,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setValue(List<Long> value, boolean fireEvents) {
         this.fireEvents = fireEvents;
-        refBookPiker.setValue(value);
+        refBookPiker.setValue(value, fireEvents);
     }
 
     @Override
