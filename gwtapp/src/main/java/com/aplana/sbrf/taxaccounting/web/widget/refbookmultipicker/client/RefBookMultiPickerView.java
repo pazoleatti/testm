@@ -318,8 +318,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     private void clearSelected(boolean fireChangeEvent) {
-        selectionModel.clear();
         isClearEvent = fireChangeEvent;
+        selectionModel.clear();
         prevSelectedItems.clear();
     }
 
