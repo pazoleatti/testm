@@ -159,8 +159,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		}
 
 		sb.append(renderer.render(rendValue));
-        AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
-        if ((DataRowEditableCellUtils.editMode(columnContext, editableCell))&&cell.isEditable()) {
+        if ((DataRowEditableCellUtils.editMode(columnContext, cell))&&cell.isEditable()) {
             sb.append(template.referenceIcon());
         }
     }
