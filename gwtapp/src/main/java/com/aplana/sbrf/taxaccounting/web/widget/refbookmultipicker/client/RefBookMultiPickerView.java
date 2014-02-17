@@ -64,6 +64,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Boolean multiSelect = false;
     // так как развыделение асинхронное используем флаг для создания события измнеения
     private Boolean isClearEvent = false;
+    private Boolean isFireChangeEvent = true;
 
     private Long refBookAttrId;
     private String filter;
@@ -285,8 +286,10 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 selectionModel.setSelected(item, true);
             }
         }
-
-        widgetFireChangeEvent(getSelectedIds());
+        if (isFireChangeEvent) {
+            isFireChangeEvent = true;
+            widgetFireChangeEvent(getSelectedIds());
+        }
     }
 
     @Override
@@ -297,6 +300,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void setValue(List<Long> value, boolean fireEvent) {
         if (value != null) {
+            isFireChangeEvent = fireEvent;
             clearSelected(false);
             if (!value.isEmpty()) {
                 getUiHandlers().loadingForSelection(value);
@@ -361,9 +365,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         this.filter = filter;
         this.startDate = startDate;
         this.endDate = endDate;
-        if (!RefBookPickerUtils.isCorrectDate(startDate, endDate, version.getValue())) {
-            this.version.setValue(endDate != null ? endDate : startDate);
-        }
+        this.version.setValue(endDate != null ? endDate : startDate);
+        System.out.println(version.getValue());
         getUiHandlers().init(refBookAttrId, filter, version.getValue());
     }
 
