@@ -19,7 +19,7 @@
 
 
 
-    <g:HorizontalPanel verticalAlignment="middle">
+    <g:HorizontalPanel  ui:field="panel" verticalAlignment="middle">
         <g:cell width="100%">
             <g:TextBox readOnly="true" addStyleNames="{style.selected}"  ui:field="text" width="100%"/>
         </g:cell>

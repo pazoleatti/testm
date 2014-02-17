@@ -35,6 +35,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiField
     Image selectButton;
+    @UiField
+    HorizontalPanel panel;
 
     private ModalWindow popupPanel;
 
@@ -102,6 +104,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public Boolean isMultiSelect(){
         return this.multiSelect;
+    }
+
+    @Override
+    public void setWidth(String width){
+        panel.setWidth(width);
     }
 
     @Override
@@ -212,6 +219,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         if (stringValue.equals(EMPTY_STRING_VALUE))
             label.setTitle(EMPTY_STRING_TITLE);
         else
-            label.setTitle(stringValue);
+            label.setTitle(TextUtils.generateTextBoxTitle(stringValue));
     }
 }
