@@ -38,13 +38,13 @@
     </ui:style>
 
 
-    <dw:ModalWindow glassEnabled="true" ui:field="deadlineDialog" iconUrl="" title="">
+    <dw:ModalWindow glassEnabled="true" ui:field="deadlineDialog" iconUrl="" title="" >
 
-        <g:VerticalPanel>
-            <g:cell>
-                <g:VerticalPanel addStyleNames="{style.typicalFormBody}" >
+        <g:VerticalPanel width="100%">
+            <g:cell >
+                <g:VerticalPanel addStyleNames="{style.typicalFormBody}" width="97%">
                     <g:cell>
-                        <g:HorizontalPanel spacing="4" width="300px">
+                        <g:HorizontalPanel spacing="4">
                             <g:cell verticalAlignment="middle">
                                 <g:Label addStyleNames="{style.labelDate}" wordWrap="false" text="Срок сдачи отчетности:"/>
                             </g:cell>
@@ -55,7 +55,7 @@
                     </g:cell>
                     <g:cell>
                         <picker:DepartmentTreeWidget headerVisible="false" ui:field="departmentPicker" height="250px"
-                                                     width="500px" multiSelection="false"/>
+                                                     multiSelection="false"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:cell>

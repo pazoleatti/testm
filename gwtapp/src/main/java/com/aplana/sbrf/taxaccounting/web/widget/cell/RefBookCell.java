@@ -31,6 +31,7 @@ import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img style=\"margin: 4px 2px;\" align=\"right\" src=\"resources/img/dot.png\"/>")
+		@Template("<img style=\"margin: 3px 2px;\" align=\"right\" src=\"resources/img/circle.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
@@ -86,13 +87,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	@Override
 	public void onBrowserEvent(final Context context, final Element parent, final Long nvalue,
 			final NativeEvent nevent, final ValueUpdater<Long> valueUpdater) {
-		
 
 		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
 		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
-			
+
 	    String eventType = nevent.getType();
 	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
 	    		|| (CLICK.equals(eventType))) {
@@ -100,13 +100,15 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
                 refBookPiker.load(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
-						columnContext.getEndDate());
+                        columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
-			// Устанавливаем старое значение
-			refBookPiker.setValue(nvalue);
-			
-			// Регистрируем событие изменения значени 
+            // Устанавливаем старое значение
+            if (nvalue != null) {
+                refBookPiker.setValue(Arrays.asList(nvalue), false);
+            }
+
+            // Регистрируем событие изменения значени
 			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<List<Long>> event) {
@@ -155,8 +157,9 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		if (rendValue == null) {
 			rendValue = "";
 		}
+
 		sb.append(renderer.render(rendValue));
-        if (cell.isEditable()) {
+        if ((DataRowEditableCellUtils.editMode(columnContext, cell))&&cell.isEditable()) {
             sb.append(template.referenceIcon());
         }
     }

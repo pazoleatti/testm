@@ -8,6 +8,7 @@
 			/WEB-INF/applicationContext.xml
 			/WEB-INF/security.xml
             /WEB-INF/spring-ejb.xml
+            /WEB-INF/mvc-dispatcher-servlet.xml
 			classpath:com/aplana/sbrf/taxaccounting/dao.xml
             classpath:com/aplana/sbrf/taxaccounting/script-support.xml
 			classpath:com/aplana/sbrf/taxaccounting/service.xml
@@ -28,16 +29,6 @@
     </filter>
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-
-    <!-- Добавляем наш фильтр для отлавливания AccessDeniedException -->
-    <filter>
-        <filter-name>errorHandlerFilter</filter-name>
-        <filter-class>com.aplana.sbrf.taxaccounting.web.module.audit.server.ErrorHandlerFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>errorHandlerFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -63,11 +54,11 @@
         <url-pattern>/j_spring_security_logout</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>dispatch</servlet-name>
+		<servlet-name>rpc-dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>dispatch</servlet-name>
+		<servlet-name>rpc-dispatcher</servlet-name>
 		<url-pattern>/dispatch/*</url-pattern>
 	</servlet-mapping>
 

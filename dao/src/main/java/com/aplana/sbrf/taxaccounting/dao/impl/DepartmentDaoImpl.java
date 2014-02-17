@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -267,6 +268,25 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }
+
+	@Override
+	public List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes) {
+		String sql = "SELECT performer_dep_id " +
+				"FROM department_form_type dft " +
+				"LEFT JOIN form_type ft on dft.FORM_TYPE_ID=ft.ID " +
+				"WHERE department_id in (:ids) AND ft.tax_type in (:tt) AND performer_dep_id IS NOT null " +
+				"GROUP BY performer_dep_id";
+
+		MapSqlParameterSource parameterMap = new MapSqlParameterSource();
+		parameterMap.addValue("ids", departments);
+		List<String> types = new ArrayList<String>();
+		for (TaxType type : taxTypes) {
+			types.add(String.valueOf(type.getCode()));
+		}
+		parameterMap.addValue("tt", types);
+
+		return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
+	}
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений

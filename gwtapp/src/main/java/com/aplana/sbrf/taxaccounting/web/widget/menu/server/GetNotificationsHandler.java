@@ -36,7 +36,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		NotificationsFilterData filter = new NotificationsFilterData();
 		filter.setCountOfRecords(action.getLength());
 		filter.setStartIndex(action.getStart());
-		filter.setReceiverDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
+		filter.setSenderDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
 		for (Notification notification : result) {

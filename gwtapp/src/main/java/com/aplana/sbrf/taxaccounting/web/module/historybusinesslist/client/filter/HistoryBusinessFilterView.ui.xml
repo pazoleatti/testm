@@ -122,7 +122,7 @@
                                     <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" isHierarchical="false" multiSelect="true" width="100%"/>
                                 </g:cell>
                                 <g:cell height="26px">
-                                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="836" isHierarchical="false" multiSelect="true" width="100%"/>
+                                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false" multiSelect="true" width="100%"/>
                                 </g:cell>
                             </g:VerticalPanel>
                         </g:cell>

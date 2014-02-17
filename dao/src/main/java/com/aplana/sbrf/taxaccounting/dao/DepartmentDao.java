@@ -121,4 +121,12 @@ public interface DepartmentDao {
      * @return писок id'шников подразделений (исполнителей)
      */
     List<Integer> getPerformers(List<Integer> departments);
+
+	/**
+	 * Получение списка исполнителей по списку идентификаторов подразделений и типам налога
+	 * @param departments список id'шников подразделений
+	 * @param taxTypes типы налогов
+	 * @return писок id'шников подразделений (исполнителей)
+	 */
+	List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes);
 }
