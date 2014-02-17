@@ -184,7 +184,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
-        user.setEndDate(new Date());
+        user.setPeriodDates(null, new Date());
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
         reportPeriodIds.setEnabled(false);

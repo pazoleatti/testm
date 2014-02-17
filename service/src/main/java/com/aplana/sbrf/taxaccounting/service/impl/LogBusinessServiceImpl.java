@@ -41,6 +41,7 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         List<Long> declarationDataIds = null;
         FormDataFilter formDataFilter = new FormDataFilter();
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
+        List<Long> formTypeIds = new ArrayList<Long>();
 
         switch (filter.getAuditFormTypeId() != null ? filter.getAuditFormTypeId() : 0){
             case 1:
@@ -48,7 +49,10 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));//TODO убрать преобразование типов
+                if ((filter.getFormTypeId() != null)){
+                    formTypeIds.add(Long.valueOf(filter.getFormTypeId()));
+                    formDataFilter.setFormTypeId(formTypeIds);
+                }
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
                 if(formDataIds.isEmpty())
@@ -70,7 +74,10 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataFilter.setTaxType(filter.getTaxType());
                 /*formDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId()) : new ArrayList<Integer>());*/
                 formDataFilter.setFormDataKind(filter.getFormKind());
-                formDataFilter.setFormTypeId(Arrays.asList(filter.getFormTypeId().longValue()));//TODO убрать преобразование типов
+                if ((filter.getFormTypeId() != null)){
+                    formTypeIds.add(Long.valueOf(filter.getFormTypeId()));
+                    formDataFilter.setFormTypeId(formTypeIds);
+                }
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
 

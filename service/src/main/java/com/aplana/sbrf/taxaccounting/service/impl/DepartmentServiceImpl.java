@@ -148,16 +148,16 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
             retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
             // все дочерние подразделения для подразделения пользователя (включая его)
             for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
                 retList.add(dep.getId());
             }
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -234,4 +234,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 	private List<Integer> getExecutorsDepartments(List<Integer> departments) {
         return departmentDao.getPerformers(departments);
     }
+
+	private List<Integer> getExecutorsDepartments(List<Integer> departments, List<TaxType> taxTypes) {
+		return departmentDao.getPerformers(departments, taxTypes);
+	}
 }

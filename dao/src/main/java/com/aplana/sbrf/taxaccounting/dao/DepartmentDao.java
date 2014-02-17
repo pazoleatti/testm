@@ -43,6 +43,13 @@ public interface DepartmentDao {
 	Department getParent(int departmentId);
 
     /**
+     * Возвращает иерархию подразделений, являющихся родительскими для указанного подразделения
+     * @param departmentId подразделение, для которого выполняется поиск родительских
+     * @return
+     */
+    List<Department> getParentsHierarchy(int departmentId);
+
+    /**
      * Получить список всех подразделений
      * @return список всех подразделений
      */
@@ -114,4 +121,12 @@ public interface DepartmentDao {
      * @return писок id'шников подразделений (исполнителей)
      */
     List<Integer> getPerformers(List<Integer> departments);
+
+	/**
+	 * Получение списка исполнителей по списку идентификаторов подразделений и типам налога
+	 * @param departments список id'шников подразделений
+	 * @param taxTypes типы налогов
+	 * @return писок id'шников подразделений (исполнителей)
+	 */
+	List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes);
 }

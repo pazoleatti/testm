@@ -140,6 +140,27 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                 new ReportPeriodMapper(), params);
     }
 
+	@Override
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
+		Object[] params = new Object[departmentList.size() + 1];
+		int cnt = 0;
+		for (Integer departmentId : departmentList) {
+			params[cnt++] = departmentId;
+		}
+		params[cnt] = String.valueOf(taxType.getCode());
+
+		return getJdbcTemplate().query(
+				"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
+						"rp.calendar_start_date from report_period rp, tax_period tp where rp.id in " +
+						"(select distinct report_period_id from department_report_period " +
+						"where department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+") and is_active=1 " +
+						(withoutBalance ? " and is_balance_period=0 " : "") + " ) " +
+						"and rp.tax_period_id = tp.id " +
+						"and tp.tax_type = ?" +
+						"order by tp.year desc, rp.ord",
+				new ReportPeriodMapper(), params);
+	}
+
     @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {

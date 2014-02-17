@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
-import java.util.List;
-
 /**
  * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
  * @author dsultanbekov
@@ -82,4 +80,13 @@ public interface ReportPeriodDao {
 	 * @return
 	 */
 	List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
+
+	/**
+	 * Список открытых периодов
+	 * @param taxType тип налога
+	 * @param departmentList подразделения
+	 * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
+	 * @return список отчетных периодов
+	 */
+	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
 }

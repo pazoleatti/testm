@@ -31,6 +31,7 @@ import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img style=\"margin: 4px 2px;\" align=\"right\" src=\"resources/img/dot.png\"/>")
+		@Template("<img style=\"margin: 4px 2px; background-color: #00940C;\" align=\"right\" src=\"resources/img/dot.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
@@ -99,14 +100,16 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
-                refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
-						columnContext.getEndDate());
+                refBookPiker.load(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+                        columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
-			// Устанавливаем старое значение
-			refBookPiker.setValue(nvalue);
-			
-			// Регистрируем событие изменения значени 
+            // Устанавливаем старое значение
+            if (nvalue != null) {
+                refBookPiker.setValue(Arrays.asList(nvalue), false);
+            }
+
+            // Регистрируем событие изменения значени
 			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<List<Long>> event) {

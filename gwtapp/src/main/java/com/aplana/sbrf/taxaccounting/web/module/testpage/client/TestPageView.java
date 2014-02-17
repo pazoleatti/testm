@@ -87,6 +87,17 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     @UiField
     RefBookPickerWidget fpicker;
 
+    @UiField
+    RefBookPickerWidget flatPicker;
+    @UiField
+    Label fPickerLabel;
+    @UiField
+    Label flatPickerLabel;
+    @UiField
+    Label fpickerList;
+    @UiField
+    Label flatPickerList;
+
     @Inject
     public TestPageView(final Binder uiBinder) {
         List<TestItem> itemList = new ArrayList<TestItem>();
@@ -130,7 +141,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 showResult.setText(strCont);
             }
         });
-
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -180,7 +190,26 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
-        fpicker.setEndDate(new Date());
+        fpicker.setPeriodDates(null, new Date());
+
+        fpicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
+                fPickerLabel.setText("Выбрано: " + fpicker.getDereferenceValue());
+                fpickerList.setText("Список: " + event.getValue());
+            }
+        });
+
+
+        flatPicker.setPeriodDates(null, new Date());
+        flatPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
+                flatPickerLabel.setText("Выбрано: " + flatPicker.getDereferenceValue());
+                flatPickerList.setText("Список: " + event.getValue());
+            }
+        });
+        //flatPicker.setValue(322L);
 
         testMaskBox();
 
@@ -259,8 +288,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         });
     }
 
-    private String getTestMaskValues(Object eventValue, Object elemValue){
-        return "Event: " + String.valueOf(eventValue) + " " + String.valueOf(elemValue) + " .";
+    private String getTestMaskValues(Object eventValue, Object elemValue) {
+        return "Событие: " + String.valueOf(eventValue) + " " + String.valueOf(elemValue) + " .";
     }
 
 }

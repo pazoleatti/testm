@@ -241,9 +241,9 @@ public interface RefBookDao {
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordIds список идентификаторов версий записей
-     * @return есть ссылки на версию?
+     * @return результаты проверки. Сообщения об ошибках
      */
-    boolean isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
+    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной
