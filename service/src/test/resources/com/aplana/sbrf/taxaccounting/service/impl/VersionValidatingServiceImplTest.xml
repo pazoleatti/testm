@@ -11,6 +11,11 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
     </bean>
-
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PeriodService"/>
+    </bean>
     <bean id="versionValidatingService" class="com.aplana.sbrf.taxaccounting.service.impl.templateversion.VersionFTOperatingServiceImpl" />
 </beans>
