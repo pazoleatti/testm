@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,6 +20,10 @@ public class SimpleFilterTreeListener extends UniversalFilterTreeListener {
 
     @Override
     public void enterInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
-        ps.appendQuery(ctx.getText());
+        if (ctx.getText().equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
+            ps.appendQuery("id");
+        } else{
+            ps.appendQuery(ctx.getText());
+        }
     }
 }

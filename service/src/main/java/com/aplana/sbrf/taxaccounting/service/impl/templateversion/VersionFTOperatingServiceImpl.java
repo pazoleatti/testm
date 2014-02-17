@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl.templateversion;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,11 +24,22 @@ import java.util.List;
 @Transactional
 public class VersionFTOperatingServiceImpl implements VersionOperatingService<FormTemplate> {
 
+    public static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
+
+    @Autowired
+    private FormDataDao formDataDao;
+
     @Autowired
     private FormTemplateService formTemplateService;
 
     @Autowired
     private FormDataService formDataService;
+
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private PeriodService periodService;
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -38,7 +49,13 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
             return;
         List<Long> fdIds = formDataService.getFormDataLisByVersionTemplate(template.getId());
         if (!fdIds.isEmpty()){
-            logger.error("Обнаружено использование макета для налоговых форм");
+            for(Long id: fdIds) {
+                FormData formData = formDataDao.getWithoutRows(id);
+                Department department = departmentService.getDepartment(formData.getDepartmentId());
+                ReportPeriod period = periodService.getReportPeriod(formData.getReportPeriodId());
+
+                logger.error(MSG_IS_USED_VERSION, formData.getFormType().getName(), department.getName(), period.getName() + " " + period.getTaxPeriod().getYear());
+            }
         }
 
     }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -56,16 +55,20 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 }
                 formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+                if(formDataIds.isEmpty())
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
                 break;
             case 2:
 
                 declarationDataFilter.setTaxType(filter.getTaxType());
-                declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
-                        : new ArrayList<Integer>());
+                /*declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
+                        : new ArrayList<Integer>());*/
                 declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
                 declarationDataIds =
                         declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                if(declarationDataIds.isEmpty())
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
                 break;
             default:
                 formDataFilter.setTaxType(filter.getTaxType());
@@ -79,8 +82,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
 
                 declarationDataFilter.setTaxType(filter.getTaxType());
-                declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
-                        : new ArrayList<Integer>());
+                /*declarationDataFilter.setDepartmentIds(filter.getDepartmentId() != null ? Arrays.asList(filter.getDepartmentId())
+                        : new ArrayList<Integer>());*/
                 declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
                 declarationDataIds =

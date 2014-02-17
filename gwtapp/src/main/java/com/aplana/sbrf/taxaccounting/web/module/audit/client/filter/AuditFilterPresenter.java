@@ -54,29 +54,13 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
-
         void init();
-
         void setDepartments(List<Department> list, Set<Integer> availableValues);
-
-        /*void setFormTypeId(List<Long> formTypes);*/
-
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
-
-
         void setFormDataTaxType(List<TaxType> taxTypeList);
-
-        /*void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);*/
-
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
-
         LogSystemFilter getFilterData();
 
-        /*void setVisibleTaxFields();
-
-        void setVisibleDeclarationFields();
-
-        void hideAll();*/
     }
 
     public void initFilterData() {
