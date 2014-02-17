@@ -190,7 +190,7 @@
                                             <g:Label text="ОКАТО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="7" isHierarchical="false" width="150px"
+                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="840" isHierarchical="false" width="150px"
                                                                         multiSelect="false"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
