@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.UpdateDepartmentDeadlineAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.UpdateDepartmentDeadlineResult;
@@ -35,6 +35,9 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
     @Autowired
     private DepartmentService departmentService;
 
+	@Autowired
+	private TAUserService userService;
+
     public UpdateDepartmentDeadlineHandler() {
         super(UpdateDepartmentDeadlineAction.class);
     }
@@ -46,7 +49,6 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         TAUserInfo userInfo = securityService.currentUserInfo();
         String text = "%s назначил подразделению %s новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
-
 	    for (DepartmentPair pair : action.getDepartments()) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             Department receiver =
@@ -54,7 +56,24 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
 		            ? null
 		            : departmentService.getDepartment(pair.getParentDepartmentId());
 
-		    Department sender = departmentService.getDepartment(pair.getDepartmentId());
+		    StringBuilder receiverName = new StringBuilder();
+		    if (receiver != null) {
+			    for (Department dep : userService.getDepartmentHierarchy(receiver.getId())) {
+				    receiverName.append("/").append(dep.getName());
+			    }
+			    if (receiverName.charAt(0) == '/') {
+				    receiverName.deleteCharAt(0);
+			    }
+		    }
+
+		    StringBuilder senderName = new StringBuilder();
+		    for (Department dep : userService.getDepartmentHierarchy(pair.getDepartmentId())) {
+			    senderName.append("/").append(dep.getName());
+		    }
+		    if (senderName.charAt(0) == '/') {
+			    senderName.deleteCharAt(0);
+		    }
+
             Notification notification = new Notification();
             notification.setCreateDate(new Date());
             notification.setDeadline(action.getDeadline());
@@ -62,7 +81,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setSenderDepartmentId(pair.getDepartmentId());
             notification.setReceiverDepartmentId(pair.getParentDepartmentId());
             notification.setText(String.format(text,
-		            userInfo.getUser().getName(), sender.getName(),  receiver == null ? "" : receiver.getName(), action.getTaxType().getName(),
+		            userInfo.getUser().getName(), senderName,  receiver == null ? "" : receiverName, action.getTaxType().getName(),
 		            action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
 
             notifications.add(notification);
