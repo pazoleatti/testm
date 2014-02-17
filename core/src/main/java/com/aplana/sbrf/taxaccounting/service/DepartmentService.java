@@ -151,4 +151,10 @@ public interface DepartmentService {
 	 * @return набор сочетаний идентификатор-подразделение
 	 */
 	Map<Integer, Department> getDepartments(List<Integer> departmentId);
+
+    /**
+     * Список подразделений передаваемых в СУДИР
+     * @return подразделения с типом {@link DepartmentType.MANAGEMENT} и {@link DepartmentType.MANAGEMENT}
+     */
+    List<Department> getDepartmentForSudir();
 }

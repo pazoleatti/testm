@@ -231,7 +231,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 		return result;
 	}
 
-	private List<Integer> getExecutorsDepartments(List<Integer> departments) {
+    @Override
+    public List<Department> getDepartmentForSudir() {
+        ArrayList<Department> departments = new ArrayList<Department>();
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
+        return departments;
+    }
+
+    private List<Integer> getExecutorsDepartments(List<Integer> departments) {
         return departmentDao.getPerformers(departments);
     }
 

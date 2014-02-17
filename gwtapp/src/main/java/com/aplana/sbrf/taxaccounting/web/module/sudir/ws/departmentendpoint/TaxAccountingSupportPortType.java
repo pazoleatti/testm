@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint;
 
-import java.util.List;
-
-import javax.jws.WebService;
-
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.GenericAccountInfoAssembler;
+import javax.jws.WebService;
+import java.util.List;
 
 
 @WebService(endpointInterface="com.aplana.sbrf.taxaccounting.web.module.sudir.ws.departmentendpoint.TaxAccountingSupportingData",
@@ -24,7 +22,7 @@ public class TaxAccountingSupportPortType extends SpringBeanAutowiringSupport{
 	private GenericAccountInfoAssembler gais = new GenericAccountInfoAssembler(); 
 	
 	public List<TaxAccDepartment> getDepartments() {
-		return gais.desassembleDepartments(departmentService.listDepartments());
+		return gais.desassembleDepartments(departmentService.getDepartmentForSudir());
 	}
 
 }
