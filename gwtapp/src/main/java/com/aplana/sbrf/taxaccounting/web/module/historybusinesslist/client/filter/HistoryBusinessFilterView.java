@@ -143,7 +143,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         reportPeriodIds.setPeriods(reportPeriods);
     }
 
-
     @Inject
     public HistoryBusinessFilterView(Binder binder) {
         auditFormTypeId = new ValueListBox<AuditFormType>(new AbstractRenderer<AuditFormType>() {

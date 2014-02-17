@@ -223,6 +223,7 @@ public class FilterTreeListenerTest {
         Filter.getFilterQuery("LOWER(AliasStringType11) > 5", simpleFilterTreeListener);
     }
 
+    @Test
     public void complexExpr2(){
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
@@ -233,6 +234,30 @@ public class FilterTreeListenerTest {
         assertTrue(result.getQuery().toString().equals("LOWER(AliasStringType11) = LOWER(?)"));
         assertTrue(result.getParams().size() == 1);
         assertTrue(result.getParams().get(0).equals(new String("\"Сбербанк КИБ\" ЗАО ")));
+    }
+
+    @Test
+    public void recordIdTest(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("AliasStringType11 like '123' AND Record_id = 1", simpleFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("AliasStringType11 like ? AND id = 1"));
+        assertTrue(result.getParams().size() == 1);
+        assertTrue(result.getParams().get(0).equals(new String("123")));
+    }
+
+    @Test
+    public void recordIdTestUniversal(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 = 123 AND Record_id = 1", universalFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("aAlias123.NUMBER_value = 123 AND id = 1"));
     }
 }
 
