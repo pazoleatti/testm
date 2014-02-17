@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service("taUserService")
@@ -164,5 +165,22 @@ public class TAUserServiceImpl implements TAUserService {
 		taUserFullList.setTotalCount(userDao.count(filter));
 
 		return taUserFullList;
+	}
+
+	@Override
+	public List<Department> getDepartmentHierarchy(int department) {
+		return getHierarchy(departmentDao.getDepartment(department));
+	}
+
+	List<Department> getHierarchy(Department department) {
+
+		List<Department> departments = new LinkedList<Department>();
+		if (department.getType() != DepartmentType.ROOT_BANK) {
+			departments.add(0, department);
+		}
+		if (department.getParentId() != null) {
+			departments.addAll(0, getHierarchy(departmentDao.getDepartment(department.getParentId())));
+		}
+		return departments;
 	}
 }
