@@ -149,7 +149,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         if (formDataFilter.getFormTypeId() != null) {
             List<Integer> formTypeIds = new ArrayList<Integer>();//TODO убрать преобразование типов
             for (Long formTypeId : formDataFilter.getFormTypeId()){
-                formTypeIds.add(formTypeId.intValue());
+                formTypeIds.add((formTypeId != null) ? formTypeId.intValue() : null);
             }
             formDataDaoFilter.setFormTypeIds(formTypeIds);
         }

@@ -68,8 +68,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 		super(eventBus);
 
         initWidget(uiBinder.createAndBindUi(this));
-        formTypeId.setPeriodDates(new Date(), new Date());
-        formDataKind.setPeriodDates(new Date(), new Date());
+        formTypeId.setPeriodDates(null, new Date());
+        formDataKind.setPeriodDates(null, new Date());
 	}
 
 	@UiHandler("createButton")
@@ -273,13 +273,13 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
         // Вид налоговой формы
         // TODO да пребудет время когда люди будут использвать List и Set по назначениею
-        formTypeId.setValue(new ArrayList<Long>(types));
+        formTypeId.setValue(new ArrayList<Long>(types), true);
         formTypeId.setEnabled(false);
 
 
         // тип налоговой формы
         // TODO да пребудет время когда люди будут использвать List и Set по назначениею
-        formDataKind.setValue(new ArrayList<Long>(kinds));
+        formDataKind.setValue(new ArrayList<Long>(kinds), true);
         formDataKind.setEnabled(false);
 
         // TODO нужно включать мультиселект, сейчас это еще не предусмотрено
