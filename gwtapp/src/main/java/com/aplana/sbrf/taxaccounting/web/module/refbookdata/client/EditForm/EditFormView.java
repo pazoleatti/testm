@@ -253,11 +253,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 nfe.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
+                badValueException.setDescription("значение некорректно!");
 				throw badValueException;
 			} catch (ClassCastException cce) {
                 cce.printStackTrace();
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
+                badValueException.setDescription("значение некорректно!");
 				throw badValueException;
 			}
 		}
