@@ -408,7 +408,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBook.isHierarchic()) {
                 checkChildren(uniqueRecordIds);
             }
-            //refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
+            refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
@@ -436,7 +436,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);
-            //refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
