@@ -99,7 +99,7 @@
                 <g:Button ui:field="save" enabled="false" text="Сохранить" width="80px"/>
             </g:cell>
             <g:cell width="50%" horizontalAlignment="left">
-                <g:Button ui:field="cancel" enabled="false" text="Отмена" width="80px"/>
+                <g:Button ui:field="cancel" enabled="false" text="Отменить" width="80px"/>
             </g:cell>
         </g:HorizontalPanel>
 

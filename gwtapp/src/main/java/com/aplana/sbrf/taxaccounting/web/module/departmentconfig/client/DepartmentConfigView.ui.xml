@@ -399,7 +399,7 @@
                 <style:LeftBar childValign="middle" marginRight="9" addStyleNames="{style.btnPanel}">
                     <g:Button ui:field="editButton" text="Редактировать" enabled="false"/>
                     <g:Button ui:field="saveButton" text="Сохранить" visible="false"/>
-                    <g:Button ui:field="cancelButton" text="Отмена" visible="false"/>
+                    <g:Button ui:field="cancelButton" text="Отменить" visible="false"/>
                 </style:LeftBar>
 
             </fm:BodyContainer>

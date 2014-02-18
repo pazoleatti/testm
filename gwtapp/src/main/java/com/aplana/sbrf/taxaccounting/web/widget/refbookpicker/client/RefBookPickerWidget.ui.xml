@@ -125,7 +125,7 @@
         <g:HorizontalPanel addStyleNames="{style.footerPanel}" spacing="10">
             <g:Button ui:field="clearButton" text="Очистить" addStyleNames="{style.forButtons}"/>
             <g:Button ui:field="ok" text="Выбрать" addStyleNames="{style.forButtons}"/>
-            <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forButtons}"/>
+            <g:Button ui:field="cancel" text="Закрыть" addStyleNames="{style.forButtons}"/>
         </g:HorizontalPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>
