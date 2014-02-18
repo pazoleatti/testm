@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -53,10 +55,9 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
         FillFormFieldsResult result = new FillFormFieldsResult();
         switch (action.getFieldsNum()){
             case FIRST:
-                HashSet<Integer> departmentIds = new HashSet<Integer>(departmentService.getTaxFormDepartments(securityService.currentUserInfo().getUser(),
-                        asList(action.getTaxType())));
-                result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
-                        new ArrayList<Integer>(departmentIds)));
+	            List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
+	            periodList.addAll(periodService.getOpenForUser(securityService.currentUserInfo().getUser(), action.getTaxType()));
+                result.setReportPeriods(periodList);
                 break;
             case SECOND:
                 List<Integer> departments =
@@ -65,7 +66,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                     result.setDepartments(new ArrayList<Department>());
                     result.setDepartmentIds(new HashSet<Integer>());
                 } else {
-                    departmentIds = new HashSet<Integer>(departments);
+	                Set<Integer> departmentIds = new HashSet<Integer>(departments);
                     result.setDepartments(new ArrayList<Department>(
                             departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                     result.setDepartmentIds(departmentIds);

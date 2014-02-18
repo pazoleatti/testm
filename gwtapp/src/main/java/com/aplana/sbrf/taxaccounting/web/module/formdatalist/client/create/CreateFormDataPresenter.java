@@ -34,8 +34,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
 
-        void setAcceptableFormTypeList(List<FormType> list);
-
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
 
         FormDataFilter getFilterData();
@@ -90,21 +88,6 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     @Override
                     public void onSuccess(FillFormFieldsResult result) {
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
-                    }
-                }, this));
-    }
-
-    @Override
-    public void onFormKindChange() {
-        FillFormFieldsAction action = new FillFormFieldsAction();
-        action.setFieldsNum(FillFormFieldsAction.FieldsNum.FORTH);
-        action.setTaxType(taxType);
-        action.setFieldId(getView().getFilterData().getReportPeriodIds().get(0));
-        dispatchAsync.execute(action, CallbackUtils
-                .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
-                    @Override
-                    public void onSuccess(FillFormFieldsResult result) {
-                        getView().setAcceptableFormTypeList(result.getFormTypes());
                     }
                 }, this));
     }

@@ -45,7 +45,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Форма создания назначения" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" ui:field="modalWindowTitle" title="">
         <g:VerticalPanel height="100%" >
 
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
