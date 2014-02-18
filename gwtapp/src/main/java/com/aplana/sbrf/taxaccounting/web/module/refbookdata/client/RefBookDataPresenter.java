@@ -43,6 +43,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	private Long refBookDataId;
 
+    private Long recordId;
+    private Integer page;
+
 	EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
@@ -63,6 +66,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
         void setReadOnlyMode(boolean readOnly);
+        public int getPage();
+        public void setPage(int page);
     }
 
 	@Inject
@@ -85,6 +90,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	protected void onReveal() {
 		super.onReveal();
+        if (recordId != null) getView().setPage(page);
 		setInSlot(TYPE_editFormPresenter, editFormPresenter);
 	}
 
@@ -128,7 +134,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-			editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
+            recordId = getView().getSelectedRow().getRefBookRowId();
+            page = getView().getPage();
+			editFormPresenter.show(recordId);
 		}
 	}
 
@@ -198,7 +206,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								@Override
 								public void onSuccess(GetRefBookTableDataResult result) {
 									getView().setTableData(range.getStart(),
-											result.getTotalCount(), result.getDataRows());
+                                            result.getTotalCount(), result.getDataRows());
+                                    // http://jira.aplana.com/browse/SBRFACCTAX-5759 элемент можно выбирать только после загрузки нужной страницы
+                                    if (page != null && range.getStart() == page * range.getLength()) {
+                                        getView().setSelected(recordId);
+                                    }
 								}
 							}, RefBookDataPresenter.this));
 		}
