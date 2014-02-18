@@ -61,7 +61,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
 			    for (Department dep : userService.getDepartmentHierarchy(receiver.getId())) {
 				    receiverName.append("/").append(dep.getName());
 			    }
-			    if (receiverName.charAt(0) == '/') {
+			    if ((receiverName.length() != 0) && (receiverName.charAt(0) == '/')) {
 				    receiverName.deleteCharAt(0);
 			    }
 		    }
@@ -70,7 +70,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
 		    for (Department dep : userService.getDepartmentHierarchy(pair.getDepartmentId())) {
 			    senderName.append("/").append(dep.getName());
 		    }
-		    if (senderName.charAt(0) == '/') {
+		    if ((senderName.length() != 0) && (senderName.charAt(0) == '/')) {
 			    senderName.deleteCharAt(0);
 		    }
 
