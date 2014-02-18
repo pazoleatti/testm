@@ -130,19 +130,19 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         ps.appendQuery("(select\n");
         ps.appendQuery("  r.id as \"");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-        ps.appendQuery("\",\n");
 
         if (version == null) {
+			ps.appendQuery("\",\n");
             ps.appendQuery("  t.version as \"");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
             ps.appendQuery("\",\n");
 
             ps.appendQuery("  t.versionEnd as \"");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
-            ps.appendQuery("\",\n");
         }
 
         if (sortAttribute != null) {
+			ps.appendQuery("\",\n");
             ps.appendQuery("row_number()");
             // Надо делать сортировку
             ps.appendQuery(" over (order by '");
