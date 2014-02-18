@@ -179,18 +179,21 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 	@Override
 	public ReportPeriod getReportPeriodByDate(TaxType taxType, Date date) {
 		try {
-			return getJdbcTemplate().queryForObject(
+			List<ReportPeriod> result = getJdbcTemplate().query(
 					"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
-							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=?",
+							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=? order by rp.ord",
 					new Object[]{taxType.getCode(), date, date},
 					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
 					new ReportPeriodMapper()
 			);
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(String.format("Не найден отчетный период с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
-		} catch (IncorrectResultSizeDataAccessException e) {
-			throw new DaoException(String.format("Найдено более одного отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
+			if (result.isEmpty()) {
+				throw new DaoException(String.format("Не найден отчетный период с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
+			}
+			return result.get(0);
+		} catch (Exception e) {
+			// изменить форматирование для даты на "%td %<tm,%<tY" (31.12.2013) вместо "%tD" (12/31/13)(Marat Fayzullin 02.18.2014)
+			throw new DaoException(String.format("Позникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
 		}
 	}
 
