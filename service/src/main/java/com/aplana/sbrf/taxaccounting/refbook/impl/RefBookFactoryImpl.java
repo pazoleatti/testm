@@ -70,11 +70,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
 			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
 			return refBookSimple;
-        } else if(RefBookSimpleReadOnly.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+        } else if(RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
             RefBookBigDataProvider dataProvider = (RefBookBigDataProvider) applicationContext.getBean("RefBookBigDataProvider", RefBookDataProvider.class);
             dataProvider.setRefBookId(refBookId);
-            if (RefBookSimpleReadOnly.OKTMO_REF_BOOK_ID.equals(refBookId)) {
-                dataProvider.setTableName(RefBookSimpleReadOnly.OKTMO_TABLE_NAME);
+            if (RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {
+                dataProvider.setTableName(RefBookBigDataProvider.OKTMO_TABLE_NAME);
             }
             return dataProvider;
 		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) {
