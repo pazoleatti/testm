@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -151,13 +150,7 @@ boolean prevPeriodCheck() {
     }
     if (!lostReportPeriods.isEmpty()) {
         def periods = lostReportPeriods.join(', ')
-        def msg = "Не найдены экземпляры РНУ-6 за $periods!"
-        if (getBalancePeriod()) {
-            logger.warn(msg)
-        } else {
-            logger.error(msg)
-            return false
-        }
+        logger.warn("Не найдены экземпляры РНУ-6 за $periods!")
     }
     return true
 }
