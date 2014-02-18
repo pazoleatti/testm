@@ -49,7 +49,6 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
 	    res.setFilterValues(filterValues);
         // Периоды, связанные с доступными подразделениями
-	    periodService.getOpenForUser(currentUser.getUser(), action.getTaxType());
 	    List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
 	    periodList.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
 	    res.setReportPeriods(periodList);

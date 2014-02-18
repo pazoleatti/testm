@@ -5,7 +5,8 @@ public enum Formats {
 	DD_MM_YYYY (1, "dd.MM.yyyy", "99.99.9999"),
 	MM_YYYY    (2, "MM.yyyy", "99.9999"),
 	MMM_YYYY   (3, "MMMM yyyy", "99.9999"),
-	YYYY       (4, "yyyy", "9999");
+	YYYY       (4, "yyyy", "9999"),
+	DD_MM	   (5, "dd.MM", "99.99");
 
 	public static String[] months = new String[]{
 			"Январь",
