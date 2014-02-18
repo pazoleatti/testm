@@ -54,10 +54,12 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		res.setFilterValues(declarationFilterValues);
 
         // Периоды, связанные с доступными подразделениями
+		res.setPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
+                new ArrayList<Integer>(declarationFilterValues.getDepartmentIds())));
+
 		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
 		reportPeriods.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
-		res.setPeriods(reportPeriods);
-
+		res.setPeriodsForCreation(reportPeriods);
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
         dataFilter.setTaxType(action.getTaxType());
         res.setDefaultDecFilterData(dataFilter);

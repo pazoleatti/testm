@@ -471,8 +471,11 @@ def consolidation() {
                      * в общий список, и проверим остальные поля
                      */
                     def contains = sources202.find { el ->
-                        el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber) && el.regNumber.equals(sRow.regNumber)
+                        (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
+                                && el.powerVal.equals(sRow.powerVal) && el.baseUnit.equals(sRow.baseUnit))
                     }
+                    // «Графа 9» принимает значение «графы 11» формы-источника
+                    newRow.taxBaseOkeiUnit = sRow.baseUnit
                     if (contains != null) {
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
