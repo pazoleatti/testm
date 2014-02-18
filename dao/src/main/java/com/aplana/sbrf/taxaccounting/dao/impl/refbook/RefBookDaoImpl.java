@@ -978,7 +978,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
             "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
-            "select d.name as departmentName, pn.string_value as periodName, t.number_value as isT, i.number_value as isI, d.number_value as isD,\n" +
+            "select distinct d.name as departmentName, pn.string_value as periodName, t.number_value as isT, i.number_value as isI, d.number_value as isD,\n" +
             "case\n" +
             "\twhen u.ref_book_id = 31 then 'T'\n" +        //Транспортный налог
             "\twhen u.ref_book_id = 33 then 'I'\n" +        //Налог на прибыль
