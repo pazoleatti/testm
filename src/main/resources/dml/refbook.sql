@@ -65,6 +65,9 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (74, 'Поль�
 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (80, 'Виды изменений', 0, 1, 0);
 
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (82, 'Шифры видов реализованного (выбывшего) имущества', 0, 1, 0);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (83, 'Шифры видов реализации (выбытия)', 0, 1, 0);
+
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (84, 'Ценные бумаги', 0, 1, 0);
 
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (85, 'Виды срочных сделок', 0, 1, 0);
@@ -414,6 +417,12 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFEREN
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (801, 80, 'Код', 'CODE', 2, 0, null, null, 1, 0, 10, 1, 1);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (802, 80, 'Вид изменения', 'CHANGE_TYPE', 1, 1, null, null, 1, null, 20, 0, 0);
+
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT) VALUES (804, 82, 'Шифр вида реализованного (выбывшего) имущества', 'CODE', 2, 0, null, null, 1, 0, 1, 0, 1, null, null);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT) VALUES (805, 82, 'Вид реализованного (выбывшего) имущества', 'SOLD_PROPERTY', 1, 1, null, null, 1, null, 255, 0, 0, null, null);
+
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT) VALUES (806, 83, 'Шифр вида реализации (выбытия)', 'CODE', 2, 0, null, null, 1, 0, 1, 0, 1, null, null);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE, SORT_ORDER, FORMAT) VALUES (807, 83, 'Вид реализации (выбытия)', 'TYPES_IMPLEMENTATION', 1, 1, null, null, 1, null, 40, 0, 0, null, null);
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (808, 84, 'Идентификатор ценной бумаги', 'ID', 2, 1, null, null, 1, 0, 10, 0, 1);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (809, 84, 'Эмитент', 'ISSUER', 2, 2, null, null, 1, 0, 17, 0, 0);
