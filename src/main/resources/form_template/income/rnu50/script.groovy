@@ -46,6 +46,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 // Все атрибуты

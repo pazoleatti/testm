@@ -57,7 +57,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
             refBookPage = new PagingResult<Map<String, RefBookValue>>();
             for (Long id : action.getIdsTofind()) {
-                refBookPage.add(refBookDataProvider.getRecordData(id));
+                if (id != null) {
+                    refBookPage.add(refBookDataProvider.getRecordData(id));
+                }
             }
             refBookPage.setTotalCount(action.getIdsTofind().size());
         } else {

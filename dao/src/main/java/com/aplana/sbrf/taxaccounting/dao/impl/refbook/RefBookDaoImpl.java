@@ -962,7 +962,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "\t(select form_data_id from data_row where id in\n" +
             "\t(select row_id from numeric_value where column_id in\n" +
             "\t(select id from form_column where attribute_id in\n" +
-            "\t(select id from ref_book_attribute where reference_id = ?)) and value in %s))\n" +
+            "\t(select id from ref_book_attribute where ref_book_id = ?)) and value in %s))\n" +
             ")\n" +
             "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, rp.name as reportPeriodName, tp.year as year from forms f \n" +
             "join (select department_id, path from (SELECT f.department_id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
