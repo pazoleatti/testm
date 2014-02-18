@@ -179,7 +179,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getFilterValues().getDepartmentIds());
-                getView().setAcceptableReportPeriods(result.getPeriods());
+                getView().setAcceptableReportPeriods(result.getPeriodsForCreation());
                 getView().setAcceptableDeclarationTypes(result.getFilterValues().getDeclarationTypes());
                 setDeclarationFilter(dataFilter);
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
