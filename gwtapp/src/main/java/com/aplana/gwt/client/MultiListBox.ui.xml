@@ -79,7 +79,7 @@
                             <g:cell horizontalAlignment="ALIGN_RIGHT">
                                 <g:FlowPanel>
                                     <g:Button addStyleNames="{style.selectButton}" ui:field="selectButton">Выбрать</g:Button>
-                                    <g:Button visible="false" addStyleNames="{style.cancelButton}" ui:field="cancelButton">Отмена</g:Button>
+                                    <g:Button visible="false" addStyleNames="{style.cancelButton}" ui:field="cancelButton">Закрыть</g:Button>
                                 </g:FlowPanel>
                             </g:cell>
                         </g:HorizontalPanel>

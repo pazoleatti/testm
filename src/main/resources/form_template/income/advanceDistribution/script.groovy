@@ -76,6 +76,9 @@ switch (formDataEvent) {
         // для сохранения изменении приемников
 //        getData(formData).commit()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 //// Кэши и константы

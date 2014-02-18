@@ -29,7 +29,7 @@
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel width="100%" addStyleNames="{style.footerPanel}">
                         <g:Button addStyleNames="{style.footerButton}" ui:field="archiveButton" text="Пернести в архив"/>
-                        <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"/>
+                        <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
                 </g:FlowPanel>
             </g:cell>
         </g:VerticalPanel>

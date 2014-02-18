@@ -107,7 +107,7 @@
                         <g:cell horizontalAlignment="right"  verticalAlignment="middle">
                             <g:HorizontalPanel>
                                 <g:Button ui:field="ok" text="Выбрать"/>
-                                <g:Button ui:field="cancel" text="Отмена" addStyleNames="{style.forCancel}"/>
+                                <g:Button ui:field="cancel" text="Закрыть" addStyleNames="{style.forCancel}"/>
                             </g:HorizontalPanel>
                         </g:cell>
                     </g:HorizontalPanel>

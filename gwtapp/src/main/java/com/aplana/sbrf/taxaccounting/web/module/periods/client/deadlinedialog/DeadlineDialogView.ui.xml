@@ -64,7 +64,7 @@
                     <g:cell>
                         <g:FlowPanel>
                             <g:Button addStyleNames="{style.footerButtonLeft}" ui:field="saveButton" text="Сохранить"/>
-                            <g:Button addStyleNames="{style.footerButtonLeft}" ui:field="cancelButton" text="Отменить"/>
+                            <g:Button addStyleNames="{style.footerButtonLeft}" ui:field="cancelButton" text="Закрыть"/>
                         </g:FlowPanel>
                     </g:cell>
                     <g:cell horizontalAlignment="ALIGN_RIGHT">

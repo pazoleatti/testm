@@ -88,7 +88,7 @@
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <g:Button text="Сохранить" ui:field="saveButton"/>
                     <g:Button text="Сбросить" ui:field="resetButton"/>
-                    <g:Button text="Отмена" ui:field="cancelButton"/>
+                    <g:Button text="Отменить" ui:field="cancelButton"/>
                     <g:Button text="Ввести в действие" ui:field="activateVersion"/>
                 </g:HorizontalPanel>
 
