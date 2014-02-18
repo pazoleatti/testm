@@ -31,6 +31,9 @@ switch (formDataEvent) {
         consolidation()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 @Field
