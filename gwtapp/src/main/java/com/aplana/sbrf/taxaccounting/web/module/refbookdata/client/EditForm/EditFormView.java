@@ -89,7 +89,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 				case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(false, false);
-                    refbookWidget.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
+                    Date start = versionStart.getValue();
+                    if (start == null) {
+                        start = new Date();
+                    }
+                    refbookWidget.setPeriodDates(start, versionEnd.getValue());
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
 					widget = refbookWidget;
 					break;
