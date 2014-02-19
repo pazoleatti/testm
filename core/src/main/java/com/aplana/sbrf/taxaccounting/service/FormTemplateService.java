@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -40,13 +39,14 @@ public interface FormTemplateService {
 	
 	/**
 	 * Возвращает идентификатор действующего {@link FormTemplate описания налоговой формы} по виду налоговой формы
-	 * Такое описание для каждого вида формы в любой момент времени может быть только одно
+	 * Такое описание для каждого вида формы в аанном отчетном пеииоде может быть только одно
 	 * @param formTypeId идентификатор вида налоговой формы
+     * @param reportPeriodId идентификатор отчетного периода
 	 * @return идентификатор описания налоговой формы
 	 * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу, 
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
 	 */
-	int getActiveFormTemplateId(int formTypeId);
+	int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
 	/**
 	 * Снять блокировку с formTemplate.
@@ -111,8 +111,8 @@ public interface FormTemplateService {
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param formTemplate
-     * @return
+     * @param formTemplate макет для удаления
+     * @return идентификатор удаленного объекта
      */
     int delete(FormTemplate formTemplate);
 
