@@ -125,7 +125,7 @@
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
 
-                    <g:Button title="Поиск" text="Поиск" addStyleNames="{style.findButton}" ui:field="applyButton"/>
+                    <g:Button title="Найти" text="Найти" addStyleNames="{style.findButton}" ui:field="applyButton"/>
                 </g:HorizontalPanel>
                 <g:Label addStyleNames="{style.horSep}"/>
                 <g:ScrollPanel addStyleNames="{style.scroll}">

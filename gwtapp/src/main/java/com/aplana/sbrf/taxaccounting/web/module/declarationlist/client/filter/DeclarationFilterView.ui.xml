@@ -63,7 +63,7 @@
             <g:HTML addStyleNames="{style.separator}"/>
         </g:cell>
 
-        <g:Button title="Поиск" text="Поиск" ui:field="apply" addStyleNames="{margin.right15}"/>
+        <g:Button title="Найти" text="Найти" ui:field="apply" addStyleNames="{margin.right15}"/>
     </g:HorizontalPanel>
 
 </ui:UiBinder>

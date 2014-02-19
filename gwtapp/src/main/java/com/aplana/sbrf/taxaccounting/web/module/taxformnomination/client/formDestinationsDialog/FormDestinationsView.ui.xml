@@ -82,7 +82,7 @@
                 <style:RightBar>
                     <g:Button addStyleNames="{style.footerButton}"  ui:field="editButton" text="Сохранить"/>
                     <g:Button addStyleNames="{style.footerButton}"  ui:field="createButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Отменить"/>
+                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Закрыть"/>
                 </style:RightBar>
             </style:Bar>
 

@@ -3,6 +3,7 @@ package form_template.transport.summary
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -60,6 +61,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 
@@ -471,8 +475,11 @@ def consolidation() {
                      * в общий список, и проверим остальные поля
                      */
                     def contains = sources202.find { el ->
-                        el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber) && el.regNumber.equals(sRow.regNumber)
+                        (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
+                                && el.powerVal.equals(sRow.powerVal) && el.baseUnit.equals(sRow.baseUnit))
                     }
+                    // «Графа 9» принимает значение «графы 11» формы-источника
+                    newRow.taxBaseOkeiUnit = sRow.baseUnit
                     if (contains != null) {
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции

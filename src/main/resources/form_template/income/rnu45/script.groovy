@@ -1,5 +1,6 @@
 package form_template.income.rnu45
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -63,6 +64,9 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 

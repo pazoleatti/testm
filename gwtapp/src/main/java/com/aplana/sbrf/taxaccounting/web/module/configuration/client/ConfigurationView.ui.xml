@@ -47,7 +47,7 @@
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <g:Button ui:field="saveButton" text="Сохранить"/>
-                    <g:Button ui:field="reloadButton" text="Отмена"/>
+                    <g:Button ui:field="reloadButton" text="Отменить"/>
                 </g:HorizontalPanel>
 
                 <g:ResizeLayoutPanel height="100%" width="100%">

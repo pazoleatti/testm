@@ -86,7 +86,7 @@
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
                     <g:cell horizontalAlignment="left">
-                        <g:Button ui:field="findButton" addStyleNames="{style.btnFind}" text="Поиск"/>
+                        <g:Button ui:field="findButton" addStyleNames="{style.btnFind}" text="Найти"/>
                     </g:cell>
                 </g:HorizontalPanel>
                 <g:ResizeLayoutPanel addStyleNames="{style.table}">

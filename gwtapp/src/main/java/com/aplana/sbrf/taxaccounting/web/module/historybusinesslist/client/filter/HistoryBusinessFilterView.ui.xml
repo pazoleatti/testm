@@ -145,7 +145,7 @@
         <g:cell width="71px">
             <g:VerticalPanel>
                 <g:Label height="20px" text="Дата архивации: " visible="false"/>
-                <g:Button ui:field="search" addStyleNames="{style.btnFind}">Поиск</g:Button>
+                <g:Button ui:field="search" addStyleNames="{style.btnFind}">Найти</g:Button>
             </g:VerticalPanel>
         </g:cell>
     </g:HorizontalPanel>
