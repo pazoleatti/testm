@@ -8,22 +8,29 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
  * @author sgoryachkin
- *
  */
 public class InitRefBookMultiAction extends UnsecuredActionImpl<InitRefBookMultiResult> implements Serializable, ActionName {
-	private static final long serialVersionUID = 3385076853496363265L;
-	
-	private long refBookAttrId;
-	
-	public long getRefBookAttrId() {
-		return refBookAttrId;
-	}
-	public void setRefBookAttrId(long refBookAttrId) {
-		this.refBookAttrId = refBookAttrId;
-	}
+    private static final long serialVersionUID = 3385076853496363265L;
+
+    private long refBookAttrId;
+
+    public InitRefBookMultiAction() {
+    }
+
+    public InitRefBookMultiAction(long refBookAttrId) {
+        this.refBookAttrId = refBookAttrId;
+    }
+
+    public long getRefBookAttrId() {
+        return refBookAttrId;
+    }
+
+    public void setRefBookAttrId(long refBookAttrId) {
+        this.refBookAttrId = refBookAttrId;
+    }
 
     @Override
-	public String getName() {
-		return "Получение справочника";
-	}
+    public String getName() {
+        return "Получение справочника";
+    }
 }

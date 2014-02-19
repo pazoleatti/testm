@@ -175,6 +175,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         checkBoxNull.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
+                flatPicker.setMultiSelect(event.getValue());
                 boxDate.setMayBeNull(event.getValue());
                 boxMy.setMayBeNull(event.getValue());
                 boxY.setMayBeNull(event.getValue());

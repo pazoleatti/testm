@@ -1,22 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 /**
  * Версионный справочник с выбором значения из линейного или иерархичного опредставления
@@ -31,69 +36,203 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     private static Binder binder = GWT.create(Binder.class);
 
     @UiField
-    TextBox text;
+    TextBox textBox;
+    @UiField
+    Image pickImageButton;
 
     @UiField
-    Image selectButton;
+    HorizontalPanel widgetPanel;
+    @UiField
+    ModalWindow modalPanel;
+    @UiField
+    HTMLPanel widgetWrapper;
 
-    private ModalWindow popupPanel;
+    @UiField
+    Button searchButton;
+    @UiField
+    Button clearButton;
+    @UiField
+    Button pickButton;
+    @UiField
+    Button cancelButton;
+    @UiField
+    DateMaskBoxPicker versionDateBox;
+    @UiField
+    TextBox searchTextBox;
+    @UiField
+    Label selectionCountLabel;
 
-    private RefBookView refBookPiker;
+    /* Вьюха которая принимает параметры, загружает и отображает записи из справочника */
+    private RefBookView refBookView;
 
-    private boolean fireEvents = true;
+    /* Даты ограничевающего периода */
+    private Date startDate;
+    private Date endDate;
 
-    /**
-     * Признак иерархичности окна
-     */
-    private boolean isHierarchical;
+    /* Состояние виджета которые было перед нажатием кнопки "Выбрать"*/
+    private PickerState prevState = new PickerState();
+    /* Текущее состояние виджета */
+    private PickerState state = new PickerState();
+
+    /* Признак иерархичности справочника */
+    private boolean isHierarchical = false;
+    /* Признак - пробрасывать ли изменения из вьюхи */
+    private boolean isEnabledFireChangeEvent = false;
+    /* Флаг пустого значения виджета */
+    private boolean isNullValue = true;
 
     @UiConstructor
     public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
-        initWidget(binder.createAndBindUi(this));
         this.isHierarchical = isHierarchical;
-        popupPanel = new ModalWindow("Выбор значения из справочника");
+        state.setMultiSelect(multiSelect);
 
+        initWidget(binder.createAndBindUi(this));
 
-        // пример внедрения своего датапровайдера
-//        List<RefBookItem> refBookItems = new ArrayList<RefBookItem>();
-//        for(long i=1; i< 20;i++){
-//            List<RefBookRecordDereferenceValue>  values = new ArrayList<RefBookRecordDereferenceValue>();
-//            values.add(new RefBookRecordDereferenceValue(835L, "NAME", "NAME"+i));
-//            values.add(new RefBookRecordDereferenceValue(836L, "TAX_TYPE", "TAX_TYPE"+i));
-//            refBookItems.add(new RefBookItem(i, String.valueOf(i), values));
-//        }
-//        ListDataProvider<RefBookItem> listDataProvider = new ListDataProvider<RefBookItem>(RefBookPickerUtils.KEY_PROVIDER);
-//        listDataProvider.setList(refBookItems);
+        //refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
+        refBookView = new RefBookMultiPickerView(multiSelect);
 
-        refBookPiker = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
+        widgetWrapper.add(refBookView);
 
-        popupPanel.add(refBookPiker);
-        refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+        versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onValueChange(ValueChangeEvent<List<Long>> event) {
-                String defValue = refBookPiker.getDereferenceValue();
-                text.setText(defValue);
-                text.setTitle(TextUtils.generateTextBoxTitle(defValue));
-                updateLabelValue();
-                if (fireEvents) {
-                    ValueChangeEvent.fire(RefBookPickerWidget.this, event.getValue());
-                } else {
-                    fireEvents = true;
+            public void onValueChange(final ValueChangeEvent<Date> dateValueChangeEvent) {
+                Date d = dateValueChangeEvent.getValue();
+                if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
+                    versionDateBox.setValue(startDate, false);
                 }
-                popupPanel.hide();
+                state.setVersionDate(versionDateBox.getValue());
+                refBookView.reloadOnDate(versionDateBox.getValue());
             }
         });
+        versionDateBox.getDatePicker().addShowRangeHandler(new ShowRangeHandler<Date>() {
+            @Override
+            public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
+                Date d = new Date(dateShowRangeEvent.getStart().getTime());
+                while (d.before(dateShowRangeEvent.getEnd())) {
+                    if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
+                        versionDateBox.getDatePicker().setTransientEnabledOnDates(false, d);
+                    }
+                    CalendarUtil.addDaysToDate(d, 1);
+                }
+            }
+        });
+
+        refBookView.addValueChangeHandler(new ValueChangeHandler<Set<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Set<Long>> event) {
+                selectionCountLabel.setText("Выбрано: " + event.getValue().size());
+                clearAndSetValues(event.getValue());
+                updateUIState();
+                if (isEnabledFireChangeEvent) {
+                    isEnabledFireChangeEvent = false;
+                    ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
+                }
+            }
+        });
+
+        searchTextBox.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    refBookView.find(searchTextBox.getText());
+                    state.setSearchPattern(searchTextBox.getText());
+                }
+            }
+        });
+            // оставлю для примера
+//        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
+//            @Override
+//            public void OnHide(CanHide modalWindow) {
+//                Dialog.confirmMessage("Закрыть окно выбора из справочника",
+//                        "Закрытие окна приведет к отмене выбора. Продолжить?",
+//                        new DialogHandler() {
+//                            @Override
+//                            public void yes() {
+//                                cancelPick();
+//                                super.yes();
+//                            }
+//
+//                            @Override
+//                            public void no() {
+//                                super.no();
+//                            }
+//                        });
+//            }
+//        });
     }
 
-    @UiHandler("selectButton")
+    @UiHandler("pickImageButton")
     void onSelectButtonClicked(ClickEvent event) {
-        refBookPiker.load();
-        popupPanel.center();
+        refBookView.load(state);
+        modalPanel.center();
+    }
+
+    @UiHandler("searchButton")
+    void onSearchButtonClicked(ClickEvent event) {
+        refBookView.find(searchTextBox.getText());
+    }
+
+    @UiHandler("clearButton")
+    void onClearButtonClicked(ClickEvent event) {
+        searchTextBox.setText("");
+        versionDateBox.setValue(endDate != null ? endDate : startDate);
+
+        state.getSetIds().clear();
+        state.setSearchPattern(searchTextBox.getText());
+        state.setVersionDate(versionDateBox.getValue());
+        prevState.setValues(state);
+        isEnabledFireChangeEvent = true;
+        refBookView.load(state);
+        modalPanel.hide();
+    }
+
+    @UiHandler("pickButton")
+    void onPickButtonClicked(ClickEvent event) {
+        save();
+    }
+
+    @UiHandler("cancelButton")
+    void onCancelButtonClicked(ClickEvent event) {
+        cancelPick();
+    }
+
+    private void cancelPick() {
+        state.setValues(prevState);
+        refBookView.load(state);
+        searchTextBox.setText(state.getSearchPattern());
+        versionDateBox.setValue(state.getVersionDate());
+        modalPanel.hide();
+    }
+
+    private void save() {
+        clearAndSetValues(refBookView.getSelectedIds());
+        prevState.setValues(state);
+        updateUIState();
+        ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
+        modalPanel.hide();
+    }
+
+    private void clearAndSetValues(Collection<Long> longs) {
+        isNullValue = false;
+        state.getSetIds().clear();
+        state.getSetIds().addAll(longs);
+    }
+
+    @Override
+    public void setMultiSelect(boolean multiSelect) {
+        state.setMultiSelect(multiSelect);
+        isEnabledFireChangeEvent = true;
+        refBookView.setMultiSelect(multiSelect);
+    }
+
+    @Override
+    public Boolean isMultiSelect() {
+        return state.isMultiSelect();
     }
 
     @Override
     public List<Long> getValue() {
-        return refBookPiker.getValue();
+        return isNullValue ? null : state.getSetIds();
     }
 
     @Override
@@ -102,81 +241,153 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
-    public void setValue(List<Long> value, boolean fireEvents) {
-        this.fireEvents = fireEvents;
-        refBookPiker.setValue(value, fireEvents);
-    }
-
-    @Override
     public Long getSingleValue() {
-        return refBookPiker.getSingleValue();
+        return state.getSetIds().iterator().next();
     }
 
     @Override
-    public void setValue(Long value) {
-        setValue(Arrays.asList(value), false);
+    public void setSingleValue(Long value, boolean fireEvents) {
+        if (value == null) {
+            isNullValue = true;
+            state.getSetIds().clear();
+            if (fireEvents) {
+                ValueChangeEvent.fire(this, null);
+            }
+        } else {
+            setValue(Arrays.asList(value), fireEvents);
+        }
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Long>> handler) {
-        return asWidget().addHandler(handler, ValueChangeEvent.getType());
+    public void setSingleValue(Long value) {
+        setSingleValue(value, false);
+    }
+
+    @Override
+    public void setValue(List<Long> value, boolean fireEvents) {
+        prevState.setValues(state);
+        if (value == null) {
+            isNullValue = true;
+            state.getSetIds().clear();
+            if (fireEvents) {
+                ValueChangeEvent.fire(this, null);
+            }
+        } else {
+            isEnabledFireChangeEvent = fireEvents;
+            clearAndSetValues(value);
+            refBookView.load(state);
+        }
+    }
+
+    @Override
+    public void open() {
+        modalPanel.center();
+    }
+
+    @Override
+    public void load(long attributeId, String filter, Date startDate, Date endDate) {
+        setAttributeId(attributeId);
+        setFilter(filter);
+        setPeriodDates(startDate, endDate);
+        refBookView.load(state);
+    }
+
+    @Override
+    public void load() {
+        refBookView.load(state);
+    }
+
+    @Override
+    public String getOtherDereferenceValue(String alias) {
+        return refBookView.getOtherDereferenceValue(alias);
+    }
+
+    @Override
+    public String getOtherDereferenceValue(Long attrId) {
+        return refBookView.getOtherDereferenceValue(attrId);
+    }
+
+    private void updateUIState() {
+        String defValue = refBookView.getDereferenceValue();
+        System.out.println(defValue);
+        textBox.setText(defValue);
+        textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
+        updateLabelValue();
     }
 
     @Override
     public String getDereferenceValue() {
-        return text.getValue();
+        return textBox.getValue();
     }
 
     @Override
     public void setDereferenceValue(String value) {
-        text.setValue(value);
+        textBox.setValue(value);
         setLabelValue(value);
     }
 
     @Override
     public Long getAttributeId() {
-        return refBookPiker.getAttributeId();
+        return state.getRefBookAttrId();
     }
 
     @Override
     public void setAttributeId(long attributeId) {
-        refBookPiker.setAttributeId(attributeId);
+        state.setRefBookAttrId(attributeId);
     }
 
     /*Для совместимости с UiBinder */
     public void setAttributeIdInt(int attributeId) {
-        refBookPiker.setAttributeId(Long.valueOf(attributeId));
+        state.setRefBookAttrId((long) attributeId);
     }
 
     @Override
     public String getFilter() {
-        return refBookPiker.getFilter();
+        return state.getFilter();
     }
 
     @Override
     public void setFilter(String filter) {
-        refBookPiker.setFilter(filter);
-    }
-
-    @Override
-    public Date getEndDate() {
-        return refBookPiker.getEndDate();
-    }
-
-    @Override
-    public Date getStartDate() {
-        return refBookPiker.getStartDate();
+        state.setFilter(filter);
     }
 
     @Override
     public void setPeriodDates(Date startDate, Date endDate) {
-        refBookPiker.setPeriodDates(startDate, endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
+        state.setVersionDate(endDate != null ? endDate : startDate);
+        versionDateBox.setValue(state.getVersionDate());
     }
 
     @Override
     public void setTitle(String title) {
-        if (popupPanel != null) {
-            popupPanel.setText(title);
+        if (modalPanel != null) {
+            modalPanel.setText(title);
+        }
+    }
+
+    public boolean isVisible() {
+        return widgetPanel.isVisible();
+    }
+
+    public void setVisible(boolean visible) {
+        widgetPanel.setVisible(visible);
+    }
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Long>> handler) {
+        return addHandler(handler, ValueChangeEvent.getType());
+    }
+
+    @Override
+    public HandlerRegistration addCloseHandler(CloseHandler<ModalWindow> handler) {
+        return modalPanel.addHandler(handler, CloseEvent.getType());
+    }
+
+    @Override
+    public void setOnHideHandler(OnHideHandler<CanHide> hideHandler) {
+        if (hideHandler != null) {
+            modalPanel.setOnHideHandler(hideHandler);
         }
     }
 
@@ -196,9 +407,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             }
         }
         label.setText(stringValue);
-        if (stringValue.equals(EMPTY_STRING_VALUE))
-            label.setTitle(EMPTY_STRING_TITLE);
-        else
-            label.setTitle(stringValue);
+        label.setTitle(stringValue.equals(EMPTY_STRING_VALUE) ? EMPTY_STRING_TITLE : TextUtils.generateTextBoxTitle(stringValue));
     }
 }
