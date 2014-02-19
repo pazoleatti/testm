@@ -2,19 +2,28 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -31,7 +40,7 @@ import java.util.Set;
  * Date: 2013
  */
 public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
-        implements AuditFilterPresenter.MyView {
+        implements AuditFilterPresenter.MyView, Editor<LogSystemAuditFilter> {
 
     @UiField
     PeriodPickerPopupWidget reportPeriodIds;
@@ -39,21 +48,28 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     interface Binder extends UiBinder<Widget, AuditFilterView> {
     }
 
+    interface MyDriver extends SimpleBeanEditorDriver<LogSystemAuditFilter, AuditFilterView>{}
+
+    private MyDriver driver;
+
     @UiField
     DateMaskBoxPicker fromSearchDate;
 
     @UiField
     DateMaskBoxPicker toSearchDate;
 
+    @Path("departmentIds")
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;
 
+    @Path("formTypeIds")
     @UiField
     RefBookPicker formTypeId;
 
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> declarationTypeId;
 
+    @Path("formKind")
     @UiField
     RefBookPicker formDataKind;
 
@@ -63,6 +79,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField(provided = true)
     ValueListBox<AuditFormType> auditFormTypeId;
 
+    @Path("userIds")
     @UiField
     RefBookPicker user;
 
@@ -71,6 +88,10 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @UiField
     Panel formPanel;
+
+    @Editor.Ignore
+    @UiField
+    Button search;
 
     private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
@@ -98,56 +119,23 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public LogSystemFilter getFilterData() {
-        LogSystemFilter lsf = new LogSystemFilter();
-        // Отчетные периоды
-        lsf.setReportPeriodIds(reportPeriodIds.getValue());
-        // Подразделение
-        if (departmentSelectionTree.getValue() != null && !departmentSelectionTree.getValue().isEmpty()) {
-            lsf.setDepartmentId(departmentSelectionTree.getValue().get(0));
-        }
-        // Тип формы
-        lsf.setAuditFormTypeId(auditFormTypeId.getValue() == null ? null : auditFormTypeId.getValue().getId());
-        // Вид налоговой формы
-        lsf.setFormTypeId(formTypeId.getValue().isEmpty()? null : Integer.valueOf(String.valueOf(formTypeId.getValue().get(0))));
-        // Вид декларации
-        lsf.setDeclarationTypeId(declarationTypeId.getValue());
-        // Тип налоговой формы
-        lsf.setFormKind(formDataKind.getValue().isEmpty()? null :FormDataKind.fromId(Integer.valueOf(String.valueOf(formDataKind.getValue().get(0)))));
-        // Период
-        lsf.setFromSearchDate(fromSearchDate.getValue());
-        lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
-        // Пользователь
-        lsf.setUserIds(user.getValue());
-        lsf.setTaxType(taxType.getValue());
-
-        return lsf;
+    public HandlerRegistration addSearchButtonClickHandler(ClickHandler clickHandler) {
+        return search.addClickHandler(clickHandler);
     }
 
-    /*@Override
-    public void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler) {
-        auditFormTypeId.addValueChangeHandler(handler);
-    }*/
+    @Override
+    public LogSystemAuditFilter getFilterData() {
+        return driver.flush();
+    }
 
     @Override
     public void init() {
-        fromSearchDate.setValue(new Date());
-        toSearchDate.setValue(new Date());
-        departmentSelectionTree.setValue(null, true);
-        reportPeriodIds.setValue(null, true);
-        taxType.setValue(null, true);
-        auditFormTypeId.setValue(null, true);
-        user.setValue(null, true);
-        user.setDereferenceValue(null);
-        formDataKind.setValue(null, true);
-        formDataKind.setDereferenceValue(null);
-        formTypeId.setValue(null, true);
-        formTypeId.setDereferenceValue(null);
+        driver.edit(new LogSystemAuditFilter());
     }
 
     @Inject
     @UiConstructor
-    public AuditFilterView(final Binder uiBinder) {
+    public AuditFilterView(final Binder uiBinder, MyDriver driver) {
 
         auditFormTypeId = new ValueListBox<AuditFormType>(new AbstractRenderer<AuditFormType>() {
             @Override
@@ -191,6 +179,9 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         reportPeriodIds.setEnabled(false);
         formDataKind.setPeriodDates(new Date(), new Date());
         formTypeId.setEnabled(false);
+
+        this.driver = driver;
+        this.driver.initialize(this);
     }
 
     @UiHandler("search")
@@ -206,12 +197,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         if (fromDate != null && toDate != null) {
             if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
                 Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
-                return;
             }
-        }
-
-        if (getUiHandlers() != null) {
-            getUiHandlers().onSearchButtonClicked();
         }
     }
 
