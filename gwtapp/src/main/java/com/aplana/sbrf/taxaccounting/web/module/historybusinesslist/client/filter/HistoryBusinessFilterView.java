@@ -102,7 +102,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         // Тип формы
         lbf.setAuditFormTypeId(auditFormTypeId.getValue() == null ? null : auditFormTypeId.getValue().getId());
         // Вид налоговой формы
-        lbf.setFormTypeId(formTypeId.getValue().isEmpty()? null : Integer.valueOf(String.valueOf(formTypeId.getValue().get(0))));
+        lbf.setFormTypeId((formTypeId.getValue() == null || formTypeId.getValue().isEmpty()) ? null : Integer.valueOf(String.valueOf(formTypeId.getSingleValue())));
         // Вид декларации
         lbf.setDeclarationTypeId(declarationTypeIds.getValue());
         // Тип налоговой формы

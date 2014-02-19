@@ -1,0 +1,142 @@
+package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
+
+import java.util.*;
+
+/**
+ * Модель для хранения предыдущего значения сосотояния виджета
+ * По кнопке отмена должно устанавливаться этот объект
+ *
+ * @author aivanov
+ */
+public class PickerState{
+
+    private Long refBookAttrId;     // can't be null
+    private Date versionDate;       // can't be null
+    private Boolean multiSelect;    // can't be null
+
+    private String filter;
+    private String searchPattern;
+    private List<Long> setIds = new LinkedList<Long>();
+
+    public PickerState() {
+    }
+
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect) {
+        this.refBookAttrId = refBookAttrId;
+        this.filter = filter;
+        this.searchPattern = searchPattern;
+        this.versionDate = versionDate;
+        this.multiSelect = multiSelect;
+    }
+
+    public PickerState(Long refBookAttrId, String filter, String searchPattern, Date versionDate, Boolean multiSelect, List<Long> longList) {
+        this.refBookAttrId = refBookAttrId;
+        this.filter = filter;
+        this.searchPattern = searchPattern;
+        this.versionDate = versionDate;
+        this.multiSelect = multiSelect;
+
+        this.setIds.clear();
+        for (Long aLong : longList) {
+            this.setIds.add(aLong);
+        }
+    }
+
+    public void setValues(PickerState newState){
+        this.refBookAttrId = newState.getRefBookAttrId();
+        this.filter = newState.getFilter();
+        this.searchPattern = newState.getSearchPattern();
+        this.versionDate = newState.getVersionDate();
+        this.multiSelect = newState.isMultiSelect();
+        this.getSetIds().clear();
+        this.getSetIds().addAll(newState.getSetIds());
+    }
+
+
+
+    public Long getRefBookAttrId() {
+        return refBookAttrId;
+    }
+
+    public void setRefBookAttrId(Long refBookAttrId) {
+        this.refBookAttrId = refBookAttrId;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+    public String getSearchPattern() {
+        return searchPattern;
+    }
+
+    public void setSearchPattern(String searchPattern) {
+        this.searchPattern = searchPattern;
+    }
+
+    public Date getVersionDate() {
+        return versionDate;
+    }
+
+    public void setVersionDate(Date versionDate) {
+        this.versionDate = versionDate;
+    }
+
+    public Boolean isMultiSelect() {
+        return multiSelect;
+    }
+
+    public void setMultiSelect(Boolean multiSelect) {
+        this.multiSelect = multiSelect;
+    }
+
+    public List<Long> getSetIds() {
+        return setIds;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PickerState)) return false;
+
+        PickerState that = (PickerState) o;
+
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
+        if (!multiSelect.equals(that.multiSelect)) return false;
+        if (!refBookAttrId.equals(that.refBookAttrId)) return false;
+        if (searchPattern != null ? !searchPattern.equals(that.searchPattern) : that.searchPattern != null)
+            return false;
+        if (!setIds.equals(that.setIds)) return false;
+        if (!versionDate.equals(that.versionDate)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = refBookAttrId.hashCode();
+        result = 31 * result + versionDate.hashCode();
+        result = 31 * result + multiSelect.hashCode();
+        result = 31 * result + (filter != null ? filter.hashCode() : 0);
+        result = 31 * result + (searchPattern != null ? searchPattern.hashCode() : 0);
+        result = 31 * result + setIds.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PickerState{" +
+                "refBookAttrId=" + refBookAttrId +
+                ", filter='" + filter + '\'' +
+                ", searchPattern='" + searchPattern + '\'' +
+                ", versionDate=" + versionDate +
+                ", multiSelect=" + multiSelect +
+                ", setIds=" + setIds +
+                '}';
+    }
+
+}

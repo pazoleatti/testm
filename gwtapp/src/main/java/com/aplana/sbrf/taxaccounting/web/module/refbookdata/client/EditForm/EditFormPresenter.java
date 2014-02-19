@@ -133,7 +133,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
 	private void showRecord(final Long refBookRecordId) {
-		if (refBookRecordId == null) {
+        if (refBookRecordId == null) {
 			currentUniqueRecordId = null;
 			getView().fillInputFields(null);
 			setEnabled(true);
