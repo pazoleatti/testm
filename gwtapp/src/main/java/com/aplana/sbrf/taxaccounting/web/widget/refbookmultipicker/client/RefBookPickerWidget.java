@@ -309,6 +309,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void updateUIState() {
         String defValue = refBookView.getDereferenceValue();
+        System.out.println(defValue);
         textBox.setText(defValue);
         textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
         updateLabelValue();

@@ -123,7 +123,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
-                        getView().setSelection(result.getPage());
+                        if (result.getUuid() == null){
+                            getView().setSelection(result.getPage());
+                        }
                     }
                 }, this));
 

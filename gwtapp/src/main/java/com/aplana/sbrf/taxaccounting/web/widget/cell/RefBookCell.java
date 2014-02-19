@@ -27,8 +27,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
 
 import java.util.Arrays;
 import java.util.List;
