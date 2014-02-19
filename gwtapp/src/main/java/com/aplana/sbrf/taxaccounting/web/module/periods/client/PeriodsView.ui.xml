@@ -112,7 +112,7 @@
                         <g:HTML addStyleNames="{style.verSep}"/>
                     </g:cell>
 
-                    <g:Button title="Поиск" text="Поиск" ui:field="find"/>
+                    <g:Button title="Найти" text="Найти" ui:field="find"/>
                     <g:cell width="70%">
                         <g:Label width="100%"/>
                     </g:cell>

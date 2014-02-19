@@ -158,6 +158,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			}
 			i++;
 		}
+        if (i == refbookDataTable.getVisibleItems().size()) {
+            setPage(0);
+        }
 	}
 
 	@Override
@@ -182,6 +185,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     public void setReadOnlyMode(boolean readOnly) {
         addRow.setVisible(!readOnly);
         deleteRow.setVisible(!readOnly);
+    }
+
+    @Override
+    public int getPage(){
+        return pager.getPage();
+    }
+
+    @Override
+    public void setPage(int page){
+        pager.setPage(page);
     }
 
     @UiHandler("addRow")

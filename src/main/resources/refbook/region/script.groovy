@@ -29,14 +29,14 @@ switch (formDataEvent) {
 
 @Field
 def lstOkatoDefinition = ['Ненецкий автономный округ': '1110',
-        'Ханты - Мансийский автономный округ': '71100',
-        'Ямало - Ненецкий автономный округ': '71140']
+        'Ханты-Мансийский автономный округ - Югра': '71100',
+        'Ямало-Ненецкий автономный округ': '71140']
 
 // Получение строки для фильтрации записей по кодам ОКАТО
 def getFilterString(def tempList) {
     def retVal = ''
     tempList?.each { okato ->
-        retVal <<= "OKATO='$okato' or "
+        retVal <<= "OKATO='${okato.stringValue.padRight(11,"0")}' or "
     }
     if (tempList != null && !tempList.isEmpty()) {
         retVal = retVal.substring(0, retVal.length() - 3)
@@ -141,7 +141,6 @@ void importFromXML() {
                 }
             }
             if (map.containsKey('OKATO_DEFINITION')) {
-                map.OKATO_DEFINITION.value = map.OKATO_DEFINITION.stringValue.padRight(11, '0')
                 okatoList.add(map.OKATO_DEFINITION)
             }
         }
@@ -165,7 +164,8 @@ void importFromXML() {
         // Подстановка ссылок на ОКАТО
         for (def map : addRecordList) {
             def okato = map.OKATO_DEFINITION?.stringValue
-            if (okato != null) {
+            if (okato != null && okato != '') {
+                okato = okato.padRight(11,'0')
                 def actuaOkatolMap = actualOkatoRecordMap.get(okato)
 
                 if (actuaOkatolMap == null) {
@@ -284,7 +284,7 @@ void importFromXML() {
         }
         if (!updList.isEmpty()) {
             updList.each { map ->
-                dataProvider.updateRecordVersion(logger, map.get(RefBook.RECORD_ID_ALIAS).numberValue, actualDate, null, map)
+                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
             }
         }
     }

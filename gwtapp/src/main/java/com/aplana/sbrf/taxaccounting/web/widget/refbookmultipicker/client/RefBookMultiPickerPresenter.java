@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.google.gwt.user.client.ui.HasValue;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -127,7 +128,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
-                        getView().trySetSelection(result.getPage());
+                        if (result.getUuid() == null){
+                            getView().trySetSelection(result.getPage());
+                        }
                     }
                 }, this));
 

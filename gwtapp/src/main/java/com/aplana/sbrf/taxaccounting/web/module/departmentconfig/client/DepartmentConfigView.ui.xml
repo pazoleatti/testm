@@ -141,7 +141,7 @@
                         <g:HTML addStyleNames="{style.separator}" visible="false"/>
                     </g:cell>
 
-                    <g:Button title="Поиск" width="70px" text="Поиск" ui:field="findButton" visible="false"/>
+                    <g:Button title="Найти" width="70px" text="Поиск" ui:field="findButton" visible="false"/>
                 </g:HorizontalPanel>
 
                 <g:ScrollPanel addStyleNames="{style.scrolPanelStyle}">
@@ -187,7 +187,7 @@
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
                                         <g:cell width="1%">
-                                            <g:Label text="ОКАТО:" addStyleNames="{style.leftLabels}"/>
+                                            <g:Label text="ОКТМО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="840" isHierarchical="false" width="150px"

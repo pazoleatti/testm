@@ -181,7 +181,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
         String sql = getRefBookRecordSql(refBookId, recordId);
         RefBook refBook = get(refBookId);
-		try {
+        try {
         	return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найдена строка с id = %d", refBook.getName(), refBookId, recordId));
