@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -68,7 +69,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                 if (id != null) {
                     try{
                         refBookPage.add(refBookDataProvider.getRecordData(id));
-                    } catch (DaoException e){
+                    } catch (TAException e){
                         logger.error(e.getMessage());
                     }
                 }                
