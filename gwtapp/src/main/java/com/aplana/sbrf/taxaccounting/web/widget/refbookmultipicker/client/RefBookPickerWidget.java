@@ -121,10 +121,9 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onValueChange(ValueChangeEvent<Set<Long>> event) {
                 selectionCountLabel.setText("Выбрано: " + event.getValue().size());
-                clearAndSetValues(event.getValue());
-
                 if (isEnabledFireChangeEvent) {
                     isEnabledFireChangeEvent = false;
+                    clearAndSetValues(event.getValue());
                     updateUIState();
                     ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
                 }
@@ -183,6 +182,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         state.setSearchPattern(searchTextBox.getText());
         state.setVersionDate(versionDateBox.getValue());
         prevState.setValues(state);
+
         isEnabledFireChangeEvent = true;
         refBookView.load(state);
         modalPanel.hide();
@@ -254,6 +254,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.getSetIds().clear();
             prevState.setValues(state);
             refBookView.load(state);
+            updateUIState();
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
@@ -275,11 +276,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.getSetIds().clear();
             prevState.setValues(state);
             refBookView.load(state);
+            updateUIState();
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
         } else {
-            isEnabledFireChangeEvent = fireEvents;
+            isEnabledFireChangeEvent = true;
             clearAndSetValues(value);
             refBookView.load(state);
         }
@@ -314,8 +316,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     private void updateUIState() {
-        String defValue = refBookView.getDereferenceValue();
-        System.out.println(defValue);
+        String defValue = "";
+        if (!isNullValue) {
+            defValue = refBookView.getDereferenceValue();
+        }
         textBox.setText(defValue);
         textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
         updateLabelValue();
