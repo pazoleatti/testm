@@ -27,7 +27,7 @@
 
     <w:ModalWindow iconUrl="resources/img/unlock-16.png" glassEnabled="true" title="Открыть период">
 		<g:VerticalPanel width="400px">
-			<g:DecoratorPanel addStyleNames="{style.content}" width="90%">
+			<g:DecoratorPanel addStyleNames="{style.content}" width="380px">
 				<g:VerticalPanel>
 					<g:VerticalPanel>
 						<g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
