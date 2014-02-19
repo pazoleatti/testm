@@ -77,8 +77,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
 	@Override
-	public int getActiveFormTemplateId(int formTypeId) {
-		return formTemplateDao.getActiveFormTemplateId(formTypeId);
+	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
+		return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
 	}
 
 	@Override
