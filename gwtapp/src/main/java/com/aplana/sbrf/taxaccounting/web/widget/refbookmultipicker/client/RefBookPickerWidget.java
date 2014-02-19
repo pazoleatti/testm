@@ -250,6 +250,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         if (value == null) {
             isNullValue = true;
             state.getSetIds().clear();
+            prevState.setValues(state);
+            refBookView.load(state);
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
@@ -269,6 +271,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         if (value == null) {
             isNullValue = true;
             state.getSetIds().clear();
+            prevState.setValues(state);
+            refBookView.load(state);
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
