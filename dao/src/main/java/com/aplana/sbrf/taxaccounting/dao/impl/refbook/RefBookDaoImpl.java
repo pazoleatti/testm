@@ -836,61 +836,132 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
             "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
+    private final static String CHECK_COMBINED_UNIQUE_MATCHES = "select ID from (\n" +
+            "\tselect v.record_id as ID, count(v.record_id) as cnt from ref_book_value v\n" +
+            "\tjoin ref_book_record r on (r.id = v.record_id and r.ref_book_id = ? and r.status = 0)\n" +
+            "\twhere (\n" +
+            "%s" +
+            "\n\t)\t\n" +
+            "\tgroup by v.record_id\n" +
+            ") where cnt = ?";
+
     @Override
     public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull List<RefBookAttribute> attributes,
 			@NotNull List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
-        List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(CHECK_UNIQUE_MATCHES);
-        ps.addParam(refBookId);
-        for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()) {
-                hasUniqueAttributes = true;
-                ps.appendQuery(" and ");
-                if (records.size() > 1) {
-                    ps.appendQuery(" (");
-                }
-                for (int i=0; i < records.size(); i++) {
-                    Map<String, RefBookValue> values = records.get(i).getValues();
-                    ps.appendQuery("(v.ATTRIBUTE_ID = ?");
-                    ps.addParam(attribute.getId());
 
-                    ps.appendQuery(" and v.");
-                    ps.appendQuery(attribute.getAttributeType() + "_VALUE");
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        ps.appendQuery(" = '%s')");
+        //Проверяем нет ли особой обработки уникальных атрибутов
+        if (!UniqueAttributeCombination.getRefBookIds().contains(refBookId)) {
+            ps.appendQuery(CHECK_UNIQUE_MATCHES);
+            ps.addParam(refBookId);
+            for (RefBookAttribute attribute : attributes) {
+                if (attribute.isUnique()) {
+                    hasUniqueAttributes = true;
+                    ps.appendQuery(" and ");
+                    if (records.size() > 1) {
+                        ps.appendQuery(" (");
                     }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        ps.appendQuery(" = %s)");
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        ps.appendQuery(" = to_date('%s', 'DD.MM.YYYY'))");
-                    }
-                    attributeValues.add(values.get(attribute.getAlias()));
+                    for (int i=0; i < records.size(); i++) {
+                        Map<String, RefBookValue> values = records.get(i).getValues();
+                        ps.appendQuery("(v.ATTRIBUTE_ID = ?");
+                        ps.addParam(attribute.getId());
 
-                    if (i < records.size() - 1) {
-                        ps.appendQuery(" or ");
+                        ps.appendQuery(" and v.");
+                        ps.appendQuery(attribute.getAttributeType() + "_VALUE = ?");
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                            ps.addParam(values.get(attribute.getAlias()).getStringValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                            ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                            ps.addParam(values.get(attribute.getAlias()).getNumberValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                            ps.addParam(values.get(attribute.getAlias()).getDateValue());
+                        }
+                        ps.appendQuery(")");
+
+                        if (i < records.size() - 1) {
+                            ps.appendQuery(" or ");
+                        }
+                    }
+                    if (records.size() > 1) {
+                        ps.appendQuery(")");
                     }
                 }
-                if (records.size() > 1) {
-                    ps.appendQuery(")");
+
+                if (hasUniqueAttributes) {
+                    return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                        @Override
+                        public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                        }
+                    });
+                } else {
+                    return null;
                 }
             }
-        }
+        } else {
+            List<Long> uniqueAttributes = UniqueAttributeCombination.getByRefBookId(refBookId).getAttributeIds();
 
-        if (hasUniqueAttributes) {
-            String sql = String.format(ps.getQuery().toString(), attributeValues.toArray());
+            Map<Long, RefBookAttribute> attrMap = new HashMap<Long, RefBookAttribute>();
+            for (RefBookAttribute attribute : attributes) {
+                attrMap.put(attribute.getId(), attribute);
+            }
 
-            return getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+            ps.appendQuery(CHECK_COMBINED_UNIQUE_MATCHES);
+            ps.addParam(refBookId);
+
+            StringBuilder attrQuery = new StringBuilder();
+
+            for (int i = 0; i < records.size(); i++) {
+                Map<String, RefBookValue> values = records.get(i).getValues();
+                attrQuery.append("\t\t(");
+                for (int j = 0; j < uniqueAttributes.size(); j++) {
+                    RefBookAttribute attribute = attrMap.get(uniqueAttributes.get(j));
+                    String type = attribute.getAttributeType().toString() + "_VALUE";
+                    attrQuery.append("(v.attribute_id = ? and v.").append(type).append(" = ?)");
+                    ps.addParam(attribute.getId());
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        ps.addParam(values.get(attribute.getAlias()).getStringValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        ps.addParam(values.get(attribute.getAlias()).getNumberValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getDateValue());
+                    }
+                    if (j < uniqueAttributes.size() - 1) {
+                        attrQuery.append(" or ");
+                    }
+                }
+                attrQuery.append(")");
+                if (i < records.size() - 1) {
+                    attrQuery.append(" or \n");
+                }
+            }
+            ps.addParam(uniqueAttributes.size());
+            String sql = String.format(ps.getQuery().toString(), attrQuery);
+            List<Long> matchedIds = getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Long>() {
                 @Override
-                public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("ID");
                 }
             });
-        } else {
-            return null;
+            List<Pair<Long, String>> result = new ArrayList<Pair<Long, String>>();
+            for (Long id : matchedIds) {
+                for (Long uniqueAttribute : uniqueAttributes) {
+                    result.add(new Pair<Long, String>(id, attrMap.get(uniqueAttribute).getName()));
+                }
+            }
+            return result;
         }
+        return null;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
@@ -904,7 +975,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ")";
 
     @Override
-    public void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo) {
+    public List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo) {
         List<Long> recordIds = new ArrayList<Long>();
         for (Pair<Long,String> pair : recordPairs) {
             recordIds.add(pair.getFirst());
@@ -912,19 +983,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 SqlUtils.transformToSqlInStatement(recordIds));
-        List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
-        if (conflictedIds.size() > 0) {
-            StringBuilder attrNames = new StringBuilder();
-            for (Long id : conflictedIds) {
-                for (Pair<Long,String> pair : recordPairs) {
-                    if (pair.getFirst().equals(id)) {
-                        attrNames.append("'").append(pair.getSecond()).append("',");
-                    }
-                }
-            }
-            attrNames.deleteCharAt(attrNames.length()-1);
-            throw new DaoException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
-        }
+        return getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
     }
 
     public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
