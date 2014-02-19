@@ -88,7 +88,7 @@
 			<style:Bar addStyleNames="{style.footerPanel}">
 				<style:RightBar>
 					<g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Открыть период" width="120px" />
-					<g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно" />
+					<g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно" width="120px"/>
 				</style:RightBar>
 			</style:Bar>
 
