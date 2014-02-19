@@ -597,8 +597,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
         //Сказали что дату окончания не обязательно сравнивать, т.к. она при сохранении макета должна быть кратна отчетному периоду
         if (templateEndDate != null)
-            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) >= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0
-                    || templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) <= 0;
+            return  formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0;
         else
             return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
                     || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0;

@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.TAException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -8,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookMultiValuesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefMultiBookValuesResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
@@ -36,6 +40,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     @Autowired
     RefBookHelper refBookHelper;
 
+    @Autowired
+    LogEntryService logEntryService;
+
     public GetRefBookMultiValuesHandler() {
         super(GetRefBookMultiValuesAction.class);
     }
@@ -43,6 +50,8 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     @Override
     public GetRefMultiBookValuesResult execute(GetRefBookMultiValuesAction action,
                                                ExecutionContext context) throws ActionException {
+
+        Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 
         RefBookAttribute sortAttribute = getRefBookAttributeById(refBook, action.getSortAttributeIndex());
@@ -57,7 +66,13 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
             refBookPage = new PagingResult<Map<String, RefBookValue>>();
             for (Long id : action.getIdsTofind()) {
-                refBookPage.add(refBookDataProvider.getRecordData(id));
+                if (id != null) {
+                    try{
+                        refBookPage.add(refBookDataProvider.getRecordData(id));
+                    } catch (TAException e){
+                        logger.error(e.getMessage());
+                    }
+                }                
             }
             refBookPage.setTotalCount(action.getIdsTofind().size());
         } else {
@@ -67,7 +82,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         }
         GetRefMultiBookValuesResult result = new GetRefMultiBookValuesResult();
+        result.setUuid(logEntryService.save(logger.getEntries()));
         result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
+
         return result;
     }
 

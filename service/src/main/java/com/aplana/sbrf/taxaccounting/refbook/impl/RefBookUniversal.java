@@ -19,7 +19,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -309,6 +308,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             boolean isRelevancePeriodChanged = false;
             if (!isJustNeedValuesUpdate) {
+                assert versionFrom != null;
                 isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
                         || (versionTo != null && !versionTo.equals(oldVersionPeriod.getVersionEnd()))
                         || (oldVersionPeriod.getVersionEnd() != null && !oldVersionPeriod.getVersionEnd().equals(versionTo));
@@ -320,9 +320,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
 
                 //Проверка использования
-                boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordId, versionFrom);
-                if (isReferenceToVersionExists) {
-                    throw new ServiceException("Обнаружено использование версии в других точках запроса");
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId));
+                if (usagesResult != null && !usagesResult.isEmpty()) {
+                    for (String error: usagesResult) {
+                        logger.error(error);
+                    }
+                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
                 }
             }
 
@@ -408,7 +411,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBook.isHierarchic()) {
                 checkChildren(uniqueRecordIds);
             }
-            //refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
+            refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
@@ -436,7 +439,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
             uniqueRecordIds.addAll(fakeVersionIds);
-            //refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
+            refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);

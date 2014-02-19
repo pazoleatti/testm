@@ -7,6 +7,4 @@ public interface CreateFormDataUiHandlers extends UiHandlers {
     void onConfirm();
 
     void onReportPeriodChange();
-
-    void onFormKindChange();
 }

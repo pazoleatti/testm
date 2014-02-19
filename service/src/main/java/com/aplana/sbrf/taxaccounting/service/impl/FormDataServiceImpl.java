@@ -251,12 +251,9 @@ public class FormDataServiceImpl implements FormDataService {
 			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
 			if (logger.containsLevel(LogLevel.ERROR)) {
 				throw new ServiceLoggerException(
-						"Произошли ошибки в скрипте создания налоговой формы",
+						"Произошли ошибки в скрипте после создания налоговой формы",
 						logEntryService.save(logger.getEntries()));
 			}
-			logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.AFTER_CREATE, null);
-			auditService.add(FormDataEvent.AFTER_CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-					null, formData.getFormType().getId(), formData.getKind().getId(), null);
 		}
 
 		dataRowDao.commit(formData.getId());

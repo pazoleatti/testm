@@ -84,13 +84,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	@Override
 	public void onBrowserEvent(final Context context, final Element parent, final Long nvalue,
 			final NativeEvent nevent, final ValueUpdater<Long> valueUpdater) {
-		
 
 		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
 		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
-			
+
 	    String eventType = nevent.getType();
 	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
 	    		|| (CLICK.equals(eventType))) {
@@ -154,8 +153,9 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		if (rendValue == null) {
 			rendValue = "";
 		}
+
 		sb.append(renderer.render(rendValue));
-        if (cell.isEditable()) {
+        if ((DataRowEditableCellUtils.editMode(columnContext, cell))&&cell.isEditable()) {
             sb.append(template.referenceIcon());
         }
     }

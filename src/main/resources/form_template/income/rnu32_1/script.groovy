@@ -67,7 +67,8 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE :
         consolidation()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
     case FormDataEvent.MIGRATION :
         break

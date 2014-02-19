@@ -218,7 +218,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		} catch (BadValueException bve) {
             isFormModified = false;
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\" - " + bve.getDescription()));
+            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
             action.setLogEntries(logEntries);
 
@@ -235,8 +235,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onCancelClicked() {
-		isFormModified = false;
-		showRecord(currentUniqueRecordId);
+        if (isFormModified) {
+            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    isFormModified = false;
+                    onSaveClicked();
+                }
+
+                @Override
+                public void no() {
+                    isFormModified = false;
+                    showRecord(currentUniqueRecordId);
+                    if (currentUniqueRecordId == null) setEnabled(false);
+                }
+            });
+        } else {
+            showRecord(currentUniqueRecordId);
+            if (currentUniqueRecordId == null) setEnabled(false);
+        }
 	}
 
 	@Override

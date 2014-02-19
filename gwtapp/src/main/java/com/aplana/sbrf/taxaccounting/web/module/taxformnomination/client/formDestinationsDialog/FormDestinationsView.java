@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDestinationsDialog;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
@@ -29,6 +30,9 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	}
 
     private boolean isEditForm = false;
+
+    @UiField
+    ModalWindow modalWindowTitle;
 
     @UiField
     RefBookPickerWidget formDataKind;
@@ -206,6 +210,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     public void prepareCreationForm(){
         isEditForm = false;
         resetForm();
+        modalWindowTitle.setTitle("Форма создания назначения");
         // кнопки "создать" и "изменить"
         createButton.setVisible(true);
         editButton.setVisible(false);
@@ -253,6 +258,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     public void prepareEditForm(List<FormTypeKind> formTypeKinds){
         isEditForm = true;
         resetForm();
+        modalWindowTitle.setTitle("Форма редактирования назначения");
         // установка выбранных строк
         selectedDFT = formTypeKinds;
 

@@ -127,30 +127,31 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         }
 
         ps.appendQuery("SELECT * FROM ");
-        ps.appendQuery("(select\n");
-        ps.appendQuery("  r.id as \"");
+        ps.appendQuery("(select r.id as ");
         ps.appendQuery(RefBook.RECORD_ID_ALIAS);
-        ps.appendQuery("\",\n");
 
         if (version == null) {
-            ps.appendQuery("  t.version as \"");
+            ps.appendQuery(",  t.version as ");
             ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
-            ps.appendQuery("\",\n");
+            ps.appendQuery(",");
 
-            ps.appendQuery("  t.versionEnd as \"");
+            ps.appendQuery("  t.versionEnd as ");
             ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
-            ps.appendQuery("\",\n");
         }
 
-        if (sortAttribute != null) {
-            ps.appendQuery("row_number()");
+        if (isSupportOver() && sortAttribute != null) {
+			ps.appendQuery(",");
+            ps.appendQuery(" row_number()");
             // Надо делать сортировку
             ps.appendQuery(" over (order by '");
             ps.appendQuery(sortAttribute.getAlias());
             ps.appendQuery("'");
-            ps.appendQuery(isSortAscending ? "ASC":"DESC");
+            ps.appendQuery(isSortAscending ? " ASC":" DESC");
             ps.appendQuery(")");
             ps.appendQuery(" as row_number_over\n");
+        } else {
+            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
+            ps.appendQuery(", rownum row_number_over\n");
         }
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {

@@ -75,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
 	@Override
 	public int getCount(int receiverDepartmentId) {
 		NotificationsFilterData filter = new NotificationsFilterData();
-		filter.setReceiverDepartmentId(receiverDepartmentId);
+		filter.setSenderDepartmentId(receiverDepartmentId);
 		return notificationDao.getCountByFilter(filter);
 	}
 }

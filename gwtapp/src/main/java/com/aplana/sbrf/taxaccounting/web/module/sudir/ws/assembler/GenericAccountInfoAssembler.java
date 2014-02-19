@@ -138,11 +138,11 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 		List<TaxAccDepartment> listTaxAccDepartments = new ArrayList<TaxAccDepartment>();
 		for (Department department : listDepartments) {
 			TaxAccDepartment taxAccDepartment = new TaxAccDepartment();
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder("");
             taxAccDepartment.setParentId(Integer.toString(0));
             buildAttrName(builder, department);
             taxAccDepartment.setId(Integer.toString(department.getId()));
-            taxAccDepartment.setName(builder.toString().substring(1));
+            taxAccDepartment.setName(builder.toString().isEmpty()?builder.toString():builder.toString().substring(1));
 			
 			listTaxAccDepartments.add(taxAccDepartment);
 		}
@@ -154,7 +154,8 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
     private void buildAttrName(StringBuilder builder, Department department){
         if (department.getParentId() != null)
             buildAttrName(builder, departmentService.getDepartment(department.getParentId()));
-        builder.append("/").append(department.getShortName());
+        if (department.getType().getCode() != 1)
+            builder.append("/").append(department.getShortName());
     }
 
 }

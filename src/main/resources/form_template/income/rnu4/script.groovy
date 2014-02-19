@@ -17,7 +17,6 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -44,6 +43,9 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 
@@ -83,19 +85,6 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-    }
 }
 
 //// Кастомные методы

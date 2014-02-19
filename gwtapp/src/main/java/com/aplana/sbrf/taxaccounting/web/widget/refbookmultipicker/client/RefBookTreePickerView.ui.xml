@@ -95,7 +95,7 @@
             </g:cell>
             <g:Button ui:field="clearButton" text="Очистить" width="70px"/>
             <g:Button ui:field="okButton" text="Выбрать" width="70px"/>
-            <g:Button ui:field="cancel" text="Отмена" width="70px"/>
+            <g:Button ui:field="cancel" text="Закрыть" width="70px"/>
         </g:HorizontalPanel>
     </g:VerticalPanel>
 </ui:UiBinder>
