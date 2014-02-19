@@ -173,12 +173,12 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         }
 
         // Тип налоговой формы
-        if (formDataKind.getValue().size() == 0){
+        if (formDataKind.getValue() == null || formDataKind.getValue().size() == 0){
             emptyFields.add("Тип налоговой формы");
         }
 
         // Вид налоговой формы
-        if (formTypeId.getValue().size() == 0){
+        if (formTypeId.getValue() == null || formTypeId.getValue().size() == 0){
             emptyFields.add("Вид налоговой формы");
         }
 

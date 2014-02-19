@@ -9,8 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookView;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -49,8 +48,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-    private ModalWindow panel;
-	private RefBookView refBookPiker = new RefBookMultiPickerView();
+	private RefBookPickerWidget refBookPiker = new RefBookPickerWidget(false, false);
 	
 	private HandlerRegistration changeHandlerRegistration;
 
@@ -67,16 +65,15 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
 		// Create popup panel
-        this.panel = new ModalWindow(this.column.getName());
+        refBookPiker.setTitle(this.column.getName());
 
+        refBookPiker.addCloseHandler(new CloseHandler<ModalWindow>() {
+            public void onClose(CloseEvent<ModalWindow> event) {
+                changeHandlerRegistration.removeHandler();
+            }
+        });
 
-		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
-			public void onClose(CloseEvent<PopupPanel> event) {
-				changeHandlerRegistration.removeHandler();
-			}
-		});
-
-        panel.add(refBookPiker);
+        refBookPiker.setVisible(false);
 	}
 
 	@Override
@@ -115,6 +112,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 				public void onValueChange(ValueChangeEvent<List<Long>> event) {
 					// Update the cell and value updater.
                     List<Long> values = event.getValue();
+                    System.out.println(values);
                     Long value = (values != null && !values.isEmpty() ? values.get(0) : null);
 
 					@SuppressWarnings("unchecked")
@@ -137,13 +135,11 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                     if (valueUpdater != null) {
 						valueUpdater.update(value);
 					}
-					// Скрываем панель. При скрытии удаляется хендлер.
-					panel.hide();
 				}
 			});
 			
 			// Устанавливаем позицию и отображаем справочник
-			panel.center();
+			refBookPiker.open();
 			
 		}
 	}

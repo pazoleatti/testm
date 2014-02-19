@@ -1,16 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
-import com.google.gwt.user.client.ui.HasValue;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -26,81 +22,77 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         implements RefBookMultiPickerUiHandlers {
 
     private final DispatchAsync dispatcher;
-
-    private Long refBookAttrId;
-    private String filter;
-    private Date relevanceDate;
-    private Boolean multiSelect;
+    private PickerState ps;
     private Integer sortColumnIndex;
     private boolean isSortAscending = true;
 
-    interface MyView extends View, HasValue<List<Long>>, HasUiHandlers<RefBookMultiPickerUiHandlers> {
+    interface MyView extends View, HasUiHandlers<RefBookMultiPickerUiHandlers> {
+
         void setHeaders(Map<String, Integer> headers);
-
-        void setVersion(Date version);
-
-        Date getVersion();
-
-        Boolean getMultiSelect();
-
-        String getSearchPattern();
-
-        Long getAttributeId();
-
-        String getFilter();
 
         void setRowData(int start, List<RefBookItem> values, int size);
 
-        void trySetSelection(List<RefBookItem> values);
+        void setSelection(List<RefBookItem> values);
 
-        List<RefBookItem> getSelectionValues();
-
-        void refreshDataAndGoToFirstPage();
-
-        void widgetFireChangeEvent(List<Long> value);
+        void refresh();
     }
 
     public RefBookMultiPickerPresenter(MyView view) {
         super(GINContextHolder.getEventBus(), view);
         dispatcher = GINContextHolder.getDispatchAsync();
         getView().setUiHandlers(this);
-        this.multiSelect = getView().getMultiSelect();
+        ps = new PickerState();
     }
 
     @Override
-    public void init(final long refBookAttrId, final String filter, Date relevanceDate, Boolean multiSelect) {
-        if (isNewParams()) {
-            if (getView().getAttributeId() == null) {
+    public void init(final PickerState newState) {
+        if (isNeedReloadHeaders(newState)) {
+            // Установка новых значений после проверки на новость основных параметров
+            setNewState(newState);
+            if (ps.getRefBookAttrId() == null) {
                 return;
             }
-            if (getView().getVersion() == null) {
+            if (ps.getVersionDate() == null) {
                 return;
             }
 
-            InitRefBookMultiAction initRefBookMultiAction = new InitRefBookMultiAction();
-            initRefBookMultiAction.setRefBookAttrId(getView().getAttributeId());
+            dispatcher.execute(new InitRefBookMultiAction(ps.getRefBookAttrId()),
+                    CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
+                        @Override
+                        public void onSuccess(InitRefBookMultiResult result) {
+                            getView().setHeaders(result.getHeaders());
+                            getView().refresh();
 
-            dispatcher.execute(initRefBookMultiAction, CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
-                @Override
-                public void onSuccess(InitRefBookMultiResult result) {
-                    getView().setHeaders(result.getHeaders());
-                    getView().refreshDataAndGoToFirstPage();
-                }
-            }, this));
+                            if (newState.getSetIds().size() > 0) {
+                                loadingForSelection(newState.getSetIds());
+                            } else {
+                                getView().setSelection(new ArrayList<RefBookItem>());
+                            }
+                        }
+                    }, this));
+        } else {
+            //иначе просто сеттим
+            setNewState(newState);
+            if (newState.getSetIds().size() > 0) {
+                loadingForSelection(newState.getSetIds());
+            } else {
+                getView().setSelection(new ArrayList<RefBookItem>());
+            }
+            getView().refresh();
         }
     }
 
     @Override
     public void reload(Date relevanceDate) {
-        init(getView().getAttributeId(), getView().getFilter(), relevanceDate, multiSelect);
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
     }
 
     @Override
     public void rangeChanged(int startIndex, int maxRows) {
-        if (getView().getAttributeId() == null) {
+        if (ps.getRefBookAttrId() == null) {
             return;
         }
-        if (getView().getVersion() == null) {
+        if (ps.getVersionDate() == null) {
             getView().setRowData(0, new ArrayList<RefBookItem>(), 0);
             return;
         }
@@ -118,20 +110,20 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     }
 
     @Override
-    public void loadingForSelection(List<Long> ids) {
-        if (getView().getAttributeId() == null) {
+    public void loadingForSelection(Collection<Long> ids) {
+        if (ps.getRefBookAttrId() == null) {
             return;
         }
-        if (getView().getVersion() == null) {
+        if (ps.getVersionDate() == null) {
             return;
         }
 
-        GetRefBookMultiValuesAction action = getRowsLoadAction(null, ids);
+        GetRefBookMultiValuesAction action = getRowsLoadAction(null, new ArrayList<Long>(ids));
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
-                        getView().trySetSelection(result.getPage());
+                        getView().setSelection(result.getPage());
                     }
                 }, this));
 
@@ -139,13 +131,13 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     private GetRefBookMultiValuesAction getRowsLoadAction(PagingParams pagingParams, List<Long> idToFinds) {
         GetRefBookMultiValuesAction action = new GetRefBookMultiValuesAction();
-        action.setSearchPattern(getView().getSearchPattern());
-        action.setFilter(getView().getFilter());
+        action.setSearchPattern(ps.getSearchPattern());
+        action.setFilter(ps.getFilter());
         action.setSortAscending(isSortAscending);
         action.setSortAttributeIndex(sortColumnIndex);
         action.setPagingParams(pagingParams);
-        action.setRefBookAttrId(getView().getAttributeId());
-        action.setVersion(getView().getVersion());
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setVersion(ps.getVersionDate());
         action.setIdsTofind(idToFinds);
 
         return action;
@@ -155,48 +147,45 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     public void onSort(Integer columnIndex, boolean isSortAscending) {
         sortColumnIndex = columnIndex;
         this.isSortAscending = isSortAscending;
-        getView().refreshDataAndGoToFirstPage();
+        getView().refresh();
     }
 
     @Override
-    public void search() {
-        getView().refreshDataAndGoToFirstPage();
+    public void find(String searchPattern) {
+        ps.setSearchPattern(searchPattern);
     }
 
-
-    @Override
-    public void versionChange() {
-        getView().refreshDataAndGoToFirstPage();
+    private boolean isNeedReloadHeaders(PickerState newPs) {
+        return RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate());
     }
 
+    private void setNewState(PickerState newPs) {
+        ps.setRefBookAttrId(newPs.getRefBookAttrId());
+        ps.setFilter(newPs.getFilter());
+        ps.setSearchPattern(newPs.getSearchPattern());
+        ps.setVersionDate(newPs.getVersionDate());
+        ps.setMultiSelect(newPs.isMultiSelect());
+    }
 
     /* Проверка на изменения входных параметров*/
-    // TODO (aivanov) вынести в RefBookPickerUtils
-    private boolean isNewParams() {
-        Long refBookAttrId = getView().getAttributeId();
-        String filter = getView().getFilter();
-        Date relevanceDate = getView().getVersion();
-        Boolean multiSelect = getView().getMultiSelect();
+    private boolean isNewParams(PickerState newPs) {
+        Boolean hasChange =
+                RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                        RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                        RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                        RefBookPickerUtils.itWasChange(ps.getFilter(), newPs.getFilter()) ||
+                        RefBookPickerUtils.itWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
 
-        Boolean hasChange = (refBookAttrId == null && this.refBookAttrId != null)
-                || (refBookAttrId != null && this.refBookAttrId == null)
-                || (refBookAttrId != null && this.refBookAttrId != null && !refBookAttrId.equals(this.refBookAttrId))
-                || (filter == null && this.filter != null)
-                || (filter != null && this.filter == null)
-                || (filter != null && this.filter != null && !filter.equals(this.filter))
-                || (multiSelect == null && this.multiSelect != null)
-                || (multiSelect != null && this.multiSelect == null)
-                || (multiSelect != null && this.multiSelect != null && !multiSelect.equals(this.multiSelect))
-                || (relevanceDate == null && this.relevanceDate != null)
-                || (relevanceDate != null && this.relevanceDate == null)
-                || (relevanceDate != null && this.relevanceDate != null && relevanceDate.compareTo(this.relevanceDate) != 0);
-        if(hasChange){
-            this.refBookAttrId = refBookAttrId;
-            this.filter = filter;
-            this.relevanceDate = relevanceDate;
-            this.multiSelect = multiSelect;
+
+        if (hasChange) {
+            ps.setRefBookAttrId(newPs.getRefBookAttrId());
+            ps.setFilter(newPs.getFilter());
+            ps.setSearchPattern(newPs.getSearchPattern());
+            ps.setVersionDate(newPs.getVersionDate());
+            ps.setMultiSelect(newPs.isMultiSelect());
         }
-
 
         return hasChange;
     }

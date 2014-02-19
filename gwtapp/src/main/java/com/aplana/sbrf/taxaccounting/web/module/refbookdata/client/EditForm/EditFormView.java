@@ -171,7 +171,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
-					rbw.setValue(recordValue.getReferenceValue());
+					rbw.setSingleValue(recordValue.getReferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
 				} else if(w.getValue() instanceof HasText) {
                     ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());

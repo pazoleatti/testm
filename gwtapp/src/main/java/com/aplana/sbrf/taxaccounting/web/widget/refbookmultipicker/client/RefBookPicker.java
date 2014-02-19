@@ -3,39 +3,41 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 import java.util.Date;
 import java.util.List;
 
+import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * Интерфейс компонента выбора значений из справочника
- * 
+ *
  * @author sgoryachkin
- * 
  */
-public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, HasEnabled, IsWidget{
+public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, HasEnabled, IsWidget {
 
-    @Deprecated
-	public void setDereferenceValue(String value);
-
-	public String getDereferenceValue();
-	
     /**
-     * Id отображаемого атрибута
-     * @return
+     *
+     * @param value
+     * @deprecated Это значение будет автоматически меняться при смене значения через setValue или через UI
      */
-    public Long getAttributeId();
-    
-    public void setAttributeId(long attributeId);
+    @Deprecated
+    void setDereferenceValue(String value);
 
-	public Date getStartDate();
+    String getDereferenceValue();
 
-	public Date getEndDate();
+    /* id отображаемого атрибута */
+    Long getAttributeId();
 
-	public String getFilter();
+    void setAttributeId(long attributeId);
 
-	public void setFilter(String filter);
+    String getFilter();
+
+    void setFilter(String filter);
 
     void setPeriodDates(Date startDate, Date endDate);
 
@@ -43,9 +45,23 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     Boolean isMultiSelect();
 
-    public Long getSingleValue();
+    Long getSingleValue();
 
-    public void setValue(Long value);
+    void setSingleValue(Long value, boolean fireEvents);
 
+    void setSingleValue(Long value);
 
+    void open();
+
+    void load(long attributeId, String filter, Date startDate, Date endDate);
+
+    void load();
+
+    String getOtherDereferenceValue(String alias);
+
+    String getOtherDereferenceValue(Long attrId);
+
+    HandlerRegistration addCloseHandler(CloseHandler<ModalWindow> handler);
+
+    void setOnHideHandler(OnHideHandler<CanHide> hideHandler);
 }

@@ -1,23 +1,22 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.gwtplatform.mvp.client.UiHandlers;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 public interface RefBookMultiPickerUiHandlers extends UiHandlers {
 
-    void init(long refBookAttrId, String filter, Date relevanceDate, Boolean multiSelect);
+    void init(PickerState pickerState);
 
     void reload(Date relevanceDate);
 
     void rangeChanged(int startIndex, int max);
 
-    void loadingForSelection(List<Long> id);
+    void loadingForSelection(Collection<Long> ids);
 
     void onSort(Integer columnIndex, boolean isSortAscending);
 
-    void search();
-
-    void versionChange();
+    void find(String searchPattern);
 }
