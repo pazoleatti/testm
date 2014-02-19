@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -203,4 +204,14 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 			getUiHandlers().onApplyClicked();
 		}
 	}
+
+    @Override
+    public void setKindFilter(List<FormDataKind> dataKinds) {
+        List<Integer> list = new ArrayList<Integer>(dataKinds.size());
+
+        for (FormDataKind kind : dataKinds) {
+            list.add(kind.getId());
+        }
+        formDataKind.setFilter(StringUtils.join(list.toArray(), ','));
+    }
 }
