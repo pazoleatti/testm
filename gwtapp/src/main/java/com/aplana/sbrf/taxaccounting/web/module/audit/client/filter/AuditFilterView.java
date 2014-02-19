@@ -93,8 +93,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     Button search;
 
-    private static final int oneDayTime = 24 * 60 * 60 * 1000;
-
     private Map<Integer, String> declarationTypesMap;
 
     @Override
