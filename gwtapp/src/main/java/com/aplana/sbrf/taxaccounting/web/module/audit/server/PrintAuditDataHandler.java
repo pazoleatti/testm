@@ -42,7 +42,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     @Override
     public PrintAuditDataResult execute(PrintAuditDataAction printAuditDataAction, ExecutionContext executionContext) throws ActionException {
         try {
-            PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter());
+            PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(printAuditDataAction.getLogSystemFilter().convertTo());
             String filePath = printingService.generateExcelLogSystem(records);
             InputStream fileInputStream = new FileInputStream(filePath);
 
