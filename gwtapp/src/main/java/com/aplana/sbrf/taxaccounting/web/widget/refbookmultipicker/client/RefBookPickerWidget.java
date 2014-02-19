@@ -122,9 +122,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             public void onValueChange(ValueChangeEvent<Set<Long>> event) {
                 selectionCountLabel.setText("Выбрано: " + event.getValue().size());
                 clearAndSetValues(event.getValue());
-                updateUIState();
+
                 if (isEnabledFireChangeEvent) {
                     isEnabledFireChangeEvent = false;
+                    updateUIState();
                     ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
                 }
             }
@@ -163,6 +164,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("pickImageButton")
     void onSelectButtonClicked(ClickEvent event) {
+        prevState.setValues(state);
         refBookView.load(state);
         modalPanel.center();
     }

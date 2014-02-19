@@ -42,11 +42,8 @@
         }
 
         .footerPanel {
-            text-align: right;
-            float: right;
             position: absolute;
             bottom: 0;
-            right: 0;
         }
 
         .forMargin0 {
@@ -68,10 +65,10 @@
 
     <g:HTMLPanel>
         <g:HorizontalPanel ui:field="widgetPanel" verticalAlignment="middle">
-            <g:cell width="100%">
+            <g:cell width="99%">
                 <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="textBox" width="100%"/>
             </g:cell>
-            <g:cell>
+            <g:cell width="1%">
                 <g:Image ui:field="pickImageButton" styleName="{style.selectButton}"
                          url="resources/img/reference-16.gif"/>
             </g:cell>
