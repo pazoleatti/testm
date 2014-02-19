@@ -175,7 +175,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
-					rbw.setValue(recordValue.getReferenceValue());
+					rbw.setSingleValue(recordValue.getReferenceValue());
                     rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
 				} else if(w.getValue() instanceof HasText) {
                     ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
@@ -296,6 +296,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				((HasEnabled) entry).setEnabled(enabled);
 			}
 		}
+        versionStart.setEnabled(!readOnly);
+        versionEnd.setEnabled(!readOnly);
 		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
 	}
@@ -318,8 +320,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         allVersion.setVisible(false);
-        versionStart.setEnabled(true);
-        versionEnd.setEnabled(true);
+        versionStart.setEnabled(!readOnly);
+        versionEnd.setEnabled(!readOnly);
     }
 
     @Override

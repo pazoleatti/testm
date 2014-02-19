@@ -109,11 +109,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         // Тип формы
         lsf.setAuditFormTypeId(auditFormTypeId.getValue() == null ? null : auditFormTypeId.getValue().getId());
         // Вид налоговой формы
-        lsf.setFormTypeId(formTypeId.getValue().isEmpty()? null : Integer.valueOf(String.valueOf(formTypeId.getValue().get(0))));
+        lsf.setFormTypeId((formTypeId.getValue() == null || formTypeId.getValue().isEmpty()) ? null : Integer.valueOf(String.valueOf(formTypeId.getSingleValue())));
         // Вид декларации
         lsf.setDeclarationTypeId(declarationTypeId.getValue());
         // Тип налоговой формы
-        lsf.setFormKind(formDataKind.getValue().isEmpty()? null :FormDataKind.fromId(Integer.valueOf(String.valueOf(formDataKind.getValue().get(0)))));
+        lsf.setFormKind((formTypeId.getValue() == null || formDataKind.getValue().isEmpty()) ? null : FormDataKind.fromId(Integer.valueOf(String.valueOf(formDataKind.getSingleValue()))));
         // Период
         lsf.setFromSearchDate(fromSearchDate.getValue());
         lsf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
