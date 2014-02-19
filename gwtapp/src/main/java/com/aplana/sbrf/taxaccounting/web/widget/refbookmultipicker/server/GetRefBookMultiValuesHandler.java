@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
