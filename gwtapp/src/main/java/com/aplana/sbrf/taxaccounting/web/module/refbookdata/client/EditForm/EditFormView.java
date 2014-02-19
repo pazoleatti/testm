@@ -296,6 +296,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				((HasEnabled) entry).setEnabled(enabled);
 			}
 		}
+        versionStart.setEnabled(!readOnly);
+        versionEnd.setEnabled(!readOnly);
 		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
 	}
@@ -318,8 +320,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         allVersion.setVisible(false);
-        versionStart.setEnabled(true);
-        versionEnd.setEnabled(true);
+        versionStart.setEnabled(!readOnly);
+        versionEnd.setEnabled(!readOnly);
     }
 
     @Override
