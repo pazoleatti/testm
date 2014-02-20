@@ -22,13 +22,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 /**
  * Реализация DAO для работы с данными налоговых форм
  * @author dsultanbekov
@@ -70,7 +63,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(rs.getLong("id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
-            fd.setPrintDepartmentId(rs.getInt("print_department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
 			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -92,7 +84,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			FormData result = new FormData();
 			result.setId(rs.getLong("id"));
 			result.setDepartmentId(rs.getInt("department_id"));
-            result.setPrintDepartmentId(rs.getInt("print_department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));
 			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -147,23 +138,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		if (formData.getId() == null) {
 			formDataId = generateId("seq_form_data", Long.class);
 			jt.update(
-					"insert into form_data (id, form_template_id, department_id, print_department_id, kind, state, report_period_id, return_sign, period_order)" +
-							" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into form_data (id, form_template_id, department_id, kind, state, report_period_id, return_sign, period_order)" +
+							" values (?, ?, ?, ?, ?, ?, ?, ?)",
 					formDataId, formData.getFormTemplateId(),
-					formData.getDepartmentId(), formData.getPrintDepartmentId(), formData.getKind().getId(),
+					formData.getDepartmentId(), formData.getKind().getId(),
 					formData.getState().getId(), formData.getReportPeriodId(), 0, formData.getPeriodOrder());
 			formData.setId(formDataId);
 		} else {
 			formDataId = formData.getId();
 		}
-		
+
 		if (formData.getPerformer() != null &&
 				(StringUtils.hasLength(formData.getPerformer().getName())
-						|| StringUtils.hasLength(formData.getPerformer().getPhone()))
+						|| StringUtils.hasLength(formData.getPerformer().getPhone())
+                        || formData.getPerformer().getPrintDepartmentId() != null)
 			) {
-			// Плохой фикс: http://jira.aplana.com/browse/SBRFACCTAX-3627
-			formData.getPerformer().setPhone(formData.getPerformer().getPhone() == null ? "" : formData.getPerformer().getPhone());
-			formData.getPerformer().setName(formData.getPerformer().getName() == null ? "" : formData.getPerformer().getName());
 			formPerformerDao.save(formDataId, formData.getPerformer());
 		} else {
 			formPerformerDao.clear(formDataId);
@@ -302,7 +291,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.print_department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
 					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
 							"FROM form_data fd WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },

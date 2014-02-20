@@ -11,6 +11,7 @@ public class FormDataPerformer implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private String phone;
+    private Integer printDepartmentId;
 	
 	/**
 	 * Получить ФИО исполнителя
@@ -43,4 +44,21 @@ public class FormDataPerformer implements Serializable {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+
+    public Integer getPrintDepartmentId() {
+        return printDepartmentId;
+    }
+
+    public void setPrintDepartmentId(Integer printDepartmentId) {
+        this.printDepartmentId = printDepartmentId;
+    }
+
+    @Override
+    public String toString() {
+        return "FormDataPerformer{" +
+                "name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", printDepartmentId=" + printDepartmentId +
+                '}';
+    }
 }

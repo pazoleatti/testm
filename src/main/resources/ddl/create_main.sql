@@ -409,7 +409,6 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
-  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
@@ -420,7 +419,6 @@ comment on table form_data is 'Данные по налоговым формам
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
-comment on column form_data.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
@@ -448,12 +446,14 @@ create sequence seq_form_data_signer start with 10000;
 create table form_data_performer (
   form_data_id number(18) not null,
   name varchar2(200) not null,
-  phone varchar2(40)
+  phone varchar2(40),
+  print_department_id number(9)
 );
 comment on table form_data_performer is 'Исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';
 comment on column form_data_performer.name is 'ФИО исполнителя';
 comment on column form_data_performer.phone is 'Телефон';
+comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
 --------------------------------------------------------------------------------------------------
 create table data_row (
   id number(18) not null,
