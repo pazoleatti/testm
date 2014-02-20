@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -167,6 +168,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справкочнике
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, true);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
+        return result;
+    }
+
+
+    private PagingResult<Map<String, RefBookValue>> getChildrens(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+                                                                 String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
+        PreparedStatementData ps = getChildrensStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
+        RefBook refBook = get(refBookId);
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // Получение количества данных в справкочнике
+        PreparedStatementData psForCount = getChildrensStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
@@ -338,6 +353,153 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return ps;
     }
 
+
+
+    private PreparedStatementData getChildrensStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+                                                        String filter, PagingParams pagingParams, boolean isSortAscending, Long parentId) {
+        // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        if (sortAttribute != null && !attributes.contains(sortAttribute)) {
+            throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
+                    refBookId, sortAttribute.getAlias()));
+        }
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener =  applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder("\nfrom\n");
+
+        fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
+        if (version != null) {
+            ps.appendQuery(WITH_STATEMENT);
+            ps.addParam(refBookId);
+            ps.addParam(version);
+        } else {
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
+            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+        }
+
+        ps.appendQuery(" SELECT "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
+
+        if (sortAttribute != null) {
+            // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
+            ps.appendQuery("row_number()");
+            // Надо делать сортировку
+            ps.appendQuery(" over (order by ");
+            ps.appendQuery("a");
+            ps.appendQuery(sortAttribute.getAlias());
+            ps.appendQuery(".");
+            ps.appendQuery(sortAttribute.getAttributeType().toString());
+            ps.appendQuery("_value ");
+            ps.appendQuery(isSortAscending ? "ASC":"DESC");
+            ps.appendQuery(")");
+            ps.appendQuery(" as row_number_over,\n");
+        } else {
+            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
+            ps.appendQuery("rownum row_number_over,\n");
+        }
+
+
+        // выбираем все алиасы + row_number_over
+        List<String> aliases = new ArrayList<String>(attributes.size()+1);
+        aliases.add("record_id");
+        //aliases.add("rownum row_number_over");
+        for (RefBookAttribute attr: attributes){
+            aliases.add(attr.getAlias());
+        }
+        ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
+        ps.appendQuery(" FROM");
+        ps.appendQuery("(select distinct \n");
+        ps.appendQuery(" CONNECT_BY_ROOT  r.id as \"RECORD_ID\", \n");
+        if (version == null) {
+            ps.appendQuery("  t.version as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+            ps.appendQuery("\",\n");
+
+            ps.appendQuery("  t.versionEnd as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+            ps.appendQuery("\",\n");
+        }
+
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+            ps.appendQuery(" CONNECT_BY_ROOT  a");
+            ps.appendQuery(alias);
+            ps.appendQuery(".");
+            ps.appendQuery(attribute.getAttributeType().toString());
+            ps.appendQuery("_value as \"");
+            ps.appendQuery(alias);
+            ps.appendQuery("\"");
+            if (i < attributes.size() - 1) {
+                ps.appendQuery(",\n");
+            }
+            fromSql.append("  left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = r.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+            fromSql.append("\n");
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null){
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and\n  status <> -1\n");
+
+        if (version == null) {
+            ps.appendQuery("order by t.version\n");
+        }
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+
+        // выборка иерархического исправочника
+        ps.appendQuery(" CONNECT BY PRIOR r.id = aPARENT_ID.REFERENCE_value ");
+        ps.appendQuery("START WITH aPARENT_ID.REFERENCE_value ");
+        if (parentId == null){
+            ps.appendQuery(" is null ");
+        } else {
+            ps.appendQuery(" = ");
+            ps.appendQuery(parentId.toString());
+        }
+
+
+        ps.appendQuery(")");
+
+        if (pagingParams != null) {
+            ps.appendQuery(" where row_number_over between ? and ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
+        }
+
+        return ps;
+    }
+
     /**
      * Динамически формирует запрос для элемента справочника
      *
@@ -395,7 +557,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * @param parentRecordId код родительской записи
 	 * @return фильтр с учетом условия по родительской записи
 	 */
-	static String getParentFilter(final String filter, final Long parentRecordId) {
+	public static String getParentFilter(final String filter, final Long parentRecordId) {
 		String parentFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
 		return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
 	}
@@ -416,7 +578,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		if (!checkHierarchical(refBook)) {
 			throw new IllegalArgumentException(String.format(NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
 		}
-		return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute);
+
+        /**
+         * Если фильтра нет, то выбираем как обычно, просто используя фильтр PARENT_ID = ?
+         * в случае же с переданнм фильтром используем иной запрос,
+         * который ищет все записи, включая вложенные, которые соответствуют условию фильтрации,
+         * а затем выбираеются их родители для текущего parentRecordId
+         *
+         */
+        if (filter == null || filter.equals("")){
+            return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute, true);
+        } else {
+            return getChildrens(refBookId, version, pagingParams, filter, sortAttribute, true, parentRecordId);
+        }
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
