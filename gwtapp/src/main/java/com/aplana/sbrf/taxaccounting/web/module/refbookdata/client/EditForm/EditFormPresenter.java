@@ -83,7 +83,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;
-								isFormModified = false;
+                                setIsFormModified(false);
 								setEnabled(false);
 							}
 						}, this));
@@ -109,7 +109,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             Dialog.confirmMessage("Вопрос", DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
-                    isFormModified = false;
+                    setIsFormModified(false);
                     showRecord(refBookRecordId);
                 }
 
@@ -187,7 +187,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(AddRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        isFormModified = false;
+                                        setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, true);
@@ -208,7 +208,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        isFormModified = false;
+                                        setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, true);
@@ -216,7 +216,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            isFormModified = false;
+            setIsFormModified(false);
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
             logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
@@ -239,13 +239,13 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
-                    isFormModified = false;
+                    setIsFormModified(false);
                     onSaveClicked();
                 }
 
                 @Override
                 public void no() {
-                    isFormModified = false;
+                    setIsFormModified(false);
                     showRecord(currentUniqueRecordId);
                     if (currentUniqueRecordId == null) setEnabled(false);
                 }
@@ -258,8 +258,17 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void valueChanged() {
-		isFormModified = true;
+        setIsFormModified(true);
 	}
+
+    private void setIsFormModified(boolean isFormModified) {
+        this.isFormModified = isFormModified;
+        if (isFormModified) {
+            placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
+        } else {
+            placeManager.setOnLeaveConfirmation(null);
+        }
+    }
 
     public void setEnabled(boolean enabled) {
 		getView().setEnabled(enabled);
