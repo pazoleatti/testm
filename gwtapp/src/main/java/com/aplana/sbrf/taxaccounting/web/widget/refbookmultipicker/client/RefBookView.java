@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
-import com.google.gwt.editor.client.LeafValueEditor;
-import com.google.gwt.user.client.ui.HasValue;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
@@ -12,12 +12,19 @@ import com.google.gwt.user.client.ui.IsWidget;
  * 
  * @author sgoryachkin
  */
-public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, IsWidget {
+public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget {
 
-    void load();
+    void trySelectValues(Set<Long> ids);
 
+    void load(PickerState pickerState);
 
-    void load(long refBookAttrId, String filter, Date startDate, Date endDate);
+    void find(String searchPattern);
+
+    void reloadOnDate(Date version);
+
+    void clearSelected(boolean fireChangeEvent);
+
+    Set<Long> getSelectedIds();
 
     /**
      * Разименновванное значение
@@ -45,30 +52,12 @@ public interface RefBookView extends HasValue<List<Long>>, LeafValueEditor<List<
      */
     String getOtherDereferenceValue(Long attrId);
 
-    /**
-     * Первый выделнный объект
-     * обчно используется для одинарного режима выбора
-     * @return ид объекта выбранной строки
-     */
-    Long getSingleValue();
+    Boolean isMultiSelect();
 
     /**
-     * Установка выделенной строки
-     * @param value id объекта в строке
+     * Смена режима выбора значений.
+     * При смене происходит очищение ранее выделенных значений
+     * @param multiSelect true - множественный выбор
      */
-    void setValue(Long value);
-
-    public Long getAttributeId();
-
-    public void setAttributeId(long attributeId);
-
-    public Date getStartDate();
-
-    public Date getEndDate();
-
-    void setPeriodDates(Date startDate, Date endDate);
-
-    public String getFilter();
-
-    public void setFilter(String filter);
+    void setMultiSelect(Boolean multiSelect);
 }

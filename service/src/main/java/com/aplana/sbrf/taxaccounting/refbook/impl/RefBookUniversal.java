@@ -160,7 +160,20 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             } else {
                 //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+                List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+
+                if (conflictedIds.size() > 0) {
+                    StringBuilder attrNames = new StringBuilder();
+                    for (Long id : conflictedIds) {
+                        for (Pair<Long,String> pair : matchedRecords) {
+                            if (pair.getFirst().equals(id)) {
+                                attrNames.append("\"").append(pair.getSecond()).append("\", ");
+                            }
+                        }
+                    }
+                    attrNames.delete(attrNames.length() - 2, attrNames.length());
+                    throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
+                }
                 //System.out.println("checkConflictValuesVersions: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
                 //time = System.nanoTime();
             }

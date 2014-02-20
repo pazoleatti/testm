@@ -36,6 +36,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
 	private static final String dateFormat = "yyyyMMdd HH:mm:ss";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+    //Т.к. в базе при построении запросы часы/минуты/секунды присваиваются значения 00:00:00
+    //соответственно поиск только за прошлый день поучается и надо прибавить один день, чтобы получить поиск за текущий
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
@@ -151,7 +154,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-				(formatter.format(filter.getToSearchDate()))
+				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
 				.append("', '").append(dbDateFormat).append("')");
 
 		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
@@ -165,7 +168,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     userSql = userSql + ", " + temp.toString();
                 }
             }
-            sql.append(String.format(" AND %suser_id in ",prefix)).append("(" + userSql + ")");
+            sql.append(String.format(" AND %suser_id in ", prefix)).append("(").append(userSql).append(")");
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {

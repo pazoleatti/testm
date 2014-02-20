@@ -9,13 +9,14 @@ import java.util.List;
 
 /**
  * Класс утилит для виджетов выбора из справоника
+ *
  * @author aivanov
  */
 public class RefBookPickerUtils {
 
     /* Провайдер для идентификации конкретноого объекта в строке
- * С помощью провайдера при листании селектшнМодел понимает что
- * за объект был выделе или развыделен */
+     * С помощью провайдера при листании селектшнМодел понимает что
+     * за объект был выделе или развыделен */
     public static final ProvidesKey<RefBookItem> KEY_PROVIDER = new ProvidesKey<RefBookItem>() {
         @Override
         public Object getKey(RefBookItem item) {
@@ -25,9 +26,10 @@ public class RefBookPickerUtils {
 
     /**
      * Проверка вхождения даты в ограничивающий период
+     *
      * @param startDate наччало огр периода
-     * @param endDate коннец огр периода
-     * @param current дату которую проверяют
+     * @param endDate   коннец огр периода
+     * @param current   дату которую проверяют
      * @return тру если входит, иначе фолс
      */
     public static Boolean isCorrectDate(Date startDate, Date endDate, Date current) {
@@ -36,11 +38,12 @@ public class RefBookPickerUtils {
 
     /**
      * Поиск разименноованного значения для атрибута записи справочника по идентификатору атрибута
+     *
      * @param recordDereferenceValues recordDereferenceValues разименновоннаые значения атрибутов у записи справоника
-     * @param attrId идентификатор атрибута
+     * @param attrId                  идентификатор атрибута
      * @return разименног ованного значение или null
      */
-    public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, Long attrId){
+    public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, Long attrId) {
         if (recordDereferenceValues != null && !recordDereferenceValues.isEmpty() && attrId != null) {
             for (RefBookRecordDereferenceValue value : recordDereferenceValues) {
                 if (attrId.equals(value.getValueAttrId())) {
@@ -53,11 +56,12 @@ public class RefBookPickerUtils {
 
     /**
      * Поиск разименноованного значения для атрибута записи справочника по идентификатору атрибута
+     *
      * @param recordDereferenceValues разименновоннаые значения атрибутов у записи справоника
-     * @param alias алиас атрибута
+     * @param alias                   алиас атрибута
      * @return разименног ованного значение или null
      */
-    public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, String alias){
+    public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, String alias) {
         if (recordDereferenceValues != null && alias != null && !alias.isEmpty()) {
             for (RefBookRecordDereferenceValue value : recordDereferenceValues) {
                 if (value.getValueAttrAlias() != null &&
@@ -67,5 +71,12 @@ public class RefBookPickerUtils {
             }
         }
         return null;
+    }
+
+    public static boolean itWasChange(Object before, Object after) {
+        return (before == null && after != null)
+                || (before != null && after == null)
+                || (before != null && after != null &&
+                ((before instanceof Date && after instanceof Date) ? ((Date) before).compareTo(((Date) after)) != 0 : !before.equals(after)));
     }
 }

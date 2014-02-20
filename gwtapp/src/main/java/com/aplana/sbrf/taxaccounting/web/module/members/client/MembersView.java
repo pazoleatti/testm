@@ -144,8 +144,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     public void setTaUserFullCellTable(PagingResult<TAUserFullWithDepartmentPath> userFullList, int startIndex) {
 	    taUserFullCellTable.setRowCount(userFullList.getTotalCount());
         taUserFullCellTable.setRowData(startIndex, userFullList);
-
-
     }
 
 	@Override
@@ -153,12 +151,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		MembersFilterData membersFilterData = new MembersFilterData();
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
-		//List<Integer> selectedRoleIds = new ArrayList<Integer>();
-        List<Long> selectedRoleIds = new ArrayList<Long>(role.getValue());
-        /*for (TARole selectedRole : roleBox.getValue()) {
-            selectedRoleIds.add(selectedRole.getId());
-        }*/
-		membersFilterData.setRoleIds(selectedRoleIds);
+		membersFilterData.setRoleIds(role.getValue()!= null ? role.getValue() : new ArrayList<Long>());
 		Set<Integer> depIds = new HashSet<Integer>();
 		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
 			depIds.add(dep.getDepartmentId());

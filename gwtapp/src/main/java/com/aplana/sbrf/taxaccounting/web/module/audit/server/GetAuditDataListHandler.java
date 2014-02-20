@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -30,7 +31,8 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
     public GetAuditDataListResult execute(GetAuditDataListAction getAuditDataListAction, ExecutionContext executionContext) throws ActionException {
 
         GetAuditDataListResult result = new GetAuditDataListResult();
-		PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(getAuditDataListAction.getLogSystemFilter());
+        LogSystemAuditFilter auditFilter = getAuditDataListAction.getLogSystemFilter();
+		PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(auditFilter.convertTo());
         result.setRecords(records);
 		result.setTotalCountOfRecords(records.getTotalCount());
 
@@ -39,6 +41,6 @@ public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataL
 
     @Override
     public void undo(GetAuditDataListAction getAuditDataListAction, GetAuditDataListResult getAuditDataListResult, ExecutionContext executionContext) throws ActionException {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 }
