@@ -29,7 +29,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (27, 'Клас�
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (28, 'Классификатор доходов Сбербанка России для целей налогового учёта', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (29, 'Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта', 0, 1, 0);
 
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (30, 'Подразделения', 0, 1, 0);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (30, 'Подразделения', 1, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (31, 'Параметры подразделения по транспортному налогу', 0, 0, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (33, 'Параметры подразделения по налогу на прибыль', 0, 0, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (34, 'Общероссийский классификатор видов экономической деятельности', 0, 1, 0);

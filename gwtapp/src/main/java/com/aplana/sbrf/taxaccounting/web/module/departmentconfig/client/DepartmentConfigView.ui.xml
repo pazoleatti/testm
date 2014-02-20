@@ -343,7 +343,6 @@
                                             <aplana:TextBox ui:field="formatVersion" width="200px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
-                                    <!-- TODO "Обязанность по уплате авансовых платежей"-->
                                     <g:HorizontalPanel ui:field="payPanelPrepayment" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
                                         <g:cell width="1%">
                                             <g:Label text="Обязанность по уплате авансовых платежей:" addStyleNames="{style.rightLabels}" />

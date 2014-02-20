@@ -141,7 +141,7 @@ def logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index?:0, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
         if (!(row.regDateEnd == null || row.regDateEnd.compareTo(row.regDate) > 0)) {
@@ -166,8 +166,8 @@ def logicCheck() {
                 logger.error("Обнаружены строки $index$errorRows, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
-                        "Мощность (величина) = $row.powerVal), " +
-                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}) " +
+                        "Мощность (величина) = $row.powerVal, " +
+                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue} " +
                         "совпадают!")
             }
         }
@@ -216,11 +216,11 @@ def copyData() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (reportPeriod.order == 4) {
-        rows += getPrevRowsForCopy(prevReportPeriod, [])
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, []))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod, rows)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod, rows)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
     } else {
         rows += getPrevRowsForCopy(prevReportPeriod, [])
     }
@@ -244,8 +244,10 @@ def copyRow(def row) {
 }
 
 //Получить строки для копирования за предыдущий отчетный период
-def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
+def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
     def rows = []
+    def rowsOld = []
+    rowsOld.addAll(rowsOldE)
     if (reportPeriod != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
@@ -253,9 +255,24 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
             def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
             def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
             for (def row in dataRowsOld) {
-                if (row.regDate == null || row.regDateEnd == null || row.regDate > dTo || row.regDateEnd < dFrom) {
+                if ((row.regDateEnd != null && row.regDateEnd < dFrom) || (row.regDate > dTo)) {
                     continue
                 }
+
+                // эта часть вроде как лишняя
+                def regDateEnd = row.regDateEnd
+                if (regDateEnd == null || regDateEnd > dTo) {
+                    regDateEnd = dTo
+                }
+                def regDate = row.regDate
+                if (regDate < dFrom) {
+                    regDate = dFrom
+                }
+                if (regDate > dTo || regDateEnd < dFrom) {
+                    continue
+                }
+
+                // исключаем дубли
                 def need = true
                 for (def rowOld in rowsOld) {
                     if (isEquals(row, rowOld)) {
@@ -265,8 +282,9 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
                 }
                 if (need) {
                     row.setIndex(rowsOld.size())
-                    rows.add(copyRow(row))
-                    rowsOld.add(copyRow(row))
+                    newRow = copyRow(row)
+                    rows.add(newRow)
+                    rowsOld.add(newRow)
                 }
             }
         }
@@ -275,7 +293,7 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
 }
 
 def isEquals(def row1, def row2) {
-    if (row1.codeOKATO== null || row1.identNumber== null || row1.powerVal == null || row1.baseUnit == null){
+    if (row1.codeOKATO == null || row1.identNumber == null || row1.powerVal == null || row1.baseUnit == null) {
         return true
     }
     return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)

@@ -98,7 +98,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			signatoryId,
 			taxPlaceTypeCode,
 			obligation,
-            oktmo,// TODO
+            oktmo,
 			okvedCode,
 			type;
 
@@ -296,6 +296,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
 		getUiHandlers().save(driver.flush(), currentReportPeriodId);
+        // TODO http://jira.aplana.com/browse/SBRFACCTAX-5954 После решения проверить работу без автоматич. разыменования
 		driver.edit(data);
 
 		if (dereferenceValues != null) {

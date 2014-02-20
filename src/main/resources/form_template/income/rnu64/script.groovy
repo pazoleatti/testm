@@ -104,7 +104,7 @@ def autoFillColumns = ['number']
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
@@ -161,7 +161,7 @@ void logicCheck() {
     def totalRow = null
     def totalQuarterRow = null
     def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
-    def dTo = getEndDate()
+    def dTo = getReportPeriodEndDate()
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         // 1. Проверка на заполнение поля
@@ -318,7 +318,7 @@ def addData(def xml, def fileName) {
         tmp = null
         if (getCellValue(row, indexCol, type, true) != null && getCellValue(row, indexCol, type).trim() != '') {
             tmp = formDataService.getRefBookRecordIdImport(60, recordCache, providerCache, 'CODE',
-                    getCellValue(row, indexCol, type), getEndDate(), indexRow, indexCol, logger, false)
+                    getCellValue(row, indexCol, type), getReportPeriodEndDate(), indexRow, indexCol, logger, false)
         }
         newRow.part = tmp
         indexCol++
@@ -428,13 +428,6 @@ def isBalancePeriod() {
     return isBalancePeriod
 }
 
-def getEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    }
-    return reportPeriodEndDate
-}
-
 void consolidation() {
     def rows = []
     def sum = 0
@@ -469,4 +462,11 @@ void prevPeriodCheck() {
         def formName = formData.formType.name
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

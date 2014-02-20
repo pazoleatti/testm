@@ -159,8 +159,8 @@ def logicCheck() {
                 logger.error("Обнаружены строки $index$errorRows, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
-                        "Мощность (величина) = $row.powerVal), " +
-                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}) " +
+                        "Мощность (величина) = $row.powerVal, " +
+                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue} " +
                         "совпадают!")
             }
         }
@@ -201,11 +201,11 @@ def copyData() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (reportPeriod.order == 4) {
-        rows += getPrevRowsForCopy(prevReportPeriod, [])
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, []))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod, rows)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod, rows)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
     } else {
         rows += getPrevRowsForCopy(prevReportPeriod, [])
     }
@@ -229,8 +229,10 @@ def copyRow(def row) {
 }
 
 //Получить строки для копирования за предыдущий отчетный период
-def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
+def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
     def rows = []
+    def rowsOld = []
+    rowsOld.addAll(rowsOldE)
     if (reportPeriod != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
@@ -238,9 +240,24 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
             def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
             def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
             for (def row in dataRowsOld) {
-                if (row.benefitStartDate == null || row.benefitEndDate == null || row.benefitStartDate > dTo || row.benefitEndDate < dFrom) {
+                if (( row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
                     continue
                 }
+
+                // эта часть вроде как лишняя
+                def  benefitEndDate = row.benefitEndDate
+                if(benefitEndDate == null || benefitEndDate > dTo){
+                    benefitEndDate = dTo
+                }
+                def  benefitStartDate = row.benefitStartDate
+                if(benefitStartDate < dFrom){
+                    benefitStartDate = dFrom
+                }
+                if (benefitStartDate > dTo || benefitEndDate < dFrom) {
+                    continue
+                }
+
+                // исключаем дубли
                 def need = true
                 for (def rowOld in rowsOld) {
                     if (isEquals(row, rowOld)) {
@@ -250,8 +267,9 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOld) {
                 }
                 if (need) {
                     row.setIndex(rowsOld.size())
-                    rows.add(copyRow(row))
-                    rowsOld.add(copyRow(row))
+                    newRow = copyRow(row)
+                    rows.add(newRow)
+                    rowsOld.add(newRow)
                 }
             }
         }

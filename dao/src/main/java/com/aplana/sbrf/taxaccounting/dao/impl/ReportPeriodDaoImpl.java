@@ -193,7 +193,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 			return result.get(0);
 		} catch (Exception e) {
 			// изменить форматирование для даты на "%td %<tm,%<tY" (31.12.2013) вместо "%tD" (12/31/13)(Marat Fayzullin 02.18.2014)
-			throw new DaoException(String.format("Позникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
+			throw new DaoException(String.format("Возникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
 		}
 	}
 
