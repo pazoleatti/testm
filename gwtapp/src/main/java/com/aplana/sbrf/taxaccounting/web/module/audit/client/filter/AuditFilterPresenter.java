@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -20,7 +18,16 @@ import java.util.*;
  * User: avanteev
  * Date: 2013
  */
-public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.MyView> implements AuditFilterUIHandlers, HasClickHandlers {
+public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.MyView> implements AuditFilterUIHandlers {
+
+    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
+        void init();
+        void setDepartments(List<Department> list, Set<Integer> availableValues);
+        void setDeclarationType(Map<Integer, String> declarationTypesMap);
+        void setFormDataTaxType(List<TaxType> taxTypeList);
+        void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        LogSystemAuditFilter getFilterData();
+    }
 
     private final DispatchAsync dispatchAsync;
 
@@ -48,19 +55,8 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     @Override
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
-        return getView().addSearchButtonClickHandler(handler);
-    }
-
-    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
-        void init();
-        void setDepartments(List<Department> list, Set<Integer> availableValues);
-        void setDeclarationType(Map<Integer, String> declarationTypesMap);
-        void setFormDataTaxType(List<TaxType> taxTypeList);
-        void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
-        HandlerRegistration addSearchButtonClickHandler(ClickHandler clickHandler);
-        LogSystemAuditFilter getFilterData();
-
+    public void onSearchClicked() {
+        AuditClientSearchEvent.fire(this);
     }
 
     public void initFilterData() {
