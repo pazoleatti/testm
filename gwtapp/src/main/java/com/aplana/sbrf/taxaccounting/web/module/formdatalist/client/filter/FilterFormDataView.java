@@ -76,8 +76,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@UiField
 	Label reportPeriodIdsLbl;
 
-	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-
     @Inject
     public FilterFormDataView(final MyBinder binder, final MyDriver driver) {
     	super();
@@ -181,17 +179,10 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		}
 	}
 
-	@Override
-	public void setFormTypesMap(List<FormType> formTypes){
-		formTypesMap.clear();
-		for (FormType formType : formTypes) {
-			formTypesMap.put(formType.getId(), formType.getName());
-		}
-		
-		/** .setValue(null) see
-		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-		formTypeId.setValue(null, true);
-	}
+    @Override
+    public void setFilter(String filter) {
+        formTypeId.setFilter(filter);
+    }
 
 	@Override
 	public void setDepartments(List<Department> list, Set<Integer> availableValues){
