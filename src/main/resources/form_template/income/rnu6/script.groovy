@@ -113,6 +113,9 @@ def currentDate = new Date()
 @Field
 def start = null
 
+@Field
+def endDate = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -253,7 +256,7 @@ def BigDecimal calc12(DataRow row) {
 
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : currentDate, null, "CODE_NUMBER = $value", null);
+    def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
     return res.getRecords().get(0).RATE.numberValue
 }
 
@@ -309,7 +312,7 @@ void logicCheck() {
     // Дата начала отчетного периода
     def startDate = getStartDate()
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = getReportPeriodEndDate()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -452,4 +455,11 @@ def getStartDate() {
         start = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     }
     return start
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

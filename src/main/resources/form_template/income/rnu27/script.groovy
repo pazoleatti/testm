@@ -145,7 +145,7 @@ def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCours
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -157,14 +157,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -390,14 +390,6 @@ DataRow getPrevRowWithoutAlias(def dataRows, DataRow row) {
 }
 
 /**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (tmp ? tmp.getTime() + 1 : null)
-}
-
-/**
  * Получение импортируемых данных.
  */
 void importData() {
@@ -584,8 +576,6 @@ void calc() {
 
     // отсортировать/группировать
     sortRows(dataRows, groupColumns)
-
-    def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
 
     // данные предыдущего отчетного периода
     def formPrev = getFormPrev()
@@ -818,7 +808,7 @@ void setTotalStyle(def row) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = getReportPeriodEndDate()
 
     def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -1103,4 +1093,11 @@ DataRow<Cell> getRow(int i, def dataRows) {
     } else {
         return null
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
