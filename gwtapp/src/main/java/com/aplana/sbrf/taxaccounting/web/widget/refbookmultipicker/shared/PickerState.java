@@ -35,11 +35,7 @@ public class PickerState{
         this.searchPattern = searchPattern;
         this.versionDate = versionDate;
         this.multiSelect = multiSelect;
-
-        this.setIds.clear();
-        for (Long aLong : longList) {
-            this.setIds.add(aLong);
-        }
+        this.setIds = new LinkedList<Long>(longList);
     }
 
     public void setValues(PickerState newState){
@@ -48,11 +44,9 @@ public class PickerState{
         this.searchPattern = newState.getSearchPattern();
         this.versionDate = newState.getVersionDate();
         this.multiSelect = newState.isMultiSelect();
-        this.getSetIds().clear();
-        this.getSetIds().addAll(newState.getSetIds());
+
+        this.setIds = newState.setIds != null ? new LinkedList<Long>(newState.getSetIds()) : null;
     }
-
-
 
     public Long getRefBookAttrId() {
         return refBookAttrId;
@@ -96,6 +90,10 @@ public class PickerState{
 
     public List<Long> getSetIds() {
         return setIds;
+    }
+
+    public void setSetIds(List<Long> setIds) {
+        this.setIds = setIds;
     }
 
     @Override

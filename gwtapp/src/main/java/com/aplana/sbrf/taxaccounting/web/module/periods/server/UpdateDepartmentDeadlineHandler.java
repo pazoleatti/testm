@@ -47,24 +47,10 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         UpdateDepartmentDeadlineResult result = new UpdateDepartmentDeadlineResult();
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String text = "%s назначил подразделению %s новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
+        String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
 	    for (DepartmentPair pair : action.getDepartments()) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            Department receiver =
-		            pair.getParentDepartmentId() == null
-		            ? null
-		            : departmentService.getDepartment(pair.getParentDepartmentId());
-
-		    StringBuilder receiverName = new StringBuilder();
-		    if (receiver != null) {
-			    for (Department dep : userService.getDepartmentHierarchy(receiver.getId())) {
-				    receiverName.append("/").append(dep.getName());
-			    }
-			    if ((receiverName.length() != 0) && (receiverName.charAt(0) == '/')) {
-				    receiverName.deleteCharAt(0);
-			    }
-		    }
 
 		    StringBuilder senderName = new StringBuilder();
 		    for (Department dep : userService.getDepartmentHierarchy(pair.getDepartmentId())) {
@@ -81,7 +67,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setSenderDepartmentId(pair.getDepartmentId());
             notification.setReceiverDepartmentId(pair.getParentDepartmentId());
             notification.setText(String.format(text,
-		            userInfo.getUser().getName(), senderName,  receiver == null ? "" : receiverName, action.getTaxType().getName(),
+		            userInfo.getUser().getName(), senderName, action.getTaxType().getName(),
 		            action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
 
             notifications.add(notification);

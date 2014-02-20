@@ -75,7 +75,7 @@
         </g:HorizontalPanel>
 
         <g:HTMLPanel ui:field="testwrap" visible="false">
-            <m:ModalWindow ui:field="modalPanel" iconUrl="" title="вавава">
+            <m:ModalWindow ui:field="modalPanel" iconUrl="" title="Выбор из справочника">
                 <g:VerticalPanel addStyleNames="{modal.mainPanel}">
                     <g:HorizontalPanel spacing="10" width="100%">
                         <g:cell width="99%">
