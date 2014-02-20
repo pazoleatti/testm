@@ -39,6 +39,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         FormDataFilter getFilterData();
 
         void setFilterData(FormDataFilter filter);
+
+        public void setFilter(String filter);
     }
 
     @Inject
@@ -103,7 +105,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     public void onSuccess(FillFormFieldsResult result) {
                         getView().init();
                         getView().setAcceptableReportPeriods(result.getReportPeriods());
-
+                        getView().setFilter("TAX_TYPE='" + taxType.getCode() + "'");
                         // setSelectedFilterValues(filter);
                         // в текущей постановке фильтры не передаются
                         getView().setFilterData(new FormDataFilter());

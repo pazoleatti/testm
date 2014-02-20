@@ -86,6 +86,10 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         return filterText.getText();
     }
 
+    public void setFilter(String filterText){
+        this.filterText.setText(filterText);
+    }
+
     @UiHandler("findButton")
     void onFindClicked(ClickEvent event) {
         if (getUiHandlers() != null) {

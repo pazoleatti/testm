@@ -179,4 +179,10 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         //filter.setDepartmentIds(departmentPicker.getValue());
         return driver.flush();
     }
+
+    @Override
+    public void setFilter(String filter) {
+        formTypeId.setFilter(filter);
+    }
+
 }
