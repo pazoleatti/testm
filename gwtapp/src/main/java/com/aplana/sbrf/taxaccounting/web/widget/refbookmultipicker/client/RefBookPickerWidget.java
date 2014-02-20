@@ -80,6 +80,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     private boolean isEnabledFireChangeEvent = false;
     /* Флаг пустого значения виджета */
     private boolean isNullValue = true;
+    private boolean isManualUpdate = false;
 
     @UiConstructor
     public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
@@ -253,8 +254,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             isNullValue = true;
             state.getSetIds().clear();
             prevState.setValues(state);
-            refBookView.load(state);
-            updateUIState();
+            if (!isManualUpdate) {
+                refBookView.load(state);
+                updateUIState();
+            }
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
@@ -275,15 +278,19 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             isNullValue = true;
             state.getSetIds().clear();
             prevState.setValues(state);
-            refBookView.load(state);
-            updateUIState();
+            if (!isManualUpdate) {
+                refBookView.load(state);
+                updateUIState();
+            }
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
         } else {
             isEnabledFireChangeEvent = true;
             clearAndSetValues(value);
-            refBookView.load(state);
+            if (!isManualUpdate) {
+                refBookView.load(state);
+            }
         }
     }
 
@@ -367,6 +374,16 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         this.endDate = endDate;
         state.setVersionDate(endDate != null ? endDate : startDate);
         versionDateBox.setValue(state.getVersionDate());
+    }
+
+    @Override
+    public boolean isManualUpdate() {
+        return isManualUpdate;
+    }
+
+    @Override
+    public void setManualUpdate(boolean isManualUpdate) {
+        this.isManualUpdate = isManualUpdate;
     }
 
     @Override

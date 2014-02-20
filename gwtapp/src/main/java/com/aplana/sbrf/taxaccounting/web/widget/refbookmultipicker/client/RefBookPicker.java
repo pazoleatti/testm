@@ -6,7 +6,9 @@ import java.util.List;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
+import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.editor.client.adapters.TakesValueEditor;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -20,12 +22,6 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<List<Long>>, HasEnabled, IsWidget {
 
-    /**
-     *
-     * @param value
-     * @deprecated Это значение будет автоматически меняться при смене значения через setValue или через UI
-     */
-    @Deprecated
     void setDereferenceValue(String value);
 
     String getDereferenceValue();
@@ -61,7 +57,26 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     String getOtherDereferenceValue(Long attrId);
 
+    boolean isManualUpdate();
+
+    /**
+     * Установка режима ручного редактирования значения виджета
+     * Если true то dereferenceValue нужно вручную проставлять,
+     * иначе выставится автоматически относительно засеченого значения
+     * @param isManualUpdate
+     */
+    void setManualUpdate(boolean isManualUpdate);
+
+    /**
+     * регистрация события после закрытия модального окна
+     * @param handler
+     * @return
+     */
     HandlerRegistration addCloseHandler(CloseHandler<ModalWindow> handler);
 
+    /**
+     * Установка хендлера который срабатывает перед закрытием модального окна
+     * @param hideHandler
+     */
     void setOnHideHandler(OnHideHandler<CanHide> hideHandler);
 }

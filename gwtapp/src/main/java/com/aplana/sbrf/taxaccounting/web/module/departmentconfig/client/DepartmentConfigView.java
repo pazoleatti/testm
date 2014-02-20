@@ -151,6 +151,16 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+
+        dictRegionId.setManualUpdate(true);
+        reorgFormCode.setManualUpdate(true);
+        signatoryId.setManualUpdate(true);
+        taxPlaceTypeCode.setManualUpdate(true);
+        obligation.setManualUpdate(true);
+        oktmo.setManualUpdate(true);
+        okvedCode.setManualUpdate(true);
+        type.setManualUpdate(true);
+
         driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
