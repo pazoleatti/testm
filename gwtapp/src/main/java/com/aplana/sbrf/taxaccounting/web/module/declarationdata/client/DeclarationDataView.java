@@ -111,10 +111,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		this.reportPeriod.setText(reportPeriod);
 	}
 
-	@Override
-	public void setBackButton(String link){
-		returnAnchor.setHref(link);
-	}
+    @Override
+    public void setBackButton(String link, String text) {
+        returnAnchor.setHref(link);
+        returnAnchor.setText(text);
+    }
 
 	@Override
 	public void setPdf(Pdf pdf) {

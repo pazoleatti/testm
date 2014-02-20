@@ -110,10 +110,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getType())));
             }
 
-            // TODO Транспортный налог
+            // Транспортный налог
             if (action.getTaxType() == TaxType.TRANSPORT) {
-                //Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
-                //paramsMap.put(prepayment == null ? null : prepayment.longValue());
                 paramsMap.put(DepartmentParamAliases.PREPAYMENT.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getPrepayment() ? 1L : 0L));
             }
 

@@ -202,7 +202,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
-
+        //flatPicker.setManualUpdate(true);
         flatPicker.setPeriodDates(null, new Date());
         flatPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
@@ -211,7 +211,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 flatPickerList.setText("Список: " + event.getValue());
             }
         });
-        //flatPicker.setValue(322L);
+        //flatPicker.setSingleValue(322L);
 
         testMaskBox();
 

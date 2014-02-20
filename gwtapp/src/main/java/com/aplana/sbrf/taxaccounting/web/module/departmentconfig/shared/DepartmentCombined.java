@@ -19,7 +19,7 @@ public class DepartmentCombined implements Serializable {
     // Общие параметры
     private List<Long> departmentId;
     private List<Long> dictRegionId;
-    private List<Long> oktmo; // TODO
+    private List<Long> oktmo;
     private String inn;
     private String kpp;
     private String taxOrganCode;
