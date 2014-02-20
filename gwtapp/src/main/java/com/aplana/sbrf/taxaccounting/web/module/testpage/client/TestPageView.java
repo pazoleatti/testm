@@ -176,7 +176,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 //flatPicker.setEnabled(false);
-                flatPicker.setValue(null, false);
+                flatPicker.setValue(null, true);
                 boxDate.setMayBeNull(event.getValue());
                 boxMy.setMayBeNull(event.getValue());
                 boxY.setMayBeNull(event.getValue());

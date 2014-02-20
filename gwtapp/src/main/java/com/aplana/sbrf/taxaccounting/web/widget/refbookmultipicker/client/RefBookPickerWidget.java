@@ -78,8 +78,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     private boolean isHierarchical = false;
     /* Признак - пробрасывать ли изменения из вьюхи */
     private boolean isEnabledFireChangeEvent = false;
-    /* Флаг пустого значения виджета */
-    private boolean isNullValue = true;
+    /* Флаг ручного выставления разименнованного значения виджета */
     private boolean isManualUpdate = false;
 
     @UiConstructor
@@ -216,9 +215,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     private void clearAndSetValues(Collection<Long> longs) {
-        isNullValue = false;
-        state.getSetIds().clear();
-        state.getSetIds().addAll(longs);
+        state.setSetIds(new LinkedList<Long>(longs));
     }
 
     @Override
@@ -235,7 +232,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public List<Long> getValue() {
-        return isNullValue ? null : state.getSetIds();
+        return state.getSetIds();
     }
 
     @Override
@@ -245,14 +242,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public Long getSingleValue() {
-        return state.getSetIds().iterator().next();
+        return state.getSetIds()!= null ? state.getSetIds().iterator().next() : null;
     }
 
     @Override
     public void setSingleValue(Long value, boolean fireEvents) {
         if (value == null) {
-            isNullValue = true;
-            state.getSetIds().clear();
+            state.setSetIds(null);
             prevState.setValues(state);
             if (!isManualUpdate) {
                 refBookView.load(state);
@@ -275,8 +271,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     public void setValue(List<Long> value, boolean fireEvents) {
         prevState.setValues(state);
         if (value == null) {
-            isNullValue = true;
-            state.getSetIds().clear();
+            state.setSetIds(null);
             prevState.setValues(state);
             if (!isManualUpdate) {
                 refBookView.load(state);
@@ -324,7 +319,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void updateUIState() {
         String defValue = "";
-        if (!isNullValue) {
+        if (state.getSetIds() != null) {
             defValue = refBookView.getDereferenceValue();
         }
         textBox.setText(defValue);
