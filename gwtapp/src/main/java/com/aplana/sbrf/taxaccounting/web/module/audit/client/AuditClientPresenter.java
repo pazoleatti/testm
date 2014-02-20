@@ -9,10 +9,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiveDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientArchiveEvent;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPrintEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -35,17 +37,13 @@ import java.util.List;
  * Date: 2013
  */
 public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView, AuditClientPresenter.MyProxy>
-        implements AuditClientUIHandler,
-        AuditClientSearchEvent.MyHandler, AuditClientArchiveEvent.AuditClientArchiveHandler,
+        implements AuditClientUIHandler, AuditClientArchiveEvent.AuditClientArchiveHandler,
         AuditArchiveDialogEvent.AuditArchiveHandler, AuditFilterPrintEvent.AuditFilterPrintHandler {
 
     private AuditArchiveDialogPresenter auditArchiveDialogPresenter;
 
-    @ProxyEvent
-    @Override
-    public void onAuditFormSearchButtonClicked(AuditClientSearchEvent event) {
-        getView().updateData(0);
-    }
+    private HandlerRegistration searchButtonRegistration;
+
 
     @ProxyEvent
     @Override
@@ -56,7 +54,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     @Override
     public void onRangeChange(final int start, int length) {
         GetAuditDataListAction action = new GetAuditDataListAction();
-        LogSystemFilter filter = auditFilterPresenter.getLogSystemFilter();
+        LogSystemAuditFilter filter = auditFilterPresenter.getLogSystemFilter();
         filter.setStartIndex(start);
         filter.setCountOfRecords(length);
         action.setLogSystemFilter(filter);
@@ -176,4 +174,21 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         setInSlot(TYPE_auditFilterPresenter, auditFilterPresenter);
     }
 
+    @Override
+    protected void onBind() {
+        super.onBind();
+        ClickHandler clickHandler = new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                getView().updateData(0);
+            }
+        };
+        searchButtonRegistration = auditFilterPresenter.addClickHandler(clickHandler);
+    }
+
+    @Override
+    protected void onUnbind() {
+        super.onUnbind();
+        searchButtonRegistration.removeHandler();
+    }
 }

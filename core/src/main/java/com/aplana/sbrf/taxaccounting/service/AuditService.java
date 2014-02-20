@@ -24,11 +24,11 @@ public interface AuditService {
 	/**
 	 * Получить данные используемые для фильтрации журналом аудита
 	 */
-	LogSystemFilterAvailableValues getFilterAvailableValues();
+	LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
-     * @param itemList
+     * @param itemList архивированные записи
      */
     void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
 }

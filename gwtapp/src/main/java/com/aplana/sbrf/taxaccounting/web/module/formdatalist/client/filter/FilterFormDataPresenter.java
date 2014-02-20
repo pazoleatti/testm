@@ -40,6 +40,9 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setElementNames(Map<FormDataElementName, String> names);
 
+        // Установить фильтр для типов налоговых форм
+        void setKindFilter(List<FormDataKind> dataKinds);
+
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -59,7 +62,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		getView().setDataFilter(formDataFilter);
 	}
 
-	public void initFilter(final TaxType taxType, final FormDataFilter filter) {
+	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
 		dispatchAsync.execute(action, CallbackUtils
@@ -67,6 +70,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
+                        getView().setKindFilter(kindListResult.getDataKinds());
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
 						getView().setFormTypesMap(filterValues.getFormTypes());
 						getView().setReportPeriods(result.getReportPeriods());

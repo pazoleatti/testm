@@ -225,8 +225,9 @@ public interface RefBookDao {
      * @param recordPairs записи, у которых совпали уникальные атрибуты
      * @param versionFrom дата начала актуальности новой версии
      * @param versionTo дата конца актуальности новой версии
+     * @return список идентификаторов записей, в которых есть пересечение
      */
-    void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
+    List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса

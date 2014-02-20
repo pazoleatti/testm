@@ -69,9 +69,13 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	public LogSystemFilterAvailableValues getFilterAvailableValues() {
+	public LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user) {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
-		values.setDepartments(departmentService.listDepartments());
+        if (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.ROLE_CONTROL_UNP))
+            values.setDepartments(departmentService.listAll());
+        else if (user.hasRole(TARole.ROLE_CONTROL_NS))
+            values.setDepartments(departmentService.getBADepartments(user));
+
 		/*values.setFormTypeIds(formTypeDao.getAll());*/
 		values.setDeclarationTypes(declarationTypeDao.listAll());
 		return values;

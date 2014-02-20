@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.shared;
 
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -9,13 +8,13 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetAuditDataListAction extends UnsecuredActionImpl<GetAuditDataListResult> implements ActionName {
 
-    private LogSystemFilter logSystemFilter;
+    private LogSystemAuditFilter logSystemFilter;
 
-    public LogSystemFilter getLogSystemFilter() {
+    public LogSystemAuditFilter getLogSystemFilter() {
         return logSystemFilter;
     }
 
-    public void setLogSystemFilter(LogSystemFilter logSystemFilter) {
+    public void setLogSystemFilter(LogSystemAuditFilter logSystemFilter) {
         this.logSystemFilter = logSystemFilter;
     }
 
