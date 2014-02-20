@@ -39,16 +39,7 @@ void importFromXML() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>() // измененные записи
     def Long code = null // код валюты
     def Double rate = null // курс валюты
-    def RefBookAttributeType codeType = null // тип кода
-    def RefBookAttributeType rateType = null // тип курса
     def Map<String, Number> recordsDB = new HashMap<String, Number>() // записи в БД
-
-    refBook.attributes.each {
-        if (it.alias.equals("CODE_NUMBER"))
-            codeType = it.attributeType
-        else if (it.alias.equals("RATE"))
-            rateType = it.attributeType
-    }
 
     try {
 
@@ -96,8 +87,10 @@ void importFromXML() {
             // Запись в лист
             if (reader.endElement && reader.getName().equals(QName.valueOf("CurrencyRate")) && code != null) {
                 recordsMap = new HashMap<String, RefBookValue>()
-                recordsMap.put("CODE_NUMBER", new RefBookValue(codeType, code))
-                recordsMap.put("RATE", new RefBookValue(rateType, rate))
+                recordsMap.put("CODE_NUMBER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
+                recordsMap.put("NAME", new RefBookValue(RefBookAttributeType.REFERENCE, code))
+                recordsMap.put("CODE_LETTER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
+                recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate))
                 if (recordsDB.containsKey(code)) {
                     recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordsDB.get(code)))
                     updateList.add(recordsMap)

@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 public enum DepartmentParamAliases {
     DEPARTMENT_ID,
     DICT_REGION_ID,
-    OKTMO, // TODO
+    OKTMO,
     INN,
     KPP,
     TAX_ORGAN_CODE,

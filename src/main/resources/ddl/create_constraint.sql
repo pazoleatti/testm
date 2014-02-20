@@ -61,7 +61,7 @@ alter table ref_book_value add constraint ref_book_value_fk_record_id foreign ke
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 alter table form_column add constraint form_column_pk primary key (id);
-alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id);
+alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D', 'R'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
@@ -230,7 +230,7 @@ alter table notification add constraint notification_fk_sec_user foreign key (fi
 
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
-alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id);
+alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id);
 alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
 
