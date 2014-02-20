@@ -5,7 +5,8 @@
 // Пути к корневой папке для определенного вида налога, например C:\workspace\sbrfacctax\src\main\resources\form_template\deal\
 def scriptLocations = [
         'C:\\workspace\\sbrfacctax\\src\\main\\resources\\form_template\\deal\\',  // МУКС
-        'C:\\workspace\\sbrfacctax\\src\\main\\resources\\form_template\\income\\' // Налог на прибыль
+        'C:\\workspace\\sbrfacctax\\src\\main\\resources\\form_template\\income\\', // Налог на прибыль
+        'C:\\workspace\\sbrfacctax\\src\\main\\resources\\form_template\\transport\\' // Транспортный налог
 ]
 
 // Маппинг
@@ -54,7 +55,58 @@ def map = [
         339: "rnu40_2",
         355: "rnu64",
         502: "rnu107",
-        396: "rnu110"
+        396: "rnu110",
+
+        372: "app5",
+        362: "f7_8",
+        308: "output3",
+        395: "rnu108",
+        367: "rnu111",
+        374: "rnu112",
+        369: "rnu115",
+        368: "rnu116",
+        370: "rnu117",
+        373: "rnu118",
+        378: "rnu120",
+        321: "rnu14",
+        499: "rnu16",
+        501: "rnu17",
+        322: "rnu22",
+        331: "rnu32_2",
+        333: "rnu36_1",
+        315: "rnu36_2",
+        334: "rnu38_1",
+        335: "rnu38_2",
+        336: "rnu39_1",
+        316: "rnu4",
+        340: "rnu44",
+        341: "rnu45",
+        342: "rnu46",
+        344: "rnu47",
+        343: "rnu48_1",
+        313: "rnu48_2",
+        312: "rnu49",
+        317: "rnu5",
+        365: "rnu50",
+        348: "rnu55",
+        349: "rnu56",
+        353: "rnu57",
+        318: "rnu6",
+        352: "rnu61",
+        354: "rnu62",
+        311: "rnu7",
+        504: "rnu70_1",
+        357: "rnu70_2",
+        356: "rnu71_1",
+        503: "rnu71_2",
+        358: "rnu72",
+        366: "rnu75",
+        320: "rnu8",
+
+        // Транспортный налог
+        202: "benefit_vehicles",
+        200: "summary",
+        201: "vehicles"
 ]
 // Проверка корневой папки
 scriptLocations.each {
