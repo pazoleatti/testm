@@ -15,9 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -117,11 +115,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
-    public HandlerRegistration addSearchButtonClickHandler(ClickHandler clickHandler) {
-        return search.addClickHandler(clickHandler);
-    }
-
-    @Override
     public LogSystemAuditFilter getFilterData() {
         return driver.flush();
     }
@@ -195,7 +188,12 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         if (fromDate != null && toDate != null) {
             if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
                 Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+                return;
             }
+        }
+
+        if (getUiHandlers() != null) {
+            getUiHandlers().onSearchClicked();
         }
     }
 

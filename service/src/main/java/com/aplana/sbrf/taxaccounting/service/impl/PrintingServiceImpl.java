@@ -69,7 +69,7 @@ public class PrintingServiceImpl implements PrintingService {
         FormDataReport data = new FormDataReport();
         FormData formData = formDataDao.get(formDataId);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-        Department department =  departmentDao.getDepartment(formData.getPrintDepartmentId());
+        Department department =  departmentDao.getDepartment(formData.getPerformer().getPrintDepartmentId());
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
         data.setData(formData);

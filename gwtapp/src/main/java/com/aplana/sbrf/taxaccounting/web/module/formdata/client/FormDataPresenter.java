@@ -209,7 +209,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
-		action.setFormData(formData);
+        System.out.println("onSaveClicked: "+formData);
+        action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
