@@ -151,16 +151,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-
-        dictRegionId.setManualUpdate(true);
-        reorgFormCode.setManualUpdate(true);
-        signatoryId.setManualUpdate(true);
-        taxPlaceTypeCode.setManualUpdate(true);
-        obligation.setManualUpdate(true);
-        oktmo.setManualUpdate(true);
-        okvedCode.setManualUpdate(true);
-        type.setManualUpdate(true);
-
         driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
@@ -239,7 +229,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				}
 			}
 		});
-
 	}
 
 	@Override
@@ -258,19 +247,28 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		if (dereferenceValues != null) {
 			dereferenceValues.clear();
 		}
-//		dictRegionId.setDereferenceValue(null);
-//		reorgFormCode.setDereferenceValue(null);
-//		signatoryId.setDereferenceValue(null);
-//		taxPlaceTypeCode.setDereferenceValue(null);
-//		obligation.setDereferenceValue(null);
-//		oktmo.setDereferenceValue(null);
-//		okvedCode.setDereferenceValue(null);
-//		type.setDereferenceValue(null);
+		dictRegionId.setDereferenceValue(null);
+		reorgFormCode.setDereferenceValue(null);
+		signatoryId.setDereferenceValue(null);
+		taxPlaceTypeCode.setDereferenceValue(null);
+		obligation.setDereferenceValue(null);
+		oktmo.setDereferenceValue(null);
+		okvedCode.setDereferenceValue(null);
+		type.setDereferenceValue(null);
 
 		driver.edit(new DepartmentCombined());
 	}
 
-	/**
+    /**
+     * Отмена редактирования
+     */
+    private void cancel() {
+        setEditMode(false);
+        driver.edit(data);
+        setDereferenceValue(dereferenceValues);
+    }
+
+    /**
 	 * Обновление видимости полей
 	 */
 	private void updateVisibility() {
@@ -315,29 +313,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event) {
 		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
-				@Override
-				public void yes() {
-					setEditMode(false);
-					driver.edit(data);
-					setDereferenceValue(dereferenceValues);
-					Dialog.hideMessage();
-				}
+            Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    DepartmentConfigView.this.cancel();
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void no() {
-					Dialog.hideMessage();
-				}
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void close() {
-					no();
-				}
-			});
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
-			setEditMode(false);
-			driver.edit(data);
-			setDereferenceValue(dereferenceValues);
+            cancel();
 		}
 	}
 
