@@ -139,7 +139,7 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 		for (Department department : listDepartments) {
 			TaxAccDepartment taxAccDepartment = new TaxAccDepartment();
             StringBuilder builder = new StringBuilder("");
-            taxAccDepartment.setParentId(Integer.toString(0));
+            taxAccDepartment.setParentId("null");
             buildAttrName(builder, department);
             taxAccDepartment.setId(Integer.toString(department.getId()));
             taxAccDepartment.setName(builder.toString().isEmpty()?builder.toString():builder.toString().substring(1));
