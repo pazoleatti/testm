@@ -4,11 +4,14 @@ import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -27,11 +30,15 @@ import java.util.*;
  * User: avanteev
  */
 public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusinessUIHandler> implements HistoryBusinessFilterPresenter.MyView,
-        Editor<LogBusinessFilterValues> {
+        Editor<LogSystemAuditFilter> {
 
 
     interface Binder extends UiBinder<Widget, HistoryBusinessFilterView> {
     }
+
+    interface MyDriver extends SimpleBeanEditorDriver<LogSystemAuditFilter, HistoryBusinessFilterView> {}
+
+    private MyDriver driver = GWT.create(MyDriver.class);
 
     @UiField
     PeriodPickerPopupWidget reportPeriodIds;
@@ -42,23 +49,25 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiField
     DateMaskBoxPicker toSearchDate;
 
-    @Ignore
+    @Path("departmentIds")
     @UiField
     DepartmentPickerPopupWidget departmentSelectionTree;
 
+    @Path("formTypeIds")
     @UiField
     RefBookPicker formTypeId;
 
+    @Path("declarationTypeId")
     @UiField(provided = true)
     ListBoxWithTooltip<Integer> declarationTypeIds;
 
+    @Path("formKind")
     @UiField
     RefBookPicker formDataKind;
 
     @UiField(provided = true)
     ValueListBox<TaxType> taxType;
 
-    @Ignore
     @UiField(provided = true)
     ValueListBox<AuditFormType> auditFormTypeId;
 
@@ -68,6 +77,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiField
     Panel declarationTypePanel;
 
+    @Path("userIds")
     @UiField
     RefBookPicker user;
 
@@ -76,44 +86,12 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @Override
     public void init() {
-        fromSearchDate.setValue(new Date());
-        toSearchDate.setValue(new Date());
-        departmentSelectionTree.setValue(null, true);
-        reportPeriodIds.setValue(null, true);
-        taxType.setValue(null, true);
-        auditFormTypeId.setValue(null, true);
-        user.setValue(null, true);
-        user.setDereferenceValue(null);
-        formDataKind.setValue(null, true);
-        formDataKind.setDereferenceValue(null);
-        formTypeId.setValue(null, true);
-        formTypeId.setDereferenceValue(null);
+        driver.edit(new LogSystemAuditFilter());
     }
 
     @Override
-    public LogBusinessFilterValues getDataFilter() {
-        LogBusinessFilterValues lbf = new LogBusinessFilterValues();
-        // Отчетные периоды
-        lbf.setReportPeriodIds(reportPeriodIds.getValue());
-        // Подразделение
-        if (departmentSelectionTree.getValue() != null && !departmentSelectionTree.getValue().isEmpty()) {
-            lbf.setDepartmentId(departmentSelectionTree.getValue().get(0));
-        }
-        // Тип формы
-        lbf.setAuditFormTypeId(auditFormTypeId.getValue() == null ? null : auditFormTypeId.getValue().getId());
-        // Вид налоговой формы
-        lbf.setFormTypeId((formTypeId.getValue() == null || formTypeId.getValue().isEmpty()) ? null : Integer.valueOf(String.valueOf(formTypeId.getSingleValue())));
-        // Вид декларации
-        lbf.setDeclarationTypeId(declarationTypeIds.getValue());
-        // Тип налоговой формы
-        lbf.setFormKind(formDataKind.getValue());
-        // Период
-        lbf.setFromSearchDate(fromSearchDate.getValue());
-        lbf.setToSearchDate(new Date(oneDayTime + toSearchDate.getValue().getTime()));
-        // Пользователь
-        lbf.setUserIds(user.getValue());
-        lbf.setTaxType(taxType.getValue());
-        return lbf;
+    public LogSystemAuditFilter getDataFilter() {
+        return driver.flush();
     }
 
     @Override
@@ -141,6 +119,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @Override
     public void setReportPeriodPicker(List<ReportPeriod> reportPeriods) {
         reportPeriodIds.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public boolean isChangeFilter() {
+        return driver.isDirty();
+    }
+
+    @Override
+    public void edit(LogSystemAuditFilter auditFilter) {
+        driver.edit(auditFilter);
     }
 
     @Inject
@@ -189,6 +177,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         formDataKind.setPeriodDates(new Date(), new Date());
         reportPeriodIds.setEnabled(false);
         formTypeId.setEnabled(false);
+
+        driver.initialize(this);
     }
 
     private void setVisibleTaxFields() {
