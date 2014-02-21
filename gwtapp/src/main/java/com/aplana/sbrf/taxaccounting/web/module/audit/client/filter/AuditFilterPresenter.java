@@ -20,16 +20,9 @@ import java.util.*;
  */
 public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.MyView> implements AuditFilterUIHandlers {
 
-    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
-        void init();
-        void setDepartments(List<Department> list, Set<Integer> availableValues);
-        void setDeclarationType(Map<Integer, String> declarationTypesMap);
-        void setFormDataTaxType(List<TaxType> taxTypeList);
-        void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
-        LogSystemAuditFilter getFilterData();
-    }
-
     private final DispatchAsync dispatchAsync;
+
+    private LogSystemAuditFilter previousLogSystemAuditFilter;
 
     @Inject
     public AuditFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
@@ -54,14 +47,22 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         });
     }
 
-    @Override
-    public void onSearchClicked() {
-        AuditClientSearchEvent.fire(this);
+    public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
+        void init();
+        void setDepartments(List<Department> list, Set<Integer> availableValues);
+        void setDeclarationType(Map<Integer, String> declarationTypesMap);
+        void setFormDataTaxType(List<TaxType> taxTypeList);
+        void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        LogSystemAuditFilter getFilterData();
+        boolean isChangeFilter();
+        void edit(LogSystemAuditFilter auditFilter);
+
     }
 
     public void initFilterData() {
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
         getView().init();
+        previousLogSystemAuditFilter = getView().getFilterData();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
@@ -87,6 +88,13 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     }
 
+    @Override
+    public void onSearchButtonClicked() {
+        previousLogSystemAuditFilter = getView().getFilterData();
+        getView().edit(previousLogSystemAuditFilter);
+        AuditClientSearchEvent.fire(this);
+    }
+
     private Set<Integer> convertDepartmentsToIds(List<Department> source) {
         Set<Integer> result = new HashSet<Integer>();
         for (Department department : source) {
@@ -105,7 +113,11 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public LogSystemAuditFilter getLogSystemFilter() {
-        return getView().getFilterData();
+        return isFilterChange() ? previousLogSystemAuditFilter : getView().getFilterData();
+    }
+
+    public boolean isFilterChange(){
+        return getView().isChangeFilter();
     }
 
 }

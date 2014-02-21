@@ -45,6 +45,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
     private static final String dateFormat = "yyyyMMdd";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
+
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
@@ -129,7 +131,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("departmentId", filter.getDepartmentId());
         names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
-        names.put("toDate", filter.getToSearchDate());
+        names.put("toDate", new Date(filter.getToSearchDate().getTime() + oneDayTime));
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
@@ -148,7 +150,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
                 (formatter.format(filter.getFromSearchDate()))
                 .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-                (formatter.format(filter.getToSearchDate()))
+                (formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
                 .append("', '").append(dbDateFormat).append("')");
         sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
         if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){

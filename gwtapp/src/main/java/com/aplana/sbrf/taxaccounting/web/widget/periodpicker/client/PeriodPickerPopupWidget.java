@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -49,7 +48,7 @@ public class PeriodPickerPopupWidget extends Composite implements
     TextBox text;
 	 
 	
-	private List<Integer> value;
+	private List<Integer> value =  new LinkedList<Integer>();
 	
 	private TakesValueEditor<List<Integer>> editor;
 	
@@ -90,7 +89,8 @@ public class PeriodPickerPopupWidget extends Composite implements
 
     @Override
     public List<Integer> getValue() {
-        return this.value;
+        Collections.sort(value);
+        return new ArrayList<Integer>(value);
     }
 
     @Override
@@ -100,7 +100,10 @@ public class PeriodPickerPopupWidget extends Composite implements
 
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
-        this.value = value;
+        this.value.clear();
+        if(value != null){
+            this.value.addAll(value);
+        }
         dereference(this.value);
         if (fireEvents){
             ValueChangeEvent.fire(this, this.value);

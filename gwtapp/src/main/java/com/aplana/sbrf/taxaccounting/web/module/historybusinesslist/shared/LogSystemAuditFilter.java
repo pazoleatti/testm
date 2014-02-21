@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.audit.shared;
+package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
@@ -166,13 +166,12 @@ public class LogSystemAuditFilter implements Serializable {
         this.auditFormTypeId = auditFormTypeId;
     }
 
-    public LogSystemFilter convertTo(){
-        LogSystemFilter systemFilter = new LogSystemFilter();
+    public LogBusinessFilterValues convertTo(){
+        LogBusinessFilterValues systemFilter = new LogBusinessFilterValues();
         systemFilter.setCountOfRecords(this.getCountOfRecords());
-        systemFilter.setFormKind(formKind != null && !formKind.isEmpty()? FormDataKind.fromId(Integer.valueOf(String.valueOf(formKind.get(0)))) : null);
+        systemFilter.setFormKind(formKind);
         systemFilter.setDepartmentId(departmentIds != null && !departmentIds.isEmpty() ? departmentIds.get(0) : null);
         systemFilter.setTaxType(this.getTaxType());
-        systemFilter.setAscSorting(this.isAscSorting());
         systemFilter.setAuditFormTypeId(auditFormTypeId != null? auditFormTypeId.getId() : null);
         systemFilter.setDeclarationTypeId(this.getDeclarationTypeId());
         systemFilter.setFormTypeId(this.getFormTypeIds() != null && !formTypeIds.isEmpty() ? formTypeIds.get(0).intValue() : null);
@@ -181,7 +180,6 @@ public class LogSystemAuditFilter implements Serializable {
         systemFilter.setReportPeriodIds(this.getReportPeriodIds());
         systemFilter.setUserIds(this.getUserIds());
         systemFilter.setStartIndex(this.getStartIndex());
-        systemFilter.setSearchOrdering(this.getSearchOrdering());
 
         return systemFilter;
     }
