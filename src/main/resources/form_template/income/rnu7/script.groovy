@@ -373,7 +373,7 @@ void logicCheck() {
                 map.put(4, row.code);
                 if (uniq456.contains(map)) {
                     loggerError(errorMsg + "Имеется другая запись в налоговом учете с аналогичными значениями балансового " +
-                            "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, row.code, 'NUMBER').toString(),
+                            "счета=%s, документа № %s от %s.", refBookService.getStringValue(27, row.code, 'NUMBER').toString(),
                             row.docNumber.toString(), dateFormat.format(row.docDate))
                 } else {
                     uniq456.add(map)
@@ -388,7 +388,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, !getBalancePeriod())
 
         // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
-        def String code = row.code
+        def String code = getKnu(row.code)
         if (sumRowsByCode[code] != null) {
             sumRowsByCode[code] += row.taxAccountingRuble ?: 0
         } else {
@@ -452,7 +452,7 @@ void logicCheck() {
 }
 
 def String getKnu(def code) {
-    return getRefBookValue(28, code)?.CODE?.stringValue
+    return getRefBookValue(27, code)?.CODE?.stringValue
 }
 
 def getStartDate() {
