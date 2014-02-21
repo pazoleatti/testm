@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -275,14 +276,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getPerformers(List<Integer> departments) {
+    public List<Integer> getPerformers(List<Integer> departments, int formType) {
         String sql = "SELECT performer_dep_id " +
                 "FROM department_form_type " +
-                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null " +
+                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
                 "GROUP BY performer_dep_id";
 
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         parameterMap.put("ids", departments);
+        parameterMap.put("formtype", formType);
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }

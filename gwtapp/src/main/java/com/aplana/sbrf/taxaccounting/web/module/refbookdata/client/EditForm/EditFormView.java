@@ -310,7 +310,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         allVersion.setVisible(!isVersionMode);
         versionStart.setEnabled(isVersionMode && !readOnly);
         versionEnd.setEnabled(isVersionMode && !readOnly);
-        allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
+        allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
