@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,13 +87,31 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	}
 
     @Override
-    public List<Department> getParentsHierarchy(int departmentId) {
+    public String getParentsHierarchy(Integer departmentId) {
         try {
-            return getJdbcTemplate().query(
-                    "SELECT * FROM department START WITH id = ? CONNECT BY PRIOR parent_id = id",
-                    new DepartmentJdbcMapper(),
+            String path = getJdbcTemplate().queryForObject(
+                    "select path from (SELECT id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
+                            "FROM department  where type != 1 START\n" +
+                            "WITH id = ?\n" +
+                            "CONNECT BY PRIOR parent_id = id order by lvl desc)\n" +
+                            "where ROWNUM = 1 ",
+                    new RowMapper<String>() {
+                        @Override
+                        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getString("path");
+                        }
+                    },
                     departmentId
             );
+            String[] pathParts = path.substring(1).split("/");
+            StringBuilder result = new StringBuilder();
+            for (int i = pathParts.length - 1; i > -1; i--) {
+                result.append(pathParts[i]);
+                if (i != 0) {
+                    result.append("/");
+                }
+            }
+            return result.toString();
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -257,14 +276,15 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getPerformers(List<Integer> departments) {
+    public List<Integer> getPerformers(List<Integer> departments, int formType) {
         String sql = "SELECT performer_dep_id " +
                 "FROM department_form_type " +
-                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null " +
+                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
                 "GROUP BY performer_dep_id";
 
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         parameterMap.put("ids", departments);
+        parameterMap.put("formtype", formType);
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }

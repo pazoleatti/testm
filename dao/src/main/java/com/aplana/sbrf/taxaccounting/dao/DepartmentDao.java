@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
@@ -43,11 +44,11 @@ public interface DepartmentDao {
 	Department getParent(int departmentId);
 
     /**
-     * Возвращает иерархию подразделений, являющихся родительскими для указанного подразделения
-     * @param departmentId подразделение, для которого выполняется поиск родительских
-     * @return
+     * Возвращает путь в иерархии до указанного подразделения
+     * @param departmentId подразделение до которого строится иерархия
+     * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
-    List<Department> getParentsHierarchy(int departmentId);
+    String getParentsHierarchy(Integer departmentId);
 
     /**
      * Получить список всех подразделений
@@ -118,9 +119,10 @@ public interface DepartmentDao {
     /**
      * Получение списка исполнителей по списку идентификаторов подразделений
      * @param departments список id'шников подразделений
+     * @param formType id формы
      * @return писок id'шников подразделений (исполнителей)
      */
-    List<Integer> getPerformers(List<Integer> departments);
+    List<Integer> getPerformers(List<Integer> departments, int formType);
 
 	/**
 	 * Получение списка исполнителей по списку идентификаторов подразделений и типам налога

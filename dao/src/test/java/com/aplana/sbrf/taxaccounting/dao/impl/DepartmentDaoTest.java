@@ -160,7 +160,7 @@ public class DepartmentDaoTest {
     @Test
     public void getPerformers(){
         Department department2 = departmentDao.getDepartment(2);
-        List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()));
+        List<Integer> performers = departmentDao.getPerformers(asList(department2.getId()),1);
         Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);
         Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
     }
@@ -168,7 +168,7 @@ public class DepartmentDaoTest {
     @Test
     public void getPerformersGroup(){
         Department department3 = departmentDao.getDepartment(3);
-        List<Integer> performers = departmentDao.getPerformers(asList(department3.getId()));
+        List<Integer> performers = departmentDao.getPerformers(asList(department3.getId()),2);
         Assert.assertTrue("Department(id=3) has 1 performer", performers.size() == 1);
         Assert.assertTrue("Department(id=3) has 1 performer with id = 2", performers.get(0) == 2);
     }
