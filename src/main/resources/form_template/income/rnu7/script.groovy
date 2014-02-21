@@ -101,6 +101,9 @@ def currentDate = new Date()
 @Field
 def start = null
 
+@Field
+def endDate = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -236,7 +239,7 @@ def BigDecimal calc12(DataRow row) {
 
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : currentDate, null, "CODE_NUMBER = $value", null);
+    def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
     return res.getRecords().get(0).RATE.numberValue
 }
 
@@ -292,7 +295,7 @@ void logicCheck() {
     // Дата начала отчетного периода
     def startDate = getStartDate()
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = getReportPeriodEndDate()
 
     //две карты: одна с реальными значениями итого по кодам, а вторая - с рассчитанными
     def totalRows = [:]
@@ -425,7 +428,7 @@ void logicCheck() {
             }
             if (!isFind) {
                 logger.warn('Операция, указанная в строке %s, в налоговом учете за последние 3 года не проходила!',
-                        row.number.toString())
+                        row.getIndex())
             }
         }
     }
@@ -473,4 +476,11 @@ void loggerError(def msg, Object...args) {
     } else {
         logger.error(msg, args)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

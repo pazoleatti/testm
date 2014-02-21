@@ -209,7 +209,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
-		action.setFormData(formData);
+        System.out.println("onSaveClicked: "+formData);
+        action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
@@ -256,7 +257,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onDeleteFormClicked() {
         final FormDataPresenter t = this;
-        Dialog.confirmMessage("Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
+        Dialog.confirmMessage("Подтверждение", "Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
             @Override
             public void yes() {
                 DeleteFormDataAction action = new DeleteFormDataAction();

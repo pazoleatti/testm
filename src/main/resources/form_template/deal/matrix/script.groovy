@@ -117,6 +117,17 @@ def refBookCache = [:]
 // 54.	taxpayerCode	п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
 // 55.	address	п. 090 "Адрес"
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            currentDate, rowIndex, cellName, logger, required)
+}
+
 /**
  * Проверка при создании формы.
  */
@@ -253,7 +264,7 @@ void consolidation() {
  */
 DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // Общие значения
-    def Date date = new Date()
+    def Date date = getReportPeriodEndDate()
 
     // "Да"
     def Long recYesId = getRecordId(38, 'CODE', '1', date)
@@ -1083,4 +1094,11 @@ def getRefBookValue(def long refBookId, def long recordId) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
     return refBookCache.get(recordId)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

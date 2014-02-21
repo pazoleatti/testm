@@ -383,9 +383,9 @@ public class PeriodServiceImpl implements PeriodService{
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)
 				|| user.hasRole(TARole.ROLE_CONTROL)
 				) {
-			return new HashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
 		} else if (user.hasRole(TARole.ROLE_OPER)) {
-			return new HashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
 		} else {
 			return Collections.EMPTY_SET;
 		}

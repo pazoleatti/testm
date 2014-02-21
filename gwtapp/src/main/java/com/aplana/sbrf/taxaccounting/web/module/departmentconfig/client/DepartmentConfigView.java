@@ -98,7 +98,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			signatoryId,
 			taxPlaceTypeCode,
 			obligation,
-            oktmo,// TODO
+            oktmo,
 			okvedCode,
 			type;
 
@@ -151,6 +151,16 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+
+        dictRegionId.setManualUpdate(true);
+        reorgFormCode.setManualUpdate(true);
+        signatoryId.setManualUpdate(true);
+        taxPlaceTypeCode.setManualUpdate(true);
+        obligation.setManualUpdate(true);
+        oktmo.setManualUpdate(true);
+        okvedCode.setManualUpdate(true);
+        type.setManualUpdate(true);
+
         driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
@@ -286,6 +296,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
 		getUiHandlers().save(driver.flush(), currentReportPeriodId);
+        // TODO http://jira.aplana.com/browse/SBRFACCTAX-5954 После решения проверить работу без автоматич. разыменования
 		driver.edit(data);
 
 		if (dereferenceValues != null) {

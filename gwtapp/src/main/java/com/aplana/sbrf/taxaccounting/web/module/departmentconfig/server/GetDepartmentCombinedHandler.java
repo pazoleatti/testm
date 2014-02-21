@@ -136,9 +136,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
             // Транспортный налог
             if (action.getTaxType() == TaxType.TRANSPORT) {
-                // TODO   http://jira.aplana.com/browse/SBRFACCTAX-5658
                 Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
-                depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue()==1L);
+                depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue() == 1L);
             }
         }
 
@@ -162,7 +161,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
         }
         if (depCombined.getOktmo() != null && !depCombined.getOktmo().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 3L, 7L, depCombined.getOktmo().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 96L, 840L, depCombined.getOktmo().get(0), logger);
         }
         if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 34L, 210L, depCombined.getOkvedCode().get(0), logger);

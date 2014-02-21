@@ -61,7 +61,7 @@ alter table ref_book_value add constraint ref_book_value_fk_record_id foreign ke
 alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
 
 alter table form_column add constraint form_column_pk primary key (id);
-alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id);
+alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D', 'R'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision < 9) or (type <> 'N' and precision is null));
@@ -122,7 +122,6 @@ alter table declaration_data add constraint declaration_data_uniq_template uniqu
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_id foreign key (department_id) references department(id);
-alter table form_data add constraint form_data_fk_print_dep_id foreign key (print_department_id) references department(id);
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
 alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
@@ -134,6 +133,7 @@ alter table form_data_signer add constraint form_data_signer_fk_formdata foreign
 
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
 alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
+alter table form_data_performer add constraint formdata_performer_fk_print_dep_id foreign key (print_department_id) references department(id);
 
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
@@ -230,7 +230,7 @@ alter table notification add constraint notification_fk_sec_user foreign key (fi
 
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
-alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id);
+alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id);
 alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
 

@@ -2,7 +2,7 @@ package form_template.income.rnu26
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -16,7 +16,7 @@ import groovy.transform.Field
 
 // Признак периода ввода остатков
 @Field
-def boolean isBalancePeriod = null
+def Boolean isBalancePeriod = null
 
 def getBalancePeriod() {
     if (isBalancePeriod == null) {
@@ -139,7 +139,7 @@ def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'co
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -151,14 +151,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -672,7 +672,7 @@ def getColumnName(def row, def alias) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = getReportPeriodEndDate()
 
     def cache = [:]
     def data = formDataService.getDataRowHelper(formData)
@@ -946,4 +946,11 @@ void migration() {
         def total = getCalcTotalRow()
         dataRowHelper.insert(total, dataRows.size() + 1)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
