@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 
 import javax.xml.namespace.QName
@@ -109,9 +110,18 @@ void importFromXML() {
         throw new ServiceException("Сообщение не содержит значений, соответствующих загружаемым данным")
     }
 
-    if (!updateList.empty)
-        dataProvider.updateRecords(version, updateList)
-    if (!insertList.empty)
-        dataProvider.insertRecords(version, insertList)
-
+    if (!updateList.empty) {
+        updateList.each { map ->
+            dataProvider.updateRecordVersion(logger, map.get(RefBook.RECORD_ID_ALIAS).numberValue, version, null, map)
+        }
+    }
+    if (!insertList.empty) {
+        def recordList = []
+        insertList.each { map ->
+            def rbRecord = new RefBookRecord()
+            rbRecord.setValues(map)
+            recordList.add(rbRecord)
+        }
+        dataProvider.createRecordVersion(logger, version, null, recordList)
+    }
 }

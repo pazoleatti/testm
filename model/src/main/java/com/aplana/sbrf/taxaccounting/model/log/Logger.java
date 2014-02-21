@@ -57,7 +57,7 @@ public class Logger {
         if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
         }
-        log(LogLevel.ERROR, "Необработанная ошибка: %s", msg);
+        log(LogLevel.ERROR, "Ошибка: %s", msg);
 		logger.error("Unhandled exception: " + msg, e);
 	}
 

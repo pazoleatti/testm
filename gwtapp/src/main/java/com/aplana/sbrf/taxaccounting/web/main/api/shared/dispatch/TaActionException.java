@@ -8,6 +8,8 @@ public class TaActionException extends ActionException {
 	private String uuid;
 	
 	private String trace;
+
+    private boolean needStackTrace;
 	
 	public TaActionException() {
 		super();
@@ -49,5 +51,13 @@ public class TaActionException extends ActionException {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isNeedStackTrace() {
+        return needStackTrace;
+    }
+
+    public void setNeedStackTrace(boolean needStackTrace) {
+        this.needStackTrace = needStackTrace;
     }
 }

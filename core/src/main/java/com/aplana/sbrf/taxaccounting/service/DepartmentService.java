@@ -157,4 +157,11 @@ public interface DepartmentService {
      * @return подразделения с типом {@link DepartmentType.MANAGEMENT} и {@link DepartmentType.MANAGEMENT}
      */
     List<Department> getDepartmentForSudir();
+
+    /**
+     * Возвращает путь в иерархии до указанного подразделения
+     * @param departmentId подразделение до которого строится иерархия
+     * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
+     */
+    String getParentsHierarchy(Integer departmentId);
 }
