@@ -43,11 +43,11 @@ public interface DepartmentDao {
 	Department getParent(int departmentId);
 
     /**
-     * Возвращает иерархию подразделений, являющихся родительскими для указанного подразделения
-     * @param departmentId подразделение, для которого выполняется поиск родительских
-     * @return
+     * Возвращает путь в иерархии до указанного подразделения
+     * @param departmentId подразделение до которого строится иерархия
+     * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
-    List<Department> getParentsHierarchy(int departmentId);
+    String getParentsHierarchy(Integer departmentId);
 
     /**
      * Получить список всех подразделений
