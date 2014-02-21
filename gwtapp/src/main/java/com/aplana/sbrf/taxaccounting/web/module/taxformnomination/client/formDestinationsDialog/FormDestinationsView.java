@@ -224,8 +224,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         // тип налоговой формы
         formDataKind.setEnabled(true);
         formDataKind.setValue(null, false);
-        // TODO нужно отключать мультиселект, сейчас это еще не предусмотрено
-        //formDataKind.setM
+        formDataKind.setMultiSelect(false);
     }
 
     @Override
@@ -285,10 +284,9 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
         // тип налоговой формы
         // TODO да пребудет время когда люди будут использвать List и Set по назначениею
+        formDataKind.setMultiSelect(true);
         formDataKind.setValue(new ArrayList<Long>(kinds), true);
         formDataKind.setEnabled(false);
 
-        // TODO нужно включать мультиселект, сейчас это еще не предусмотрено
-        //formDataKind.setM
     }
 }
