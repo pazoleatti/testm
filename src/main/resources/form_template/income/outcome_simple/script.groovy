@@ -83,9 +83,6 @@ def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
-@Field
-def isBank
-
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -97,7 +94,7 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
     } else {
         recordCache[ref_id] = [:]
     }
-    def records = getProvider(ref_id).getRecords(date, null, filter, null)
+    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
     if (records.size() == 1) {
         recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
@@ -235,6 +232,8 @@ void calculationControlGraphs(def dataRows) {
 
 /** Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка. */
 def consolidationBank(def dataRows) {
+    System.out.println("consolidationBank")
+
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
@@ -270,6 +269,7 @@ def consolidationBank(def dataRows) {
 
 /** Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП. */
 void consolidationSummary(def dataRows) {
+    System.out.println("consolidationSummary")
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
@@ -318,7 +318,9 @@ void consolidationSummary(def dataRows) {
     }
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
+    System.out.println("ololo")
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        System.out.println("ololo")
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def date = new Date()
@@ -330,7 +332,9 @@ void consolidationSummary(def dataRows) {
                             (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
+                        System.out.println("row.consumptionTypeId = ${row.consumptionTypeId}")
                         def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, date)
+                        System.out.println("recordId = ${recordId}")
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -339,8 +343,8 @@ void consolidationSummary(def dataRows) {
                         // сумма графы 10 рну-7 для графы 7
                         def sum = 0
                         if (recordId != null) {
-                            sum10 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'balance', 'taxAccountingRuble')
-                            sum12 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'balance', 'ruble')
+                            sum10 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'taxAccountingRuble')
+                            sum12 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'ruble')
                             sum = getSumForColumn7(child, dataRowsChild, recordId)
                         }
 
@@ -362,7 +366,7 @@ void consolidationSummary(def dataRows) {
                         // сумма графы 5 рну-5
                         def sum5 = 0
                         if (recordId != null) {
-                            sum5 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'number', 'sum')
+                            sum5 = getSumForColumn5or6or8(dataRowsChild, recordId, 'number', 'sum')
                         }
                         // графа 8
                         row.rnu5Field5Accepted = (row.rnu5Field5Accepted ?: 0) + sum5
@@ -376,13 +380,11 @@ void consolidationSummary(def dataRows) {
 
 /** Проверка на банк. */
 def isBank() {
-    if (isBank == null) {
-        departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
-            if (it.departmentId != formData.departmentId) {
-                isBank = false
-            }
+    boolean isBank = true
+    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+        if (it.departmentId != formData.departmentId) {
+            isBank = false
         }
-        isBank = true
     }
     return isBank
 }
@@ -442,17 +444,17 @@ def getFormDataRNU14() {
 }
 
 /**
- * Получить сумму строк графы нф соответствующих двум условиям.
+ * Получить сумму строк графы нф.
  * @param dataRowsChild строки нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
  * @param alias1 алиас графы для первого условия
- * @param alias2 алиас графы для второго условия
  * @param resultAlias алиас графы суммирования
  */
-def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def alias2, def resultAlias) {
+def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def resultAlias) {
     def sum = 0
     for (row in dataRowsChild) {
-        if (value1 == row[alias1] && value1 == row[alias2]) {
+        System.out.println("value1 = ${value1} row[alias1] = ${row[alias1]}")
+        if (value1 == row[alias1]) {
             sum += (row[resultAlias] ?: 0)
         }
     }
@@ -468,7 +470,7 @@ def getSumForColumn7(def form, def dataRows, def value1) {
     def sum = 0
     dataRows.each { row ->
         if (row.getAlias() == null) {
-            if (value1 == row.code && value1 == row.balance && row.ruble != null && row.ruble != 0) {
+            if (value1 == row.code && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
                 // получить отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
@@ -480,11 +482,11 @@ def getSumForColumn7(def form, def dataRows, def value1) {
                         def d = formDataService.getDataRowHelper(f)
                         if (d != null) {
                             d.allCached.each { r ->
-                                // графа  4 - balance
+                                // графа  4 - code
                                 // графа  5 - docNumber
                                 // графа  6 - docDate
                                 // графа 10 - taxAccountingRuble
-                                if (r.balance == row.balance && r.docNumber == row.docNumber && r.docDate == row.docDate) {
+                                if (r.code == row.code && r.docNumber == row.docNumber && r.docDate == row.docDate) {
                                     sum += (r.taxAccountingRuble ?: 0)
                                 }
                             }
