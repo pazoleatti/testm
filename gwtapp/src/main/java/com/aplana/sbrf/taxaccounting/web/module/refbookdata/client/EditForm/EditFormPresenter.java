@@ -212,6 +212,14 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         getView().fillInputFields(null);
                                         setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, true);
+                                        if (result.isException()) {
+                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!", new DialogHandler() {
+                                                @Override
+                                                public void close() {
+                                                    super.close();
+                                                }
+                                            });
+                                        }
                                     }
                                 }, this));
 			}

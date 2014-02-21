@@ -199,10 +199,10 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
-                throw new ServiceLoggerException("Версия не создана, обнаружены фатальные ошибки!",
+                throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
-                throw new ServiceException("Версия не создана, обнаружены фатальные ошибки!");
+                throw new ServiceException("Версия не сохранена. Обнаружены фатальные ошибки!");
             }
         }
 

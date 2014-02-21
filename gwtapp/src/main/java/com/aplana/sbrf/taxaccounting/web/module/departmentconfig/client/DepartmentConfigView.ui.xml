@@ -166,7 +166,7 @@
                                         <g:cell width="99%">
                                             <r:RefBookPickerWidget ui:field="dictRegionId" isHierarchical="false" width="150px"
                                                                         attributeIdInt="9" title="Субъект"
-                                                                        multiSelect="false"/>
+                                                                        multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -190,8 +190,9 @@
                                             <g:Label text="ОКТМО:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="840" isHierarchical="false" width="150px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="oktmo" attributeIdInt="840"
+                                                                   isHierarchical="false" width="150px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -215,8 +216,9 @@
                                             <g:Label text="ОКВЭД:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="okvedCode" attributeIdInt="210" isHierarchical="false" width="150px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="okvedCode" attributeIdInt="210"
+                                                                   isHierarchical="false" width="150px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
 
@@ -227,8 +229,9 @@
                                             <g:Label text="Код формы реорганизации и ликвидации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="reorgFormCode" attributeIdInt="13" isHierarchical="false" width="150px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="reorgFormCode" attributeIdInt="13"
+                                                                   isHierarchical="false" width="150px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -259,8 +262,9 @@
                                             <g:Label text="Признак лица подписавшего документ:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="signatoryId" attributeIdInt="213" isHierarchical="false" addStyleNames="{style.fixRelativeWidth}"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="signatoryId" attributeIdInt="213"
+                                                                   isHierarchical="false" addStyleNames="{style.fixRelativeWidth}"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -314,8 +318,9 @@
                                             <g:Label text="Код места, по которому представляется документ:" addStyleNames="{style.rightLabels},{style.toLongLabel}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="taxPlaceTypeCode" attributeIdInt="3" isHierarchical="false" width="200px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="taxPlaceTypeCode" attributeIdInt="3"
+                                                                   isHierarchical="false" width="200px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="taxRatePanel" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">
@@ -356,8 +361,9 @@
                                             <g:Label text="Обязанность по уплате налога:" addStyleNames="{style.rightLabels}" />
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="obligation" attributeIdInt="110" isHierarchical="false" width="200px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="obligation" attributeIdInt="110"
+                                                                   isHierarchical="false" width="200px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
 
@@ -366,8 +372,9 @@
                                             <g:Label text="Признак расчёта:" addStyleNames="{style.rightLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <r:RefBookPickerWidget ui:field="type" attributeIdInt="120" isHierarchical="false" width="200px"
-                                                                        multiSelect="false"/>
+                                            <r:RefBookPickerWidget ui:field="type" attributeIdInt="120"
+                                                                   isHierarchical="false" width="200px"
+                                                                   multiSelect="false" manualUpdate="true"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel ui:field="sumTaxPanel" visible="false" width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">

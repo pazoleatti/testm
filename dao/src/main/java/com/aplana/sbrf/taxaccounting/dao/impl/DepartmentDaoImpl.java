@@ -87,13 +87,31 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	}
 
     @Override
-    public List<Department> getParentsHierarchy(int departmentId) {
+    public String getParentsHierarchy(Integer departmentId) {
         try {
-            return getJdbcTemplate().query(
-                    "SELECT * FROM department START WITH id = ? CONNECT BY PRIOR parent_id = id",
-                    new DepartmentJdbcMapper(),
+            String path = getJdbcTemplate().queryForObject(
+                    "select path from (SELECT id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
+                            "FROM department  where type != 1 START\n" +
+                            "WITH id = ?\n" +
+                            "CONNECT BY PRIOR parent_id = id order by lvl desc)\n" +
+                            "where ROWNUM = 1 ",
+                    new RowMapper<String>() {
+                        @Override
+                        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getString("path");
+                        }
+                    },
                     departmentId
             );
+            String[] pathParts = path.substring(1).split("/");
+            StringBuilder result = new StringBuilder();
+            for (int i = pathParts.length - 1; i > -1; i--) {
+                result.append(pathParts[i]);
+                if (i != 0) {
+                    result.append("/");
+                }
+            }
+            return result.toString();
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

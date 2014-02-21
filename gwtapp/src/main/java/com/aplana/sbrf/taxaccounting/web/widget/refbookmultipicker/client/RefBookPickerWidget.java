@@ -90,8 +90,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         initWidget(binder.createAndBindUi(this));
 
-        //refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
-        refBookView = new RefBookMultiPickerView(multiSelect);
+        refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
 
         widgetWrapper.add(refBookView);
 
@@ -141,7 +140,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 }
             }
         });
-            // оставлю для примера
+        // оставлю для примера
 //        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
 //            @Override
 //            public void OnHide(CanHide modalWindow) {
@@ -244,7 +243,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public Long getSingleValue() {
-        return state.getSetIds()!= null ? state.getSetIds().iterator().next() : null;
+        return state.getSetIds() != null ? state.getSetIds().iterator().next() : null;
     }
 
     @Override

@@ -195,7 +195,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         // подразделение, которому назначена налоговая форма
         retList.add(departmentDao.getDepartment(formData.getDepartmentId()).getId());
         // подразделения которые назначены исполнителями для налоговой формы
-        retList.addAll(getExecutorsDepartments(retList, formData.getFormType().getId()));
+        retList.addAll(getExecutorsDepartments(retList));
         return retList;
     }
 
@@ -237,6 +237,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
         departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
         return departments;
+    }
+
+    @Override
+    public String getParentsHierarchy(Integer departmentId) {
+        return departmentDao.getParentsHierarchy(departmentId);
     }
 
     private List<Integer> getExecutorsDepartments(List<Integer> departments, int formType) {

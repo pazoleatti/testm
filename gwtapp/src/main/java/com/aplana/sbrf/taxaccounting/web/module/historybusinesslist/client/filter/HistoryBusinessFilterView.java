@@ -254,6 +254,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
             reportPeriodIds.setEnabled(false);
             reportPeriodIds.setValue(null, true);
             return;
+        } else {
+            formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
         }
         if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());

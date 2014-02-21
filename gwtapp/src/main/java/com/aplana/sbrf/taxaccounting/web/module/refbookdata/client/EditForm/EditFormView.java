@@ -89,6 +89,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 				case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(false, false);
+                    refbookWidget.setManualUpdate(true);
                     Date start = versionStart.getValue();
                     if (start == null) {
                         start = new Date();
@@ -309,7 +310,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         allVersion.setVisible(!isVersionMode);
         versionStart.setEnabled(isVersionMode && !readOnly);
         versionEnd.setEnabled(isVersionMode && !readOnly);
-        allVersion.setText("Всего версий ("+versionData.getVersionCount()+")");
+        allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
