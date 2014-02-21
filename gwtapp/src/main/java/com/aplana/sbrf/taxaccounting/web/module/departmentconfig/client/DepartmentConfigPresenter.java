@@ -229,6 +229,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        getView().clear();
 
         String value = request.getParameter("nType", "");
         TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);

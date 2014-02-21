@@ -94,7 +94,7 @@
                         </g:cell>
                         <g:Button ui:field="clearButton" text="Очистить" width="70px" addStyleNames="{modal.marginRight10}"/>
                         <g:Button ui:field="pickButton" text="Выбрать" width="70px" addStyleNames="{modal.marginRight10}"/>
-                        <g:Button ui:field="cancelButton" text="Отмена" width="70px"/>
+                        <g:Button ui:field="cancelButton" text="Закрыть" width="70px"/>
                     </g:HorizontalPanel>
 
                 </g:VerticalPanel>

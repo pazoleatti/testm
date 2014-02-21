@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -218,6 +219,9 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private String getNumberValue(RefBookValue value) {
         if (value == null) {
             return null;
+        }
+        if (value.getAttributeType() == RefBookAttributeType.STRING) {
+            return value.getStringValue();
         }
         if (value.getNumberValue() == null) {
             return null;
