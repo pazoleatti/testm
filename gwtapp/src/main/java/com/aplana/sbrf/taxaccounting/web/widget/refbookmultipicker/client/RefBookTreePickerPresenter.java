@@ -12,49 +12,42 @@ import com.gwtplatform.mvp.client.View;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Презентер для представления отображения иерархического справочника
+ * @author aivanov
+ */
 public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePickerPresenter.MyView>
         implements RefBookTreePickerUiHandlers {
 
     private final DispatchAsync dispatcher;
 
-    private Long refBookAttrId;
-    private String filter;
-    private Date relevanceDate;
+    private PickerState ps;
 
     interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
-
-        Date getVersion();
-
-        void setVersion(Date version);
-
-        String getSearchPattern();
-
-        Long getAttributeId();
-
-        String getFilter();
 
         void loadRoot(List<RefBookTreeItem> values);
 
         void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values);
 
         List<RefBookTreeItem> getSelectionValues();
-
-        void widgetFireChangeEvent(List<Long> value);
     }
 
     public RefBookTreePickerPresenter(MyView view) {
         super(GINContextHolder.getEventBus(), view);
         dispatcher = GINContextHolder.getDispatchAsync();
         getView().setUiHandlers(this);
+        ps = new PickerState();
     }
 
     @Override
-    public void init(final long refBookAttrId, final String filter, Date relevanceDate) {
-        if (isNewParams()) {
-            if (getView().getAttributeId() == null) {
+    public void init(final PickerState newState) {
+        if (isNeedReloadHeaders(newState)) {
+            // Установка новых значений после проверки на новость основных параметров
+            ps.setValues(newState);
+            if (ps.getRefBookAttrId() == null) {
                 return;
             }
-            if (getView().getVersion() == null) {
+            if (ps.getVersionDate() == null) {
                 return;
             }
             dispatcher.execute(createLoadAction(null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
@@ -67,16 +60,16 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void reload() {
-        this.init(refBookAttrId, getView().getSearchPattern(), getView().getVersion());
+    public void reload(Date relevanceDate) {
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
     }
 
     @Override
     public void loadForItem(final RefBookUiTreeItem uiTreeItem) {
-        if (refBookAttrId == null) {
+        if (ps.getRefBookAttrId() == null) {
             return;
         }
-        if (relevanceDate == null) {
+        if (ps.getVersionDate() == null) {
             return;
         }
         RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem();
@@ -94,34 +87,34 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void search() {
+    public void find(String searchPattern) {
+        ps.setSearchPattern(searchPattern);
     }
 
-    @Override
-    public void versionChange() {
-
+    private boolean isNeedReloadHeaders(PickerState newPs) {
+        return RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate());
     }
 
     /* Проверка на изменения входных параметров*/
-    // TODO (aivanov) вынести в RefBookPickerUtils
-    private boolean isNewParams() {
-        Long refBookAttrId = getView().getAttributeId();
-        String filter = getView().getFilter();
-        Date relevanceDate = getView().getVersion();
-        Boolean hasChange = (refBookAttrId == null && this.refBookAttrId != null)
-                || (refBookAttrId != null && this.refBookAttrId == null)
-                || (refBookAttrId != null && this.refBookAttrId != null && !refBookAttrId.equals(this.refBookAttrId))
-                || (filter == null && this.filter != null)
-                || (filter != null && this.filter == null)
-                || (filter != null && this.filter != null && !filter.equals(this.filter))
-                || (relevanceDate == null && this.relevanceDate != null)
-                || (relevanceDate != null && this.relevanceDate == null)
-                || (relevanceDate != null && this.relevanceDate != null && relevanceDate.compareTo(this.relevanceDate) != 0);
-        if(hasChange){
-            this.refBookAttrId = refBookAttrId;
-            this.filter = filter;
-            this.relevanceDate = relevanceDate;
+    private boolean isNewParams(PickerState newPs) {
+        Boolean hasChange =
+                RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                        RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                        RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                        RefBookPickerUtils.itWasChange(ps.getFilter(), newPs.getFilter()) ||
+                        RefBookPickerUtils.itWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
+
+
+        if (hasChange) {
+            ps.setRefBookAttrId(newPs.getRefBookAttrId());
+            ps.setFilter(newPs.getFilter());
+            ps.setSearchPattern(newPs.getSearchPattern());
+            ps.setVersionDate(newPs.getVersionDate());
+            ps.setMultiSelect(newPs.isMultiSelect());
         }
+
         return hasChange;
     }
 
@@ -129,12 +122,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent) {
         GetRefBookTreeValuesAction action = new GetRefBookTreeValuesAction();
 
-        action.setSearchPattern(getView().getSearchPattern());
-        action.setFilter(filter);
-        action.setRefBookAttrId(refBookAttrId);
-        action.setVersion(relevanceDate);
+        action.setSearchPattern(ps.getSearchPattern());
+        action.setFilter(ps.getFilter());
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setVersion(ps.getVersionDate());
         action.setParent(parent);
-        action.setSearchPattern(getView().getSearchPattern());
         return action;
     }
 

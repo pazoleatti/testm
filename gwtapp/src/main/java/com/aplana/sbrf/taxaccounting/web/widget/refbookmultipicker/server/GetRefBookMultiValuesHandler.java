@@ -27,6 +27,7 @@ import java.text.ParsePosition;
 import java.util.*;
 
 /**
+ * обработчик для загрузки данных для компонента линейного справочника
  * @author sgoryachkin
  */
 @Component
@@ -56,9 +57,9 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         RefBookAttribute sortAttribute = getRefBookAttributeById(refBook, action.getSortAttributeIndex());
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
-        System.out.println("refBookDataProvider " + refBookDataProvider);
+
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook);
-        System.out.println("filter " + filter);
+
         PagingResult<Map<String, RefBookValue>> refBookPage;
 
         // Получаем нужные объекты по идентификаторам, что бы потом получить разименнованные значения
