@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -124,6 +126,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							public void onSuccess(DeleteRefBookRowResult result) {
                                 LogCleanEvent.fire(RefBookDataPresenter.this);
                                 LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
+                                if (result.isException()) {
+                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!", new DialogHandler() {
+                                        @Override
+                                        public void close() {
+                                            super.close();
+                                        }
+                                    });
+                                }
 								editFormPresenter.show(null);
 								editFormPresenter.setEnabled(false);
 								getView().updateTable();

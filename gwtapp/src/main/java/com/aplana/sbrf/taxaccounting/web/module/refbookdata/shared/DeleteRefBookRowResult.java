@@ -7,6 +7,8 @@ public class DeleteRefBookRowResult implements Result {
     /** Уникальный идентификатор версии записи, тип которой совпадает с удаленной, а дата начала минимальна */
     private Long nextVersion;
 
+    private boolean exception;
+
     public String getUuid() {
         return uuid;
     }
@@ -21,5 +23,13 @@ public class DeleteRefBookRowResult implements Result {
 
     public void setNextVersion(Long nextVersion) {
         this.nextVersion = nextVersion;
+    }
+
+    public boolean isException() {
+        return exception;
+    }
+
+    public void setException(boolean exception) {
+        this.exception = exception;
     }
 }
