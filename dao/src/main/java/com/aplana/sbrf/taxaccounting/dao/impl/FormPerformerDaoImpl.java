@@ -30,6 +30,7 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 			FormDataPerformer res = new FormDataPerformer();
 			res.setName(rs.getString("name"));
 			res.setPhone(rs.getString("phone"));
+            res.setPrintDepartmentId(rs.getInt("print_department_id"));
 			return res;
 		}
 	}
@@ -39,24 +40,27 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 		if (formDataDao.get(formDataId) != null) {
 			if (this.get(formDataId) != null) {
 				getJdbcTemplate().update(
-					"update form_data_performer set name = ?, phone = ? where form_data_id = ?",
+					"update form_data_performer set name = ?, phone = ?, print_department_id = ? where form_data_id = ?",
 					new Object[] {
 							performer.getName(),
 							performer.getPhone(),
+                            performer.getPrintDepartmentId(),
 							formDataId
 					},
 					new int[] {
 							Types.VARCHAR,
 							Types.VARCHAR,
-							Types.NUMERIC
+                            Types.NUMERIC,
+                            Types.NUMERIC
 					}
 				);
 			} else {
 				getJdbcTemplate().update(
-						"insert into form_data_performer(form_data_id, name, phone) values (?, ?, ?)",
+						"insert into form_data_performer(form_data_id, name, phone, print_department_id) values (?, ?, ?, ?)",
 						formDataId,
 						performer.getName(),
-						performer.getPhone()
+						performer.getPhone(),
+                        performer.getPrintDepartmentId()
 				);
 			}
 		}

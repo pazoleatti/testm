@@ -22,42 +22,34 @@
     <ui:style field="modal">
         .mainPanel {
             background-color: #E8E1CF;
-            height: 500px;
-            width: 800px;
-        }
-
-        .mainPanel td {
-            border-spacing: 0;
-            padding: 0 !important;
+            padding: 10px 10px 0;
         }
 
         .widgetWrapper {
             border: 1px solid #000000;
-            margin: 0 10px;
-            position: absolute !important;
-            top: 100px;
-            bottom: 42px;
-            left: 0;
-            right: 0;
+            width: 780px;
+            height: 385px;
         }
 
-        .footerPanel {
-            position: absolute;
-            bottom: 0;
+        .buttons {
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
-        .forMargin0 {
-            margin: 0;
-            width: 100%;
+        .textAlign {
+            text-align: right;
         }
 
-        .forVervionPanel {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .forVersion {
+        .marginRight10 {
             margin-right: 10px;
+        }
+
+        .fix {
+            padding-right: 1px !important;
+        }
+
+        .marginBottom{
+            margin-bottom: 5px;
         }
 
     </ui:style>
@@ -75,37 +67,33 @@
         </g:HorizontalPanel>
 
         <g:HTMLPanel ui:field="testwrap" visible="false">
-            <m:ModalWindow ui:field="modalPanel" iconUrl="" title="вавава">
-                <g:VerticalPanel addStyleNames="{modal.mainPanel}">
-                    <g:HorizontalPanel spacing="10" width="100%">
-                        <g:cell width="99%">
-                            <g:VerticalPanel width="100%">
-                                <g:TextBox ui:field="searchTextBox" addStyleNames="{modal.forMargin0}"/>
-                                <g:HorizontalPanel addStyleNames="{modal.forVervionPanel}" verticalAlignment="middle">
-                                    <g:cell horizontalAlignment="right">
-                                        <g:Label text="Дата актуальности:" wordWrap="false"
-                                                 addStyleNames="{modal.forVersion}"/>
-                                    </g:cell>
-                                    <g:cell horizontalAlignment="left">
-                                        <d:DateMaskBoxPicker ui:field="versionDateBox"/>
-                                    </g:cell>
-                                </g:HorizontalPanel>
-                            </g:VerticalPanel>
+            <m:ModalWindow ui:field="modalPanel" iconUrl="" title="Выбор из справочника">
+                <g:VerticalPanel spacing="0" addStyleNames="{modal.mainPanel}" verticalAlignment="top">
+
+                    <g:HorizontalPanel ui:field="filterPanel" spacing="0" width="100%" addStyleNames="{modal.marginBottom}"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:TextBox ui:field="searchTextBox" width="99%"/>
                         </g:cell>
-                        <g:cell width="1%">
-                            <g:Button ui:field="searchButton" text="Найти" width="70px"/>
+                        <g:Button ui:field="searchButton" text="Найти" width="70px"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.marginBottom}"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{modal.marginRight10}, {modal.textAlign}"/>
                         </g:cell>
+                        <d:DateMaskBoxPicker ui:field="versionDateBox" width="148px" addStyleNames="{modal.fix}"/>
                     </g:HorizontalPanel>
 
                     <g:HTMLPanel ui:field="widgetWrapper" addStyleNames="{modal.widgetWrapper}"/>
 
-                    <g:HorizontalPanel addStyleNames="{modal.footerPanel}" spacing="10"
-                                       horizontalAlignment="right" verticalAlignment="middle">
-                        <g:cell horizontalAlignment="left" width="100%">
-                            <g:Label ui:field="selectionCountLabel" text="Выбрано: 0"/>
+                    <g:HorizontalPanel spacing="0" horizontalAlignment="right" verticalAlignment="middle" width="100%" addStyleNames="{modal.buttons}">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:Label ui:field="selectionCountLabel" width="100%" text="Выбрано: 0"/>
                         </g:cell>
-                        <g:Button ui:field="clearButton" text="Очистить" width="70px"/>
-                        <g:Button ui:field="pickButton" text="Выбрать" width="70px"/>
+                        <g:Button ui:field="clearButton" text="Очистить" width="70px" addStyleNames="{modal.marginRight10}"/>
+                        <g:Button ui:field="pickButton" text="Выбрать" width="70px" addStyleNames="{modal.marginRight10}"/>
                         <g:Button ui:field="cancelButton" text="Отмена" width="70px"/>
                     </g:HorizontalPanel>
 

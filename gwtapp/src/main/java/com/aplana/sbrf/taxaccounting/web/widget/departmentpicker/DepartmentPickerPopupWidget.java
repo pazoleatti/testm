@@ -73,10 +73,10 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     private Boolean doubleState = true;
 
     /** Значения id */
-    private List<Integer> value = new ArrayList<Integer>();
+    private List<Integer> value = new LinkedList<Integer>();
 
     /** Разименованные значения. */
-    private List<String> valueDereference = new ArrayList<String>();
+    private List<String> valueDereference = new LinkedList<String>();
 
     boolean multiselection;
 
@@ -148,9 +148,10 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
-        this.value.clear();
         if(value != null){
-            this.value.addAll(value);
+            this.value = new LinkedList<Integer>(value);
+        } else {
+            this.value.clear();
         }
         setValueById(this.value);
 
@@ -175,7 +176,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
 	/** Установить выбранными узлы дерева для указанных подразделений. */
     public void setValueByDepartmentPair(List<DepartmentPair> values, boolean fireEvents) {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new LinkedList<Integer>();
         for (DepartmentPair i : values) {
             list.add(i.getDepartmentId());
         }
@@ -259,7 +260,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @UiHandler("cancel")
     void onCancelButtonClicked(ClickEvent event) {
         popupPanel.hide();
-        List<Integer> list = new ArrayList<Integer>(value);
+        List<Integer> list = new LinkedList<Integer>(value);
         setValue(list);
     }
 

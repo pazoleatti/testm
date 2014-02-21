@@ -61,6 +61,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     TextBox searchTextBox;
     @UiField
     Label selectionCountLabel;
+    @UiField
+    HorizontalPanel filterPanel;
 
     /* Вьюха которая принимает параметры, загружает и отображает записи из справочника */
     private RefBookView refBookView;
@@ -78,8 +80,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     private boolean isHierarchical = false;
     /* Признак - пробрасывать ли изменения из вьюхи */
     private boolean isEnabledFireChangeEvent = false;
-    /* Флаг пустого значения виджета */
-    private boolean isNullValue = true;
+    /* Флаг ручного выставления разименнованного значения виджета */
+    private boolean isManualUpdate = false;
 
     @UiConstructor
     public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
@@ -215,9 +217,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     private void clearAndSetValues(Collection<Long> longs) {
-        isNullValue = false;
-        state.getSetIds().clear();
-        state.getSetIds().addAll(longs);
+        state.setSetIds(new LinkedList<Long>(longs));
     }
 
     @Override
@@ -228,13 +228,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
-    public Boolean isMultiSelect() {
+    public Boolean getMultiSelect() {
         return state.isMultiSelect();
     }
 
     @Override
     public List<Long> getValue() {
-        return isNullValue ? null : state.getSetIds();
+        return state.getSetIds();
     }
 
     @Override
@@ -244,17 +244,18 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public Long getSingleValue() {
-        return state.getSetIds().iterator().next();
+        return state.getSetIds()!= null ? state.getSetIds().iterator().next() : null;
     }
 
     @Override
     public void setSingleValue(Long value, boolean fireEvents) {
         if (value == null) {
-            isNullValue = true;
-            state.getSetIds().clear();
+            state.setSetIds(null);
             prevState.setValues(state);
-            refBookView.load(state);
-            updateUIState();
+            if (!isManualUpdate) {
+                refBookView.load(state);
+                updateUIState();
+            }
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
@@ -272,18 +273,21 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     public void setValue(List<Long> value, boolean fireEvents) {
         prevState.setValues(state);
         if (value == null) {
-            isNullValue = true;
-            state.getSetIds().clear();
+            state.setSetIds(null);
             prevState.setValues(state);
-            refBookView.load(state);
-            updateUIState();
+            if (!isManualUpdate) {
+                refBookView.load(state);
+                updateUIState();
+            }
             if (fireEvents) {
                 ValueChangeEvent.fire(this, null);
             }
         } else {
             isEnabledFireChangeEvent = true;
             clearAndSetValues(value);
-            refBookView.load(state);
+            if (!isManualUpdate) {
+                refBookView.load(state);
+            }
         }
     }
 
@@ -317,7 +321,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void updateUIState() {
         String defValue = "";
-        if (!isNullValue) {
+        if (state.getSetIds() != null) {
             defValue = refBookView.getDereferenceValue();
         }
         textBox.setText(defValue);
@@ -367,6 +371,26 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         this.endDate = endDate;
         state.setVersionDate(endDate != null ? endDate : startDate);
         versionDateBox.setValue(state.getVersionDate());
+    }
+
+    @Override
+    public boolean getSearchEnabled() {
+        return filterPanel.isVisible();
+    }
+
+    @Override
+    public void setSearchEnabled(boolean isSearchEnabled) {
+        filterPanel.setVisible(isSearchEnabled);
+    }
+
+    @Override
+    public boolean isManualUpdate() {
+        return isManualUpdate;
+    }
+
+    @Override
+    public void setManualUpdate(boolean isManualUpdate) {
+        this.isManualUpdate = isManualUpdate;
     }
 
     @Override
