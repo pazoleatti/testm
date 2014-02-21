@@ -789,35 +789,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
 
-        String columnAlias = null;
-        Class cs = null;
-        switch (attribute.getAttributeType()) {
-            case STRING:
-                columnAlias = " string_value ";
-                cs = String.class;
-                break;
-            case NUMBER:
-                columnAlias = " number_value ";
-                cs = Number.class;
-                break;
-            case DATE:
-                columnAlias = " date_value ";
-                cs = Date.class;
-                break;
-            case REFERENCE:
-                columnAlias = " reference_value ";
-                cs = Long.class;
-                break;
-        }
-        if (columnAlias == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
         try {
             return new RefBookValue(attribute.getAttributeType(), getJdbcTemplate().queryForObject(
 					"select " +
-					columnAlias +
-					"from ref_book_value where record_id = ? and attribute_id = ?",
-                    new Object[]{recordId, attributeId}, cs));
+					attribute.getAttributeType().toString() + "_value" +
+					" from ref_book_value where record_id = ? and attribute_id = ?",
+                    new Object[]{recordId, attributeId}, attribute.getAttributeType().getTypeClass()));
         } catch (EmptyResultDataAccessException ex) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
