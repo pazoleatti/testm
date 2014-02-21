@@ -134,7 +134,7 @@ def totalSumColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'cost
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -146,7 +146,7 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -248,7 +248,7 @@ void logicCheck() {
         def missContract = []
         def severalContract = []
         prevDataRows.each { prevRow ->
-            if (prevRow.getAlias() != null && prevRow.reserveCalcValue > 0) {
+            if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
                 count = 0
                 dataRows.each { row ->
                     if (row.tradeNumber == prevRow.tradeNumber) {
@@ -630,8 +630,6 @@ def addData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     dataRows.clear()
-
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     def indexRow = 0
     for (def row : xml.row) {
         def newRow = getNewRow()
@@ -811,4 +809,11 @@ def loggerError(def msg) {
     } else {
         logger.error(msg)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
