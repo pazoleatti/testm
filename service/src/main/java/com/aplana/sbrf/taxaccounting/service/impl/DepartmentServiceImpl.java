@@ -239,6 +239,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departments;
     }
 
+    @Override
+    public String getParentsHierarchy(Integer departmentId) {
+        return departmentDao.getParentsHierarchy(departmentId);
+    }
+
     private List<Integer> getExecutorsDepartments(List<Integer> departments) {
         return departmentDao.getPerformers(departments);
     }
