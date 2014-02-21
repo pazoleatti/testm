@@ -12,20 +12,29 @@
 
         .titleText {
             font-size: 14px;
-            color:  #636460;
+            color: #636460;
         }
 
-        .ms {
-            padding-left: 10px;
-        }
-
-        .marginRight5{
+        .marginRight5 {
             margin-right: 5px;
         }
 
-        .margin5{
+        .margin5 {
             margin: 5px;
         }
+
+        .borderr {
+            border: #277E55 solid 1px;
+            padding: 5px;
+            margin: 2px;
+        }
+
+        .labelName {
+            margin-top: 5px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
     </ui:style>
 
 
@@ -37,20 +46,24 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <style:LinkButton ui:field="create" text="Создать налоговую форму..."
                                               img="resources/img/add.png" title="Создание налоговой формы"/>
-                            <g:Label text="Режим редактирования" addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                            <g:Label text="Тестовая страница"
+                                     addStyleNames="{style.titleText}, {style.marginRight5}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
                         <g:Label
-                                text="Сводная форма начисленных доходов (доходы сложные) Очень длинный заголовок бла бла бал ба лаб ла бал аб лалалалалалал ла ла"/>
+                                text="Пример очень длинного названия формы которая используется сбербанком для подсчета
+                                наших и не наших денег, так что вот думаете над этим ибо мы сейчас решаем наше
+                                будущие делаем эту программу!!!"/>
                     </fm:Resizable>
                 </fm:resizable>
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}" text="Список налоговых форм" />
+                            <g:Label ui:field="formHeader" addStyleNames="{style.titleText}, {style.marginRight5}"
+                                     text="Список налоговых форм"/>
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -60,79 +73,159 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <style:LabelSeparator text="test dfdf dfsdf" ui:field="sep" width="500px"/>
-                <g:HorizontalPanel addStyleNames="{style.ms}" width="200px">
-                    <my:MultiListBox ui:field="mlistbox"/>
-                </g:HorizontalPanel>
-                <g:Label ui:field="showResult"/>
-                <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
-                    <g:HorizontalPanel>
-                        <g:CheckBox ui:field="chk"/>
-                        <g:Label ui:field="lbl">
-                            TheLabelasfasdfasdfasdfkjaskfdjsadkfjasldfjalskdjflasdjflasdjfalsfjlsakdjflskjdflaskdjflksadjflk
-                        </g:Label>
-                    </g:HorizontalPanel>
-                </g:ScrollPanel>
-                <g:Button ui:field="showDialog">Показать окно</g:Button>
-
-                <g:Label text="Иерархический справочник"/>
 
                 <g:HorizontalPanel>
-                    <refbookmultipicker:RefBookPickerWidget ui:field="fpicker" width="300px"
-                                                            multiSelect="true" isHierarchical="true"
-                                                            attributeIdInt="423" addStyleNames="{style.margin5}"/>
-                    <g:Label ui:field="fpickerList" text="Лист: " addStyleNames="{style.margin5}"/>
+                    <g:cell>
+                        <g:HTMLPanel>
+                            <g:Label text="Лейбл разделитель" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel addStyleNames="{style.borderr}">
+                                <style:LabelSeparator text="Лейбл разделитель" ui:field="sep" width="300px"/>
+                            </g:VerticalPanel>
+                            <g:Label text="Кнопка ссылка (2 компонента видов)" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel addStyleNames="{style.borderr}">
+
+                                <g:HorizontalPanel spacing="2" verticalAlignment="middle">
+                                    <g:Label text="LinkButton"/>
+                                    <style:LinkButton ui:field="linkButton" text="История изменений"
+                                                      img="resources/img/exclamation_mark.png"
+                                                      title="Отобразить историю налоговой формы"/>
+
+                                    <style:LinkButton ui:field="linkButtonDisable" text="История изменений"
+                                                      img="resources/img/exclamation_mark.png"
+                                                      title="Отобразить историю налоговой формы" enabled="false"/>
+                                </g:HorizontalPanel>
+                                <g:HorizontalPanel spacing="2" verticalAlignment="middle">
+                                    <g:Label text="LinkAnchor"/>
+                                    <style:LinkAnchor ui:field="linkAnchor" text="История изменений"
+                                                      img="resources/img/exclamation_mark.png"
+                                                      title="Отобразить историю налоговой формы"/>
+
+                                    <style:LinkAnchor ui:field="linkAnchorDisable" text="История изменений"
+                                                      img="resources/img/exclamation_mark.png"
+                                                      title="Отобразить историю налоговой формы" enabled="false"/>
+                                </g:HorizontalPanel>
+                            </g:VerticalPanel>
+                        </g:HTMLPanel>
+                    </g:cell>
+                    <g:cell>
+                        <g:HTMLPanel>
+                            <g:Label text="Тестирвоание со скролбаром" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel addStyleNames="{style.borderr}">
+                                <g:ScrollPanel ui:field="scrollPanel" width="200px" height="50px">
+                                    <g:HorizontalPanel>
+                                        <g:CheckBox ui:field="chk"/>
+                                        <g:Label ui:field="lbl" wordWrap="false">
+                                            Очень длинное название лейбла для проверки оторбажения мира в призме незнания как устроен мир из внутренних взглядов чрезмерно умного человека
+                                        </g:Label>
+                                    </g:HorizontalPanel>
+                                </g:ScrollPanel>
+                            </g:VerticalPanel>
+
+                        </g:HTMLPanel>
+                    </g:cell>
+                    <g:cell>
+                        <g:HTMLPanel>
+                            <g:Label text="Мультивыбор из списка" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel addStyleNames="{style.borderr}">
+                                <my:MultiListBox ui:field="mlistbox" width="200px"/>
+                                <g:HorizontalPanel spacing="1">
+                                    <g:Label text="Выбрано: "/>
+                                    <g:Label ui:field="showResult"/>
+                                </g:HorizontalPanel>
+                            </g:VerticalPanel>
+                        </g:HTMLPanel>
+                    </g:cell>
+
+                    <g:cell>
+                        <g:HTMLPanel>
+                            <g:Label text="Модальное окно" addStyleNames="{style.labelName}"/>
+                            <g:VerticalPanel addStyleNames="{style.borderr}">
+                                <g:Button ui:field="showDialog">Показать окно</g:Button>
+                            </g:VerticalPanel>
+                        </g:HTMLPanel>
+                    </g:cell>
                 </g:HorizontalPanel>
 
-                <g:Label ui:field="fPickerLabel" text="Выбрано: "/>
+                <g:Label text="Иерархический справочник" addStyleNames="{style.labelName}"/>
+                <g:HorizontalPanel addStyleNames="{style.borderr}">
+                    <g:VerticalPanel>
+                        <refbookmultipicker:RefBookPickerWidget ui:field="hPicker" width="480px" labelWordWrap="false"
+                                                                multiSelect="true" isHierarchical="true"
+                                                                attributeIdInt="423" addStyleNames="{style.margin5}"/>
+                        <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                            <g:VerticalPanel>
+                                <g:CheckBox ui:field="hpMultiPickCb" wordWrap="false" text="Мультивыбор"/>
+                                <g:CheckBox ui:field="hpDisabledCb" wordWrap="false" text="Отключен"/>
+                            </g:VerticalPanel>
+                            <g:VerticalPanel>
+                                <g:CheckBox ui:field="hpSearchCb" wordWrap="false" text="Фильтр выключен"/>
+                                <g:CheckBox ui:field="hpManualCb" wordWrap="false" text="Ручное обновление"/>
+                            </g:VerticalPanel>
+                            <g:HorizontalPanel spacing="3" verticalAlignment="middle">
+                                <g:TextBox ui:field="hpValueTb" title="введите идентификаторы записей через запятую, если пусто выставит null"/>
+                                <g:Button ui:field="hpSetValueBtn" text="Установить" title="Установить написанное значение"/>
+                            </g:HorizontalPanel>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
+                    <g:VerticalPanel>
+                        <g:Label ui:field="hPickerList" text="Список: "/>
+                        <g:Label ui:field="hPickerLabel" text="Выбрано: "/>
+                    </g:VerticalPanel>
 
-                <g:Label text="Линейный справочник"/>
-                <g:HorizontalPanel>
-                    <refbookmultipicker:RefBookPickerWidget ui:field="flatPicker" width="300px"
-                                                            multiSelect="true" isHierarchical="false"
-                                                            attributeIdInt="835" addStyleNames="{style.margin5}"/>
-                    <g:Label ui:field="flatPickerList" text="Лист: " addStyleNames="{style.margin5}"/>
                 </g:HorizontalPanel>
-                <g:Label ui:field="flatPickerLabel" text="ВЫбрано:"/>
 
 
+                <g:Label text="Линейный справочник" addStyleNames="{style.labelName}"/>
+                <g:HorizontalPanel addStyleNames="{style.borderr}">
+                    <g:VerticalPanel>
+                        <refbookmultipicker:RefBookPickerWidget ui:field="fPicker" width="480px" labelWordWrap="false"
+                                                                multiSelect="true" isHierarchical="false"
+                                                                attributeIdInt="835" addStyleNames="{style.margin5}"/>
+                        <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                            <g:VerticalPanel>
+                                <g:CheckBox ui:field="fpMultiPickCb" wordWrap="false" text="Мультивыбор"/>
+                                <g:CheckBox ui:field="fpDisabledCb" wordWrap="false" text="Отключен"/>
+                            </g:VerticalPanel>
+                            <g:VerticalPanel>
+                                <g:CheckBox ui:field="fpSearchCb" wordWrap="false" text="Фильтр выключен"/>
+                                <g:CheckBox ui:field="fpManualCb" wordWrap="false" text="Ручное обновление"/>
+                            </g:VerticalPanel>
+                            <g:HorizontalPanel spacing="3" verticalAlignment="middle">
+                                <g:TextBox ui:field="fpValueTb" title="введите идентификаторы записей через запятую, если пусто выставит null"/>
+                                <g:Button ui:field="fpSetValueBtn" text="Установить" title="Установить написанное значение"/>
+                            </g:HorizontalPanel>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
+                    <g:VerticalPanel>
+                        <g:Label ui:field="fPickerList" text="Список: "/>
+                        <g:Label ui:field="fPickerLabel" text="Выбрано: "/>
+                    </g:VerticalPanel>
 
-                <g:VerticalPanel spacing="3" borderWidth="1" width="100%">
+                </g:HorizontalPanel>
+
+
+                <g:Label text="Ввод с маской" addStyleNames="{style.labelName}"/>
+                <g:VerticalPanel addStyleNames="{style.borderr}">
                     <g:CheckBox ui:field="checkBoxNull" text="Могут принимать пустые значения"/>
-                    <g:HorizontalPanel spacing="2">
+                    <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                         <mask:DateMaskBox ui:field="boxDate"/>
                         <g:Label ui:field="boxDateLb" width="100%"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel  spacing="2">
+                    <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                         <mask:MonthYearMaskBox ui:field="boxMy"/>
                         <g:Label ui:field="boxMyLb" width="100%"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel  spacing="2">
-                        <mask:YearMaskBox ui:field="boxY" />
+                    <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                        <mask:YearMaskBox ui:field="boxY"/>
                         <g:Label ui:field="boxYLb" width="100%"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel  spacing="2">
-                        <mask:TextMaskBox mask="XXXXXX" text="1" ui:field="boxText" mayBeNull="true" />
+                    <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                        <mask:TextMaskBox mask="XXXXXX" text="1" ui:field="boxText" mayBeNull="true"/>
                         <g:Label ui:field="boxTextLb" width="100%"/>
                     </g:HorizontalPanel>
-
-                    <g:HorizontalPanel  spacing="2">
-                        <d:DateMaskBoxPicker ui:field="boxDatePicker" width="200px" visible="true"/>
-                        <g:Label ui:field="boxDatePickerLb" width="80%"/>
-                    </g:HorizontalPanel>
-                    <g:HorizontalPanel>
-                        <style:LinkButton ui:field="linkButton" text="История изменений" img="resources/img/exclamation_mark.png"
-                                          title="Отобразить историю налоговой формы" />
-
-                        <style:LinkButton ui:field="linkButtonDisable" text="История изменений" img="resources/img/exclamation_mark.png"
-                                          title="Отобразить историю налоговой формы" enabled="false" />
-                    </g:HorizontalPanel>
-                    <g:HorizontalPanel>
-                        <style:LinkAnchor ui:field="linkAnchor" text="История изменений" img="resources/img/exclamation_mark.png"
-                                          title="Отобразить историю налоговой формы" />
-
-                        <style:LinkAnchor ui:field="linkAnchorDisable" text="История изменений" img="resources/img/exclamation_mark.png"
-                                          title="Отобразить историю налоговой формы" enabled="false" />
+                    <g:HorizontalPanel spacing="1" verticalAlignment="middle">
+                        <d:DateMaskBoxPicker ui:field="boxDatePicker" visible="true"/>
+                        <g:Label ui:field="boxDatePickerLb" width="100%"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>
 
