@@ -39,7 +39,7 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void setMultiSelect(boolean multiSelect);
 
-    Boolean isMultiSelect();
+    Boolean getMultiSelect();
 
     Long getSingleValue();
 
@@ -56,6 +56,10 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
     String getOtherDereferenceValue(String alias);
 
     String getOtherDereferenceValue(Long attrId);
+
+    boolean getSearchEnabled();
+
+    void setSearchEnabled(boolean isSearchEnabled);
 
     boolean isManualUpdate();
 

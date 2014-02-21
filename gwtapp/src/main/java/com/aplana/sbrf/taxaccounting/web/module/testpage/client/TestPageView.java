@@ -202,6 +202,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
+        flatPicker.setSearchEnabled(false);
         //flatPicker.setManualUpdate(true);
         flatPicker.setPeriodDates(null, new Date());
         flatPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {

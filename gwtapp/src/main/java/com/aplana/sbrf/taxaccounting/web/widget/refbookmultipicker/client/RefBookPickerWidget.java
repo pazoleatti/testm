@@ -61,6 +61,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     TextBox searchTextBox;
     @UiField
     Label selectionCountLabel;
+    @UiField
+    HorizontalPanel filterPanel;
 
     /* Вьюха которая принимает параметры, загружает и отображает записи из справочника */
     private RefBookView refBookView;
@@ -226,7 +228,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
-    public Boolean isMultiSelect() {
+    public Boolean getMultiSelect() {
         return state.isMultiSelect();
     }
 
@@ -369,6 +371,16 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         this.endDate = endDate;
         state.setVersionDate(endDate != null ? endDate : startDate);
         versionDateBox.setValue(state.getVersionDate());
+    }
+
+    @Override
+    public boolean getSearchEnabled() {
+        return filterPanel.isVisible();
+    }
+
+    @Override
+    public void setSearchEnabled(boolean isSearchEnabled) {
+        filterPanel.setVisible(isSearchEnabled);
     }
 
     @Override

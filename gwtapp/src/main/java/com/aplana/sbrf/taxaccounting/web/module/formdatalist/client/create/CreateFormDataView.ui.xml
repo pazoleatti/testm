@@ -50,7 +50,8 @@
                     <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" isHierarchical="false" multiSelect="false" width="100%"/>
+                    <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" searchEnabled="false"
+                                           isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
