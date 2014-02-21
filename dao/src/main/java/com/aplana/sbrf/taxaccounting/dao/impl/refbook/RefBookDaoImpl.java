@@ -159,6 +159,29 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		RefBookAttribute defaultSort = refBook.getSortAttribute();
+		String sortAlias = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
+		if (isSupportOver()) {
+			// row_number() over (order by ... asc\desc)
+			ps.appendQuery("row_number() over ( order by ");
+			if (sortAttribute != null || defaultSort != null) {
+				ps.appendQuery("a");
+				ps.appendQuery(sortAlias);
+				ps.appendQuery(".");
+				ps.appendQuery(sortAttribute.getAttributeType().toString());
+				ps.appendQuery("_value ");
+			} else {
+				ps.appendQuery(sortAlias);
+			}
+			ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
+		} else {
+			ps.appendQuery("rownum");
+		}
+		ps.appendQuery(" as ");
+		ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+	}
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -172,7 +195,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
     }
-
 
     private PagingResult<Map<String, RefBookValue>> getChildrens(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
                                                                  String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
@@ -277,37 +299,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-        if (isSupportOver() && sortAttribute != null) {
-            // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
-            ps.appendQuery("row_number()");
-            // Надо делать сортировку
-            ps.appendQuery(" over (order by ");
-            ps.appendQuery("a");
-            ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery(".");
-            ps.appendQuery(sortAttribute.getAttributeType().toString());
-            ps.appendQuery("_value ");
-            ps.appendQuery(isSortAscending ? "ASC":"DESC");
-            ps.appendQuery(")");
-            ps.appendQuery(" as row_number_over,\n");
-        } else {
-            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            ps.appendQuery("rownum row_number_over,\n");
-        }
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
             String alias = attribute.getAlias();
-            ps.appendQuery("  a");
+            ps.appendQuery(", a");
             ps.appendQuery(alias);
             ps.appendQuery(".");
             ps.appendQuery(attribute.getAttributeType().toString());
             ps.appendQuery("_value as \"");
             ps.appendQuery(alias);
             ps.appendQuery("\"");
-            if (i < attributes.size() - 1) {
-                ps.appendQuery(",\n");
-            }
-            fromSql.append("  left join ref_book_value a");
+
+            fromSql.append(" left join ref_book_value a");
             fromSql.append(alias);
             fromSql.append(" on a");
             fromSql.append(alias);
@@ -315,7 +320,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append(alias);
             fromSql.append(".attribute_id = ");
             fromSql.append(attribute.getId());
-            fromSql.append("\n");
         }
 
         // добавляем join'ы относящиеся к фильтру
@@ -345,15 +349,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.appendQuery(")");
 
         if (pagingParams != null) {
-            ps.appendQuery(" where row_number_over between ? and ?");
+			ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
 
         return ps;
     }
-
-
 
     private PreparedStatementData getChildrensStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
                                                         String filter, PagingParams pagingParams, boolean isSortAscending, Long parentId) {
@@ -386,31 +390,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
-        ps.appendQuery(" SELECT "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
+        ps.appendQuery(" SELECT ");
 
-        if (sortAttribute != null) {
-            // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
-            ps.appendQuery("row_number()");
-            // Надо делать сортировку
-            ps.appendQuery(" over (order by ");
-            ps.appendQuery("a");
-            ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery(".");
-            ps.appendQuery(sortAttribute.getAttributeType().toString());
-            ps.appendQuery("_value ");
-            ps.appendQuery(isSortAscending ? "ASC":"DESC");
-            ps.appendQuery(")");
-            ps.appendQuery(" as row_number_over,\n");
-        } else {
-            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            ps.appendQuery("rownum row_number_over,\n");
-        }
-
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+		ps.appendQuery(",");
 
         // выбираем все алиасы + row_number_over
         List<String> aliases = new ArrayList<String>(attributes.size()+1);
         aliases.add("record_id");
-        //aliases.add("rownum row_number_over");
+        //aliases.add("rownum ");
+		//aliases.add(RefBook.RECORD_SORT_ALIAS);
         for (RefBookAttribute attr: attributes){
             aliases.add(attr.getAlias());
         }
@@ -488,11 +477,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(parentId.toString());
         }
 
-
         ps.appendQuery(")");
 
         if (pagingParams != null) {
-            ps.appendQuery(" where row_number_over between ? and ?");
+			ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
@@ -794,40 +784,39 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (rb == null) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
-        //TODO: лучше одним запросом получать значение и тип атрибута (Marat Fayzullin 2013-08-06)
         RefBookAttribute attribute = rb.getAttribute(attributeId);
         if (attribute == null) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
 
-        String q1 = "select";
-        String q2 = "from ref_book_value where record_id = ? and attribute_id = ?";
-        String q3 = null;
+        String columnAlias = null;
         Class cs = null;
-
         switch (attribute.getAttributeType()) {
             case STRING:
-                q3 = " string_value ";
+                columnAlias = " string_value ";
                 cs = String.class;
                 break;
             case NUMBER:
-                q3 = " number_value ";
+                columnAlias = " number_value ";
                 cs = Number.class;
                 break;
             case DATE:
-                q3 = " date_value ";
+                columnAlias = " date_value ";
                 cs = Date.class;
                 break;
             case REFERENCE:
-                q3 = " reference_value ";
+                columnAlias = " reference_value ";
                 cs = Long.class;
                 break;
         }
-        if (q3 == null) {
+        if (columnAlias == null) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
         }
         try {
-            return new RefBookValue(attribute.getAttributeType(), getJdbcTemplate().queryForObject(q1 + q3 + q2,
+            return new RefBookValue(attribute.getAttributeType(), getJdbcTemplate().queryForObject(
+					"select " +
+					columnAlias +
+					"from ref_book_value where record_id = ? and attribute_id = ?",
                     new Object[]{recordId, attributeId}, cs));
         } catch (EmptyResultDataAccessException ex) {
             throw new DaoException(String.format(errStr, attributeId, recordId));
