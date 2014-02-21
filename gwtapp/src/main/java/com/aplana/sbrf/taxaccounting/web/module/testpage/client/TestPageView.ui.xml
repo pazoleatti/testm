@@ -89,7 +89,7 @@
                 <g:Label text="Линейный справочник"/>
                 <g:HorizontalPanel>
                     <refbookmultipicker:RefBookPickerWidget ui:field="flatPicker" width="300px"
-                                                            multiSelect="false" isHierarchical="false"
+                                                            multiSelect="true" isHierarchical="false"
                                                             attributeIdInt="835" addStyleNames="{style.margin5}"/>
                     <g:Label ui:field="flatPickerList" text="Лист: " addStyleNames="{style.margin5}"/>
                 </g:HorizontalPanel>

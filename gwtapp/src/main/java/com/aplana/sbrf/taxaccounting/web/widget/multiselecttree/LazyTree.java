@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.HasLazyTre
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -22,7 +21,7 @@ import java.util.*;
  */
 public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTreeSelectionHandlers<H> {
 
-    private List<H> selectedItems = new LinkedList<H>();
+    private Set<H> selectedItems = new LinkedHashSet<H>();
 
     /**
      * Выбирать ли дочерние элементы при выборе узла.
@@ -75,11 +74,11 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
                     if (!multiSelect) {
                         if (!selectedItems.isEmpty()) {
-                            if (selectedItems.get(0).equals(lazyTreeItem)) {
+                            if (selectedItems.iterator().next().equals(lazyTreeItem)) {
                                 return;
                             }
                             // для предыдушего радио-значения удаляем выделение
-                            selectedItems.get(0).setItemState(null);
+                            selectedItems.iterator().next().setItemState(null);
                         }
                         selectedItems.clear();
                         lazyTreeItem.setItemState(true);
@@ -212,8 +211,8 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         return null;
     }
 
-    public List<H> getSelectedItems() {
-        return Collections.unmodifiableList(selectedItems);
+    public Set<H> getSelectedItems() {
+        return Collections.unmodifiableSet(selectedItems);
     }
 
     public void clearSelection() {
@@ -233,7 +232,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     /**
      * Удалить элементы из дерева.
      */
-    public void removeItems(List<H> items) {
+    public void removeItems(Set<H> items) {
         for (H i : items) {
             super.removeItem(i);
         }

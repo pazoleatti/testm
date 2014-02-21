@@ -16,20 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.text.NumberFormat;
-import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * Хендлер для загрузки данных для иерархичного компнента
  * @author aivanov
  */
 @Component
 @PreAuthorize("isAuthenticated()")
-public class GetRefBookTreeValuesHandler extends
-        AbstractActionHandler<GetRefBookTreeValuesAction, GetRefBookTreeValuesResult> {
+public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBookTreeValuesAction, GetRefBookTreeValuesResult> {
 
     @Autowired
     RefBookFactory refBookFactory;
@@ -57,11 +55,6 @@ public class GetRefBookTreeValuesHandler extends
         result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
 
         return result;
-    }
-
-    @Override
-    public void undo(GetRefBookTreeValuesAction action, GetRefBookTreeValuesResult result, ExecutionContext context)
-            throws ActionException {
     }
 
     private RefBookAttribute getRefBookAttributeById(RefBook refBook, int attributeId) {
@@ -151,6 +144,11 @@ public class GetRefBookTreeValuesHandler extends
         }
 
         return new PagingResult<RefBookTreeItem>(items, refBookPage.getTotalCount());
+    }
+
+    @Override
+    public void undo(GetRefBookTreeValuesAction action, GetRefBookTreeValuesResult result, ExecutionContext context)
+            throws ActionException {
     }
 
 }

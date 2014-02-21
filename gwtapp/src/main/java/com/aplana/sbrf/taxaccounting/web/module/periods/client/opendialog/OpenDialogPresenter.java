@@ -113,7 +113,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                                 });
                                 break;
                             case BALANCE_STATUS_CHANGED:
-                                Dialog.warningMessage("Данный период уже заведён в Системе. Изменение признака ввода остатков невозможно, так как в Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                Dialog.warningMessage("Внимание", "Данный период уже заведён в Системе. Изменение признака ввода остатков невозможно, так как в Системе может быть заведён только один период с (без) указания признака ввода остатков!");
                                 break;
                             default:
                                 getView().hide();
