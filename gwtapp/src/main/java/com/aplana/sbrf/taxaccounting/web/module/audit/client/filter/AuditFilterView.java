@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.AuditFormType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
@@ -203,6 +200,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             reportPeriodIds.setEnabled(false);
             reportPeriodIds.setValue(null, true);
             return;
+        } else {
+            formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
         }
         if (getUiHandlers() != null) {
             getUiHandlers().getReportPeriods(event.getValue());
