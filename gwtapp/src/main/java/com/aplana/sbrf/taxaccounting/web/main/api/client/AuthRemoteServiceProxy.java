@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -71,13 +70,9 @@ public class AuthRemoteServiceProxy extends RemoteServiceProxy {
                     Dialog.infoMessage("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
                     Window.Location.reload();
                     // Если ответ 403
-//                } else if (status == Response.SC_FORBIDDEN && contentType != null && contentType.contains("html")) {
-//                    Dialog.errorMessage("Ошибка", "Ошибка доступа!", new DialogHandler() {
-//                        @Override
-//                        public void close() {
-//                            super.close();
-//                        }
-//                    });
+                } else if (status == Response.SC_FORBIDDEN) {
+                    Response response403 = new ResponseImpl();
+                    delegate.onResponseReceived(request, response403);
                 } else {
                     // Во всех остальных случаях, пусть разбирается стандартный обраблотчик.
                     delegate.onResponseReceived(request, response);
