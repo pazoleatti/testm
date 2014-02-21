@@ -229,7 +229,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				}
 			}
 		});
-
 	}
 
 	@Override
@@ -248,19 +247,28 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		if (dereferenceValues != null) {
 			dereferenceValues.clear();
 		}
-//		dictRegionId.setDereferenceValue(null);
-//		reorgFormCode.setDereferenceValue(null);
-//		signatoryId.setDereferenceValue(null);
-//		taxPlaceTypeCode.setDereferenceValue(null);
-//		obligation.setDereferenceValue(null);
-//		oktmo.setDereferenceValue(null);
-//		okvedCode.setDereferenceValue(null);
-//		type.setDereferenceValue(null);
+		dictRegionId.setDereferenceValue(null);
+		reorgFormCode.setDereferenceValue(null);
+		signatoryId.setDereferenceValue(null);
+		taxPlaceTypeCode.setDereferenceValue(null);
+		obligation.setDereferenceValue(null);
+		oktmo.setDereferenceValue(null);
+		okvedCode.setDereferenceValue(null);
+		type.setDereferenceValue(null);
 
 		driver.edit(new DepartmentCombined());
 	}
 
-	/**
+    /**
+     * Отмена редактирования
+     */
+    private void cancel() {
+        setEditMode(false);
+        driver.edit(data);
+        setDereferenceValue(dereferenceValues);
+    }
+
+    /**
 	 * Обновление видимости полей
 	 */
 	private void updateVisibility() {
@@ -286,7 +294,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
 		getUiHandlers().save(driver.flush(), currentReportPeriodId);
-        // TODO http://jira.aplana.com/browse/SBRFACCTAX-5954 После решения проверить работу без автоматич. разыменования
 		driver.edit(data);
 
 		if (dereferenceValues != null) {
@@ -306,29 +313,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event) {
 		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
-				@Override
-				public void yes() {
-					setEditMode(false);
-					driver.edit(data);
-					setDereferenceValue(dereferenceValues);
-					Dialog.hideMessage();
-				}
+            Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    DepartmentConfigView.this.cancel();
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void no() {
-					Dialog.hideMessage();
-				}
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void close() {
-					no();
-				}
-			});
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
-			setEditMode(false);
-			driver.edit(data);
-			setDereferenceValue(dereferenceValues);
+            cancel();
 		}
 	}
 

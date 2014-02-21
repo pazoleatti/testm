@@ -63,7 +63,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                             getView().setHeaders(result.getHeaders());
                             getView().refresh();
 
-                            if (newState.getSetIds().size() > 0) {
+                            if (newState.getSetIds()!= null && newState.getSetIds().size() > 0) {
                                 loadingForSelection(newState.getSetIds());
                             } else {
                                 getView().setSelection(new ArrayList<RefBookItem>());
@@ -73,7 +73,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         } else {
             //иначе просто сеттим
             setNewState(newState);
-            if (newState.getSetIds().size() > 0) {
+            if (newState.getSetIds()!= null && newState.getSetIds().size() > 0) {
                 loadingForSelection(newState.getSetIds());
             } else {
                 getView().setSelection(new ArrayList<RefBookItem>());

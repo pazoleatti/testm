@@ -63,7 +63,7 @@ public class DeclarationDataPresenter
 
 		void setReportPeriod(String reportPeriod);
 
-		void setBackButton(String link);
+		void setBackButton(String link, String text);
 
 		void setPdf(Pdf pdf);
 
@@ -123,7 +123,8 @@ public class DeclarationDataPresenter
 												"#"
 														+ DeclarationListNameTokens.DECLARATION_LIST
 														+ ";nType="
-														+ result.getTaxType());
+														+ result.getTaxType(), result.getTaxType()
+                                        .getName());
 								getView().setTitle(result.getDeclarationType());
 								updateTitle(result.getDeclarationType());
 

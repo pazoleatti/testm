@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -176,7 +177,18 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 //flatPicker.setEnabled(false);
-                flatPicker.setValue(null, true);
+                //flatPicker.setValue(null, true);
+
+                ArrayList<Long> longs = new ArrayList<Long>();
+                if (event.getValue()) {
+                    longs.add(332L);
+                } else {
+                    longs.add(332L);
+                    longs.add(331L);
+                }
+                flatPicker.setValue(longs, true);
+                flatPicker.setEnabled(false);
+
                 boxDate.setMayBeNull(event.getValue());
                 boxMy.setMayBeNull(event.getValue());
                 boxY.setMayBeNull(event.getValue());
@@ -202,7 +214,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
 
-
+        flatPicker.setSearchEnabled(false);
+        //flatPicker.setManualUpdate(true);
         flatPicker.setPeriodDates(null, new Date());
         flatPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
@@ -211,7 +224,11 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 flatPickerList.setText("Список: " + event.getValue());
             }
         });
-        //flatPicker.setValue(322L);
+        ArrayList<Long> longs = new ArrayList<Long>();
+        longs.add(332L);
+        longs.add(331L);
+        flatPicker.setValue(longs, true);
+        flatPicker.setEnabled(false);
 
         testMaskBox();
 
