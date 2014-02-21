@@ -17,42 +17,39 @@ import com.gwtplatform.dispatch.shared.ActionException;
 
 /**
  * @author sgoryachkin
- * 
  */
 @Component
 @PreAuthorize("isAuthenticated()")
 public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMultiAction, InitRefBookMultiResult> {
 
-	@Autowired
-	RefBookFactory refBookFactory;
+    @Autowired
+    RefBookFactory refBookFactory;
 
-	public InitRefBookMultiHandler() {
-		super(InitRefBookMultiAction.class);
-	}
+    public InitRefBookMultiHandler() {
+        super(InitRefBookMultiAction.class);
+    }
 
-	@Override
-	public InitRefBookMultiResult execute(InitRefBookMultiAction action,
-			ExecutionContext context) throws ActionException {
-		InitRefBookMultiResult result = new InitRefBookMultiResult();
-		Map<String, Integer> headers = new LinkedHashMap<String, Integer>();
+    @Override
+    public InitRefBookMultiResult execute(InitRefBookMultiAction action, ExecutionContext context) throws ActionException {
+        InitRefBookMultiResult result = new InitRefBookMultiResult();
+        Map<String, Integer> headers = new LinkedHashMap<String, Integer>();
 
-		RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
-		for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
-			if (refBookAttribute.isVisible()) {
-				headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
-			}
-		}
-		
-		result.setRefBookId(refBook.getId());
-		result.setHeaders(headers);
-		
-		return result;
-	}
+        RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
+            if (refBookAttribute.isVisible()) {
+                headers.put(refBookAttribute.getName(), refBookAttribute.getWidth());
+            }
+        }
 
-	@Override
-	public void undo(InitRefBookMultiAction action, InitRefBookMultiResult result,
-			ExecutionContext context) throws ActionException {
-		//
-	}
+        result.setRefBookId(refBook.getId());
+        result.setHeaders(headers);
+
+        return result;
+    }
+
+    @Override
+    public void undo(InitRefBookMultiAction action, InitRefBookMultiResult result, ExecutionContext context) throws ActionException {
+        //
+    }
 
 }
