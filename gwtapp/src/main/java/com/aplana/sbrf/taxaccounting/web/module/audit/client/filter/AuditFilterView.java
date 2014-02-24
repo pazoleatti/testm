@@ -129,6 +129,16 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     }
 
     @Override
+    public void clear() {
+        taxType.setValue(null, true);
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(null, true);
+        declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
+    }
+
+    @Override
     public void init() {
         driver.edit(new LogSystemAuditFilter());
     }

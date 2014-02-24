@@ -70,6 +70,7 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
         boolean isChangeFilter();
         void edit(LogSystemAuditFilter auditFilter);
+        void clear();
     }
 
     public void initFilterData() {
@@ -104,5 +105,11 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
     public boolean isFilterChange(){
         return getView().isChangeFilter();
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clear();
     }
 }
