@@ -161,18 +161,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
 		RefBookAttribute defaultSort = refBook.getSortAttribute();
-		String sortAlias = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
 		if (isSupportOver()) {
 			// row_number() over (order by ... asc\desc)
 			ps.appendQuery("row_number() over ( order by ");
 			if (sortAttribute != null || defaultSort != null) {
+				String sortAlias = sortAttribute == null ? defaultSort.getAlias() : sortAttribute.getAlias();
+				RefBookAttributeType sortType = sortAttribute == null ? defaultSort.getAttributeType() : sortAttribute.getAttributeType();
+
 				ps.appendQuery("a");
 				ps.appendQuery(sortAlias);
 				ps.appendQuery(".");
-				ps.appendQuery(sortAttribute.getAttributeType().toString());
+				ps.appendQuery(sortType.toString());
 				ps.appendQuery("_value ");
 			} else {
-				ps.appendQuery(sortAlias);
+				ps.appendQuery("id");
 			}
 			ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
 		} else {
