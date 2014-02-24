@@ -97,7 +97,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     /**
-     * Возвращает календарную дату начала отчетного периода
+     * Возвращает календарную дату начала отчетного периода. Для налога по прибыли.
      *
      * @param reportPeriodId
      * @return
