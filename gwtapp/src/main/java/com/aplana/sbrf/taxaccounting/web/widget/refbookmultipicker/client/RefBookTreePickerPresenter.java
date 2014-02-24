@@ -102,6 +102,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
+    public void find(String searchPattern) {
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect()));
+    }
+
+    @Override
     public void loadForItem(final RefBookUiTreeItem uiTreeItem) {
         if (ps.getRefBookAttrId() == null) {
             return;
@@ -123,14 +128,10 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                 }, this));
     }
 
-    @Override
-    public void find(String searchPattern) {
-        ps.setSearchPattern(searchPattern);
-    }
-
     private boolean isNeedReloadHeaders(PickerState newPs) {
         return RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                RefBookPickerUtils.itWasChange(ps.getSearchPattern(), newPs.getSearchPattern()) ||
                 RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate());
     }
 

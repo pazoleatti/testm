@@ -151,7 +151,7 @@
                     <g:VerticalPanel>
                         <refbookmultipicker:RefBookPickerWidget ui:field="hPicker" width="480px" labelWordWrap="false"
                                                                 multiSelect="true" isHierarchical="true"
-                                                                attributeIdInt="423" addStyleNames="{style.margin5}"/>
+                                                                attributeIdInt="841" addStyleNames="{style.margin5}"/>
                         <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                             <g:VerticalPanel>
                                 <g:CheckBox ui:field="hpMultiPickCb" wordWrap="false" text="Мультивыбор"/>
