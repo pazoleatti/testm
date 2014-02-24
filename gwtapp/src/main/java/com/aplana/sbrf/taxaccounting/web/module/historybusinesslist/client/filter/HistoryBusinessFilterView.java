@@ -75,6 +75,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     Panel formPanel;
 
     @UiField
+    Panel reportPeriodPanel;
+
+    @UiField
     Panel declarationTypePanel;
 
     @Path("userIds")
@@ -184,7 +187,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         user.setPeriodDates(null, new Date());
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
-        reportPeriodIds.setEnabled(false);
+        reportPeriodPanel.setVisible(false);
         formTypeId.setEnabled(false);
 
         driver.initialize(this);
@@ -248,15 +251,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodIds.setEnabled(false);
+            reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
             return;
         } else {
             formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
         }
         if (getUiHandlers() != null) {
+            reportPeriodIds.setValue(null, true);
             getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodIds.setEnabled(true);
+            reportPeriodPanel.setVisible(true);
         }
     }
 
