@@ -9,11 +9,11 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Презентер для представления отображения иерархического справочника
+ *
  * @author aivanov
  */
 public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePickerPresenter.MyView>
@@ -30,6 +30,10 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values);
 
         List<RefBookTreeItem> getSelectionValues();
+
+        void clearSelected(boolean fireChangeEvent);
+
+        void setSelection(List<RefBookTreeItem> values);
     }
 
     public RefBookTreePickerPresenter(MyView view) {
@@ -50,13 +54,46 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             if (ps.getVersionDate() == null) {
                 return;
             }
-            dispatcher.execute(createLoadAction(null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
+
+            dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
                 @Override
                 public void onSuccess(GetRefBookTreeValuesResult result) {
                     getView().loadRoot(result.getPage());
+                    trySelect(ps);
                 }
             }, this));
+        } else {
+            //иначе просто сеттим
+            ps.setValues(newState);
+            trySelect(ps);
         }
+    }
+
+    private void trySelect(PickerState stateWithIds) {
+        if (stateWithIds.getSetIds() != null && stateWithIds.getSetIds().size() > 0) {
+            loadingForSelection(stateWithIds.getSetIds());
+        } else {
+            getView().setSelection(new ArrayList<RefBookTreeItem>());
+        }
+    }
+
+
+    public void loadingForSelection(Collection<Long> ids) {
+        if (ps.getRefBookAttrId() == null) {
+            return;
+        }
+        if (ps.getVersionDate() == null) {
+            return;
+        }
+        GetRefBookTreeValuesAction action = createLoadAction(null, new ArrayList<Long>(ids));
+        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+                new AbstractCallback<GetRefBookTreeValuesResult>() {
+                    @Override
+                    public void onSuccess(GetRefBookTreeValuesResult result) {
+                        getView().setSelection(result.getPage());
+                    }
+                }, this));
+
     }
 
     @Override
@@ -73,11 +110,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
         RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem();
-        dispatcher.execute(createLoadAction(parent), CallbackUtils.defaultCallbackNoLock(
+        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {
-                        // очищаем чилдов, так как там лежит чил с надписью "Загрузка..."
+                        // очищаем чилдов, так как там лежит чилд с надписью "Загрузка..."
                         uiTreeItem.removeItems();
                         if (!result.getPage().isEmpty()) {
                             getView().insertChildrens(uiTreeItem, result.getPage());
@@ -119,7 +156,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     /* Создание и заполнения модели экшена для загрузки с сервера*/
-    private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent) {
+    private GetRefBookTreeValuesAction createLoadAction(RefBookTreeItem parent, ArrayList<Long> longs) {
         GetRefBookTreeValuesAction action = new GetRefBookTreeValuesAction();
 
         action.setSearchPattern(ps.getSearchPattern());
@@ -127,6 +164,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(ps.getVersionDate());
         action.setParent(parent);
+        action.setIdsTofind(longs);
         return action;
     }
 

@@ -226,7 +226,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                     if (s.contains(",")) {
                         for (String s1 : s.split(",")) {
                             if (s1 != null && !s1.trim().isEmpty()) {
-                                longs.add(Long.valueOf(s1));
+                                longs.add(Long.valueOf(s1.trim()));
                             }
                         }
                     } else {
@@ -287,7 +287,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                     if (s.contains(",")) {
                         for (String s1 : s.split(",")) {
                             if (s1 != null && !s1.trim().isEmpty()) {
-                                longs.add(Long.valueOf(s1));
+                                longs.add(Long.valueOf(s1.trim()));
                             }
                         }
                     } else {

@@ -39,7 +39,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
 
-
     public RefBookTreePickerView() {
         this(false);
     }
@@ -47,7 +46,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public RefBookTreePickerView(final boolean multiSelect) {
         this.multiSelect = multiSelect;
 
-        tree = new LazyTree<RefBookUiTreeItem>(multiSelect);
+        tree = new LazyTree<RefBookUiTreeItem>(multiSelect, RefBookPickerUtils.TREE_KEY_PROVIDER);
 
         initWidget(binder.createAndBindUi(this));
 
@@ -92,7 +91,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values) {
         for (RefBookTreeItem value : values) {
-            uiTreeItem.addItem(new RefBookUiTreeItem(value, multiSelect));
+            tree.addTreeItem(uiTreeItem, new RefBookUiTreeItem(value, multiSelect));
         }
     }
 
@@ -106,8 +105,22 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void trySelectValues(Set<Long> ids) {
-        // Заглушка
+    public void trySelectValues(Set<Long> value) {
+    }
+
+    @Override
+    public void setSelection(List<RefBookTreeItem> values) {
+        if (values != null) {
+            if (!values.isEmpty()) {
+                clearSelected(false);
+                for (RefBookTreeItem item : values) {
+                    tree.setSelected(new RefBookUiTreeItem(item, multiSelect), true);
+                }
+                widgetFireChangeEvent(getSelectedIds());
+            } else {
+                clearSelected(true);
+            }
+        }
     }
 
     @Override
@@ -131,6 +144,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         isEnabledFireChangeEvent = fireChangeEvent;
         longList.clear();
         tree.clearSelection();
+        onSelection();
     }
 
     @Override
@@ -190,6 +204,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void setMultiSelect(Boolean multiSelect) {
         this.multiSelect = multiSelect;
+        tree.setMultiSelect(this.multiSelect);
+        widgetFireChangeEvent(getSelectedIds());
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

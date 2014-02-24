@@ -198,7 +198,7 @@ public class TestPage2View extends ViewWithUiHandlers<TestPage2UiHandlers> imple
 
                     getUiHandlers().getData(m);
 
-                    // MultiSelectTreeItem newItem = new MultiSelectTreeItem(tmpId++, "opened" + tmpId, tree.isMultiSelection());
+                    // MultiSelectTreeItem newItem = new MultiSelectTreeItem(tmpId++, "opened" + tmpId, tree.getMultiSelect());
                     // m.addItem(newItem);
                 }
             }

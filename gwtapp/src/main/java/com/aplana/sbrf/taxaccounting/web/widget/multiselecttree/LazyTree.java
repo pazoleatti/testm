@@ -11,6 +11,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.*;
 
 import java.util.*;
 
@@ -20,19 +21,6 @@ import java.util.*;
  * @author aivanov
  */
 public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTreeSelectionHandlers<H> {
-
-    private Set<H> selectedItems = new LinkedHashSet<H>();
-
-    /**
-     * Выбирать ли дочерние элементы при выборе узла.
-     */
-    private boolean isSelectChildViaParent;
-
-    /**
-     * Признак возможности выбора нескольких узлов дерева.
-     */
-    protected Boolean multiSelection;
-
 
     public interface MultiSelectTreeResources extends Tree.Resources {
 
@@ -45,23 +33,35 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
     public static MultiSelectTreeResources resources = GWT.create(MultiSelectTreeResources.class);
 
+    private ProvidesKey<H> providesKey;
+
+    private SetSelectionModel<H> selectionModel;
+    /* Выбирать ли дочерние элементы при выборе узла. */
+    private boolean isSelectChildViaParent;
+    /* Признак возможности выбора нескольких узлов дерева. */
+    private Boolean multiSelect;
+
+    private HandlerRegistration selectionHandlerRegistration;
+
     /**
      * Дерево множественного выбора.
      */
-    public LazyTree() {
-        this(true);
+    public LazyTree(ProvidesKey<H> providesKey) {
+        this(true, providesKey);
     }
 
     /**
      * Дерево множественного выбора.
      *
-     * @param multiSelection true - выбрать несколько элементов, false - выбрать один элемент
+     * @param multiSelect true - выбрать несколько элементов, false - выбрать один элемент
      */
-    public LazyTree(Boolean multiSelection) {
+    public LazyTree(Boolean multiSelect, ProvidesKey<H> providesKey) {
         super(resources);
-        this.multiSelection = multiSelection;
+        this.multiSelect = multiSelect;
+        this.providesKey = providesKey;
         setAnimationEnabled(true);
         setScrollOnSelectEnabled(false);
+
         super.addSelectionHandler(new SelectionHandler<TreeItem>() {
             @Override
             public void onSelection(SelectionEvent<TreeItem> event) {
@@ -73,24 +73,23 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
                 if (multiSelect != null) {
 
                     if (!multiSelect) {
-                        if (!selectedItems.isEmpty()) {
-                            if (selectedItems.iterator().next().equals(lazyTreeItem)) {
+                        if (!getSelectedSet().isEmpty()) {
+                            if (getSelectedSet().iterator().next().equals(lazyTreeItem)) {
                                 return;
                             }
                             // для предыдушего радио-значения удаляем выделение
-                            selectedItems.iterator().next().setItemState(null);
+                            getSelectedSet().iterator().next().setItemState(null);
                         }
-                        selectedItems.clear();
-                        lazyTreeItem.setItemState(true);
-                        selectedItems.add((H) lazyTreeItem);
+                        getSelectedSet().clear();
+                        //lazyTreeItem.setItemState(true);
+                        selectionModel.setSelected((H) lazyTreeItem, true);
                     } else {
-                        Boolean isSelected = lazyTreeItem.isSelected();
-                        if (!isSelected) {
-                            lazyTreeItem.setItemState(true);
-                            selectedItems.add((H) lazyTreeItem);
+                        if (!lazyTreeItem.isSelected()) {
+                            //lazyTreeItem.setItemState(true);
+                            selectionModel.setSelected((H) lazyTreeItem, true);
                         } else {
-                            lazyTreeItem.setItemState(null);
-                            selectedItems.remove((H) lazyTreeItem);
+                            //lazyTreeItem.setItemState(null);
+                            selectionModel.setSelected((H) lazyTreeItem, false);
                         }
                     }
                     LazyTreeSelectionEvent.fire(LazyTree.this, ((H) lazyTreeItem));
@@ -98,17 +97,62 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
             }
         });
+
+        this.selectionModel = getSelectionModel(multiSelect, providesKey);
+
+        selectionHandlerRegistration = selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                LazyTree.this.onSelectionChange();
+            }
+        });
+
+    }
+
+    private void onSelectionChange(){
+        ArrayList<H> hs = new ArrayList<H>();
+        findAllChild(hs, null);
+        for (H h : hs) {
+            h.setItemState(selectionModel.isSelected(h) ? true : null);
+        }
+    }
+
+    public void setSelected(H refBookUiTreeItem, boolean selected) {
+        selectionModel.setSelected(refBookUiTreeItem, selected);
+    }
+
+    private Set<H> getSelectedSet(){
+        return selectionModel.getSelectedSet();
     }
 
     public boolean isSelectChildViaParent() {
         return isSelectChildViaParent;
     }
 
-    /**
-     * Установить выбирать ли дочерние элементы при выборе узла дерева.
-     */
+    /* Установить выбирать ли дочерние элементы при выборе узла дерева. */
     public void setSelectChildViaParent(boolean selectChildViaParent) {
         this.isSelectChildViaParent = selectChildViaParent;
+    }
+
+    public boolean getMultiSelect() {
+        return multiSelect;
+    }
+
+    public void setMultiSelect(Boolean multiSelect) {
+        this.multiSelect = multiSelect;
+
+        clearSelection();
+
+        this.selectionModel = getSelectionModel(this.multiSelect, providesKey);
+        selectionHandlerRegistration.removeHandler();
+
+        selectionHandlerRegistration = selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                LazyTree.this.onSelectionChange();
+            }
+        });
+
     }
 
     /**
@@ -120,6 +164,9 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
     public void addItem(H item) {
         item.addItem("Загрузка...");
+        if (selectionModel.isSelected(item)){
+            item.setItemState(true);
+        }
         super.addItem(item);
     }
 
@@ -130,6 +177,9 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
      * @param item   добавляемый узел
      */
     public void addTreeItem(H parent, H item) {
+        if (selectionModel.isSelected(item)){
+            item.setItemState(true);
+        }
         if (parent != null) {
             parent.addItem(item);
         } else {
@@ -166,16 +216,34 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
 
     /**
-     * Найти все дочерние элементы узла. Поиск рекурсивный.
+     * Обход по загруженным элементам всего дерева, исключая те элементы которые служат для отображения "Загрузки"
      *
-     * @param list список дочерних элементов
-     * @param item узел для которого ищутся дочерние
+     * @param list список элементов
+     * @param item узел для которого ищутся дочерние, если null что ищется с root'a
      */
     private void findAllChild(List<H> list, H item) {
-        list.add(item);
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                findAllChild(list, (H) item.getChild(i));
+        if (item == null) {
+            if (getItemCount() > 0) {
+                for (int j = 0; j < getItemCount(); j++) {
+                    H par = (H) getItem(j);
+                    list.add(par);
+                    if (par.getChildCount() > 0) {
+                        for (int i = 0; i < par.getChildCount(); i++) {
+                            if (par.getChild(i) instanceof LazyTreeItem) {
+                                findAllChild(list, (H) par.getChild(i));
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            list.add(item);
+            if (item.getChildCount() > 0) {
+                for (int i = 0; i < item.getChildCount(); i++) {
+                    if (item.getChild(i) instanceof LazyTreeItem) {
+                        findAllChild(list, (H) item.getChild(i));
+                    }
+                }
             }
         }
     }
@@ -197,53 +265,50 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     @Override
+    @Deprecated
     public void setSelectedItem(TreeItem item) {
         setSelectedItem(item, true);
     }
 
     @Override
+    @Deprecated
     public void setSelectedItem(TreeItem item, boolean fireEvents) {
         // заглушка
     }
 
+    @Deprecated
     public H getSelectedItem() {
         // заглушка
         return null;
     }
 
     public Set<H> getSelectedItems() {
-        return Collections.unmodifiableSet(selectedItems);
+        return Collections.unmodifiableSet(selectionModel.getSelectedSet());
     }
 
     public void clearSelection() {
-        for (H item : selectedItems) {
+        for (H item : selectionModel.getSelectedSet()) {
             item.setItemState(null);
         }
-        selectedItems.clear();
+        selectionModel.clear();
     }
 
-    /**
-     * Удалить элемент из дерева.
-     */
-    public void removeItem(H item) {
-        item.remove();
-    }
+//    /**
+//     * Удалить элемент из дерева.
+//     */
+//    public void removeItem(H item) {
+//        item.remove();
+//    }
+//
+//    /**
+//     * Удалить элементы из дерева.
+//     */
+//    public void removeItems(Set<H> items) {
+//        for (H i : items) {
+//            super.removeItem(i);
+//        }
+//    }
 
-    /**
-     * Удалить элементы из дерева.
-     */
-    public void removeItems(Set<H> items) {
-        for (H i : items) {
-            super.removeItem(i);
-        }
-    }
-
-    /**
-     * Получить признак возможности выбора нескольких узлов дерева.
-     */
-    public boolean isMultiSelection() {
-        return multiSelection;
-    }
 
 //    /**
 //     * Фильтр элементов дерева по названию.
@@ -274,6 +339,32 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 //            }
 //        }
 //    }
+
+    private SetSelectionModel<H> getSelectionModel(boolean multiSelect, ProvidesKey<H> key) {
+        return multiSelect ?
+                new MultiSelectionModel<H>(key) {
+                    // Переопределение методов - попытка убрать задержку при сеттинге селекта
+                    @Override
+                    protected boolean isEventScheduled() {
+                        return false;
+                    }
+                    @Override
+                    protected void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                } :
+                new SingleSelectionModel<H>(key) {
+                    // Переопределение методов - попытка убрать задержку при сеттинге селекта
+                    @Override
+                    public boolean isEventScheduled() {
+                        return false;
+                    }
+                    @Override
+                    public void scheduleSelectionChangeEvent() {
+                        fireSelectionChangeEvent();
+                    }
+                };
+    }
 
     @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
