@@ -147,10 +147,6 @@ def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCours
 @Field
 def endDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -180,9 +176,16 @@ def getNumber(def value, def indexRow, def indexCol) {
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
+}
+
+def getMessageLP1(def list, def lable){
+    StringBuilder sb = new StringBuilder(lable)
+    for (tradeNumber in list) {
+        sb.append(" " + tradeNumber.toString() + ",")
+    }
+    return  sb.substring(0, sb.length() - 1).toString()
 }
 
 def logicCheck() {
@@ -209,28 +212,17 @@ def logicCheck() {
                     }
                     if (count == 0) {
                         notFound.add(rowPrev.tradeNumber)
-                    }
-                    if (count != 0 && count != 1) {
+                    } else if (count > 1) {
                         foundMany.add(rowPrev.tradeNumber)
                     }
                 }
             }
         }
         if (!notFound.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in notFound) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(notFound, "Отсутствуют строки с номерами сделок:"))
         }
         if (!foundMany.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in foundMany) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(foundMany, "Существует несколько строк с номерами сделок:"))
         }
     }
 

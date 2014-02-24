@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
@@ -52,7 +53,9 @@ public class FormDataListView extends
 
 	private boolean isAscSorting;
 
-	@UiField
+    private Map<Integer, String> departmentFullNames;
+
+    @UiField
 	Panel filterContentPanel;
 
 	@UiField
@@ -91,7 +94,7 @@ public class FormDataListView extends
 		TextColumn<FormDataSearchResultItem> departmentColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return object.getDepartmentName();
+				return departmentFullNames.get(object.getDepartmentId());
 			}
 		};
 
@@ -195,9 +198,10 @@ public class FormDataListView extends
 	}
 
 	@Override
-	public void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records) {
+	public void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames) {
 		formDataTable.setRowCount((int) totalCount);
 		formDataTable.setRowData(start, records);
+        this.departmentFullNames = departmentFullNames;
 	}
 
 	@Override

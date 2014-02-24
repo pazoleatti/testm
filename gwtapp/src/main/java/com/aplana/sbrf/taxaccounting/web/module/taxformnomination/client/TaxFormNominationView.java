@@ -152,14 +152,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         departmentColumn = new TextColumn<TableModel>(){
             @Override
             public String getValue(TableModel object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 
         performerColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel object) {
-                return object.getPerformer() != null ? object.getPerformer().getName():"";
+                return object.getPerformer() != null ? object.getPerformerName():"";
             }
         };
 
@@ -260,7 +260,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         private int index;
         private FormTypeKind departmentFormType;
         private Department department;
+        private String departmentName;
         private Department performer;
+        private String performerName;
+
+        public String getPerformerName() {
+            return performerName;
+        }
+
+        public void setPerformerName(String performerName) {
+            this.performerName = performerName;
+        }
 
         public Department getPerformer() {
             return performer;
@@ -268,6 +278,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         public void setPerformer(Department performer) {
             this.performer = performer;
+        }
+
+        public String getDepartmentName() {
+            return departmentName;
+        }
+
+        public void setDepartmentName(String departmentName) {
+            this.departmentName = departmentName;
         }
 
         public Department getDepartment() {
@@ -426,7 +444,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     @Override
-    public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
+    public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
         List<TableModel> types = new ArrayList<TableModel>();
 
         int index = start + 1;
@@ -436,7 +454,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             model.setIndex(index++);
             model.setDepartmentFormType(type);
             model.setDepartment(type.getDepartment());
+            model.setDepartmentName(departmentFullNames.get(type.getDepartment().getId()));
             model.setPerformer(type.getPerformer());
+            if (type.getPerformer() != null) model.setPerformerName(departmentFullNames.get(type.getPerformer().getId()));
             types.add(model);
         }
 

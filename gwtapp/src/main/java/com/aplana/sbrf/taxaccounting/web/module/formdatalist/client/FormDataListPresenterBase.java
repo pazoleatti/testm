@@ -17,6 +17,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client;
 
 import java.util.List;
+import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
@@ -50,7 +51,7 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 	 */
 	public interface MyView extends View, HasUiHandlers<FormDataListUiHandlers> {
 		
-		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records);
+		void setTableData(int start, long totalCount, List<FormDataSearchResultItem> records, Map<Integer, String> departmentFullNames);
 		
 		void updateData();
 		
