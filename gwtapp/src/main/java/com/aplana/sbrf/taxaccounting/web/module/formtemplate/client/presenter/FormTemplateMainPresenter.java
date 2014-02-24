@@ -123,7 +123,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
                         getView().setLogMessages(null);
                         getView().setTitle(formTemplate.getType().getName());
-                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateMainPage).
+                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
                         TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
