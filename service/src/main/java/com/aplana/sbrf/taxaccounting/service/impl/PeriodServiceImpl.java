@@ -124,26 +124,28 @@ public class PeriodServiceImpl implements PeriodService{
 			Number ord = record.get("ORD").getNumberValue();
 
 			if (name == null || name.isEmpty() || ord == null
-					|| record.get("START_DATE").getDateValue() == null || record.get("END_DATE").getDateValue() == null) {
+					|| record.get("START_DATE").getDateValue() == null
+					|| record.get("END_DATE").getDateValue() == null
+					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
 			Calendar start = new GregorianCalendar();
 			start.setTime(record.get("START_DATE").getDateValue());
 			start.set(Calendar.YEAR, year);
-			Date startDate = start.getTime();
 
 			Calendar end = new GregorianCalendar();
 			end.setTime(record.get("END_DATE").getDateValue());
 			end.set(Calendar.YEAR, year);
-			Date endDate = end.getTime();
+
+			Calendar calendarDate = new GregorianCalendar();
+			calendarDate.setTime(record.get("CALENDAR_START_DATE").getDateValue());
+			calendarDate.set(Calendar.YEAR, year);
 
 			newReportPeriod.setName(name);
 			newReportPeriod.setOrder(ord.intValue());
-			newReportPeriod.setStartDate(startDate);
-			newReportPeriod.setEndDate(endDate);
-
-			// TODO: установить правильный calendar_start_date http://conf.aplana.com/pages/viewpage.action?pageId=9570811 (Marat Fayzullin 2014-01-22)
-			newReportPeriod.setCalendarStartDate(startDate);
+			newReportPeriod.setStartDate(start.getTime());
+			newReportPeriod.setEndDate(end.getTime());
+			newReportPeriod.setCalendarStartDate(calendarDate.getTime());
 
 			reportPeriodDao.save(newReportPeriod);
 		} else {

@@ -238,7 +238,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
-        getUiHandlers().onPrintButtonClicked();
+        if (getUiHandlers() != null){
+            getUiHandlers().onPrintButtonClicked();
+        }
     }
 
     @UiHandler("archive")

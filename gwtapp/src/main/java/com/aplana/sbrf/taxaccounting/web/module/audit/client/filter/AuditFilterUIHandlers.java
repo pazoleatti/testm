@@ -7,8 +7,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * User: avanteev
  */
 public interface AuditFilterUIHandlers extends UiHandlers {
-
+    void onSearchButtonClicked();
     void getReportPeriods(TaxType value);
-
-    void onSearchClicked();
 }

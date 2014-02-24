@@ -78,9 +78,11 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     RefBookPicker user;
 
+    @Editor.Ignore
     @UiField
     Panel declarationTypePanel;
 
+    @Editor.Ignore
     @UiField
     Panel formPanel;
 
@@ -114,6 +116,26 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public LogSystemAuditFilter getFilterData() {
         return driver.flush();
+    }
+
+    @Override
+    public boolean isChangeFilter() {
+        return driver.isDirty();
+    }
+
+    @Override
+    public void edit(LogSystemAuditFilter auditFilter) {
+        driver.edit(auditFilter);
+    }
+
+    @Override
+    public void clear() {
+        taxType.setValue(null, true);
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(null, true);
+        declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
@@ -182,16 +204,13 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             return;
         }
 
-        if (fromDate != null && toDate != null) {
-            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
-                Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
-                return;
-            }
+        if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+            Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+            return;
         }
 
-        if (getUiHandlers() != null) {
-            getUiHandlers().onSearchClicked();
-        }
+        if (getUiHandlers() != null)
+            getUiHandlers().onSearchButtonClicked();
     }
 
     @UiHandler("taxType")

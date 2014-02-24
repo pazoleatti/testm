@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import java.util.Date;
+
 /**
  * Типы атрибутов справочника. <br /><br />
  * <i>Примечание: </i>При рефакторинге данного класса порядок следования элементов менять нельзя.
@@ -10,12 +12,21 @@ package com.aplana.sbrf.taxaccounting.model.refbook;
 public enum RefBookAttributeType {
 
 	/** Строка */
-	STRING,
+	STRING(String.class),
 	/** Число */
-	NUMBER,
+	NUMBER(Number.class),
 	/** Дата-время */
-	DATE,
+	DATE(Date.class),
 	/** Ссылка на элемент справочника */
-	REFERENCE;
+	REFERENCE(Long.class);
 
+	private Class typeClass;
+
+	RefBookAttributeType(Class typeClass) {
+		this.typeClass = typeClass;
+	}
+
+	public Class getTypeClass() {
+		return typeClass;
+	}
 }

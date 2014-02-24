@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataList, GetFormDataListResult> {
@@ -21,6 +25,9 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 
 	@Autowired
 	private SecurityService securityService;
+
+    @Autowired
+    private DepartmentService departmentService;
 
 	public GetFormDataListHandler() {
 		super(GetFormDataList.class);
@@ -34,8 +41,13 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
         GetFormDataListResult res = new GetFormDataListResult();
         PagingResult<FormDataSearchResultItem> resultPage = formDataSearchService
                 .findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
+        Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
+        for(FormDataSearchResultItem item: resultPage) {
+            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchy(item.getDepartmentId()));
+        }
         res.setTotalCountOfRecords(resultPage.getTotalCount());
         res.setRecords(resultPage);
+        res.setDepartmentFullNames(departmentFullNames);
         return res;
     }
 

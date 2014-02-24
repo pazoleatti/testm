@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
+import java.util.Map;
 
 public class GetFormDataListResult implements Result {
 	private static final long serialVersionUID = -7862353388101445807L;
@@ -13,6 +14,7 @@ public class GetFormDataListResult implements Result {
 	private List<FormDataSearchResultItem> records;
 	private List<Department> departments;
 	private List<ReportPeriod> reportPeriods;
+    Map<Integer, String> departmentFullNames;
 
 	//общее количество записей (на всех страницах)
 	private long totalCountOfRecords;
@@ -49,7 +51,15 @@ public class GetFormDataListResult implements Result {
 		this.reportPeriods = reportPeriods;
 	}
 
-	public long getTotalCountOfRecords() {
+    public Map<Integer, String> getDepartmentFullNames() {
+        return departmentFullNames;
+    }
+
+    public void setDepartmentFullNames(Map<Integer, String> departmentFullNames) {
+        this.departmentFullNames = departmentFullNames;
+    }
+
+    public long getTotalCountOfRecords() {
 		return totalCountOfRecords;
 	}
 

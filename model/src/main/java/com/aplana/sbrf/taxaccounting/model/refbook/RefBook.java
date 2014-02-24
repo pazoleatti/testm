@@ -18,17 +18,19 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-    public final static String RECORD_ID_ALIAS = "record_id";
+    public static final String RECORD_ID_ALIAS = "record_id";
 
-	public final static String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
+	public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
 
-    public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
+    public static final String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
     public static final int REF_BOOK_VERSION_FROM_WIDTH = 6;
 
-    public final static String RECORD_VERSION_TO_ALIAS = "record_version_to";
+    public static final String RECORD_VERSION_TO_ALIAS = "record_version_to";
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
+
+	public static final String RECORD_SORT_ALIAS = "row_number_over";
 
 	/** Код справочника */
 	private Long id;

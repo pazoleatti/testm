@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -38,6 +36,21 @@ public class RefBookUtils extends AbstractDao {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		RefBookAttribute defaultSort = refBook.getSortAttribute();
+		String sortAlias = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
+		if (isSupportOver()) {
+			// row_number() over (order by ... asc\desc)
+			ps.appendQuery("row_number() over ( order by ");
+			ps.appendQuery(sortAlias);
+			ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
+		} else {
+			ps.appendQuery("rownum");
+		}
+		ps.appendQuery(" as ");
+		ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+	}
 
     /**
      * Формирует простой sql-запрос по принципу: один справочник - одна таблица
@@ -62,15 +75,7 @@ public class RefBookUtils extends AbstractDao {
             ps.appendQuery(attribute.getAlias());
         }
         ps.appendQuery(" FROM (SELECT ");
-        if (isSupportOver()) {
-            RefBookAttribute defaultSort = refBook.getSortAttribute();
-            String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
-            String sortDirection = isSortAscending ? "ASC" : "DESC";
-            orderBy = " order by " + sortColumn + " " + sortDirection;
-            ps.appendQuery("row_number() over (" + orderBy + ") as row_number_over");
-        } else {
-            ps.appendQuery("rownum row_number_over");
-        }
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
         ps.appendQuery(", t.* FROM ");
         ps.appendQuery(tableName);
         ps.appendQuery(" t");
@@ -100,7 +105,9 @@ public class RefBookUtils extends AbstractDao {
 
         ps.appendQuery(")");
         if (pagingParams != null) {
-            ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
+            ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
@@ -108,7 +115,6 @@ public class RefBookUtils extends AbstractDao {
         ps.appendQuery(orderBy);
         return ps;
     }
-
 
     /**
      * Формирует простой sql-запрос по выборке данных учитывая иерархичность таблицы
@@ -126,18 +132,7 @@ public class RefBookUtils extends AbstractDao {
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("SELECT ");
         ps.appendQuery("RECORD_ID, ");
-        if (isSupportOver()) {
-            RefBookAttribute defaultSort = refBook.getSortAttribute();
-            String sortColumn = sortAttribute == null ? (defaultSort == null ? "id" : defaultSort.getAlias()) : sortAttribute.getAlias();
-            String sortDirection = isSortAscending ? "ASC" : "DESC";
-            orderBy = " order by " + sortColumn + " " + sortDirection;
-            ps.appendQuery("row_number() over (" + orderBy + ") as ");
-
-        } else {
-            ps.appendQuery("rownum ");
-        }
-        ps.appendQuery("row_number_over ");
-
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
 
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", ");
@@ -160,7 +155,6 @@ public class RefBookUtils extends AbstractDao {
         ps.appendQuery(" START WITH ");
         ps.appendQuery(parentId == null ? " PARENT_ID is null ":" PARENT_ID = "+parentId);
 
-
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
@@ -178,7 +172,9 @@ public class RefBookUtils extends AbstractDao {
         ps.appendQuery(")");
 
         if (pagingParams != null) {
-            ps.appendQuery(" WHERE row_number_over BETWEEN ? AND ?");
+			ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
         }
@@ -214,8 +210,7 @@ public class RefBookUtils extends AbstractDao {
         return result;
     }
 
-
-    /**
+	/**
      * Возвращает дочерние записи справочника учитывая иерархичность таблицы
      * @param tableName название таблицы
      * @param refBookId код справочника

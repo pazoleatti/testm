@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.LogSystemFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessSearchEvent;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterAction;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterResult;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessReportPeriodsAction;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessReportPeriodsResult;
+import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -25,6 +25,7 @@ import java.util.Set;
 public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusinessFilterPresenter.MyView> implements HistoryBusinessUIHandler {
 
     private DispatchAsync dispatchAsync;
+    private LogSystemAuditFilter previousLogSystemAuditFilter;
 
     @Inject
     public HistoryBusinessFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
@@ -47,6 +48,8 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
     @Override
     public void onSearchClicked() {
+        previousLogSystemAuditFilter = getView().getDataFilter();
+        getView().edit(previousLogSystemAuditFilter);
         LogBusinessSearchEvent.fire(this);
     }
 
@@ -54,7 +57,7 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
         void init();
         // Получение значений фильтра
-        LogBusinessFilterValues getDataFilter();
+        LogSystemAuditFilter getDataFilter();
 
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
@@ -65,10 +68,14 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
         void setFormDataTaxType(List<TaxType> taxTypeList);
 
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        boolean isChangeFilter();
+        void edit(LogSystemAuditFilter auditFilter);
+        void clear();
     }
 
     public void initFilterData() {
         getView().init();
+        previousLogSystemAuditFilter = getView().getDataFilter();
         GetHistoryBusinessFilterAction action = new GetHistoryBusinessFilterAction();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetHistoryBusinessFilterResult>() {
@@ -92,7 +99,17 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
     }
 
-    public LogBusinessFilterValues getLogSystemFilter() {
-        return getView().getDataFilter();
+    public LogSystemAuditFilter getLogSystemFilter() {
+        return isFilterChange() ? previousLogSystemAuditFilter : getView().getDataFilter();
+    }
+
+    public boolean isFilterChange(){
+        return getView().isChangeFilter();
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clear();
     }
 }
