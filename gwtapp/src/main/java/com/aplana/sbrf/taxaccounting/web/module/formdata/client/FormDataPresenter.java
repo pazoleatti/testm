@@ -371,7 +371,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 .getTaxType(),
                                         result.getFormData().getKind()
                                                 .getName(),
-                                        result.getDepartmenName(),
+                                        result.getDepartmenFullName(),
                                         buildPeriodName(result),
                                         result.getFormData().getState()
                                                 .getName(),

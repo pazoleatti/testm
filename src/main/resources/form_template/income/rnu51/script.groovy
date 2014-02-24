@@ -64,7 +64,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['itogoKvartal', 'itogo'])
         calc()
         logicCheck()
         break
@@ -287,8 +287,7 @@ def BigDecimal calc16(def row) {
 }
 
 def BigDecimal calc17(def row) {
-    // TODO Левыкин: Для всех остальных случаев значение графы не изменяется?
-    return row.redemptionValue > 0 ? 100 : row.marketPriceInRub1
+    return row.redemptionValue > 0 ? row.redemptionValue : row.marketPriceInRub1
 }
 
 def BigDecimal calc18(def row) {
