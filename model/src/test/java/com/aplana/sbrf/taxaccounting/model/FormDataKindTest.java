@@ -31,8 +31,14 @@ public class FormDataKindTest {
 		
 		kind = FormDataKind.fromId(3);
 		assert(kind == FormDataKind.SUMMARY);
-		
-		try {
+
+        kind = FormDataKind.fromId(4);
+        assert (kind == FormDataKind.UNP);
+
+        kind = FormDataKind.fromId(5);
+        assert (kind == FormDataKind.ADDITIONAL);
+
+        try {
 			kind = FormDataKind.fromId(100);
 			fail("Checking of wrong id retrieval failed");
 		} catch (IllegalArgumentException e) {
