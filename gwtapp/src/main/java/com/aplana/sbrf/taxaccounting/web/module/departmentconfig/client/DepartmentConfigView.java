@@ -242,22 +242,34 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				currentReportPeriodId == null ? null : currentReportPeriodId);
 	}
 
+    @Override
+    public void init() {
+        setEditMode(false);
+        currentDepartmentId = null;
+        currentReportPeriodId = null;
+        currentTaxType = null;
+        isReportPeriodActive = false;
+
+        updateVisibility();
+        clear();
+    }
+
 	@Override
 	public void clear() {
-		if (dereferenceValues != null) {
-			dereferenceValues.clear();
-		}
-		dictRegionId.setDereferenceValue(null);
-		reorgFormCode.setDereferenceValue(null);
-		signatoryId.setDereferenceValue(null);
-		taxPlaceTypeCode.setDereferenceValue(null);
-		obligation.setDereferenceValue(null);
-		oktmo.setDereferenceValue(null);
-		okvedCode.setDereferenceValue(null);
-		type.setDereferenceValue(null);
+        if (dereferenceValues != null) {
+            dereferenceValues.clear();
+        }
+        dictRegionId.setDereferenceValue(null);
+        reorgFormCode.setDereferenceValue(null);
+        signatoryId.setDereferenceValue(null);
+        taxPlaceTypeCode.setDereferenceValue(null);
+        obligation.setDereferenceValue(null);
+        oktmo.setDereferenceValue(null);
+        okvedCode.setDereferenceValue(null);
+        type.setDereferenceValue(null);
 
-		driver.edit(new DepartmentCombined());
-	}
+        driver.edit(new DepartmentCombined());
+    }
 
     /**
      * Отмена редактирования
@@ -351,8 +363,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		this.isEditMode = isEditMode;
 		editModeLabel.setVisible(isEditMode);
 		editButton.setVisible(!isEditMode);
-		editButton.setEnabled(currentDepartmentId !=null && currentReportPeriodId != null && isReportPeriodActive);
-		saveButton.setVisible(isEditMode);
+        editButton.setEnabled(currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive);
+        saveButton.setVisible(isEditMode);
 		cancelButton.setVisible(isEditMode);
 		enableAllChildren(isEditMode, formPanel);
 	}
@@ -402,7 +414,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 		} else {
 			setEditMode(false);
-
 			afterCheckUnsaved(reportPeriodId);
 		}
 	}
@@ -512,5 +523,5 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
 		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
-	}
+    }
 }

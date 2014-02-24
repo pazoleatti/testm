@@ -89,6 +89,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void reloadDepartmentParams();
 
         /**
+         * Исходное состояние формы
+         */
+        void init();
+
+        /**
          * Очистка формы
          */
         void clear();
@@ -229,7 +234,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
-        getView().clear();
+        getView().init();
 
         String value = request.getParameter("nType", "");
         TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
