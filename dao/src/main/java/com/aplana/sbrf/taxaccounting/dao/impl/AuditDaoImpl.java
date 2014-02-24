@@ -68,15 +68,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
-		sql.append(" order by ls.id desc,");
-		sql.append(" rp.start_date desc,");
-		sql.append(" rp.end_date desc,");
-		sql.append(" rp.ord desc,");
-		sql.append(" dep.name asc,");
-		sql.append(" dt.name asc,");
-		sql.append(" ft.name asc,");
-		sql.append(" ls.form_kind_id asc,");
-		sql.append(" su.name asc ");
+        sql.append(" order by ls.log_date desc");
 
 		sql.append(") dat) ordDat");
         List<LogSearchResultItem> records;

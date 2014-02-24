@@ -31,6 +31,9 @@ public class LogSystemReportBuilderTest {
         user.setLogin("controlBank");
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setName("1 квартал");
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2014);
+        reportPeriod.setTaxPeriod(taxPeriod);
         item.setIp("172.15.0.1");
         item.setLogDate(new Date());
         item.setNote("Проверочка!");

@@ -104,7 +104,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<AuditArchiveResult>() {
             @Override
             public void onSuccess(AuditArchiveResult result) {
-                MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно.");
+                MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
                 getView().getBlobFromServer(result.getUuid());
             }
         }, this));

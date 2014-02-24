@@ -7,6 +7,15 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class AuditArchiveResult implements Result {
     String uuid;
+    private int countOfRemoveRecords;
+
+    public int getCountOfRemoveRecords() {
+        return countOfRemoveRecords;
+    }
+
+    public void setCountOfRemoveRecords(int countOfRemoveRecords) {
+        this.countOfRemoveRecords = countOfRemoveRecords;
+    }
 
     public String getUuid() {
         return uuid;
