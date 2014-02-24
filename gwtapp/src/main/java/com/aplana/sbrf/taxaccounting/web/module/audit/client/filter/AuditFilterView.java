@@ -88,6 +88,10 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Editor.Ignore
     @UiField
+    Panel reportPeriodPanel;
+
+    @Editor.Ignore
+    @UiField
     Button search;
 
     private Map<Integer, String> declarationTypesMap;
@@ -126,6 +130,16 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @Override
     public void edit(LogSystemAuditFilter auditFilter) {
         driver.edit(auditFilter);
+    }
+
+    @Override
+    public void clear() {
+        taxType.setValue(null, true);
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(null, true);
+        declarationTypeId.setValue(null);
+        formPanel.setVisible(false);
+        declarationTypePanel.setVisible(false);
     }
 
     @Override
@@ -176,7 +190,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         user.setPeriodDates(null, new Date());
-        reportPeriodIds.setEnabled(false);
         formDataKind.setPeriodDates(new Date(), new Date());
         formTypeId.setEnabled(false);
 
@@ -206,15 +219,16 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodIds.setEnabled(false);
+            reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
             return;
         } else {
             formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
         }
         if (getUiHandlers() != null) {
+            reportPeriodIds.setValue(null, true);
             getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodIds.setEnabled(true);
+            reportPeriodPanel.setVisible(true);
         }
     }
 

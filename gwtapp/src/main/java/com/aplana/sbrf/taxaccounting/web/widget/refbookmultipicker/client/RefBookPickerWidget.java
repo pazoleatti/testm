@@ -176,12 +176,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("clearButton")
     void onClearButtonClicked(ClickEvent event) {
-        searchTextBox.setText("");
-        versionDateBox.setValue(endDate != null ? endDate : startDate);
-
         state.getSetIds().clear();
-        state.setSearchPattern(searchTextBox.getText());
-        state.setVersionDate(versionDateBox.getValue());
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;

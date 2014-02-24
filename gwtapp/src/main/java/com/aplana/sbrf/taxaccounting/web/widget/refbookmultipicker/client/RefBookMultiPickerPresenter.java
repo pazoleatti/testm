@@ -63,22 +63,22 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                             getView().setHeaders(result.getHeaders());
                             getView().refresh();
 
-                            if (newState.getSetIds()!= null && newState.getSetIds().size() > 0) {
-                                loadingForSelection(newState.getSetIds());
-                            } else {
-                                getView().setSelection(new ArrayList<RefBookItem>());
-                            }
+                            trySelect(newState);
                         }
                     }, this));
         } else {
             //иначе просто сеттим
             setNewState(newState);
-            if (newState.getSetIds()!= null && newState.getSetIds().size() > 0) {
-                loadingForSelection(newState.getSetIds());
-            } else {
-                getView().setSelection(new ArrayList<RefBookItem>());
-            }
+            trySelect(newState);
             getView().refresh();
+        }
+    }
+
+    private void trySelect(PickerState stateWithIds){
+        if (stateWithIds.getSetIds()!= null && stateWithIds.getSetIds().size() > 0) {
+            loadingForSelection(stateWithIds.getSetIds());
+        } else {
+            getView().setSelection(new ArrayList<RefBookItem>());
         }
     }
 

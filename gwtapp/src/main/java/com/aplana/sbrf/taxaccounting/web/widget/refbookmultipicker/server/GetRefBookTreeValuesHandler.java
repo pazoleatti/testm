@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.exception.TAException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -8,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -35,6 +38,9 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     @Autowired
     RefBookHelper refBookHelper;
 
+    @Autowired
+    LogEntryService logEntryService;
+
     public GetRefBookTreeValuesHandler() {
         super(GetRefBookTreeValuesAction.class);
     }
@@ -42,16 +48,35 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     @Override
     public GetRefBookTreeValuesResult execute(GetRefBookTreeValuesAction action, ExecutionContext context) throws ActionException {
 
+        Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook);
 
-        RefBookTreeItem item = action.getParent();
-        PagingResult<Map<String, RefBookValue>> refBookPage =
-                refBookDataProvider.getChildrenRecords(item != null ? item.getId() : null, action.getVersion(), null, filter, null);
+        PagingResult<Map<String, RefBookValue>> refBookPage;
+
+        // Получаем нужные объекты по идентификаторам, что бы потом получить разименнованные значения
+        if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
+            refBookPage = new PagingResult<Map<String, RefBookValue>>();
+            for (Long id : action.getIdsTofind()) {
+                if (id != null) {
+                    try{
+                        refBookPage.add(refBookDataProvider.getRecordData(id));
+                    } catch (TAException e){
+                        logger.error(e.getMessage());
+                    }
+                }
+            }
+            refBookPage.setTotalCount(action.getIdsTofind().size());
+        } else {
+            RefBookTreeItem parent = action.getParent();
+            refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null);
+
+        }
 
         GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
 
+        result.setUuid(logEntryService.save(logger.getEntries()));
         result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
 
         return result;

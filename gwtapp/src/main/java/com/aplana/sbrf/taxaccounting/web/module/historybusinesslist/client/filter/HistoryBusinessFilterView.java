@@ -75,6 +75,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     Panel formPanel;
 
     @UiField
+    Panel reportPeriodPanel;
+
+    @UiField
     Panel declarationTypePanel;
 
     @Path("userIds")
@@ -82,7 +85,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     RefBookPicker user;
 
     private Map<Integer, String> declarationTypesMap;
-    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     @Override
     public void init() {
@@ -131,6 +133,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         driver.edit(auditFilter);
     }
 
+    @Override
+    public void clear() {
+        taxType.setValue(null, true);
+        formPanel.setVisible(false);
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(new ArrayList<Long>());
+        declarationTypePanel.setVisible(false);
+        declarationTypeIds.setValue(null);
+    }
+
     @Inject
     public HistoryBusinessFilterView(Binder binder) {
         auditFormTypeId = new ValueListBox<AuditFormType>(new AbstractRenderer<AuditFormType>() {
@@ -175,7 +187,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         user.setPeriodDates(null, new Date());
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
-        reportPeriodIds.setEnabled(false);
+        reportPeriodPanel.setVisible(false);
         formTypeId.setEnabled(false);
 
         driver.initialize(this);
@@ -226,11 +238,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
             return;
         }
 
-        if (fromDate !=null && toDate != null) {
-            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
-                Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
-                return;
-            }
+        if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+            Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+            return;
         }
 
         if (getUiHandlers() != null) {
@@ -241,15 +251,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodIds.setEnabled(false);
+            reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
             return;
         } else {
             formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
         }
         if (getUiHandlers() != null) {
+            reportPeriodIds.setValue(null, true);
             getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodIds.setEnabled(true);
+            reportPeriodPanel.setVisible(true);
         }
     }
 

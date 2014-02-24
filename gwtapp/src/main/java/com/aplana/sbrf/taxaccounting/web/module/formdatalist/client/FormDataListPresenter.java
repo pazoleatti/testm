@@ -15,6 +15,9 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataL
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetKindListAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetKindListResult;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,7 +43,7 @@ public class FormDataListPresenter extends
 	@NameToken(FormDataListNameTokens.FORM_DATA_LIST)
 	public interface MyProxy extends ProxyPlace<FormDataListPresenter>, Place {
 	}
-	
+
 	/**
 	 * Текущий тип налога
 	 */
@@ -49,10 +52,12 @@ public class FormDataListPresenter extends
 	/**
 	 * Текущее состояние фильтров для всех типов налогов.
 	 * Обновляться из фильтра при FormDataListApplyEvent.
-	 * Сетится в фильтр при открытии формы.  
+	 * Сетится в фильтр при открытии формы.
 	 * Используется при заполнении начальных значений фильтра поиска
 	 */
 	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
+
+    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
 	@Inject
 	public FormDataListPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -60,6 +65,13 @@ public class FormDataListPresenter extends
 			FilterFormDataPresenter filterPresenter, CreateFormDataPresenter dialogPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, dialogPresenter);
 		getView().setUiHandlers(this);
+        History.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                lstHistory.put(0, lstHistory.get(1));
+                lstHistory.put(1, event.getValue());
+            }
+        });
 	}
 
 	@Override
@@ -69,7 +81,7 @@ public class FormDataListPresenter extends
 		addRegisteredHandler(FormDataListApplyEvent.getType(), this);
 		super.onBind();
 	}
-	
+
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		LogCleanEvent.fire(this);
@@ -90,7 +102,16 @@ public class FormDataListPresenter extends
         super.prepareFromRequest(request);
 	}
 
-	@Override
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith("!formData;formDataId")) &&
+            (lstHistory.get(1) == null || !lstHistory.get(1).startsWith("!formData;formDataId"))) {
+            filterPresenter.getView().clean();
+        }
+    }
+
+    @Override
 	public void onClickCreate(FormDataListCreateEvent event) {
 		// При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
 		// Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
@@ -119,7 +140,7 @@ public class FormDataListPresenter extends
 				this.taxType = filter.getTaxType();
 				saveFilterState(filter.getTaxType(), filter);
 				getView().updateData(0);
-				
+
 				// Презентор фильтра успешно проинициализировался - делаем ревал
 				getProxy().manualReveal(FormDataListPresenter.this);
 			} else {
@@ -136,7 +157,7 @@ public class FormDataListPresenter extends
 
 	private void saveFilterState(TaxType taxType, FormDataFilter filter){
 		// Это ворк эраунд.
-		// Нужно клонировать состояние т.к. в FilterFormDataPresenter 
+		// Нужно клонировать состояние т.к. в FilterFormDataPresenter
 		// может менять значения в этом объекте, что нужно не всегда.
 		// Здесь должны быть добавлены все поля для которых мы хотим сохранять состояние
 		// при переходах между формами
@@ -150,10 +171,10 @@ public class FormDataListPresenter extends
 		cloneFilter.setReturnState(filter.getReturnState());
 		// Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
 		// то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
-		
+
 		filterStates.put(taxType, cloneFilter);
 	}
-	
+
 	private FormDataFilter getFilterState(TaxType taxType){
 		return filterStates.get(taxType);
 	}

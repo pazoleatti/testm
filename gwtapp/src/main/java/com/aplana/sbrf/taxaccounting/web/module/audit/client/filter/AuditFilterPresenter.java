@@ -56,7 +56,7 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         LogSystemAuditFilter getFilterData();
         boolean isChangeFilter();
         void edit(LogSystemAuditFilter auditFilter);
-
+        void clear();
     }
 
     public void initFilterData() {
@@ -120,4 +120,9 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         return getView().isChangeFilter();
     }
 
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clear();
+    }
 }
