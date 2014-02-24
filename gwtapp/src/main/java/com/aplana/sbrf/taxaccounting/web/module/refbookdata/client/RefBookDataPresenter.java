@@ -217,6 +217,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								public void onSuccess(GetRefBookTableDataResult result) {
 									getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows());
+                                    // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
+                                    getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759 элемент можно выбирать только после загрузки нужной страницы
                                     if (page != null && range.getStart() == page * range.getLength()) {
                                         getView().setSelected(recordId);

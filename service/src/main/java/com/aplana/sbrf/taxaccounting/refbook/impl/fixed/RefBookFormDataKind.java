@@ -29,7 +29,7 @@ public class RefBookFormDataKind extends AbstractPermanentRefBook {
 
             }
         } else {
-            for (int i = 1; i <= 5; i++) {
+            for (int i = 1; i <= FormDataKind.values().length; i++) {
                 Map<String, String> attrs = new HashMap<String, String>();
                 FormDataKind item = FormDataKind.fromId(i);
                 attrs.put("NAME", item.getName());

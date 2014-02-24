@@ -82,7 +82,6 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     RefBookPicker user;
 
     private Map<Integer, String> declarationTypesMap;
-    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
     @Override
     public void init() {
@@ -129,6 +128,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @Override
     public void edit(LogSystemAuditFilter auditFilter) {
         driver.edit(auditFilter);
+    }
+
+    @Override
+    public void clear() {
+        taxType.setValue(null, true);
+        formPanel.setVisible(false);
+        formTypeId.setValue(null, true);
+        formDataKind.setValue(new ArrayList<Long>());
+        declarationTypePanel.setVisible(false);
+        declarationTypeIds.setValue(null);
     }
 
     @Inject
@@ -226,11 +235,9 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
             return;
         }
 
-        if (fromDate !=null && toDate != null) {
-            if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
-                Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
-                return;
-            }
+        if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
+            Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+            return;
         }
 
         if (getUiHandlers() != null) {
