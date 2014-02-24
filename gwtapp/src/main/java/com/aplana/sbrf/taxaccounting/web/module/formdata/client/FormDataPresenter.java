@@ -330,9 +330,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(GetFormDataResult result) {
 
-                                LogAddEvent.fire(FormDataPresenter.this,
-                                        result.getUuid());
-                                
+                                // если нет сообщений для показа то не обращаться к логгеру, по причине того что при обращении логгер очищается
+                                if (result.getUuid() != null){
+                                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                                }
+
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
                     			
