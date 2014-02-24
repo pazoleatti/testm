@@ -49,13 +49,15 @@ switch (formDataEvent) {
         break
 }
 
-// 1 № пп  -  rowNumber
-// 2 Код ОКТМО  -  codeOKATO
-// 3 Идентификационный номер  -  identNumber
-// 4 Регистрационный знак  -  regNumber
-// 5 Код налоговой льготы - taxBenefitCode
-// 6 Дата начала Использование льготы - benefitStartDate
-// 7 Дата окончания Использование льготы - benefitEndDate
+// графа 1 - rowNumber         - № пп
+// графа 2 - codeOKATO         - Код ОКТМО
+// графа 3 - identNumber       - Идентификационный номер
+// графа 4 - regNumber         - Регистрационный знак
+// графа 5 - powerVal          - Мощность (величина)
+// графа 6 - baseUnit          - Мощность (ед. измерения)
+// графа 7 - taxBenefitCode    - Код налоговой льготы
+// графа 8 - benefitStartDate  - Дата начала Использование льготы
+// графа 9 - benefitEndDate    - Дата окончания Использование льготы
 
 //// Кэши и константы
 @Field
@@ -63,15 +65,25 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def copyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+def copyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 @Field
-def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate',
-        'benefitEndDate']
+def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+
+// дата начала отчетного периода
+@Field
+def startDate = null
+
+// дата окончания отчетного периода
+@Field
+def endDate = null
 
 //// Обертки методов
 
@@ -115,8 +127,8 @@ def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dFrom = getReportPeriodStartDate()
+    def dTo = getReportPeriodEndDate()
     def String dFormat = "dd.MM.yyyy"
 
     // Проверенные строки (3-я провека)
@@ -237,8 +249,8 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
         if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
-            def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-            def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+            def dFrom = getReportPeriodStartDate()
+            def dTo = getReportPeriodEndDate()
             for (def row in dataRowsOld) {
                 if (( row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
                     continue
@@ -283,4 +295,18 @@ def isEquals(def row1, def row2) {
     }
     return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)
             && row1.powerVal.equals(row2.powerVal) && row1.baseUnit.equals(row2.baseUnit))
+}
+
+def getReportPeriodStartDate() {
+    if (!startDate) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
