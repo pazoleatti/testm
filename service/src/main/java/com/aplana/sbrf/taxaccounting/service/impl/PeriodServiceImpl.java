@@ -115,7 +115,7 @@ public class PeriodServiceImpl implements PeriodService{
 		if (reportPeriods.isEmpty()) {
 			RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
 			RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-			Map<String, RefBookValue> record = provider.getRecordData(Long.valueOf(dictionaryTaxPeriodId));
+			Map<String, RefBookValue> record = provider.getRecordData((long) dictionaryTaxPeriodId);
 			newReportPeriod = new ReportPeriod();
 			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
@@ -129,15 +129,15 @@ public class PeriodServiceImpl implements PeriodService{
 					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
-			Calendar start = new GregorianCalendar();
+			Calendar start = Calendar.getInstance();
 			start.setTime(record.get("START_DATE").getDateValue());
 			start.set(Calendar.YEAR, year);
 
-			Calendar end = new GregorianCalendar();
+			Calendar end = Calendar.getInstance();
 			end.setTime(record.get("END_DATE").getDateValue());
 			end.set(Calendar.YEAR, year);
 
-			Calendar calendarDate = new GregorianCalendar();
+			Calendar calendarDate = Calendar.getInstance();
 			calendarDate.setTime(record.get("CALENDAR_START_DATE").getDateValue());
 			calendarDate.set(Calendar.YEAR, year);
 
@@ -154,7 +154,7 @@ public class PeriodServiceImpl implements PeriodService{
 		for (Department dep : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, (int)departmentId)) {
 			DepartmentReportPeriod depRP = new DepartmentReportPeriod();
 			depRP.setReportPeriod(newReportPeriod);
-			depRP.setDepartmentId(Long.valueOf(dep.getId()));
+			depRP.setDepartmentId((long) dep.getId());
 			depRP.setActive(true);
 			depRP.setBalance(isBalance);
 			depRP.setHasCorrectPeriod(isCorrection);
