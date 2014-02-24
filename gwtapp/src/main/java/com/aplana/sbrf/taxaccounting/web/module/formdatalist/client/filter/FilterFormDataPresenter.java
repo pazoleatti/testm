@@ -43,6 +43,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
         // Установить фильтр для типов налоговых форм
         void setKindFilter(List<FormDataKind> dataKinds);
 
+        void clean();
 	}
 
 	private final DispatchAsync dispatchAsync;
