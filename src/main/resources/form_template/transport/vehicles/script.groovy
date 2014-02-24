@@ -174,9 +174,9 @@ def logicCheck() {
         checkedRows.add(row)
 
         // 5. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным
-        if (row.regDate != null && row.regDateEnd != null && (row.regDate > dTo || row.regDateEnd < dFrom)) {
+        if (row.regDate != null && row.regDate > dTo || row.regDateEnd != null && row.regDateEnd < dFrom) {
             logger.error(errorMsg + 'Период регистрации ТС ('
-                    + row.regDate.format(dFormat) + ' - ' + row.regDateEnd.format(dFormat) + ') ' +
+                    + row.regDate.format(dFormat) + ' - ' + ((row.regDateEnd != null) ? row.regDateEnd.format(dFormat) : '...') + ') ' +
                     ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                     '), за который сформирована налоговая форма!')
         }

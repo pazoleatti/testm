@@ -205,4 +205,17 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         }
         formDataKind.setFilter(StringUtils.join(list.toArray(), ','));
     }
+
+    @Override
+    public void clean() {
+        formTypeId.setValue(null);
+        formDataKind.setValue(null);
+        formState.setValue(null);
+        returnState.setValue(null);
+        reportPeriodIds.setValue(null);
+        departmentPicker.setValue(null);
+        if (getUiHandlers() != null) {
+            getUiHandlers().onApplyClicked();
+        }
+    }
 }
