@@ -220,10 +220,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
 	public static final String SELECT_SINGLE_ROW_VALUES_QUERY =
-		" SELECT r.id, a.id as attribute_id, " +
+		" SELECT r.id, v.attribute_id, " +
 		" v.string_value, v.number_value, v.date_value, v.reference_value" +
 		" FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
-		" JOIN ref_book_attribute a  ON v.attribute_id = a.id " +
 		" WHERE r.id = ? AND r.ref_book_id = ?";
 
     @Override
