@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
@@ -18,6 +17,8 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepar
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,8 @@ import java.util.*;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
         GetDepartmentCombinedResult> {
+
+    private static final Log log = LogFactory.getLog(GetDepartmentCombinedHandler.class);
 
     @Autowired
     private PeriodService reportService;
@@ -54,14 +57,16 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         DepartmentCombined depCombined = new DepartmentCombined();
 
-        // Параметры пагинации
-        PagingParams pp = new PagingParams();
-        pp.setCount(1);
-        pp.setStartIndex(0);
-
         RefBookDataProvider provider = null;
 
         Long parentRefBookId = null;
+
+        GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
+        result.setDepartmentCombined(depCombined);
+
+        if (action.getDepartmentId() == null) {
+            return result;
+        }
 
         switch (action.getTaxType()) {
             case INCOME:
@@ -86,13 +91,15 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendarFrom.getTime(), pp, filter, null);
+                calendarFrom.getTime(), null, filter, null);
 
         if (params.size() != 0) {
             Map<String, RefBookValue> paramsMap = params.get(0);
             if (params.size() != 1) {
-                throw new ActionException("Miltiple RefBook records (version = " +
-                        new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
+                String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
+                log.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
+                        dt, parentRefBookId, action.getDepartmentId(), params));
+                throw new ActionException("Найдено несколько записей для версии " + dt);
             }
 
             // Id записи
@@ -141,9 +148,6 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue() == 1L);
             }
         }
-
-        GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
-        result.setDepartmentCombined(depCombined);
 
         // Если запись не нашлась, то готовим новую
         if (result.getDepartmentCombined().getDepartmentId() == null && action.getDepartmentId() != null) {
