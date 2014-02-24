@@ -46,6 +46,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 	public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
 
+	public static final String UNKNOWN_ATTRIBUTE_ERROR = "Не указан атрибут справочника";
+	public static final String UNKNOWN_RECORD_ERROR = "Не указан код элемента справочника";
+
 	@Autowired
     private RefBookUtils refBookUtils;
 
@@ -198,14 +201,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return result;
     }
 
-    private PagingResult<Map<String, RefBookValue>> getChildrens(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
-                                                                 String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
-        PreparedStatementData ps = getChildrensStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
+    private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+																String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
+        PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справкочнике
-        PreparedStatementData psForCount = getChildrensStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
+        PreparedStatementData psForCount = getChildrenStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
@@ -216,15 +219,56 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
+	public static final String SELECT_SINGLE_ROW_VALUES_QUERY =
+		" SELECT r.id, a.id as attribute_id, " +
+		" v.string_value, v.number_value, v.date_value, v.reference_value" +
+		" FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
+		" JOIN ref_book_attribute a  ON v.attribute_id = a.id " +
+		" WHERE r.id = ? AND r.ref_book_id = ?";
+
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
-        String sql = getRefBookRecordSql(refBookId, recordId);
-        RefBook refBook = get(refBookId);
-        try {
-        	return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найдена строка с id = %d", refBook.getName(), refBookId, recordId));
+
+        final RefBook refBook = get(refBookId);
+		final Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
+			@Override
+			public void processRow(ResultSet rs) throws SQLException {
+				if (result.get(RefBook.RECORD_ID_ALIAS) == null) {
+					Long recordId = rs.getLong("id");
+					result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+				}
+				Long attributeId = rs.getLong("attribute_id");
+				RefBookAttribute attribute = refBook.getAttribute(attributeId);
+				String columnName = attribute.getAttributeType().name() + "_value";
+				Object value = null;
+				if (rs.getObject(columnName) != null) {
+					switch (attribute.getAttributeType()) {
+						case STRING: {
+							value = rs.getString(columnName);
+						}
+						break;
+						case NUMBER: {
+							value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+						}
+						break;
+						case DATE: {
+							value = rs.getDate(columnName);
+						}
+						break;
+						case REFERENCE: {
+							value = rs.getLong(columnName);
+						}
+						break;
+					}
+				}
+				result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
+			}
+		});
+		if (result.get(RefBook.RECORD_ID_ALIAS) == null) { // если элемент не найден
+			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
 		}
+		return result;
     }
 
     private static final String WITH_STATEMENT =
@@ -361,8 +405,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return ps;
     }
 
-    private PreparedStatementData getChildrensStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
-                                                        String filter, PagingParams pagingParams, boolean isSortAscending, Long parentId) {
+    private PreparedStatementData getChildrenStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+													   String filter, PagingParams pagingParams, boolean isSortAscending, Long parentId) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -581,7 +625,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (filter == null || filter.equals("")){
             return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute, true);
         } else {
-            return getChildrens(refBookId, version, pagingParams, filter, sortAttribute, true, parentRecordId);
+            return getChildren(refBookId, version, pagingParams, filter, sortAttribute, true, parentRecordId);
         }
     }
 
@@ -776,30 +820,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public RefBookValue getValue(Long recordId, Long attributeId) {
-        String errStr = "Не найдено значение атрибута справочника с id = %d, соответствующее записи с id = %d";
-
-        if (recordId == null || attributeId == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-        RefBook rb = getByAttribute(attributeId);
-        if (rb == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-        RefBookAttribute attribute = rb.getAttribute(attributeId);
-        if (attribute == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-
-        try {
-            return new RefBookValue(attribute.getAttributeType(), getJdbcTemplate().queryForObject(
-					"select " +
-					attribute.getAttributeType().toString() + "_value" +
-					" from ref_book_value where record_id = ? and attribute_id = ?",
-                    new Object[]{recordId, attributeId}, attribute.getAttributeType().getTypeClass()));
-        } catch (EmptyResultDataAccessException ex) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
+    public RefBookValue getValue(@NotNull(message = UNKNOWN_RECORD_ERROR) Long recordId, @NotNull(message = UNKNOWN_ATTRIBUTE_ERROR) Long attributeId) {
+        RefBook refBook = getByAttribute(attributeId);
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		return getRecordData(refBook.getId(), recordId).get(attribute.getAlias());
     }
 
     private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.ref_book_id, r.record_id, r.version from ref_book_record r where r.id=?),\n" +
@@ -807,7 +831,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "select cr.id as %s, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv";
 
     @Override
-    public RefBookRecordVersion getRecordVersionInfo(@NotNull Long uniqueRecordId) {
+    public RefBookRecordVersion getRecordVersionInfo(@NotNull(message = UNKNOWN_RECORD_ERROR) Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
                     RefBook.RECORD_ID_ALIAS);
@@ -822,7 +846,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public int getRecordVersionsCount(@NotNull Long refBookId, @NotNull Long uniqueRecordId) {
+    public int getRecordVersionsCount(@NotNull Long refBookId, @NotNull(message = UNKNOWN_RECORD_ERROR) Long uniqueRecordId) {
         return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
                 "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from REF_BOOK_RECORD where ID=?)",
                 new Object[]{refBookId, uniqueRecordId});

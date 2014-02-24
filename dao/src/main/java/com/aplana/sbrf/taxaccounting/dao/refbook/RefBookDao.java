@@ -52,6 +52,7 @@ public interface RefBookDao {
 	/**
 	 * Ищет справочник по коду атрибута
 	 * @param attributeId код атрибута, входящего в справочник
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если справочник не найден
 	 * @return
 	 */
 	RefBook getByAttribute(Long attributeId);
