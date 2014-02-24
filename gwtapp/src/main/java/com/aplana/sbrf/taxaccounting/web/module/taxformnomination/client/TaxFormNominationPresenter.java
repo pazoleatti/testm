@@ -25,6 +25,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,7 +56,7 @@ public class TaxFormNominationPresenter
         void setTaxFormKind(List<FormType> formTypes);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes);
+        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
         void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
 
@@ -164,7 +165,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
+                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updatePanelAnchors();
                     }
                 }, this));
@@ -209,7 +210,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getTableData() != null)
-                            getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
+                            getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         // ??
                     }
                 }, this));
@@ -297,7 +298,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData());
+                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updatePanelAnchors();
                     }
                 }, this));

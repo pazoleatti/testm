@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
@@ -11,14 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
+
+    @Autowired
+    private DepartmentService departmentService;
 
     public GetTableDataHandler() {
         super(GetTableDataAction.class);
@@ -70,7 +71,12 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
                 data.addAll(departmentFormTypeService.getDeclarationAssigned(depoId.longValue(), taxType));
             }
         }
-
+        Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
+        for(FormTypeKind item: data) {
+            if (departmentFullNames.get(item.getDepartment().getId()) == null) departmentFullNames.put(item.getDepartment().getId(), departmentService.getParentsHierarchy(item.getDepartment().getId()));
+            if (item.getPerformer() != null && departmentFullNames.get(item.getPerformer().getId()) == null) departmentFullNames.put(item.getPerformer().getId(), departmentService.getParentsHierarchy(item.getPerformer().getId()));
+        }
+        result.setDepartmentFullNames(departmentFullNames);
 
         if (action.getCount() != 0){
             int toIndex = action.getStartIndex()+action.getCount() > data.size() ?
