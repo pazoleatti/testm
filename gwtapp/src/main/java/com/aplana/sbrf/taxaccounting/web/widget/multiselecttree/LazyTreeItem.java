@@ -104,7 +104,14 @@ public class LazyTreeItem extends TreeItem {
         setStyleName(getWidget().getElement().getParentElement(), "gwt-TreeItem-selected", select);
     }
 
+    /**
+     *
+     * @param selected
+     * @deprecated
+     * @see LazyTreeItem#setItemState(java.lang.Boolean)
+     */
     @Override
+    @Deprecated
     public void setSelected(boolean selected) {
         // специально переопределил метод
         // обычное дерево не поддерживает множественность выбор и поэтому при выборе одного значения
@@ -142,7 +149,7 @@ public class LazyTreeItem extends TreeItem {
     public String toString() {
         final StringBuffer sb = new StringBuffer("LazyTreeItem{");
         sb.append("itemId=").append(itemId);
-        sb.append(", multiSelection=").append(multiSelection);
+        sb.append(", multiSelect=").append(multiSelection);
         sb.append(", isChildLoaded=").append(isChildLoaded);
         sb.append('}');
         return sb.toString();

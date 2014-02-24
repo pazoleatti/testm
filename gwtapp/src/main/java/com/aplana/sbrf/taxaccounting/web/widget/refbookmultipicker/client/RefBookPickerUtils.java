@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.google.gwt.view.client.ProvidesKey;
 
 import java.util.Date;
@@ -21,6 +22,16 @@ public class RefBookPickerUtils {
         @Override
         public Object getKey(RefBookItem item) {
             return item == null ? null : item.getId();
+        }
+    };
+
+    /* Провайдер для идентификации конкретноого объекта в строке иерархичного справочника
+     * С помощью провайдера при листании селектшнМодел понимает что
+     * за объект был выделе или развыделен */
+    public static final ProvidesKey<RefBookUiTreeItem> TREE_KEY_PROVIDER = new ProvidesKey<RefBookUiTreeItem>() {
+        @Override
+        public Object getKey(RefBookUiTreeItem item) {
+            return item == null ? null : item.getRefBookTreeItem() == null ? null : item.getRefBookTreeItem().getId();
         }
     };
 

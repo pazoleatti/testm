@@ -5,6 +5,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author aivanov
@@ -17,6 +18,14 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
     private String searchPattern;
     private String filter;
     private Date version;
+
+    // идентификаторы которые нужно выделить
+    // может быть пустой
+    // используется только при попытке выделения засеченный виджету значений
+    private List<Long> idsTofind;
+
+    public GetRefBookTreeValuesAction() {
+    }
 
     public RefBookTreeItem getParent() {
         return parent;
@@ -58,17 +67,12 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
         this.filter = filter;
     }
 
+    public List<Long> getIdsTofind() {
+        return idsTofind;
+    }
 
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("GetRefBookTreeValuesAction{");
-        sb.append("parent=").append(parent);
-        sb.append(", refBookAttrId=").append(refBookAttrId);
-        sb.append(", searchPattern='").append(searchPattern).append('\'');
-        sb.append(", filter='").append(filter).append('\'');
-        sb.append(", version=").append(version);
-        sb.append('}');
-        return sb.toString();
+    public void setIdsTofind(List<Long> idsTofind) {
+        this.idsTofind = idsTofind;
     }
 
     @Override

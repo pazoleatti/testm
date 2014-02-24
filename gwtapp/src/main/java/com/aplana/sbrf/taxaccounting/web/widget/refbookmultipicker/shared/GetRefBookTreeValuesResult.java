@@ -8,6 +8,7 @@ public class GetRefBookTreeValuesResult implements Result {
     private static final long serialVersionUID = 1099858233534060155L;
 
     private PagingResult<RefBookTreeItem> page;
+    private String uuid;
 
     public PagingResult<RefBookTreeItem> getPage() {
         return page;
@@ -17,4 +18,11 @@ public class GetRefBookTreeValuesResult implements Result {
         this.page = page;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }
