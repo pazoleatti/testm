@@ -185,7 +185,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
@@ -196,6 +196,88 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
+    }
+
+    @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter) {                       // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener =  applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder("\nfrom\n");
+
+        if (version != null) {
+            fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
+            ps.appendQuery(WITH_STATEMENT);
+            ps.addParam(refBookId);
+            ps.addParam(version);
+        } else {
+            fromSql.append("  ref_book_record r\n");
+        }
+
+        ps.appendQuery("select\n");
+        ps.appendQuery(" r.id as ID, r.record_id as RECORD_ID\n");
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+            ps.appendQuery(", a");
+            ps.appendQuery(alias);
+            ps.appendQuery(".");
+            ps.appendQuery(attribute.getAttributeType().toString());
+            ps.appendQuery("_value as \"");
+            ps.appendQuery(alias);
+            ps.appendQuery("\"");
+
+            fromSql.append(" left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = r.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null){
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and\n  status <> -1\n");
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+
+        try {
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                    new RowMapper<Pair<Long, Long>>() {
+                        @Override
+                        public Pair<Long, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new Pair<Long, Long>(rs.getLong("ID"), rs.getLong("RECORD_ID"));
+                        }
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     private PagingResult<Map<String, RefBookValue>> getChildrens(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
@@ -1276,7 +1358,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
-            "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day from nextVersion nv, nextVersionEnd nve";
+            "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day as versionEnd from nextVersion nv, nextVersionEnd nve";
 
     @Override
     public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {

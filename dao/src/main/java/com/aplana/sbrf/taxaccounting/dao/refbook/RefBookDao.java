@@ -80,6 +80,14 @@ public interface RefBookDao {
 	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
+    /**
+     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param filter
+     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter);
+
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *

@@ -32,6 +32,10 @@ public class RefBook implements Serializable {
 
 	public static final String RECORD_SORT_ALIAS = "row_number_over";
 
+    public static final Long DEPARTMENT_CONFIG_TRANSPORT = 31L;
+    public static final Long DEPARTMENT_CONFIG_PROFIT = 33L;
+    public static final Long DEPARTMENT_CONFIG_UKS = 37L;
+
 	/** Код справочника */
 	private Long id;
 

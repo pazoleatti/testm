@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -131,30 +132,39 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             record.setValues(paramsMap);
             record.setRecordId(depCombined.getRecordId());
 
-            // Проверка существования записи
-            boolean exist = false;
+            // Проверка необходимости редактирования
+            boolean needEdit = false;
 
-            if (depCombined.getRecordId() != null) {
-                exist = true;
-            } else {
-                // Поиск
-                String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId();
-                PagingResult<Map<String, RefBookValue>> params = provider.getRecords(calendarFrom.getTime(), null, filter, null);
-                if (params.size() != 0) {
-                    exist = true;
-                    // Запись нашлась
-                    Map<String, RefBookValue> existParamsMap = params.get(0);
-                    if (params.size() != 1) {
-                        String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
-                        log.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
-                                dt, refBookId, action.getDepartmentCombined().getDepartmentId(), params));
-                        throw new ActionException("Найдено несколько записей для версии " + dt);
-                    }
-                    depCombined.setRecordId(existParamsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId();
+            List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(null, filter);
+            if (recordPairs.size() != 0) {
+                //Проверяем, к одному ли элементу относятся версии
+                Set<Long> recordIdSet = new HashSet<Long>();
+                for (Pair<Long, Long> pair : recordPairs) {
+                    recordIdSet.add(pair.getSecond());
                 }
+
+                if (recordIdSet.size() > 1) {
+                    throw new ActionException("Версии настроек, отобраные по фильтру, относятся к разным подразделениям");
+                }
+
+                // Существуют версии настроек для указанного подразделения
+                record.setRecordId(recordPairs.get(0).getSecond());
             }
 
-            if (!exist) {
+            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            recordPairs = provider.checkRecordExistence(calendarFrom.getTime(), filter);
+            if (recordPairs.size() != 0) {
+                needEdit = true;
+                // Запись нашлась
+                if (recordPairs.size() != 1) {
+                    throw new ActionException("Найдено несколько настроек для подразделения ");
+                }
+                depCombined.setRecordId(recordPairs.get(0).getFirst());
+            }
+
+            if (!needEdit) {
                 provider.createRecordVersion(logger, calendarFrom.getTime(), null, Arrays.asList(record));
             } else {
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);

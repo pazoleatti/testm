@@ -155,4 +155,9 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
 	public void setRefBookId(Long refBookId) {
 		this.refBookId = refBookId;
 	}
+
+    @Override
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
 }

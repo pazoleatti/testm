@@ -74,6 +74,11 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     }
 
     @Override
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute){
         return dao.getChildrenRecords(getTableName(), refBookId, version, parentRecordId, pagingParams, filter, sortAttribute);
     }
