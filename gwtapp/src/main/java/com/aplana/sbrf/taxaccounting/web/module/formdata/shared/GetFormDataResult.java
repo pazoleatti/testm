@@ -31,6 +31,8 @@ public class GetFormDataResult implements Result {
 	private String uuid;
 	
 	private String departmenName;
+
+    private String departmenFullName;
 	
 	private ReportPeriod reportPeriod;
 	
@@ -82,7 +84,15 @@ public class GetFormDataResult implements Result {
 		this.departmenName = departmenName;
 	}
 
-	public ReportPeriod getReportPeriod() {
+    public String getDepartmenFullName() {
+        return departmenFullName;
+    }
+
+    public void setDepartmenFullName(String departmenFullName) {
+        this.departmenFullName = departmenFullName;
+    }
+
+    public ReportPeriod getReportPeriod() {
 		return reportPeriod;
 	}
 
@@ -193,6 +203,7 @@ public class GetFormDataResult implements Result {
                 ", templateFormName='" + templateFormName + '\'' +
                 ", uuid='" + uuid + '\'' +
                 ", departmenName='" + departmenName + '\'' +
+                ", departmenFullName='" + departmenFullName + '\'' +
                 ", reportPeriod=" + reportPeriod +
                 ", formDataAccessParams=" + formDataAccessParams +
                 ", allStyles=" + allStyles +
