@@ -162,6 +162,7 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
+        dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
