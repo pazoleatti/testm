@@ -174,7 +174,7 @@ public class FormDataListPresenter extends
 				.defaultCallback(new AbstractCallback<GetFormDataListResult>() {
 					@Override
 					public void onSuccess(GetFormDataListResult result) {
-						getView().setTableData(start, result.getTotalCountOfRecords(), result.getRecords());
+						getView().setTableData(start, result.getTotalCountOfRecords(), result.getRecords(), result.getDepartmentFullNames());
 					}
 				}, FormDataListPresenter.this));
 	}
