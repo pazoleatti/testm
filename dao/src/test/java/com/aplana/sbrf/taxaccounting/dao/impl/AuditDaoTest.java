@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -133,6 +134,11 @@ public class AuditDaoTest {
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 
-        assertEquals(0, auditDao.getLogs(filter).size());
+        assertEquals(1, auditDao.getLogs(filter).size());
+    }
+
+    @Test
+    public void testGetDate(){
+        assertNotNull(auditDao.lastArchiveDate());
     }
 }
