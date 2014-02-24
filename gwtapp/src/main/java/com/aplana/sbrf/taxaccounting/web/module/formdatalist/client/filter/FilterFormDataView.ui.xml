@@ -36,9 +36,9 @@
             <g:cell width="33%">
                 <g:VerticalPanel width="100%">
                     <r:RefBookPickerWidget ui:field="formDataKind" width="100%" searchEnabled="false"
-                                           attributeIdInt="837" isHierarchical="false" multiSelect="true"/>
+                                           attributeIdInt="837" isHierarchical="false" multiSelect="true" title="Тип налоговой формы"/>
                     <r:RefBookPickerWidget ui:field="formTypeId" width="100%"
-                                           attributeIdInt="835" isHierarchical="false" multiSelect="true"/>
+                                           attributeIdInt="835" isHierarchical="false" multiSelect="true" title="Вид налоговой формы"/>
                 </g:VerticalPanel>
             </g:cell>
 
