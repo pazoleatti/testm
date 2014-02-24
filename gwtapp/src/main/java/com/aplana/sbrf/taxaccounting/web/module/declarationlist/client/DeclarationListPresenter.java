@@ -119,7 +119,7 @@ public class DeclarationListPresenter extends
                     @Override
                     public void onSuccess(GetDeclarationListResult result) {
                         getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords());
+                                result.getRecords(), result.getDepartmentFullNames());
                     }
                 }, DeclarationListPresenter.this));
     }

@@ -14,7 +14,10 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -67,8 +70,13 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
         }
 
 		PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(action.getDeclarationFilter());
-		GetDeclarationListResult result = new GetDeclarationListResult();
+        Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
+        for(DeclarationDataSearchResultItem item: page) {
+            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchy(item.getDepartmentId()));
+        }
+        GetDeclarationListResult result = new GetDeclarationListResult();
 		result.setRecords(page);
+        result.setDepartmentFullNames(departmentFullNames);
 		result.setTotalCountOfRecords(page.getTotalCount());
 		return result;
 	}
