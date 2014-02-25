@@ -310,19 +310,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
 
         final RefBook refBook = get(refBookId);
-		final Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+		final Map<String, RefBookValue> result = refBook.createRecord();
 		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
-				if (result.get(RefBook.RECORD_ID_ALIAS) == null) {
-					Long recordId = rs.getLong("id");
-					result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+				RefBookValue recordIdValue = result.get(RefBook.RECORD_ID_ALIAS);
+				if (recordIdValue.getNumberValue() == null) {
+					recordIdValue.setValue(rs.getLong("id"));
 				}
 				Long attributeId = rs.getLong("attribute_id");
 				RefBookAttribute attribute = refBook.getAttribute(attributeId);
 				String columnName = attribute.getAttributeType().name() + "_value";
-				Object value = null;
 				if (rs.getObject(columnName) != null) {
+					Object value = null;
 					switch (attribute.getAttributeType()) {
 						case STRING: {
 							value = rs.getString(columnName);
@@ -341,11 +341,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 						}
 						break;
 					}
+					RefBookValue attrValue = result.get(attribute.getAlias());
+					attrValue.setValue(value);
 				}
-				result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
 			}
 		});
-		if (result.get(RefBook.RECORD_ID_ALIAS) == null) { // если элемент не найден
+		if (result.get(RefBook.RECORD_ID_ALIAS).getNumberValue() == null) { // если элемент не найден
 			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
 		}
 		return result;
@@ -1350,7 +1351,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         StringBuilder result = new StringBuilder();
                         result.append("В настройке подразделения \"");
                         result.append(rs.getString("departmentName")).append("\" для налога \"");
-                        result.append(TaxType.fromCode(taxCode.charAt(0)).getName()).append("\" в периоде \"");
+                        result.append(TaxTypeCase.fromCode(taxCode.charAt(0)).getGenitive()).append("\" в периоде \"");
                         result.append(rs.getString("periodName")).append("\" указана ссылка на версию!");
                         return result.toString();
                     }

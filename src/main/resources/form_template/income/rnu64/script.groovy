@@ -460,7 +460,9 @@ void consolidation() {
 void prevPeriodCheck() {
     if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.formType.name
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        // http://jira.aplana.com/browse/SBRFACCTAX-6015
+        //throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        logger.warn("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
 }
 
