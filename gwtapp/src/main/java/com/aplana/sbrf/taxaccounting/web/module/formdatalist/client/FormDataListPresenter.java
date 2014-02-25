@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create.CreateFormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataReadyEvent;
@@ -105,8 +106,9 @@ public class FormDataListPresenter extends
     @Override
     protected void onReveal() {
         super.onReveal();
-        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith("!formData;formDataId")) &&
-            (lstHistory.get(1) == null || !lstHistory.get(1).startsWith("!formData;formDataId"))) {
+        String url = FormDataListNameTokens.FORM_DATA_LIST + ";" + FormDataPresenter.FORM_DATA_ID;
+        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
             filterPresenter.getView().clean();
         }
     }
