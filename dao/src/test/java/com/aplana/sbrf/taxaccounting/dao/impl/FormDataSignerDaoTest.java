@@ -33,9 +33,12 @@ public class FormDataSignerDaoTest {
 		assertEquals(1, signers.get(0).getId());
 		assertEquals("name1", signers.get(0).getName());
 		assertEquals("position1", signers.get(0).getPosition());
-		assertEquals("name2", signers.get(1).getName());
+        assertEquals(1, signers.get(0).getOrd());
+        assertEquals(2, signers.get(1).getId());
+        assertEquals("name2", signers.get(1).getName());
 		assertEquals("position2", signers.get(1).getPosition());
-	}
+        assertEquals(2, signers.get(1).getOrd());
+    }
 
 	@Test
 	public void saveSignersTest() {
@@ -54,11 +57,15 @@ public class FormDataSignerDaoTest {
 		// Check order
 		assertEquals("name3", formSigners.get(0).getName());
 		assertEquals("position3", formSigners.get(0).getPosition());
+        assertEquals(1, formSigners.get(0).getOrd());
 		assertEquals("name4", formSigners.get(1).getName());
 		assertEquals("position4", formSigners.get(1).getPosition());
+        assertEquals(2, formSigners.get(1).getOrd());
 		assertEquals("newName0", formSigners.get(2).getName());
 		assertEquals("newPosition0", formSigners.get(2).getPosition());
+        assertEquals(3, formSigners.get(2).getOrd());
 		assertEquals("newName1", formSigners.get(3).getName());
 		assertEquals("newPosition1", formSigners.get(3).getPosition());
+        assertEquals(4, formSigners.get(3).getOrd());
 	}
 }
