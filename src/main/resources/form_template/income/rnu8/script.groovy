@@ -258,7 +258,7 @@ void consolidation() {
                     if (sRow.getAlias() == null || sRow.getAlias() == '') {
                         def isFind = false
                         for (def row : dataRows) {
-                            if (sRow.code == row.code) {
+                            if (sRow.balance == row.balance) {
                                 isFind = true
                                 totalColumns.each { alias ->
                                     def tmp = (row.getCell(alias).value ?: 0) + (sRow.getCell(alias).value ?: 0)
