@@ -48,25 +48,35 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
             ps.setValues(newState);
-            if (ps.getRefBookAttrId() == null) {
-                return;
-            }
-            if (ps.getVersionDate() == null) {
-                return;
-            }
-
-            dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
-                @Override
-                public void onSuccess(GetRefBookTreeValuesResult result) {
-                    getView().loadRoot(result.getPage());
-                    trySelect(ps);
-                }
-            }, this));
+            load();
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
             trySelect(ps);
         }
+    }
+
+    @Override
+    public void reload(){
+        load();
+    }
+
+    /* Загрузка верхушки дерева */
+    private void load(){
+        if (ps.getRefBookAttrId() == null) {
+            return;
+        }
+        if (ps.getVersionDate() == null) {
+            return;
+        }
+
+        dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
+            @Override
+            public void onSuccess(GetRefBookTreeValuesResult result) {
+                getView().loadRoot(result.getPage());
+                trySelect(ps);
+            }
+        }, this));
     }
 
     private void trySelect(PickerState stateWithIds) {
@@ -76,7 +86,6 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             getView().setSelection(new ArrayList<RefBookTreeItem>());
         }
     }
-
 
     public void loadingForSelection(Collection<Long> ids) {
         if (ps.getRefBookAttrId() == null) {
@@ -97,7 +106,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void reload(Date relevanceDate) {
+    public void reloadForDate(Date relevanceDate) {
         init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
     }
 

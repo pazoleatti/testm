@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -50,7 +51,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
-		void setSaveButtonEnabled(boolean enabled);
+
+        void setHierarchy(boolean isHierarchy);
+
+        void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
 		void setEnabled(boolean enabled);
         void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
@@ -80,6 +84,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 EditFormPresenter.this.readOnly = readOnly;
+                                getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;

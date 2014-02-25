@@ -4,15 +4,25 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.Edit
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class RefBookDataModule extends AbstractPresenterModule {
-	@Override
-	protected void configure() {
-		bindPresenter(RefBookDataPresenter.class, RefBookDataPresenter.MyView.class,
-				RefBookDataView.class, RefBookDataPresenter.MyProxy.class);
+    @Override
+    protected void configure() {
+
+        // создаем отдельный презентор что бы не смешивать логику загрузки и обработки данных при разных типах справочниках
+        // для иерархических справочников
+        bindPresenter(RefBookHierDataPresenter.class, RefBookHierDataPresenter.MyView.class,
+                RefBookHierDataView.class, RefBookHierDataPresenter.MyProxy.class);
+        // для линейных справочников
+        bindPresenter(RefBookDataPresenter.class, RefBookDataPresenter.MyView.class,
+                RefBookDataView.class, RefBookDataPresenter.MyProxy.class);
+
+        // общие виджеты
         bindPresenter(RefBookVersionPresenter.class, RefBookVersionPresenter.MyView.class,
                 RefBookVersionView.class, RefBookVersionPresenter.MyProxy.class);
-		bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
-	}
+        bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
+    }
 }
