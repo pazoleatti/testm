@@ -1,6 +1,7 @@
 package form_template.income.rnu8
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -44,7 +45,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        consolidation()
         calc()
         logicCheck()
         break
@@ -243,4 +244,37 @@ void logicCheck() {
 
 def String getKnu(def code) {
     return getRefBookValue(28, code)?.CODE?.stringValue
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                formDataService.getDataRowHelper(source).allCached.each { sRow ->
+                    if (sRow.getAlias() == null || sRow.getAlias() == '') {
+                        def isFind = false
+                        for (def row : dataRows) {
+                            if (sRow.code == row.code) {
+                                isFind = true
+                                totalColumns.each { alias ->
+                                    def tmp = (row.getCell(alias).value ?: 0) + (sRow.getCell(alias).value ?: 0)
+                                    row.getCell(alias).setValue(tmp, null)
+                                }
+                                break
+                            }
+                        }
+                        if (!isFind) {
+                            dataRows.add(sRow)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }

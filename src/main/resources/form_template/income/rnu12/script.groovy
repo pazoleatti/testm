@@ -222,9 +222,9 @@ void logicCheck() {
 
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
-    // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    // Дата окончания отчетного периода
+    // календарная дата начала отчетного периода
+    def startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    // дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     // алиасы графов для арифметической проверки
@@ -239,32 +239,33 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // Проверка на заполнение поля
+        // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 1. Проверка даты совершения операции и границ отчетного периода (графа 5)
+
+        // 2. Проверка на уникальность поля «№ пп» (графа 1)
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+        }
+
+        // 3. Проверка даты совершения операции и границ отчетного периода (графа 5)
         if (row.operationDate != null && (row.operationDate.after(endDate) || row.operationDate.before(startDate))) {
             logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
-        // 2. Проверка количества отчетных периодов при авансовых платежах (графа 9)
+        // 4. Проверка количества отчетных периодов при авансовых платежах (графа 9)
         if (row.periodCounts != null && (row.periodCounts < 1 || 999 < row.periodCounts)) {
             logger.error(errorMsg + 'Неверное количество отчетных периодов при авансовых платежах!')
         }
 
-        // 3. Проверка на нулевые значения (графа 11, 12)
+        // 5. Проверка на нулевые значения (графа 11, 12)
         if (row.outcomeInNalog == 0 && row.outcomeInBuh == 0) {
             logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-        // 4. Проверка формата номера первой записи
+        // 6. Проверка формата номера первой записи
         if (row.numberFirstRecord != null && !row.numberFirstRecord.matches('\\d{2}-\\w{6}')) {
             logger.error(errorMsg + 'Неправильно указан номер первой записи (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
-        }
-
-        // 7. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++i != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
         needValue['outcomeInNalog'] = calc11(row)

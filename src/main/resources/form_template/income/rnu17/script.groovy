@@ -12,6 +12,8 @@ import groovy.transform.Field
  * графа - rowNumber
  * графа - knu
  * графа - incomeType
+ *
+ * // TODO заголовок доходы?
  * графа - sum
  *
  * @author akadyrgulov
@@ -61,11 +63,11 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['knu', 'sum']
+def editableColumns = ['incomeType', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'knu', 'incomeType', 'sum']
+def nonEmptyColumns = ['rowNumber', 'incomeType', 'sum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -107,14 +109,13 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.knu) })
+        dataRowHelper.save(dataRows.sort { getKnu(it.incomeType) })
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (row in dataRows) {
             row.rowNumber = ++number
-            row.incomeType = row.knu
         }
     }
 
@@ -157,14 +158,6 @@ void logicCheck() {
         if (++i != row.rowNumber) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
-
-        if (row.knu != row.incomeType) {
-            logger.error(errorMsg + "Вид (наименование) дохода не соответствует коду налогового учета!")
-        }
-
-        // Проверки соответствия НСИ
-        checkNSI(27, row, "knu")
-        checkNSI(27, row, "incomeType")
     }
 
     // 3. Арифметические проверки расчета итоговой строки

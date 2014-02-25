@@ -61,11 +61,11 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['code', 'sum']
+def editableColumns = ['incomeType', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'code', 'incomeType', 'sum']
+def nonEmptyColumns = ['rowNumber', 'incomeType', 'sum']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -107,14 +107,13 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.code) })
+        dataRowHelper.save(dataRows.sort { getKnu(it.incomeType) })
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
         for (row in dataRows) {
             row.rowNumber = ++number
-            row.incomeType = row.code
         }
     }
 
@@ -157,14 +156,6 @@ void logicCheck() {
         if (++i != row.rowNumber) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
-
-        if (row.code != row.incomeType) {
-            logger.error(errorMsg + "Вид (наименование) дохода не соответствует коду налогового учета!")
-        }
-
-        // Проверки соответствия НСИ
-        checkNSI(28, row, "code")
-        checkNSI(28, row, "incomeType")
     }
 
     // 3. Арифметические проверки расчета итоговой строки
