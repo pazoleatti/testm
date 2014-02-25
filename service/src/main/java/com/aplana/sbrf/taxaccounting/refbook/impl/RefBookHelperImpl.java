@@ -89,7 +89,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 				Long refValue = record.get(alias).getReferenceValue();
 				if (refValue != null) {
 					// получаем провайдер данных для целевого справочника
-					RefBookDataProvider attrProvider = refProviders.get(attribute.getAlias());
+					RefBookDataProvider attrProvider = refProviders.get(alias);
 					// запрашиваем значение для разыменовывания
 					value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
 				}
