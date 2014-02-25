@@ -181,10 +181,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     /**
      * Обновление линков редактировать/отменить назначение
      */
+    @Override
     public void updatePanelAnchors(){
         int selectedCount = getSelectedItemsOnFormGrid().size();
         cancelAnchor.setEnabled(selectedCount  > 0);
         editAnchor.setEnabled(selectedCount  > 0);
+    }
+
+    @Override
+    public void updateDeclarationPanelAnchors(){
+        int selectedCount = getSelectedItems(declarationGrid).size();
+        cancelAnchor.setEnabled(selectedCount  > 0);
     }
 
     private void initDeclarationGrid(){
@@ -199,7 +206,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             @Override
             public void update(int index, TableModel object, Boolean value) {
 	            declarationGrid.getVisibleItem(index).setChecked(value);
-                //enableAnchor(cancelAnchor, isCanCancel());
+                updateDeclarationPanelAnchors();
             }
         });
 
@@ -214,7 +221,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         departmentColumn = new TextColumn<TableModel>(){
             @Override
             public String getValue(TableModel object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 
@@ -465,7 +472,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     @Override
-    public void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes) {
+    public void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
 	    if (departmentFormTypes.isEmpty()) {
 		    declarationGrid.setRowCount(0);
 		    return;
@@ -490,6 +497,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             model.setIndex(index++);
             model.setDepartmentFormType(type);
             model.setDepartment(type.getDepartment());
+            model.setDepartmentName(departmentFullNames.get(type.getDepartment().getId()));
             model.setPerformer(type.getPerformer());
             types.add(model);
         }

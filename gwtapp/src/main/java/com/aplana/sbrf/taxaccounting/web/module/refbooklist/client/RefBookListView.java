@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -53,7 +54,8 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
                         if (model == null) {
                             return;
                         }
-                        sb.appendHtmlConstant("<a href=\"#" + RefBookDataTokens.refBookData + ";"
+                        sb.appendHtmlConstant("<a href=\"#" +
+                                (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.refBookData : RefBookDataTokens.refBookHierData) + ";"
                                 + RefBookDataTokens.REFBOOK_DATA_ID + "=" + model.getId() + "\">"
                                 + model.getName() + "</a>");
                     }

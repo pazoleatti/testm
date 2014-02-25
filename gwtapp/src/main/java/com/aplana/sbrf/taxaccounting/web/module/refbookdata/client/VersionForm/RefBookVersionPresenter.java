@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -186,7 +187,12 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 							public void onSuccess(GetNameResult result) {
 								getView().setRefBookNameDesc(result.getName());
                                 getView().setTitleDetails(result.getUniqueAttributeValues());
-                                getView().setBackAction("#"+RefBookDataTokens.refBookData+";id=" + refBookId);
+                                String href = "#" + (
+                                        result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
+                                        RefBookDataTokens.refBookData :
+                                        RefBookDataTokens.refBookHierData
+                                ) + ";id=" + refBookId;
+                                getView().setBackAction(href);
                                 editFormPresenter.setRecordId(result.getRecordId());
 							}
 						}, this));

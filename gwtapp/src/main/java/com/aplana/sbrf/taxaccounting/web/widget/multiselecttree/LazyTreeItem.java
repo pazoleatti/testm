@@ -49,6 +49,7 @@ public class LazyTreeItem extends TreeItem {
 
         checkBox = new CheckBox(name);
         radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
+        radioButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.NONE);
 
         label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
         DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);

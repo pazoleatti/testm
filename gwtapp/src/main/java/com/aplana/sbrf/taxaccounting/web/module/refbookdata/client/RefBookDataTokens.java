@@ -8,6 +8,8 @@ public final class RefBookDataTokens {
 	public static final String refBookData = "!refbook";
     public static final String refBookVersion = "!refbookversion";
 
+    public static final String refBookHierData = "!refbookhier";
+
 	public static final String REFBOOK_DATA_ID = "id";
     public static final String REFBOOK_RECORD_ID = "record";
 }
