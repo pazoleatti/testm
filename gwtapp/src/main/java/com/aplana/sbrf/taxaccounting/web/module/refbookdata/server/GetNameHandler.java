@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -30,9 +31,12 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 
 	@Override
 	public GetNameResult execute(GetNameAction action, ExecutionContext executionContext) throws ActionException {
-		String name = refBookFactory.get(action.getRefBookId()).getName();
-		GetNameResult result = new GetNameResult();
-		result.setName(name);
+        GetNameResult result = new GetNameResult();
+
+        RefBook refBook = refBookFactory.get(action.getRefBookId());
+		result.setName(refBook.getName());
+        result.setRefBookType(refBook.getType());
+
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         if (action.getUniqueRecordId() != null) {

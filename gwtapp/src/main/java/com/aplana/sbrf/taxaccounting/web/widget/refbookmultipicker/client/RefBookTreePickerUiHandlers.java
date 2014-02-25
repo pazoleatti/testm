@@ -28,5 +28,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void find(String searchPattern);
 
-    void reload(Date version);
+    void reload();
+
+    void reloadForDate(Date version);
 }
