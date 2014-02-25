@@ -2,6 +2,7 @@ package form_template.income.rnu22
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -13,9 +14,7 @@ import java.math.RoundingMode
  *
  * @version 59
  *
- * - нет условии в проверках соответствия НСИ (потому что действительно нет справочников)
  * TODO:
- * 	- графа 19 опущена в регламенте
  * 	- консолидация http://jira.aplana.com/browse/SBRFACCTAX-4455
  * 	- http://conf.aplana.com/pages/viewpage.action?pageId=8790975 период ввода остатков
  *
@@ -43,11 +42,23 @@ import java.math.RoundingMode
  * графа 20 - reportPeriodRub
  */
 
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        if (!prevPeriodCheck()) {
+            return
+        }
         calc()
         logicCheck()
         break
@@ -55,7 +66,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, arithmeticCheckAlias)
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -75,6 +86,9 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 
@@ -116,17 +130,9 @@ def arithmeticCheckAlias = ['accruedCommisCurrency', 'accruedCommisRub',
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    // РНУ-22 за предыдущий отчетный период
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    formDataOld = formDataOld?.state == WorkflowState.ACCEPTED ? formDataOld : null
-    if(formDataOld==null){
-        logger.error("Не найдены экземпляры РНУ-22 за прошлый отчетный период!")
-    }
-    def dataRowsOld = formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
-
+    def dataRowsOld = getPrevDataRows()
     def tmp
-
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
     // Номер последний строки предыдущей формы
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
@@ -233,15 +239,7 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-
-    // РНУ-22 за предыдущий отчетный период
-    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
-    formDataOld = formDataOld?.state == WorkflowState.ACCEPTED ? formDataOld : null
-    if(formDataOld==null){
-        //Прерываем расчет, при проверке сообщение выведется
-        return
-    }
-    def dataRowsOld = formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
+    def dataRowsOld = getPrevDataRows()
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -257,7 +255,7 @@ void calc() {
     // графа 1, 13..20
     dataRows.each { DataRow row ->
 
-        def rowPrev
+        def rowPrev = null
         for (def rowOld in dataRowsOld) {
             if (rowOld.contractNumber == row.contractNumber) {
                 rowPrev = rowOld
@@ -269,15 +267,19 @@ void calc() {
 
         // графа 13, 15
         def temp = getGraph13_15(row)
-
         row.accruedCommisCurrency = temp
         row.commisInAccountingCurrency = temp
+        // графа 14
         row.accruedCommisRub = getGraph14(row)
+        // графа 16
         row.commisInAccountingRub = getGraph16(row)
+        // графа 17
         row.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
+        // графа 18
         row.accrualPrevRub = rowPrev?.reportPeriodRub
-        //TODO (Bulat Kinzyabulatov|Sariya Mustafina) описание опущено в регламенте
+        // графа 19
         row.reportPeriodCurrency = getGraph19(row)
+        // графа 20
         row.reportPeriodRub = getGraph20(row)
     }
 
@@ -371,18 +373,7 @@ BigDecimal getGraph13_15(def DataRow row) {
         date1 = row.calcPeriodBeginDate
         date2 = row.calcPeriodEndDate
     }
-    def tmp
-    if (date1 == null || date2 == null) {
-        tmp = BigDecimal.ZERO
-    } else {
-        def division = row.basisForCalc * (date2 - date1 + 1)
-        if (division == 0) {
-            tmp = BigDecimal.ZERO
-        } else if (row.base != null && row.interestRate != null) {
-            tmp = ((row.base * row.interestRate) / (division))
-        }
-    }
-    return tmp?.setScale(2, RoundingMode.HALF_UP)
+    return calcFor13or15or19(row, date1, date2)
 }
 
 BigDecimal getGraph14(def DataRow row) {
@@ -398,18 +389,18 @@ BigDecimal getGraph16(def DataRow row) {
 }
 
 BigDecimal getGraph19(def DataRow row) {
-    def date1 = row.calcPeriodBeginDate
-    def date2 = row.calcPeriodEndDate
-    def tmp
-    if (date1 == null || date2 == null) {
-        tmp = BigDecimal.ZERO
-    } else {
-        def division = (row.basisForCalc != null) ? row.basisForCalc * (date2 - date1 + 1) : null
-        if (division == 0) {
-            tmp = BigDecimal.ZERO
-        } else if (row.base != null && row.interestRate != null) {
-            tmp = ((row.base * row.interestRate) / (division))
-        }
+    return calcFor13or15or19(row, row.calcPeriodBeginDate, row.calcPeriodEndDate)
+}
+
+BigDecimal calcFor13or15or19(def row, def date1, def date2) {
+    def tmp = BigDecimal.ZERO
+    if (date1 == null || date2 == null || row.basisForCalc == null ||
+            row.base == null || row.interestRate == null) {
+        return tmp.setScale(2, RoundingMode.HALF_UP)
+    }
+    def division = row.basisForCalc * (date2 - date1 + 1)
+    if (division != 0) {
+        tmp = (row.base * row.interestRate) / division
     }
     return tmp?.setScale(2, RoundingMode.HALF_UP)
 }
@@ -418,4 +409,22 @@ BigDecimal getGraph20(def DataRow row) {
     if (row.reportPeriodCurrency != null && row.course != null) {
         return (row.reportPeriodCurrency * row.course).setScale(2, RoundingMode.HALF_UP)
     }
+}
+
+/** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
+boolean prevPeriodCheck() {
+    if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return false
+    }
+    return true
+}
+
+/** Получить строки за предыдущий отчетный период. */
+def getPrevDataRows() {
+    if (isBalancePeriod || isConsolidated) {
+        return null
+    }
+    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 }
