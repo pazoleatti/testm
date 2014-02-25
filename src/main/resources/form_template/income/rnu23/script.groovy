@@ -119,18 +119,13 @@ def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'a
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
 def currentDate = new Date()
 
 //// Обертки методов
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -142,7 +137,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
@@ -217,7 +212,7 @@ void logicCheck() {
     def prevTotalRow = (prevDataRows == null || prevDataRows.isEmpty() ? null : getDataRow(prevDataRows, 'total'))
 
     /** Дата начала отчетного периода. */
-    def a = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def a = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
 
     /** Дата окончания отчетного периода. */
     def b = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -299,25 +294,6 @@ void logicCheck() {
         needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
         needValue['taxPeriodRuble'] = calc20(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
-
-        // TODO (Ramil Timerbaev)
-        // проверки деления на ноль
-        if (row.baseForCalculation == 0) {
-            def name = row.getCell('baseForCalculation').column.name
-            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-        }
-        if (row.accrualAccountingStartDate != null && row.accrualAccountingEndDate != null &&
-                (row.accrualAccountingStartDate - row.accrualAccountingEndDate + 1) == 0) {
-            def name1 = row.getCell('accrualAccountingStartDate').column.name
-            def name2 = row.getCell('accrualAccountingEndDate').column.name
-            logger.error(errorMsg + "деление на ноль: количество дней между \"$name1\" и \"$name2\" равно 0.")
-        }
-        if (row.preAccrualsStartDate != null && row.preAccrualsEndDate != null &&
-                (row.preAccrualsStartDate - row.preAccrualsEndDate + 1) == 0) {
-            def name1 = row.getCell('preAccrualsStartDate').column.name
-            def name2 = row.getCell('preAccrualsEndDate').column.name
-            logger.error(errorMsg + "деление на ноль: количество дней между \"$name1\" и \"$name2\" равно 0.")
-        }
     }
 
     def totalRow = getDataRow(dataRows, 'total')
@@ -558,8 +534,6 @@ def addData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 
-    // def date = new Date()
-    def cache = [:]
     def newRows = []
     def index = 0
     def int rowIndex = 1
@@ -745,4 +719,11 @@ void prevPeriodCheck() {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }
