@@ -106,6 +106,13 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
             public void onSuccess(AuditArchiveResult result) {
                 MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
                 getView().getBlobFromServer(result.getUuid());
+                GetLastArchiveDateAction action = new GetLastArchiveDateAction();
+                dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
+                    @Override
+                    public void onSuccess(GetLastArchiveDateResult result) {
+                        getView().updateArchiveDateLbl(result.getLastArchiveDate());
+                    }
+                }, AuditClientPresenter.this));
             }
         }, this));
         getProxy().manualReveal(AuditClientPresenter.this);
@@ -115,6 +122,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
         void getBlobFromServer(String uuid);
         void updateData(int pageNumber);
+        void updateArchiveDateLbl(String archiveDate);
     }
 
     @ProxyCodeSplit
@@ -141,6 +149,13 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     protected void revealInParent() {
         RevealContentEvent.fire(this, RevealContentTypeHolder.getMainContent(),
                 this);
+        GetLastArchiveDateAction action = new GetLastArchiveDateAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
+            @Override
+            public void onSuccess(GetLastArchiveDateResult result) {
+                getView().updateArchiveDateLbl(result.getLastArchiveDate());
+            }
+        }, this));
     }
 
     @Override

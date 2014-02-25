@@ -35,6 +35,11 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void setFilter(String filter);
 
+    /**
+     * Установка ограничивающего периода
+     * @param startDate
+     * @param endDate
+     */
     void setPeriodDates(Date startDate, Date endDate);
 
     void setMultiSelect(boolean multiSelect);

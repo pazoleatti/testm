@@ -12,6 +12,7 @@ import groovy.transform.Field
  * @author ivildanov
  * @author Stanislav Yasinskiy
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -85,6 +86,15 @@ def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoCl
 def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'tsTypeCode', 'identNumber', 'model',
         'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate']
 
+
+// дата начала отчетного периода
+@Field
+def start = null
+
+// дата окончания отчетного периода
+@Field
+def endDate = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -129,8 +139,9 @@ def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def dFrom = getReportPeriodStartDate()
+    def dTo = getReportPeriodEndDate()
     def String dFormat = "dd.MM.yyyy"
 
     // Проверенные строки (4-ая провека)
@@ -180,10 +191,18 @@ def logicCheck() {
                     ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                     '), за который сформирована налоговая форма!')
         }
+
+        // 7. Проверка года изготовления ТС
+        if (row.year != null) {
+            Calendar calenadarMake = Calendar.getInstance()
+            calenadarMake.setTime(row.year)
+            if (calenadarMake.get(Calendar.YEAR) > reportPeriod.taxPeriod.year) {
+                logger.error(errorMsg + 'Год изготовления ТС не может быть больше отчетного года!')
+            }
+        }
     }
 
     // 6. Проверка наличия формы предыдущего периода
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def str = ''
     if (reportPeriod.order == 4) {
@@ -252,8 +271,8 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
         if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
-            def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-            def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+            def dFrom = getReportPeriodStartDate()
+            def dTo = getReportPeriodEndDate()
             for (def row in dataRowsOld) {
                 if ((row.regDateEnd != null && row.regDateEnd < dFrom) || (row.regDate > dTo)) {
                     continue
@@ -298,4 +317,18 @@ def isEquals(def row1, def row2) {
     }
     return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)
             && row1.powerVal.equals(row2.powerVal) && row1.baseUnit.equals(row2.baseUnit))
+}
+
+def getReportPeriodStartDate() {
+    if (!start) {
+        start = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return start
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

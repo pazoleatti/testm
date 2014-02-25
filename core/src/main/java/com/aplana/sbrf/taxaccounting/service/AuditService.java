@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,4 +32,10 @@ public interface AuditService {
      * @param itemList архивированные записи
      */
     void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
+
+    /**
+     * Получение даты последней архивации
+     * @return дата ахивации
+     */
+    Date getLastArchiveDate();
 }

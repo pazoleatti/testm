@@ -4,9 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -140,6 +144,23 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                         return listIds.size();
                     }
                 });
+    }
+
+    @Override
+    public Date lastArchiveDate() {
+        try {
+            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+        } catch (EmptyResultDataAccessException e){
+            logger.warn("Не найдено записей об архивации.", e);
+            return null;
+        } catch (IncorrectResultSizeDataAccessException e){
+            logger.error("Найдено больше одной записи об архивировании.", e);
+            throw new DaoException("Найдено больше одной записи об архивировании.", e);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении даты последней архивации", e);
+            throw new DaoException("Ошибка при получении даты последней архивации", e);
+        }
+
     }
 
     private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {

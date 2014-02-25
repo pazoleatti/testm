@@ -64,15 +64,14 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			return lock;
 		}
 	}
-	
+
+	private static final String GET_LOCK_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ?";
+	private static final String GET_LOCK_FOR_UPDATE_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ? FOR UPDATE";
+
 	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz, boolean forUpdate) {
-		StringBuilder sql = new StringBuilder("select * from object_lock where object_id = ? and class = ?");
-		if (forUpdate) {
-			sql.append(" for update");
-		}
 		try {
 			return getJdbcTemplate().queryForObject(
-				sql.toString(), 
+				forUpdate ? GET_LOCK_FOR_UPDATE_SQL : GET_LOCK_SQL,
 				new ObjectLockRowMapper<IdType>(),
 				id,
 				clazz.getName()
