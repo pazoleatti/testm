@@ -5,6 +5,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -30,6 +33,13 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 	}
 
 	private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
+
+    public static boolean itWasChange(Object before, Object after) {
+        return (before == null && after != null)
+                || (before != null && after == null)
+                || (before != null && after != null &&
+                ((before instanceof Date && after instanceof Date) ? ((Date) before).compareTo(((Date) after)) != 0 : !before.equals(after)));
+    }
 
     public static interface Icons extends ClientBundle {
         @Source("clear.png")
@@ -66,6 +76,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);
     private boolean widgetEnabled = true;
     private boolean canBeEmpty = false;
+
+    private Date prevValue;
 
 	public DateMaskBoxPicker() {
 		initWidget(ourUiBinder.createAndBindUi(this));
@@ -106,6 +118,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     @UiHandler("clearImage")
     public void onClearImage(ClickEvent event) {
         if (widgetEnabled) {
+            prevValue = null;
             setValue(null, true);
         }
     }
@@ -122,8 +135,13 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Date> event) {
-                DateMaskBoxPicker.this.setValue(event.getValue(), true);
-				datePickerPanel.hide();
+                System.out.println("datePicker prevValue        " + (prevValue!= null ? prevValue.getTime() : null));
+                System.out.println("datePicker event.getValue() " +  event.getValue().getTime());
+                if(itWasChange(prevValue, event.getValue())){
+                    prevValue = event.getValue();
+                    DateMaskBoxPicker.this.setValue(event.getValue(), true);
+                }
+                datePickerPanel.hide();
 			}
 		});
 	}
@@ -132,7 +150,21 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
         dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                DateMaskBoxPicker.this.setValue(dateBox.getValue(), true);
+                if(itWasChange(prevValue, event.getValue())){
+                    System.out.println("dateBox prevValue         " + (prevValue!= null ? prevValue.getTime() : null));
+                    System.out.println("dateBox event.getValue() " +  event.getValue().getTime());
+                    prevValue = event.getValue();
+                    DateMaskBoxPicker.this.setValue(dateBox.getValue(), true);
+                }
+            }
+        });
+        dateBox.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER) {
+                    System.out.println("ff");
+                    dateBox.trySetValue();
+                }
             }
         });
     }

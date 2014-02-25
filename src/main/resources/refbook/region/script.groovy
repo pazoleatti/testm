@@ -1,5 +1,6 @@
 /*
     blob_data.id = '8891efea-5d2d-4f0e-bc63-6349f354b48d'
+    ref_book_id = 4
     Коды субъектов Российской Федерации
  */
 package refbook.region
@@ -49,8 +50,7 @@ void importFromXML() {
     println("Import Region: Start " + System.currentTimeMillis())
     // Текущая дата - используется для ссылки на записи справочника "ОКАТО"
     // "01.01.2012" Версия для добавляемых записей
-    def actualDate = new GregorianCalendar(2015, Calendar.JANUARY, 1).getTime()
-    // def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
+    def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
     println("Import Region: Import date = " + new SimpleDateFormat("dd.MM.yyyy").format(actualDate))
     def dataProvider = refBookFactory.getDataProvider(4L)
     def dataProviderOKATO = refBookFactory.getDataProvider(3L)
@@ -146,7 +146,6 @@ void importFromXML() {
         }
 
         println("Import Region: okatoList.size = " + okatoList.size())
-        // println("Import Region: okatoList = " + okatoList)
 
         // Поиск записей ОКАТО
         def actualOkatoRecordMap = [:]
@@ -159,6 +158,14 @@ void importFromXML() {
             actualOkatoRecordList.each { actualMap ->
                 actualOkatoRecordMap.put(actualMap.OKATO.stringValue, actualMap)
             }
+        }
+
+        // Актуальный справочник регионов (для подстановки ОКТМО)
+        def actualRegionList = dataProvider.getRecords(actualDate, null, null, null)
+        println("Import Region: Current Region found record count = " + actualRegionList?.size())
+        def actualRegionMap = [:]
+        actualRegionList?.each { map ->
+            actualRegionMap.put(map.CODE.stringValue, map)
         }
 
         // Подстановка ссылок на ОКАТО
@@ -178,10 +185,16 @@ void importFromXML() {
                             actuaOkatolMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
             }
-        }
 
-        // Подстановка ссылок на ОКТМО
-        // TODO (пока нет в ЧТЗ) http://conf.aplana.com/pages/viewpage.action?pageId=9572224
+            // Подстановка ссылок на ОКТМО (из предыдущей версии)
+            def actualValue = actualRegionMap.get(map.CODE.stringValue)
+            if (actualValue != null) {
+                map.OKTMO = new RefBookValue(RefBookAttributeType.REFERENCE,
+                        actualValue.OKTMO?.referenceValue)
+                map.OKTMO_DEFINITION = new RefBookValue(RefBookAttributeType.STRING,
+                        actualValue.OKTMO_DEFINITION?.stringValue)
+            }
+        }
 
         // Список записей для добавления
         def addList = []
@@ -193,17 +206,17 @@ void importFromXML() {
         def updList = []
 
         // Актуальные записи Регионов
-        def actualRegionRecordList = dataProvider.getRecords(actualDate, null, null, null)
+        //def actualRegionRecordList = dataProvider.getRecords(actualDate, null, null, null)
 
-        println("Import Region: Current Region found record count = " + actualRegionRecordList?.size())
+        //println("Import Region: Current Region found record count = " + actualRegionRecordList?.size())
 
         // Код -> RECORD_ID
         def recIdMap = [:]
 
         // Построение Map для списка актуальных записей
-        def actualRegionRecordMap = [:]
-        actualRegionRecordList.each { actualMap ->
-            actualRegionRecordMap.put(actualMap.CODE.stringValue, actualMap)
+        //def actualRegionRecordMap = [:]
+        actualRegionList?.each { actualMap ->
+            //actualRegionRecordMap.put(actualMap.CODE.stringValue, actualMap)
             recIdMap.put(actualMap.CODE.stringValue, actualMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
         }
 
@@ -212,7 +225,7 @@ void importFromXML() {
         // Сравнение
         addRecordList.each { map ->
             def code = map.CODE.stringValue
-            def actualMap = actualRegionRecordMap.get(code)
+            def actualMap = actualRegionMap.get(code)
             if (actualMap == null) {
                 // Запись новая
                 addList.add(map)
@@ -220,8 +233,24 @@ void importFromXML() {
                 // Запись обновляемая
                 if (map.NAME.stringValue != actualMap.NAME.stringValue
                         || map.OKATO_DEFINITION?.stringValue != actualMap.OKATO_DEFINITION?.stringValue
-                        || map.OKATO?.stringValue != actualMap.OKATO?.stringValue) {
-                    // TODO проверять атрибуты ОКТМО после добавления в ЧТЗ
+                        || map.OKATO?.numberValue != actualMap.OKATO?.numberValue
+                        || map.OKTMO_DEFINITION?.stringValue != actualMap.OKTMO_DEFINITION?.stringValue
+                        || map.OKTMO?.numberValue != actualMap.OKTMO?.numberValue
+                ) {
+                    // Код отладки. Сравнение.
+//                    def ch = ''
+//                    if (map.NAME.stringValue != actualMap.NAME.stringValue) {
+//                        ch = 'NAME'
+//                    } else if (map.OKATO_DEFINITION?.stringValue != actualMap.OKATO_DEFINITION?.stringValue) {
+//                        ch = 'OKATO_DEFINITION'
+//                    } else if (map.OKATO?.numberValue != actualMap.OKATO?.numberValue) {
+//                        ch = 'OKATO'
+//                    } else if (map.OKTMO_DEFINITION?.stringValue != actualMap.OKTMO_DEFINITION?.stringValue) {
+//                        ch = 'OKTMO_DEFINITION'
+//                    } else if (map.OKTMO?.numberValue != actualMap.OKTMO?.numberValue) {
+//                        ch = 'OKTMO'
+//                    }
+//                    println("changed " + map.CODE.stringValue + " " + ch + " old = " + actualMap + " new = " + map)
                     addList.add(map)
                 }
             }
@@ -232,7 +261,7 @@ void importFromXML() {
         def checkIds = []
         addList.each { map ->
             def code = map.CODE.stringValue
-            def actualValue = actualRegionRecordMap.get(code)
+            def actualValue = actualRegionMap.get(code)
             if (actualValue != null) {
                 checkIds.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
             }
@@ -243,12 +272,13 @@ void importFromXML() {
             def versionMap = dataProvider.getRecordsVersionStart(checkIds)
             addList.each { map ->
                 def code = map.CODE.stringValue
-                def actualValue = actualRegionRecordMap.get(code)
+                def actualValue = actualRegionMap.get(code)
                 if (actualValue != null) {
                     def recordId = actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue
                     def recVersion = versionMap.get(recordId)
                     if (recVersion.equals(actualDate)) {
                         println("Import Region: Found update code = " + code)
+                        map.put(RefBook.RECORD_ID_ALIAS, actualValue.get(RefBook.RECORD_ID_ALIAS))
                         updList.add(map)
                     }
                 }
@@ -259,7 +289,7 @@ void importFromXML() {
         }
 
         // Поиск неактуальных (есть в справочнике, но нет в файле)
-        actualRegionRecordList.each { actualMap ->
+        actualRegionList?.each { actualMap ->
             if (!addRecordMap.containsKey(actualMap.CODE.stringValue)) {
                 delList.add(actualMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
             }
@@ -273,23 +303,24 @@ void importFromXML() {
             dataProvider.updateRecordsVersionEnd(logger, actualDate, delList)
         }
         if (!addList.isEmpty()) {
-            def addCreateRecordList = []
-            addList.each { map ->
-                def rbRecord = new RefBookRecord()
-                rbRecord.setRecordId(recIdMap.get(map.CODE.stringValue))
-                rbRecord.setValues(map)
-                addCreateRecordList.add(rbRecord)
-            }
-            dataProvider.createRecordVersion(logger, actualDate, null, addCreateRecordList)
+            //            def addCreateRecordList = []
+            //            addList.each { map ->
+            //                def rbRecord = new RefBookRecord()
+            //                rbRecord.setRecordId(recIdMap.get(map.CODE.stringValue))
+            //                rbRecord.setValues(map)
+            //                addCreateRecordList.add(rbRecord)
+            //            }
+            // dataProvider.createRecordVersion(logger, actualDate, null, addCreateRecordList)
+            dataProvider.insertRecords(actualDate, addList)
         }
         if (!updList.isEmpty()) {
-            updList.each { map ->
-                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
-            }
+//            updList.each { map ->
+//                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
+//            }
+            println(updList)
+            dataProvider.updateRecords(actualDate, updList)
         }
     }
-
-    // TODO ОКТМО (пока нет в ЧТЗ) http://conf.aplana.com/pages/viewpage.action?pageId=9572224
 
     println("Import Region: End " + System.currentTimeMillis())
     if (!logger.containsLevel(LogLevel.ERROR)) {
