@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -91,5 +92,14 @@ public class AuditServiceImpl implements AuditService {
             auditDao.removeRecords(listIds);
         }
         add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+    }
+
+    @Override
+    public Date getLastArchiveDate() {
+        try {
+            return auditDao.lastArchiveDate();
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении последней даты архивации.", e);
+        }
     }
 }

@@ -5,9 +5,7 @@ import java.io.Serializable;
 /**
  * Информация о подписанте налогвой формы.
  * У налоговой формы может быть несколько подписантов
- * 
- * Информация о порядковом номере не хранится в модели, она задаётся неявно, порядок подписантов задаётся
- * на основе порядка следования в коллекции {@link FormData#getSigners()}
+ *
  * @author dsultanbekov
  */
 public class FormDataSigner implements Serializable {
@@ -16,8 +14,9 @@ public class FormDataSigner implements Serializable {
 	private long id;
 	private String name;
 	private String position;
-	
-	/**
+    private int ord;
+
+    /**
 	 * Получить идентификатор записи
 	 * @return идентификатор записи
 	 */
@@ -64,4 +63,20 @@ public class FormDataSigner implements Serializable {
 	public void setPosition(String position) {
 		this.position = position;
 	}
+
+    /**
+     * Получить порядковый номер подписанта
+     * @return номер подписанта
+     */
+    public int getOrd() {
+        return ord;
+    }
+
+    /**
+     * Задать порядковый номер подписанта
+     * @param ord порядковый номер подписанта
+     */
+    public void setOrd(int ord) {
+        this.ord = ord;
+    }
 }

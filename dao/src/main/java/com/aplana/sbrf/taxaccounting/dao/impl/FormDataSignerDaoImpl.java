@@ -24,6 +24,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 			result.setId(rs.getLong("id"));
 			result.setName(rs.getString("name"));
 			result.setPosition(rs.getString("position"));
+            result.setOrd(rs.getInt("ord"));
 			return result;
 		}
 	}
@@ -41,6 +42,13 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 
 	@Override
 	public void saveSigners(final long formDataId, List<FormDataSigner> signers) {
+
+        // Устанавливаем порядковые номера
+        for (int i = 0; i < signers.size(); i++) {
+            FormDataSigner signer = signers.get(i);
+            signer.setOrd(i+1);
+        }
+
 		final List<FormDataSigner> newSigners = new LinkedList<FormDataSigner>();
 		final List<FormDataSigner> oldSigners = new LinkedList<FormDataSigner>();
 		final Set<Long> removedSigners = new HashSet<Long>(getJdbcTemplate().queryForList(
@@ -82,8 +90,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 		if (!newSigners.isEmpty()) {
 			getJdbcTemplate().batchUpdate(
 					"insert into form_data_signer (id, form_data_id, name, position, ord) " +
-							"values (seq_form_data_signer.nextval, ?, ?, ?, (select case when max(ord) is null then 0 else max(ord) end from " +
-							"(select * from form_data_signer where form_data_id = ?))+1)",
+							"values (seq_form_data_signer.nextval, ?, ?, ?, ?)",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -91,7 +98,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 							ps.setLong(1, formDataId);
 							ps.setString(2, signer.getName());
 							ps.setString(3, signer.getPosition());
-							ps.setLong(4, formDataId);
+                            ps.setInt(4, signer.getOrd());
 						}
 
 						@Override
@@ -104,7 +111,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 		// update old
 		if (!oldSigners.isEmpty()) {
 			getJdbcTemplate().batchUpdate(
-				"update form_data_signer set form_data_id = ?, name = ?, position = ?" +
+				"update form_data_signer set form_data_id = ?, name = ?, position = ?, ord = ?" +
 						"where id = ?",
 				new BatchPreparedStatementSetter() {
 					@Override
@@ -113,7 +120,8 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 						ps.setLong(1, formDataId);
 						ps.setString(2, signer.getName());
 						ps.setString(3, signer.getPosition());
-						ps.setLong(4, signer.getId());
+                        ps.setInt(4, signer.getOrd());
+						ps.setLong(5, signer.getId());
 					}
 
 					@Override

@@ -40,7 +40,9 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
 
     @Override
     public int compareTo(RefBookTreeItem o) {
-        return (o == null || o.getId() == null) ? -1 : -o.getId().compareTo(o.getId());
+        Long thisId = this.getId();
+        Long anotherId = o == null ? null : o.getId();
+        return anotherId == null ? -1 : thisId.compareTo(anotherId);
     }
 
     @Override

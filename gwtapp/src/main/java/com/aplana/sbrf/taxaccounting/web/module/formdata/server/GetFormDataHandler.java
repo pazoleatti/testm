@@ -119,7 +119,7 @@ public class GetFormDataHandler extends
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
 		result.setFormData(formData);
-		result.setReportPeriodStartDate(reportPeriod.getStartDate());
+		result.setReportPeriodStartDate(reportPeriod.getCalendarStartDate());
 		result.setReportPeriodEndDate(reportPeriod.getEndDate());
 
 		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));

@@ -45,7 +45,7 @@ public class PickerState{
         this.versionDate = newState.getVersionDate();
         this.multiSelect = newState.isMultiSelect();
 
-        this.setIds = newState.setIds != null ? new LinkedList<Long>(newState.getSetIds()) : null;
+        this.setIds = newState.getSetIds() != null ? new LinkedList<Long>(newState.getSetIds()) : null;
     }
 
     public Long getRefBookAttrId() {

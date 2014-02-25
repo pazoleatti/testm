@@ -37,61 +37,65 @@
 
     <g:HorizontalPanel width="100%" verticalAlignment="middle">
         <g:HorizontalPanel>
-            <g:cell verticalAlignment="middle">
+            <g:cell  width="150px" verticalAlignment="middle">
                 <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
-                                 addStyleNames="{style.FirstlabelBlockMargin}">
-                    <g:cell height="26px">
-                        <g:Label text="От:" width="70px"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <g:Label text="До:" width="70px"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <g:Label text="Вид налога:" width="70px"/>
-                    </g:cell>
-                </g:VerticalPanel>
-            </g:cell>
-            <g:cell horizontalAlignment="left" verticalAlignment="middle" width="150px">
-                <g:VerticalPanel width="150px" verticalAlignment="middle">
-                    <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <g:ValueListBox ui:field="taxType" width="150px" addStyleNames="{style.nalogType}"/>
-                    </g:cell>
-                </g:VerticalPanel>
-            </g:cell>
-            <g:cell horizontalAlignment="left" width="150px">
-                <g:VerticalPanel horizontalAlignment="right" verticalAlignment="middle"
-                                 addStyleNames="{style.labelBlockMargin}">
-                    <g:cell height="26px">
-                        <g:Label width="130px" text="Подразделение:"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <g:Label width="130px" text="Пользователь:"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <g:Label width="130px" text="Период:"/>
-                    </g:cell>
+                                 addStyleNames="{style.FirstlabelBlockMargin}" >
+                    <g:HorizontalPanel>
+                        <g:cell height="26px">
+                            <g:Label text="От:" width="70px"/>
+                        </g:cell>
+                        <g:cell height="26px">
+                            <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <g:cell height="26px">
+                            <g:Label text="До:" width="70px"/>
+                        </g:cell>
+                        <g:cell height="26px">
+                            <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <g:cell height="26px" horizontalAlignment="left">
+                            <g:Label text="Вид налога:" width="70px"/>
+                        </g:cell>
+                        <g:cell height="26px" horizontalAlignment="right">
+                            <g:ValueListBox ui:field="taxType" addStyleNames="{style.nalogType}" width="150px"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="40%">
-                <g:VerticalPanel verticalAlignment="middle" width="100%">
-                    <g:cell height="26px">
-                        <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
-                                                       header="Выберите подразделение" multiselection="false"
-                                                       modal="true" width="100%"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <r:RefBookPickerWidget ui:field="user" width="100%" attributeIdInt="652" isHierarchical="false"
-                                                    multiSelect="true"/>
-                    </g:cell>
-                    <g:cell height="26px">
-                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
-                    </g:cell>
+                <g:VerticalPanel verticalAlignment="middle"
+                                 addStyleNames="{style.labelBlockMargin}" width="100%">
+                    <g:HorizontalPanel>
+                        <g:cell height="26px">
+                            <g:Label width="130px" text="Подразделение:"/>
+                        </g:cell>
+                        <g:cell height="26px"  width="100%">
+                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
+                                                           header="Выберите подразделение" multiselection="false"
+                                                           modal="true" width="100%"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel>
+                        <g:cell height="26px">
+                            <g:Label width="130px" text="Пользователь:"/>
+                        </g:cell>
+                        <g:cell height="26px" width="100%" >
+                            <r:RefBookPickerWidget ui:field="user" attributeIdInt="652" isHierarchical="false"
+                                                   multiSelect="true" />
+                        </g:cell>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="reportPeriodPanel" visible="false">
+                        <g:cell height="26px">
+                            <g:Label width="130px" text="Период:"/>
+                        </g:cell>
+                        <g:cell height="26px" width="100%">
+                            <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="left" width="60%">

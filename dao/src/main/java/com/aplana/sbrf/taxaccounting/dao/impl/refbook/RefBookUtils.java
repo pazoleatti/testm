@@ -113,7 +113,6 @@ public class RefBookUtils extends AbstractDao {
         }
 
         ps.appendQuery(orderBy);
-        System.out.println(ps.getQuery().toString());
         return ps;
     }
 
@@ -181,7 +180,6 @@ public class RefBookUtils extends AbstractDao {
         }
 
         ps.appendQuery(orderBy);
-        System.out.println(ps.getQuery().toString());
         return ps;
     }
 
