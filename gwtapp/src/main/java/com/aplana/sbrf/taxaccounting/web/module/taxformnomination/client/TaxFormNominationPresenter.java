@@ -79,6 +79,7 @@ public class TaxFormNominationPresenter
          */
         void updatePanelAnchors();
 
+        public void updateDeclarationPanelAnchors();
         /**
          * Обновление страницы
          */
@@ -178,6 +179,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToDeclarationTable(result.getTableData());
+                        getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
     }
