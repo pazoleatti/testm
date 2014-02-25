@@ -240,7 +240,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each { column ->
         def cell = row.getCell(column)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
             def name = getColumnName(row, column)
             colNames.add('«' + name + '»')
         }
