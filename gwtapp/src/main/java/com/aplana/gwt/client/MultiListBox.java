@@ -19,8 +19,9 @@ import java.util.List;
 
 /**
  * Выподающий список с возможностью выбора нескольких элементов
+ *
  * @author : vpetrov
- * Date: 27.11.13
+ *         Date: 27.11.13
  */
 
 public class MultiListBox<T> extends Composite implements HasValue<List<T>>, LeafValueEditor<List<T>>, HasEnabled {
@@ -55,7 +56,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
     Button selectButton;
 
     @UiField
-	com.google.gwt.user.client.ui.TextBox txt;
+    com.google.gwt.user.client.ui.TextBox txt;
 
     @UiField
     ScrollPanel scrollPanel;
@@ -86,14 +87,14 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
     @Inject
     public MultiListBox() {
         initWidget(uiBinder.createAndBindUi(this));
-        addStyleName("AplanaMultiListBox");
+        addStyleName("aplana-MultiListBox");
         this.multiselect = true;
         setEnabled(true);
     }
 
     public MultiListBox(Renderer<T> renderer, boolean multiselect, boolean enable) {
         initWidget(uiBinder.createAndBindUi(this));
-        addStyleName("AplanaMultiListBox");
+        addStyleName("aplana-MultiListBox");
         this.multiselect = multiselect;
         footerPanel.setVisible(isMultiselect());
         setEnabled(enable);
@@ -140,7 +141,7 @@ public class MultiListBox<T> extends Composite implements HasValue<List<T>>, Lea
                 }
             });
 
-            itemChkPanel.addStyleName("AplanaMultiListBoxItem");
+            itemChkPanel.addStyleName("aplana-MultiListBoxItem");
             checkBoxPanel.add(itemChkPanel);
         }
         updateTxtValue();

@@ -163,51 +163,31 @@ a, a:visited, a:hover {
 }
 
 .gwt-DialogBox {
-    border: 2px solid #00940C;
+    border: 1px solid #646464;
     z-index: 10;
 }
 
 .gwt-DialogBox .Caption {
-    background: #e3e8f3 url(images/hborder.png) repeat-x 0 -2003px;
-    padding: 4px 4px 4px 8px;
-    cursor: default;
     text-align: left;
     color: white;
+    background-color: #808080;
+    cursor: move;
 }
 
 .gwt-DialogBox .dialogTopLeft, .gwt-DialogBox .dialogTopRight {
-    background: #e3e8f3 url(images/hborder.png) repeat-x 0 -2003px;
+    background-color: #808080;
 }
 
 .gwt-DialogBox .dialogMiddleLeft, .gwt-DialogBox .dialogMiddleRight {
-    background-color: white;
+    background-color: #e8e1cf;
+}
+
+.gwt-DialogBox .dialogBottomLeft, .gwt-DialogBox .dialogBottomRight {
+    background-color: #e8e1cf;
 }
 
 .gwt-DialogBox .dialogMiddleCenter {
-    padding: 3px;
-    background: white;
-}
-
-* html .gwt-DialogBox .dialogTopLeftInner {
-    width: 5px;
-    overflow: hidden;
-}
-
-* html .gwt-DialogBox .dialogTopRightInner {
-    width: 8px;
-    overflow: hidden;
-}
-
-* html .gwt-DialogBox .dialogBottomLeftInner {
-    width: 5px;
-    height: 8px;
-    overflow: hidden;
-}
-
-* html .gwt-DialogBox .dialogBottomRightInner {
-    width: 8px;
-    height: 8px;
-    overflow: hidden;
+    background-color: #e8e1cf;
 }
 
 .gwt-DisclosurePanel {

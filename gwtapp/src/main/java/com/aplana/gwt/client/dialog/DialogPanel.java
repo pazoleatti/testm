@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
-
 /**
  * User: vpetrov
  * Date: 14.01.14
@@ -19,7 +18,7 @@ import java.util.*;
 public class DialogPanel extends Composite {
     private static Binder uiBinder = GWT.create(Binder.class);
 
-    private List<Dialog.predefinedButton> buttons = new ArrayList<Dialog.predefinedButton>();
+    private List<Dialog.PredefinedButton> buttons = new ArrayList<Dialog.PredefinedButton>();
 
     interface Binder extends UiBinder<Widget, DialogPanel> {
     }
@@ -41,19 +40,19 @@ public class DialogPanel extends Composite {
     @UiField
     Button closeButton;
 
-    private EnumMap<Dialog.predefinedButton, Button> buttonsMap = new EnumMap<Dialog.predefinedButton, Button>(
-            Dialog.predefinedButton.class);
+    private EnumMap<Dialog.PredefinedButton, Button> buttonsMap = new EnumMap<Dialog.PredefinedButton, Button>(
+            Dialog.PredefinedButton.class);
 
     private List<HandlerRegistration> registrationsList = new ArrayList<HandlerRegistration>();
 
 
     public DialogPanel(){
         initWidget(uiBinder.createAndBindUi(this));
-        buttonsMap.put(Dialog.predefinedButton.YES, yesButton);
-        buttonsMap.put(Dialog.predefinedButton.NO, noButton);
-        buttonsMap.put(Dialog.predefinedButton.OK, okButton);
-        buttonsMap.put(Dialog.predefinedButton.CANCEL, cancelButton);
-        buttonsMap.put(Dialog.predefinedButton.CLOSE, closeButton);
+        buttonsMap.put(Dialog.PredefinedButton.YES, yesButton);
+        buttonsMap.put(Dialog.PredefinedButton.NO, noButton);
+        buttonsMap.put(Dialog.PredefinedButton.OK, okButton);
+        buttonsMap.put(Dialog.PredefinedButton.CANCEL, cancelButton);
+        buttonsMap.put(Dialog.PredefinedButton.CLOSE, closeButton);
 
         yesButton.addClickHandler(new ClickHandler() {
             @Override
@@ -114,7 +113,7 @@ public class DialogPanel extends Composite {
         if (handler==null)
             return;
         removeDialogHandlers();
-        for (Map.Entry<Dialog.predefinedButton, Button> entry : buttonsMap.entrySet()){
+        for (Map.Entry<Dialog.PredefinedButton, Button> entry : buttonsMap.entrySet()){
             switch (entry.getKey()){
                 case YES:
                     registrationsList.add(entry.getValue().addClickHandler(new ClickHandler() {
@@ -173,7 +172,7 @@ public class DialogPanel extends Composite {
      * Устанавивает отображаемые кнопки
      * @param buttons - список кнопок
      */
-    public void setPredefinedButtons(Dialog.predefinedButton... buttons){
+    public void setPredefinedButtons(Dialog.PredefinedButton... buttons){
         if (this.buttons == null) {
             return;
         }
@@ -186,7 +185,7 @@ public class DialogPanel extends Composite {
      * Устанавливает видимость кнопок в соответствии с задаными
      */
     private void showButtons(){
-        for(Dialog.predefinedButton e: buttonsMap.keySet()){
+        for(Dialog.PredefinedButton e: buttonsMap.keySet()){
             buttonsMap.get(e).setVisible(buttons.contains(e));
         }
 
