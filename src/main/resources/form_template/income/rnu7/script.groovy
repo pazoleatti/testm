@@ -283,7 +283,7 @@ void logicCheck() {
     }
 
     List<Map<Integer, Object>> docs = new ArrayList<>()
-    List<Map<Integer, Object>> uniq456 = new ArrayList<>(dataRows.size())
+    Map<Map<Integer, Object>, List<Integer>> uniq456 = [:]
     SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
 
     // алиасы графов для арифметической проверки
@@ -369,15 +369,15 @@ void logicCheck() {
                             'для документа %s от %s!', row.docNumber as String, rowSum.docDate as String)
                 }
             }
-            if (row.code != null) {
+            if (row.taxAccountingRuble > 0 && row.code != null) {
                 // 7. Проверка на уникальность записи по налоговому учету
                 map.put(4, row.code);
-                if (uniq456.contains(map)) {
-                    loggerError(errorMsg + "Имеется другая запись в налоговом учете с аналогичными значениями балансового " +
-                            "счета=%s, документа № %s от %s.", refBookService.getStringValue(27, row.code, 'NUMBER').toString(),
-                            row.docNumber.toString(), dateFormat.format(row.docDate))
+                if (uniq456.get(map) != null) {
+                    uniq456.get(map).add(row.getIndex())
                 } else {
-                    uniq456.add(map)
+                    List<Integer> newList = new ArrayList<Integer>()
+                    newList.add(row.getIndex())
+                    uniq456.put(map, newList)
                 }
             }
         }
@@ -433,6 +433,16 @@ void logicCheck() {
             }
         }
     }
+
+    for (def map : uniq456.keySet()) {
+        def rowList = uniq456.get(map)
+        if (rowList.size() > 1) {
+            loggerError("Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
+                    "счета=%s, документа № %s от %s.", refBookService.getStringValue(27, map.get(4), 'NUMBER').toString(),
+                    map.get(5).toString(), dateFormat.format(map.get(6)))
+        }
+    }
+
 
     // 9. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     totalRows.each { key, val ->

@@ -18,5 +18,5 @@ public interface BookerStatementsService {
      * @param typeID       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
      * @param departmentId Подразделение    @throws IOException, ServiceException
      */
-    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, int departmentId);
+    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, Integer departmentId);
 }
