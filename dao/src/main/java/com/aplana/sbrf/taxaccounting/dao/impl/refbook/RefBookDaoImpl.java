@@ -310,19 +310,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
 
         final RefBook refBook = get(refBookId);
-		final Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+		final Map<String, RefBookValue> result = refBook.createRecord();
 		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
-				if (result.get(RefBook.RECORD_ID_ALIAS) == null) {
-					Long recordId = rs.getLong("id");
-					result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
+				RefBookValue recordIdValue = result.get(RefBook.RECORD_ID_ALIAS);
+				if (recordIdValue.getNumberValue() == null) {
+					recordIdValue.setValue(rs.getLong("id"));
 				}
 				Long attributeId = rs.getLong("attribute_id");
 				RefBookAttribute attribute = refBook.getAttribute(attributeId);
 				String columnName = attribute.getAttributeType().name() + "_value";
-				Object value = null;
 				if (rs.getObject(columnName) != null) {
+					Object value = null;
 					switch (attribute.getAttributeType()) {
 						case STRING: {
 							value = rs.getString(columnName);
@@ -341,8 +341,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 						}
 						break;
 					}
+					RefBookValue attrValue = result.get(attribute.getAlias());
+					attrValue.setValue(value);
 				}
-				result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
 			}
 		});
 		if (result.get(RefBook.RECORD_ID_ALIAS) == null) { // если элемент не найден
