@@ -1351,7 +1351,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         StringBuilder result = new StringBuilder();
                         result.append("В настройке подразделения \"");
                         result.append(rs.getString("departmentName")).append("\" для налога \"");
-                        result.append(TaxType.fromCode(taxCode.charAt(0)).getName()).append("\" в периоде \"");
+                        result.append(TaxTypeCase.fromCode(taxCode.charAt(0)).getGenitive()).append("\" в периоде \"");
                         result.append(rs.getString("periodName")).append("\" указана ссылка на версию!");
                         return result.toString();
                     }
