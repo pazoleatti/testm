@@ -106,7 +106,7 @@ public class FormDataListPresenter extends
     @Override
     protected void onReveal() {
         super.onReveal();
-        String url = FormDataListNameTokens.FORM_DATA_LIST + ";" + FormDataPresenter.FORM_DATA_ID;
+        String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
         if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
                 (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
             filterPresenter.getView().clean();
