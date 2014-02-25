@@ -222,7 +222,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 								public void onSuccess(GetRefBookRecordVersionResult result) {
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
-                                    getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    if (!result.getDataRows().isEmpty()) {
+                                        getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    }
 								}
 							}, RefBookVersionPresenter.this));
 		}
