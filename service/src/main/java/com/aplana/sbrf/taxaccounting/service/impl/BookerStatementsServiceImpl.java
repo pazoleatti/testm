@@ -17,9 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,6 +62,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String REPORT_PERIOD_CLOSED = "Указан закрытый период. Файл не может быть загружен.";
     private static final String REPORT_PERIOD_INVALID = "Отчетный период не указан.";
+    private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
     private static final String FILE_NULL = "Не указан фаил.";
 	private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
 	private static final String ATTRIBUTE_NAME = "Название";
@@ -85,10 +88,13 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     RefBookFactory rbFactory;
 
     @Override
-    public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, int departmentId) {
+    public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, Integer departmentId) {
 
         if (stream == null) {
             throw new ServiceException(FILE_NULL);
+        }
+        if (departmentId == null){
+            throw new ServiceException(DEPARTMENTID_INVALID);
         }
         if (periodId == null) {
             throw new ServiceException(REPORT_PERIOD_INVALID);

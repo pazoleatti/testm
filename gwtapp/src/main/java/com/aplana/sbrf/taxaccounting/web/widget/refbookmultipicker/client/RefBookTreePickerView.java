@@ -129,6 +129,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
+    public void reload() {
+        getUiHandlers().reload();
+    }
+
+    @Override
     public void find(String searchPattern) {
         getUiHandlers().find(searchPattern);
     }
@@ -136,7 +141,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void reloadOnDate(Date version) {
         clearSelected(true);
-        getUiHandlers().reload(version);
+        getUiHandlers().reloadForDate(version);
     }
 
     @Override

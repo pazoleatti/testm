@@ -50,6 +50,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     private boolean isVersionMode = false;
     private boolean readOnly;
+    private boolean isHierarchy = false;
 
 	@Inject
 	@UiConstructor
@@ -88,7 +89,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new DateMaskBoxPicker();
 					break;
 				case REFERENCE:
-                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(false, false);
+                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);
                     refbookWidget.setManualUpdate(true);
                     Date start = versionStart.getValue();
                     if (start == null) {
@@ -280,7 +281,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		}
 	}
 
-	@Override
+    @Override
+    public void setHierarchy(boolean isHierarchy) {
+        this.isHierarchy = isHierarchy;
+    }
+
+    @Override
 	public void setSaveButtonEnabled(boolean enabled) {
 		save.setEnabled(enabled);
 	}
