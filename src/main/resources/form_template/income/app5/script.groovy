@@ -133,7 +133,8 @@ void logicCheckBeforeCalc() {
         // 1. Проверка наличия значения «Наименование подразделения» в справочнике «Подразделения»
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             throw new ServiceException(errorMsg + "Не найдено подразделение территориального банка!")
@@ -151,10 +152,11 @@ void logicCheckBeforeCalc() {
         // 2. Проверка наличия значения «КПП» в форме настроек подразделения
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
-            throw new ServiceException("Не найдены настройки подразделения!")
+            throw new ServiceException(errorMsg + "Не найдены настройки подразделения!")
         } else {
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
