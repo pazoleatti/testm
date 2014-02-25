@@ -75,35 +75,28 @@ public class RefBookHelperImpl implements RefBookHelper {
         //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
         Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
         for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && !refProviders.containsKey(attribute.getAlias())) {
                 refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
             }
         }
 
         Map<String, String> result = new HashMap<String, String>();
-		for (RefBookAttribute refBookAttribute : attributes) {
-			RefBookAttributeType type = record.get(refBookAttribute.getAlias())
-					.getAttributeType();
-			String alias = refBookAttribute.getAlias();
+		for (RefBookAttribute attribute : attributes) {
+			RefBookAttributeType type = attribute.getAttributeType();
+			String alias = attribute.getAlias();
+			RefBookValue value = null;
 			if (RefBookAttributeType.REFERENCE.equals(type)) {
-				Long longRefValue = record.get(alias).getReferenceValue();
-				if (longRefValue == null) {
-					result.put(alias, "");
-				} else {
-					if (refBook.getId().equals(refBookAttribute.getRefBookId())) {
-						RefBookValue val = provider.getValue(longRefValue,
-								refBookAttribute.getRefBookAttributeId());
-						result.put(alias, String.valueOf(val));
-					} else {
-                        RefBookValue val = refProviders.get(refBookAttribute.getAlias()).getValue(longRefValue,
-                                refBookAttribute.getRefBookAttributeId());
-                        result.put(alias, String.valueOf(val));
-					}
+				Long refValue = record.get(alias).getReferenceValue();
+				if (refValue != null) {
+					// получаем провайдер данных для целевого справочника
+					RefBookDataProvider attrProvider = refProviders.get(attribute.getAlias());
+					// запрашиваем значение для разыменовывания
+					value = attrProvider.getValue(refValue, attribute.getRefBookAttributeId());
 				}
 			} else {
-				String derefValue = String.valueOf(record.get(alias));
-				result.put(alias, derefValue);
+				value = record.get(alias);
 			}
+			result.put(alias, value == null ? "" : String.valueOf(value));
 		}
 		return result;
 	}
