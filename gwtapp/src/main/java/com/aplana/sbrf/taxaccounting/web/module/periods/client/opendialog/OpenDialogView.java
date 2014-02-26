@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.gwt.client.Spinner;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -114,7 +116,13 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		hide();
+        Dialog.confirmMessage("Отмена операции открытия периода", "Отменить операцию открытия периода?", new DialogHandler() {
+            @Override
+            public void yes() {
+                hide();
+                super.yes();    //To change body of overridden methods use File | Settings | File Templates.
+            }
+        });
 	}
 
     @UiHandler("correctPeriod")
