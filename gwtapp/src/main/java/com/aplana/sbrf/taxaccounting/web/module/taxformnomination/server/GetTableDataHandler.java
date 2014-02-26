@@ -80,7 +80,7 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
 
         if (action.getCount() != 0){
             int toIndex = action.getStartIndex()+action.getCount() > data.size() ?
-                        data.size()-1 : action.getStartIndex()+action.getCount();
+                        data.size() : action.getStartIndex()+action.getCount();
             result.setTableData(new ArrayList<FormTypeKind>(data.subList(action.getStartIndex(), toIndex)));
         } else {
             result.setTableData(data);

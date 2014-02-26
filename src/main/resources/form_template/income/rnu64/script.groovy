@@ -3,7 +3,6 @@ package form_template.income.rnu64
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -136,12 +135,12 @@ void calc() {
 
     if (formData.kind == FormDataKind.PRIMARY) {
         // строка Итого за текущий отчетный (налоговый) период
-        def total =  getDataRow(dataRows, 'total')
+        def total = getDataRow(dataRows, 'total')
         def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
 
-    dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def getDataRowsPrev() {
@@ -194,19 +193,16 @@ void logicCheck() {
     }
     def testRows = dataRows.findAll { it -> it.getAlias() == null }
     // проверка на наличие итоговых строк, иначе будет ошибка
-    if (totalQuarterRow == null || totalRow == null) {
+    //if (totalQuarterRow != null && totalRow != null) {
         // 5. Проверка итоговых значений за текущий квартал
         def testRow = formData.createDataRow()
         calcTotalSum(testRows, testRow, totalColumns)
-        if (totalQuarterRow == null || totalQuarterRow != null && totalQuarterRow.costs != testRow.costs) {
+        if (totalQuarterRow.costs != testRow.costs) {
             loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
+            // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
+            loggerError('Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!')
         }
-        // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
-        def dataRowsPrev = getDataRowsPrev()
-        if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
-            loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
-        }
-    }
+   // }
 }
 
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
@@ -236,7 +232,7 @@ void importData() {
             logger.error('Формат файла должен быть *.xml')
             return
         }
-    } else if (formDataEvent == FormDataEvent.IMPORT){
+    } else if (formDataEvent == FormDataEvent.IMPORT) {
         if (!fileName.contains('.r')) {
             logger.error('Формат файла должен быть *.rnu')
             return
@@ -438,7 +434,7 @@ void consolidation() {
                 formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null) {
                         rows.add(row)
-                    } else if (row.getAlias() == 'total' && row.costs!=null) {
+                    } else if (row.getAlias() == 'total' && row.costs != null) {
                         sum += row.costs
                     }
                 }
