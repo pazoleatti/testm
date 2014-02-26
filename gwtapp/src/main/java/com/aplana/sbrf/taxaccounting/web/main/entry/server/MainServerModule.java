@@ -28,7 +28,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.server.Ve
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.server.LogAreaModule;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.server.MainMenuServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server.RefBookMultiPickerServerModule;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.server.RefBookPickerServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.signin.server.SigninControlServerModule;
 import com.aplana.sbrf.taxaccounting.web.widget.version.server.ProjectVersionControlServerModule;
 import org.springframework.context.annotation.ComponentScan;
@@ -43,7 +42,7 @@ import org.springframework.context.annotation.Import;
         TaxFormNominationServerModule.class, DeclarationServerModule.class, ProjectVersionControlServerModule.class,
         HistoryServerModule.class, TemplateVersionListServerModule.class, MembersServerModule.class, ConfigurationServerModule.class,
         AuditFormServerModule.class, PeriodsServerModule.class, LogAreaModule.class, SourcesServerModule.class,
-        DepartmentConfigServerModule.class, BookerStatementsServerModule.class, RefBookPickerServerModule.class,
+        DepartmentConfigServerModule.class, BookerStatementsServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
         HistoryBusinessServerModule.class, TestPageServerModule.class, DeclarationVersionListServerModule.class,
         VersionHistoryServerModule.class, TestPage2ServerModule.class, RefBookMultiPickerServerModule.class})

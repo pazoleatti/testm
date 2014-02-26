@@ -56,7 +56,7 @@ public class RefBookDaoTest {
 	public void testGet1() {
 		RefBook refBook1 = refBookDao.get(1L);
 		assertEquals(1, refBook1.getId().longValue());
-		assertEquals(4, refBook1.getAttributes().size());
+		assertEquals(5, refBook1.getAttributes().size());
 	}
 
 	@Test

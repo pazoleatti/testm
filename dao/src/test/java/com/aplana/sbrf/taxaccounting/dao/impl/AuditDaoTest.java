@@ -1,12 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
+import com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
@@ -16,6 +23,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -27,6 +36,16 @@ public class AuditDaoTest {
 
     @Autowired
     private AuditDao auditDao;
+
+    @Before
+    public void init() {
+        Department dep = new Department();
+        dep.setId(1);
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
+        when(departmentDao.getDepartment(1)).thenReturn(dep);
+        ReflectionTestUtils.setField(auditDao, "departmentDao", departmentDao);
+    }
 
     @Test
     public void testGet() {

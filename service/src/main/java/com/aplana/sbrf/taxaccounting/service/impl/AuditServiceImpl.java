@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -74,8 +72,15 @@ public class AuditServiceImpl implements AuditService {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
         if (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.ROLE_CONTROL_UNP))
             values.setDepartments(departmentService.listAll());
-        else if (user.hasRole(TARole.ROLE_CONTROL_NS))
-            values.setDepartments(departmentService.getBADepartments(user));
+        else if (user.hasRole(TARole.ROLE_CONTROL_NS)){
+            List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(TaxType.values()));
+            if (departments.isEmpty()){
+                values.setDepartments(new ArrayList<Department>());
+            } else{
+                Set<Integer> departmentIds = new HashSet<Integer>(departments);
+                values.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(departmentIds).values()));
+            }
+        }
 
 		/*values.setFormTypeIds(formTypeDao.getAll());*/
 		values.setDeclarationTypes(declarationTypeDao.listAll());
