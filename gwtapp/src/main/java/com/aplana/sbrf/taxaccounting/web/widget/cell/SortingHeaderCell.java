@@ -19,8 +19,8 @@ import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
 
 	private static final int ESCAPE = 27;
-	private static final String ARROW_ASC_IMAGE_SOURCE = "resources/img/sort_arrow_asc_image.png";
-	private static final String ARROW_DES_IMAGE_SOURCE = "resources/img/sort_arrow_des_image.png";
+	private static final String ARROW_ASC_IMAGE_SOURCE = "resources/img/sortAscending.png";
+	private static final String ARROW_DES_IMAGE_SOURCE = "resources/img/sortDescending.png";
 	private static final String ARROW_IMAGE_WIDTH = "10px";
 	private static final String ARROW_IMAGE_HEIGHT = "10px";
 	private static final String HEADER_BACKGROUND_COLOR = "#949494";
@@ -35,13 +35,13 @@ public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
 		arrowAscImage.setUrl(ARROW_ASC_IMAGE_SOURCE);
 		arrowAscImage.setWidth(ARROW_IMAGE_WIDTH);
 		arrowAscImage.setHeight(ARROW_IMAGE_HEIGHT);
-		arrowAscImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+
 
 		arrowDesImage = new Image();
 		arrowDesImage.setUrl(ARROW_DES_IMAGE_SOURCE);
 		arrowDesImage.setWidth(ARROW_IMAGE_WIDTH);
 		arrowDesImage.setHeight(ARROW_IMAGE_HEIGHT);
-		arrowDesImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		//arrowDesImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
 	}
 
 	public SortingHeaderCell() {
@@ -65,6 +65,7 @@ public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
 
 		popupWithArrow.getElement().getStyle().setBorderStyle(Style.BorderStyle.HIDDEN);
 		popupWithArrow.getElement().getStyle().setBackgroundColor(HEADER_BACKGROUND_COLOR);
+		popupWithArrow.getElement().getStyle().setPadding(0, Style.Unit.PX);
 	}
 
 	@Override
