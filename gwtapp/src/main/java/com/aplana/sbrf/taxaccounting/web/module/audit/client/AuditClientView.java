@@ -116,7 +116,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> departmentColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 

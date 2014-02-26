@@ -156,7 +156,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getDepartment().getName());
+            cell.setCellValue(item.getDepartmentName());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

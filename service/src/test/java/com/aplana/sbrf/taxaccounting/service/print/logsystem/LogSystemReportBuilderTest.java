@@ -40,6 +40,7 @@ public class LogSystemReportBuilderTest {
         item.setFormKind(FormDataKind.ADDITIONAL);
         item.setFormType(type);
         item.setDepartment(department);
+        item.setDepartmentName("Подразделение");
         item.setDeclarationType(declarationType);
         item.setRoles("Контролер");
         item.setEvent(FormDataEvent.ADD_ROW);
