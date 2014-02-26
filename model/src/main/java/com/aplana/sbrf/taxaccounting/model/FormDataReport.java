@@ -6,7 +6,7 @@ public class FormDataReport {
 	
 	private FormData data;
 	private FormTemplate formTemplate;
-	private Department department;
+	private String departmentName;
 	private ReportPeriod reportPeriod;
 	private Date acceptanceDate;
 	private Date creationDate;
@@ -23,11 +23,11 @@ public class FormDataReport {
 	public void setFormTemplate(FormTemplate formTemplate) {
 		this.formTemplate = formTemplate;
 	}
-	public Department getDepartment() {
-		return department;
+	public String getDepartmentName() {
+		return departmentName;
 	}
-	public void setDepartment(Department department) {
-		this.department = department;
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
 	}
 	public ReportPeriod getReportPeriod() {
 		return reportPeriod;
