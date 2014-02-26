@@ -10,7 +10,6 @@ import groovy.transform.Field
  * formTemplateId=330
  *
  * TODO:
- *      - логическая проверка 2 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780
  *      - импорт и миграция еще не сделаны
  *      - невозможно проверить форму пока не будет заполнен справочник 84 "Ценные бумаги"
  *
@@ -20,8 +19,8 @@ import groovy.transform.Field
 // графа 0  - fix
 // графа 1  - number                - Номер территориального банка          - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
 // графа 2  - name                  - Наименование территориального банка   - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - code                  - Код валюты номинала                   - атрибут 64 - CODE - "Код валюты. Цифровой", справочник 15 "Общероссийский классификатор валют"
-// графа 4  - issuer                - Эмитент
+// графа 3  - code                  - Код валюты номинала                   - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
+// графа 4  - issuer                - Эмитент                               - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
 // графа 5  - regNumber             - Номер государственной регистрации     - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
 // графа 6  - shortPositionData     - Дата открытия короткой позиции
 // графа 7  - faceValue             - Номинальная стоимость (ед. валюты)
@@ -89,7 +88,7 @@ def allColumns = ['fix', 'number', 'name', 'code', 'issuer', 'regNumber', 'short
 
 // Редактируемые атрибуты (графа 2..14)
 @Field
-def editableColumns = ['name', 'code', 'issuer', 'regNumber', 'shortPositionData', 'faceValue',
+def editableColumns = ['name', 'issuer', 'shortPositionData', 'faceValue',
             'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate',
             'currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon']
 
@@ -97,9 +96,9 @@ def editableColumns = ['name', 'code', 'issuer', 'regNumber', 'shortPositionData
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1..8, 10..14, 17, 18)
+// Проверяемые на пустые значения атрибуты (графа 2..8, 10..14, 17, 18)
 @Field
-def nonEmptyColumns = ['number', 'name', 'code', 'issuer', 'regNumber', 'shortPositionData',
+def nonEmptyColumns = ['name', 'issuer', 'shortPositionData',
         'faceValue', 'countsBonds', 'termBondsIssued', 'maturityDate', 'currentPeriod',
         'currentCouponRate', 'incomeCurrentCoupon', 'percIncome', 'totalPercIncome']
 
@@ -116,11 +115,6 @@ sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 def reportPeriodEndDate = null
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
@@ -162,8 +156,6 @@ void calc() {
         if (row.getAlias() != null) {
             continue
         }
-        // графа 1
-        row.number = row.name
         // графа 15
         row.incomePrev = calc15(row, lastDay, dataRows)
         // графа 16
@@ -204,18 +196,6 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // . Проверка наименования террбанка
-        if (row.number != row.name) {
-            logger.error(errorMsg + 'номер территориального банка не соответствует названию.')
-        }
-
-        // 1. Проверка формата номера подразделения
-        // def recordDivision = getRefBookValue(30, row.number)
-        // if (recordDivision.SBRF_CODE.value != row.name) { // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4780
-        if (false) {
-            logger.error(errorMsg + 'неверно указан номер подразделения (формат: ТТВВВВ)!')
-        }
-
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
@@ -225,12 +205,6 @@ void logicCheck() {
         needValue['percIncome'] = calc17(row, lastDay)
         needValue['totalPercIncome'] = calc18(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        // Проверки соответствия НСИ
-        checkNSI(15, row, 'code')       // 1. Проверка соответствия кода валюты значению из справочника	(графа 3)
-        checkNSI(30, row, 'number')     // 2. Проверка соответствия поля «Номер территориального банка»	(графа 1)
-        checkNSI(30, row, 'name')       // 3. Проверка соответствия поля «Наименование территориального банка» (графа 2)
-        checkNSI(84, row, 'regNumber')  // 4. Проверка соответствия поля «Номер государственной регистрации» (графа 5)
     }
 
     // 4. Арифметическая проверка итоговых значений по разделам (графа 8, 15..18)
@@ -301,8 +275,8 @@ void sort(def dataRows) {
             // графа 1  - number (справочник)
             // графа 2  - name (справочник)
 
-            def recordA = getRefBookValue(30, a.number)
-            def recordB = getRefBookValue(30, b.number)
+            def recordA = getRefBookValue(30, a.name)
+            def recordB = getRefBookValue(30, b.name)
 
             def numberA = (recordA != null ? recordA.SBRF_CODE.value : null)
             def numberB = (recordB != null ? recordB.SBRF_CODE.value : null)

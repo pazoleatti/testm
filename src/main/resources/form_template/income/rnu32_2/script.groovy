@@ -9,8 +9,8 @@ import groovy.transform.Field
 /**
  * Форма "(РНУ-32.2) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 2".
  * formTemplateId=331
+
  * TODO:
- *      - логическая проверка 1 - проблемы с форматом TTBBBB - http://jira.aplana.com/browse/SBRFACCTAX-4780 - РНУ-32.1 Формат графы 1 "Номер территориального банка"
  *      - невозможно проверить форму пока не будет готова рну 32.1.
  *
  * @author rtimerbaev
@@ -18,7 +18,7 @@ import groovy.transform.Field
 
 // графа 1  - number        атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
 // графа 2  - name          атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - code          атрибут 64  - CODE - "Код валюты. Цифровой", справочник 15 "Общероссийский классификатор валют"
+// графа 3  - code          атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
 // графа 4  - cost
 // графа 5  - bondsCount
 // графа 6  - percent
@@ -86,9 +86,6 @@ void logicCheck() {
         if (row.getAlias() != null) {
             return
         }
-        // 1. Проверка формата номера подразделения	Формат графы 1: ТТВВВВ	1	Неправильно указан номер подразделения (формат: ТТВВВВ)!
-        // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4780	- РНУ-32.1 Формат графы 1 "Номер территориального банка"
-
         // 2. Обязательность заполнения поля графы 1..6
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
@@ -109,7 +106,7 @@ void logicCheck() {
             continue
         }
         for (def row : rows32_2) {
-            def tmpRow = getCalcRowFromRNU_32_1(row.number, row.name, row.code, rows32_1)
+            def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
             if (tmpRow) {
                 checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
             }
@@ -153,10 +150,10 @@ void consolidation() {
                     def rows32_2 = getRowsBySection(dataRows, section)
                     def newRows = []
                     for (def row : rows32_1) {
-                        if (hasCalcRow(row.number, row.name, row.code, rows32_2)) {
+                        if (hasCalcRow(row.name, row.issuer, rows32_2)) {
                             continue
                         }
-                        def newRow = getCalcRowFromRNU_32_1(row.number, row.name, row.code, rows32_1)
+                        def newRow = getCalcRowFromRNU_32_1(row.name, row.issuer, rows32_1)
                         newRows.add(newRow)
                         rows32_2.add(newRow)
                     }
@@ -311,22 +308,21 @@ def getRowsBySection(def dataRows, def section) {
  * У строк рну 32.1, подходящих под эти условия, суммируются графы 7, 8, 18 в строку рну 32.2 графы 4, 5, 6.
  * </p>
  *
- * @param number номер тб
  * @param name наименование тб
  * @param code код валюты номинала
  * @param rows32_1 строки рну 32.1 среди которых искать подходящие (строки должны принадлежать одному разделу)
  * @return строка рну 32.2
  */
-def getCalcRowFromRNU_32_1(def number, def name, def code, def rows32_1) {
+def getCalcRowFromRNU_32_1(def name, def code, def rows32_1) {
     if (rows32_1 == null || rows32_1.isEmpty()) {
         return null
     }
     def calcRow = null
     for (def row : rows32_1) {
-        if (row.number == number && row.name == name && row.code == code) {
+        if (row.name == name && row.code == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
-                calcRow.number = number
+                calcRow.number = name
                 calcRow.name = name
                 calcRow.code = code
                 calcRow.cost = 0
@@ -345,16 +341,15 @@ def getCalcRowFromRNU_32_1(def number, def name, def code, def rows32_1) {
 /**
  * Проверить посчитана ли уже для рну 32.2 строка с заданными параметрами (по номеру и названию тб и коду валюты).
  *
- * @param number номер тб
  * @param name наименование тб
  * @param code код валюты номинала
  * @param rows32_2 строки рну 32.2 среди которых искать строку (строки должны принадлежать одному разделу)
  * @return true - строка с такими параметрами уже есть, false - строки нет
  */
-def hasCalcRow(def number, def name, def code, def rows32_2) {
+def hasCalcRow(def name, def code, def rows32_2) {
     if (rows32_2 != null && !rows32_2.isEmpty()) {
         for (def row : rows32_2) {
-            if (row.number == number && row.name == name && row.code == code) {
+            if (row.name == name && row.code == code) {
                 return true
             }
         }

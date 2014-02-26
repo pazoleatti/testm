@@ -477,9 +477,11 @@ def calc15(def row) {
                 def type2 = getRefBookValue(16, row.transactionType)?.TYPE?.value
                 if (type2 == 'покупка' && tmp2 > row.maxPrice) {
                     value15_1 = 0
-                    // TODO (Ramil Timerbaev) что за графа 2.7
+                    // TODO (Ramil Timerbaev) что за графа 2.7 (пока сказали использовать 2.6)
                     value15_2 = (row.income + row.outcome) * (row.course - row.maxPrice + row.coursSecondPart) /
-                            (row.course - row.XXXX) - (row.income + row.outcome)
+                            (row.course -
+                                    row.coursSecondPart // тут по чтз графа 2.7
+                            ) - (row.income + row.outcome)
                 } else if (type2 == 'покупка' && tmp2 <= row.minPrice) {
                     value15_1 = 0
                     value15_2 = 0
@@ -487,9 +489,11 @@ def calc15(def row) {
                     value15_1 = 0
                     value15_2 = 0
                 } else if (type2 == 'продажа' && tmp2 <= row.minPrice) {
-                    // TODO (Ramil Timerbaev) что за графа 2.7
+                    // TODO (Ramil Timerbaev) что за графа 2.7 (пока сказали использовать 2.6)
                     value15_1 = (row.income + row.outcome) * (row.minPrice + row.coursSecondPart - row.course) /
-                            (row.XXXX - row.course) - (row.income + row.outcome)
+                            (
+                            row.coursSecondPart // тут по чтз графа 2.7
+                                    - row.course) - (row.income + row.outcome)
                 }
             }
         }
