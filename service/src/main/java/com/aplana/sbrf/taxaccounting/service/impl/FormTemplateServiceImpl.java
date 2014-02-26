@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -64,7 +65,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	@Override
 	public FormTemplate get(int formTemplateId) {
-		return formTemplateDao.get(formTemplateId);
+        try {
+            return formTemplateDao.get(formTemplateId);
+        }catch (DaoException e){
+            throw new ServiceException("Обновление статуса версии.", e);
+        }
 	}
 
     @Transactional(readOnly = false)
@@ -268,6 +273,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
+    }
+
+    @Override
+    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+        return formTemplateDao.updateVersionStatus(versionStatus, formTemplateId);
     }
 
     @Override

@@ -133,4 +133,6 @@ public interface FormTemplateService {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, VersionedObjectStatus... status);
+
+    int updateVersionStatus(int versionStatus, int formTemplateId);
 }
