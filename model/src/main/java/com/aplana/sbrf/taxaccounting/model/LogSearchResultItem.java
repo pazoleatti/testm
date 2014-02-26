@@ -17,6 +17,7 @@ public class LogSearchResultItem implements Serializable {
 	private TAUser user;
 	private String roles;
 	private Department department;
+    private String departmentName;
 	private ReportPeriod reportPeriod;
 	private DeclarationType declarationType;
 	private FormType formType;
@@ -80,7 +81,15 @@ public class LogSearchResultItem implements Serializable {
 		this.department = department;
 	}
 
-	public ReportPeriod getReportPeriod() {
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public ReportPeriod getReportPeriod() {
 		return reportPeriod;
 	}
 
@@ -133,6 +142,7 @@ public class LogSearchResultItem implements Serializable {
         return new StringBuilder().append("id: " + id).append(", user: " + (user != null?user.getLogin():""))
                 .append(" ip: " + ip)
                 .append(" department: " + (department != null?department.getName():""))
+                .append(" departmentName: " + departmentName)
                 .append(" roles: " + roles)
                 .append(" event: " + (event!= null?event.getTitle():""))
                 .append(" logdate: " + logDate)

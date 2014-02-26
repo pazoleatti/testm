@@ -113,7 +113,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             }
             return result.toString();
         } catch (EmptyResultDataAccessException e) {
-            return null;
+            return "";
         }
     }
 
