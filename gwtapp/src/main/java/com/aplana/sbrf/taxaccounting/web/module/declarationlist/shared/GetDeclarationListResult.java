@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 import com.aplana.sbrf.taxaccounting.model.DeclarationDataSearchResultItem;
 import com.gwtplatform.dispatch.shared.Result;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +32,7 @@ public class GetDeclarationListResult implements Result {
         return departmentFullNames;
     }
 
-    public void setDepartmentFullNames(Map<Integer, String> departmentFullName) {
+    public void setDepartmentFullNames(Map<Integer, String> departmentFullNames) {
         this.departmentFullNames = departmentFullNames;
     }
 

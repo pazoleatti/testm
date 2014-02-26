@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -22,6 +23,7 @@ import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,15 +37,16 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 
     @Override
     public void onConfirm() {
-	    StringBuilder errorMsg = new StringBuilder("Не заполнены обязательные атрибуты, необходимые для создания назначения: ");
-	    if (getView().getSelectedDepartments().isEmpty()) {
-			errorMsg.append("Подразделение; ");
-	    }
-	    if (getView().getSelectedDeclarationTypes().isEmpty()) {
-		    errorMsg.append("Вид декларации; ");
-	    }
-	    if (getView().getSelectedDepartments().isEmpty() || getView().getSelectedDeclarationTypes().isEmpty()) {
-		    Dialog.errorMessage("Ошибка", errorMsg.toString());
+        List<String> err = new ArrayList<String>();
+        if (getView().getSelectedDepartments().isEmpty()) {
+            err.add("Подразделение");
+        }
+        if (getView().getSelectedDeclarationTypes().isEmpty()) {
+            err.add("Вид декларации");
+        }
+
+        if (err.size() != 0) {
+		    Dialog.errorMessage("Ошибка", "Не заполнены обязательные атрибуты, необходимые для создания назначения: "+ StringUtils.join(err.toArray(), ','));
 		    return;
 	    }
 
