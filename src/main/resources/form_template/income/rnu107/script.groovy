@@ -151,7 +151,7 @@ void calc() {
     }
 
     dataRows.sort { refBookService.getStringValue(9, it.interdependence, 'NAME') }
-    dataRowHelper.update(dataRows);
+    dataRowHelper.save(dataRows);
 
     // Столбцы для которых надо вычислять итого и итого по коду. Графа 7, 10..12
     def totalColumns = ['operationSum', 'incomeSumFact', 'incomeSumTax', 'incomeSumBefore']

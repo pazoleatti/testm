@@ -24,19 +24,19 @@ public final class Dialog extends ModalWindow {
     private static ModalWindowResources mwRes = GWT.create(ModalWindowResources.class);
 
     interface ModalWindowResources extends ClientBundle {
-        @Source("dialog/icon-info.gif")
+        @Source("icon-info.gif")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource infoImage();
 
-        @Source("dialog/icon-error.gif")
+        @Source("icon-error.gif")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource errorImage();
 
-        @Source("dialog/icon-question.gif")
+        @Source("icon-question.gif")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource questionImage();
 
-        @Source("dialog/icon-warning.gif")
+        @Source("icon-warning.gif")
         @ImageResource.ImageOptions(repeatStyle = ImageResource.RepeatStyle.Both)
         ImageResource warningImage();
     }

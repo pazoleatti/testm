@@ -165,11 +165,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Dialog.warningMessage("Не указана дата начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
 			if (currentUniqueRecordId == null) {

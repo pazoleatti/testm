@@ -208,7 +208,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-        Dialog.confirmMessage("Подтверждение", "Удалить выбранную запись справочника?", new DialogHandler() {
+        Dialog.confirmMessage("Удаление элемента справочника", "Вы подтверждаете удаление всех версий элемента?", new DialogHandler() {
             @Override
             public void yes() {
                 if (getUiHandlers() != null) {
