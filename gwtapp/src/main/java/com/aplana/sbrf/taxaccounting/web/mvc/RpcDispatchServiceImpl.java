@@ -28,9 +28,20 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
     @Override
     protected void doUnexpectedFailure(Throwable e) {
 
-        Throwable cause = e.getCause().getCause().getCause();
+        boolean isAccessDeniedException = false;
 
-        if (cause instanceof AccessDeniedException) {
+        Throwable cause = e;
+
+        while (cause.getCause() != null && !(cause instanceof AccessDeniedException)) {
+            if (cause.getCause() instanceof AccessDeniedException) {
+                isAccessDeniedException = true;
+            }
+
+            cause = cause.getCause();
+        }
+
+
+        if (isAccessDeniedException) {
             throw new AccessDeniedException("Access is denied", cause);
         } else {
             try {
