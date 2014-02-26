@@ -45,7 +45,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	@Override
 	public List<DepartmentReportPeriod> getByDepartment(Long departmentId) {
 		return getJdbcTemplate()
-				.query("select * from DEPARTMENT_REPORT_PERIOD where DEPARTMENT_ID=?",
+				.query("select * from DEPARTMENT_REPORT_PERIOD where DEPARTMENT_ID=? order by REPORT_PERIOD_ID",
 						new Object[] { departmentId },
 						new int[] { Types.NUMERIC},
 						mapper);
@@ -56,7 +56,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		return getJdbcTemplate()
 				.query("select drp.* from DEPARTMENT_REPORT_PERIOD drp " +
 						"left join report_period rp on drp.report_period_id = rp.ID " +
-						"left join tax_period tp on rp.TAX_PERIOD_ID=tp.ID where drp.DEPARTMENT_ID=? and tp.TAX_TYPE=?",
+						"left join tax_period tp on rp.TAX_PERIOD_ID=tp.ID where drp.DEPARTMENT_ID=? and tp.TAX_TYPE=? order by rp.calendar_start_date",
 						new Object[] { departmentId, String.valueOf(taxType.getCode()) },
 						new int[] { Types.NUMERIC, Types.CHAR},
 						mapper);

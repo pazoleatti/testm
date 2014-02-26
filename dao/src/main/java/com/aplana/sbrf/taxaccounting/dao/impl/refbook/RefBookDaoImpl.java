@@ -748,8 +748,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
-                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
@@ -815,8 +814,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : records.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
-                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
