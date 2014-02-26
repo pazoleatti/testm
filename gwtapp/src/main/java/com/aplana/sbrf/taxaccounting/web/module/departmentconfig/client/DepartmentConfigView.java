@@ -38,6 +38,9 @@ import java.util.*;
 public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiHandlers>
 		implements DepartmentConfigPresenter.MyView, Editor<DepartmentCombined> {
 
+    private static final String CONFIRM_TITLE = "Подтверждение операции";
+    private static final String CONFIRM_MSG = "Все несохранённые данные будут потеряны. Выйти из режима редактирования?";
+
 	// Признак режима редактирования
 	private boolean isEditMode = false;
 
@@ -183,39 +186,36 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				final Integer selDepid = selDepartmentId;
 
 				if (isEditMode && driver.isDirty()) {
-					Dialog.confirmMessage(
-							"Все несохранённые данные будут потеряны. Выйти из режима редактирования?",
-							new DialogHandler() {
-								@Override
-								public void yes() {
-									setEditMode(false);
-									// Проверка совпадения выбранного подразделения с текущим
-									if (DepartmentConfigView.this.currentDepartmentId != null
-											&& DepartmentConfigView.this.currentDepartmentId.equals(selDepid)) {
-										return;
-									}
-									DepartmentConfigView.this.currentDepartmentId = selDepid;
-									// Очистка формы
-									clear();
-									updateVisibility();
-									reloadDepartmentParams();
-									Dialog.hideMessage();
-								}
+                    Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            setEditMode(false);
+                            // Проверка совпадения выбранного подразделения с текущим
+                            if (DepartmentConfigView.this.currentDepartmentId != null
+                                    && DepartmentConfigView.this.currentDepartmentId.equals(selDepid)) {
+                                return;
+                            }
+                            DepartmentConfigView.this.currentDepartmentId = selDepid;
+                            // Очистка формы
+                            clear();
+                            updateVisibility();
+                            reloadDepartmentParams();
+                            Dialog.hideMessage();
+                        }
 
-								@Override
-								public void no() {
-									// Вернуть старое подразделение
-									departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
-								}
+                        @Override
+                        public void no() {
+                            // Вернуть старое подразделение
+                            departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
+                        }
 
-								@Override
-								public void close() {
-									no();
-								}
-							}
-					);
-				} else {
-					setEditMode(false);
+                        @Override
+                        public void close() {
+                            no();
+                        }
+                    });
+                } else {
+                    setEditMode(false);
 					// Проверка совпадения выбранного подразделения с текущим
 					if (DepartmentConfigView.this.currentDepartmentId != null
 							&& DepartmentConfigView.this.currentDepartmentId.equals(selDepartmentId)) {
@@ -325,7 +325,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event) {
 		if (isEditMode && driver.isDirty()) {
-            Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
+            Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
                 @Override
                 public void yes() {
                     DepartmentConfigView.this.cancel();
@@ -393,7 +393,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		}
 		final Integer repPeriodId = reportPeriodId;
 		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
+			Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
 				@Override
 				public void yes() {
 					setEditMode(false);

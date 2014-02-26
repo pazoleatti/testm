@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.*;
  */
 public class ModalWindow extends DialogBox implements CanHide {
 
-
     interface LocalHtmlTemplates extends SafeHtmlTemplates {
         @Template("<div style=\"" +
                 "text-decoration: underline;" +
@@ -118,6 +117,8 @@ public class ModalWindow extends DialogBox implements CanHide {
     public void setIconUrl(String iconUrl){
         if (iconUrl != null && !iconUrl.trim().isEmpty()) {
             icon.setUrl(iconUrl);
+            icon.getElement().getStyle().setFloat(Style.Float.LEFT);
+            icon.getElement().getStyle().setMargin(4, Style.Unit.PX);
         }
     }
 
