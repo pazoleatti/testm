@@ -222,7 +222,7 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setSigners(formDataSigners);
 
 		data.setData(formData);
-		data.setDepartment(department);
+		data.setDepartmentName(department.getName());
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);

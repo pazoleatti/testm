@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.AuditFormType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
@@ -184,14 +186,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 return declarationTypesMap.get(object);
             }
         });
-        declarationTypeId.setEnabled(false);
+        /*declarationTypeId.setEnabled(false);*/
 
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
         user.setPeriodDates(null, new Date());
         formDataKind.setPeriodDates(new Date(), new Date());
-        formTypeId.setEnabled(false);
+        /*formTypeId.setEnabled(false);*/
+        formTypeId.setPeriodDates(new Date(), new Date());
 
         this.driver = driver;
         this.driver.initialize(this);
@@ -221,6 +224,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         if (taxType.getValue() == null){
             reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
+            formTypeId.setFilter(null);
             return;
         } else {
             formTypeId.setFilter("TAX_TYPE='" + taxType.getValue().getCode() + "'");
@@ -232,7 +236,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         }
     }
 
-    @UiHandler("reportPeriodIds")
+    /*@UiHandler("reportPeriodIds")
     public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event){
 
         if (event.getValue() != null && !event.getValue().isEmpty() && auditFormTypeId.getValue() != null){
@@ -255,7 +259,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
             declarationTypeId.setValue(null);
             declarationTypeId.setEnabled(false);
         }
-    }
+    }*/
 
     @UiHandler("auditFormTypeId")
     public void onAuditFormTypeChange(ValueChangeEvent<AuditFormType> event){
@@ -265,21 +269,21 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         }
         switch (event.getValue()){
             case FORM_TYPE_TAX:
-                if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
+                /*if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
                     setVisibleTaxFields();
                     return;
                 }
                 Pair<Date, Date> datePair = reportPeriodIds.getPeriodDates(reportPeriodIds.getValue().get(0));
                 formTypeId.setPeriodDates(datePair.getFirst(), datePair.getSecond());
-                formTypeId.setEnabled(true);
+                formTypeId.setEnabled(true);*/
                 setVisibleTaxFields();
                 break;
             case FORM_TYPE_DECLARATION:
-                if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
+                /*if (reportPeriodIds.getValue() == null || reportPeriodIds.getValue().isEmpty()){
                     setVisibleDeclarationFields();
                     return;
                 }
-                declarationTypeId.setEnabled(true);
+                declarationTypeId.setEnabled(true);*/
                 setVisibleDeclarationFields();
                 break;
         }
