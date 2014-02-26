@@ -12,6 +12,7 @@ import groovy.transform.Field
  * TODO заполнение граф 7.1, 7.2 - вручную или автоматом
  * TODO 7.1 - справочник форвардных курсов?
  *
+ * fix
  * Графа 1    rowNumber           № пп
  * Графа 2.1  transactionNumber   Общая информация о сделке. Номер сделки
  * Графа 2.2  transactionKind     Общая информация о сделке. Вид сделки 91 справочник 831 атрибут KIND
@@ -72,7 +73,7 @@ def refBookCache = [:]
 
 // Все аттрибуты
 @Field
-def allColumns = ["rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
+def allColumns = ["fix", "rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
         "transactionEndDate", "resolveDate", "transactionType", "courseFix", "course", "minPrice", "maxPrice",
         "request", "liability", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
 
@@ -130,9 +131,6 @@ void logicCheck() {
         calc11(row, values)
 
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
-
-        // Проверки соответствия НСИ
-        formDataService.checkNSI(16, refBookCache, row, "transactionType", logger, true)
     }
     // Проверка итогов
     def totalCorrupt = false
@@ -165,7 +163,8 @@ void calc() {
 
     // Добавление строки итогов
     def totalRow = formData.createDataRow()
-    totalRow.transactionNumber = "Итого"
+    totalRow.fix = "Итого"
+    totalRow.getCell("fix").setColSpan(2)
     totalRow.setAlias('itg')
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
