@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
@@ -28,10 +29,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
 
@@ -103,6 +101,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public void onCellModified(DataRow<Cell> dataRow) {
 		modifiedRows.add(dataRow);
 	}
+
+    @Override
+    public void onStartLoad() {
+        LockInteractionEvent.fire(this, true);
+    }
+
+    @Override
+    public void onEndLoad() {
+        LockInteractionEvent.fire(this, false);
+    }
 
     @Override
 	public void onSelectRow() {

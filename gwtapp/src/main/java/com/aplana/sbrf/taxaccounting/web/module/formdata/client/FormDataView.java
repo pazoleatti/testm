@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -10,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -31,6 +34,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.Date;
 import java.util.List;
@@ -132,6 +136,20 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Inject
 	public FormDataView(final Binder binder) {
 		initWidget(binder.createAndBindUi(this));
+
+        fileUploader.addStartLoadHandler(new StartLoadFileEvent.StartLoadFileHandler() {
+            @Override
+            public void onStartLoad(StartLoadFileEvent event) {
+                getUiHandlers().onStartLoad();
+            }
+        });
+
+        fileUploader.addEndLoadHandler(new EndLoadFileEvent.EndLoadFileHandler() {
+            @Override
+            public void onEndLoad(EndLoadFileEvent event) {
+                getUiHandlers().onEndLoad();
+            }
+        });
 
 		selectionModel = new NoSelectionModel<DataRow<Cell>>();
 		formDataTable.setSelectionModel(selectionModel);

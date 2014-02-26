@@ -165,6 +165,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				if (w instanceof UIObject) {
 					((UIObject) w).setTitle(null);
 					if (w instanceof RefBookPickerWidget) {
+                        ((RefBookPickerWidget)w).reload();
 						((RefBookPickerWidget)w).setDereferenceValue("");
                         ((RefBookPickerWidget)w).setEnabled(!readOnly);
 					}
@@ -175,6 +176,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
 				if (w.getValue() instanceof RefBookPickerWidget) {
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                    rbw.reload();
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setSingleValue(recordValue.getReferenceValue());

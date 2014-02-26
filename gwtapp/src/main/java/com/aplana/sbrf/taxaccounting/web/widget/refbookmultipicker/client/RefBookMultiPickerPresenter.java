@@ -99,7 +99,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         final int offset = startIndex;
 
         GetRefBookMultiValuesAction action = getRowsLoadAction(new PagingParams(offset + 1, maxRows), null);
-        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
