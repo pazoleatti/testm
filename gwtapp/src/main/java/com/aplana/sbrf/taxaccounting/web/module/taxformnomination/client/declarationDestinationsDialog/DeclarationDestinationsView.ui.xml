@@ -51,9 +51,9 @@
 <!-- эта штука понадобится в 0.3.7
                 <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
                     <g:Label text="Период с" addStyleNames="{style.labels}"/>
-                    <d:CustomDateBox width="110px"/>
+                    <d:DateMaskBoxPicker width="110px"/>
                     <g:Label text="по " addStyleNames="{style.datePo}"/>
-                    <d:CustomDateBox width="104px"/>
+                    <d:DateMaskBoxPicker width="104px"/>
                 </g:HorizontalPanel>
 -->
 
@@ -72,7 +72,7 @@
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
                     <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
                 </style:RightBar>
             </style:Bar>
 

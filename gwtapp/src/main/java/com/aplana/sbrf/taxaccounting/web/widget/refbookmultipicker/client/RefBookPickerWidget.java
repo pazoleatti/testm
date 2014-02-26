@@ -176,7 +176,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @UiHandler("clearButton")
     void onClearButtonClicked(ClickEvent event) {
-        state.getSetIds().clear();
+        if (state.getSetIds() != null) {
+            state.getSetIds().clear();
+        }
+        clearSearchPattern();
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
@@ -245,6 +248,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     public void setSingleValue(Long value, boolean fireEvents) {
         if (value == null) {
             state.setSetIds(null);
+            clearSearchPattern();
             prevState.setValues(state);
             if (!isManualUpdate) {
                 refBookView.load(state);
@@ -268,6 +272,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         prevState.setValues(state);
         if (value == null) {
             state.setSetIds(null);
+            clearSearchPattern();
             prevState.setValues(state);
             if (!isManualUpdate) {
                 refBookView.load(state);
@@ -279,6 +284,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         } else {
             isEnabledFireChangeEvent = true;
             clearAndSetValues(value);
+            clearSearchPattern();
             if (!isManualUpdate) {
                 refBookView.load(state);
             }
@@ -304,6 +310,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
+    public void reload() {
+        refBookView.reload();
+    }
+
+    @Override
     public String getOtherDereferenceValue(String alias) {
         return refBookView.getOtherDereferenceValue(alias);
     }
@@ -311,6 +322,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public String getOtherDereferenceValue(Long attrId) {
         return refBookView.getOtherDereferenceValue(attrId);
+    }
+
+    private void clearSearchPattern(){
+        state.setSearchPattern(null);
+        searchTextBox.setText(null);
     }
 
     private void updateUIState() {
@@ -394,10 +410,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         }
     }
 
+    @Override
     public boolean isVisible() {
         return widgetPanel.isVisible();
     }
 
+    @Override
     public void setVisible(boolean visible) {
         widgetPanel.setVisible(visible);
     }

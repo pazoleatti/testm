@@ -232,6 +232,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
 			log.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+            log.setDepartmentName(rs.getInt("department_id")!=0?departmentDao.getParentsHierarchy(rs.getInt("department_id")):log.getDepartment().getName());
 			log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             if(rs.getInt("declaration_type_id") != 0)
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));

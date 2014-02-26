@@ -58,7 +58,7 @@ public class TaxFormNominationPresenter
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
         void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
-        void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
+        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
 
         // получение данных
         boolean isForm();
@@ -79,10 +79,13 @@ public class TaxFormNominationPresenter
          */
         void updatePanelAnchors();
 
+        public void updateDeclarationPanelAnchors();
         /**
          * Обновление страницы
          */
         void onReveal();
+
+        void clearFilter();
     }
 
     private TaxType taxType;
@@ -177,7 +180,8 @@ public class TaxFormNominationPresenter
 		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(result.getTableData());
+                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
     }
@@ -289,7 +293,13 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onRangeChange(final int start, int length) {
+    protected void onHide() {
+        super.onHide();
+        getView().clearFilter();
+    }
+
+    @Override
+    public void onFormRangeChange(final int start, int length) {
         GetTableDataAction action = getTableDataAction();
         action.setCount(length);
         action.setStartIndex(start);
@@ -300,6 +310,23 @@ public class TaxFormNominationPresenter
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updatePanelAnchors();
+                    }
+                }, this));
+    }
+
+
+    @Override
+    public void onDeclarationRangeChange(final int start, int length) {
+        GetTableDataAction action = getTableDataAction();
+        action.setCount(length);
+        action.setStartIndex(start);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
     }

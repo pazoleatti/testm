@@ -50,6 +50,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     private boolean isVersionMode = false;
     private boolean readOnly;
+    private boolean isHierarchy = false;
 
 	@Inject
 	@UiConstructor
@@ -88,7 +89,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new DateMaskBoxPicker();
 					break;
 				case REFERENCE:
-                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(false, false);
+                    RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);
                     refbookWidget.setManualUpdate(true);
                     Date start = versionStart.getValue();
                     if (start == null) {
@@ -96,6 +97,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     }
                     refbookWidget.setPeriodDates(start, versionEnd.getValue());
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
+                    refbookWidget.setTitle(col.getRefBookName());
 					widget = refbookWidget;
 					break;
 				default:
@@ -107,9 +109,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             hasValue.addValueChangeHandler(new ValueChangeHandler() {
                 @Override
                 public void onValueChange(ValueChangeEvent event) {
-                    if (event.getSource() instanceof UIObject) {
-                        ((UIObject) event.getSource()).setTitle(event.getValue().toString());
-                    }
                     if (getUiHandlers() != null) {
                         getUiHandlers().valueChanged();
                     }
@@ -162,8 +161,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
 				if (w instanceof UIObject) {
-					((UIObject) w).setTitle(null);
 					if (w instanceof RefBookPickerWidget) {
+                        ((RefBookPickerWidget)w).reload();
 						((RefBookPickerWidget)w).setDereferenceValue("");
                         ((RefBookPickerWidget)w).setEnabled(!readOnly);
 					}
@@ -174,12 +173,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
 				if (w.getValue() instanceof RefBookPickerWidget) {
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                    rbw.reload();
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setSingleValue(recordValue.getReferenceValue());
-                    rbw.setTitle(String.valueOf(rbw.getDereferenceValue()));
 				} else if(w.getValue() instanceof HasText) {
-                    ((Widget)w.getValue()).setTitle(((HasText)w.getValue()).getText());
 					if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
 						w.getValue().setValue(((BigDecimal) recordValue.getValue()) == null ? ""
 								: ((BigDecimal) recordValue.getValue()).toPlainString());
@@ -188,10 +186,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					}
                 } else {
 					w.getValue().setValue(recordValue.getValue());
-				}
-				if (w.getValue() instanceof Widget) {
-					((Widget) w.getValue()).setTitle(w.getValue().getValue() == null ? ""
-							: w.getValue().getValue().toString());
 				}
 			}
 		}
@@ -280,7 +274,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		}
 	}
 
-	@Override
+    @Override
+    public void setHierarchy(boolean isHierarchy) {
+        this.isHierarchy = isHierarchy;
+    }
+
+    @Override
 	public void setSaveButtonEnabled(boolean enabled) {
 		save.setEnabled(enabled);
 	}

@@ -18,6 +18,8 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
 
     void load(PickerState pickerState);
 
+    void reload();
+
     void find(String searchPattern);
 
     void reloadOnDate(Date version);

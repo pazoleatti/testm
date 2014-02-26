@@ -36,6 +36,7 @@ public class RefBookDaoTest {
 	public static final String ATTRIBUTE_AUTHOR = "author";
 	public static final String ATTRIBUTE_NAME = "name";
     public static final String ATTRIBUTE_WEIGHT = "weight";
+	public static final String ATTRIBUTE_NULL = "null";
     private static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
 
 	@Autowired
@@ -55,7 +56,7 @@ public class RefBookDaoTest {
 	public void testGet1() {
 		RefBook refBook1 = refBookDao.get(1L);
 		assertEquals(1, refBook1.getId().longValue());
-		assertEquals(4, refBook1.getAttributes().size());
+		assertEquals(5, refBook1.getAttributes().size());
 	}
 
 	@Test
@@ -183,6 +184,7 @@ public class RefBookDaoTest {
 		assertEquals("Вий", record.get(ATTRIBUTE_NAME).getStringValue());
 		assertEquals(425, record.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
 		assertEquals(6, record.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
+		assertNull(record.get(ATTRIBUTE_NULL).getStringValue());
 	}
 
 	private Date getDate(int day, int month, int year) {

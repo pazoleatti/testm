@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -14,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exce
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -50,7 +50,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
-		void setSaveButtonEnabled(boolean enabled);
+
+        void setHierarchy(boolean isHierarchy);
+
+        void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
 		void setEnabled(boolean enabled);
         void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
@@ -80,6 +83,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 EditFormPresenter.this.readOnly = readOnly;
+                                getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;
@@ -161,11 +165,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Dialog.warningMessage("Не указана дата начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
 			if (currentUniqueRecordId == null) {
