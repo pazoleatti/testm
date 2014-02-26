@@ -52,7 +52,7 @@ public class GetDeclarationListHandler extends AbstractActionHandler<GetDeclarat
             wasEmpty = true;
         }
 
-        // Для всех пользователей, кроме пользователей с колью "Контролер УНП" происходит принудительная фильтрация
+        // Для всех пользователей, кроме пользователей с ролью "Контролер УНП" происходит принудительная фильтрация
         // деклараций по подразделениям
         if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP) && !wasEmpty) {
             // Список доступных подразделений
