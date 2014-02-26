@@ -58,7 +58,7 @@ public class TaxFormNominationPresenter
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
         void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
-        void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
+        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
 
         // получение данных
         boolean isForm();
@@ -178,7 +178,7 @@ public class TaxFormNominationPresenter
 		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(result.getTableData(), result.getDepartmentFullNames());
+                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
@@ -291,7 +291,7 @@ public class TaxFormNominationPresenter
     }
 
     @Override
-    public void onRangeChange(final int start, int length) {
+    public void onFormRangeChange(final int start, int length) {
         GetTableDataAction action = getTableDataAction();
         action.setCount(length);
         action.setStartIndex(start);
@@ -302,6 +302,23 @@ public class TaxFormNominationPresenter
                     public void onSuccess(GetTableDataResult result) {
                         getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updatePanelAnchors();
+                    }
+                }, this));
+    }
+
+
+    @Override
+    public void onDeclarationRangeChange(final int start, int length) {
+        GetTableDataAction action = getTableDataAction();
+        action.setCount(length);
+        action.setStartIndex(start);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
     }

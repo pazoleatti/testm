@@ -7,35 +7,32 @@
 	<inherits name='com.google.gwt.inject.Inject' />
 
 	<!-- TaxAccounting Modules -->
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate" />
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.DeclarationTemplate" />
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationdata.DeclarationData" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.about.AboutModule" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formdata.FormData" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule" />
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.TemplateVersionList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.about.AboutModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationdata.DeclarationData" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationlist.DeclarationList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.DeclarationTemplate" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.DeclarationVersionList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdata.FormData" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList" />
+	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.TemplateVersionList"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
+	<inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule" />
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.scheduler.Scheduler"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.sources.Sources"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage2.TestPage2"/>
-
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.DeclarationVersionList"/>
-
-
 
     <replace-with class="com.google.gwt.user.cellview.client.CustomCellBasedWidgetImplTrident">
         <when-type-is class="com.google.gwt.user.cellview.client.CellBasedWidgetImpl"/>

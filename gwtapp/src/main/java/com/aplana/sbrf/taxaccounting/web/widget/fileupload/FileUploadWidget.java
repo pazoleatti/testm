@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
@@ -87,6 +89,14 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
+    public HandlerRegistration addStartLoadHandler(StartLoadFileEvent.StartLoadFileHandler handler) {
+        return addHandler(handler, StartLoadFileEvent.getType());
+    }
+
+    public HandlerRegistration addEndLoadHandler(EndLoadFileEvent.EndLoadFileHandler handler) {
+        return addHandler(handler, EndLoadFileEvent.getType());
+    }
+
     interface Binder extends UiBinder<FormPanel, FileUploadWidget>{
     }
 
@@ -102,8 +112,11 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
                     String uuid = event.getResults().replaceAll(jsonPattern, "$2");
                     JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                    setValue(jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim(), true);
+                    String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
+                    EndLoadFileEvent.fire(FileUploadWidget.this, value);
+                    setValue(value, true);
                 } else {
+                    EndLoadFileEvent.fire(FileUploadWidget.this, true);
                     setValue("");
                 }
                 uploadFormDataXls.reset();
@@ -113,6 +126,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         uploader.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                StartLoadFileEvent.fire(FileUploadWidget.this, uploader.getFilename());
                 uploadFormDataXls.submit();
             }
         });
