@@ -32,4 +32,6 @@ public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEdit
 	void setHeader(String header);
 
     void setSelectButtonFocus(boolean focused);
+
+    void clearFilter();
 }
