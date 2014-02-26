@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:dw='urn:import:com.aplana.gwt.client'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:style>
 
         .content {
@@ -16,27 +15,31 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 64px;
         }
 
-        .image{
+        .image {
             margin-right: 10px;
+        }
+
+        .bgcolor {
+            background-color: white;
         }
 
     </ui:style>
 
-    <g:VerticalPanel width="450px">
+    <g:VerticalPanel width="450px" addStyleNames="{style.bgcolor}">
         <g:HorizontalPanel addStyleNames="{style.content}">
             <g:cell verticalAlignment="MIDDLE">
                 <g:FlowPanel addStyleNames="{style.image}" ui:field="imagePanel"/>
             </g:cell>
             <g:cell verticalAlignment="MIDDLE">
-                <g:Label ui:field="message" />
+                <g:Label ui:field="message"/>
             </g:cell>
         </g:HorizontalPanel>
-        <g:cell horizontalAlignment="ALIGN_RIGHT" >
-            <g:FlowPanel addStyleNames="{style.footerPanel}" >
+        <g:cell horizontalAlignment="ALIGN_RIGHT">
+            <g:FlowPanel addStyleNames="{style.footerPanel}">
                 <g:Button ui:field="yesButton" addStyleNames="{style.footerButton}" text="Да" visible="false"/>
                 <g:Button ui:field="noButton" addStyleNames="{style.footerButton}" text="Нет" visible="false"/>
                 <g:Button ui:field="okButton" addStyleNames="{style.footerButton}" text="Ок" visible="false"/>

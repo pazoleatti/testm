@@ -310,6 +310,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
+    public void reload() {
+        refBookView.reload();
+    }
+
+    @Override
     public String getOtherDereferenceValue(String alias) {
         return refBookView.getOtherDereferenceValue(alias);
     }

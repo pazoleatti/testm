@@ -84,6 +84,8 @@ public class TaxFormNominationPresenter
          * Обновление страницы
          */
         void onReveal();
+
+        void clearFilter();
     }
 
     private TaxType taxType;
@@ -288,6 +290,12 @@ public class TaxFormNominationPresenter
     protected void onReveal() {
         super.onReveal();
         getView().onReveal();
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clearFilter();
     }
 
     @Override

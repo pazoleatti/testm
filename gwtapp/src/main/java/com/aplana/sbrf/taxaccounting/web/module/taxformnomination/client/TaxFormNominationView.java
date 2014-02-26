@@ -595,6 +595,11 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     @Override
+    public void clearFilter() {
+        departmentPicker.clearFilter();
+    }
+
+    @Override
     public void setDepartments(List<Integer> department){
         departmentPicker.setValue(department);
     }
