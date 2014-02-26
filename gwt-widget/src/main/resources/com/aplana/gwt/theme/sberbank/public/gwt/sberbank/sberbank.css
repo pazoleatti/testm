@@ -1314,9 +1314,10 @@ td.datePickerMonth {
 }
 
 .aplana-Spinner-textBox {
+    line-height: 19px;
     border: none;
     text-align: right;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 .aplana-Spinner-panel {
