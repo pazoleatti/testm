@@ -40,7 +40,6 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -215,11 +214,11 @@ void calc() {
 }
 
 def BigDecimal calc8(DataRow row) {
-    if (isRubleCurrency(row.currencyCode)) {
-        return 1
-    }
     if (row.date == null || row.currencyCode == null) {
         return null
+    }
+    if (isRubleCurrency(row.currencyCode)) {
+        return 1
     }
     return getRate(row.date, row.currencyCode)
 }
@@ -277,6 +276,7 @@ def getTotalRow(def alias, def title) {
 
 // Логические проверки
 void logicCheck() {
+    prevPeriodCheck()
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
     if (dataRows.isEmpty()) {
         return
