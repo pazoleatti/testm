@@ -19,7 +19,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
     private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String PATTER_LOG_FILE_NAME = "log_%s-%s_";
+    private static final String PATTER_LOG_FILE_NAME = "log_%s-%s";
     private static final String ENCODING = "windows-1251";
 
     private static final String POSTFIX = ".zip";
@@ -60,7 +60,9 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         String fileName = String.format(PATTER_LOG_FILE_NAME,
                 SDF_LOG_NAME.format(items.get(0).getLogDate()),
                 SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()));
-        File file = File.createTempFile(fileName, ".csv");
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        //File file = File.createTempFile(fileName, ".csv");
+        File file = new File(tmpDir + File.separator + fileName + ".csv");
         CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');
 
         csvWriter.writeNext(headers);
@@ -69,14 +71,16 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         }
         csvWriter.close();
 
-        File zipFile = File.createTempFile(fileName, POSTFIX);
+        //File zipFile = File.createTempFile(fileName, POSTFIX);
+        File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
         ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
         ZipEntry zipEntry = new ZipEntry(file.getName());
         zout.putNextEntry(zipEntry);
         zout.write(IOUtils.toByteArray(new FileReader(file), ENCODING));
         zout.close();
 
-        file.delete();
+        if (!file.delete())
+            logger.warn(String.format("Временнный файл %s не был удален.", fileName));
         return zipFile.getAbsolutePath();
     }
 
@@ -88,7 +92,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         entries.add(item.getReportPeriod() != null ?
                 item.getReportPeriod().getName() + " " + item.getReportPeriod().getTaxPeriod().getYear() :
                 "");
-        entries.add(item.getDepartment().getName());
+        entries.add(item.getDepartmentName());
         entries.add(item.getFormType() != null?"Налоговые формы" :
                 item.getDeclarationType() != null?"Декларации":"");
         entries.add(item.getFormKind() != null ? item.getFormKind().getName() : "");
@@ -99,4 +103,5 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
 
         return entries.toArray(new String[entries.size()]);
     }
+
 }

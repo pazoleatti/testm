@@ -1,11 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsResult;
@@ -16,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -48,15 +42,17 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
     @Autowired
     private FormDataAccessService formDataAccessService;
 
+	@Autowired
+	private SourceService departmentFormTypeService;
+
     @Override
     public FillFormFieldsResult execute(FillFormFieldsAction action, ExecutionContext executionContext) throws ActionException {
         FillFormFieldsResult result = new FillFormFieldsResult();
         switch (action.getFieldsNum()){
             case FIRST:
-                HashSet<Integer> departmentIds = new HashSet<Integer>(departmentService.getTaxFormDepartments(securityService.currentUserInfo().getUser(),
-                        asList(action.getTaxType())));
-                result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
-                        new ArrayList<Integer>(departmentIds)));
+	            List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
+	            periodList.addAll(periodService.getOpenForUser(securityService.currentUserInfo().getUser(), action.getTaxType()));
+                result.setReportPeriods(periodList);
                 break;
             case SECOND:
                 List<Integer> departments =
@@ -65,19 +61,29 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                     result.setDepartments(new ArrayList<Department>());
                     result.setDepartmentIds(new HashSet<Integer>());
                 } else {
-                    departmentIds = new HashSet<Integer>(departments);
+	                Set<Integer> departmentIds = new HashSet<Integer>(departments);
                     result.setDepartments(new ArrayList<Department>(
                             departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                     result.setDepartmentIds(departmentIds);
                 }
                 break;
             case THIRD:
-                List<FormDataKind> kinds = new ArrayList<FormDataKind>(FormDataKind.values().length);
-                kinds.addAll(formDataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
+                List<FormDataKind> kinds = new ArrayList<FormDataKind>();
+	            List<FormTypeKind> formTypeKinds = departmentFormTypeService.getFormAssigned(action.getDepartmentId(), action.getTaxType().getCode());
+	            List<FormType> types = formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo());
+	            for (FormTypeKind ftk : formTypeKinds) {
+		            for (FormType type : types) {
+			            if (ftk.getFormTypeId() == type.getId()) {
+				            kinds.add(ftk.getKind());
+				            break;
+			            }
+		            }
+
+	            }
                 result.setDataKinds(kinds);
                 break;
             case FORTH:
-                result.setFormTypes(formDataSearchService.getActiveFormTypeInReportPeriod(action.getFieldId(), action.getTaxType()));
+                result.setFormTypes(formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo()));
                 break;
         }
 

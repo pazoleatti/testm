@@ -89,6 +89,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void reloadDepartmentParams();
 
         /**
+         * Исходное состояние формы
+         */
+        void init();
+
+        /**
          * Очистка формы
          */
         void clear();
@@ -136,7 +141,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
                     public void onSuccess(SaveDepartmentCombinedResult result) {
-                        MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                        if (result.getUuid() != null) {
+                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                        }
+                        if(!result.isHasError()){
+                            MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                        }
                     }
                 }, this));
     }
@@ -224,6 +234,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
+        getView().init();
 
         String value = request.getParameter("nType", "");
         TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);

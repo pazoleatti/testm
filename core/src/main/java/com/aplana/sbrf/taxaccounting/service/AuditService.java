@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,11 +25,17 @@ public interface AuditService {
 	/**
 	 * Получить данные используемые для фильтрации журналом аудита
 	 */
-	LogSystemFilterAvailableValues getFilterAvailableValues();
+	LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
-     * @param itemList
+     * @param itemList архивированные записи
      */
     void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
+
+    /**
+     * Получение даты последней архивации
+     * @return дата ахивации
+     */
+    Date getLastArchiveDate();
 }

@@ -13,7 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -37,6 +37,9 @@ import java.util.*;
  */
 public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiHandlers>
 		implements DepartmentConfigPresenter.MyView, Editor<DepartmentCombined> {
+
+    private static final String CONFIRM_TITLE = "Подтверждение операции";
+    private static final String CONFIRM_MSG = "Все несохранённые данные будут потеряны. Выйти из режима редактирования?";
 
 	// Признак режима редактирования
 	private boolean isEditMode = false;
@@ -92,15 +95,18 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			sumDividends;
 
 	@UiField
-    RefBookMultiPickerModalWidget
+    RefBookPickerWidget
 			dictRegionId,
 			reorgFormCode,
 			signatoryId,
 			taxPlaceTypeCode,
 			obligation,
-			okato,
+            oktmo,
 			okvedCode,
 			type;
+
+    @UiField
+    CheckBox prepayment;
 
 	@UiField
 	TextArea name;
@@ -114,7 +120,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@Ignore
 	HorizontalPanel sumTaxPanel,
 			sumDividendsPanel,
-			payPanelObligation,
+            payPanelObligation,
+            payPanelPrepayment,
 			payPanelType,
 			taxRatePanel;
 
@@ -147,7 +154,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		driver.initialize(this);
+        driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
 	}
@@ -179,39 +186,36 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				final Integer selDepid = selDepartmentId;
 
 				if (isEditMode && driver.isDirty()) {
-					Dialog.confirmMessage(
-							"Все несохранённые данные будут потеряны. Выйти из режима редактирования?",
-							new DialogHandler() {
-								@Override
-								public void yes() {
-									setEditMode(false);
-									// Проверка совпадения выбранного подразделения с текущим
-									if (DepartmentConfigView.this.currentDepartmentId != null
-											&& DepartmentConfigView.this.currentDepartmentId.equals(selDepid)) {
-										return;
-									}
-									DepartmentConfigView.this.currentDepartmentId = selDepid;
-									// Очистка формы
-									clear();
-									updateVisibility();
-									reloadDepartmentParams();
-									Dialog.hideMessage();
-								}
+                    Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            setEditMode(false);
+                            // Проверка совпадения выбранного подразделения с текущим
+                            if (DepartmentConfigView.this.currentDepartmentId != null
+                                    && DepartmentConfigView.this.currentDepartmentId.equals(selDepid)) {
+                                return;
+                            }
+                            DepartmentConfigView.this.currentDepartmentId = selDepid;
+                            // Очистка формы
+                            clear();
+                            updateVisibility();
+                            reloadDepartmentParams();
+                            Dialog.hideMessage();
+                        }
 
-								@Override
-								public void no() {
-									// Вернуть старое подразделение
-									departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
-								}
+                        @Override
+                        public void no() {
+                            // Вернуть старое подразделение
+                            departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
+                        }
 
-								@Override
-								public void close() {
-									no();
-								}
-							}
-					);
-				} else {
-					setEditMode(false);
+                        @Override
+                        public void close() {
+                            no();
+                        }
+                    });
+                } else {
+                    setEditMode(false);
 					// Проверка совпадения выбранного подразделения с текущим
 					if (DepartmentConfigView.this.currentDepartmentId != null
 							&& DepartmentConfigView.this.currentDepartmentId.equals(selDepartmentId)) {
@@ -225,7 +229,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				}
 			}
 		});
-
 	}
 
 	@Override
@@ -239,24 +242,45 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 				currentReportPeriodId == null ? null : currentReportPeriodId);
 	}
 
+    @Override
+    public void init() {
+        setEditMode(false);
+        currentDepartmentId = null;
+        currentReportPeriodId = null;
+        currentTaxType = null;
+        isReportPeriodActive = false;
+
+        updateVisibility();
+        clear();
+    }
+
 	@Override
 	public void clear() {
-		if (dereferenceValues != null) {
-			dereferenceValues.clear();
-		}
-		dictRegionId.setDereferenceValue(null);
-		reorgFormCode.setDereferenceValue(null);
-		signatoryId.setDereferenceValue(null);
-		taxPlaceTypeCode.setDereferenceValue(null);
-		obligation.setDereferenceValue(null);
-		okato.setDereferenceValue(null);
-		okvedCode.setDereferenceValue(null);
-		type.setDereferenceValue(null);
+        if (dereferenceValues != null) {
+            dereferenceValues.clear();
+        }
+        dictRegionId.setDereferenceValue(null);
+        reorgFormCode.setDereferenceValue(null);
+        signatoryId.setDereferenceValue(null);
+        taxPlaceTypeCode.setDereferenceValue(null);
+        obligation.setDereferenceValue(null);
+        oktmo.setDereferenceValue(null);
+        okvedCode.setDereferenceValue(null);
+        type.setDereferenceValue(null);
 
-		driver.edit(new DepartmentCombined());
-	}
+        driver.edit(new DepartmentCombined());
+    }
 
-	/**
+    /**
+     * Отмена редактирования
+     */
+    private void cancel() {
+        setEditMode(false);
+        driver.edit(data);
+        setDereferenceValue(dereferenceValues);
+    }
+
+    /**
 	 * Обновление видимости полей
 	 */
 	private void updateVisibility() {
@@ -271,6 +295,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		boolean isPayPanelVisible = currentDepartmentId != null && !isUnp && currentTaxType == TaxType.INCOME;
 		payPanelObligation.setVisible(isPayPanelVisible);
 		payPanelType.setVisible(isPayPanelVisible);
+        payPanelPrepayment.setVisible(currentTaxType == TaxType.TRANSPORT);
 	}
 
 	@UiHandler("findButton")
@@ -291,7 +316,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
 			dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
 			dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-			dereferenceValues.put(okato.getAttributeId(), okato.getDereferenceValue());
+			dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
 			dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
 			dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
 		}
@@ -300,29 +325,25 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event) {
 		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
-				@Override
-				public void yes() {
-					setEditMode(false);
-					driver.edit(data);
-					setDereferenceValue(dereferenceValues);
-					Dialog.hideMessage();
-				}
+            Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
+                @Override
+                public void yes() {
+                    DepartmentConfigView.this.cancel();
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void no() {
-					Dialog.hideMessage();
-				}
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
 
-				@Override
-				public void close() {
-					no();
-				}
-			});
+                @Override
+                public void close() {
+                    no();
+                }
+            });
 		} else {
-			setEditMode(false);
-			driver.edit(data);
-			setDereferenceValue(dereferenceValues);
+            cancel();
 		}
 	}
 
@@ -342,8 +363,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		this.isEditMode = isEditMode;
 		editModeLabel.setVisible(isEditMode);
 		editButton.setVisible(!isEditMode);
-		editButton.setEnabled(currentDepartmentId !=null && currentReportPeriodId != null && isReportPeriodActive);
-		saveButton.setVisible(isEditMode);
+        editButton.setEnabled(currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive);
+        saveButton.setVisible(isEditMode);
 		cancelButton.setVisible(isEditMode);
 		enableAllChildren(isEditMode, formPanel);
 	}
@@ -372,7 +393,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		}
 		final Integer repPeriodId = reportPeriodId;
 		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage("Все несохранённые данные будут потеряны. Выйти из режима редактирования?", new DialogHandler() {
+			Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
 				@Override
 				public void yes() {
 					setEditMode(false);
@@ -393,7 +414,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 		} else {
 			setEditMode(false);
-
 			afterCheckUnsaved(reportPeriodId);
 		}
 	}
@@ -459,8 +479,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			taxPlaceTypeCode.setPeriodDates(period.first, period.second);
 			obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
 			obligation.setPeriodDates(period.first, period.second);
-			okato.setDereferenceValue(rbTextValues.get(okato.getAttributeId()));
-			okato.setPeriodDates(period.first, period.second);
+			oktmo.setDereferenceValue(rbTextValues.get(oktmo.getAttributeId()));
+			oktmo.setPeriodDates(period.first, period.second);
 			okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
 			okvedCode.setPeriodDates(period.first, period.second);
 			type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
@@ -482,7 +502,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		signatoryId.setPeriodDates(startDate, endDate);
 		taxPlaceTypeCode.setPeriodDates(startDate, endDate);
 		obligation.setPeriodDates(startDate, endDate);
-		okato.setPeriodDates(startDate, endDate);
+		oktmo.setPeriodDates(startDate, endDate);
 		okvedCode.setPeriodDates(startDate, endDate);
 		type.setPeriodDates(startDate, endDate);
 	}
@@ -503,5 +523,5 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
 		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
-	}
+    }
 }

@@ -7,12 +7,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTree
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +45,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
 	public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
+
+	public static final String UNKNOWN_ATTRIBUTE_ERROR = "Не указан атрибут справочника";
+	public static final String UNKNOWN_RECORD_ERROR = "Не указан код элемента справочника";
 
 	@Autowired
     private RefBookUtils refBookUtils;
@@ -161,8 +162,33 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+		RefBookAttribute defaultSort = refBook.getSortAttribute();
+		if (isSupportOver()) {
+			// row_number() over (order by ... asc\desc)
+			ps.appendQuery("row_number() over ( order by ");
+			if (sortAttribute != null || defaultSort != null) {
+				String sortAlias = sortAttribute == null ? defaultSort.getAlias() : sortAttribute.getAlias();
+				RefBookAttributeType sortType = sortAttribute == null ? defaultSort.getAttributeType() : sortAttribute.getAttributeType();
+
+				ps.appendQuery("a");
+				ps.appendQuery(sortAlias);
+				ps.appendQuery(".");
+				ps.appendQuery(sortType.toString());
+				ps.appendQuery("_value ");
+			} else {
+				ps.appendQuery("id");
+			}
+			ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
+		} else {
+			ps.appendQuery("rownum");
+		}
+		ps.appendQuery(" as ");
+		ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+	}
+
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+    public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
@@ -175,20 +201,155 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return result;
     }
 
+    @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter) {                       // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener =  applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder("\nfrom\n");
+
+        if (version != null) {
+            fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
+            ps.appendQuery(WITH_STATEMENT);
+            ps.addParam(refBookId);
+            ps.addParam(version);
+        } else {
+            fromSql.append("  ref_book_record r\n");
+        }
+
+        ps.appendQuery("select\n");
+        ps.appendQuery(" r.id as ID, r.record_id as RECORD_ID\n");
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+            ps.appendQuery(", a");
+            ps.appendQuery(alias);
+            ps.appendQuery(".");
+            ps.appendQuery(attribute.getAttributeType().toString());
+            ps.appendQuery("_value as \"");
+            ps.appendQuery(alias);
+            ps.appendQuery("\"");
+
+            fromSql.append(" left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = r.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null){
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and\n  status <> -1\n");
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+
+        try {
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                    new RowMapper<Pair<Long, Long>>() {
+                        @Override
+                        public Pair<Long, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new Pair<Long, Long>(rs.getLong("ID"), rs.getLong("RECORD_ID"));
+                        }
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+    private PagingResult<Map<String, RefBookValue>> getChildren(@NotNull Long refBookId, @NotNull Date version, PagingParams pagingParams,
+																String filter, RefBookAttribute sortAttribute, boolean isSortAscending, Long parentId) {
+        PreparedStatementData ps = getChildrenStatement(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending, parentId);
+        RefBook refBook = get(refBookId);
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // Получение количества данных в справкочнике
+        PreparedStatementData psForCount = getChildrenStatement(refBookId, null, version, sortAttribute, filter, null, true, parentId);
+        psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
+        result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
+        return result;
+    }
+
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, @NotNull Date version,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(refBookId, version, pagingParams, filter, sortAttribute, true);
     }
 
+	public static final String SELECT_SINGLE_ROW_VALUES_QUERY =
+		" SELECT r.id, v.attribute_id, " +
+		" v.string_value, v.number_value, v.date_value, v.reference_value" +
+		" FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
+		" WHERE r.id = ? AND r.ref_book_id = ?";
+
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
-        String sql = getRefBookRecordSql(refBookId, recordId);
-        RefBook refBook = get(refBookId);
-		try {
-        	return getJdbcTemplate().queryForObject(sql, new RefBookValueMapper(refBook));
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найдена строка с id = %d", refBook.getName(), refBookId, recordId));
+
+        final RefBook refBook = get(refBookId);
+		final Map<String, RefBookValue> result = refBook.createRecord();
+		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
+			@Override
+			public void processRow(ResultSet rs) throws SQLException {
+				RefBookValue recordIdValue = result.get(RefBook.RECORD_ID_ALIAS);
+				if (recordIdValue.getNumberValue() == null) {
+					recordIdValue.setValue(rs.getLong("id"));
+				}
+				Long attributeId = rs.getLong("attribute_id");
+				RefBookAttribute attribute = refBook.getAttribute(attributeId);
+				String columnName = attribute.getAttributeType().name() + "_value";
+				if (rs.getObject(columnName) != null) {
+					Object value = null;
+					switch (attribute.getAttributeType()) {
+						case STRING: {
+							value = rs.getString(columnName);
+						}
+						break;
+						case NUMBER: {
+							value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+						}
+						break;
+						case DATE: {
+							value = rs.getDate(columnName);
+						}
+						break;
+						case REFERENCE: {
+							value = rs.getLong(columnName);
+						}
+						break;
+					}
+					RefBookValue attrValue = result.get(attribute.getAlias());
+					attrValue.setValue(value);
+				}
+			}
+		});
+		if (result.get(RefBook.RECORD_ID_ALIAS).getNumberValue() == null) { // если элемент не найден
+			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
 		}
+		return result;
     }
 
     private static final String WITH_STATEMENT =
@@ -204,7 +365,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String RECORD_VERSIONS_STATEMENT =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
             "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID), \n" +
-            "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+            "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     /**
      * Динамически формирует запрос для справочника
@@ -265,27 +426,129 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-        if (isSupportOver() && sortAttribute != null) {
-            // эту часть кода нельзя покрыть юнит тестами с использованием hsql потому что она не поддерживает row_number()
-            ps.appendQuery("row_number()");
-            // Надо делать сортировку
-            ps.appendQuery(" over (order by ");
-            ps.appendQuery("a");
-            ps.appendQuery(sortAttribute.getAlias());
-            ps.appendQuery(".");
-            ps.appendQuery(sortAttribute.getAttributeType().toString());
-            ps.appendQuery("_value ");
-            ps.appendQuery(isSortAscending ? "ASC":"DESC");
-            ps.appendQuery(")");
-            ps.appendQuery(" as row_number_over,\n");
-        } else {
-            // База тестовая и не поддерживает row_number() значит сортировка работать не будет
-            ps.appendQuery("rownum row_number_over,\n");
-        }
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
             String alias = attribute.getAlias();
-            ps.appendQuery("  a");
+            ps.appendQuery(", a");
+            ps.appendQuery(alias);
+            ps.appendQuery(".");
+            ps.appendQuery(attribute.getAttributeType().toString());
+            ps.appendQuery("_value as \"");
+            ps.appendQuery(alias);
+            ps.appendQuery("\"");
+
+            fromSql.append(" left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = r.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null){
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery("?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and\n  status <> -1\n");
+
+        if (version == null) {
+            ps.appendQuery("order by t.version\n");
+        }
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+        ps.appendQuery(")");
+
+        if (pagingParams != null) {
+			ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
+            ps.addParam(pagingParams.getStartIndex());
+            ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
+        }
+
+        return ps;
+    }
+
+    private PreparedStatementData getChildrenStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+													   String filter, PagingParams pagingParams, boolean isSortAscending, Long parentId) {
+        // модель которая будет возвращаться как результат
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        if (sortAttribute != null && !attributes.contains(sortAttribute)) {
+            throw new IllegalArgumentException(String.format("Reference book (id=%d) doesn't contains attribute \"%s\"",
+                    refBookId, sortAttribute.getAlias()));
+        }
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener =  applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder("\nfrom\n");
+
+        fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
+        if (version != null) {
+            ps.appendQuery(WITH_STATEMENT);
+            ps.addParam(refBookId);
+            ps.addParam(version);
+        } else {
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
+            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+        }
+
+        ps.appendQuery(" SELECT ");
+
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+		ps.appendQuery(",");
+
+        // выбираем все алиасы + row_number_over
+        List<String> aliases = new ArrayList<String>(attributes.size()+1);
+        aliases.add("record_id");
+        //aliases.add("rownum ");
+		//aliases.add(RefBook.RECORD_SORT_ALIAS);
+        for (RefBookAttribute attr: attributes){
+            aliases.add(attr.getAlias());
+        }
+        ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
+        ps.appendQuery(" FROM");
+        ps.appendQuery("(select distinct \n");
+        ps.appendQuery(" CONNECT_BY_ROOT  r.id as \"RECORD_ID\", \n");
+        if (version == null) {
+            ps.appendQuery("  t.version as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+            ps.appendQuery("\",\n");
+
+            ps.appendQuery("  t.versionEnd as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+            ps.appendQuery("\",\n");
+        }
+
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+            ps.appendQuery(" CONNECT_BY_ROOT  a");
             ps.appendQuery(alias);
             ps.appendQuery(".");
             ps.appendQuery(attribute.getAttributeType().toString());
@@ -330,10 +593,23 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\n");
             ps.addParam(filterPS.getParams());
         }
+
+        // выборка иерархического исправочника
+        ps.appendQuery(" CONNECT BY PRIOR r.id = aPARENT_ID.REFERENCE_value ");
+        ps.appendQuery("START WITH aPARENT_ID.REFERENCE_value ");
+        if (parentId == null){
+            ps.appendQuery(" is null ");
+        } else {
+            ps.appendQuery(" = ");
+            ps.appendQuery(parentId.toString());
+        }
+
         ps.appendQuery(")");
 
         if (pagingParams != null) {
-            ps.appendQuery(" where row_number_over between ? and ?");
+			ps.appendQuery(" WHERE ");
+			ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
+			ps.appendQuery(" BETWEEN ? AND ?");
             ps.addParam(pagingParams.getStartIndex());
             ps.addParam(String.valueOf(pagingParams.getStartIndex() + pagingParams.getCount()));
         }
@@ -398,7 +674,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	 * @param parentRecordId код родительской записи
 	 * @return фильтр с учетом условия по родительской записи
 	 */
-	static String getParentFilter(final String filter, final Long parentRecordId) {
+	public static String getParentFilter(final String filter, final Long parentRecordId) {
 		String parentFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
 		return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
 	}
@@ -419,7 +695,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		if (!checkHierarchical(refBook)) {
 			throw new IllegalArgumentException(String.format(NOT_HIERARCHICAL_REF_BOOK_ERROR, refBook.getName(), refBook.getId()));
 		}
-		return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute);
+
+        /**
+         * Если фильтра нет, то выбираем как обычно, просто используя фильтр PARENT_ID = ?
+         * в случае же с переданнм фильтром используем иной запрос,
+         * который ищет все записи, включая вложенные, которые соответствуют условию фильтрации,
+         * а затем выбираеются их родители для текущего parentRecordId
+         *
+         */
+        if (filter == null || filter.equals("")){
+            return getRecords(refBookId, version, pagingParams, getParentFilter(filter, parentRecordId), sortAttribute, true);
+        } else {
+            return getChildren(refBookId, version, pagingParams, filter, sortAttribute, true, parentRecordId);
+        }
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
@@ -460,8 +748,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : record.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
-                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
@@ -527,8 +814,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             for (Map.Entry<String, RefBookValue> entry : records.entrySet()) {
                 String attributeAlias = entry.getKey();
-                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias) ||
-                        RefBook.RECORD_PARENT_ID_ALIAS.equals(attributeAlias)) {
+                if (RefBook.RECORD_ID_ALIAS.equals(attributeAlias)) {
                     continue;
                 }
                 RefBookAttribute attribute = refBook.getAttribute(attributeAlias);
@@ -613,62 +899,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public RefBookValue getValue(Long recordId, Long attributeId) {
-        String errStr = "Не найдено значение атрибута справочника с id = %d, соответствующее записи с id = %d";
-
-        if (recordId == null || attributeId == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-        RefBook rb = getByAttribute(attributeId);
-        if (rb == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-        //TODO: лучше одним запросом получать значение и тип атрибута (Marat Fayzullin 2013-08-06)
-        RefBookAttribute attribute = rb.getAttribute(attributeId);
-        if (attribute == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-
-        String q1 = "select";
-        String q2 = "from ref_book_value where record_id = ? and attribute_id = ?";
-        String q3 = null;
-        Class cs = null;
-
-        switch (attribute.getAttributeType()) {
-            case STRING:
-                q3 = " string_value ";
-                cs = String.class;
-                break;
-            case NUMBER:
-                q3 = " number_value ";
-                cs = Number.class;
-                break;
-            case DATE:
-                q3 = " date_value ";
-                cs = Date.class;
-                break;
-            case REFERENCE:
-                q3 = " reference_value ";
-                cs = Long.class;
-                break;
-        }
-        if (q3 == null) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
-        try {
-            return new RefBookValue(attribute.getAttributeType(), getJdbcTemplate().queryForObject(q1 + q3 + q2,
-                    new Object[]{recordId, attributeId}, cs));
-        } catch (EmptyResultDataAccessException ex) {
-            throw new DaoException(String.format(errStr, attributeId, recordId));
-        }
+    public RefBookValue getValue(@NotNull(message = UNKNOWN_RECORD_ERROR) Long recordId, @NotNull(message = UNKNOWN_ATTRIBUTE_ERROR) Long attributeId) {
+        RefBook refBook = getByAttribute(attributeId);
+        RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		return getRecordData(refBook.getId(), recordId).get(attribute.getAlias());
     }
 
     private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.ref_book_id, r.record_id, r.version from ref_book_record r where r.id=?),\n" +
             "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id)\n" +
-            "select cr.id as %s, cr.version as versionStart, nv.version as versionEnd from currentRecord cr, nextVersion nv";
+            "select cr.id as %s, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv";
 
     @Override
-    public RefBookRecordVersion getRecordVersionInfo(@NotNull Long uniqueRecordId) {
+    public RefBookRecordVersion getRecordVersionInfo(@NotNull(message = UNKNOWN_RECORD_ERROR) Long uniqueRecordId) {
         try {
             String sql = String.format(GET_RECORD_VERSION,
                     RefBook.RECORD_ID_ALIAS);
@@ -683,7 +925,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public int getRecordVersionsCount(@NotNull Long refBookId, @NotNull Long uniqueRecordId) {
+    public int getRecordVersionsCount(@NotNull Long refBookId, @NotNull(message = UNKNOWN_RECORD_ERROR) Long uniqueRecordId) {
         return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
                 "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from REF_BOOK_RECORD where ID=?)",
                 new Object[]{refBookId, uniqueRecordId});
@@ -817,8 +1059,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<CheckCrossVersionsResult> checkCrossVersions(@NotNull Long refBookId, @NotNull Long recordId,
 			@NotNull Date versionFrom, @NotNull Date versionTo, Long excludedRecordId) {
-        String sVersionFrom = sdf.format(versionFrom);
-        String sVersionTo = versionTo != null ? "'"+sdf.format(versionTo)+"'" : null;
 
         return getJdbcTemplate().query(CHECK_CROSS_VERSIONS, new RowMapper<CheckCrossVersionsResult>() {
             @Override
@@ -841,67 +1081,138 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
             "where r.ID = v.RECORD_ID and r.STATUS=0 and a.ID=v.ATTRIBUTE_ID and r.REF_BOOK_ID = ?";
 
+    private final static String CHECK_COMBINED_UNIQUE_MATCHES = "select ID from (\n" +
+            "\tselect v.record_id as ID, count(v.record_id) as cnt from ref_book_value v\n" +
+            "\tjoin ref_book_record r on (r.id = v.record_id and r.ref_book_id = ? and r.status = 0)\n" +
+            "\twhere (\n" +
+            "%s" +
+            "\n\t)\t\n" +
+            "\tgroup by v.record_id\n" +
+            ") where cnt = ?";
+
     @Override
     public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull List<RefBookAttribute> attributes,
 			@NotNull List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
-        List<RefBookValue> attributeValues = new ArrayList<RefBookValue>();
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery(CHECK_UNIQUE_MATCHES);
-        ps.addParam(refBookId);
-        for (RefBookAttribute attribute : attributes) {
-            if (attribute.isUnique()) {
-                hasUniqueAttributes = true;
-                ps.appendQuery(" and ");
-                if (records.size() > 1) {
-                    ps.appendQuery(" (");
-                }
-                for (int i=0; i < records.size(); i++) {
-                    Map<String, RefBookValue> values = records.get(i).getValues();
-                    ps.appendQuery("(v.ATTRIBUTE_ID = ?");
-                    ps.addParam(attribute.getId());
 
-                    ps.appendQuery(" and v.");
-                    ps.appendQuery(attribute.getAttributeType() + "_VALUE");
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        ps.appendQuery(" = '%s')");
+        //Проверяем нет ли особой обработки уникальных атрибутов
+        if (!UniqueAttributeCombination.getRefBookIds().contains(refBookId)) {
+            ps.appendQuery(CHECK_UNIQUE_MATCHES);
+            ps.addParam(refBookId);
+            for (RefBookAttribute attribute : attributes) {
+                if (attribute.isUnique()) {
+                    hasUniqueAttributes = true;
+                    ps.appendQuery(" and ");
+                    if (records.size() > 1) {
+                        ps.appendQuery(" (");
                     }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        ps.appendQuery(" = %s)");
-                    }
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        ps.appendQuery(" = to_date('%s', 'DD.MM.YYYY'))");
-                    }
-                    attributeValues.add(values.get(attribute.getAlias()));
+                    for (int i=0; i < records.size(); i++) {
+                        Map<String, RefBookValue> values = records.get(i).getValues();
+                        ps.appendQuery("(v.ATTRIBUTE_ID = ?");
+                        ps.addParam(attribute.getId());
 
-                    if (i < records.size() - 1) {
-                        ps.appendQuery(" or ");
+                        ps.appendQuery(" and v.");
+                        ps.appendQuery(attribute.getAttributeType() + "_VALUE = ?");
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                            ps.addParam(values.get(attribute.getAlias()).getStringValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                            ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                            ps.addParam(values.get(attribute.getAlias()).getNumberValue());
+                        }
+                        if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                            ps.addParam(values.get(attribute.getAlias()).getDateValue());
+                        }
+                        ps.appendQuery(")");
+
+                        if (i < records.size() - 1) {
+                            ps.appendQuery(" or ");
+                        }
+                    }
+                    if (records.size() > 1) {
+                        ps.appendQuery(")");
                     }
                 }
-                if (records.size() > 1) {
-                    ps.appendQuery(")");
+
+                if (hasUniqueAttributes) {
+                    return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                        @Override
+                        public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                        }
+                    });
+                } else {
+                    return null;
                 }
             }
-        }
+        } else {
+            List<Long> uniqueAttributes = UniqueAttributeCombination.getByRefBookId(refBookId).getAttributeIds();
 
-        if (hasUniqueAttributes) {
-            String sql = String.format(ps.getQuery().toString(), attributeValues.toArray());
+            Map<Long, RefBookAttribute> attrMap = new HashMap<Long, RefBookAttribute>();
+            for (RefBookAttribute attribute : attributes) {
+                attrMap.put(attribute.getId(), attribute);
+            }
 
-            return getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+            ps.appendQuery(CHECK_COMBINED_UNIQUE_MATCHES);
+            ps.addParam(refBookId);
+
+            StringBuilder attrQuery = new StringBuilder();
+
+            for (int i = 0; i < records.size(); i++) {
+                Map<String, RefBookValue> values = records.get(i).getValues();
+                attrQuery.append("\t\t(");
+                for (int j = 0; j < uniqueAttributes.size(); j++) {
+                    RefBookAttribute attribute = attrMap.get(uniqueAttributes.get(j));
+                    String type = attribute.getAttributeType().toString() + "_VALUE";
+                    attrQuery.append("(v.attribute_id = ? and v.").append(type).append(" = ?)");
+                    ps.addParam(attribute.getId());
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        ps.addParam(values.get(attribute.getAlias()).getStringValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        ps.addParam(values.get(attribute.getAlias()).getNumberValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getDateValue());
+                    }
+                    if (j < uniqueAttributes.size() - 1) {
+                        attrQuery.append(" or ");
+                    }
+                }
+                attrQuery.append(")");
+                if (i < records.size() - 1) {
+                    attrQuery.append(" or \n");
+                }
+            }
+            ps.addParam(uniqueAttributes.size());
+            String sql = String.format(ps.getQuery().toString(), attrQuery);
+            List<Long> matchedIds = getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Long>() {
                 @Override
-                public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("ID");
                 }
             });
-        } else {
-            return null;
+            List<Pair<Long, String>> result = new ArrayList<Pair<Long, String>>();
+            for (Long id : matchedIds) {
+                for (Long uniqueAttribute : uniqueAttributes) {
+                    result.add(new Pair<Long, String>(id, attrMap.get(uniqueAttribute).getName()));
+                }
+            }
+            return result;
         }
+        return null;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
             "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
-            "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
+            "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
             "\tversionTo IS NOT NULL and (versionFrom <= ? and versionTo >= ?)\n" +
             ") or (\n" +
@@ -909,7 +1220,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ")";
 
     @Override
-    public void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo) {
+    public List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo) {
         List<Long> recordIds = new ArrayList<Long>();
         for (Pair<Long,String> pair : recordPairs) {
             recordIds.add(pair.getFirst());
@@ -917,19 +1228,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 SqlUtils.transformToSqlInStatement(recordIds));
-        List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
-        if (conflictedIds.size() > 0) {
-            StringBuilder attrNames = new StringBuilder();
-            for (Long id : conflictedIds) {
-                for (Pair<Long,String> pair : recordPairs) {
-                    if (pair.getFirst().equals(id)) {
-                        attrNames.append("'").append(pair.getSecond()).append("',");
-                    }
-                }
-            }
-            attrNames.deleteCharAt(attrNames.length()-1);
-            throw new DaoException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
-        }
+        return getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
     }
 
     public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
@@ -939,32 +1238,148 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom) {
-        //TODO добавить проверки по другим точкам запросов
         //Проверка использования в справочниках и настройках подразделений
-        return getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
+        boolean hasUsages = getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v " +
+                "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) and r.version >= ? and v.REFERENCE_VALUE=?",
                 refBookId, versionFrom, uniqueRecordId) != 0;
+        if (!hasUsages) {
+            //Проверка использования в налоговых формах
+            return getJdbcTemplate().queryForInt("select count(*) from report_period where id in \n" +
+                    "(select report_period_id from form_data where id in \n" +
+                    "(select form_data_id from data_row where id in \n" +
+                    "(select row_id from numeric_value where column_id in \n" +
+                    "(select id from form_column where attribute_id in \n" +
+                    "(select id from ref_book_attribute where ref_book_id = ?)) and value = ?))) and start_date > ?",
+                    refBookId, uniqueRecordId, versionFrom) != 0;
+        } else {
+            return hasUsages;
+        }
     }
 
-    private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from ref_book_record where id in %s)\n" +
-            "select count(r.id) from ref_book_record r, ref_book_value v, checkRecords cr where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= cr.version and v.REFERENCE_VALUE=cr.id";
+    private static final String CHECK_USAGES_IN_REFBOOK = "select b.name as refBookName from ref_book b\n" +
+            "join ref_book_record r on r.ref_book_id = b.id \n" +
+            "join ref_book_value v on (v.record_id = r.id and v.reference_value in %s)\n" +
+            "join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = ?)";
 
-    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value " +
-            "where column_id in (select id from form_column where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and record_id in %s)) and value in %s";
+    private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
+            "\tselect * from form_data where id in\n" +
+            "\t(select form_data_id from data_row where id in\n" +
+            "\t(select row_id from numeric_value where column_id in\n" +
+            "\t(select id from form_column where attribute_id in\n" +
+            "\t(select id from ref_book_attribute where ref_book_id = ?)) and value in %s))\n" +
+            ")\n" +
+            "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, rp.name as reportPeriodName, tp.year as year from forms f \n" +
+            "join (select department_id, path from (SELECT f.department_id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
+            "\t\tFROM department d, forms f where d.type != 1 START \n" +
+            "\t\tWITH d.id = f.department_id \n" +
+            "\t\tCONNECT BY PRIOR d.parent_id = d.id order by lvl desc) \n" +
+            "\twhere ROWNUM = 1 ) d on d.department_id=f.department_id\n" +
+            "join form_type t on t.id in (select t.type_id from form_template t, forms f where t.id = f.form_template_id)\n" +
+            "join report_period rp on rp.id = f.report_period_id\n" +
+            "join tax_period tp on tp.id = rp.tax_period_id";
 
-    public boolean isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
-        //Проверка использования в справочниках и настройках подразделений
+    private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "with checkRecords as (select * from ref_book_record r where r.id in %s),\n" +
+            "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
+            "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
+            "select distinct d.name as departmentName, pn.string_value as periodName, t.number_value as isT, i.number_value as isI, d.number_value as isD,\n" +
+            "case\n" +
+            "\twhen u.ref_book_id = 31 then 'T'\n" +        //Транспортный налог
+            "\twhen u.ref_book_id = 33 then 'I'\n" +        //Налог на прибыль
+            "\twhen u.ref_book_id = 37 then 'D'\n" +        //Учет контролируемых сделок
+            "\telse null\n" +
+            "end as taxCode\n" +
+            "from usages u\n" +
+            "join department d on d.id in (select v.reference_value from ref_book_value v, usages u where v.record_id=u.id and v.attribute_id = (select id from ref_book_attribute where ref_book_id=u.ref_book_id and alias='DEPARTMENT_ID'))\n" +
+            "join (select date_value, record_id from periodCodes where alias='CALENDAR_START_DATE') p on to_char(p.date_value,'dd.mm')=to_char(u.version,'dd.mm')\n" +
+            "join (select string_value, record_id from periodCodes where alias='NAME') pn on pn.record_id=p.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='T') t on t.record_id=p.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='I') i on i.record_id=p.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='D') d on d.record_id=p.record_id";
+
+    public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
+        List<String> results = new ArrayList<String>();
+        //Проверка использования в справочниках
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
-        boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
-        if (!hasReferences) {
-            sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
-            return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
-        } else return true;
+        try {
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return "Существует запись справочника "+rs.getString("refBookName")+", которая содержит ссылку на версию!";
+                }
+            }, refBookId));
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
+        }
+
+        try {
+            //Проверка использования в налоговых формах
+            sql = String.format(CHECK_USAGES_IN_FORMS, in);
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    StringBuilder result = new StringBuilder();
+                    result.append("Существует экземпляр налоговой формы \"");
+                    result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
+                    result.append(rs.getString("formType")).append("\" в подразделении \"");
+                    result.append(reverseDepartmentPath(rs.getString("departmentPath"))).append("\" периоде \"");
+                    result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
+                    return result.toString();
+                }
+            }, refBookId));
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
+        }
+
+        try {
+            //Проверка использования в настройках подразделений
+            sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
+            results.addAll(getJdbcTemplate().query(sql, new RowMapper<String>() {
+                @Override
+                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    boolean isT = rs.getBoolean("isT");
+                    boolean isI = rs.getBoolean("isI");
+                    boolean isD = rs.getBoolean("isD");
+                    String taxCode = rs.getString("taxCode");
+
+                    if (taxCode != null && ((taxCode.equals("T") && isT)
+                            || (taxCode.equals("I") && isI)
+                            || (taxCode.equals("D") && isD))) {
+                        StringBuilder result = new StringBuilder();
+                        result.append("В настройке подразделения \"");
+                        result.append(rs.getString("departmentName")).append("\" для налога \"");
+                        result.append(TaxTypeCase.fromCode(taxCode.charAt(0)).getGenitive()).append("\" в периоде \"");
+                        result.append(rs.getString("periodName")).append("\" указана ссылка на версию!");
+                        return result.toString();
+                    }
+                    return null;
+                }
+            }));
+            if (!results.isEmpty()) {
+                while (results.remove(null));
+            }
+        } catch (EmptyResultDataAccessException e) {
+            //do nothing
+        }
+        return results;
+    }
+
+    private String reverseDepartmentPath(String departmentPath) {
+        String[] pathParts = departmentPath.substring(1).split("/");
+        StringBuilder result = new StringBuilder();
+        for (int i = pathParts.length - 1; i > -1; i--) {
+            result.append(pathParts[i]);
+            if (i != 0) {
+                result.append("/");
+            }
+        }
+        return result.toString();
     }
 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
-            "select nv.id as %s, nv.version as versionStart, nve.versionEnd from nextVersion nv, nextVersionEnd nve";
+            "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day as versionEnd from nextVersion nv, nextVersionEnd nve";
 
     @Override
     public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {

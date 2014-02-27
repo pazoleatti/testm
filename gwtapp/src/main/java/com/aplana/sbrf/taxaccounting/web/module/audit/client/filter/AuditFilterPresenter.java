@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsAction;
-import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetReportPeriodsResult;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -25,16 +22,13 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     private final DispatchAsync dispatchAsync;
 
+    private LogSystemAuditFilter previousLogSystemAuditFilter;
+
     @Inject
     public AuditFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
-    }
-
-    @Override
-    public void onSearchButtonClicked() {
-        AuditClientSearchEvent.fire(this);
     }
 
     @Override
@@ -54,31 +48,21 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
     }
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
+        void init();
         void setDepartments(List<Department> list, Set<Integer> availableValues);
-
-        /*void setFormTypeId(List<Long> formTypes);*/
-
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
-
-
         void setFormDataTaxType(List<TaxType> taxTypeList);
-
-        /*void setFormTypeHandler(ValueChangeHandler<AuditFormType> handler);*/
-
         void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
-
-        LogSystemFilter getFilterData();
-
-        /*void setVisibleTaxFields();
-
-        void setVisibleDeclarationFields();
-
-        void hideAll();*/
+        LogSystemAuditFilter getFilterData();
+        boolean isChangeFilter();
+        void edit(LogSystemAuditFilter auditFilter);
+        void clear();
     }
 
     public void initFilterData() {
-
         GetAuditFilterDataAction action = new GetAuditFilterDataAction();
+        getView().init();
+        previousLogSystemAuditFilter = getView().getFilterData();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAuditFilterDataResult>() {
 
@@ -104,6 +88,13 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     }
 
+    @Override
+    public void onSearchButtonClicked() {
+        previousLogSystemAuditFilter = getView().getFilterData();
+        getView().edit(previousLogSystemAuditFilter);
+        AuditClientSearchEvent.fire(this);
+    }
+
     private Set<Integer> convertDepartmentsToIds(List<Department> source) {
         Set<Integer> result = new HashSet<Integer>();
         for (Department department : source) {
@@ -121,26 +112,17 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         return formTypesMap;
     }
 
-    public LogSystemFilter getLogSystemFilter() {
-        return getView().getFilterData();
+    public LogSystemAuditFilter getLogSystemFilter() {
+        return isFilterChange() ? previousLogSystemAuditFilter : getView().getFilterData();
     }
 
-    /*@Override
-    protected void onBind() {
-        super.onBind();
+    public boolean isFilterChange(){
+        return getView().isChangeFilter();
+    }
 
-        ValueChangeHandler<AuditFormType> formTypeValueChangeHandler = new ValueChangeHandler<AuditFormType>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<AuditFormType> event) {
-                if (event.getValue() == AuditFormType.FORM_TYPE_TAX) {
-                    getView().setVisibleTaxFields();
-                } else if (event.getValue() == AuditFormType.FORM_TYPE_DECLARATION) {
-                    getView().setVisibleDeclarationFields();
-                } else {
-                    getView().hideAll();
-                }
-            }
-        };
-        getView().setFormTypeHandler(formTypeValueChangeHandler);
-    }*/
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clear();
+    }
 }

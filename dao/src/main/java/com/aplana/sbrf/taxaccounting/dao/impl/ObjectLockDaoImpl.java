@@ -64,15 +64,14 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			return lock;
 		}
 	}
-	
+
+	private static final String GET_LOCK_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ?";
+	private static final String GET_LOCK_FOR_UPDATE_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ? FOR UPDATE";
+
 	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz, boolean forUpdate) {
-		StringBuilder sql = new StringBuilder("select * from object_lock where object_id = ? and class = ?");
-		if (forUpdate) {
-			sql.append(" for update");
-		}
 		try {
 			return getJdbcTemplate().queryForObject(
-				sql.toString(), 
+				forUpdate ? GET_LOCK_FOR_UPDATE_SQL : GET_LOCK_SQL,
 				new ObjectLockRowMapper<IdType>(),
 				id,
 				clazz.getName()
@@ -169,16 +168,15 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 		if (lock == null) {
 			throw new LockException("Невозможно разблокировать объект типа %s с идентификатором %d, так как он не заблокирован", className, id);
 		} else {
-			Date currentTime = new Date();
-			Date timeoutTime = getLockTimeoutTime(lock);
-			
-			if (lock.getUserId() != userId) {			
+			if (lock.getUserId() != userId) {
 				throw new LockException(
 					"Невозможно разблокировать объект типа %s с идентификатором %d, так как он заблокирован другим пользователем",
 					className,
 					id
 				);
 			} else {
+				Date currentTime = new Date();
+				Date timeoutTime = getLockTimeoutTime(lock);
 				if (currentTime.after(timeoutTime)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Trying to unlock object with timed-out lock: className = " + className + ", id = " + id + ", lock_time = " + lock.getLockTime());
@@ -189,7 +187,6 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 					id,
 					clazz.getName()
 				);
-				
 			}
 		}
 	}
@@ -206,12 +203,11 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			id,
 			clazz.getName()
 		);
-
 	}
 
 	@Override
 	public <IdType extends Number> boolean isLockedByUser(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
-		ObjectLock<?> lock = getObjectLock(id, clazz, true);
+		ObjectLock<?> lock = getObjectLock(id, clazz);
 		return lock != null && lock.getUserId() == userId && !isLockTimedOut(lock);
 	}
 }

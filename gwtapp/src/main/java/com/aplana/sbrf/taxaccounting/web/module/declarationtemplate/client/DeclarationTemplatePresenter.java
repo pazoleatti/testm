@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -181,17 +183,31 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
     @Override
-    public void activate() {
+    public void activate(boolean force) {
         if (declarationTemplate.getId() == null)
             return;
         SetActiveAction action = new SetActiveAction();
         action.setDtId(declarationTemplate.getId());
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetActiveResult>() {
             @Override
             public void onSuccess(SetActiveResult result) {
                 if (result.getUuid() != null)
                     LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
                 setDeclarationTemplate();
+                if (!result.isSetStatusSuccessfully()) { //
+                    Dialog.confirmMessage("Информация",
+                            "Найдены экземпляры деклараций",
+                            new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    activate(true);
+                                    super.yes();
+                                }
+                            });
+                } else {
+                    setDeclarationTemplate();
+                }
             }
         }, this));
     }

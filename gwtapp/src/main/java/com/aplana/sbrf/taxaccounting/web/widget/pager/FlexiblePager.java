@@ -715,6 +715,9 @@ public class FlexiblePager extends AbstractPager {
             if (storage != null) {
                 storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(rowsCountOnPage.getValue()));
             }
+            if (getPage() != 0) {
+                firstPage();
+            }
         }
     }
 

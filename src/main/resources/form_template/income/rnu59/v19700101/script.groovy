@@ -2,6 +2,7 @@ package form_template.income.rnu59.v19700101
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
@@ -14,7 +15,7 @@ import java.text.SimpleDateFormat
  *
  * TODO:
  *      - убрать loggerError и заменить на logger.error
- *      - это формы нет в базе
+ *      - этой формы нет в базе
  *
  * Столбцы
  * 1. Номер сделки первая часть / вторая часть - tradeNumber
@@ -106,6 +107,9 @@ switch (formDataEvent){
         }
         break
 }
+
+@Field
+def endDate = null
 
 /**
  * Добавление новой строки
@@ -273,12 +277,9 @@ def logicalCheck(){
     def outcome269st = 0
     def outcomeTax = 0
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).getTime()
-
-    def Calendar endDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-    endDate.set(Calendar.DATE, endDate.get(Calendar.DATE) + 1)
-
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).getTime()
+    def dTo = getReportPeriodEndDate()
+    def reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
 
     data.getAllCached().each{ row ->
         if (!isTotalRow(row)) {
@@ -297,13 +298,13 @@ def logicalCheck(){
             }
 
             // графа 5 заполнена и «графа 5» ? «отчётная дата». Текст ошибки - Неверно указана дата первой части сделки! SBRFACCTAX-2575
-            if (!(row.part1REPODate != null && (row.part1REPODate.compareTo(endDate.getTime())  <= 0))){
+            if (!(row.part1REPODate != null && (row.part1REPODate.compareTo(reportDay)  <= 0))) {
                 loggerError(errorMsg + 'неверно указана дата первой части сделки!')//TODO вернуть error
                 return false
             }
 
             // графа 6 заполнена и графа 6 в рамках отчётного периода. Текст ошибки - Неверно указана дата второй части сделки!
-            if (row.part2REPODate != null && (row.part2REPODate < dFrom || row.part2REPODate > dTo)){
+            if (row.part2REPODate != null && (row.part2REPODate < dFrom || row.part2REPODate > dTo)) {
                 loggerError(errorMsg + 'неверно указана дата второй части сделки!')//TODO вернуть error
                 return false
             }
@@ -425,7 +426,7 @@ def calculateColumn11(DataRow row, def rateDate){
  * @return
  */
 int getCountDaysOfYear() {
-    Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
 }
 
@@ -699,7 +700,7 @@ def addData(def xml, def fileName) {
     def data = getData(formData)
     data.clear()
     def cache = [:]
-    def date = new Date()
+    def date = getReportPeriodEndDate()
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
@@ -1102,4 +1103,11 @@ void loggerError(def msg) {
     } else {
         logger.warn(msg)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

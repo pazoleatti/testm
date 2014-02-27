@@ -86,11 +86,6 @@
 		<location>/WEB-INF/jsp/forbidden.jsp</location>
 	</error-page>
 
-    <error-page>
-        <error-code>404</error-code>
-        <location>/Main.jsp</location>
-    </error-page>
-
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>Main.jsp</welcome-file>

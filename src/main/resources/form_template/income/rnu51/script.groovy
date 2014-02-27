@@ -64,7 +64,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['itogoKvartal', 'itogo'])
         calc()
         logicCheck()
         break
@@ -110,7 +110,7 @@ def currentDate = new Date()
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Признак периода ввода остатков
 @Field
@@ -130,14 +130,14 @@ def dataRowHelperPrev = null
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -287,12 +287,19 @@ def BigDecimal calc16(def row) {
 }
 
 def BigDecimal calc17(def row) {
-    // TODO Левыкин: Для всех остальных случаев значение графы не изменяется?
-    return row.redemptionValue > 0 ? 100 : row.marketPriceInRub1
+    return row.redemptionValue > 0 ? row.redemptionValue : row.marketPriceInRub1
 }
 
 def BigDecimal calc18(def row) {
     def code = getCode(row.tradeNumber)
+// Debug:
+//    println("---------------------- "+row)
+//    println(" code = " + code)
+//    println(" 14 = " + row.priceInFactPerc)
+//    println(" 15 = " + row.priceInFactRub)
+//    println(" 16 = " + row.marketPriceInPerc1)
+//    println(" 17 = " + row.marketPriceInRub1)
+
     if ((code == 1 || code == 2 || code == 5)
             && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
         return row.priceInFactRub
@@ -385,7 +392,7 @@ void logicCheck() {
         }
         // 2. Проверка рыночной цены в процентах при погашении
         if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInPerc1 != 100) {
-            logger.error(errorMsg + "Неверно указана рыночная цена в % при погашении!")
+            logger.error(errorMsg + 'Неверно указана рыночная цена в % при погашении!')
         }
         // 3. Проверка рыночной цены в рублях при погашении
         if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInRub1 != row.redemptionValue) {
@@ -518,7 +525,6 @@ void importData() {
 
 // Заполнить форму данными
 def addData(def xml, def fileName) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
@@ -737,4 +743,11 @@ String getCellValue(def row, int index, def type, boolean isTextXml = false) {
         return isTextXml ? row.field[index].text() : row.field[index].@value.text()
     }
     return row.cell[index + 1].text()
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

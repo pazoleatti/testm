@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.LogSystem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,8 +26,14 @@ public interface AuditDao {
 
     /**
      * Удалить информацию о логировании.
-     * @param integers
+     * @param integers идентификаторы
      */
     void removeRecords(List<Long> integers);
+
+    /**
+     * Дата последней архивации
+     * @return дата
+     */
+    Date lastArchiveDate();
 
 }

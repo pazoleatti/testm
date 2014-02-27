@@ -320,6 +320,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookBox")
 	public void onRefBookBox(ValueChangeEvent<RefBook> event) {
+        Column currentColumn = columns.get(columnListBox.getSelectedIndex());
+        if (currentColumn instanceof RefBookColumn) {
+            ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
+        } else if (currentColumn instanceof ReferenceColumn) {
+            ((ReferenceColumn) currentColumn).setRefBookAttributeId(event.getValue().getAttributes().get(0).getId());
+        }
         refBookAttrBox.setValue(event.getValue().getAttributes().get(0));
         refBookAttrBox.setAcceptableValues(event.getValue().getAttributes());
 	}

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,6 +85,37 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			return null;
 		}
 	}
+
+    @Override
+    public String getParentsHierarchy(Integer departmentId) {
+        try {
+            String path = getJdbcTemplate().queryForObject(
+                    "select path from (SELECT id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
+                            "FROM department  where type != 1 START\n" +
+                            "WITH id = ?\n" +
+                            "CONNECT BY PRIOR parent_id = id order by lvl desc)\n" +
+                            "where ROWNUM = 1 ",
+                    new RowMapper<String>() {
+                        @Override
+                        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getString("path");
+                        }
+                    },
+                    departmentId
+            );
+            String[] pathParts = path.substring(1).split("/");
+            StringBuilder result = new StringBuilder();
+            for (int i = pathParts.length - 1; i > -1; i--) {
+                result.append(pathParts[i]);
+                if (i != 0) {
+                    result.append("/");
+                }
+            }
+            return result.toString();
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 
     @Override
     public List<Department> listDepartments(){
@@ -243,17 +276,37 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     }
 
     @Override
-    public List<Integer> getPerformers(List<Integer> departments) {
+    public List<Integer> getPerformers(List<Integer> departments, int formType) {
         String sql = "SELECT performer_dep_id " +
                 "FROM department_form_type " +
-                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null " +
+                "WHERE department_id in (:ids) AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
                 "GROUP BY performer_dep_id";
 
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         parameterMap.put("ids", departments);
+        parameterMap.put("formtype", formType);
 
         return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
     }
+
+	@Override
+	public List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes) {
+		String sql = "SELECT performer_dep_id " +
+				"FROM department_form_type dft " +
+				"LEFT JOIN form_type ft on dft.FORM_TYPE_ID=ft.ID " +
+				"WHERE department_id in (:ids) AND ft.tax_type in (:tt) AND performer_dep_id IS NOT null " +
+				"GROUP BY performer_dep_id";
+
+		MapSqlParameterSource parameterMap = new MapSqlParameterSource();
+		parameterMap.addValue("ids", departments);
+		List<String> types = new ArrayList<String>();
+		for (TaxType type : taxTypes) {
+			types.add(String.valueOf(type.getCode()));
+		}
+		parameterMap.addValue("tt", types);
+
+		return  getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
+	}
 
     /**
      * Поиск подразделений, доступных по иерархии и подразделений доступных по связи приемник-источник для этих подразделений

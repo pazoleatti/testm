@@ -1,6 +1,7 @@
 package form_template.income.advanceDistribution
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -76,6 +77,9 @@ switch (formDataEvent) {
         // для сохранения изменении приемников
 //        getData(formData).commit()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 //// Кэши и константы
@@ -132,6 +136,9 @@ def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTa
 @Field
 def currentDate = new Date()
 
+@Field
+def endDate = null
+
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
@@ -174,7 +181,7 @@ void calc() {
 
     /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
     def sumNal = 0
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", currentDate, -1, null, false)
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
         sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
     }
@@ -185,7 +192,9 @@ void calc() {
         row.regionBank = calc2(row)
 
         def incomeParam
-        if (row.regionBankDivision != null) incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) {
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        }
         if (incomeParam == null || incomeParam.isEmpty()) {
             continue
         }
@@ -270,7 +279,9 @@ void calc() {
 // графа 2 - название подразделения
 def calc2(def row) {
     def departmentParam
-    if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+    if (row.regionBankDivision != null) {
+        departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+    }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
     }
@@ -312,7 +323,7 @@ void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", currentDate, -1, null, false)
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
         logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
@@ -328,7 +339,9 @@ void logicalCheckBeforeCalc() {
         def errorMsg = "Строка ${index}: "
 
         def departmentParam
-        if (row.regionBankDivision != null) departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+        if (row.regionBankDivision != null) {
+            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        }
         if (departmentParam == null || departmentParam.isEmpty()) {
             logger.error(errorMsg + "Не найдено подразделение территориального банка!")
             return
@@ -345,7 +358,7 @@ void logicalCheckBeforeCalc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
             logger.error(errorMsg + "Не найдены настройки подразделения!")
@@ -894,4 +907,11 @@ def roundValue(BigDecimal value, def precision) {
  */
 def getTaxRateAttribute(def id) {
     return getRefBookValue(33, id)?.TAX_RATE?.getNumberValue()
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -14,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exce
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,7 +34,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private final DispatchAsync dispatchAsync;
 	private boolean isFormModified = false;
 	private Date relevanceDate;
-	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны.";
+	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
 
     /** Идентификатор справочника */
     private Long currentRefBookId;
@@ -50,7 +50,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
-		void setSaveButtonEnabled(boolean enabled);
+
+        void setHierarchy(boolean isHierarchy);
+
+        void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
 		void setEnabled(boolean enabled);
         void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
@@ -80,10 +83,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 							@Override
 							public void onSuccess(GetRefBookAttributesResult result) {
                                 EditFormPresenter.this.readOnly = readOnly;
+                                getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
 								currentRefBookId = refbookId;
-								isFormModified = false;
+                                setIsFormModified(false);
 								setEnabled(false);
 							}
 						}, this));
@@ -106,10 +110,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		if (isFormModified) {
-            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+            Dialog.confirmMessage("Вопрос", DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
-                    isFormModified = false;
+                    setIsFormModified(false);
                     showRecord(refBookRecordId);
                 }
 
@@ -133,7 +137,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
 	private void showRecord(final Long refBookRecordId) {
-		if (refBookRecordId == null) {
+        if (refBookRecordId == null) {
 			currentUniqueRecordId = null;
 			getView().fillInputFields(null);
 			setEnabled(true);
@@ -161,11 +165,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	public void onSaveClicked() {
 		try {
             if (getView().getVersionFrom() == null) {
-                Dialog.warningMessage("Не указана дата начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
                 return;
             }
             if (getView().getVersionTo() != null && (getView().getVersionFrom().getTime() >= getView().getVersionTo().getTime())) {
-                Dialog.warningMessage("Дата окончания должна быть больше даты начала актуальности");
+                Dialog.warningMessage("Версия не сохранена", "Дата окончания должна быть больше даты начала актуальности");
                 return;
             }
 			if (currentUniqueRecordId == null) {
@@ -187,7 +191,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(AddRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        isFormModified = false;
+                                        setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, true);
@@ -208,17 +212,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                        isFormModified = false;
+                                        setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, true);
+                                        if (result.isException()) {
+                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!", new DialogHandler() {
+                                                @Override
+                                                public void close() {
+                                                    super.close();
+                                                }
+                                            });
+                                        }
                                     }
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            isFormModified = false;
+            setIsFormModified(false);
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\" - " + bve.getDescription()));
+            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
             action.setLogEntries(logEntries);
 
@@ -235,14 +247,40 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onCancelClicked() {
-		isFormModified = false;
-		showRecord(currentUniqueRecordId);
+        if (isFormModified) {
+            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    setIsFormModified(false);
+                    onSaveClicked();
+                }
+
+                @Override
+                public void no() {
+                    setIsFormModified(false);
+                    showRecord(currentUniqueRecordId);
+                    if (currentUniqueRecordId == null) setEnabled(false);
+                }
+            });
+        } else {
+            showRecord(currentUniqueRecordId);
+            if (currentUniqueRecordId == null) setEnabled(false);
+        }
 	}
 
 	@Override
 	public void valueChanged() {
-		isFormModified = true;
+        setIsFormModified(true);
 	}
+
+    private void setIsFormModified(boolean isFormModified) {
+        this.isFormModified = isFormModified;
+        if (isFormModified) {
+            placeManager.setOnLeaveConfirmation("Вы подтверждаете отмену изменений?");
+        } else {
+            placeManager.setOnLeaveConfirmation(null);
+        }
+    }
 
     public void setEnabled(boolean enabled) {
 		getView().setEnabled(enabled);

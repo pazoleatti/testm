@@ -36,6 +36,10 @@ import java.util.*;
 @Transactional
 public class RefBookBigDataProvider implements RefBookDataProvider {
 
+	// Справочник "ОКТМО"
+	public static final Long OKTMO_REF_BOOK_ID = 96L;
+	public static final String OKTMO_TABLE_NAME = "REF_BOOK_OKTMO";
+
     /** Код справочника */
     private Long refBookId;
 
@@ -67,6 +71,11 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
+    }
+
+    @Override
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

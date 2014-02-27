@@ -46,6 +46,8 @@ public class ExceptionHandlerAspect {
             TaActionException tae = new TaActionException(
                     getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
             tae.setUuid(((ServiceLoggerException) e).getUuid());
+            //Сделал на случай если все таки надо будет отображать стек трейс
+            tae.setNeedStackTrace(false);
             throw tae;
         } else if (e instanceof AccessDeniedException) {
 			throw new TaActionException(

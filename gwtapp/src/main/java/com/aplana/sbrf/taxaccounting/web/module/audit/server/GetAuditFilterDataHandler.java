@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilterAvailableValues;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditFilterDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -24,16 +25,18 @@ public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFil
 
     @Autowired
     AuditService auditService;
+    @Autowired
+    private SecurityService securityService;
 
     public GetAuditFilterDataHandler() {
         super(GetAuditFilterDataAction.class);
     }
 
     @Override
-    public GetAuditFilterDataResult execute(GetAuditFilterDataAction auditFilterDataAction, ExecutionContext executionContext) throws ActionException {
+    public GetAuditFilterDataResult execute(GetAuditFilterDataAction action, ExecutionContext executionContext) throws ActionException {
         GetAuditFilterDataResult result = new GetAuditFilterDataResult();
 
-        LogSystemFilterAvailableValues avaliableValues = auditService.getFilterAvailableValues();
+        LogSystemFilterAvailableValues avaliableValues = auditService.getFilterAvailableValues(securityService.currentUserInfo().getUser());
         result.setTaxTypes(Arrays.asList(TaxType.values()));
         result.setAvailableValues(avaliableValues);
         return result;

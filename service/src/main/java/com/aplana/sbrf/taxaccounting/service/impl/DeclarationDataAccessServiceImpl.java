@@ -131,7 +131,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			}
 		}
 		if (!found) {
-			throw new AccessDeniedException("В данном подразделении нельзя работать с декларациями данного вида");
+			throw new AccessDeniedException("Выбранный вид декларации не назначен подразделению");
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения

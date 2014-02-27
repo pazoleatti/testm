@@ -14,6 +14,7 @@ import java.io.Serializable;
  */
 public enum FormDataEvent implements Serializable {
 	CREATE(1, "Создать"),
+	AFTER_CREATE(12, "После создания"),
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
 	COMPOSE(4, "Обобщить"),

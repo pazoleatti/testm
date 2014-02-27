@@ -17,7 +17,7 @@
 
         .table {
             position: absolute !important;
-            bottom: 0;
+            bottom: 30px;
             right: 0;
             left: 0;
             top: 69px;
@@ -95,7 +95,7 @@
                     </g:cell>
                     <g:HTML addStyleNames="{style.verSep}"/>
 
-                    <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
+                    <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                 </g:HorizontalPanel>
 
                 <g:Label addStyleNames="{style.horSep}"/>
@@ -114,9 +114,10 @@
                     <style:GenericCellTable ui:field="declarationGrid" width="100%" height="100%"/>
                 </g:ScrollPanel>
 
-
-
-                <pager:FlexiblePager ui:field="pager" addStyleNames="{style.pager}"
+                <pager:FlexiblePager ui:field="formPager" addStyleNames="{style.pager}"
+                                     location="CENTER" showFastForwardButton="false"
+                                     fastForwardRows="0" showLastPageButton="true" type="formDataList"/>
+                <pager:FlexiblePager ui:field="declarationPager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
                                      fastForwardRows="0" showLastPageButton="true" type="formDataList"/>
             </fm:BodyContainer>

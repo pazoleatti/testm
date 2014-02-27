@@ -1,7 +1,9 @@
 package form_template.income.rnu5
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -16,7 +18,6 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -40,9 +41,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        consolidation()
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 
@@ -82,19 +86,6 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-    }
 }
 
 //// Кастомные методы
@@ -240,4 +231,42 @@ def getNewRow(def alias, def sum) {
 
 def String getKnu(def code) {
     return getRefBookValue(27, code)?.CODE?.stringValue
+}
+
+/**
+ * Консолидация.
+ */
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+        if (it.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                formDataService.getDataRowHelper(source).allCached.each { sRow ->
+                    if (sRow.getAlias() == null || sRow.getAlias() == '') {
+                        def isFind = false
+                        // строки приемника - искать совпадения, если совпадения есть, то суммировать графу 5
+                        for (def row : dataRows) {
+                            if (sRow.number == row.number) {
+                                isFind = true
+                                totalColumns.each { alias ->
+                                    def tmp = (row.getCell(alias).value ?: 0) + (sRow.getCell(alias).value ?: 0)
+                                    row.getCell(alias).setValue(tmp, null)
+                                }
+                                break
+                            }
+                        }
+                        // если совпадений нет, то просто добавить строку
+                        if (!isFind) {
+                            dataRows.add(sRow)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }

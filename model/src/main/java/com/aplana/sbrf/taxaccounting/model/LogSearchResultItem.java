@@ -17,14 +17,24 @@ public class LogSearchResultItem implements Serializable {
 	private TAUser user;
 	private String roles;
 	private Department department;
+    private String departmentName;
 	private ReportPeriod reportPeriod;
 	private DeclarationType declarationType;
 	private FormType formType;
 	private FormDataKind formKind;
 	private String note;
 	private Department userDepartment;
+    private String userDepartmentHierarchy;
 
-	public Long getId() {
+    public String getUserDepartmentHierarchy() {
+        return userDepartmentHierarchy;
+    }
+
+    public void setUserDepartmentHierarchy(String userDepartmentHierarchy) {
+        this.userDepartmentHierarchy = userDepartmentHierarchy;
+    }
+
+    public Long getId() {
 		return id;
 	}
 
@@ -80,7 +90,15 @@ public class LogSearchResultItem implements Serializable {
 		this.department = department;
 	}
 
-	public ReportPeriod getReportPeriod() {
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public ReportPeriod getReportPeriod() {
 		return reportPeriod;
 	}
 
@@ -130,15 +148,10 @@ public class LogSearchResultItem implements Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("id: " + id).append(", user: " + (user != null?user.getLogin():""))
-                .append(" ip: " + ip)
-                .append(" department: " + (department != null?department.getName():""))
-                .append(" roles: " + roles)
-                .append(" event: " + (event!= null?event.getTitle():""))
-                .append(" logdate: " + logDate)
-                .append(" note: " + note)
-                .append(" reportperiod: " + (reportPeriod != null?reportPeriod.getName():""))
-                .append(" formKind: " + (formKind !=null?formKind.getName():""))
-                .toString();
+        return ("id: " + id) + ", user: " + (user != null ? user.getLogin() : "") + " ip: " + ip +
+                " department: " + (department != null ? department.getName() : "") + " departmentName: " + departmentName +
+                " roles: " + roles + " event: " + (event != null ? event.getTitle() : "") + " logdate: " + logDate +
+                " note: " + note + " reportperiod: " + (reportPeriod != null ? reportPeriod.getName() : "") +
+                " formKind: " + (formKind != null ? formKind.getName() : "");
     }
 }

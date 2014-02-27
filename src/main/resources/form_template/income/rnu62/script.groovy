@@ -68,6 +68,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 //// Кэши и константы
@@ -276,7 +279,7 @@ void calc() {
     // пересчитываем строки итого
     calcTotalSum(dataRows,  getDataRow(dataRows, 'itg'), totalColumns)
 
-    dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def BigDecimal calc7(def row) {

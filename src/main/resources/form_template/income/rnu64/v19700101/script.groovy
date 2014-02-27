@@ -47,12 +47,12 @@ switch (formDataEvent) {
         // ?? logicalCheck()
         //3.    Проверки соответствия НСИ.
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         //1.    Проверка наличия и статуса формы, консолидирующей данные текущей налоговой формы, при переходе в статус «Подготовлена».
         //2.    Логические проверки значений налоговой формы.
         logicalCheck()
@@ -101,13 +101,13 @@ switch (formDataEvent) {
         logicalCheck()
         break
 // загрузка xml
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         if (!hasError()) {
             calc()
         }
         break
-    case FormDataEvent.MIGRATION :
+    case FormDataEvent.MIGRATION:
         importData()
         if (!hasError()) {
             def total = getCalcTotalRow()
@@ -140,25 +140,25 @@ def addNewRow() {
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     def index = 0
-    if (currentDataRow!=null){
+    if (currentDataRow != null) {
         index = currentDataRow.getIndex()
         def row = currentDataRow
-        while(row.getAlias()!=null && index>0){
+        while (row.getAlias() != null && index > 0) {
             row = getRows(data).get(--index)
         }
-        if(index!=currentDataRow.getIndex() && getRows(data).get(index).getAlias()==null){
+        if (index != currentDataRow.getIndex() && getRows(data).get(index).getAlias() == null) {
             index++
         }
-    }else if (getRows(data).size()>0) {
-        for(int i = getRows(data).size()-1;i>=0;i--){
+    } else if (getRows(data).size() > 0) {
+        for (int i = getRows(data).size() - 1; i >= 0; i--) {
             def row = getRows(data).get(i)
-            if(row.getAlias()==null){
-                index = getRows(data).indexOf(row)+1
+            if (row.getAlias() == null) {
+                index = getRows(data).indexOf(row) + 1
                 break
             }
         }
     }
-    data.insert(newRow,index+1)
+    data.insert(newRow, index + 1)
 }
 
 /**
@@ -235,21 +235,21 @@ def logicalCheck() {
     def data = getData(formData)
     def totalQuarterRow = null
     def totalRow = null
-    reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
 
     for (def row : getRows(data)) {
         // Обязательность заполнения поля графы (с 1 по 6); фатальная; Поле ”Наименование поля” не заполнено!
         if (!isTotalRow(row)) {
             def requiredColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
-            if(!checkRequiredColumns(row, requiredColumns)){
+            if (!checkRequiredColumns(row, requiredColumns)) {
                 return false
             }
 
             // Проверка даты совершения операции и границ отчетного периода; фатальная; Дата совершения операции вне границ отчетного периода!
             if (!isTotalRow(row) && row.date != null && !(
-                    (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
-                            (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
+            (reportPeriodStartDate.getTime().equals(row.date) || row.date.after(reportPeriodStartDate.getTime())) &&
+                    (reportPeriodEndDate.getTime().equals(row.date) || row.date.before(reportPeriodEndDate.getTime()))
             )) {
                 loggerError("В строке " + row.number + " дата совершения операции вне границ отчетного периода!")//TODO вернуть error
                 return false
@@ -388,7 +388,7 @@ def getTotalValue() {
     def data = getData(formData)
     quarterRow = data.getDataRow(getRows(data), 'totalQuarter')
     // возьмем форму за предыдущий отчетный период
-    def prevQuarter = quarterService.getPrevReportPeriod(formData.reportPeriodId)
+    def prevQuarter = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevQuarter != null) {
         prevQuarterFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, prevQuarter.id);
 
@@ -429,13 +429,13 @@ void setRowIndex() {
  */
 void sort() {
     data = getData(formData)
-    if (data!=null && !data.getAllCached().isEmpty()) {
+    if (data != null && !data.getAllCached().isEmpty()) {
         data.getAllCached().sort({ DataRow a, DataRow b ->
-            def aTime = a.date!=null?(a.date as Date).time:null
-            def bTime = b.date!=null?(b.date as Date).time:null
+            def aTime = a.date != null ? (a.date as Date).time : null
+            def bTime = b.date != null ? (b.date as Date).time : null
             if (aTime == bTime) {
-                aNumber = a.dealingNumber!=null?a.dealingNumber as String:null;
-                bNumber = b.dealingNumber!=null?b.dealingNumber as String:null;
+                aNumber = a.dealingNumber != null ? a.dealingNumber as String : null;
+                bNumber = b.dealingNumber != null ? b.dealingNumber as String : null;
                 return aNumber <=> bNumber
             }
             return aTime <=> bTime
@@ -565,7 +565,7 @@ void importData() {
                 logger.error("Нет итоговой строки.")
             }
         }
-    } catch(Exception e) {
+    } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
@@ -649,15 +649,15 @@ def addData(def xml, def fileName) {
 }
 
 // для получения данных из RNU или XML
-String getCellValue(def row, int index, def type, boolean isTextXml = false){
-    if (type==1) {
+String getCellValue(def row, int index, def type, boolean isTextXml = false) {
+    if (type == 1) {
         if (isTextXml) {
             return row.field[index].text()
         } else {
             return row.field[index].@value.text()
         }
     }
-    return row.cell[index+1].text()
+    return row.cell[index + 1].text()
 }
 
 /**
@@ -722,14 +722,13 @@ void calc() {
     fillForm()
 }
 
-
 /**
  * Рассчитать, проверить и сравнить итоги.
  *
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def totalColumns = [6 : 'costs']
+    def totalColumns = [6: 'costs']
 
     def totalCalc = getCalcTotalRow()
     def errorColums = []
@@ -775,7 +774,7 @@ void insert(def data, def row) {
  */
 def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     String filter = code + " = '" + value + "'"
-    if (cache[ref_id]!=null) {
+    if (cache[ref_id] != null) {
         if (cache[ref_id][filter] != null) {
             return cache[ref_id][filter]
         }
@@ -784,14 +783,13 @@ def getRecordId(def ref_id, String code, def value, Date date, def cache) {
     }
     def refDataProvider = refBookFactory.getDataProvider(ref_id)
     def records = refDataProvider.getRecords(date, null, filter, null).getRecords()
-    if (records.size() == 1){
+    if (records.size() == 1) {
         cache[ref_id][filter] = (records.get(0).record_id.toString() as Long)
         return cache[ref_id][filter]
     }
     logger.error("Не удалось найти запись в справочнике «" + refBookFactory.get(ref_id).getName() + "» с атрибутом $code равным $value!")
     return null
 }
-
 
 /**
  * Получить итоговую строку с суммами.
@@ -824,18 +822,18 @@ void loggerError(def msg) {
     //logger.error(msg)
     if (
             formDataEvent != FormDataEvent.COMPOSE &&
-            formDataEvent != FormDataEvent.MOVE_APPROVED_TO_ACCEPTED &&
-            formDataEvent != FormDataEvent.MOVE_CREATED_TO_ACCEPTED &&
-            formDataEvent != FormDataEvent.MOVE_PREPARED_TO_ACCEPTED &&
-            formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_APPROVED &&
-            formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_PREPARED &&
-            formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_CREATED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED &&
-            formDataEvent != FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED
+                    formDataEvent != FormDataEvent.MOVE_APPROVED_TO_ACCEPTED &&
+                    formDataEvent != FormDataEvent.MOVE_CREATED_TO_ACCEPTED &&
+                    formDataEvent != FormDataEvent.MOVE_PREPARED_TO_ACCEPTED &&
+                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_APPROVED &&
+                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_PREPARED &&
+                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_CREATED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED &&
+                    formDataEvent != FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED
     ) {
         logger.error(msg)
     } else {

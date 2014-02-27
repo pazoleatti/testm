@@ -1,7 +1,6 @@
 package form_template.income.rnu45
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -38,9 +37,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (formData.kind == FormDataKind.PRIMARY) {
-            prevPeriodCheck()
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -162,21 +159,13 @@ void calc() {
         def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
         def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
 
-        def dataOld = null
-        if (formData.kind != FormDataKind.PRIMARY) {
-            dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
-        }
-
+        def formDataOld = getFormDataPrev()
+        def dataOld = formDataOld != null ? getDataRowHelperPrev() : null
         def index = 0
 
         for (def row in dataRows) {
             // графа 1
             row.rowNumber = ++index
-
-            if (formData.kind != FormDataKind.PRIMARY) {
-                continue;
-            }
-
             // графа 8
             row.depreciationRate = calc8(row)
             // графа 9
@@ -261,10 +250,8 @@ def logicCheck() {
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
         def Set<String> invSet = new HashSet<String>()
-        def dataOld = null
-        if (formData.kind != FormDataKind.PRIMARY) {
-            dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
-        }
+        def formDataOld = getFormDataPrev()
+        def dataOld = formDataOld != null ? getDataRowHelperPrev() : null
         // Отчетная дата
         def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
         //Начальная дата отчетного периода
@@ -298,15 +285,14 @@ def logicCheck() {
                 logger.error(errorMsg + "Все суммы по операции нулевые!")
             }
 
-            if (formData.kind == FormDataKind.PRIMARY) {
-                // 4. Арифметические проверки расчета неитоговых граф
-                needValue['depreciationRate'] = calc8(row)
-                needValue['amortizationMonth'] = calc9(row)
-                prevValues = getPrev10and11(dataOld, row)
-                needValue['amortizationSinceYear'] = calc10(row, reportDateStart, reportDate, prevValues[0])
-                needValue['amortizationSinceUsed'] = calc11(row, reportDateStart, reportDate, prevValues[1])
-                checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-            }
+            // 4. Арифметические проверки расчета неитоговых граф
+            needValue['depreciationRate'] = calc8(row)
+            needValue['amortizationMonth'] = calc9(row)
+            prevValues = getPrev10and11(dataOld, row)
+            needValue['amortizationSinceYear'] = calc10(row, reportDateStart, reportDate, prevValues[0])
+            needValue['amortizationSinceUsed'] = calc11(row, reportDateStart, reportDate, prevValues[1])
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
         }
         // 5. Арифметические проверки расчета итоговой строки
         checkTotalSum(dataRows, totalColumns, logger, true)

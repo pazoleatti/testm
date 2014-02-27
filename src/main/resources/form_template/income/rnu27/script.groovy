@@ -189,19 +189,14 @@ void prevPeriodCheck() {
 def logicCheck() {
     def data = formDataService.getDataRowHelper(formData)
     def dataRows = data.getAllCached()
-    def formPrev = null
-    def dataPrev = null
-    def dataPrevRows = null
-    if (formData.kind == FormDataKind.PRIMARY) {
-         formPrev = getFormPrev()
-         dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-         dataPrevRows = dataPrev?.getAllCached()
-    }
+    def formPrev = getFormPrev()
+    def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
+    def dataPrevRows = dataPrev?.getAllCached()
 
     /** 1. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
      */
-    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null) {
+    if (dataPrev != null) {
         List notFound = []
         List foundMany = []
         if (dataPrevRows != null) {
@@ -289,7 +284,7 @@ def logicCheck() {
                 logger.warn(errorMsg + "Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!")
             }
             // 11. LC • Проверка корректности заполнения РНУ
-            if (formData.kind == FormDataKind.PRIMARY && formPrev != null) {
+            if (formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
                         logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
@@ -297,7 +292,7 @@ def logicCheck() {
                 }
             }
             // 12. LC • Проверка корректности заполнения РНУ
-            if (formData.kind == FormDataKind.PRIMARY && formPrev != null) {
+            if (formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
                         loggerError(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то графа 8 = графа 15 формы РНУ-27 за предыдущий отчётный период")
@@ -324,7 +319,7 @@ def logicCheck() {
                 }
             }
 
-            if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod) {
+            if (!isBalancePeriod) {
                 // 19. Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
                 def calcValues = [
                         reserveCalcValuePrev: calc8(row, dataPrevRows),
@@ -364,7 +359,7 @@ def logicCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
+    if (dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
         DataRow itogoPrev = data.getDataRow(dataPrevRows, 'itogo')
         DataRow itogo = data.getDataRow(dataRows, 'itogo')
         // 13.
@@ -592,19 +587,16 @@ void calc() {
     sortRows(dataRows, groupColumns)
 
     // данные предыдущего отчетного периода
-    def dataPrevRows = null
-    if (formData.kind == FormDataKind.PRIMARY) {
-        def formPrev = getFormPrev()
-        def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-        dataPrevRows = dataPrev?.getAllCached()
-    }
+    def formPrev = getFormPrev()
+    def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
+    def dataPrevRows = dataPrev?.getAllCached()
 
     // номер последний строки предыдущей формы
     def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
     for (row in dataRows) {
         row.number = ++number
-        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
+        if (!isBalancePeriod) {
             row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)

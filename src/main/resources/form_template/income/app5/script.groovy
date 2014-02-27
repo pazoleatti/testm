@@ -51,6 +51,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 //// Кэши и константы
@@ -63,7 +66,7 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
 
 // Редактируемые атрибуты
 @Field
@@ -89,9 +92,8 @@ def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredi
 @Field
 def currentDate = new Date()
 
-// отчетная дата
 @Field
-def reportD = null
+def endDate = null
 
 //// Обертки методов
 
@@ -99,7 +101,7 @@ def reportD = null
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            getReportDate(), rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -131,7 +133,8 @@ void logicCheckBeforeCalc() {
         // 1. Проверка наличия значения «Наименование подразделения» в справочнике «Подразделения»
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", currentDate, -1, null, false)
+            departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             throw new ServiceException(errorMsg + "Не найдено подразделение территориального банка!")
@@ -149,10 +152,11 @@ void logicCheckBeforeCalc() {
         // 2. Проверка наличия значения «КПП» в форме настроек подразделения
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", currentDate, -1, null, false)
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
-            throw new ServiceException("Не найдены настройки подразделения!")
+            throw new ServiceException(errorMsg + "Не найдены настройки подразделения!")
         } else {
             // графа 4 - кпп
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
@@ -234,7 +238,7 @@ void calc() {
 def calc2(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportDate(), -1, null, false)
+        departmentParam = getRefBookRecord(30, "ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
     }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
@@ -253,7 +257,7 @@ def calc2(def row) {
 def calc4(def row) {
     def incomeParam
     if (row.regionBankDivision != null) {
-        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportDate(), -1, null, false)
+        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
     }
     if (incomeParam == null || incomeParam.isEmpty()) {
         return null
@@ -274,10 +278,9 @@ def getTotalRow(def dataRows) {
     return totalRow
 }
 
-// Дата окончания отчетного периода
-def getReportDate() {
-    if (reportD == null) {
-        reportD = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
-    return reportD
+    return endDate
 }

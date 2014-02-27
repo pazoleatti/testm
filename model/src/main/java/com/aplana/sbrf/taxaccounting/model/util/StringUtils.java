@@ -8,11 +8,15 @@ public final class StringUtils {
      * замена вида кавычек.
      */
     public static  String cleanString(String uncleanString) {
-        String cleanString = uncleanString.trim();
-        cleanString = cleanString.replaceAll("\\s{2,}", " ");
-        cleanString = cleanString.replaceAll("['`«»]", "\"");
+        if (uncleanString != null) {
+            String cleanString = uncleanString.trim();
+            cleanString = cleanString.replaceAll("\\s{2,}", " ");
+            cleanString = cleanString.replaceAll("['`«»]", "\"");
+            return cleanString;
+        } else {
+            return null;
+        }
 
-        return cleanString;
     }
 
     public static String join(Object[] array, char separator){

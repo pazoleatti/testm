@@ -13,13 +13,11 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -158,6 +156,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			}
 			i++;
 		}
+        if (i == refbookDataTable.getVisibleItems().size()) {
+            setPage(0);
+        }
 	}
 
 	@Override
@@ -184,6 +185,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         deleteRow.setVisible(!readOnly);
     }
 
+    @Override
+    public int getPage(){
+        return pager.getPage();
+    }
+
+    @Override
+    public void setPage(int page){
+        pager.setPage(page);
+    }
+
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
         selectionModel.clear();
@@ -197,7 +208,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+        Dialog.confirmMessage("Удаление элемента справочника", "Вы подтверждаете удаление всех версий элемента?", new DialogHandler() {
             @Override
             public void yes() {
                 if (getUiHandlers() != null) {

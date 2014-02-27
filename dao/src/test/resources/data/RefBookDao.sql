@@ -19,6 +19,8 @@ insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, referenc
   (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10, 0);
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
   (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 0);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique) values
+  (9, 1, 6, 'Ничего', 'null', 1, null, null, 1, null, 10, 0);
 --ОКАТО
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique) values
   (8, 4, 'Наименование муниципального образования', 'NAME', 1, 3, null, null, 1, null, 510, 1, 0);

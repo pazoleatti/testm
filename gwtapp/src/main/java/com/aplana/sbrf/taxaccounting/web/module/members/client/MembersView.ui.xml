@@ -104,7 +104,7 @@
                     </g:cell>
                     <g:cell width="25%">
                         <g:VerticalPanel>
-                            <r:RefBookMultiPickerModalWidget ui:field="role" attributeIdInt="838" modal="true" width="100%"
+                            <r:RefBookPickerWidget ui:field="role" attributeIdInt="838" isHierarchical="false" width="100%"
                                                              multiSelect="true"/>
                         </g:VerticalPanel>
                     </g:cell>
@@ -125,7 +125,7 @@
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
 
-                    <g:Button title="Поиск" text="Поиск" addStyleNames="{style.findButton}" ui:field="applyButton"/>
+                    <g:Button title="Найти" text="Найти" addStyleNames="{style.findButton}" ui:field="applyButton"/>
                 </g:HorizontalPanel>
                 <g:Label addStyleNames="{style.horSep}"/>
                 <g:ScrollPanel addStyleNames="{style.scroll}">

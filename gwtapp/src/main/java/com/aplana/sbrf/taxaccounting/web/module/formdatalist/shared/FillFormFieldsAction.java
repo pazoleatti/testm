@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.List;
+
 /**
  * Запрос для заполнения полей формы создания НФ.
  * User: avanteev
@@ -21,6 +23,8 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
     private int fieldId;
     private TaxType taxType;
     private FieldsNum fieldsNum;
+	private Long DepartmentId;
+	private List<Integer> reportPeriodId;
 
     public FieldsNum getFieldsNum() {
         return fieldsNum;
@@ -45,4 +49,20 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
     }
+
+	public Long getDepartmentId() {
+		return DepartmentId;
+	}
+
+	public void setDepartmentId(Long departmentId) {
+		DepartmentId = departmentId;
+	}
+
+	public List<Integer> getReportPeriodId() {
+		return reportPeriodId;
+	}
+
+	public void setReportPeriodId(List<Integer> reportPeriodId) {
+		this.reportPeriodId = reportPeriodId;
+	}
 }

@@ -216,27 +216,25 @@ void logicCheck() {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        if (formData.kind == FormDataKind.PRIMARY) {
-            def rowPrev
-            for (def rowOld in dataRowsOld) {
-                if (rowOld.contractNumber == row.contractNumber) {
-                    rowPrev = rowOld
-                    break
-                }
+        def rowPrev
+        for (def rowOld in dataRowsOld) {
+            if (rowOld.contractNumber == row.contractNumber) {
+                rowPrev = rowOld
+                break
             }
-            def values = [:]
-
-            tmp = getGraph13_15(row)
-            values.accruedCommisCurrency = tmp
-            values.commisInAccountingCurrency = tmp
-            values.accruedCommisRub = getGraph14(row)
-            values.commisInAccountingRub = getGraph16(row)
-            values.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
-            values.accrualPrevRub = rowPrev?.reportPeriodRub
-            values.reportPeriodCurrency = getGraph19(row)
-            values.reportPeriodRub = getGraph20(row)
-            checkCalc(row, arithmeticCheckAlias, values, logger, false)
         }
+        def values = [:]
+
+        tmp = getGraph13_15(row)
+        values.accruedCommisCurrency = tmp
+        values.commisInAccountingCurrency = tmp
+        values.accruedCommisRub = getGraph14(row)
+        values.commisInAccountingRub = getGraph16(row)
+        values.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
+        values.accrualPrevRub = rowPrev?.reportPeriodRub
+        values.reportPeriodCurrency = getGraph19(row)
+        values.reportPeriodRub = getGraph20(row)
+        checkCalc(row, arithmeticCheckAlias, values, logger, false)
     }
     checkTotalSum(dataRows, totalColumns, logger, true)
 }

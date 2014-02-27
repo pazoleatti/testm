@@ -54,6 +54,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
             String uuid = blobDataService.createTemporary(new FileInputStream(filePath), filePath.getName());
             result.setUuid(uuid);
             auditService.removeRecords(records, securityService.currentUserInfo());
+            result.setCountOfRemoveRecords(records.getTotalCount());
             return result;
         } catch (FileNotFoundException e) {
             throw new ServiceException("Возникла проблема при считывании файла, файл не найден.");

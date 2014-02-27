@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.members.client;
 
-import com.aplana.gwt.client.MultiListBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -52,7 +51,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
-    RefBookMultiPickerModalWidget role;
+    RefBookPickerWidget role;
 
     @UiField
     CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
@@ -132,6 +131,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	    taUserFullCellTable.setPageSize(pager.getPageSize());
 	    pager.setDisplay(taUserFullCellTable);
 	    dataProvider.addDataDisplay(taUserFullCellTable);
+	    Date current = new Date();
+	    role.setPeriodDates(current, current);
     }
 
     @Override
@@ -143,8 +144,6 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     public void setTaUserFullCellTable(PagingResult<TAUserFullWithDepartmentPath> userFullList, int startIndex) {
 	    taUserFullCellTable.setRowCount(userFullList.getTotalCount());
         taUserFullCellTable.setRowData(startIndex, userFullList);
-
-
     }
 
 	@Override
@@ -152,17 +151,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		MembersFilterData membersFilterData = new MembersFilterData();
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
-		//List<Integer> selectedRoleIds = new ArrayList<Integer>();
-        List<Long> selectedRoleIds = new ArrayList<Long>(role.getValue());
-        /*for (TARole selectedRole : roleBox.getValue()) {
-            selectedRoleIds.add(selectedRole.getId());
-        }*/
-		membersFilterData.setRoleIds(selectedRoleIds);
-		Set<Integer> depIds = new HashSet<Integer>();
-		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
-			depIds.add(dep.getDepartmentId());
-		}
-		membersFilterData.setDepartmentIds(depIds);
+		membersFilterData.setRoleIds(role.getValue()!= null ? role.getValue() : new ArrayList<Long>());
+		membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getValue()));
 		return membersFilterData;
 	}
 
@@ -195,7 +185,11 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@Override
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
-		departmentPicker.setAvalibleValues(values.getDepartments(), null);
+        Set<Integer> departmentIds = new HashSet<Integer>();
+        for (Department d: values.getDepartments()){
+            departmentIds.add(d.getId());
+        }
+        departmentPicker.setAvalibleValues(values.getDepartments(), departmentIds);
 	}
 
 	@Override

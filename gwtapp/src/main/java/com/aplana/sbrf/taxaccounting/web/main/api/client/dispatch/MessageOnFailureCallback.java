@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
@@ -59,7 +60,11 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 				// сообщений об ошибке в логе. В других случаях всё равно нужно
 				// отобразить диалог.
 				if (!showLogOnly) {
-					MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
+                    if (((TaActionException) caught).isNeedStackTrace()) {
+                        MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
+                    } else {
+                        Dialog.errorMessage("Ошибка", caught.getLocalizedMessage());
+                    }
 				}
 			} else {
 				MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);

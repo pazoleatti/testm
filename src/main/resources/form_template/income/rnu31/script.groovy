@@ -109,7 +109,8 @@ void logicCheck() {
             for (def column : editableColumns) {
                 if (row.getCell(column).value < rowOld.getCell(column).value) {
                     def securitiesType = row.securitiesType
-                    def message = "Процентный (купонный) доход по $securitiesType уменьшился!"
+                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-5984
+                    def message = "Процентный (купонный) доход по «$securitiesType» уменьшился!"
                     if (column in warnColumns) {
                         logger.warn(message)
                     } else {
@@ -147,12 +148,13 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+            def sourceFormData = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
                 def sourceRow = getDataRow(sourceDataRows, 'total')
                 editableColumns.each { alias ->
-                    row.getCell(alias).setValue(sourceRow.getCell(alias).value, row.getIndex())
+                    row.getCell(alias).setValue(sourceRow.getCell(alias).value + row.getCell(alias).getValue(), row.getIndex())
                 }
             }
         }

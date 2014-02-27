@@ -9,6 +9,6 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class GetHistoryBusinessFilterAction extends UnsecuredActionImpl<GetHistoryBusinessFilterResult> implements ActionName {
     @Override
     public String getName() {
-        return "ПОлучение истории по налогам.";
+        return "Получение истории по налогам.";
     }
 }

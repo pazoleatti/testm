@@ -52,6 +52,7 @@ public interface RefBookDao {
 	/**
 	 * Ищет справочник по коду атрибута
 	 * @param attributeId код атрибута, входящего в справочник
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если справочник не найден
 	 * @return
 	 */
 	RefBook getByAttribute(Long attributeId);
@@ -80,6 +81,14 @@ public interface RefBookDao {
 	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
+    /**
+     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param filter
+     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter);
+
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *
@@ -99,6 +108,7 @@ public interface RefBookDao {
 	 * @param refBookId код справочника
 	 * @param recordId код строки справочника
 	 * @return
+	 * @throws org.springframework.dao.EmptyResultDataAccessException если строка не найдена
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
@@ -224,8 +234,9 @@ public interface RefBookDao {
      * @param recordPairs записи, у которых совпали уникальные атрибуты
      * @param versionFrom дата начала актуальности новой версии
      * @param versionTo дата конца актуальности новой версии
+     * @return список идентификаторов записей, в которых есть пересечение
      */
-    void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
+    List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
@@ -240,9 +251,9 @@ public interface RefBookDao {
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordIds список идентификаторов версий записей
-     * @return есть ссылки на версию?
+     * @return результаты проверки. Сообщения об ошибках
      */
-    boolean isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
+    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной

@@ -53,6 +53,14 @@ public interface RefBookDataProvider {
     PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
                                                        String filter, RefBookAttribute sortAttribute);
 
+    /**
+     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param filter
+     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> checkRecordExistence(Date version, String filter);
+
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *

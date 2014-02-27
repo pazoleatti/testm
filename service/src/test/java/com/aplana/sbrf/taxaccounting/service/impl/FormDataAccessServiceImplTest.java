@@ -698,4 +698,52 @@ public class FormDataAccessServiceImplTest {
 
         return isThrown;
     }
+
+    @Test
+    public void testGetAvailableFormDataKind() {
+        List<TaxType> taxType = new ArrayList<TaxType>();
+        List<FormDataKind> kinds = new ArrayList<FormDataKind>();
+        List<FormDataKind> controlKinds = new ArrayList<FormDataKind>();
+        List<FormDataKind> taxTypeKinds = new ArrayList<FormDataKind>();
+
+        taxType.add(TaxType.DEAL);
+        /* Тип по умолчанию */
+        kinds.add(FormDataKind.PRIMARY);
+        /* Дополнительные типы для контролеров */
+        controlKinds.add(FormDataKind.CONSOLIDATED);
+        controlKinds.add(FormDataKind.SUMMARY);
+        /* Типы доступные для налогов на прибыль */
+        taxTypeKinds.add(FormDataKind.ADDITIONAL);
+        taxTypeKinds.add(FormDataKind.UNP);
+
+        /* Для обычного оператора */
+        userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
+        List<FormDataKind> list = service.getAvailableFormDataKind(userInfo, taxType);
+        assertTrue(list.size() == 1);
+        assertTrue(kinds.equals(list));
+
+        /* Для контролеров */
+        kinds.addAll(controlKinds);
+        userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+        list = service.getAvailableFormDataKind(userInfo, taxType);
+        assertTrue(list.size() == 3);
+        assertTrue(kinds.equals(list));
+
+        /* Для налога на прибыль */
+        taxType.clear();
+        taxType.add(TaxType.INCOME);
+
+        /* Для контролеров */
+        kinds.addAll(taxTypeKinds);
+        userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+        list = service.getAvailableFormDataKind(userInfo, taxType);
+        assertTrue(list.size() == 5);
+        assertTrue(kinds.equals(list));
+        /* Для оператора */
+        kinds.removeAll(controlKinds);
+        userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
+        list = service.getAvailableFormDataKind(userInfo, taxType);
+        assertTrue(list.size() == 3);
+        assertTrue(kinds.equals(list));
+    }
 }

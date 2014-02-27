@@ -14,8 +14,9 @@ import groovy.transform.Field
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
-        // TODO пока нет возможности добавлять строки при создании: http://jira.aplana.com/browse/SBRFACCTAX-5219
-        // copyData()
+        break
+    case FormDataEvent.AFTER_CREATE:
+        copyData()
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -43,15 +44,20 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
-// 1 № пп  -  rowNumber
-// 2 Код ОКТМО  -  codeOKATO
-// 3 Идентификационный номер  -  identNumber
-// 4 Регистрационный знак  -  regNumber
-// 5 Код налоговой льготы - taxBenefitCode
-// 6 Дата начала Использование льготы - benefitStartDate
-// 7 Дата окончания Использование льготы - benefitEndDate
+// графа 1 - rowNumber         - № пп
+// графа 2 - codeOKATO         - Код ОКТМО
+// графа 3 - identNumber       - Идентификационный номер
+// графа 4 - regNumber         - Регистрационный знак
+// графа 5 - powerVal          - Мощность (величина)
+// графа 6 - baseUnit          - Мощность (ед. измерения)
+// графа 7 - taxBenefitCode    - Код налоговой льготы
+// графа 8 - benefitStartDate  - Дата начала Использование льготы
+// графа 9 - benefitEndDate    - Дата окончания Использование льготы
 
 //// Кэши и константы
 @Field
@@ -59,15 +65,25 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def copyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+def copyColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 @Field
-def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'taxBenefitCode', 'benefitStartDate',
-        'benefitEndDate']
+def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
+        'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+
+// дата начала отчетного периода
+@Field
+def startDate = null
+
+// дата окончания отчетного периода
+@Field
+def endDate = null
 
 //// Обертки методов
 
@@ -111,8 +127,8 @@ def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dFrom = getReportPeriodStartDate()
+    def dTo = getReportPeriodEndDate()
     def String dFormat = "dd.MM.yyyy"
 
     // Проверенные строки (3-я провека)
@@ -123,7 +139,7 @@ def logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index?:0, nonEmptyColumns, logger, true)
 
         if (row.benefitStartDate != null && row.benefitEndDate != null) {
             // 2. Поверка на соответствие дат использования льготы
@@ -146,16 +162,18 @@ def logicCheck() {
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
-                if (!checkedRows.contains(rowIn) && row != rowIn && row.codeOKATO.equals(rowIn.codeOKATO)
-                        && row.identNumber.equals(rowIn.identNumber) && row.regNumber.equals(rowIn.regNumber)) {
+                if (!checkedRows.contains(rowIn) && row != rowIn && isEquals(row, rowIn)) {
                     checkedRows.add(rowIn)
                     errorRows = ', ' + rowIn.getIndex()
                 }
             }
             if (!''.equals(errorRows)) {
-                logger.error("Обнаружены строки $index$errorRows, у которых Код ОКТМО = ${getRefBookValue(96, row.codeOKATO).CODE.stringValue}, " +
+                logger.error("Обнаружены строки $index$errorRows, у которых " +
+                        "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Идентификационный номер = $row.identNumber, " +
-                        "Регистрационный знак = $row.regNumber совпадают!")
+                        "Мощность (величина) = $row.powerVal, " +
+                        "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue} " +
+                        "совпадают!")
             }
         }
         checkedRows.add(row)
@@ -191,17 +209,17 @@ def String checkPrevPeriod(def reportPeriod) {
 
 // Алгоритм копирования данных из форм предыдущего периода при создании формы
 def copyData() {
-    def rows = new LinkedList<DataRow<Cell>>()
+    def rows = []
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (reportPeriod.order == 4) {
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, []))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
         prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows.addAll(getPrevRowsForCopy(prevReportPeriod, rows))
     } else {
-        rows += getPrevRowsForCopy(prevReportPeriod)
+        rows += getPrevRowsForCopy(prevReportPeriod, [])
     }
 
     if (rows.size() > 0) {
@@ -223,21 +241,72 @@ def copyRow(def row) {
 }
 
 //Получить строки для копирования за предыдущий отчетный период
-def getPrevRowsForCopy(def reportPeriod) {
-    def rows = new LinkedList<DataRow<Cell>>()
+def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
+    def rows = []
+    def rowsOld = []
+    rowsOld.addAll(rowsOldE)
     if (reportPeriod != null) {
         formDataOld = formDataService.find(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
         if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
-            def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-            def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
+            def dFrom = getReportPeriodStartDate()
+            def dTo = getReportPeriodEndDate()
             for (def row in dataRowsOld) {
-                if (row.regDate == null || row.regDateEnd == null || row.regDate > dTo || row.regDateEnd < dFrom) {
+                if (( row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
                     continue
                 }
-                rows.add(copyRow(row))
+
+                // эта часть вроде как лишняя
+                def  benefitEndDate = row.benefitEndDate
+                if(benefitEndDate == null || benefitEndDate > dTo){
+                    benefitEndDate = dTo
+                }
+                def  benefitStartDate = row.benefitStartDate
+                if(benefitStartDate < dFrom){
+                    benefitStartDate = dFrom
+                }
+                if (benefitStartDate > dTo || benefitEndDate < dFrom) {
+                    continue
+                }
+
+                // исключаем дубли
+                def need = true
+                for (def rowOld in rowsOld) {
+                    if (isEquals(row, rowOld)) {
+                        need = false
+                        break
+                    }
+                }
+                if (need) {
+                    row.setIndex(rowsOld.size())
+                    newRow = copyRow(row)
+                    rows.add(newRow)
+                    rowsOld.add(newRow)
+                }
             }
         }
     }
     return rows
+}
+
+def isEquals(def row1, def row2) {
+    if (row1.codeOKATO== null || row1.identNumber== null || row1.powerVal == null || row1.baseUnit == null){
+        return true
+    }
+    return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)
+            && row1.powerVal.equals(row2.powerVal) && row1.baseUnit.equals(row2.baseUnit))
+}
+
+def getReportPeriodStartDate() {
+    if (!startDate) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

@@ -9,8 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerView;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -28,8 +27,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
-import com.google.gwt.user.client.ui.PopupPanel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,14 +40,13 @@ import java.util.List;
 public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 	interface Template extends SafeHtmlTemplates {
-		@Template("<img align=\"right\" src=\"resources/img/reference-16.gif\"/>")
+		@Template("<img style=\"margin: 3px 2px;\" align=\"right\" src=\"resources/img/circle.png\"/>")
 		SafeHtml referenceIcon();
 	}
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-    private ModalWindow panel;
-	private RefBookMultiPicker refBookPiker = new RefBookMultiPickerView();
+	private RefBookPickerWidget refBookPiker = new RefBookPickerWidget(false, false);
 	
 	private HandlerRegistration changeHandlerRegistration;
 
@@ -65,16 +63,15 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
 		// Create popup panel
-        this.panel = new ModalWindow(this.column.getName());
+        refBookPiker.setTitle(this.column.getName());
 
+        refBookPiker.addCloseHandler(new CloseHandler<ModalWindow>() {
+            public void onClose(CloseEvent<ModalWindow> event) {
+                changeHandlerRegistration.removeHandler();
+            }
+        });
 
-		panel.addCloseHandler(new CloseHandler<PopupPanel>() {
-			public void onClose(CloseEvent<PopupPanel> event) {
-				changeHandlerRegistration.removeHandler();
-			}
-		});
-
-        panel.add(refBookPiker);
+        refBookPiker.setVisible(false);
 	}
 
 	@Override
@@ -85,32 +82,34 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	@Override
 	public void onBrowserEvent(final Context context, final Element parent, final Long nvalue,
 			final NativeEvent nevent, final ValueUpdater<Long> valueUpdater) {
-		
 
 		AbstractCell editableCell = ((DataRow<?>) context.getKey()).getCell(column.getAlias());
 		if (!DataRowEditableCellUtils.editMode(columnContext, editableCell)) {
 			return;
 		}
-			
+
 	    String eventType = nevent.getType();
 	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
 	    		|| (CLICK.equals(eventType))) {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
-                refBookPiker.setAcceptableValues(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
-						columnContext.getEndDate());
+                refBookPiker.load(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+                        columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
-			// Устанавливаем старое значение
-			refBookPiker.setValue(nvalue);
-			
-			// Регистрируем событие изменения значени 
+            // Устанавливаем старое значение
+            if (nvalue != null) {
+                refBookPiker.setValue(Arrays.asList(nvalue), false);
+            }
+
+            // Регистрируем событие изменения значени
 			this.changeHandlerRegistration = refBookPiker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<List<Long>> event) {
 					// Update the cell and value updater.
                     List<Long> values = event.getValue();
+                    System.out.println(values);
                     Long value = (values != null && !values.isEmpty() ? values.get(0) : null);
 
 					@SuppressWarnings("unchecked")
@@ -133,13 +132,11 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                     if (valueUpdater != null) {
 						valueUpdater.update(value);
 					}
-					// Скрываем панель. При скрытии удаляется хендлер.
-					panel.hide();
 				}
 			});
 			
 			// Устанавливаем позицию и отображаем справочник
-			panel.center();
+			refBookPiker.open();
 			
 		}
 	}
@@ -150,12 +147,15 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
 		Cell cell = dataRow.getCell(column.getAlias());
 		String rendValue = cell.getRefBookDereference();
+
 		if (rendValue == null) {
 			rendValue = "";
 		}
+
 		sb.append(renderer.render(rendValue));
-        if (cell.isEditable()) {
+        if ((DataRowEditableCellUtils.editMode(columnContext, cell))&&cell.isEditable()) {
             sb.append(template.referenceIcon());
         }
     }
 }
+

@@ -15,6 +15,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.List;
+import java.util.Map;
 
 public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<DeclarationListPresenterBase.MyView, Proxy_> {
@@ -22,7 +23,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	public interface MyView extends View, HasUiHandlers<DeclarationListUiHandlers> {
         void updateData(int pageNumber);
 
-        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records);
+        void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames);
 
         void updateData();
 

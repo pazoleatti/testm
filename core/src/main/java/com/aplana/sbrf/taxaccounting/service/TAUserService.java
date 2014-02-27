@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserFull;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 /**
  * Сервис для работы с таблицей сохраненных пользователей.
@@ -79,5 +76,12 @@ public interface TAUserService {
 	 * @return возвращает страницу со списком пользователей
 	 */
 	PagingResult<TAUserFull> getByFilter(MembersFilterData filter);
+
+	/**
+	 * Возвращает список-путь от переданного подразделения по иерархии вверх
+	 * @param department
+	 * @return
+	 */
+	List<Department> getDepartmentHierarchy(int department);
 
 }

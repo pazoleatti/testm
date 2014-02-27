@@ -38,6 +38,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 		void setReportPeriods(List<ReportPeriod> reportPeriods);
 
         void setFormStateList(List<WorkflowState> list);
+
+        void clean();
 	}
 
 	private final DispatchAsync dispatchAsync;

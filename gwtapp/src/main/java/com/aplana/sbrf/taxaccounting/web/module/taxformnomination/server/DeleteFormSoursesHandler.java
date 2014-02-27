@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -67,20 +68,14 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             if (formsSources.size() != 0){
                 StringBuffer stringBuffer = new StringBuffer();
                 for (DepartmentFormType form: formsSources){
-                    stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
-                    stringBuffer.append(form.getKind().getName());
-                    stringBuffer.append(formTypeService.get(form.getFormTypeId()).getName());
-                    stringBuffer.append(", ");
+                    stringBuffer.append(getTaxFormErrorTextPart(form.getDepartmentId(), form.getKind(), form.getFormTypeId()));
                 }
                 // удаляем последний символ ", "
                 logger.error(headErrMsg+ " приемником для "+stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString());
             } else if (formsDestinations.size() != 0){
                 StringBuffer stringBuffer = new StringBuffer();
                 for (DepartmentFormType form: formsDestinations){
-                    stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
-                    stringBuffer.append(form.getKind().getName());
-                    stringBuffer.append(formTypeService.get(form.getFormTypeId()).getName());
-                    stringBuffer.append(", ");
+                    stringBuffer.append(getTaxFormErrorTextPart(form.getDepartmentId(), form.getKind(), form.getFormTypeId()));
                 }
                 // удаляем последний символ ", "
                 logger.error(headErrMsg+ " источником для "+stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString());
@@ -88,6 +83,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 StringBuffer stringBuffer = new StringBuffer();
                 for (DepartmentDeclarationType form: declarationDestinitions){
                     stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
+                    stringBuffer.append(" - ");
                     stringBuffer.append(formTypeService.get(form.getDeclarationTypeId()).getName());
                     stringBuffer.append(", ");
                 }
@@ -104,6 +100,19 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
+    }
+
+    private StringBuffer getTaxFormErrorTextPart(int departmentId, FormDataKind formDataKind, int formTypeId){
+        StringBuffer stringBuffer = new StringBuffer();
+
+        stringBuffer.append(departmentService.getDepartment(departmentId).getName());
+        stringBuffer.append(" - ");
+        stringBuffer.append(formDataKind.getName());
+        stringBuffer.append(" - ");
+        stringBuffer.append(formTypeService.get(formTypeId).getName());
+        stringBuffer.append(", ");
+
+        return stringBuffer;
     }
 
     @Override

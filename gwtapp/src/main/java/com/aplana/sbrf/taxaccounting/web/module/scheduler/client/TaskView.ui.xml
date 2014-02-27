@@ -90,7 +90,7 @@
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
                     <g:Button text="Создать" ui:field="createButton"/>
-                    <g:Button text="Отмена" ui:field="cancelButton"/>
+                    <g:Button text="Отменить" ui:field="cancelButton"/>
                 </g:HorizontalPanel>
 
                 <g:Label addStyleNames="{style.horSep}"/>

@@ -46,7 +46,7 @@ public class DeparmentFormTypeAssembler {
     
     private DepartmentFormTypeShared assemble(DepartmentFormType departmentFormType){
     	DepartmentFormTypeShared result = new DepartmentFormTypeShared();    	
-    	result.setDepartmentName(departmentService.getDepartment(departmentFormType.getDepartmentId()).getName());
+    	result.setDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
     	result.setId(departmentFormType.getId());
     	result.setFormTypeName(departmentFormTypeService.getFormType(departmentFormType.getFormTypeId()).getName());
     	result.setKind(departmentFormType.getKind());

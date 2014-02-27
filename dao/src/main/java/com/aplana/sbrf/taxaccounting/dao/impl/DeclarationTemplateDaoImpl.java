@@ -92,7 +92,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 			);
 			return declarationTemplate.getId();
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Для данного вида декларации %d не найдено активного шаблона декларации.", declarationTypeId);
+			throw new DaoException("Выбранный вид декларации %d не существует в выбранном периоде.", declarationTypeId);
 		}catch(IncorrectResultSizeDataAccessException e){
 			throw new DaoException("Для даного вида декларации %d найдено несколько активных шаблонов деклараций.", declarationTypeId);
 		}

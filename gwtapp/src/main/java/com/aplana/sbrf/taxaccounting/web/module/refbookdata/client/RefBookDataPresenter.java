@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -43,6 +45,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	private Long refBookDataId;
 
+    private Long recordId;
+    private Integer page;
+
 	EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
@@ -63,6 +68,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
         void setReadOnlyMode(boolean readOnly);
+        public int getPage();
+        public void setPage(int page);
     }
 
 	@Inject
@@ -85,6 +92,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	protected void onReveal() {
 		super.onReveal();
+        if (recordId != null) getView().setPage(page);
 		setInSlot(TYPE_editFormPresenter, editFormPresenter);
 	}
 
@@ -118,6 +126,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							public void onSuccess(DeleteRefBookRowResult result) {
                                 LogCleanEvent.fire(RefBookDataPresenter.this);
                                 LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
+                                if (result.isException()) {
+                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!", new DialogHandler() {
+                                        @Override
+                                        public void close() {
+                                            super.close();
+                                        }
+                                    });
+                                }
 								editFormPresenter.show(null);
 								editFormPresenter.setEnabled(false);
 								getView().updateTable();
@@ -128,7 +144,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-			editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
+            recordId = getView().getSelectedRow().getRefBookRowId();
+            page = getView().getPage();
+			editFormPresenter.show(recordId);
 		}
 	}
 
@@ -198,7 +216,15 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 								@Override
 								public void onSuccess(GetRefBookTableDataResult result) {
 									getView().setTableData(range.getStart(),
-											result.getTotalCount(), result.getDataRows());
+                                            result.getTotalCount(), result.getDataRows());
+                                    // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
+                                    if (!result.getDataRows().isEmpty()) {
+                                        getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    }
+                                    // http://jira.aplana.com/browse/SBRFACCTAX-5759 элемент можно выбирать только после загрузки нужной страницы
+                                    if (page != null && range.getStart() == page * range.getLength()) {
+                                        getView().setSelected(recordId);
+                                    }
 								}
 							}, RefBookDataPresenter.this));
 		}
