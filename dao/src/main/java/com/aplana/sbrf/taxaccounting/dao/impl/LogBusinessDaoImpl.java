@@ -87,12 +87,13 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
             log.setUser(userDao.getUser(rs.getInt("user_id")));
             log.setRoles(rs.getString("roles"));
-            log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            /*log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));*/
             log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             log.setDeclarationType(rs.getInt("declaration_type_id") != 0 ? declarationTypeDao.get(rs.getInt("declaration_type_id")) : null);
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
             log.setNote(rs.getString("note"));
             log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            log.setDepartmentName(departmentDao.getParentsHierarchy(rs.getInt("user_department_id")));
             return log;
         }
     }
@@ -165,7 +166,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                     userSql = userSql + ", " + temp.toString();
                 }
             }
-            sql.append(" AND user_id in ").append("(" + userSql + ")");
+            sql.append(" AND user_id in ").append("(").append(userSql).append(")");
         }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
@@ -258,7 +259,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
         sql.append(" log_date between :fromDate and :toDate");
         sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
-        if (((List<Long>)names.get("userId"))!=null&&!((List<Long>)names.get("userId")).isEmpty()){
+        if (names.get("userId") !=null&&!((List<Long>)names.get("userId")).isEmpty()){
             sql.append(" and user_id in (:userId)");
         }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())

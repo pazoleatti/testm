@@ -47,12 +47,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         allCheck()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED :
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
         allCheck()
         break
-// обобщить
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE : // обобщить
         consolidation()
         deleteAllStatic()
         sort()
@@ -92,6 +90,11 @@ switch (formDataEvent) {
  13.        outcomeTax          Расходы по сделке РЕПО, учитываемые для целей налогообложения (руб.коп.)    Число/17.2/
 
  */
+
+// Проверяемые на пустые значения атрибуты (графа 1..13)
+@Field
+def nonEmptyColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate',
+        'part2REPODate', 'salePrice', 'acquisitionPrice', 'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax']
 
 @Field
 def endDate = null
@@ -134,7 +137,7 @@ def logicalCheck() {
             }
 
             // 1. Проверка на заполнение поля «<Наименование поля>»
-            if (!checkRequiredColumns(row,['outcome269st', 'outcomeTax'])){
+            if (!checkRequiredColumns(row, nonEmptyColumns)) {
                 return false
             }
             // 2. Проверка даты первой части РЕПО
@@ -374,7 +377,7 @@ BigDecimal calc12(DataRow row) {
     if (row.outcome != null && row.outcome > 0) {
         long difference = 0
         if (row.part2REPODate != null && row.part1REPODate != null) {
-            difference = (row.part2REPODate.getTime() - row.part1REPODate.getTime()) / (1000 * 60 * 60 * 24)
+            difference = row.part2REPODate - row.part1REPODate
         }
         // необходимо получить кол-во в днях
         difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
@@ -451,7 +454,6 @@ void calc() {
         }
     }
     data.save(getRows(data));
-
 }
 
 /**
