@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -26,8 +25,6 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
 
-//	@Autowired
-//	private DepartmentDeclarationTypeDao departmentDeclarationTypeDao;
 
     @Autowired
     private DepartmentService departmentService;

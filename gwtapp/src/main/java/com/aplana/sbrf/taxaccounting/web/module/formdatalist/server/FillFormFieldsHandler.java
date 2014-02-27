@@ -39,9 +39,6 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
     @Autowired
     private PeriodService periodService;
 
-    @Autowired
-    private FormDataAccessService formDataAccessService;
-
 	@Autowired
 	private SourceService departmentFormTypeService;
 
