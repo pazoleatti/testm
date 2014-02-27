@@ -93,7 +93,7 @@ void logicCheck() {
     // 22. Обязательность заполнения полей графы 3..12
     checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-    if (formData.periodOrder > 1) {
+    if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
 

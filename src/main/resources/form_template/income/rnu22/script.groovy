@@ -130,7 +130,10 @@ def arithmeticCheckAlias = ['accruedCommisCurrency', 'accruedCommisRub',
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def dataRowsOld = getPrevDataRows()
+    def dataRowsOld = null
+    if (formData.kind == FormDataKind.PRIMARY) {
+        dataRowsOld = getPrevDataRows()
+    }
     def tmp
     def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
     def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -213,25 +216,27 @@ void logicCheck() {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
-        def rowPrev
-        for (def rowOld in dataRowsOld) {
-            if (rowOld.contractNumber == row.contractNumber) {
-                rowPrev = rowOld
-                break
+        if (formData.kind == FormDataKind.PRIMARY) {
+            def rowPrev
+            for (def rowOld in dataRowsOld) {
+                if (rowOld.contractNumber == row.contractNumber) {
+                    rowPrev = rowOld
+                    break
+                }
             }
-        }
-        def values = [:]
+            def values = [:]
 
-        tmp = getGraph13_15(row)
-        values.accruedCommisCurrency = tmp
-        values.commisInAccountingCurrency = tmp
-        values.accruedCommisRub = getGraph14(row)
-        values.commisInAccountingRub = getGraph16(row)
-        values.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
-        values.accrualPrevRub = rowPrev?.reportPeriodRub
-        values.reportPeriodCurrency = getGraph19(row)
-        values.reportPeriodRub = getGraph20(row)
-        checkCalc(row, arithmeticCheckAlias, values, logger, false)
+            tmp = getGraph13_15(row)
+            values.accruedCommisCurrency = tmp
+            values.commisInAccountingCurrency = tmp
+            values.accruedCommisRub = getGraph14(row)
+            values.commisInAccountingRub = getGraph16(row)
+            values.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
+            values.accrualPrevRub = rowPrev?.reportPeriodRub
+            values.reportPeriodCurrency = getGraph19(row)
+            values.reportPeriodRub = getGraph20(row)
+            checkCalc(row, arithmeticCheckAlias, values, logger, false)
+        }
     }
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
@@ -239,7 +244,10 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def dataRowsOld = getPrevDataRows()
+    def dataRowsOld = null
+    if (formData.kind == FormDataKind.PRIMARY) {
+        dataRowsOld = getPrevDataRows()
+    }
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -255,32 +263,35 @@ void calc() {
     // графа 1, 13..20
     dataRows.each { DataRow row ->
 
-        def rowPrev = null
-        for (def rowOld in dataRowsOld) {
-            if (rowOld.contractNumber == row.contractNumber) {
-                rowPrev = rowOld
-                break
-            }
-        }
         // графа 1
         row.rowNumber = ++i
 
-        // графа 13, 15
-        def temp = getGraph13_15(row)
-        row.accruedCommisCurrency = temp
-        row.commisInAccountingCurrency = temp
-        // графа 14
-        row.accruedCommisRub = getGraph14(row)
-        // графа 16
-        row.commisInAccountingRub = getGraph16(row)
-        // графа 17
-        row.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
-        // графа 18
-        row.accrualPrevRub = rowPrev?.reportPeriodRub
-        // графа 19
-        row.reportPeriodCurrency = getGraph19(row)
-        // графа 20
-        row.reportPeriodRub = getGraph20(row)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            def rowPrev = null
+            for (def rowOld in dataRowsOld) {
+                if (rowOld.contractNumber == row.contractNumber) {
+                    rowPrev = rowOld
+                    break
+                }
+            }
+
+            // графа 13, 15
+            def temp = getGraph13_15(row)
+            row.accruedCommisCurrency = temp
+            row.commisInAccountingCurrency = temp
+            // графа 14
+            row.accruedCommisRub = getGraph14(row)
+            // графа 16
+            row.commisInAccountingRub = getGraph16(row)
+            // графа 17
+            row.accrualPrevCurrency = rowPrev?.reportPeriodCurrency
+            // графа 18
+            row.accrualPrevRub = rowPrev?.reportPeriodRub
+            // графа 19
+            row.reportPeriodCurrency = getGraph19(row)
+            // графа 20
+            row.reportPeriodRub = getGraph20(row)
+        }
     }
 
     // добавить строку "итого"
@@ -413,7 +424,7 @@ BigDecimal getGraph20(def DataRow row) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 boolean prevPeriodCheck() {
-    if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
         return false
     }

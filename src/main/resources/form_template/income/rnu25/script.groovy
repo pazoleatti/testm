@@ -185,7 +185,7 @@ void calc() {
             // графа 1
             row.rowNumber = ++rowNumber
         }
-        if (!isBalancePeriod) {
+        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
             // графа 6
             row.reserve = calc6(prevDataRows, row)
 

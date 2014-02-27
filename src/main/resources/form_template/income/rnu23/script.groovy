@@ -1,6 +1,7 @@
 package form_template.income.rnu23
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -41,46 +42,46 @@ import groovy.transform.Field
 // графа 20 - taxPeriodRuble
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         prevPeriodCheck()
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4455
         // calc()
         // logicCheck()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         // TODO (Ramil Timerbaev)
         // calc()
         // logicCheck()
         break
-    case FormDataEvent.MIGRATION :
+    case FormDataEvent.MIGRATION:
         migration()
         break
 }
@@ -162,8 +163,11 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     // РНУ-23 предыдущего периода
-    def prevDataRows = getPrevDataRows()
-    def totalRowOld = (prevDataRows ? getDataRow(prevDataRows, 'total') : null)
+    def totalRowOld
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def prevDataRows = getPrevDataRows()
+        totalRowOld = (prevDataRows ? getDataRow(prevDataRows, 'total') : null)
+    }
 
     // удалить строку "итого" и "итого по ГРН: ..."
     deleteAllAliased(dataRows)
@@ -175,22 +179,24 @@ void calc() {
     dataRows.eachWithIndex { row, i ->
         // графа 1
         row.number = i + 1
-        // графа 13
-        row.incomeCurrency = calc13or15(row)
-        // графа 14
-        row.incomeRuble = calc14(row)
-        // графа 15
-        row.accountingCurrency = calc13or15(row)
-        // графа 16
-        row.accountingRuble = calc16(row)
-        // графа 17
-        row.preChargeCurrency = calc17(totalRowOld)
-        // графа 18
-        row.preChargeRuble = calc18(totalRowOld)
-        // графа 19 (дата графа 11 и 12)
-        row.taxPeriodCurrency = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
-        // графа 20
-        row.taxPeriodRuble = calc20(row)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // графа 13
+            row.incomeCurrency = calc13or15(row)
+            // графа 14
+            row.incomeRuble = calc14(row)
+            // графа 15
+            row.accountingCurrency = calc13or15(row)
+            // графа 16
+            row.accountingRuble = calc16(row)
+            // графа 17
+            row.preChargeCurrency = calc17(totalRowOld)
+            // графа 18
+            row.preChargeRuble = calc18(totalRowOld)
+            // графа 19 (дата графа 11 и 12)
+            row.taxPeriodCurrency = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
+            // графа 20
+            row.taxPeriodRuble = calc20(row)
+        }
     }
     // добавить строки "итого"
     def totalRow = getTotalRow(dataRows)
@@ -208,8 +214,11 @@ void logicCheck() {
     def needValue = [:]
 
     // РНУ-23 предыдущего периода
-    def prevDataRows = getPrevDataRows()
-    def prevTotalRow = (prevDataRows == null || prevDataRows.isEmpty() ? null : getDataRow(prevDataRows, 'total'))
+    def prevTotalRow = null
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def prevDataRows = getPrevDataRows()
+        prevTotalRow = (prevDataRows == null || prevDataRows.isEmpty() ? null : getDataRow(prevDataRows, 'total'))
+    }
 
     /** Дата начала отчетного периода. */
     def a = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -284,16 +293,18 @@ void logicCheck() {
             logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
         }
 
-        // 10. Арифметическая проверка графы 13..20
-        needValue['incomeCurrency'] = calc13or15(row)
-        needValue['incomeRuble'] = calc14(row)
-        needValue['accountingCurrency'] = calc13or15(row)
-        needValue['accountingRuble'] = calc16(row)
-        needValue['preChargeCurrency'] = calc17(prevTotalRow)
-        needValue['preChargeRuble'] = calc18(prevTotalRow)
-        needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
-        needValue['taxPeriodRuble'] = calc20(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+        if (formData.kind == FormDataKind.PRIMARY) {
+            // 10. Арифметическая проверка графы 13..20
+            needValue['incomeCurrency'] = calc13or15(row)
+            needValue['incomeRuble'] = calc14(row)
+            needValue['accountingCurrency'] = calc13or15(row)
+            needValue['accountingRuble'] = calc16(row)
+            needValue['preChargeCurrency'] = calc17(prevTotalRow)
+            needValue['preChargeRuble'] = calc18(prevTotalRow)
+            needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
+            needValue['taxPeriodRuble'] = calc20(row)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+        }
     }
 
     def totalRow = getDataRow(dataRows, 'total')
@@ -403,7 +414,7 @@ void importData() {
                 logger.error("Нет итоговой строки.")
             }
         }
-    } catch(Exception e) {
+    } catch (Exception e) {
         logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
@@ -715,7 +726,7 @@ def getTotalRow(def dataRows) {
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }

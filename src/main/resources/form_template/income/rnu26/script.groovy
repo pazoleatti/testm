@@ -202,7 +202,7 @@ void calc() {
 
     for (row in dataRows) {
         row.rowNumber = ++number
-        if (!getBalancePeriod()) {
+        if (!getBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             // графа 8
             row.reserveCalcValuePrev = calc8(row, dataOld)
 

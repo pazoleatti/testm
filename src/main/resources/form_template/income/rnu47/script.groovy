@@ -28,7 +28,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (!isMonthBalance() &&  formData.kind == FormDataKind.PRIMARY) {
+        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
             def rnu46FormData = getRnu46DataRowHelper()
             if (rnu46FormData == null) {
                 logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
@@ -43,7 +43,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        if (!isMonthBalance()) {
+        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
             def rnu46FormData = getRnu46DataRowHelper()
             if (rnu46FormData == null) {
                 logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
@@ -88,8 +88,7 @@ def dateFormat = new SimpleDateFormat("dd.MM.yyyy")
 @Field
 def isBalancePeriod
 
-/* Получить данные за формы "(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые улучшения арендованного и полученного по договору безвозмездного пользования имущества»" */
-
+// Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
     def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
     def formData46 = formDataService.findMonth(342, formData.kind, formDataDepartment.id, taxPeriodId, formData.periodOrder)
@@ -184,7 +183,7 @@ void logicCheck() {
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    if (!isMonthBalance() &&  formData.kind == FormDataKind.PRIMARY) {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
         def hasData = false
         def groupList = 0..10
         for (def row : rnu46DataRowHelper.allCached) {

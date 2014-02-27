@@ -2,6 +2,7 @@ package form_template.income.rnu46
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -173,7 +174,7 @@ void calc() {
 
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
-    if (!isMonthBalace()) {
+    if (!isMonthBalace() && formData.kind == FormDataKind.PRIMARY) {
         if (getFormDataPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
             logger.error("Не найдены экземпляры ${formTypeService.get(342).name} за прошлый отчетный период!")
         } else {
@@ -188,7 +189,7 @@ void calc() {
         // Графа 1
         row.rowNumber = ++rowNumber
 
-        if (isMonthBalace()) {
+        if (isMonthBalace() || formData.kind != FormDataKind.PRIMARY) {
             // Для периода ввода остатков расчитывается только порядковый номер
             continue;
         }
@@ -354,7 +355,7 @@ void logicCheck() {
     def Set<String> invSet = new HashSet<String>()
 
     // Отчет за предыдущий месяц
-    if (getDataRowHelperPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
+    if (formData.kind == FormDataKind.PRIMARY && (getDataRowHelperPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED)) {
         logger.error('Отсутствуют данные за прошлые отчетные периоды!')
     }
 
@@ -372,8 +373,6 @@ void logicCheck() {
 
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
-
-        prevRow = getPrevRow(getDataRowHelperPrev(), row)
 
         // 1. Проверка на заполнение (графа 1..18)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -395,48 +394,48 @@ void logicCheck() {
             logger.error(errorMsg + 'Все суммы по операции нулевые!')
         }
 
-        def prevSum = getYearSum(['cost10perMonth', 'amortMonth'])
+        if (formData.kind == FormDataKind.PRIMARY) {
 
-        // 6. Проверка суммы расходов в виде капитальных вложений с начала года
-        if (prevRow == null ||
-                row.cost10perTaxPeriod == null ||
-                row.cost10perMonth == null ||
-                prevRow.cost10perTaxPeriod == null ||
-                row.cost10perTaxPeriod < row.cost10perMonth ||
-                row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
-                row.cost10perTaxPeriod != prevSum.cost10perMonth) {
-            logger.error(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
+            def prevRow = getPrevRow(getDataRowHelperPrev(), row)
+            def prevSum = getYearSum(['cost10perMonth', 'amortMonth'])
+
+            // 6. Проверка суммы расходов в виде капитальных вложений с начала года
+            if (prevRow == null ||
+                    row.cost10perTaxPeriod == null ||
+                    row.cost10perMonth == null ||
+                    prevRow.cost10perTaxPeriod == null ||
+                    row.cost10perTaxPeriod < row.cost10perMonth ||
+                    row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
+                    row.cost10perTaxPeriod != prevSum.cost10perMonth) {
+                logger.error(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
+            }
+
+            // 7. Проверка суммы начисленной амортизации с начала года
+            if (prevRow == null ||
+                    row.amortTaxPeriod == null ||
+                    row.amortMonth == null ||
+                    row.amortTaxPeriod < row.amortMonth ||
+                    row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
+                    row.amortTaxPeriod != prevSum.amortMonth) {
+                logger.error(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
+            }
+
+            // 8. Арифметические проверки расчета граф 8, 10-16, 18
+            needValue['usefulLifeWithUsed'] = calc8(row)
+            needValue['cost10perMonth'] = calc10(row, map)
+            needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
+            needValue['amortNorm'] = calc13(row)
+            needValue['amortMonth'] = calc14(row, prevRow, endDate)
+            def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
+            needValue['cost10perTaxPeriod'] = calc11and15and16[0]
+            needValue['amortTaxPeriod'] = calc11and15and16[1]
+            needValue['amortExploitation'] = calc11and15and16[2]
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+            if (row.usefullLifeEnd != calc18(row)) {
+                logger.error(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+            }
         }
-
-        // 7. Проверка суммы начисленной амортизации с начала года
-        if (prevRow == null ||
-                row.amortTaxPeriod == null ||
-                row.amortMonth == null ||
-                row.amortTaxPeriod < row.amortMonth ||
-                row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
-                row.amortTaxPeriod != prevSum.amortMonth) {
-            logger.error(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
-        }
-
-        // 8. Арифметические проверки расчета граф 8, 10-16, 18
-        needValue['usefulLifeWithUsed'] = calc8(row)
-        needValue['cost10perMonth'] = calc10(row, map)
-        needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
-        needValue['amortNorm'] = calc13(row)
-        needValue['amortMonth'] = calc14(row, prevRow, endDate)
-        def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
-        needValue['cost10perTaxPeriod'] = calc11and15and16[0]
-        needValue['amortTaxPeriod'] = calc11and15and16[1]
-        needValue['amortExploitation'] = calc11and15and16[2]
-
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        if (row.usefullLifeEnd != calc18(row)) {
-            logger.error(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
-        }
-
-        // Проверки НСИ
-        checkNSI(71, row, 'amortGroup')
     }
 }
 // Округление
