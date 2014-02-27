@@ -118,7 +118,7 @@ def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = allColumns - ['number']
+def editableColumns = allColumns - ['number', 'fix', 'marketQuotationInRub']
 
 // Автозаполняемые атрибуты
 @Field
@@ -466,7 +466,7 @@ void addAllStatic(def dataRows) {
  */
 def calcItogIssuer(int i) {
     def newRow = formData.createDataRow()
-    newRow.getCell('issuer').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoIssuer#'.concat(i ? i.toString() : ""))
 
     String tIssuer = 'Эмитент'
@@ -477,7 +477,7 @@ def calcItogIssuer(int i) {
         }
     }
 
-    newRow.issuer = tIssuer?.concat(' Итог')
+    newRow.fix = tIssuer?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -510,7 +510,7 @@ def calcItogIssuer(int i) {
 def calcItogRegNumber(int i) {
     // создаем итоговую строку ГРН
     def newRow = formData.createDataRow()
-    newRow.getCell('regNumber').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoRegNumber#'.concat(i ? i.toString() : ""))
 
     String tRegNumber = 'ГРН'
@@ -521,7 +521,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.regNumber = tRegNumber?.concat(' Итог')
+    newRow.fix = tRegNumber?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -1059,7 +1059,8 @@ def hasError() {
 def getCalcTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
-    newRow.issuer = "Общий итог"
+    newRow.getCell("fix").colSpan = 2
+    newRow.fix = "Общий итог"
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }

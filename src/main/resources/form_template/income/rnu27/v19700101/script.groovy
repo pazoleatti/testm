@@ -109,6 +109,7 @@ switch (formDataEvent) {
 }
 
 // графа 1  - число  number                 № пп
+// fix
 // графа 2  - строка issuer                 эмитит
 // графа 3  - строка regNumber              гос номер
 // графа 4  - строка tradeNumber            Номер сделки
@@ -577,10 +578,10 @@ void addAllStatic() {
  */
 def calcItogIssuer(int i) {
     def newRow = formData.createDataRow()
-    newRow.getCell('issuer').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoIssuer#'.concat(i.toString()))
 
-    String tIssuer = 'Эмитет'
+    String tIssuer = 'Эмитент'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
             tIssuer = getRow(j).issuer
@@ -588,10 +589,10 @@ def calcItogIssuer(int i) {
         }
     }
 
-    newRow.issuer = tIssuer.concat(' Итог')
+    newRow.fix = tIssuer.concat(' Итог')
 
     for (column in itogoColumns) {
-        newRow.getCell(column).value = new BigDecimal(0)
+        newRow.getCell(column).setValue(new BigDecimal(0), null)
     }
 
     for (int j = i; j >= 0; j--) {
@@ -605,7 +606,7 @@ def calcItogIssuer(int i) {
 
             for (column in itogoColumns) {
                 if (srow.get(column) != null) {
-                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                    newRow.getCell(column).setValue(newRow.getCell(column).value + (BigDecimal) srow.get(column), null)
                 }
             }
         }
@@ -622,7 +623,7 @@ def calcItogIssuer(int i) {
 def calcItogRegNumber(int i) {
     // создаем итоговую строку ГРН
     def newRow = formData.createDataRow()
-    newRow.getCell('regNumber').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoRegNumber#'.concat(i.toString()))
 
     String tRegNumber = 'ГРН'
@@ -633,10 +634,10 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.regNumber = tRegNumber.concat(' Итог')
+    newRow.fix = tRegNumber.concat(' Итог')
 
     for (column in itogoColumns) {
-        newRow.getCell(column).value = new BigDecimal(0)
+        newRow.getCell(column).setValue(new BigDecimal(0), null)
     }
 
     // идем от текущей позиции вверх и ищем нужные строки
@@ -652,7 +653,7 @@ def calcItogRegNumber(int i) {
 
             for (column in itogoColumns) {
                 if (srow.get(column) != null) {
-                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                    newRow.getCell(column).setValue(newRow.getCell(column).value + (BigDecimal) srow.get(column), null)
                 }
             }
         }
@@ -674,7 +675,7 @@ def calcItogo() {
 
     // заполняем начальными данными-нулями
     for (column in itogoColumns) {
-        rowItogo.getCell(column).value = new BigDecimal(0)
+        rowItogo.getCell(column).setValue(new BigDecimal(0), null)
     }
 
     // ищем снизу вверх итоговую строку по эмитету
@@ -683,7 +684,7 @@ def calcItogo() {
         if ((srow.getAlias() != null) && (srow.getAlias().indexOf('itogoIssuer') != -1)) {
             for (column in itogoColumns) {
                 if (srow.get(column) != null) {
-                    rowItogo.getCell(column).value = rowItogo.getCell(column).value + (BigDecimal) srow.get(column)
+                    rowItogo.getCell(column).setValue(rowItogo.getCell(column).value + (BigDecimal) srow.get(column), null)
                 }
             }
         }
@@ -1046,7 +1047,7 @@ void consolidation() {
  * Установить стиль для итоговых строк.
  */
 void setTotalStyle(def row) {
-    ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
+    ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'reserveCalcValuePrev', 'cost', 'signSecurity',
             'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery'].each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }

@@ -117,8 +117,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                     tree.setSelected(new RefBookUiTreeItem(item, multiSelect), true);
                 }
                 widgetFireChangeEvent(getSelectedIds());
-            } else {
-                clearSelected(true);
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
 
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
 
     @Override
     @Transactional(readOnly = false)
@@ -51,4 +55,9 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
             declarationTypes.add(declarationTypeDao.get(id));
         return declarationTypes;
     }
+
+	@Override
+	public List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType) {
+		return declarationTypeDao.getTypes(departmentId, reportPeriodDao.get(reportPeriod), taxType);
+	}
 }
