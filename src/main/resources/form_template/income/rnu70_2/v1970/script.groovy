@@ -1,5 +1,6 @@
 package form_template.income.rnu70_2.v1970
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 
 import java.text.DateFormat
@@ -69,6 +70,9 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 

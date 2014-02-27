@@ -232,23 +232,31 @@ public class FormDataServiceImpl implements FormDataService {
 		// Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
-
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
                     logEntryService.save(logger.getEntries()));
 		}
-
 		formDataDao.save(formData);
+
+		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+
+				null, formData.getFormType().getId(), formData.getKind().getId(), null);
 		// Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
-		dataRowDao.commit(formData.getId());
-		
-		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getId(), formData.getKind().getId(), null);
+		if (!importFormData) {
+			// Execute scripts for the form event AFTER_CREATE
+			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException(
+						"Произошли ошибки в скрипте после создания налоговой формы",
+						logEntryService.save(logger.getEntries()));
+			}
+		}
 
+		dataRowDao.commit(formData.getId());
 		return formData.getId();
 	}
 
@@ -278,7 +286,7 @@ public class FormDataServiceImpl implements FormDataService {
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
 		formDataScriptingService.executeScript(userInfo, formData,
-				FormDataEvent.ADD_ROW, logger, additionalParameters);
+                FormDataEvent.ADD_ROW, logger, additionalParameters);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте добавления новой строки",
@@ -543,7 +551,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (departmentFormTypes != null && !departmentFormTypes.isEmpty()) {
                     for (DepartmentFormType i: departmentFormTypes) {
                         // получим созданные формы с бд
-                        FormData destinationForm = formDataDao.find(i.getFormTypeId(), i.getKind(), i.getDepartmentId(), formData.getReportPeriodId());
+                        FormData destinationForm = findFormData(i, formData);
                         //В связи с http://jira.aplana.com/browse/SBRFACCTAX-4723
                         // Только для распринятия
                         if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED)
@@ -553,7 +561,7 @@ public class FormDataServiceImpl implements FormDataService {
                         // количество источников в статусе принята
                         boolean existAcceptedSources = false;
                         for (DepartmentFormType s: sourceFormTypes){
-                            FormData sourceForm = formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+                            FormData sourceForm = findFormData(s, formData);
                             if (sourceForm !=null && sourceForm.getState().equals(WorkflowState.ACCEPTED)){
                                 existAcceptedSources = true;
                                 break;
@@ -578,7 +586,16 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-	@Override
+    private FormData findFormData(DepartmentFormType s, FormData formData) {
+        if (formData.getPeriodOrder() == null) {
+            return formDataDao.find(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), formData.getReportPeriodId());
+        } else {
+            Integer taxPeriodId = reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getTaxPeriod().getId();
+            return formDataDao.findMonth(s.getFormTypeId(), s.getKind(), s.getDepartmentId(), taxPeriodId, formData.getPeriodOrder());
+        }
+    }
+
+    @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
 		lockCoreService.lock(FormData.class, formDataId, userInfo);
@@ -616,8 +633,7 @@ public class FormDataServiceImpl implements FormDataService {
                         formData.getFormType().getId(), formData.getKind());
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                FormData form = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                        departmentFormType.getDepartmentId(), formData.getReportPeriodId());
+                FormData form = findFormData(departmentFormType, formData);
                 // Если форма существует и статус отличен от "Создана"
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");

@@ -80,7 +80,7 @@ def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', '
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -92,14 +92,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -535,7 +535,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
@@ -713,4 +712,45 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getAtributes() {
+    [
+            rowNum:             ['rowNum',              'гр. 1', '№ п/п'],
+            fullName:           ['fullName',            'гр. 2.1', 'Полное наименование с указанием ОПФ'],
+            interdependence:    ['interdependence',     'гр. 2.2', 'Признак взаимозависимости'],
+            inn:                ['inn',                 'гр. 3', 'ИНН/ КИО'],
+            countryName:        ['countryName',         'гр. 4.1', 'Наименование страны регистрации'],
+            countryCode:        ['countryCode',         'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
+            docNumber:          ['docNumber',           'гр. 5', 'Номер договора'],
+            docDate:            ['docDate',             'гр. 6', 'Дата договора'],
+            dealNumber:         ['dealNumber',          'гр. 7', 'Номер сделки'],
+            dealDate:           ['dealDate',            'гр. 8', 'Дата заключения сделки'],
+            dealFocus:          ['dealFocus',           'гр. 9', 'Направленность сделки'],
+            deliverySign:       ['deliverySign',        'гр. 10', 'Признак физической поставки драгоценного металла'],
+            metalName:          ['metalName',           'гр. 11', 'Наименование драгоценного металла'],
+            foreignDeal:        ['foreignDeal',         'гр. 12', 'Внешнеторговая сделка'],
+            countryCodeNumeric: ['countryCodeNumeric',  'гр. 13.1', 'Код страны по классификатору ОКСМ (цифровой)'],
+            regionCode:         ['regionCode',          'гр. 13.2', 'Регион (код)'],
+            city:               ['city',                'гр. 13.3', 'Город'],
+            locality:           ['locality',            'гр. 13.4', 'Населенный пункт (село, поселок и т.д.)'],
+            countryCodeNumeric2:['countryCodeNumeric2', 'гр. 14.1', 'Код страны по классификатору ОКСМ (цифровой)'],
+            region2:            ['region2',             'гр. 14.2', 'Регион (код)'],
+            city2:              ['city2',               'гр. 14.3', 'Город'],
+            locality2:          ['locality2',           'гр. 14.4', 'Населенный пункт (село, поселок и т.д.)'],
+            deliveryCode:       ['deliveryCode',        'гр. 15', 'Код условия поставки'],
+            count:              ['count',               'гр. 16', 'Количество'],
+            incomeSum:          ['incomeSum',           'гр. 17', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
+            outcomeSum:         ['outcomeSum',          'гр. 18', 'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
+            price:              ['price',               'гр. 19', 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.'],
+            total:              ['total',               'гр. 20', 'Итого стоимость без учета НДС, акцизов и пошлины, руб.'],
+            dealDoneDate:       ['dealDoneDate',        'гр. 21', 'Дата совершения сделки']
+    ]
 }

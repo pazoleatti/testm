@@ -17,29 +17,29 @@
         }
 
         .footerButton {
-            margin: 8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 84px;
         }
 
-        .table{
+        .table {
             border: 1px solid #aeaeac;
             border-top: 0;
         }
 
-        .btns{
+        .btns {
             margin-left: 5px;
         }
 
     </ui:style>
 
-    <dw:ModalWindow glassEnabled="true" iconUrl="resources/img/businessperson-16.png" title="Исполнитель и подписанты">
-        <g:VerticalPanel>
+    <dw:ModalWindow iconUrl="resources/img/businessperson-16.png" title="Исполнитель и подписанты">
+        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
                     <g:HorizontalPanel height="30px" verticalAlignment="middle">
                         <g:Label width="100px" text="Подразделение:"/>
                         <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                                                            multiselection="false" width="300px" modal="true"/>
+                                                            multiselection="false" labelWordWrap="false" width="300px" modal="true"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="30px" verticalAlignment="middle">
                         <g:Label width="100px" text="Исполнитель:"/>
@@ -56,12 +56,13 @@
                         <g:cell>
                             <g:HorizontalPanel height="350px" width="100%" spacing="3">
                                 <g:cell width="100%" height="100%">
-                                    <t:GenericDataGrid ui:field="signersTable" height="350px" width="100%" addStyleNames="{style.table}"/>
+                                    <t:GenericDataGrid ui:field="signersTable" height="350px" width="100%"
+                                                       addStyleNames="{style.table}"/>
                                 </g:cell>
                                 <g:cell verticalAlignment="middle" horizontalAlignment="center">
                                     <g:VerticalPanel ui:field="directionPanel" spacing="3">
                                         <g:Button text="↑" ui:field="upSigner" addStyleNames="{style.btns}"/>
-                                        <g:Button text="↓" ui:field="downSigner"  addStyleNames="{style.btns}"/>
+                                        <g:Button text="↓" ui:field="downSigner" addStyleNames="{style.btns}"/>
                                     </g:VerticalPanel>
                                 </g:cell>
                             </g:HorizontalPanel>
@@ -76,7 +77,7 @@
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">
                     <g:Button addStyleNames="{style.footerButton}" text="Сохранить" ui:field="saveButton"/>
-                    <g:Button addStyleNames="{style.footerButton}" text="Отмена" ui:field="cancelButton"/>
+                    <g:Button addStyleNames="{style.footerButton}" text="Закрыть" ui:field="cancelButton"/>
                 </g:FlowPanel>
             </g:cell>
         </g:VerticalPanel>

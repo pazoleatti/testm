@@ -199,7 +199,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+        Dialog.confirmMessage("Удаление версии элемента справочника", "Удалить выбранную версию элемента справочника?", new DialogHandler() {
             @Override
             public void yes() {
                 if (getUiHandlers() != null) {

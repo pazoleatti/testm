@@ -97,6 +97,19 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     }
 
     /**
+     * Возвращает календарную дату начала отчетного периода. Для налога по прибыли.
+     *
+     * @param reportPeriodId
+     * @return
+     */
+    @Override
+    public Calendar getCalendarStartDate(int reportPeriodId){
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(reportPeriodService.getReportPeriod(reportPeriodId).getCalendarStartDate());
+		return cal;
+    }
+
+    /**
      * Возвращает дату конца отчетного периода
      * <p>Информация о периодах в конфлюенсе
      * <a href="http://conf.aplana.com/pages/viewpage.action?pageId=9600466">Как считать отчетные периоды для разных налогов</a><p/>

@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl.templateversion;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.SegmentIntersection;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +22,18 @@ import java.util.List;
 @Transactional
 public class VersionDTOperatingServiceImpl implements VersionOperatingService<DeclarationTemplate> {
 
+    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" периоде %s для макета!";
+
+    @Autowired
+    private DeclarationDataDao declarationDataDao;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private DeclarationDataService declarationDataService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private PeriodService periodService;
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -37,8 +43,15 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
             return;
         List<Long> ddIds = declarationDataService.getDeclarationDataLisByVersionTemplate(template.getId());
         if (!ddIds.isEmpty()){
-            logger.error("Обнаружено использование макета для налоговых форм");
+            for(Long id: ddIds) {
+                DeclarationData declarationData = declarationDataDao.get(id);
+                Department department = departmentService.getDepartment(declarationData.getDepartmentId());
+                ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
+
+                logger.error(MSG_IS_USED_VERSION, department.getName(), period.getName() + " " + period.getTaxPeriod().getYear());
+            }
         }
+
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -20,94 +21,59 @@ import java.util.*;
 
 /**
  * Виджет для выбора подразделений
+ *
  * @author Eugene Stetsenko
  */
 public class DepartmentPickerPopupWidget extends DoubleStateComposite implements DepartmentPicker {
-
-    @UiField
-    FlowPanel wrappingPanel;
-
-    @UiField
-    HasText selected;
-
-    @UiField
-    Button selectButton;
-
-    @UiField
-    Button clearButton;
-
-    @UiField
-    Panel panel;
-
-    @UiField
-    public DepartmentTreeWidget tree;
-
-    @UiField
-    public Button ok;
-
-    @UiField
-    ModalWindow popupPanel;
-
-    @UiField
-    TextBox filter;
-
-    @UiField
-    Button find;
-
-    @UiField
-    CheckBox selectChild;
-
-    @UiField(provided=true)
-    ValueListBox<Date> version;
-
-    @UiField
-    Button cancel;
-
-    @UiField
-    HorizontalPanel itemsInfoPanel;
-
-    @UiField
-    Label countItems;
-
-    private Boolean doubleState = true;
-
-    /** Значения id */
-    private List<Integer> value = new ArrayList<Integer>();
-
-    /** Разименованные значения. */
-    private List<String> valueDereference = new ArrayList<String>();
-
-    boolean multiselection;
-
-    @Override
-    public boolean isEnabled() {
-		return super.isEnabled();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-		selectButton.setEnabled(enabled);
-		clearButton.setEnabled(enabled);
-        if (isDoubleState())
-		    super.setEnabled(enabled);
-    }
-
-    public Boolean isDoubleState() {
-        return doubleState;
-    }
-
-    public void setDoubleState(Boolean doubleState) {
-        this.doubleState = doubleState;
-    }
 
     interface Binder extends UiBinder<Widget, DepartmentPickerPopupWidget> {
     }
 
     private static Binder uiBinder = GWT.create(Binder.class);
 
-    /** Виджет для выбора подразделений. */
+    @UiField
+    FlowPanel wrappingPanel;
+
+    @UiField
+    TextBox selected,
+            filter;
+
+    @UiField
+    Button selectButton,
+            clearButton,
+            find,
+            cancel,
+            ok;
+
+    @UiField
+    HorizontalPanel
+            itemsInfoPanel,
+            panel;
+
+    @UiField
+    DepartmentTreeWidget tree;
+
+    @UiField
+    ModalWindow popupPanel;
+
+    @UiField
+    CheckBox selectChild;
+
+    @UiField(provided = true)
+    ValueListBox<Date> version;
+
+    @UiField
+    Label countItems;
+
+    private Boolean doubleState = true;
+    private boolean multiselection;
+    /* Значения id  */
+    private List<Integer> value = new LinkedList<Integer>();
+    /* Разименованные значения.   */
+    private List<String> valueDereference = new LinkedList<String>();
+
     @UiConstructor
-    public DepartmentPickerPopupWidget(String header, boolean multiselection, boolean modal) {
+    public DepartmentPickerPopupWidget(String header, final boolean multiselection, boolean modal) {
         version = new ValueListBox<Date>(new DateTimeFormatRenderer());
         initWidget(uiBinder.createAndBindUi(this));
         this.multiselection = multiselection;
@@ -120,11 +86,21 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         // TODO (Ramil Timerbaev) в "Дата актуальности" пока выставил текущую дату
         setVersion(new Date());
 
-        updateCountItems();
+        /* Обновить значение количества выбранных элементов. */
+        tree.addValueChangeHandler(new ValueChangeHandler<List<DepartmentPair>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<DepartmentPair>> event) {
+                int size = tree.getValue().size();
+                ok.setEnabled(size > 0);
+                if (multiselection) {
+                    countItems.setText(String.valueOf(size));
+                }
+            }
+        });
     }
 
     @UiHandler("selectButton")
-    void onSelectButtonClicked(ClickEvent event){
+    void onSelectButtonClicked(ClickEvent event) {
         tree.setValueById(value, false);
         popupPanel.center();
     }
@@ -135,20 +111,45 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         this.setValue(null, true);
     }
 
-    private String joinListToString(Collection<String> strings) {
-        if ((strings == null) || strings.isEmpty()) {
-            return "";
+    @UiHandler("ok")
+    void onOkButtonClicked(ClickEvent event) {
+        this.value.clear();
+        this.valueDereference.clear();
+        for (DepartmentPair item : tree.getValue()) {
+            this.value.add(item.getDepartmentId());
+            this.valueDereference.add(item.getDepartmentName());
         }
-        StringBuilder text = new StringBuilder();
-        for (String name : strings) {
-            text.append(name).append("; ");
-        }
-        return text.toString();
+        ValueChangeEvent.fire(this, this.value);
+
+        String text = TextUtils.joinListToString(valueDereference);
+        selected.setText(text);
+        selected.setTitle(TextUtils.generateTextBoxTitle(text));
+        this.setLabelValue(text);
+
+        popupPanel.hide();
+    }
+
+    @UiHandler("find")
+    void onFindButtonClicked(ClickEvent event) {
+        tree.filter(filter.getText());
+    }
+
+    @UiHandler("cancel")
+    void onCancelButtonClicked(ClickEvent event) {
+        popupPanel.hide();
+        List<Integer> list = new LinkedList<Integer>(value);
+        setValue(list);
+    }
+
+    @UiHandler("selectChild")
+    void onSelectChildValueChange(ValueChangeEvent<Boolean> event) {
+        tree.setSelectChild(selectChild.getValue());
     }
 
     @Override
     public List<Integer> getValue() {
-        return value;
+        Collections.sort(value);
+        return new ArrayList<Integer>(value);
     }
 
     @Override
@@ -159,40 +160,39 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
         this.value.clear();
-        if(value != null){
+        if (value != null) {
             this.value.addAll(value);
         }
         setValueById(this.value);
 
-		String text = joinListToString(valueDereference);
-		selected.setText(text);
-		setLabelValue(text);
+        String text = TextUtils.joinListToString(valueDereference);
+        selected.setText(text);
+        selected.setTitle(TextUtils.generateTextBoxTitle(text));
+
+        setLabelValue(text);
 
         if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
     }
 
-	/**
-	 * Обновляет значение Label в состоянии disabled.
-	 */
-	@Override
-	protected void updateLabelValue() {
-		setLabelValue(joinListToString(valueDereference));
-	}
+    /**
+     * Обновляет значение Label в состоянии disabled.
+     */
+    @Override
+    protected void updateLabelValue() {
+        setLabelValue(TextUtils.joinListToString(valueDereference));
+    }
 
-	/** Установить выбранными узлы дерева для указанных подразделений. */
+    /**
+     * Установить выбранными узлы дерева для указанных подразделений.
+     */
     public void setValueByDepartmentPair(List<DepartmentPair> values, boolean fireEvents) {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new LinkedList<Integer>();
         for (DepartmentPair i : values) {
             list.add(i.getDepartmentId());
         }
         setValue(list, fireEvents);
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
-        return addHandler(handler, ValueChangeEvent.getType());
     }
 
     @Override
@@ -211,8 +211,13 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     @Override
-    public void setWidth(String width){
+    public void setWidth(String width) {
         wrappingPanel.setWidth(width);
+    }
+
+    @Override
+    public void setSelectButtonFocus(boolean focused) {
+        selectButton.setFocus(focused);
     }
 
     @Override
@@ -225,7 +230,14 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         return tree.getAvalibleValues();
     }
 
-    /** Установить выбранными элементы по идентификаторам. */
+    @Override
+    public void clearFilter(){
+        filter.setText("");
+    }
+
+    /**
+     * Установить выбранными элементы по идентификаторам.
+     */
     private void setValueById(List<Integer> itemsIdToSelect) {
         tree.setValueById(itemsIdToSelect, false);
         valueDereference.clear();
@@ -236,43 +248,11 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         ok.setEnabled(valueDereference.size() > 0);
     }
 
-    @UiHandler("ok")
-    void onOkButtonClicked(ClickEvent event) {
-        this.value.clear();
-        this.valueDereference.clear();
-        for (DepartmentPair item : tree.getValue()) {
-            this.value.add(item.getDepartmentId());
-            this.valueDereference.add(item.getDepartmentName());
-        }
-        ValueChangeEvent.fire(this, this.value);
-
-		String text = joinListToString(valueDereference);
-		selected.setText(text);
-		this.setLabelValue(text);
-
-        popupPanel.hide();
-    }
-
-    /** Получить выбранные подразделения. */
+    /**
+     * Получить выбранные подразделения.
+     */
     public List<DepartmentPair> getDepartmentPairValues() {
         return tree.getValue();
-    }
-
-    @UiHandler("find")
-    void onFindButtonClicked(ClickEvent event) {
-        tree.filter(filter.getText());
-    }
-
-    @UiHandler("cancel")
-    void onCancelButtonClicked(ClickEvent event) {
-        popupPanel.hide();
-        List<Integer> list = new ArrayList<Integer>(value);
-        setValue(list);
-    }
-
-    @UiHandler("selectChild")
-    void onSelectChildValueChange(ValueChangeEvent<Boolean> event) {
-        tree.setSelectChild(selectChild.getValue());
     }
 
     public Date getVersion() {
@@ -288,22 +268,30 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         version.setAcceptableValues(versions);
     }
 
-    @Override
-    public void setSelectButtonFocus(boolean focused) {
-        selectButton.setFocus(focused);
+    public Boolean isDoubleState() {
+        return doubleState;
     }
 
-    /** Обновить значение количества выбранных элементов. */
-    private void updateCountItems() {
-        tree.addValueChangeHandler(new ValueChangeHandler<List<DepartmentPair>>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<List<DepartmentPair>> event) {
-                int size = tree.getValue().size();
-                ok.setEnabled(size > 0);
-                if (multiselection) {
-                    countItems.setText(String.valueOf(size));
-                }
-            }
-        });
+    public void setDoubleState(Boolean doubleState) {
+        this.doubleState = doubleState;
+    }
+
+
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
+        return addHandler(handler, ValueChangeEvent.getType());
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return super.isEnabled();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        selectButton.setEnabled(enabled);
+        clearButton.setEnabled(enabled);
+        if (isDoubleState())
+            super.setEnabled(enabled);
     }
 }

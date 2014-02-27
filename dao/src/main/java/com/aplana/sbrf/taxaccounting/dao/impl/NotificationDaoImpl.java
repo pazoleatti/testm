@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -31,7 +32,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setReceiverDepartmentId(rs.getInt("RECEIVER_DEPARTMENT_ID"));
             notification.setFirstReaderId(rs.getInt("FIRST_READER_ID"));
             notification.setText(rs.getString("TEXT"));
-            notification.setCreateDate(rs.getDate("CREATE_DATE"));
+            notification.setCreateDate(new Date(rs.getTimestamp("CREATE_DATE").getTime()));
             notification.setDeadline(rs.getDate("DEADLINE"));
             return notification;
         }
@@ -116,7 +117,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                     ps.setNull(5, Types.NUMERIC);
                 }
                 ps.setString(6, elem.getText());
-                ps.setDate(7, new java.sql.Date(elem.getCreateDate().getTime()));
+                ps.setTimestamp(7, new java.sql.Timestamp(elem.getCreateDate().getTime()));
                 ps.setDate(8, new java.sql.Date(elem.getDeadline().getTime()));
             }
 
@@ -179,8 +180,6 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	@Override
 	public List<Integer> getByFilter(NotificationsFilterData filter) {
 		try {
-//			select * from (select rownum as rn, id, create_date from (select nt.id, nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1
-//					order by nt.create_date desc)) where rn between 1 and 20;
 			StringBuilder query = new StringBuilder("select id from ( select rownum as rn, id from (select nt.id, " +
 					"nt.RECEIVER_DEPARTMENT_ID, nt.SENDER_DEPARTMENT_ID, nt.create_date from notification nt where 1=1 ");
 			MapSqlParameterSource params = new MapSqlParameterSource();

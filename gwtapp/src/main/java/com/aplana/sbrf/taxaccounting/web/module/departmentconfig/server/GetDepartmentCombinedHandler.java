@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -17,6 +17,8 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepar
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ import java.util.*;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
         GetDepartmentCombinedResult> {
+
+    private static final Log log = LogFactory.getLog(GetDepartmentCombinedHandler.class);
 
     @Autowired
     private PeriodService reportService;
@@ -53,14 +57,16 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         DepartmentCombined depCombined = new DepartmentCombined();
 
-        // Параметры пагинации
-        PagingParams pp = new PagingParams();
-        pp.setCount(1);
-        pp.setStartIndex(0);
-
         RefBookDataProvider provider = null;
 
         Long parentRefBookId = null;
+
+        GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
+        result.setDepartmentCombined(depCombined);
+
+        if (action.getDepartmentId() == null) {
+            return result;
+        }
 
         switch (action.getTaxType()) {
             case INCOME:
@@ -78,21 +84,23 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         }
 
         if (parentRefBookId != null) {
-             provider = rbFactory.getDataProvider(parentRefBookId);
+            provider = rbFactory.getDataProvider(parentRefBookId);
         }
 
         Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendarFrom.getTime(), pp, filter, null);
+                calendarFrom.getTime(), null, filter, null);
 
         if (params.size() != 0) {
             Map<String, RefBookValue> paramsMap = params.get(0);
-             if (params.size() != 1) {
-                 throw new ActionException("Miltiple RefBook records (version = "+
-                         new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime()));
-             }
+            if (params.size() != 1) {
+                String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
+                log.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
+                        dt, parentRefBookId, action.getDepartmentId(), params));
+                throw new ActionException("Найдено несколько записей для версии " + dt);
+            }
 
             // Id записи
             depCombined.setRecordId(paramsMap.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
@@ -100,7 +108,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             // Общая часть
             depCombined.setDepartmentId(getList(paramsMap.get(DepartmentParamAliases.DEPARTMENT_ID.name()).getReferenceValue()));
             depCombined.setDictRegionId(getList(paramsMap.get(DepartmentParamAliases.DICT_REGION_ID.name()).getReferenceValue()));
-            depCombined.setOkato(getList(paramsMap.get(DepartmentParamAliases.OKATO.name()).getReferenceValue()));
+            depCombined.setOktmo(getList(paramsMap.get(DepartmentParamAliases.OKTMO.name()).getReferenceValue()));
             depCombined.setInn(paramsMap.get(DepartmentParamAliases.INN.name()).getStringValue());
             depCombined.setKpp(paramsMap.get(DepartmentParamAliases.KPP.name()).getStringValue());
             depCombined.setTaxOrganCode(paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE.name()).getStringValue());
@@ -133,10 +141,13 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 depCombined.setTaxRate(taxRate == null ? null : taxRate.doubleValue());
                 depCombined.setType(getList(paramsMap.get(DepartmentParamAliases.TYPE.name()).getReferenceValue()));
             }
-        }
 
-        GetDepartmentCombinedResult result = new GetDepartmentCombinedResult();
-        result.setDepartmentCombined(depCombined);
+            // Транспортный налог
+            if (action.getTaxType() == TaxType.TRANSPORT) {
+                Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
+                depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue() == 1L);
+            }
+        }
 
         // Если запись не нашлась, то готовим новую
         if (result.getDepartmentCombined().getDepartmentId() == null && action.getDepartmentId() != null) {
@@ -154,8 +165,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         if (depCombined.getDictRegionId() != null && !depCombined.getDictRegionId().isEmpty()) {
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
         }
-        if (depCombined.getOkato() != null && !depCombined.getOkato().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 3L, 7L, depCombined.getOkato().get(0), logger);
+        if (depCombined.getOktmo() != null && !depCombined.getOktmo().isEmpty()) {
+            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 96L, 840L, depCombined.getOktmo().get(0), logger);
         }
         if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
             getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 34L, 210L, depCombined.getOkvedCode().get(0), logger);
@@ -188,12 +199,13 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
     /**
      * Разыменование значения справочника с обработкой исключения, возникающего при отсутствии записи
-     * @param map Id атрибута -> Разыменованное значение
+     *
+     * @param map             Id атрибута -> Разыменованное значение
      * @param parentRefBookId Id справочника формы настроек
-     * @param refBookId Id справочника
-     * @param attributeId Id атрибута
-     * @param recordId Id записи
-     * @param logger Логгер для передачи клиенту
+     * @param refBookId       Id справочника
+     * @param attributeId     Id атрибута
+     * @param recordId        Id записи
+     * @param logger          Логгер для передачи клиенту
      */
     private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
         try {
@@ -211,6 +223,9 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private String getNumberValue(RefBookValue value) {
         if (value == null) {
             return null;
+        }
+        if (value.getAttributeType() == RefBookAttributeType.STRING) {
+            return value.getStringValue();
         }
         if (value.getNumberValue() == null) {
             return null;

@@ -3,6 +3,7 @@ package form_template.deal.organization_matching.v1970
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -75,12 +76,26 @@ void accepted() {
     }
 
     def refDataProvider = refBookFactory.getDataProvider(9)
-    if (updateList.size() > 0)
-        refDataProvider.updateRecords(new Date(), updateList)
-    if (insertList.size() > 0)
-        refDataProvider.insertRecords(new Date(), insertList)
-    if (deleteList.size() > 0)
-        refDataProvider.deleteRecords(new Date(), deleteList)
+    if (updateList.size() > 0) {
+        updateList.each { map ->
+            refDataProvider.updateRecordVersion(logger, map.get(RefBook.RECORD_ID_ALIAS)?.value, null, null, map);
+        }
+    }
+    if (insertList.size() > 0) {
+        def records = []
+        insertList.each { map ->
+            RefBookRecord rec = new RefBookRecord()
+            rec.setRecordId(null)
+            rec.setValues(map)
+            records.add(rec)
+        }
+        refDataProvider.createRecordVersion(logger, new Date(), null, records)
+    }
+    if (deleteList.size() > 0) {
+        // TODO (Ramil Timerbaev) при выполнении ругается что на этой форме есть ссылки на удаляемые справочные данные.
+        // Пока сказали оставить, возможно надо будет удалять строки с удаляемыми справочными данными
+        refDataProvider.deleteRecordVersions(logger, deleteList)
+    }
 }
 
 Map<String, RefBookValue> getRecord(DataRow<Cell> row) {

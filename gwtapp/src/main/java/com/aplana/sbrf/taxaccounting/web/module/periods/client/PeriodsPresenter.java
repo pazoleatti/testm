@@ -19,7 +19,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreat
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -130,7 +129,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Dialog.warningMessage("Интервал периода поиска указан неверно!");
+			Dialog.warningMessage("Внимание","Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}

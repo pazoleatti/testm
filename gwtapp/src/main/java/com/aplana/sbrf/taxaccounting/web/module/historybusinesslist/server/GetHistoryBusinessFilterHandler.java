@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.server;
 
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterAction;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.GetHistoryBusinessFilterResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -19,6 +20,8 @@ public class GetHistoryBusinessFilterHandler extends AbstractActionHandler<GetHi
 
     @Autowired
     AuditService auditService;
+    @Autowired
+    private SecurityService securityService;
 
     public GetHistoryBusinessFilterHandler() {
         super(GetHistoryBusinessFilterAction.class);
@@ -27,7 +30,7 @@ public class GetHistoryBusinessFilterHandler extends AbstractActionHandler<GetHi
     @Override
     public GetHistoryBusinessFilterResult execute(GetHistoryBusinessFilterAction action, ExecutionContext context) throws ActionException {
         GetHistoryBusinessFilterResult result = new GetHistoryBusinessFilterResult();
-        result.setAvailableValues(auditService.getFilterAvailableValues());
+        result.setAvailableValues(auditService.getFilterAvailableValues(securityService.currentUserInfo().getUser()));
         return result;
     }
 

@@ -15,6 +15,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -48,6 +49,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
     @UiField
     LinkAnchor archive;
+
+    @UiField
+    Label archiveDateLbl;
 
     private final AsyncDataProvider<LogSearchResultItem> dataProvider = new AsyncDataProvider<LogSearchResultItem>() {
         @Override
@@ -112,7 +116,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         TextColumn<LogSearchResultItem> departmentColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 
@@ -236,9 +240,16 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         }
     }
 
+    @Override
+    public void updateArchiveDateLbl(String archiveDate) {
+        archiveDateLbl.setText(archiveDate);
+    }
+
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
-        getUiHandlers().onPrintButtonClicked();
+        if (getUiHandlers() != null){
+            getUiHandlers().onPrintButtonClicked();
+        }
     }
 
     @UiHandler("archive")

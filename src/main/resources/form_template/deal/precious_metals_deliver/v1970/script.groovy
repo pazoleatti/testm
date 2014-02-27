@@ -80,7 +80,7 @@ def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'country', 'c
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -92,14 +92,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -560,7 +560,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
@@ -744,4 +743,52 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+// Возвращает графу вида "гр. хх"
+def getGrafNum(def alias) {
+    def atr = getAtributes().find { it -> it.getValue()[0] == alias }
+    atr.getValue()[1]
+}
+
+def getAtributes() {
+    [
+            rowNum:                     ['rowNum', 'гр. 1', '№ п/п'],
+            name:                       ['name', 'гр. 2', 'Полное наименование с указанием ОПФ'],
+            dependence:                 ['dependence', 'гр. 2.2', 'Признак взаимозависимости'],
+            innKio:                     ['innKio', 'гр. 3', 'ИНН/ КИО'],
+            country:                    ['country', 'гр. 4.1', 'Наименование страны регистрации'],
+            countryCode1:               ['countryCode1', 'гр. 4.2', 'Код страны регистрации по классификатору ОКСМ'],
+            contractNum:                ['contractNum', 'гр. 5', 'Номер договора'],
+            contractDate:               ['contractDate', 'гр. 6', 'Дата договора'],
+            transactionNum:             ['transactionNum', 'гр. 7.1', 'Номер сделки'],
+            dealType:                   ['dealType', 'гр. 7.2', 'Вид срочной сделки'],
+            transactionDeliveryDate:    ['transactionDeliveryDate', 'гр. 8', 'Дата заключения сделки'],
+            innerCode:                  ['innerCode', 'гр. 9.1', 'Внутренний код'],
+            unitCountryCode:            ['unitCountryCode', 'гр. 9.3', 'Код страны происхождения предмета сделки'],
+            signPhis:                   ['signPhis', 'гр. 10', 'Признак физической поставки драгоценного металла'],
+            signTransaction:            ['signTransaction', 'гр. 11', 'Признак внешнеторговой сделки'],
+            countryCode2:               ['countryCode2', 'гр. 12.1', 'Код страны по классификатору ОКСМ'],
+            region1:                    ['region1', 'гр. 12.2', 'Регион (код)'],
+            city1:                      ['city1', 'гр. 12.3', 'Город'],
+            settlement1:                ['settlement1', 'гр. 12.4', 'Населенный пункт'],
+            countryCode3:               ['countryCode3', 'гр. 13.1', 'Код страны по классификатору ОКСМ'],
+            region2:                    ['region2', 'гр. 13.2', 'Регион (код)'],
+            city2:                      ['city2', 'гр. 13.3', 'Город'],
+            settlement2:                ['settlement2', 'гр. 13.4', 'Населенный пункт'],
+            conditionCode:              ['conditionCode', 'гр. 14', 'Код условия поставки'],
+            count:                      ['count', 'гр. 15', 'Количество'],
+            incomeSum:                  ['incomeSum', 'гр. 16', 'Сумма доходов Банка по данным бухгалтерского учета, руб.'],
+            consumptionSum:             ['consumptionSum', 'гр. 17', 'Сумма расходов Банка по данным бухгалтерского учета, руб.'],
+            priceOne:                   ['priceOne', 'гр. 18', 'Цена (тариф) за единицу измерения без учета НДС, руб.'],
+            totalNds:                   ['totalNds', 'гр. 19', 'Итого стоимость без учета НДС, руб.'],
+            transactionDate:            ['transactionDate', 'гр. 20', 'Дата совершения сделки']
+    ]
 }

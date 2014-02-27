@@ -287,17 +287,20 @@ void importFromXML() {
                 tempList = []
                 addList.each { record ->
                     if (tempList.size() < 500) {
-                        def rbRecord = new RefBookRecord()
-                        rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
-                        rbRecord.setValues(record)
-                        tempList.add(rbRecord)
+                        //def rbRecord = new RefBookRecord()
+                        //rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
+                        //rbRecord.setValues(record)
+                        //tempList.add(rbRecord)
+                        tempList.add(record)
                     } else {
-                        dataProvider.createRecordVersion(logger, version, null, tempList)
+                        // dataProvider.createRecordVersion(logger, version, null, tempList)
+                        dataProvider.insertRecords(version, tempList)
                         tempList.clear()
                     }
                 }
                 if (!tempList.isEmpty()) {
-                    dataProvider.createRecordVersion(logger, version, null, tempList)
+                    //dataProvider.createRecordVersion(logger, version, null, tempList)
+                    dataProvider.insertRecords(version, tempList)
                     tempList.clear()
                 }
             }

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
@@ -85,6 +86,13 @@ switch (formDataEvent) {
 // графа 12 - outcome269st
 // графа 13 - outcomeTax
 
+
+@Field
+def endDate = null
+
+@Field
+def reportDay = null
+
 /**
  * Добавить новую строку.
  */
@@ -126,12 +134,12 @@ def deleteRow() {
 void checkBeforeCalc(DataRowHelper form) {
     for (row in form.allCached) {
         // 2. Проверка даты первой части РЕПО (графа 7)
-        if (!(row.part1REPODate < reportDate)) {
+        if (!(row.part1REPODate < getReportDate())) {
             loggerError('Неверно указана дата первой части сделки в строке ' + (form.allCached.indexOf(row) + 1) + '!')
             return
         }
         // 3. Проверка даты второй части РЕПО (графа 8)
-        if (!(row.part2REPODate >= reportDate)) {
+        if (!(row.part2REPODate >= getReportDate())) {
             loggerError('Неверно указана дата второй части сделки в строке ' + (form.allCached.indexOf(row) + 1) + '!')
             return
         }
@@ -161,9 +169,9 @@ void calc() {
     }
 
     /** Отчетная дата. */
-    def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
+    def reportDate = getReportDate()
     /** Последний день отчетного периода */
-    def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def lastDayReportPeriod = getReportPeriodEndDate()
 
     checkBeforeCalc(data)
     if (logger.containsLevel(LogLevel.ERROR)) {
@@ -175,7 +183,7 @@ void calc() {
     def someDate = getDate('01.11.2009', format)
 
     /** Количество дней в году. */
-    def daysInYear = getCountDaysInYear(new Date())
+    def daysInYear = getCountDaysInYear(getReportPeriodEndDate())
 
     /** Курс ЦБ РФ на Последний день отчетного периода. */
     def course = 1
@@ -258,16 +266,16 @@ def logicalCheck() {
         def requiredColumns = ['outcome269st', 'outcomeTax']
 
         /** Отчетная дата. */
-        def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId).time
+        def reportDate = getReportDate()
         /** Последний день отчетного периода */
-        def lastDayReportPeriod = reportPeriodService.getEndDate(formData.reportPeriodId).time
+        def lastDayReportPeriod = getReportPeriodEndDate()
 
         /** Дата нужная при подсчете графы 12. */
         SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
         def someDate = getDate('01.11.2009', format)
 
         /** Количество дней в году. */
-        def daysInYear = getCountDaysInYear(new Date())
+        def daysInYear = getCountDaysInYear(getReportPeriodEndDate())
 
         /** Курс ЦБ РФ на отчётную дату. */
         def course = 1
@@ -679,14 +687,6 @@ def checkRequiredColumns(def row, def columns) {
 }
 
 /**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (tmp ? tmp.getTime() + 1 : null)
-}
-
-/**
  * Получить название графы по псевдониму.
  *
  * @param row строка
@@ -845,7 +845,7 @@ def getCourse(def currency, def date) {
  * @param xml данные
  */
 def addData(def xml, def fileName) {
-    def date = new Date()
+    def date = getReportPeriodEndDate()
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def cache = [:]
     def data = getData(formData)
@@ -1145,4 +1145,19 @@ void loggerError(def msg) {
     } else {
         logger.warn(msg)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+/** Получить отчетную дату. */
+def getReportDate() {
+    if (reportDay == null) {
+        reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    }
+    return reportDay
 }

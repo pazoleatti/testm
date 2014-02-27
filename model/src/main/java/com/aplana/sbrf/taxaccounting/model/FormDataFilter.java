@@ -15,7 +15,7 @@ public class FormDataFilter implements Serializable{
 	private List<Integer> departmentIds;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
-	private Integer formTypeId;
+	private List<Long> formTypeId;
 
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
     private List<Long> formDataKind;
@@ -48,11 +48,11 @@ public class FormDataFilter implements Serializable{
 		this.departmentIds = departmentIds;
 	}
 
-	public Integer getFormTypeId() {
+	public List<Long> getFormTypeId() {
 		return formTypeId;
 	}
 
-	public void setFormTypeId(Integer formTypeId) {
+	public void setFormTypeId(List<Long> formTypeId) {
 		this.formTypeId = formTypeId;
 	}
 

@@ -14,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckPeriodStatus
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenPeriodResult;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -113,7 +112,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                                 });
                                 break;
                             case BALANCE_STATUS_CHANGED:
-                                Dialog.warningMessage("В Системе может быть заведён только один период с (без) указания признака ввода остатков!");
+                                Dialog.warningMessage("Внимание", "Данный период уже заведён в Системе. Изменение признака ввода остатков невозможно, так как в Системе может быть заведён только один период с (без) указания признака ввода остатков!");
                                 break;
                             default:
                                 getView().hide();

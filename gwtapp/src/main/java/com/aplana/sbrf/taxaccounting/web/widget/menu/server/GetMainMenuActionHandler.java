@@ -113,11 +113,20 @@ public class GetMainMenuActionHandler extends
                 // настройки форм и подразделений, назначение источников-приемников
                 if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    menu.getSubMenu().add(
-                            new MenuItem("Назначение форм и деклараций",
-                                    NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
-                                            + TYPE + "=" + menu.getMeta() + ";"
-                                            + TaxFormNominationToken.isForm + "=" + true));
+                    if (isDeal) {
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм и уведомлений",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
+                    } else {
+                        menu.getSubMenu().add(
+                                new MenuItem("Назначение форм и деклараций",
+                                        NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                + TYPE + "=" + menu.getMeta() + ";"
+                                                + TaxFormNominationToken.isForm + "=" + true));
+                    }
+
                     menu.getSubMenu().add(
                             new MenuItem("Назначение источников-приёмников",
                                     NUMBER_SIGN + SourcesTokens.SOURCES + ";"
@@ -145,11 +154,13 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
         }*/
         // НСИ
-        if (currentUser.hasRole(TARole.ROLE_CONTROL)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+        if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             MenuItem nsiMenuItem = new MenuItem("НСИ");
-            nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+            }
 
             if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -174,8 +185,14 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
                 }
-                if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)){
+                /*
+                Если пользователю назначено несколько ролей, включая роль Администратор,
+                то права доступа должны браться как для Администратора
+                http://jira.aplana.com/browse/SBRFACCTAX-5687
+                 */
+                if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
+                        && !currentUser.hasRole(TARole.ROLE_ADMIN)){
                     adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
                 }
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
@@ -207,6 +224,7 @@ public class GetMainMenuActionHandler extends
 		GetMainMenuResult result = new GetMainMenuResult();
 		if (currentUser.hasRole(TARole.ROLE_CONTROL)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+				|| currentUser.hasRole(TARole.ROLE_OPER)
 				|| currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setNotificationMenuItemName("Оповещения");
 		}

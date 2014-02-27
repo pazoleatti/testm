@@ -16,15 +16,15 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0 !important;
+            margin: 8px 10px 8px 0 !important;
         }
     </ui:style>
 
-    <dw:ModalWindow glassEnabled="true" animationEnabled="true" iconUrl="" title="Информация по форме/декларации">
-        <g:VerticalPanel>
+    <dw:ModalWindow title="Информация по форме/декларации">
+        <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
-                    <style:GenericCellTable ui:field="versionHistoryCellTable" width="450px" />
+                    <style:GenericCellTable ui:field="versionHistoryCellTable" width="450px"/>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">

@@ -69,6 +69,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
                     LogAddEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList)
                         .with(DeclarationTemplateTokens.declarationType, typeId).build());
+                getView().resetSelectedLine();
             }
         }, this).addCallback(new ManualRevealCallback<DeleteDTVersionResult>(DeclarationVersionListPresenter.this)));
     }
@@ -92,6 +93,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         void setDTVersionTable(List<DeclarationTemplateVersion> fullList);
         DeclarationTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
+        public void resetSelectedLine();
     }
 
     @Title("Версии макетов деклараций")
@@ -116,4 +118,9 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         );
     }
 
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().resetSelectedLine();
+    }
 }

@@ -8,6 +8,7 @@ import com.gwtplatform.dispatch.shared.Result;
 public class SetStatusFormResult implements Result {
     private int status;
     private String uuid;
+    private boolean isSetStatusSuccessfully;
 
     public String getUuid() {
         return uuid;
@@ -23,5 +24,13 @@ public class SetStatusFormResult implements Result {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public boolean isSetStatusSuccessfully() {
+        return isSetStatusSuccessfully;
+    }
+
+    public void setIsSetStatusSuccessfully(boolean isSetStatusSuccessfully) {
+        this.isSetStatusSuccessfully = isSetStatusSuccessfully;
     }
 }

@@ -75,25 +75,36 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     ScrollPanel declarationGridWrapper;
     @UiField
-    FlexiblePager pager;
+    FlexiblePager formPager;
+    @UiField
+    FlexiblePager declarationPager;
 
-    private final AsyncDataProvider<TableModel> dataProvider = new AsyncDataProvider<TableModel>() {
+    private final AsyncDataProvider<TableModel> formDataProvider = new AsyncDataProvider<TableModel>() {
         @Override
         protected void onRangeChanged(HasData<TableModel> display) {
             if (getUiHandlers() != null){
                 final Range range = display.getVisibleRange();
-                getUiHandlers().onRangeChange(range.getStart(), range.getLength());
+                getUiHandlers().onFormRangeChange(range.getStart(), range.getLength());
             }
         }
     };
 
-    private static final List<FormDataKind> FORM_DATA_KIND = Arrays.asList(FormDataKind.values());
+    private final AsyncDataProvider<TableModel> declarationDataProvider = new AsyncDataProvider<TableModel>() {
+        @Override
+        protected void onRangeChanged(HasData<TableModel> display) {
+            if (getUiHandlers() != null){
+                final Range range = display.getVisibleRange();
+                getUiHandlers().onDeclarationRangeChange(range.getStart(), range.getLength());
+            }
+        }
+    };
 
     @Inject
     @UiConstructor
     public TaxFormNominationView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        dataProvider.addDataDisplay(formGrid);
+        formDataProvider.addDataDisplay(formGrid);
+        declarationDataProvider.addDataDisplay(declarationGrid);
         initFormGrid();
         initDeclarationGrid();
         formViewInit();
@@ -113,7 +124,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         checkBoxColumn.setFieldUpdater(new FieldUpdater<TableModel, Boolean>() {
             @Override
             public void update(int index, TableModel object, Boolean value) {
-                formGrid.getVisibleItem(index - pager.getPageStart()).setChecked(value);
+                formGrid.getVisibleItem(index - formPager.getPageStart()).setChecked(value);
                 updatePanelAnchors();
             }
         });
@@ -152,14 +163,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         departmentColumn = new TextColumn<TableModel>(){
             @Override
             public String getValue(TableModel object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 
         performerColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel object) {
-                return object.getPerformer() != null ? object.getPerformer().getName():"";
+                return object.getPerformer() != null ? object.getPerformerName():"";
             }
         };
 
@@ -181,10 +192,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     /**
      * Обновление линков редактировать/отменить назначение
      */
+    @Override
     public void updatePanelAnchors(){
         int selectedCount = getSelectedItemsOnFormGrid().size();
         cancelAnchor.setEnabled(selectedCount  > 0);
         editAnchor.setEnabled(selectedCount  > 0);
+    }
+
+    @Override
+    public void updateDeclarationPanelAnchors(){
+        int selectedCount = getSelectedItems(declarationGrid).size();
+        cancelAnchor.setEnabled(selectedCount  > 0);
     }
 
     private void initDeclarationGrid(){
@@ -198,8 +216,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         checkBoxColumn.setFieldUpdater(new FieldUpdater<TableModel, Boolean>() {
             @Override
             public void update(int index, TableModel object, Boolean value) {
-	            declarationGrid.getVisibleItem(index).setChecked(value);
-                //enableAnchor(cancelAnchor, isCanCancel());
+                declarationGrid.getVisibleItem(index - declarationPager.getPageStart()).setChecked(value);
+                updateDeclarationPanelAnchors();
             }
         });
 
@@ -214,7 +232,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         departmentColumn = new TextColumn<TableModel>(){
             @Override
             public String getValue(TableModel object) {
-                return object.getDepartment().getName();
+                return object.getDepartmentName();
             }
         };
 
@@ -260,7 +278,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         private int index;
         private FormTypeKind departmentFormType;
         private Department department;
+        private String departmentName;
         private Department performer;
+        private String performerName;
+
+        public String getPerformerName() {
+            return performerName;
+        }
+
+        public void setPerformerName(String performerName) {
+            this.performerName = performerName;
+        }
 
         public Department getPerformer() {
             return performer;
@@ -268,6 +296,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         public void setPerformer(Department performer) {
             this.performer = performer;
+        }
+
+        public String getDepartmentName() {
+            return departmentName;
+        }
+
+        public void setDepartmentName(String departmentName) {
+            this.departmentName = departmentName;
         }
 
         public Department getDepartment() {
@@ -378,7 +414,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         formGridWrapper.setVisible(true);
         declarationGridWrapper.setVisible(false);
 
-        pager.setDisplay(formGrid);
+        formPager.setDisplay(formGrid);
+        formPager.setVisible(true);
+        declarationPager.setVisible(false);
     }
 
     /**
@@ -403,8 +441,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         // очистить таблицу с декларациями
         declarationGrid.setRowCount(0);
 
-        pager.setDisplay(declarationGrid);
-        declarationGrid.setPageSize(pager.getPageSize());
+        formPager.setVisible(false);
+        declarationPager.setVisible(true);
+        declarationPager.setDisplay(declarationGrid);
     }
 
     /**
@@ -426,7 +465,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     @Override
-    public void setDataToFormTable(int start, List<FormTypeKind> departmentFormTypes) {
+    public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
         List<TableModel> types = new ArrayList<TableModel>();
 
         int index = start + 1;
@@ -436,15 +475,22 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             model.setIndex(index++);
             model.setDepartmentFormType(type);
             model.setDepartment(type.getDepartment());
+            model.setDepartmentName(departmentFullNames.get(type.getDepartment().getId()));
             model.setPerformer(type.getPerformer());
+            if (type.getPerformer() != null) model.setPerformerName(departmentFullNames.get(type.getPerformer().getId()));
             types.add(model);
         }
 
+        formGrid.setRowCount(totalCount);
         formGrid.setRowData(start, types);
     }
 
     @Override
-    public void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes) {
+    public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames) {
+	    if (departmentFormTypes.isEmpty()) {
+		    declarationGrid.setRowCount(0);
+		    return;
+	    }
         List<TableModel> types = new ArrayList<TableModel>();
 
         Collections.sort(departmentFormTypes, new Comparator<FormTypeKind>() {
@@ -465,11 +511,14 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
             model.setIndex(index++);
             model.setDepartmentFormType(type);
             model.setDepartment(type.getDepartment());
+            model.setDepartmentName(departmentFullNames.get(type.getDepartment().getId()));
             model.setPerformer(type.getPerformer());
             types.add(model);
         }
 
-        declarationGrid.setRowData(types);
+
+        declarationGrid.setRowCount(totalCount);
+        declarationGrid.setRowData(start, types);
     }
 
     @Override
@@ -492,8 +541,10 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         //setDepoId(departmentPicker.getValue());
         if (isForm) {
             reloadFormGrid();
+            formPager.firstPage();
         } else {
             reloadDeclarationGrid();
+	        formPager.firstPage();
         }
     }
 
@@ -541,5 +592,15 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void onReveal() {
         departmentPicker.setValue(null, false);
+    }
+
+    @Override
+    public void clearFilter() {
+        departmentPicker.clearFilter();
+    }
+
+    @Override
+    public void setDepartments(List<Integer> department){
+        departmentPicker.setValue(department);
     }
 }

@@ -8,6 +8,7 @@ public class RefBookColumn implements Serializable{
 	private Long id;
 	private String name;
 	private String alias;
+    private String refBookName;
 	private int width;
 	private RefBookAttributeType attributeType;
 	private Long refBookAttributeId;
@@ -40,7 +41,15 @@ public class RefBookColumn implements Serializable{
 		this.alias = alias;
 	}
 
-	public int getWidth() {
+    public String getRefBookName() {
+        return refBookName;
+    }
+
+    public void setRefBookName(String refBookName) {
+        this.refBookName = refBookName;
+    }
+
+    public int getWidth() {
 		return width;
 	}
 

@@ -40,7 +40,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный вид налоговой формы не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create form in balance period!";
-    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролёр имеет право создавать формы в периде ввода остатков!";
+    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
     // private static final String CREATE_FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав для создания налоговой формы с указанными параметрами";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
@@ -597,8 +597,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
         //Сказали что дату окончания не обязательно сравнивать, т.к. она при сохранении макета должна быть кратна отчетному периоду
         if (templateEndDate != null)
-            return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) >= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0
-                    || templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) <= 0;
+            return  formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0;
         else
             return formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
                     || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0;

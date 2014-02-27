@@ -43,7 +43,7 @@ public interface FormTemplateDao {
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если не удалось найти активное описание налоговой формы по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
 	 */
-	int getActiveFormTemplateId(int formTypeId);
+	int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
     /**
      * Получает тело скрипта. Необходим для lazy-инициализации.
@@ -126,4 +126,6 @@ public interface FormTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, List<Integer> statusList);
+
+    int updateVersionStatus(int versionStatus, int formTemplateId);
 }

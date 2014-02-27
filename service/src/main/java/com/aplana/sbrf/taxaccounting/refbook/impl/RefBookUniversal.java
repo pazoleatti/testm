@@ -19,7 +19,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -84,7 +83,12 @@ public class RefBookUniversal implements RefBookDataProvider {
         return getRecords(version, pagingParams, filter, sortAttribute, true);
     }
 
-	@Override
+    @Override
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        return refBookDao.getRecordIdPairs(refBookId, version, filter);
+    }
+
+    @Override
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
 	}
@@ -127,7 +131,6 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
 
             List<String> errors;
-            //long time = System.nanoTime();
 
             //Проверка обязательности заполнения записей справочника
             errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
@@ -143,54 +146,60 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 throw new ServiceException("Обнаружено некорректное значение атрибута");
             }
-            //System.out.println("check values: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-            //time = System.nanoTime();
 
+            if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
+                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROFIT) &&
+                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_UKS)) {
 
-            //Проверка корректности
-            List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
-            //System.out.println("getMatchedRecordsByUniqueAttributes: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-            //time = System.nanoTime();
-            if (matchedRecords == null || matchedRecords.size() == 0) {
-                //Проверка ссылочных значений
-                boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
-                //System.out.println("isReferenceValuesCorrect: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-                //time = System.nanoTime();
-                if (!isReferencesOk) {
-                    logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
+                //Проверка корректности
+                List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
+                if (matchedRecords == null || matchedRecords.size() == 0) {
+                    //Проверка ссылочных значений
+                    boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
+                    if (!isReferencesOk) {
+                        logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
+                    }
+                } else {
+                    //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+                    List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+
+                    if (conflictedIds.size() > 0) {
+                        StringBuilder attrNames = new StringBuilder();
+                        for (Long id : conflictedIds) {
+                            for (Pair<Long,String> pair : matchedRecords) {
+                                if (pair.getFirst().equals(id)) {
+                                    attrNames.append("\"").append(pair.getSecond()).append("\", ");
+                                }
+                            }
+                        }
+                        attrNames.delete(attrNames.length() - 2, attrNames.length());
+                        throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
+                    }
                 }
-            } else {
-                //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
-                //System.out.println("checkConflictValuesVersions: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-                //time = System.nanoTime();
-            }
 
-            if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
-                throw new ServiceException("Версия с указанной датой актуальности уже существует");
-            }
+                if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
+                    throw new ServiceException("Версия с указанной датой актуальности уже существует");
+                }
 
-            for (RefBookRecord record : records) {
-                //Проверка пересечения версий
-                if (record.getRecordId() != null) {
-                    crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
-                            versionFrom, versionTo, logger);
+                for (RefBookRecord record : records) {
+                    //Проверка пересечения версий
+                    if (record.getRecordId() != null) {
+                        crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
+                                versionFrom, versionTo, logger);
+                    }
                 }
             }
-            //System.out.println("check cross: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
-            //time = System.nanoTime();
 
             //Создание настоящей и фиктивной версии
             createVersions(versionFrom, versionTo, records, countIds, logger);
-            //System.out.println("createVersions: "+((double)(System.nanoTime()-time)/1000000000.0)+"s");
             //System.out.println("all: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
-                throw new ServiceLoggerException("Версия не создана, обнаружены фатальные ошибки!",
+                throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
-                throw new ServiceException("Версия не создана, обнаружены фатальные ошибки!");
+                throw new ServiceException("Версия не сохранена. Обнаружены фатальные ошибки!");
             }
         }
 
@@ -309,6 +318,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             boolean isRelevancePeriodChanged = false;
             if (!isJustNeedValuesUpdate) {
+                assert versionFrom != null;
                 isRelevancePeriodChanged = !versionFrom.equals(oldVersionPeriod.getVersionStart())
                         || (versionTo != null && !versionTo.equals(oldVersionPeriod.getVersionEnd()))
                         || (oldVersionPeriod.getVersionEnd() != null && !oldVersionPeriod.getVersionEnd().equals(versionTo));
@@ -320,9 +330,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
 
                 //Проверка использования
-                boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordId, versionFrom);
-                if (isReferenceToVersionExists) {
-                    throw new ServiceException("Обнаружено использование версии в других точках запроса");
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId));
+                if (usagesResult != null && !usagesResult.isEmpty()) {
+                    for (String error: usagesResult) {
+                        logger.error(error);
+                    }
+                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
                 }
             }
 
@@ -397,8 +410,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
-            boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
-            if (isReferenceToVersionExists) {
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            if (usagesResult != null && !usagesResult.isEmpty()) {
+                for (String error: usagesResult) {
+                    logger.error(error);
+                }
                 throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
             }
             RefBook refBook = refBookDao.get(refBookId);
@@ -420,8 +436,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         try {
-            boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
-            if (isReferenceToVersionExists) {
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            if (usagesResult != null && !usagesResult.isEmpty()) {
+                for (String error: usagesResult) {
+                    logger.error(error);
+                }
                 throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
             }
             RefBook refBook = refBookDao.get(refBookId);

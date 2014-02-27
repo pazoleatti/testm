@@ -46,6 +46,7 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
         void setTableData(List<TableModel> tableData);
         String getFilter();
+        void  setFilter(String filterText);
     }
 
     @Inject
@@ -110,5 +111,15 @@ public class RefBookListPresenter extends Presenter<RefBookListPresenter.MyView,
     @Override
     public boolean useManualReveal() {
         return true;
+    }
+
+    /**
+     * При загрузке страницы сбрасываем фильтр.
+     */
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().setFilter("");
+        onFindClicked();
     }
 }

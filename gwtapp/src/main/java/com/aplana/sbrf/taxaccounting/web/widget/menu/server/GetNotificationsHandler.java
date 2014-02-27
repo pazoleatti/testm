@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER')")
 public class GetNotificationsHandler extends AbstractActionHandler<GetNotificationsAction, GetNotificationsResult> {
 
 	public GetNotificationsHandler() {
@@ -36,7 +36,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 		NotificationsFilterData filter = new NotificationsFilterData();
 		filter.setCountOfRecords(action.getLength());
 		filter.setStartIndex(action.getStart());
-		filter.setReceiverDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
+		filter.setSenderDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);
 		for (Notification notification : result) {

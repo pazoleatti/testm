@@ -50,7 +50,8 @@
                     <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <r:RefBookMultiPickerModalWidget ui:field="formDataKind" attributeIdInt="837" modal="true" multiSelect="false" width="100%"/>
+                    <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" searchEnabled="false"
+                                           isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -59,7 +60,7 @@
                     <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="formTypeId" showTooltip="true"/>
+                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -77,7 +78,7 @@
                     <g:Label/>
                 </g:cell>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отменить"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>

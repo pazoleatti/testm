@@ -36,16 +36,17 @@ public interface FormTemplateService {
 	 * @return идентификатор сохранённой записи
 	 */
 	int save(FormTemplate formTemplate);
-	
-	/**
-	 * Возвращает идентификатор действующего {@link FormTemplate описания налоговой формы} по виду налоговой формы
-	 * Такое описание для каждого вида формы в любой момент времени может быть только одно
-	 * @param formTypeId идентификатор вида налоговой формы
-	 * @return идентификатор описания налоговой формы
-	 * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу, 
-	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
-	 */
-	int getActiveFormTemplateId(int formTypeId);
+
+    /**
+     * Возвращает идентификатор действующего {@link FormTemplate описания налоговой формы} по виду налоговой формы
+     * Такое описание для каждого вида формы в аанном отчетном пеииоде может быть только одно
+     * @param formTypeId идентификатор вида налоговой формы
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return идентификатор описания налоговой формы
+     * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу,
+     * 	или если обнаружено несколько действуюшие описаний по данному виду формы
+     */
+    int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
 	/**
 	 * Снять блокировку с formTemplate.
@@ -139,4 +140,6 @@ public interface FormTemplateService {
      * @return
      */
     boolean isMonthly(int formId);
+
+    int updateVersionStatus(int versionStatus, int formTemplateId);
 }

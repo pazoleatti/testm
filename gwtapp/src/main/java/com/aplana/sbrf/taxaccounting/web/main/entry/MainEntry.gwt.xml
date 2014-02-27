@@ -8,29 +8,8 @@
 	<source path='client' />
 
 	<inherits name='com.gwtplatform.mvp.MvpWithEntryPoint'/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.Module"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.main.page.MainPage"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.DeclarationTemplate"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.error.ErrorModule"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.audit.Audit"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.periods.Periods"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.departmentconfig.DepartmentConfig"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.sources.Sources"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.bookerstatements.BookerStatements"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbooklist.RefBookList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.refbookdata.RefBookData"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage2.TestPage2"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.configuration.Configuration"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.scheduler.Scheduler"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.Module" />
 
     <set-configuration-property name="gin.ginjector.modules"
                                 value="com.aplana.sbrf.taxaccounting.web.main.entry.client"/>

@@ -1,0 +1,105 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:m="urn:import:com.aplana.gwt.client"
+             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
+
+    <ui:style>
+        .selectButton {
+            border-color: #009900;
+            border-style: solid;
+            border-width: 1px;
+            vertical-align: middle;
+            cursor: pointer;
+            display: block;
+        }
+
+        .selected {
+            color: #000000;
+        }
+    </ui:style>
+
+    <ui:style field="modal">
+        .mainPanel {
+            background-color: #E8E1CF;
+            padding: 10px 10px 0;
+        }
+
+        .widgetWrapper {
+            border: 1px solid #000000;
+            width: 780px;
+            height: 385px;
+        }
+
+        .buttons {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .textAlign {
+            text-align: right;
+        }
+
+        .marginRight10 {
+            margin-right: 10px;
+        }
+
+        .fix {
+            padding-right: 1px !important;
+        }
+
+        .marginBottom{
+            margin-bottom: 5px;
+        }
+
+    </ui:style>
+
+
+    <g:HTMLPanel>
+        <g:HorizontalPanel ui:field="widgetPanel" verticalAlignment="middle">
+            <g:cell width="99%">
+                <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="textBox" width="100%"/>
+            </g:cell>
+            <g:cell width="1%">
+                <g:Image ui:field="pickImageButton" styleName="{style.selectButton}"
+                         url="resources/img/reference-16.gif"/>
+            </g:cell>
+        </g:HorizontalPanel>
+
+        <g:HTMLPanel ui:field="testwrap" visible="false">
+            <m:ModalWindow ui:field="modalPanel" iconUrl="" title="Выбор из справочника">
+                <g:VerticalPanel spacing="0" addStyleNames="{modal.mainPanel}" verticalAlignment="top">
+
+                    <g:HorizontalPanel ui:field="filterPanel" spacing="0" width="100%" addStyleNames="{modal.marginBottom}"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:TextBox ui:field="searchTextBox" width="99%"/>
+                        </g:cell>
+                        <g:Button ui:field="searchButton" text="Найти" width="70px"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.marginBottom}"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{modal.marginRight10}, {modal.textAlign}"/>
+                        </g:cell>
+                        <d:DateMaskBoxPicker ui:field="versionDateBox" width="148px" addStyleNames="{modal.fix}"/>
+                    </g:HorizontalPanel>
+
+                    <g:HTMLPanel ui:field="widgetWrapper" addStyleNames="{modal.widgetWrapper}"/>
+
+                    <g:HorizontalPanel spacing="0" horizontalAlignment="right" verticalAlignment="middle" width="100%" addStyleNames="{modal.buttons}">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:Label ui:field="selectionCountLabel" width="100%" text="Выбрано: 0"/>
+                        </g:cell>
+                        <g:Button ui:field="clearButton" text="Очистить" width="70px" addStyleNames="{modal.marginRight10}"/>
+                        <g:Button ui:field="pickButton" text="Выбрать" width="70px" addStyleNames="{modal.marginRight10}"/>
+                        <g:Button ui:field="cancelButton" text="Закрыть" width="70px"/>
+                    </g:HorizontalPanel>
+
+                </g:VerticalPanel>
+            </m:ModalWindow>
+        </g:HTMLPanel>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

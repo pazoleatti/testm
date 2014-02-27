@@ -11,55 +11,6 @@ import groovy.transform.Field
  *
  * @author Dmitriy Levykin
  */
-switch (formDataEvent) {
-    case FormDataEvent.CREATE:
-        checkCreation()
-        break
-    case FormDataEvent.CALCULATE:
-        deleteAllStatic()
-        sort()
-        calc()
-        addAllStatic()
-        logicCheck()
-        break
-    case FormDataEvent.CHECK:
-        logicCheck()
-        break
-    case FormDataEvent.ADD_ROW:
-        // В ручном режиме строки добавлять нельзя
-        // addRow
-        logger.warn("Добавление строк запрещено!")
-        break
-    case FormDataEvent.DELETE_ROW:
-        // В ручном режиме строки удалять нельзя
-        //deleteRow()
-        logger.warn("Удаление строк запрещено!")
-        break
-// После принятия из Утверждено
-    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
-        logicCheck()
-        break
-// После принятия из Подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
-        logicCheck()
-        break
-// Консолидация
-    case FormDataEvent.COMPOSE:
-        consolidation()
-        calc()
-        logicCheck()
-        break
-}
-
-// Кэш провайдеров
-@Field
-def providerCache = [:]
-// Кэш id записей справочника
-@Field
-def recordCache = [:]
-// Кэш значений справочника
-@Field
-def refBookCache = [:]
 
 // 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
 // 2.	interdependenceSing	п. 100
@@ -116,6 +67,64 @@ def refBookCache = [:]
 // 53.	organRegNum	п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
 // 54.	taxpayerCode	п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
 // 55.	address	п. 090 "Адрес"
+
+switch (formDataEvent) {
+    case FormDataEvent.CREATE:
+        checkCreation()
+        break
+    case FormDataEvent.CALCULATE:
+        deleteAllStatic()
+        sort()
+        calc()
+        addAllStatic()
+        logicCheck()
+        break
+    case FormDataEvent.CHECK:
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW:
+        // В ручном режиме строки добавлять нельзя
+        logger.warn("Добавление строк запрещено!")
+        break
+    case FormDataEvent.DELETE_ROW:
+        // В ручном режиме строки удалять нельзя
+        logger.warn("Удаление строк запрещено!")
+        break
+// После принятия из Утверждено
+    case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
+        logicCheck()
+        break
+// После принятия из Подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+        logicCheck()
+        break
+// Консолидация
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
+}
+
+// Кэш провайдеров
+@Field
+def providerCache = [:]
+// Кэш id записей справочника
+@Field
+def recordCache = [:]
+// Кэш значений справочника
+@Field
+def refBookCache = [:]
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), -1, null, logger, true)
+}
 
 /**
  * Проверка при создании формы.
@@ -253,17 +262,15 @@ void consolidation() {
  */
 DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     // Общие значения
-    def Date date = new Date()
-
     // "Да"
-    def Long recYesId = getRecordId(38, 'CODE', '1', date)
+    def Long recYesId = getRecordId(38, 'CODE', '1')
     // "Нет"
-    def Long recNoId = getRecordId(38, 'CODE', '0', date)
+    def Long recNoId = getRecordId(38, 'CODE', '0')
 
     def DataRow<Cell> row = formData.createDataRow()
 
     // Графа 2
-    row.interdependenceSing = getRecordId(69, 'CODE', '1', date)
+    row.interdependenceSing = getRecordId(69, 'CODE', '1')
 
     // Графа 3
     // row.f121, заполняется после графы 50
@@ -337,7 +344,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
     if (val13 != null) {
-        row.dealNameCode = getRecordId(67, 'CODE', "$val13", date)
+        row.dealNameCode = getRecordId(67, 'CODE', "$val13")
     }
 
     // Графа 14
@@ -406,7 +413,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     if (val14 != null) {
-        row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14", date)
+        row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14")
     }
 
     // Графа 15
@@ -429,7 +436,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    row.dealPriceCode = getRecordId(66, 'CODE', "$val16", date)
+    row.dealPriceCode = getRecordId(66, 'CODE', "$val16")
 
     // Графа 17
     row.dealMemberCount = 2
@@ -518,7 +525,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
     }
 
-    row.dealType = getRecordId(64, 'CODE', "$val23", date)
+    row.dealType = getRecordId(64, 'CODE', "$val23")
 
     // Графа 24
     switch (type.id) {
@@ -594,7 +601,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
            code = '17 5220 4'
         }
         if(code !=null)
-            row.dealSubjectCode2 = getRecordId(68, 'CODE', code, date)
+            row.dealSubjectCode2 = getRecordId(68, 'CODE', code)
     }
 
     // Графа 27
@@ -636,7 +643,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     }
 
     if (val27 != null) {
-        row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27", date)
+        row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
     }
 
     // Графа 28
@@ -760,8 +767,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.locality2 = srcRow.locality2
             break
         default:
-            row.countryCode2 = getRecordId(10, 'CODE', '643', date)
-            row.region2 = getRecordId(4, 'CODE', '77', date)
+            row.countryCode2 = getRecordId(10, 'CODE', '643')
+            row.region2 = getRecordId(4, 'CODE', '77')
             row.city2 = 'Москва'
             row.locality2 = row.city2
             break
@@ -804,7 +811,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 break
         }
         if (val41 != null) {
-            row.okeiCode = getRecordId(12, 'CODE', "$val41", date)
+            row.okeiCode = getRecordId(12, 'CODE', "$val41")
         }
     }
 
@@ -1041,25 +1048,6 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
     return row
 }
 
-// Получение Id записи с использованием кэширования
-def getRecordId(def ref_id, String alias, String value, Date date) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value == '') filter = "$alias is null"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
-    }
-    def records = getProvider(ref_id).getRecords(date, null, filter, null)
-    if (records.size() == 1) {
-        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    }
-    return null
-}
-
 /**
  * Получение провайдера с использованием кэширования
  * @param providerId
@@ -1083,4 +1071,11 @@ def getRefBookValue(def long refBookId, def long recordId) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
     return refBookCache.get(recordId)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

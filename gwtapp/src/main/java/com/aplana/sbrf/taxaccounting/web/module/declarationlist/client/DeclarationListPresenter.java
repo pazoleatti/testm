@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation.DeclarationCreationPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterCreateEvent;
@@ -15,6 +16,9 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.De
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter.DeclarationFilterReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationList;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationListResult;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,6 +44,7 @@ public class DeclarationListPresenter extends
      * Используется при заполнении начальных значений фильтра поиска
      */
     private Map<TaxType, DeclarationDataFilter> filterStates = new HashMap<TaxType, DeclarationDataFilter>();
+    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
     @ProxyEvent
     @Override
@@ -66,6 +71,13 @@ public class DeclarationListPresenter extends
 	                         DeclarationFilterPresenter filterPresenter, DeclarationCreationPresenter creationPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, creationPresenter);
 		getView().setUiHandlers(this);
+        History.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                lstHistory.put(0, lstHistory.get(1));
+                lstHistory.put(1, event.getValue());
+            }
+        });
 	}
 
 	@Override
@@ -119,9 +131,19 @@ public class DeclarationListPresenter extends
                     @Override
                     public void onSuccess(GetDeclarationListResult result) {
                         getView().setTableData(start, result.getTotalCountOfRecords(),
-                                result.getRecords());
+                                result.getRecords(), result.getDepartmentFullNames());
                     }
                 }, DeclarationListPresenter.this));
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        String url = DeclarationDataTokens.declarationData + ";" +DeclarationDataTokens.declarationId;
+        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
+            filterPresenter.getView().clean();
+        }
     }
 
     private void updateTitle(TaxType taxType){

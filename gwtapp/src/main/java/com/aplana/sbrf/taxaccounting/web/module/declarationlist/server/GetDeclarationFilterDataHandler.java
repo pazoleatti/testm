@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -42,9 +43,9 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
         // Данные для панели фильтрации
 		GetDeclarationFilterDataResult res = new GetDeclarationFilterDataResult();
 
+		TAUserInfo currentUser = securityService.currentUserInfo();
         DeclarationDataFilterAvailableValues declarationFilterValues =
-                declarationDataSearchService.getFilterAvailableValues(securityService.currentUserInfo(),
-                        action.getTaxType());
+                declarationDataSearchService.getFilterAvailableValues(currentUser, action.getTaxType());
 
         // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(
@@ -56,6 +57,9 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		res.setPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(),
                 new ArrayList<Integer>(declarationFilterValues.getDepartmentIds())));
 
+		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
+		reportPeriods.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
+		res.setPeriodsForCreation(reportPeriods);
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
         dataFilter.setTaxType(action.getTaxType());
         res.setDefaultDecFilterData(dataFilter);

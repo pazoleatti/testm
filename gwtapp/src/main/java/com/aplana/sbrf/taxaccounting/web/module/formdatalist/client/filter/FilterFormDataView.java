@@ -2,10 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,11 +33,11 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     private final MyDriver driver;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<Integer> formTypeId;
+    @UiField
+    RefBookPickerWidget formTypeId;
 
     @UiField
-    RefBookMultiPickerModalWidget formDataKind;
+    RefBookPickerWidget formDataKind;
 
 	@UiField(provided = true)
 	ValueListBox<WorkflowState> formState;
@@ -75,8 +76,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 	@UiField
 	Label reportPeriodIdsLbl;
 
-	private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-
     @Inject
     public FilterFormDataView(final MyBinder binder, final MyDriver driver) {
     	super();
@@ -88,16 +87,6 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 					return "";
 				}
 				return object.getName();
-			}
-		});
-
-		formTypeId = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return formTypesMap.get(object);
 			}
 		});
 
@@ -120,7 +109,8 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         this.driver.initialize(this);
 
         // т.к. справочник не версионный, а дату выставлять обязательно
-        formDataKind.setPeriodDates(new Date(), new Date());
+        formDataKind.setPeriodDates(null, new Date());
+        formTypeId.setPeriodDates(null, new Date());
     }
 
     @Override
@@ -189,18 +179,10 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 		}
 	}
 
-	@Override
-	public void setFormTypesMap(List<FormType> formTypes){
-		formTypesMap.clear();
-		for (FormType formType : formTypes) {
-			formTypesMap.put(formType.getId(), formType.getName());
-		}
-		
-		/** .setValue(null) see
-		 *  http://stackoverflow.com/questions/11176626/how-to-remove-null-value-from-valuelistbox-values **/
-		formTypeId.setValue(null);
-		formTypeId.setAcceptableValues(formTypesMap.keySet());
-	}
+    @Override
+    public void setFilter(String filter) {
+        formTypeId.setFilter(filter);
+    }
 
 	@Override
 	public void setDepartments(List<Department> list, Set<Integer> availableValues){
@@ -213,4 +195,27 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 			getUiHandlers().onApplyClicked();
 		}
 	}
+
+    @Override
+    public void setKindFilter(List<FormDataKind> dataKinds) {
+        List<Integer> list = new ArrayList<Integer>(dataKinds.size());
+
+        for (FormDataKind kind : dataKinds) {
+            list.add(kind.getId());
+        }
+        formDataKind.setFilter(StringUtils.join(list.toArray(), ','));
+    }
+
+    @Override
+    public void clean() {
+        formTypeId.setValue(null);
+        formDataKind.setValue(null);
+        formState.setValue(null);
+        returnState.setValue(null);
+        reportPeriodIds.setValue(null);
+        departmentPicker.setValue(null);
+        if (getUiHandlers() != null) {
+            getUiHandlers().onApplyClicked();
+        }
+    }
 }

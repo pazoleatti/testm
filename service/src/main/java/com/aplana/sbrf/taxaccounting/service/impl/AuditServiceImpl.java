@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -11,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -48,11 +47,14 @@ public class AuditServiceImpl implements AuditService {
 		log.setUserId(userInfo.getUser().getId());
 
 		StringBuilder roles = new StringBuilder();
-		for (TARole role : userInfo.getUser().getRoles()) {
-			roles.append(role.getName());
-            roles.append(",");
-		}
-		log.setRoles(roles.toString().substring(0,roles.toString().length() - 1));
+        List<TARole> taRoles = userInfo.getUser().getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
+            }
+        }
+		log.setRoles(roles.toString());
 
 		log.setDepartmentId(departmentId);
 		log.setReportPeriodId(reportPeriodId);
@@ -66,9 +68,20 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	public LogSystemFilterAvailableValues getFilterAvailableValues() {
+	public LogSystemFilterAvailableValues getFilterAvailableValues(TAUser user) {
 		LogSystemFilterAvailableValues values = new LogSystemFilterAvailableValues();
-		values.setDepartments(departmentService.listDepartments());
+        if (user.hasRole(TARole.ROLE_ADMIN) || user.hasRole(TARole.ROLE_CONTROL_UNP))
+            values.setDepartments(departmentService.listAll());
+        else if (user.hasRole(TARole.ROLE_CONTROL_NS)){
+            List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(TaxType.values()));
+            if (departments.isEmpty()){
+                values.setDepartments(new ArrayList<Department>());
+            } else{
+                Set<Integer> departmentIds = new HashSet<Integer>(departments);
+                values.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(departmentIds).values()));
+            }
+        }
+
 		/*values.setFormTypeIds(formTypeDao.getAll());*/
 		values.setDeclarationTypes(declarationTypeDao.listAll());
 		return values;
@@ -84,5 +97,14 @@ public class AuditServiceImpl implements AuditService {
             auditDao.removeRecords(listIds);
         }
         add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА");
+    }
+
+    @Override
+    public Date getLastArchiveDate() {
+        try {
+            return auditDao.lastArchiveDate();
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении последней даты архивации.", e);
+        }
     }
 }

@@ -33,7 +33,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	@UiField
 	FlexiblePager pager;
 
-	private DateTimeFormat formatter = DateTimeFormat.getFormat("dd.MM.yyyy");
+	private DateTimeFormat formatter = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
 	private final PopupPanel widget;
 
@@ -68,7 +68,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	    };
 
 	    notificationTable.addColumn(dateColumn, "Дата оповещения");
-	    notificationTable.setColumnWidth(dateColumn, 80, Style.Unit.PX);
+	    notificationTable.setColumnWidth(dateColumn, 115, Style.Unit.PX);
 	    notificationTable.addColumn(contentColumn, "Содержание");
 
 	    notificationTable.setPageSize(pager.getPageSize());

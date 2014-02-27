@@ -121,4 +121,15 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 			getUiHandlers().onApplyFilter();
 		}
 	}
+
+    @Override
+    public void clean() {
+        formState.setValue(null);
+        declarationTypeId.setValue(null);
+        reportPeriodIds.setValue(null);
+        departmentPicker.setValue(null);
+        if (getUiHandlers() != null) {
+            getUiHandlers().onApplyFilter();
+        }
+    }
 }

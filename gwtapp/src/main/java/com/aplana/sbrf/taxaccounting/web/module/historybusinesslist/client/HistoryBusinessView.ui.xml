@@ -56,9 +56,9 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
-                            <style:LinkAnchor text="Выгрузить в Excel" ui:field="printButton"
+                            <style:LinkAnchor text="Выгрузить в xlsx" ui:field="printButton"
                                               img="resources/img/download-xls-16.png"
-                                              title="Выгрузка отчета в excel"/>
+                                              title="Выгрузить в xlsx"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

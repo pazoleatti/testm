@@ -4,9 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,6 +40,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
 	private static final String dateFormat = "yyyyMMdd HH:mm:ss";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+    //Т.к. в базе при построении запросы часы/минуты/секунды присваиваются значения 00:00:00
+    //соответственно поиск только за прошлый день поучается и надо прибавить один день, чтобы получить поиск за текущий
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
@@ -65,15 +72,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
-		sql.append(" order by ls.id desc,");
-		sql.append(" rp.start_date desc,");
-		sql.append(" rp.end_date desc,");
-		sql.append(" rp.ord desc,");
-		sql.append(" dep.name asc,");
-		sql.append(" dt.name asc,");
-		sql.append(" ft.name asc,");
-		sql.append(" ls.form_kind_id asc,");
-		sql.append(" su.name asc ");
+        sql.append(" order by ls.log_date desc");
 
 		sql.append(") dat) ordDat");
         List<LogSearchResultItem> records;
@@ -147,15 +146,42 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 });
     }
 
+    @Override
+    public Date lastArchiveDate() {
+        try {
+            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+        } catch (EmptyResultDataAccessException e){
+            logger.warn("Не найдено записей об архивации.", e);
+            return null;
+        } catch (IncorrectResultSizeDataAccessException e){
+            logger.error("Найдено больше одной записи об архивировании.", e);
+            throw new DaoException("Найдено больше одной записи об архивировании.", e);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении даты последней архивации", e);
+            throw new DaoException("Ошибка при получении даты последней архивации", e);
+        }
+
+    }
+
     private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
 		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
 				(formatter.format(filter.getFromSearchDate()))
 				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-				(formatter.format(filter.getToSearchDate()))
+				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
 				.append("', '").append(dbDateFormat).append("')");
 
-		if (filter.getUserId() != null) {
-			sql.append(" AND user_id = ").append(filter.getUserId());
+		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
+            List<Long> userList = filter.getUserIds();
+            String userSql = "";
+            for(Long temp : userList){
+                if (userSql.equals("")){
+                    userSql = temp.toString();
+                }
+                else{
+                    userSql = userSql + ", " + temp.toString();
+                }
+            }
+            sql.append(String.format(" AND %suser_id in ", prefix)).append("(").append(userSql).append(")");
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
@@ -206,6 +232,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
 			log.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+            log.setDepartmentName(rs.getInt("department_id")!=0?departmentDao.getParentsHierarchy(rs.getInt("department_id")):log.getDepartment().getName());
 			log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             if(rs.getInt("declaration_type_id") != 0)
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));

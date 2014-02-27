@@ -49,7 +49,7 @@ public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetD
 		}
 		result.setAvailableDepartments(availableDepartmentSet);
 
-		result.setDepartments(departmentService.listAll());
+		result.setDepartments(availableDepartmentList);
 
 		Set<Integer> availablePerformersSet = new HashSet<Integer>();
 		List<Department> availablePerformersList = departmentService.getDestinationDepartments(currUser);

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeclarationTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -13,7 +14,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -26,7 +28,7 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     interface Binder extends UiBinder<Widget, DeclarationVersionListView> {
     }
 
-    private NoSelectionModel<DeclarationTemplateVersion> selectionModel;
+    private SingleSelectionModel<DeclarationTemplateVersion> selectionModel;
 
     @UiField
     CellTable<DeclarationTemplateVersion> dtVersionCellTable;
@@ -34,10 +36,19 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     @UiField
     Label versionLabel;
 
+    @UiField
+    LinkButton deleteVersion;
+
     @Inject
     public DeclarationVersionListView(Binder binder) {
         initWidget(binder.createAndBindUi(this));
-        selectionModel = new NoSelectionModel<DeclarationTemplateVersion>();
+        selectionModel = new SingleSelectionModel<DeclarationTemplateVersion>();
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updateDeleteVersionLinkButton();
+            }
+        });
         dtVersionCellTable.setSelectionModel(selectionModel);
 
         // колонка Наименование декларации
@@ -104,13 +115,18 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
 
     @Override
     public DeclarationTemplateVersion getSelectedElement() {
-        return selectionModel.getLastSelectedObject();
+        return selectionModel.getSelectedObject();
     }
 
     @Override
     public void setLabelName(String labelName) {
         versionLabel.setTitle(labelName);
         versionLabel.setText(labelName);
+    }
+
+    @Override
+    public void resetSelectedLine() {
+        selectionModel.clear();
     }
 
     @UiHandler("createVersion")
@@ -129,5 +145,9 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     void onHistoryClick(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().onHistoryClick();
+    }
+
+    public void updateDeleteVersionLinkButton() {
+        deleteVersion.setEnabled(getSelectedElement() != null);
     }
 }

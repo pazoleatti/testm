@@ -65,6 +65,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 //// Кэши и константы

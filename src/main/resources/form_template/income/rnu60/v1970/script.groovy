@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import groovy.transform.Field
 
 import java.text.SimpleDateFormat
 
@@ -92,6 +93,9 @@ switch (formDataEvent) {
 
  */
 
+@Field
+def endDate = null
+
 def allCheck() {
     return !hasError() && logicalCheck()
 }
@@ -114,9 +118,9 @@ void checkCreation() {
  */
 def logicalCheck() {
     def data = getData(formData)
-    def dateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def reportDate = getReportDate().time
+    def dateStart = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+    def dateEnd = getReportPeriodEndDate()
+    def reportDate = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
     for (row in getRows(data)) {
         if (row.getAlias() == null) {
 
@@ -241,13 +245,6 @@ def getColumnName(def row, def alias) {
         return row.getCell(alias).getColumn().getName().replace('%', '%%')
     }
     return ''
-}
-
-Calendar getReportDate() {
-    Calendar periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)
-    Calendar reportingDate = periodEndDate
-    reportingDate.set(Calendar.DATE, reportingDate.get(Calendar.DATE) + 1)
-    return reportingDate
 }
 
 /**
@@ -477,7 +474,7 @@ void calcAfterImport() {
  * @return
  */
 int getCountDaysInYear() {
-    Calendar periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)
+    Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
 }
 
@@ -713,7 +710,7 @@ void importData() {
  * @param xml данные
  */
 def addData(def xml, def fileName) {
-    def date = new Date()
+    def date = getReportPeriodEndDate()
     def cache = [:]
     def data = getData(formData)
     data.clear()
@@ -1027,4 +1024,11 @@ void loggerError(def msg) {
     } else {
         logger.warn(msg)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

@@ -31,5 +31,7 @@ public interface TaxFormNominationUiHandlers extends UiHandlers {
      */
 	void onClickFormCancelAnchor();
 
-    void onRangeChange(int start, int length);
+    void onFormRangeChange(int start, int length);
+
+    void onDeclarationRangeChange(int start, int length);
 }

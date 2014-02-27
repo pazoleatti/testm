@@ -550,6 +550,22 @@ public class PeriodServiceImpl implements PeriodService{
         return monthsList;
     }
 
+    @Override
+    public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
+        List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType));
+        getPeriodsByTaxTypeAndDepartments(taxType, departments);
+        if (user.hasRole(TARole.ROLE_CONTROL_UNP)
+                || user.hasRole(TARole.ROLE_CONTROL_NS)
+                || user.hasRole(TARole.ROLE_CONTROL)
+                ) {
+            return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+        } else if (user.hasRole(TARole.ROLE_OPER)) {
+            return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+        } else {
+            return Collections.EMPTY_SET;
+        }
+    }
+
     /**
      * Получить упорядоченный список месяцев соответствующий налоговому периоду с кодом code.
      * @param code код налогового периода
@@ -591,4 +607,9 @@ public class PeriodServiceImpl implements PeriodService{
 
         return list;
     }
+
+	@Override
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
+		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
+	}
 }

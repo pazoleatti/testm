@@ -39,7 +39,7 @@ public class FormDataSearchDaoTest {
 		List<TaxType> taxTypes 				= new ArrayList<TaxType>();
 		List<FormDataKind> formDataKinds 	= new ArrayList<FormDataKind>();
 		List<WorkflowState> workflowStates 	= new ArrayList<WorkflowState>();
-		List<Integer> formTypes 			= new ArrayList<Integer>();
+		List<Long> formTypes 			= new ArrayList<Long>();
 		List<Integer> departments 			= new ArrayList<Integer>();
 		List<Integer> reportPeriods 		= new ArrayList<Integer>();
 
@@ -66,7 +66,7 @@ public class FormDataSearchDaoTest {
 		assertEquals(4, res.size());
 
 		//Добавляем в фильтр Вид Налоговой Формы
-		formTypes.add(1);
+		formTypes.add(1l);
 		filter.setFormTypeIds(formTypes);
 		res = formDataSearchDao.findByFilter(filter);
 		assertEquals(4, res.size());
@@ -201,7 +201,7 @@ public class FormDataSearchDaoTest {
 		assertEquals(6, formDataSearchDao.getCount(filter));
 		
 		filter.setDepartmentIds(null);
-		filter.setFormTypeIds(Collections.singletonList(1));
+		filter.setFormTypeIds(Collections.singletonList(1l));
 		assertEquals(4, formDataSearchDao.getCount(filter));
 	}
 	

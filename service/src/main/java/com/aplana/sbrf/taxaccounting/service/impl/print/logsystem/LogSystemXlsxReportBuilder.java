@@ -150,13 +150,13 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getReportPeriod() != null ? item.getReportPeriod().getName() : "");
+            cell.setCellValue(item.getReportPeriod() != null ? item.getReportPeriod().getName() + " " + item.getReportPeriod().getTaxPeriod().getYear() : "");
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getDepartment().getName());
+            cell.setCellValue(item.getDepartmentName());
             fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 

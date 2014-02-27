@@ -45,6 +45,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
     private static final String dateFormat = "yyyyMMdd";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
+
 	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
@@ -85,12 +87,13 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
             log.setUser(userDao.getUser(rs.getInt("user_id")));
             log.setRoles(rs.getString("roles"));
-            log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            /*log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));*/
             log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             log.setDeclarationType(rs.getInt("declaration_type_id") != 0 ? declarationTypeDao.get(rs.getInt("declaration_type_id")) : null);
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
             log.setNote(rs.getString("note"));
             log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            log.setDepartmentName(departmentDao.getParentsHierarchy(rs.getInt("user_department_id")));
             return log;
         }
     }
@@ -127,9 +130,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
         names.put("departmentId", filter.getDepartmentId());
-        names.put("userId", filter.getUserId());
+        names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
-        names.put("toDate", filter.getToSearchDate());
+        names.put("toDate", new Date(filter.getToSearchDate().getTime() + oneDayTime));
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
@@ -148,10 +151,23 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
                 (formatter.format(filter.getFromSearchDate()))
                 .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-                (formatter.format(filter.getToSearchDate()))
+                (formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
                 .append("', '").append(dbDateFormat).append("')");
         sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
-        sql.append(filter.getUserId() == null ? "" : " and lb.user_id = :userId");
+        if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
+
+            List<Long> userList = filter.getUserIds();
+            String userSql = "";
+            for(Long temp : userList){
+                if (userSql.equals("")){
+                    userSql = temp.toString();
+                }
+                else{
+                    userSql = userSql + ", " + temp.toString();
+                }
+            }
+            sql.append(" AND user_id in ").append("(").append(userSql).append(")");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())
@@ -243,7 +259,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
         sql.append(" log_date between :fromDate and :toDate");
         sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
-        sql.append(names.get("userId") == null ? "" : " and user_id = :userId");
+        if (names.get("userId") !=null&&!((List<Long>)names.get("userId")).isEmpty()){
+            sql.append(" and user_id in (:userId)");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())

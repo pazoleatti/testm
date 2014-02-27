@@ -32,7 +32,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setReturnStateList(List<Boolean> list);
 
-		void setFormTypesMap(List<FormType> formTypes);
+        public void setFilter(String filter);
 
 		void setDepartments(List<Department> list, Set<Integer> availableValues);
 
@@ -40,6 +40,10 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setElementNames(Map<FormDataElementName, String> names);
 
+        // Установить фильтр для типов налоговых форм
+        void setKindFilter(List<FormDataKind> dataKinds);
+
+        void clean();
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -59,7 +63,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		getView().setDataFilter(formDataFilter);
 	}
 
-	public void initFilter(final TaxType taxType, final FormDataFilter filter) {
+	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
 		dispatchAsync.execute(action, CallbackUtils
@@ -67,8 +71,9 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
+                        getView().setKindFilter(kindListResult.getDataKinds());
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setFormTypesMap(filterValues.getFormTypes());
+                        getView().setFilter("TAX_TYPE='" + taxType.getCode() + "'");
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(Arrays.asList(WorkflowState.values()));
 						getView().setReturnStateList(Arrays.asList(new Boolean[]{ Boolean.TRUE, Boolean.FALSE }));

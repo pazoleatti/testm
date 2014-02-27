@@ -148,7 +148,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
-        setAliasType(refBook.getAttribute(ctx.getText()));
+        setAliasType(ctx.getText());
     }
 
     @Override
@@ -261,14 +261,18 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 
     private String buildAliasStr(String alias){
-        StringBuffer sb = new StringBuffer();
-        sb.append("a");
-        sb.append(alias);
-        sb.append(".");
-        sb.append(refBook.getAttribute(alias).getAttributeType().toString());
-        sb.append("_value");
+        if (alias.equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
+            return "id";
+        } else {
+            StringBuffer sb = new StringBuffer();
+            sb.append("a");
+            sb.append(alias);
+            sb.append(".");
+            sb.append(refBook.getAttribute(alias).getAttributeType().toString());
+            sb.append("_value");
 
-        return sb.toString();
+            return sb.toString();
+        }
     }
 
     private void setAliasType(RefBookAttribute refBookAttribute){
@@ -278,6 +282,14 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
             case DATE: typeVerifier.setType(OperandType.DATE); break;
             case REFERENCE: typeVerifier.setType(OperandType.NUMBER); break;
             default: throw new RuntimeException("Unexpected internal alias type");
+        }
+    }
+
+    private void setAliasType(String alias){
+        if (alias.equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
+            typeVerifier.setType(OperandType.NUMBER);
+        } else{
+            setAliasType(refBook.getAttribute(alias));
         }
     }
 }

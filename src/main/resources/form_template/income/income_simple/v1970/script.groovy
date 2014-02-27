@@ -347,7 +347,7 @@ def consolidationSummary() {
                     def dataRNU6 = formDataService.getDataRowHelper(source)
                     dataRNU6.getAll().each {rowRNU6 ->
                         if (rowRNU6.getAlias() == null) {
-                            def knu = getKNUValue(rowRNU6.kny)
+                            def knu = getKNUValue(rowRNU6.code)
                             // если «графа 2» (столбец «Код налогового учета») формы источника = «графе 1» (столбец «КНУ») текущей строки и
                             //«графа 4» (столбец «Балансовый счёт (номер)») формы источника = «графе 4» (столбец «Балансовый счёт по учёту дохода»)
                             if (row.incomeTypeId != null && row.accountNo != null && row.incomeTypeId == knu && isEqualNum(row.accountNo, rowRNU6.code)) {
@@ -388,7 +388,7 @@ def consolidationSummary() {
                     def dataRNU4 = formDataService.getDataRowHelper(source)
                     dataRNU4.getAll().each { rowRNU4 ->
                         if (rowRNU4.getAlias() == null) {
-                            def knu = getKNUValue(rowRNU4.code)
+                            def knu = getKNUValue(rowRNU4.balance)
                             if (row.incomeTypeId != null && row.accountNo != null && row.incomeTypeId == knu && isEqualNum(row.accountNo, rowRNU4.balance)) {
                                 //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
                                 graph8 += rowRNU4.sum
