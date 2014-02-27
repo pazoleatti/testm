@@ -81,6 +81,7 @@ switch (formDataEvent) {
 }
 
 // графа 1  - rowNumber
+// графа    - fix
 // графа 2  - issuer
 // графа 3  - shareType
 // графа 4  - tradeNumber
@@ -108,7 +109,7 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['rowNumber', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+def allColumns = ['rowNumber', 'fix', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
@@ -529,7 +530,8 @@ def getSum(def data, def columnAlias) {
 def getNewRow(def alias, def totalColumns, def sums, def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + getRowNumber(alias, dataRows))
-    newRow.issuer = alias + ' итог'
+    newRow.fix = alias + ' итог'
+    newRow.getCell('fix').colSpan = 2
     setTotalStyle(newRow)
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it], null)
@@ -631,7 +633,7 @@ def BigDecimal calc8(def row, def dataOld) {
 
 def BigDecimal calc13(def row) {
     if (row.marketQuotation != null && row.rubCourse != null) {
-        return roundValue(row.marketQuotation * row.rubCourse, 2)
+        return roundValue(row.marketQuotation * row.rubCourse, 6)
     }
     return null
 }
