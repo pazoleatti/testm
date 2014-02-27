@@ -93,7 +93,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
             log.setNote(rs.getString("note"));
             log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
-            log.setUserDepartmentHierarchy(departmentDao.getParentsHierarchy(rs.getInt("user_department_id")));
+            log.setDepartmentName(departmentDao.getParentsHierarchy(rs.getInt("user_department_id")));
             return log;
         }
     }
