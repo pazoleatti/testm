@@ -216,19 +216,25 @@ public class PeriodServiceImpl implements PeriodService{
 	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId());
-		if (dp == null) { //не существует
+        String balance;
+        if (departmentReportPeriod.isBalance()) {
+            balance = "ввод остатков ";
+        } else {
+            balance = "";
+        }
+        if (dp == null) { //не существует
 			departmentReportPeriodDao.save(departmentReportPeriod);
 		} else if (!dp.isActive()) { // существует и не открыт
 			departmentReportPeriodDao.updateActive(departmentReportPeriod.getReportPeriod().getId(),
-				departmentReportPeriod.getDepartmentId(), true);
+                    departmentReportPeriod.getDepartmentId(), true);
 		} else { // уже открыт
 			return;
 		}
 		if (logs != null) {
 			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
-			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
-					" за " + year + " год "
-					+ "для подразделения \" " +
+			logs.add(new LogEntry(LogLevel.INFO,"\"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
+					" за " + year + " год " + balance
+					+ "открыт для \" " +
 					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
 	}
