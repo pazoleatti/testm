@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -15,6 +18,8 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -24,6 +29,16 @@ public class LogBusinessDaoTest {
 
 	@Autowired
 	private LogBusinessDao logBusinessDao;
+
+    @Before
+    public void init() {
+        Department dep = new Department();
+        dep.setId(1);
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
+        when(departmentDao.getDepartment(1)).thenReturn(dep);
+        ReflectionTestUtils.setField(logBusinessDao, "departmentDao", departmentDao);
+    }
 
 	@Test
 	public void testDeclarationGet() {
@@ -125,6 +140,7 @@ public class LogBusinessDaoTest {
         PagingResult<LogSearchResultItem> resultItems = logBusinessDao.getLogsBusiness(formDataIds, declarationIds, filterValuesDao);
         assertEquals(1, resultItems.getTotalCount());
         assertEquals(1, resultItems.size());
+        assertEquals("Подразделение", resultItems.get(0).getUserDepartmentHierarchy());
         /*assertEquals("Банк", resultItems.get(0).getDepartment().getName());*/
     }
 
