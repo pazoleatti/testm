@@ -10,8 +10,9 @@ import groovy.transform.Field
  *              и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
  * formTemplateId=326
  *
+ * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
+ *
  * графа 1  - число  number                 № пп
- * fix
  * графа 2  - строка issuer                 эмитент
  * графа 3  - строка regNumber              гос номер
  * графа 4  - строка tradeNumber            Номер сделки
@@ -111,13 +112,13 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
+def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = allColumns - ['number', 'fix']
+def editableColumns = allColumns - ['number', 'fix', 'marketQuotationInRub']
 
 // Автозаполняемые атрибуты
 @Field
