@@ -2,9 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -125,6 +124,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         formDataKind.setDereferenceValue(null);
         formTypeId.setValue(new ArrayList<Long>(), true);
         formTypeId.setDereferenceValue(null);
+	    getUiHandlers().onDepartmentChanged();
         updateEnabled();
     }
 
@@ -132,6 +132,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onDataKindChange(ValueChangeEvent<List<Long>> event) {
         formTypeId.setValue(new ArrayList<Long>(), true);
         formTypeId.setDereferenceValue(null);
+	    getUiHandlers().onDataKindChanged();
         updateEnabled();
     }
 
@@ -159,6 +160,27 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
         reportPeriodIds.setPeriods(reportPeriods);
+    }
+
+	@Override
+	public void setAcceptableKinds(List<FormDataKind> dataKinds) {
+		StringBuilder filter = new StringBuilder();
+		for (FormDataKind k : dataKinds) {
+			filter.append(k.getId() + ",");
+		}
+		filter.deleteCharAt(filter.length()-1);
+		formDataKind.setFilter(filter.toString());
+	}
+
+	@Override
+	public void setAcceptableTypes(List<FormType> types) {
+		StringBuilder str = new StringBuilder();
+		for (FormType ft : types) {
+			str.append(RefBook.RECORD_ID_ALIAS + "=" + ft.getId() + " or ");
+		}
+		str.delete(str.length()-3, str.length()-1);
+		formTypeId.setFilter(str.toString());
+
     }
 
     @Override
