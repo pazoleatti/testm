@@ -5,14 +5,14 @@
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client"
-             xmlns:a='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
+             xmlns:a="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
     <ui:style>
         .content {
             margin: 20px;
         }
 
-        .content tr{
+        .content tr {
             width: 480px;
         }
 
@@ -23,19 +23,14 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 74px;
         }
 
-        .labels{
+        .labels {
             text-align: right;
             width: 150px;
             padding-right: 5px;
-        }
-
-        .rowMiddle td{
-            /*выравние по вертикали все строчки */
-            vertical-align: middle !important;
         }
 
         /*.datePo{
@@ -44,25 +39,25 @@
         }*/
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций" >
-        <g:VerticalPanel height="100%" >
-
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций">
+        <g:VerticalPanel height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
-<!-- эта штука понадобится в 0.3.7
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
-                    <g:Label text="Период с" addStyleNames="{style.labels}"/>
-                    <d:DateMaskBoxPicker width="110px"/>
-                    <g:Label text="по " addStyleNames="{style.datePo}"/>
-                    <d:DateMaskBoxPicker width="104px"/>
-                </g:HorizontalPanel>
--->
+                <!-- эта штука понадобится в 0.3.7
+                    <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
+                        <g:Label text="Период с" addStyleNames="{style.labels}"/>
+                        <d:DateMaskBoxPicker width="110px"/>
+                        <g:Label text="по " addStyleNames="{style.datePo}"/>
+                        <d:DateMaskBoxPicker width="104px"/>
+                    </g:HorizontalPanel>
+                -->
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true" width="250px"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение"
+                                                   modal="true" multiselection="true" width="250px"/>
                 </g:HorizontalPanel>
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Вид декларации" addStyleNames="{style.labels}"/>
                     <g:ValueListBox width="250px" ui:field="declarationTypeId"/>
                 </g:HorizontalPanel>

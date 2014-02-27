@@ -1,11 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
-	xmlns:w='urn:import:com.aplana.gwt.client'
-	xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-	xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
-	xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:w="urn:import:com.aplana.gwt.client"
+             xmlns:date="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style">
 
     <ui:style>
         .content {
@@ -19,79 +19,90 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 64px;
         }
 
     </ui:style>
 
-    <w:ModalWindow iconUrl="resources/img/unlock-16.png" glassEnabled="true" title="Открыть период">
-		<g:VerticalPanel width="400px">
-			<g:DecoratorPanel addStyleNames="{style.content}" width="380px">
-				<g:VerticalPanel>
-					<g:VerticalPanel>
-						<g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
-                            <g:cell horizontalAlignment="right">
-								<g:Label text="Подразделение: " width="150px" />
-                            </g:cell>
-								<picker:DepartmentPickerPopupWidget width="100%" header="Подразделение" ui:field="departmentPicker"	multiselection="false" modal="true" />
-                                <g:Label ui:field="departmentPickerRO"/>
-						</g:HorizontalPanel>
+    <w:ModalWindow iconUrl="resources/img/unlock-16.png" title="Открытие периода">
+        <g:VerticalPanel width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:DecoratorPanel addStyleNames="{style.content}" width="380px">
+                <g:VerticalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle" width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Подразделение: " width="180px"/>
+                        </g:cell>
+                        <picker:DepartmentPickerPopupWidget width="100%" header="Подразделение" labelWordWrap="false"
+                                                            ui:field="departmentPicker" multiselection="false"
+                                                            modal="true"/>
+                        <g:Label ui:field="departmentPickerRO"/>
+                    </g:HorizontalPanel>
 
-						<g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"
-							width="100%" spacing="3">
-							<g:cell horizontalAlignment="right">
-								<g:Label text="Год: " width="150px" />
-							</g:cell>
-							<g:cell width="100%" horizontalAlignment="left">
-								<w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="100%" />
-							</g:cell>
-						</g:HorizontalPanel>
+                    <g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Год: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="100%"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
-						<g:HorizontalPanel verticalAlignment="middle"
-							width="100%" spacing="3">
-							<g:cell horizontalAlignment="right">
-								<g:Label ui:field="periodLbl" text="Период: " width="150px" />
-							</g:cell>
-							<g:cell width="100%" horizontalAlignment="left">
-								<r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="100%" attributeIdInt="26"
-                                                            multiSelect="false"/>
-							</g:cell>
-						</g:HorizontalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label ui:field="periodLbl" text="Период: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="100%"
+                                                   attributeIdInt="26"
+                                                   multiSelect="false"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
-						<g:HorizontalPanel ui:field="termPnl" verticalAlignment="middle" visible="false"
-							width="100%" spacing="3">
-							<g:cell horizontalAlignment="right">
-								<g:Label text="Период сдачи корректировки: " width="150px" />
-							</g:cell>
-							<g:cell width="100%" horizontalAlignment="left">
-								<date:DateMaskBoxPicker width="60px" ui:field="term" />
-							</g:cell>
-						</g:HorizontalPanel>
-					</g:VerticalPanel>
+                    <g:HorizontalPanel ui:field="termPnl" verticalAlignment="middle" visible="true"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Период сдачи корректировки: " width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <date:DateMaskBoxPicker width="60px" ui:field="term"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
-					<g:VerticalPanel>
-						<g:HorizontalPanel spacing="3">
-							<g:CheckBox ui:field="balancePeriod" />
-							<g:Label text="Ввод остатков" />
-						</g:HorizontalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Ввод остатков" width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <g:CheckBox ui:field="balancePeriod"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
-						<g:HorizontalPanel spacing="3">
-							<g:CheckBox ui:field="correctPeriod" />
-							<g:Label text="Корректирующий" />
-						</g:HorizontalPanel>
-					</g:VerticalPanel>
-				</g:VerticalPanel>
+                    <g:HorizontalPanel verticalAlignment="middle"
+                                       width="100%" spacing="3">
+                        <g:cell horizontalAlignment="right">
+                            <g:Label text="Корректирующий" width="180px"/>
+                        </g:cell>
+                        <g:cell width="100%" horizontalAlignment="left">
+                            <g:CheckBox ui:field="correctPeriod"/>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
 
-			</g:DecoratorPanel>
+            </g:DecoratorPanel>
 
-			<style:Bar addStyleNames="{style.footerPanel}">
-				<style:RightBar>
-					<g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Открыть период" width="120px" />
-					<g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно" width="120px"/>
-				</style:RightBar>
-			</style:Bar>
+            <style:Bar addStyleNames="{style.footerPanel}">
+                <style:RightBar>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Открыть период"
+                              width="120px"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть окно"
+                              width="100px"/>
+                </style:RightBar>
+            </style:Bar>
 
-		</g:VerticalPanel>
+        </g:VerticalPanel>
     </w:ModalWindow>
 </ui:UiBinder> 
