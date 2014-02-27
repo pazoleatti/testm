@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
+
 /**
  * (РНУ-120) Регистр налогового учёта доходов по кредитам, выданным физическим лицам, признаваемым Взаимозависимыми лицами, а также любым физическим независимым лицам, являющимся резидентами оффшорных зон
  * formTemplateId=378
@@ -32,22 +33,29 @@ import groovy.transform.Field
 // графа 16 - marketInterestRate
 // графа 17 - sumRate
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW :
         if (currentDataRow?.getAlias() == null) {
@@ -60,7 +68,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -85,43 +95,45 @@ def allColumns = ['number', 'numberAccount', 'debtBalance', 'operationDate',
         'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate', 'taxAccount', 'booAccount',
         'accrualPrev', 'accrualReportPeriod', 'marketInterestRate', 'sumRate']
 
-// Редактируемые атрибуты (графа 2 .. 4, 5, 6 .. 10, 11, 16)
-// TODO - Непонятно что делать с графой 11
+// Редактируемые атрибуты (графа 2..4, 5, 6..11, 16)
 @Field
-def editableColumns = ['numberAccount', 'debtBalance', 'operationDate',
-        'course', 'interestRate', 'baseForCalculation', 'calcPeriodAccountingBeginDate',
-        'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate', 'marketInterestRate']
+def editableColumns = ['numberAccount', 'debtBalance', 'operationDate', 'course', 'interestRate',
+        'baseForCalculation', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
+        'calcPeriodBeginDate', 'calcPeriodEndDate', 'marketInterestRate']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1 .. 17)
+// Проверяемые на пустые значения атрибуты (графа 1..11, 16)
 @Field
-def nonEmptyColumns = ['number', 'numberAccount', 'debtBalance', 'operationDate',
-                'course', 'interestRate', 'baseForCalculation', 'calcPeriodAccountingBeginDate',
-                'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate', 'taxAccount', 'booAccount',
-                'accrualPrev', 'accrualReportPeriod', 'marketInterestRate', 'sumRate']
+def nonEmptyColumns = ['number', 'numberAccount', 'debtBalance', 'operationDate', 'course',
+        'interestRate', 'baseForCalculation', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
+        'calcPeriodBeginDate', 'calcPeriodEndDate', 'marketInterestRate']
 
-// TODO - нет точного списка графов по которым нужно рассчитать сумму
+// TODO (Ramil Timerbaev) нет точного списка графов по которым нужно рассчитать сумму (пока сказали сделать по 3, 12-15, 17)
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 3, 12..15, 17)
 @Field
-def totalSumColumns = ['taxAccount', 'booAccount','accrualPrev', 'accrualReportPeriod', 'sumRate']
+def totalSumColumns = ['debtBalance', 'taxAccount', 'booAccount', 'accrualPrev', 'accrualReportPeriod', 'sumRate']
 
-// алиасы графов по которым производится сортировка
+// алиасы графов по которым производится сортировка (2, 4)
 @Field
 def groupColums = ['numberAccount', 'operationDate']
 
 // алиасы графов для арифметической проверки
 @Field
-def arithmeticCheckAlias = ['booAccount', 'taxAccount', 'accrualPrev', 'accrualReportPeriod', 'accrualReportPeriod', 'sumRate']
+def arithmeticCheckAlias = ['booAccount', 'taxAccount', 'accrualPrev', 'accrualReportPeriod', 'sumRate']
 
-// Дата окончания отчетного периода
+// дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
 def currentDate = new Date()
+
+@Field
+def isBalancePeriod = null
 
 //// Обертки методов
 
@@ -129,14 +141,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
@@ -159,9 +171,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-
-    def dataRowsPrev = getFormDataPrev()?.getAllCached()
-    if (dataRowsPrev == null) return
+    def dataRowsPrev = (!isConsolidated && !isBalancePeriod() ? getFormDataPrev()?.getAllCached() : null)
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -205,23 +215,18 @@ void calc() {
 }
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+def prevPeriodCheck() {
+    if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return false
     }
+    return true
 }
 
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-
-    def dataRowsPrev = getFormDataPrev()?.getAllCached()
-    if (dataRowsPrev == null) return
+    def dataRowsPrev = (!isConsolidated && !isBalancePeriod() ? getFormDataPrev()?.getAllCached() : null)
 
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
@@ -262,7 +267,7 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
         }
 
-        // 4. Проверка курса валюты
+        // . Проверка курса валюты
         if (row.operationDate != null && row.course != null) {
             def dataProvider = refBookFactory.getDataProvider(22)
             def record = dataProvider.getRecords(row.operationDate, null, "RATE = $row.course", null);
@@ -278,10 +283,6 @@ void logicCheck() {
     // 4. Арифметические проверки расчета итоговой графы
     checkTotalSum(dataRows, totalSumColumns, logger, true)
 }
-
-/*
- * Вспомогательные методы.
- */
 
 /** Сформировать итоговую строку с суммами. */
 def getTotalRow(def dataRows) {
@@ -300,7 +301,9 @@ def calc12(def row, def rowPrev) {
         if (row.debtBalance == null || row.course == null || row.interestRate == null ||
             row.baseForCalculation == null || row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null ||
             rowPrev.calcPeriodBeginDate == null || (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0 ||
-            rowPrev.accrualPrev == null) return null
+            rowPrev.accrualPrev == null) {
+            return null
+        }
         BigDecimal x = row.debtBalance * row.course * row.interestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) - rowPrev.accrualPrev
         return roundValue(x, 2)
@@ -309,15 +312,14 @@ def calc12(def row, def rowPrev) {
 }
 
 def calc13(def row) {
-    if (true) {
-        if (row.debtBalance == null || row.interestRate == null || row.baseForCalculation == null ||
-            row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null || row.calcPeriodAccountingBeginDate == null ||
-            (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1) == 0) return null
-        BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
-                (row.calcPeriodAccountingBeginDate - row.calcPeriodAccountingBeginDate + 1)
-        return roundValue(x, 2)
+    if (row.debtBalance == null || row.interestRate == null || row.baseForCalculation == null ||
+        row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null || row.calcPeriodAccountingBeginDate == null ||
+        (row.calcPeriodAccountingEndDate - row.calcPeriodAccountingBeginDate + 1) == 0) {
+        return null
     }
-    return null
+    BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
+            (row.calcPeriodAccountingBeginDate - row.calcPeriodAccountingBeginDate + 1)
+    return roundValue(x, 2)
 }
 
 def calc14(def rowPrev) {
@@ -327,7 +329,9 @@ def calc14(def rowPrev) {
 def calc15(def row) {
     if (row.debtBalance == null || row.interestRate == null || row.baseForCalculation == null ||
         row.baseForCalculation == 0 || row.calcPeriodEndDate == null || row.calcPeriodBeginDate == null ||
-        (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) return null
+        (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0) {
+        return null
+    }
     BigDecimal x = row.debtBalance * row.interestRate / row.baseForCalculation *
             (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1)
     return roundValue(x, 2)
@@ -339,14 +343,18 @@ def calc17(def row, def rowPrev) {
         if (row.debtBalance == null || row.marketInterestRate == null || row.baseForCalculation == null ||
                 row.baseForCalculation == 0 || row.calcPeriodAccountingEndDate == null || rowPrev.calcPeriodBeginDate == null ||
                 (row.calcPeriodAccountingEndDate - rowPrev.calcPeriodBeginDate + 1) == 0 || rowPrev.accrualReportPeriod == null ||
-                rowPrev.sumRate == null) return null
+                rowPrev.sumRate == null) {
+            return null
+        }
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodAccountingBeginDate - rowPrev.calcPeriodBeginDate + 1) -
                 rowPrev.accrualReportPeriod - rowPrev.sumRate
     } else {
         if (row.debtBalance == null || row.marketInterestRate == null || row.baseForCalculation == null ||
                 row.baseForCalculation == 0 || row.calcPeriodEndDate == null || row.calcPeriodBeginDate == null ||
-                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0 || row.accrualPrev == null) return null
+                (row.calcPeriodEndDate - row.calcPeriodBeginDate + 1) == 0 || row.accrualPrev == null) {
+            return null
+        }
         x = row.debtBalance * row.marketInterestRate / row.baseForCalculation *
                 (row.calcPeriodEndDate - rowPrev.calcPeriodBeginDate + 1) - row.accrualPrev
     }
@@ -384,4 +392,18 @@ def roundValue(def value, int precision) {
     } else {
         return null
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }
