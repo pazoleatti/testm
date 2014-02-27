@@ -1,4 +1,4 @@
-package form_template.income.rnu55
+package form_template.income.1970.rnu55
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -112,9 +112,8 @@ void prevPeriodCheck() {
     }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         def formName = formData.getFormType().getName()
-        logger.error("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
 }
 
