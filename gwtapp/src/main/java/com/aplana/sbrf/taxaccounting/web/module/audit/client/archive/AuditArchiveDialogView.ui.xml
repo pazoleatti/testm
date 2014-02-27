@@ -1,5 +1,5 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
@@ -14,22 +14,22 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
         }
     </ui:style>
 
 
-    <dw:ModalWindow iconUrl="" title="Архивация" glassEnabled="true">
-        <g:VerticalPanel width="250px">
+    <dw:ModalWindow title="Архивация">
+        <g:VerticalPanel width="250px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
-                    <d:DateMaskBoxPicker ui:field="toSearchDate" />
+                    <d:DateMaskBoxPicker ui:field="toSearchDate"/>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel width="100%" addStyleNames="{style.footerPanel}">
-                        <g:Button addStyleNames="{style.footerButton}" ui:field="archiveButton" text="Пернести в архив"/>
-                        <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="archiveButton" text="Пернести в архив"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
                 </g:FlowPanel>
             </g:cell>
         </g:VerticalPanel>

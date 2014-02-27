@@ -152,11 +152,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
 		membersFilterData.setRoleIds(role.getValue()!= null ? role.getValue() : new ArrayList<Long>());
-		Set<Integer> depIds = new HashSet<Integer>();
-		for (DepartmentPair dep : departmentPicker.getDepartmentPairValues()) {
-			depIds.add(dep.getDepartmentId());
-		}
-		membersFilterData.setDepartmentIds(depIds);
+		membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getValue()));
 		return membersFilterData;
 	}
 
@@ -189,7 +185,11 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@Override
 	public void setFilterData(FilterValues values) {
 		isActiveBox.setAcceptableValues(Arrays.asList(new Boolean[]{Boolean.TRUE, Boolean.FALSE}));
-		departmentPicker.setAvalibleValues(values.getDepartments(), null);
+        Set<Integer> departmentIds = new HashSet<Integer>();
+        for (Department d: values.getDepartments()){
+            departmentIds.add(d.getId());
+        }
+        departmentPicker.setAvalibleValues(values.getDepartments(), departmentIds);
 	}
 
 	@Override

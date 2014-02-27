@@ -102,7 +102,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         TextColumn<LogSearchResultItem> departmentColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
-                return object.getDepartment().getName();
+                return object.getUserDepartmentHierarchy();
             }
         };
 

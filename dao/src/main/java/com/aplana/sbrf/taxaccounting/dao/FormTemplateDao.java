@@ -126,4 +126,6 @@ public interface FormTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, List<Integer> statusList);
+
+    int updateVersionStatus(int versionStatus, int formTemplateId);
 }

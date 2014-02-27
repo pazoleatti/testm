@@ -292,6 +292,14 @@ def BigDecimal calc17(def row) {
 
 def BigDecimal calc18(def row) {
     def code = getCode(row.tradeNumber)
+// Debug:
+//    println("---------------------- "+row)
+//    println(" code = " + code)
+//    println(" 14 = " + row.priceInFactPerc)
+//    println(" 15 = " + row.priceInFactRub)
+//    println(" 16 = " + row.marketPriceInPerc1)
+//    println(" 17 = " + row.marketPriceInRub1)
+
     if ((code == 1 || code == 2 || code == 5)
             && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
         return row.priceInFactRub
@@ -384,7 +392,7 @@ void logicCheck() {
         }
         // 2. Проверка рыночной цены в процентах при погашении
         if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInPerc1 != 100) {
-            logger.error(errorMsg + "Неверно указана рыночная цена в % при погашении!")
+            logger.error(errorMsg + 'Неверно указана рыночная цена в % при погашении!')
         }
         // 3. Проверка рыночной цены в рублях при погашении
         if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInRub1 != row.redemptionValue) {

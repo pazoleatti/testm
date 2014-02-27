@@ -1,40 +1,58 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui'
-	xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
-    xmlns:m='urn:import:com.aplana.gwt.client'>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:p="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:m="urn:import:com.aplana.gwt.client">
 
     <ui:style>
-        .selected{
+        .selected {
             color: #000000;
         }
 
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
+        }
 
+        .footerButton {
+            margin: 8px 10px 8px 0 !important;
+        }
+
+        .margin {
+            margin: 5px;
+        }
     </ui:style>
 
-	<g:FlowPanel width="200px" ui:field="wrappingPanel">
-		<g:HorizontalPanel verticalAlignment="middle" width="100%" ui:field="panel">
-			<g:cell width="100%">
-				<g:TextBox readOnly="true" addStyleNames="{style.selected}"  ui:field="text" width="100%" />
-			</g:cell>
-			<g:cell>
-				<g:Button text="..." ui:field="selectButton" width="25px" />
-			</g:cell>
-			<g:cell>
-				<g:Button text="X" ui:field="clearButton" width="25px" />
-			</g:cell>
-		</g:HorizontalPanel>
-		<g:FlowPanel visible="false">
-			<m:ModalWindow title="Выбор периода" iconUrl="" ui:field="popupPanel" autoHideEnabled="true" modal="true" width="400px" height="300px">
-				<g:VerticalPanel spacing="10" height="100%" width="100%">
-					<g:cell height="100%" width="100%">
-						<p:PeriodPickerWidget ui:field="periodPicker" height="270px" width="400px"/>
-					</g:cell>
-					<g:cell horizontalAlignment="right">
-						<g:Button ui:field="okButton" text="Выбрать"/>
-					</g:cell>
-				</g:VerticalPanel>
-			</m:ModalWindow>
-		</g:FlowPanel>
-	</g:FlowPanel>
+    <g:FlowPanel width="200px" ui:field="wrappingPanel">
+        <g:HorizontalPanel verticalAlignment="middle" width="100%" ui:field="panel">
+            <g:cell width="100%">
+                <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="text" width="100%"/>
+            </g:cell>
+            <g:cell>
+                <g:Button text="..." ui:field="selectButton" width="25px"/>
+            </g:cell>
+            <g:cell>
+                <g:Button text="X" ui:field="clearButton" width="25px"/>
+            </g:cell>
+        </g:HorizontalPanel>
+        <g:FlowPanel visible="false">
+            <m:ModalWindow title="Выбор периода" ui:field="popupPanel" autoHideEnabled="true"
+                           width="400px" height="300px">
+                <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
+                    <g:cell>
+                        <g:VerticalPanel addStyleNames="{style.margin}">
+                            <p:PeriodPickerWidget ui:field="periodPicker" width="390px" height="270px"/>
+                        </g:VerticalPanel>
+
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <g:FlowPanel addStyleNames="{style.footerPanel}">
+                            <g:Button addStyleNames="{style.footerButton}" ui:field="okButton" text="Выбрать"/>
+                        </g:FlowPanel>
+                    </g:cell>
+                </g:VerticalPanel>
+            </m:ModalWindow>
+        </g:FlowPanel>
+    </g:FlowPanel>
 
 </ui:UiBinder>

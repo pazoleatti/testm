@@ -17,23 +17,24 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 94px;
         }
-        .textArea{
+
+        .textArea {
             resize: none;
             width: 350px;
             height: 150px;
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="" title="Список оповещений" glassEnabled="true" width="800px">
-        <g:VerticalPanel width="100%">
-            <g:cell width="100%" >
-                    <g:VerticalPanel addStyleNames="{style.content}" width="100%">
-                        <style:GenericCellTable ui:field="notificationTable" width="97%"/>
-                    </g:VerticalPanel>
-                </g:cell>
+    <dw:ModalWindow title="Список оповещений" width="800px">
+        <g:VerticalPanel width="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:cell width="100%">
+                <g:VerticalPanel addStyleNames="{style.content}" width="100%">
+                    <style:GenericCellTable ui:field="notificationTable" width="97%"/>
+                </g:VerticalPanel>
+            </g:cell>
             <g:cell>
                 <g:VerticalPanel>
                     <pager:FlexiblePager ui:field="pager"

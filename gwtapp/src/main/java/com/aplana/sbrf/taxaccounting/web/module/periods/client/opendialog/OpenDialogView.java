@@ -135,12 +135,12 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
                 yearPnl.setVisible(false);
         termPnl.setVisible(true);
         period.setTitle("Период корректировки");
-        periodLbl.setText("Период корректировки");
+        periodLbl.setText("Период корректировки:");
         } else {
                 yearPnl.setVisible(true);
         termPnl.setVisible(false);
         period.setTitle("Период");
-        periodLbl.setText("Период");
+        periodLbl.setText("Период:");
         }
     }
 

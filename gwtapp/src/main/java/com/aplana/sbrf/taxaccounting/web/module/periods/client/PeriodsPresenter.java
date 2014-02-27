@@ -129,7 +129,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Dialog.warningMessage("Интервал периода поиска указан неверно!");
+			Dialog.warningMessage("Внимание","Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}

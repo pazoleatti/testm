@@ -119,6 +119,13 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         return resultList;
     }
 
+	@Override
+	public List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo) {
+		List<FormDataKind> kinds = new ArrayList<FormDataKind>(FormDataKind.values().length);
+		kinds.addAll(formDataAccessService.getAvailableFormDataKind(userInfo, asList(taxType)));
+		return formTypeService.getFormTypes(departmentId, reportPeriodId, taxType, kinds);
+	}
+
     /**
      * Фильтр для Dao-слоя при выборке НФ. Пользовательская фильтрация и принудительная фильтрация.
      */

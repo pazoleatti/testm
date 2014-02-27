@@ -77,9 +77,9 @@ public class MembersPresenter extends Presenter<MembersPresenter.MyView, Members
 					    @Override
 					    public void onSuccess(FilterValues result) {
 						    getView().setFilterData(result);
+                            getView().updateData(0);
 					    }
 				    }, this));
-	    getView().updateData(0);
     }
 
     @Override

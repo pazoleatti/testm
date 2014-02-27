@@ -59,4 +59,6 @@ public interface FormDataSearchService {
      * @return активные виды НФ
      */
     List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType);
+
+	List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo);
 }

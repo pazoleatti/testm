@@ -135,19 +135,16 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     @Override
     public boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force) {
-        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(templateId);
-        formTemplate.setScript(formTemplateService.getFormTemplateScript(templateId));
+        FormTemplate formTemplate = formTemplateService.get(templateId);
 
         if (formTemplate.getStatus() == VersionedObjectStatus.NORMAL){
             versionOperatingService.isUsedVersion(formTemplate, null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
-            formTemplate.setStatus(VersionedObjectStatus.DRAFT);
-            formTemplateService.save(formTemplate);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT.getId(), templateId);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
         } else {
-            formTemplate.setStatus(VersionedObjectStatus.NORMAL);
-            formTemplateService.save(formTemplate);
-            logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL.getId(), templateId);
+            logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
         return true;
     }

@@ -79,8 +79,8 @@ public class GetDeclarationDataHandler
 		result.setDeclarationType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
 				.getType().getName());
-		result.setDepartment(departmentService.getDepartment(
-				declaration.getDepartmentId()).getName());
+		result.setDepartment(departmentService.getParentsHierarchy(
+				declaration.getDepartmentId()));
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());
