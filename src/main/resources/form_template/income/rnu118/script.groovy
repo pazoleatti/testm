@@ -11,7 +11,7 @@ import groovy.transform.Field
  *
  * @author bkinzyabulatov
  *
- * Графа 1    rowNumber           № пп
+ * Графа 1    number           № пп
  * Графа 2.1  transactionNumber   Общая информация о сделке. Номер сделки
  * Графа 2.2  contractor          Общая информация о сделке. Наименование контрагента
  * Графа 2.3  transactionKind     Общая информация о сделке. Вид сделки
@@ -76,7 +76,7 @@ def refBookCache = [:]
 
 // Все аттрибуты
 @Field
-def allColumns = ["rowNumber", "transactionNumber", "contractor", "transactionKind",
+def allColumns = ["fix", "number", "transactionNumber", "contractor", "transactionKind",
         "transactionDate", "transactionEndDate", "transactionCalcDate", "bonusSize",
         "bonusCurrency", "bonusSum", "course", "minPrice", "maxPrice", "deviationMinPrice",
         "deviationMaxPrice", "request", "liability", "income", "outcome"]
@@ -105,11 +105,6 @@ def nonEmptyColumnsPt2 = ["bonusSize", "bonusCurrency", "bonusSum", "course", "m
         "deviationMinPrice", "deviationMaxPrice"]
 
 //// Обертки методов
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -142,7 +137,7 @@ void logicCheck() {
     def totalRow = null
     def i = 0
     for (def DataRow row : dataRows){
-        if (row?.getAlias()?.contains('itg')) {
+        if (row?.getAlias() != null) {
             totalRow = row
             continue
         }
@@ -154,7 +149,7 @@ void logicCheck() {
         def requiredColumns = row.transactionCalcDate != null ? (nonEmptyColumns + nonEmptyColumnsPt2) : nonEmptyColumns
         checkNonEmptyColumns(row, index, requiredColumns, logger, true)
 
-        if (++i != row.rowNumber) {
+        if (++i != row.number) {
             logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
@@ -164,9 +159,6 @@ void logicCheck() {
         calc13(row, values)
 
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
-
-        // Проверки соответствия НСИ
-        checkNSI(15, row, "bonusCurrency")
     }
     // Проверка итогов
     def totalCorrupt = false
@@ -190,10 +182,9 @@ void calc() {
     deleteAllAliased(dataRows)
 
     def index = 0
-
     // Расчет ячеек
     dataRows.each{row->
-        row.rowNumber=++index
+        row.number=++index
         calc9(row, row)
         calc11(row, row)
         calc13(row, row)
@@ -201,7 +192,8 @@ void calc() {
 
     // Добавление строки итогов
     def totalRow = formData.createDataRow()
-    totalRow.transactionNumber = "Итого"
+    totalRow.getCell("fix").setColSpan(2)
+    totalRow.fix = "Итого"
     totalRow.setAlias('itg')
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -217,7 +209,7 @@ void calc() {
             totalRow[it] += row[it] != null ? row[it] : 0
         }
     }
-    dataRows.add(dataRows.size(), totalRow)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
@@ -254,6 +246,11 @@ void calc11(def row, def result) {
     if (0 > row.bonusSize && row.bonusSize < -row.maxPrice){
         result.deviationMaxPrice = (-row.maxPrice - row.bonusSize) * row.course
         result.deviationMinPrice = BigDecimal.ZERO
+    }
+    if (row.bonusSize == row.minPrice || row.bonusSize == -row.maxPrice) {
+        result.deviationMinPrice = BigDecimal.ZERO
+        result.deviationMaxPrice = BigDecimal.ZERO
+        return
     }
 }
 

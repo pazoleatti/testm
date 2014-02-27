@@ -73,7 +73,7 @@ def editableColumns = ['name', 'code', 'reasonNumber', 'reasonDate', 'base', 'cr
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'name', 'country', 'inn', 'code', 'reasonNumber', 'reasonDate', 'base', 'credit',
+def nonEmptyColumns = ['number', 'name', 'code', 'reasonNumber', 'reasonDate', 'base', 'credit',
         'currency', 'date', 'interestRate', 'incomeFactSum', 'taxInterestRate', 'incomeLevelSum', 'deviation',
         'incomeAddSum']
 
@@ -89,11 +89,6 @@ def totalColumns = ['incomeFactSum', 'incomeLevelSum', 'incomeAddSum']
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
@@ -103,10 +98,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    // РНУ-5
-    if (getFormDataRnu(317) == null) {
-        def ftRnu5 = formTypeService.get(317);
-        throw new ServiceException("Не найдены экземпляры «${ftRnu5.name}» за текущий отчетный период!")
+    // РНУ-4
+    if (getFormDataRnu(316) == null) {
+        def ftRnu4 = formTypeService.get(316);
+        throw new ServiceException("Не найдены экземпляры «${ftRnu4.name}» за текущий отчетный период!")
     }
     // РНУ-6
     if (getFormDataRnu(318) == null) {
@@ -126,14 +121,6 @@ void calc() {
     for (row in dataRows) {
         // графа 1
         row.number = ++index
-
-        def map = getRefBookValue(9, row.name)
-
-        // графа 3
-        row.country = map?.COUNTRY?.referenceValue;
-
-        // графа 4
-        row.inn = map?.INN_KIO?.stringValue;
 
         // графа 16
         if (row.taxInterestRate != null && row.interestRate != null) {
@@ -191,10 +178,6 @@ void logicCheck() {
         if (row.incomeLevelSum != null && row.incomeFactSum != null && row.incomeAddSum != row.incomeLevelSum - row.incomeFactSum) {
             logger.error(errorMsg + "Неверно рассчитана графа «${getColumnName(row, 'incomeAddSum')}»!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(9, row, 'country')
-        checkNSI(28, row, 'inn')
     }
 
     // 5. Арифметические проверки итогов
