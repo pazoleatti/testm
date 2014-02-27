@@ -152,7 +152,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
 		membersFilterData.setRoleIds(role.getValue()!= null ? role.getValue() : new ArrayList<Long>());
-		membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getAvalibleValues()));
+		membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getValue()));
 		return membersFilterData;
 	}
 
