@@ -339,7 +339,7 @@ void logicCheck() {
         }
 
         // 4. Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету
-        if ((row.taxAccountingRuble > 0 && row.ruble == 0) || (row.taxAccountingRuble == 0 && row.ruble > 0)) {
+        if (!((row.taxAccountingRuble > 0 && !(row.ruble)) || (!(row.taxAccountingRuble) && row.ruble > 0))) {
             logger.warn(errorMsg + 'Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.')
         }
 
