@@ -732,7 +732,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.reserveCalcValue - row.reserveCalcValuePrev, 2)
+            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
         } else {
             return (BigDecimal) 0
         }
