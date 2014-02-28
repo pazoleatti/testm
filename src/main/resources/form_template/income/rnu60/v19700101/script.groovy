@@ -94,7 +94,7 @@ switch (formDataEvent) {
 // Проверяемые на пустые значения атрибуты (графа 1..13)
 @Field
 def nonEmptyColumns = ['tradeNumber', 'securityName', 'currencyCode', 'nominalPrice', 'part1REPODate',
-        'part2REPODate', 'salePrice', 'acquisitionPrice', 'income', 'outcome', 'rateBR', 'outcome269st', 'outcomeTax']
+        'part2REPODate', 'salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
 
 @Field
 def endDate = null
