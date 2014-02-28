@@ -265,15 +265,33 @@ def calcTotalOne(def dataRows) {
 // Итого по налоговому периоду
 def calcTotalTwo(def totalOneSum) {
     def result = [:]
-    def prevTotal = null
-    def prevFormData = getFormDataPrev()
-    if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-        def prevRows = getDataRowHelperPrev().allCached
-        prevTotal = getDataRow(prevRows, 'itogoKvartal')
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def prevTotal = null
+        def prevFormData = getFormDataPrev()
+        if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
+            def prevRows = getDataRowHelperPrev().allCached
+            prevTotal = getDataRow(prevRows, 'itogoKvartal')
+        }
+        totalColumns.each {
+            result[it] = totalOneSum[it] ?: 0 + (prevTotal == null ? 0 : prevTotal[it])
+        }
+    } else if (formData.kind == FormDataKind.CONSOLIDATED) {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+            if (it.formTypeId == formData.getFormType().getId()) {
+                def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+                if (source != null && source.state == WorkflowState.ACCEPTED) {
+                    formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                        if (row.getAlias() == 'itogoKvartal') {
+                            totalColumns.each {
+                                result[it] = (totalOneSum[it] ?: 0) + (row[it] ?: 0)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-    totalColumns.each {
-        result[it] = totalOneSum[it] ?: 0 + (prevTotal == null ? 0 : prevTotal[it])
-    }
+
     return result
 }
 
