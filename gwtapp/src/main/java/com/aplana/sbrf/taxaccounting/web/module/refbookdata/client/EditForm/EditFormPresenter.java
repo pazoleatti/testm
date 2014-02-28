@@ -77,6 +77,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		action.setRefBookId(refbookId);
+        currentRefBookId = refbookId;
 		dispatchAsync.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<GetRefBookAttributesResult>() {
@@ -86,7 +87,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
-								currentRefBookId = refbookId;
                                 setIsFormModified(false);
 								setEnabled(false);
 							}
