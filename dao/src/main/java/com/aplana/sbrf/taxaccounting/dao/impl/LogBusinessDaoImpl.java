@@ -93,7 +93,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
             log.setNote(rs.getString("note"));
             log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
-            log.setDepartmentName(departmentDao.getParentsHierarchy(rs.getInt("user_department_id")));
+            int departmentId = rs.getInt("form_data_id") != 0?rs.getInt("fd_department_id") : rs.getInt("dd_department_id");
+            String s = departmentDao.getParentsHierarchy(departmentId);
+            log.setDepartmentName(s != null ? s : departmentDao.getDepartment(departmentId).getName());
             return log;
         }
     }
@@ -136,16 +138,16 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
-        StringBuilder sql = new StringBuilder("select * from (select fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
+        StringBuilder sql = new StringBuilder("select * from (select fd.department_id as fd_department_id, dd.department_id as dd_department_id, fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
                 "rownum as rn from log_business lb ");
         sql.append("left join form_data fd on lb.form_data_id=fd.\"ID\" ");
         sql.append("left join form_template ftemp on fd.form_template_id=ftemp.\"ID\" ");
         sql.append("left join form_type ft on ftemp.type_id=ft.\"ID\" ");
-        sql.append("left join department dep on lb.user_department_id=dep.\"ID\" ");
         sql.append("left join sec_user su on lb.user_id=su.\"ID\" ");
         sql.append("left join REPORT_PERIOD rp on fd.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
         sql.append("left join declaration_data dd on lb.declaration_data_id=dd.\"ID\" ");
+        sql.append("left join department dep on dd.department_id=dep.\"ID\" and fd.department_id=dep.\"ID\" ");
         sql.append("left join declaration_template dtemp on dd.declaration_template_id=dtemp.\"ID\" ");
         sql.append("left join declaration_type dt on dtemp.declaration_type_id=dt.\"ID\" ");
         sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
@@ -153,7 +155,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                 .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
                 (formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
                 .append("', '").append(dbDateFormat).append("')");
-        sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
+        sql.append(filter.getDepartmentId() == null?"":" and fd.department_id = :departmentId or dd.department_id = :departmentId ");
         if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
 
             List<Long> userList = filter.getUserIds();
