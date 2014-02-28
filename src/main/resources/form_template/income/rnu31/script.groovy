@@ -93,6 +93,9 @@ void logicCheck() {
     // 22. Обязательность заполнения полей графы 3..12
     checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
+    def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
+
     if (formData.periodOrder > 1) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
@@ -104,8 +107,6 @@ void logicCheck() {
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
         if (rowOld != null) {
-            // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
-            def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
             for (def column : editableColumns) {
                 if (row.getCell(column).value < rowOld.getCell(column).value) {
                     def securitiesType = row.securitiesType

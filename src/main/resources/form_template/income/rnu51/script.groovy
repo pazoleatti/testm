@@ -299,7 +299,6 @@ def BigDecimal calc18(def row) {
 //    println(" 15 = " + row.priceInFactRub)
 //    println(" 16 = " + row.marketPriceInPerc1)
 //    println(" 17 = " + row.marketPriceInRub1)
-
     if ((code == 1 || code == 2 || code == 5)
             && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
         return row.priceInFactRub
@@ -310,21 +309,6 @@ def BigDecimal calc18(def row) {
     if ((code == 2 || code == 5)
             && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
         return row.marketPriceInRub1
-    }
-    if (code == 1) {
-        return row.priceInFactRub
-    }
-    if (code == 4) {
-        return row.redemptionValue
-    }
-    if (code == 2 || code == 5) {
-        if (row.marketPriceInPerc1 > row.priceInFactPerc && row.marketPriceInRub1 > row.priceInFactRub) {
-            return row.marketPriceInRub1
-        }
-        if (row.marketPriceInPerc1 < row.priceInFactPerc && row.marketPriceInRub1 < row.priceInFactRub
-                || row.marketPriceInPerc1 == 0 && row.marketPriceInRub1 == 0) {
-            return row.priceInFactRub
-        }
     }
     // Для всех остальных случаев значение графы не изменяется
     return row.salePriceTax
@@ -443,6 +427,11 @@ void logicCheck() {
             needValue['profit'] = calc21(row)
             needValue['excessSalePriceTax'] = calc22(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+        }
+
+        // 13.
+        if(row.redemptionValue<0){
+            logger.error(errorMsg + "Стоимость погашения не может быть отрицательной")
         }
     }
 

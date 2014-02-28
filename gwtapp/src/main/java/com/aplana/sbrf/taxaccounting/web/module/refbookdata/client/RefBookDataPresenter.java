@@ -146,8 +146,13 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
             page = getView().getPage();
-            editFormPresenter.show(recordId);
-		}
+			editFormPresenter.show(recordId);
+            PlaceRequest currentPlaceRequest = placeManager.getCurrentPlaceRequest();
+            placeManager.updateHistory(new PlaceRequest.Builder().nameToken(currentPlaceRequest.getNameToken())
+                    .with(RefBookDataTokens.REFBOOK_DATA_ID, currentPlaceRequest.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null))
+                    .with(RefBookDataTokens.REFBOOK_RECORD_ID, recordId.toString())
+                    .build(), true);
+        }
 	}
 
 	@Override
@@ -166,6 +171,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         editFormPresenter.setRecordId(null);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+        if (page != null && request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+        } else {
+            recordId = null;
+            page = null;
+        }
 		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
@@ -218,11 +229,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 									getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows());
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
-                                    if (!result.getDataRows().isEmpty()) {
+                                    if ((recordId == null || page == null) && !result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                     }
-                                    // http://jira.aplana.com/browse/SBRFACCTAX-5759 элемент можно выбирать только после загрузки нужной страницы
-                                    if (page != null && range.getStart() == page * range.getLength()) {
+                                    // http://jira.aplana.com/browse/SBRFACCTAX-5759
+                                    if (recordId != null && page != null) {
                                         getView().setSelected(recordId);
                                     }
 								}
