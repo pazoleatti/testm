@@ -20,8 +20,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -41,13 +43,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
 
-    private static final String dbDateFormat = "YYYYMMDD";
-    private static final String dateFormat = "yyyyMMdd";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-
-    private static final int oneDayTime = 24 * 60 * 60 * 1000;
-
-	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
+    private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
 			LogBusiness log = new LogBusiness();
@@ -134,7 +130,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("departmentId", filter.getDepartmentId());
         names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
-        names.put("toDate", new Date(filter.getToSearchDate().getTime() + oneDayTime));
+        names.put("toDate", new Date(filter.getToSearchDate().getTime()));
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
@@ -150,11 +146,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append("left join department dep on dd.department_id=dep.\"ID\" and fd.department_id=dep.\"ID\" ");
         sql.append("left join declaration_template dtemp on dd.declaration_template_id=dtemp.\"ID\" ");
         sql.append("left join declaration_type dt on dtemp.declaration_type_id=dt.\"ID\" ");
-        sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
-                (formatter.format(filter.getFromSearchDate()))
-                .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-                (formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
-                .append("', '").append(dbDateFormat).append("')");
+        sql.append(" WHERE lb.log_date between :fromDate and :toDate + interval '1' day");
         sql.append(filter.getDepartmentId() == null?"":" and fd.department_id = :departmentId or dd.department_id = :departmentId ");
         if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
 
@@ -259,7 +251,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
     private int getCount(List<Long> formDataIds, List<Long> declarationDataIds,Map<String, Object> names) {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
-        sql.append(" log_date between :fromDate and :toDate");
+        sql.append(" log_date between :fromDate and :toDate + interval '1' day");
         sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
         if (names.get("userId") !=null&&!((List<Long>)names.get("userId")).isEmpty()){
             sql.append(" and user_id in (:userId)");
