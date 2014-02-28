@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -168,6 +169,30 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void removePeriod() {
+
+		CanRemovePeriodAction action = new CanRemovePeriodAction();
+		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
+					@Override
+					public void onSuccess(CanRemovePeriodResult result) {
+						if (result.isCanRemove()) {
+							removeReportPeriod();
+						} else {
+							Dialog.confirmMessage("При удалении периода будут удалены все данные по бухгалтерской отчётности, " +
+									"относящиеся к удаляемому периоду. Вы уверены, что хотите удалить период?",
+									new DialogHandler() {
+										@Override
+										public void yes() {
+											removeReportPeriod();
+										}
+									});
+						}
+					}
+				}, PeriodsPresenter.this));
+	}
+
+	private void removeReportPeriod() {
 		RemovePeriodAction requestData = new RemovePeriodAction();
 		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
 		requestData.setTaxType(taxType);

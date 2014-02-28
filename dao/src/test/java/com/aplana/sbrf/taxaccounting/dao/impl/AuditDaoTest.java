@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -121,6 +120,20 @@ public class AuditDaoTest {
         assertEquals(1, logSearchResultItem.getUserDepartment().getId());
         assertEquals(2, records.getTotalCount());
     }
+
+	@Test
+	public void getLogsNull() {
+		LogSystemFilter filter = new LogSystemFilter();
+//		filter.setCountOfRecords(10);
+//		filter.setStartIndex(0);
+//		filter.setFormTypeId(1);
+		filter.setFromSearchDate(null);
+		filter.setToSearchDate(null);
+		filter.setTaxType(TaxType.TRANSPORT);
+
+		PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
+		assertFalse(records.isEmpty());
+	}
 
     @Test
     public void testRemove(){

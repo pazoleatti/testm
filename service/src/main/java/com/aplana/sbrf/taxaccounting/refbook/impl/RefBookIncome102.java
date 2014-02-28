@@ -142,7 +142,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        dao.deleteRecords(uniqueRecordIds);
     }
 
     @Override

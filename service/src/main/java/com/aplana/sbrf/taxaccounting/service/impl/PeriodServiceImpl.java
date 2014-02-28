@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
@@ -31,6 +32,8 @@ import java.util.*;
 public class PeriodServiceImpl implements PeriodService{
 	
 	private static final Long PERIOD_CODE_REFBOOK = 8L;
+	private static final long REF_BOOK_101 = 50L;
+	private static final long REF_BOOK_102 = 52L;
 
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
@@ -58,6 +61,9 @@ public class PeriodServiceImpl implements PeriodService{
 
 	@Autowired
 	private DeclarationDataSearchService declarationDataSearchService;
+
+	@Autowired
+	private AuditService auditService;
 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
@@ -413,6 +419,13 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
+		LogSystemFilter logFilter = new LogSystemFilter();
+		logFilter.setReportPeriodIds(Arrays.asList(reportPeriodId));
+		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
+			logs.add(new LogEntry(LogLevel.ERROR,
+					"В удаляемом периоде были произведены действия, которые отражены в \"Журнале аудита\". Удаление периода невозможно!"));
+			return false;
+		}
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
 		for (Integer dep : departments) {
@@ -461,14 +474,32 @@ public class PeriodServiceImpl implements PeriodService{
 		boolean canRemoveReportPeriod = true;
 		for (Department dep : departmentService.listAll()) {
 			if (existForDepartment(dep.getId(), reportPeriodId)) {
-				System.out.println("Exist for " + dep.getId());
 				canRemoveReportPeriod = false;
 				break;
 			}
 		}
 
 		if (canRemoveReportPeriod) {
-			System.out.println("Remove for " + reportPeriodDao);
+			RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
+			Date endDate = getEndDate(reportPeriodId).getTime();
+			PagingResult<Map<String, RefBookValue>> result101 =  dataProvider.getRecords(endDate, null, null, null);
+			List<Long> ids101 = new ArrayList<Long>();
+			for (Map<String, RefBookValue> r : result101) {
+				ids101.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+			}
+			if (!ids101.isEmpty()) {
+				dataProvider.deleteRecordVersions(null, ids101);
+			}
+
+			dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
+			PagingResult<Map<String, RefBookValue>> result102 =  dataProvider.getRecords(endDate, null, null, null);
+			List<Long> ids102 = new ArrayList<Long>();
+			for (Map<String, RefBookValue> r : result102) {
+				ids102.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+			}
+			if (!ids102.isEmpty()) {
+				dataProvider.deleteRecordVersions(null, ids102);
+			}
 			reportPeriodDao.remove(reportPeriodId);
 		}
 
