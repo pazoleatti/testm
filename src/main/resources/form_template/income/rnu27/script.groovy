@@ -350,9 +350,9 @@ def logicCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
-        DataRow itogoPrev = data.getDataRow(dataPrevRows, 'itogo')
-        DataRow itogo = data.getDataRow(dataRows, 'itogo')
+    if (dataPrev != null && checkAlias(dataPrevRows, 'total') && checkAlias(dataRows, 'total')) {
+        def itogoPrev = data.getDataRow(dataPrevRows, 'total')
+        def itogo = data.getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             loggerError("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
