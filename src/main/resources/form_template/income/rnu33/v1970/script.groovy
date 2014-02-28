@@ -1,6 +1,8 @@
 package form_template.income.rnu33.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -42,36 +44,36 @@ import java.text.SimpleDateFormat
 // графа 27 - excessOfTheSellingPrice
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         // TODO убрать когда появится механизм назначения periodOrder при создании формы
         if (formData.periodOrder == null)
             return
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
@@ -166,7 +168,7 @@ void calc() {
 
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     dataRows.each { row ->
-        def record61 = (row.code != null? getRefBookValue(61, row.code) : null)
+        def record61 = (row.code != null ? getRefBookValue(61, row.code) : null)
         def code = record61?.CODE?.value
         // графа 1
         row.rowNumber = ++rowNumber
@@ -395,13 +397,32 @@ def getTotalRow(def currentMonthRow) {
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    // получить итоги за предыдущие месяцы текущего налогового периода
-    def prevTotal = getPrevTotalRow()
     // сложить текущие суммы и за предыдущие месяцы
-    totalSumColumns.each { alias ->
-        def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
-        def tmp2 = (prevTotal != null ? (prevTotal.getCell(alias).value ?: 0) : 0)
-        newRow.getCell(alias).setValue(tmp1 + tmp2, null)
+    if (formData.kind == FormDataKind.PRIMARY) {
+        // получить итоги за предыдущие месяцы текущего налогового периода
+        def prevTotal = getPrevTotalRow()
+        totalSumColumns.each { alias ->
+            def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
+            def tmp2 = (prevTotal != null ? (prevTotal.getCell(alias).value ?: 0) : 0)
+            newRow.getCell(alias).setValue(tmp1 + tmp2, null)
+        }
+    } else if (formData.kind == FormDataKind.CONSOLIDATED) {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+            if (it.formTypeId == formData.getFormType().getId()) {
+                def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+                if (source != null && source.state == WorkflowState.ACCEPTED) {
+                    formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                        if (row.getAlias() == 'total') {
+                            totalSumColumns.each { alias ->
+                                def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
+                                def tmp2 = (row.getCell(alias).value ?: 0)
+                                newRow.getCell(alias).setValue(tmp1 + tmp2, null)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     return newRow
 }
