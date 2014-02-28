@@ -350,9 +350,9 @@ def logicCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
-        DataRow itogoPrev = data.getDataRow(dataPrevRows, 'itogo')
-        DataRow itogo = data.getDataRow(dataRows, 'itogo')
+    if (dataPrev != null && checkAlias(dataPrevRows, 'total') && checkAlias(dataRows, 'total')) {
+        def itogoPrev = data.getDataRow(dataPrevRows, 'total')
+        def itogo = data.getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             loggerError("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
@@ -732,7 +732,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.reserveCalcValue - row.reserveCalcValuePrev, 2)
+            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
         } else {
             return (BigDecimal) 0
         }

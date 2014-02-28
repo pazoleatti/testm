@@ -18,10 +18,9 @@ import groovy.transform.Field
  * 2. date - Дата сделки
  * 3. part - Часть сделки Справочник
  * 4. dealingNumber - Номер сделки
- * -5. bondKind - Вид ценных бумаг //графу удалили
- * 5. costs - Затраты (руб.коп.)
+ * 5. bondKind - Вид ценных бумаг
+ * 6. costs - Затраты (руб.коп.)
  *
- * !!! bondKind выпилена из РНУ, а из файла для импорта/миграции нет
  */
 
 @Field
@@ -82,11 +81,11 @@ def isBalancePeriod
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'date', 'part', 'dealingNumber', 'costs']
+def allColumns = ['number', 'fix', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['date', 'part', 'dealingNumber', 'costs']
+def editableColumns = ['date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 @Field
 def sortColumns = ['date', 'dealingNumber']
@@ -95,7 +94,7 @@ def sortColumns = ['date', 'dealingNumber']
 def totalColumns = ['costs']
 
 @Field
-def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
+def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 // Автозаполняемые атрибуты
 @Field
@@ -324,7 +323,7 @@ def addData(def xml, def fileName) {
         indexCol++
 
         // графа 5
-        // !!! bondKind выпилена из РНУ, а из файла для импорта/миграции нет
+        newRow.bondKind = getCellValue(row, indexCol, type, true)
         indexCol++
 
         // графа 6
