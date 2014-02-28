@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -366,10 +367,32 @@ public class RefBookUtils extends AbstractDao {
                 if ((a.getId() == 411L) && !codeTSPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
                     errors.add("Значение атрибута " + a.getName() + " должно быть задано в формате ××××× или ***??, где × - цифра");
                 }
+
+                //Проверка для иерархичных справочников
+                if (record.getRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
+                    Long parentId = values.get(a.getAlias()).getReferenceValue();
+                    if (record.getRecordId().equals(parentId)) {
+                        errors.add("Элемент справочника не может быть родительским для самого себя");
+                    }
+                }
             }
         }
 
         return errors;
+    }
+
+    public List<Long> getParentsHierarchy(String tableName, Long uniqueRecordId) {
+        String sql = String.format("select ID from %s where level != 1 start with id = ? connect by prior parent_id = id order by level desc", tableName);
+        try {
+            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("ID");
+                }
+            }, uniqueRecordId);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        }
     }
 
 	public Map<String, RefBookValue> getRecordData(final Long refBookId, final String tableName, final Long recordId) {

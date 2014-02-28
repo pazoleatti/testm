@@ -146,7 +146,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
             page = getView().getPage();
-			editFormPresenter.show(recordId);
+            editFormPresenter.show(recordId);
 		}
 	}
 
