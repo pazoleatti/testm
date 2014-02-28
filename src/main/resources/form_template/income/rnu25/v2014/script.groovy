@@ -10,13 +10,8 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения"
- * formTemplateId=324
- *
- * TODO:
- *      - в перечне полей графа 9 - необязательная, в логических проверках входит в обязательные поля
- *              http://jira.aplana.com/browse/SBRFACCTAX-4871
- *      - уточнить у аналитика когда проверять наличие формы предыдущего периода (только перед вычислениями или перед проверками и импорте тоже)
- *
+ * formTemplateId=1324
+ * Версия 2014
  * @author rtimerbaev
  */
 
@@ -35,11 +30,6 @@ import java.math.RoundingMode
 // графа 12 - reserveCreation
 // графа 13 - reserveRecovery
 
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
 @Field
 def isConsolidated
 isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
@@ -49,20 +39,16 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        if (!prevPeriodCheck()){
-            return
-        }
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        if (!prevPeriodCheck()){
-            return
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
-        def columns = (isBalancePeriod ? allColumns - 'rowNumber' : editableColumns)
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
         formDataService.addRow(formData, currentDataRow, columns, null)
         break
     case FormDataEvent.DELETE_ROW :
@@ -76,9 +62,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        if (!prevPeriodCheck()){
-            return
-        }
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -140,6 +124,10 @@ def reportPeriodEndDate = null
 @Field
 def currentDate = new Date()
 
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -157,6 +145,14 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+// Признак периода ввода остатков.
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }
 
 void calc() {
@@ -185,7 +181,10 @@ void calc() {
             // графа 1
             row.rowNumber = ++rowNumber
         }
-        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
+        if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+            // графа 4
+            row.lotSizePrev = calc4(prevDataRows, row)
+
             // графа 6
             row.reserve = calc6(prevDataRows, row)
 
@@ -341,17 +340,17 @@ void logicCheck() {
         }
 
         // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-        if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', prevDataRows)) {
-            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 3» формы РНУ-25 за предыдущий отчётный период, то «графа 4»  = «графа 5» формы РНУ-25 за предыдущий отчётный период.")
+        if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', prevDataRows)) {
+            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 3» формы РНУ-25 за предыдущий отчётный период, то «графа 4» = «графа 5» формы РНУ-25 за предыдущий отчётный период.")
         }
 
         // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-        if (!isBalancePeriod && !isConsolidated && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', prevDataRows)) {
-            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 6» формы РНУ-25 за предыдущий отчётный период, то «графа 3»  = «графа 11» формы РНУ-25 за предыдущий отчётный период.")
+        if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', prevDataRows)) {
+            loggerError("РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 6» формы РНУ-25 за предыдущий отчётный период, то «графа 3» = «графа 11» формы РНУ-25 за предыдущий отчётный период.")
         }
 
         // 15. Обязательность заполнения поля графы 1..3, 5..13
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 16. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
@@ -359,7 +358,7 @@ void logicCheck() {
         }
 
         // 17. Арифметические проверки граф 6, 10..13
-        if (!isBalancePeriod) {
+        if (!isBalancePeriod()) {
             needValue['reserve'] = calc6(prevDataRows, row)
             needValue['costOnMarketQuotation'] = calc10(row)
             needValue['reserveCalcValue'] = calc11(row, sign)
@@ -455,7 +454,7 @@ void migration() {
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
     def newRow = formData.createDataRow()
-    def columns = (isBalancePeriod ? allColumns - 'rowNumber' : editableColumns)
+    def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
     columns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -490,7 +489,7 @@ def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName,
 
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
-    if (isBalancePeriod || isConsolidated) {
+    if (isBalancePeriod() || isConsolidated) {
         return null
     }
     def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
@@ -549,6 +548,45 @@ def getGroupRows(def dataRows, def regNumber) {
 }
 
 /**
+ * Вычисление значения графы 4.
+ *
+ * @param dataRowsOld строки за предыдущий период
+ * @param row строка текущего периода
+ */
+def calc4(def dataRowsOld, def row) {
+    if (dataRowsOld == null) {
+        return 0
+    }
+
+    // Строка с совпадающим значением графы 3
+    def prevMatchRow = null
+    for (def prevRow : dataRowsOld) {
+        if (prevRow.tradeNumber == row.tradeNumber) {
+            prevMatchRow = prevRow
+            break
+        }
+    }
+
+    if (prevMatchRow == null) {
+        return 0
+    } else {
+        if (prevMatchRow.signSecurity != null && row.signSecurity != null) {
+            def valPrev = getRefBookValue(62, prevMatchRow.signSecurity)
+            def val = getRefBookValue(62, row.signSecurity)
+            if (valPrev?.CODE?.stringValue == '+' && val?.CODE?.stringValue == '-') {
+                return prevMatchRow.lotSizePrev
+            }
+            if (valPrev?.CODE?.stringValue == '-' && val?.CODE?.stringValue == '+') {
+                return 0
+            }
+        }
+    }
+
+    // Иначе подставляется значение, введенное вручную
+    return row.lotSizePrev
+}
+
+/**
  * Получить значение за предыдущий отчетный период для графы 6.
  *
  * @param dataRowsOld строки за предыдущий период
@@ -560,7 +598,7 @@ def calc6(def dataRowsOld, def row) {
         return row.reserve
     }
     if (row.tradeNumber == null) {
-        return null
+        return 0
     }
     def value = 0
     def count = 0
@@ -581,14 +619,14 @@ def calc6(def dataRowsOld, def row) {
 
 def calc10(def row) {
     if (row.lotSizeCurrent == null) {
-        return null
+        return 0
     }
     return roundTo2(row.marketQuotation ? row.lotSizeCurrent * row.marketQuotation : 0)
 }
 
 def calc11(def row, def sign) {
     if (sign == null) {
-        return null
+        return 0
     }
     def tmp
     if (sign == '+') {
@@ -596,7 +634,7 @@ def calc11(def row, def sign) {
             return null
         }
         def a = (row.cost ?: 0)
-        tmp = (a - row.costOnMarketQuotation > 0 ? a - row.costOnMarketQuotation : 0)
+        tmp = (a > row.costOnMarketQuotation ? a - row.costOnMarketQuotation : 0)
     } else {
         tmp = 0
     }
@@ -605,7 +643,7 @@ def calc11(def row, def sign) {
 
 def calc12(def row) {
     if (row.reserve == null || row.reserveCalcValue == null) {
-        return null
+        return 0
     }
     def tmp = row.reserveCalcValue - row.reserve
     return roundTo2(tmp > 0 ? tmp : 0)
@@ -613,7 +651,7 @@ def calc12(def row) {
 
 def calc13(def row) {
     if (row.reserve == null || row.reserveCalcValue == null) {
-        return null
+        return 0
     }
     def tmp = (row.reserveCalcValue ?: 0) - (row.reserve ?: 0)
     return roundTo2(tmp < 0 ? -tmp : 0)
@@ -797,16 +835,14 @@ def getXML() {
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
-boolean prevPeriodCheck() {
-    if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-        return false
+void prevPeriodCheck() {
+    if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        throw new ServiceException('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
     }
-    return true
 }
 
 def loggerError(def msg) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod()) {
         logger.warn(msg)
     } else {
         logger.error(msg)
