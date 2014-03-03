@@ -355,9 +355,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "with t as (select\n" +
                     "  max(version) version, record_id\n" +
                     "from\n" +
-                    "  ref_book_record\n" +
+                    "  ref_book_record r\n" +
                     "where\n" +
-                    "  ref_book_id = ? and status = 0 and version <= ?\n" +
+                    "  r.ref_book_id = ? and r.status = 0 and r.version <= ? and\n" +
+                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by\n" +
                     "  record_id)\n";
 
@@ -404,6 +405,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(WITH_STATEMENT);
 			ps.addParam(refBookId);
 			ps.addParam(version);
+            ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
