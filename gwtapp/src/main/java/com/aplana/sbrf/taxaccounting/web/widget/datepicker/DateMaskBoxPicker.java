@@ -135,9 +135,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 		datePicker.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Date> event) {
-                System.out.println("datePicker prevValue        " + (prevValue!= null ? prevValue.getTime() : null));
-                System.out.println("datePicker event.getValue() " +  event.getValue().getTime());
-                if(itWasChange(prevValue, event.getValue())){
+                if(datePicker.isDateEnabled(event.getValue()) && itWasChange(prevValue, event.getValue())){
                     prevValue = event.getValue();
                     DateMaskBoxPicker.this.setValue(event.getValue(), true);
                 }
@@ -151,8 +149,6 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
                 if(itWasChange(prevValue, event.getValue())){
-                    System.out.println("dateBox prevValue         " + (prevValue!= null ? prevValue.getTime() : null));
-                    System.out.println("dateBox event.getValue() " +  event.getValue().getTime());
                     prevValue = event.getValue();
                     DateMaskBoxPicker.this.setValue(dateBox.getValue(), true);
                 }
@@ -162,7 +158,6 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
             @Override
             public void onKeyPress(KeyPressEvent event) {
                 if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER) {
-                    System.out.println("ff");
                     dateBox.trySetValue();
                 }
             }
