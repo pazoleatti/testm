@@ -169,7 +169,10 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void removePeriod() {
-
+		if (taxType != TaxType.INCOME) {
+			removeReportPeriod();
+			return;
+		}
 		CanRemovePeriodAction action = new CanRemovePeriodAction();
 		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
 		dispatcher.execute(action, CallbackUtils
