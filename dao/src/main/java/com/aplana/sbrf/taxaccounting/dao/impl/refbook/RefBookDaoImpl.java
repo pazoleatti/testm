@@ -595,7 +595,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         // выборка иерархического исправочника
-        ps.appendQuery(" CONNECT BY PRIOR r.id = aPARENT_ID.REFERENCE_value ");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR r.id = aPARENT_ID.REFERENCE_value ");
         ps.appendQuery("START WITH aPARENT_ID.REFERENCE_value ");
         if (parentId == null){
             ps.appendQuery(" is null ");
