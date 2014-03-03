@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+
 import java.io.InputStream;
 
 /**
@@ -18,5 +20,5 @@ public interface BookerStatementsService {
      * @param typeID       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
      * @param departmentId Подразделение    @throws IOException, ServiceException
      */
-    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, Integer departmentId);
+    void importXML(String realFileName, InputStream stream, Integer periodID, int typeID, Integer departmentId, TAUserInfo userInfo);
 }
