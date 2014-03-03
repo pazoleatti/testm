@@ -30,11 +30,6 @@ import java.math.RoundingMode
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-
-        // TODO убрать когда появится механизм назначения periodOrder при создании формы
-        if (formData.periodOrder == null)
-            return
-
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
