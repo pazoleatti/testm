@@ -65,7 +65,6 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 
 	@Override
 	public void onSave(FormDataPerformer performer, List<FormDataSigner> signers) {
-        System.out.println("performer: "+performer);
         formData.setPerformer(performer);
 		formData.setSigners(signers);
 		getView().hide();

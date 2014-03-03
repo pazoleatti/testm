@@ -182,9 +182,9 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 			List<ReportPeriod> result = getJdbcTemplate().query(
 					"select rp.id, rp.name, rp.tax_period_id, rp.ord, rp.start_date, rp.end_date, rp.dict_tax_period_id, " +
 							"rp.calendar_start_date from report_period rp join tax_period tp on rp.tax_period_id = tp.id " +
-							"where tp.tax_type = ? and rp.end_date>=? and rp.calendar_start_date<=? order by rp.ord",
-					new Object[]{taxType.getCode(), date, date},
-					new int[] { Types.VARCHAR, Types.DATE, Types.DATE },
+							"where tp.tax_type = ? and rp.end_date=?",
+					new Object[]{taxType.getCode(), date},
+					new int[] { Types.VARCHAR, Types.DATE },
 					new ReportPeriodMapper()
 			);
 			if (result.isEmpty()) {

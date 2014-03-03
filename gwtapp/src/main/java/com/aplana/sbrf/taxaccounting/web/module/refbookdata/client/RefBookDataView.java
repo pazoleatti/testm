@@ -156,9 +156,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			}
 			i++;
 		}
-        if (i == refbookDataTable.getVisibleItems().size()) {
-            setPage(0);
-        }
 	}
 
 	@Override

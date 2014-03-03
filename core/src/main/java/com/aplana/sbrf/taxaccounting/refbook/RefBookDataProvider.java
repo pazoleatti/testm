@@ -75,6 +75,14 @@ public interface RefBookDataProvider {
 	PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version,
 		PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
+    /**
+     * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
+     * Список упорядочен и начинается с главного корневого элемента
+     * @param uniqueRecordId идентификатор записи справочника
+     * @return иерархия родительских элементов
+     */
+    List<Long> getParentsHierarchy(Long uniqueRecordId);
+
 	/**
 	 * По коду возвращает строку справочника
 	 * @param recordId код строки справочника

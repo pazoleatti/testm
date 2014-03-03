@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
@@ -39,4 +40,13 @@ public interface DeclarationTypeDao {
     void delete(int typeId);
 
     List<Integer> getByFilter(TemplateFilter filter);
+
+	/**
+	 * Получить список видов деклараций
+	 * @param departmentId подразделение
+	 * @param reportPeriod отчетный период
+	 * @param taxType тип налога
+	 * @return список видов деклараций
+	 */
+	List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType);
 }

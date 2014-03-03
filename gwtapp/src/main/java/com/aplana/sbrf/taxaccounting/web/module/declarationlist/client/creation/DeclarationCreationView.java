@@ -127,6 +127,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiHandler("departmentPicker")
     public void onDepartmentPickerChange(ValueChangeEvent<List<Integer>> event) {
         declarationTypeBox.setValue(null, true);
+	    getUiHandlers().onDepartmentChange();
         updateEnabled();
     }
 

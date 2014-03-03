@@ -308,7 +308,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
-
         final RefBook refBook = get(refBookId);
 		final Map<String, RefBookValue> result = refBook.createRecord();
 		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
@@ -1002,6 +1001,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }, refBookId);
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        String sql = "select record_id from ref_book_value where level != 1 and attribute_id in (select id from ref_book_attribute where alias = 'PARENT_ID') " +
+                "start with record_id = ? connect by prior reference_value = record_id order by level desc";
+        try {
+            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("record_id");
+                }
+            }, uniqueRecordId);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
         }
     }
 

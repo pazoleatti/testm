@@ -118,7 +118,7 @@ def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = allColumns - ['number']
+def editableColumns = allColumns - ['number', 'fix', 'marketQuotationInRub']
 
 // Автозаполняемые атрибуты
 @Field
@@ -359,9 +359,9 @@ def logicCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
-        DataRow itogoPrev = data.getDataRow(dataPrevRows, 'itogo')
-        DataRow itogo = data.getDataRow(dataRows, 'itogo')
+    if (dataPrev != null && checkAlias(dataPrevRows, 'total') && checkAlias(dataRows, 'total')) {
+        def itogoPrev = data.getDataRow(dataPrevRows, 'total')
+        def itogo = data.getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             loggerError("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
@@ -483,7 +483,7 @@ void addAllStatic(def dataRows) {
  */
 def calcItogIssuer(int i) {
     def newRow = formData.createDataRow()
-    newRow.getCell('issuer').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoIssuer#'.concat(i ? i.toString() : ""))
 
     String tIssuer = 'Эмитент'
@@ -494,7 +494,7 @@ def calcItogIssuer(int i) {
         }
     }
 
-    newRow.issuer = tIssuer?.concat(' Итог')
+    newRow.fix = tIssuer?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -527,7 +527,7 @@ def calcItogIssuer(int i) {
 def calcItogRegNumber(int i) {
     // создаем итоговую строку ГРН
     def newRow = formData.createDataRow()
-    newRow.getCell('regNumber').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoRegNumber#'.concat(i ? i.toString() : ""))
 
     String tRegNumber = 'ГРН'
@@ -538,7 +538,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.regNumber = tRegNumber?.concat(' Итог')
+    newRow.fix = tRegNumber?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -749,7 +749,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.reserveCalcValue - row.reserveCalcValuePrev, 2)
+            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
         } else {
             return (BigDecimal) 0
         }
@@ -1076,7 +1076,8 @@ def hasError() {
 def getCalcTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
-    newRow.issuer = "Общий итог"
+    newRow.getCell("fix").colSpan = 2
+    newRow.fix = "Общий итог"
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }

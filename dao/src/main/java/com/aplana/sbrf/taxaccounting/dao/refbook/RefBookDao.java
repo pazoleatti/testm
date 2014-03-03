@@ -318,6 +318,14 @@ public interface RefBookDao {
     List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
+     * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
+     * Список упорядочен и начинается с главного корневого элемента
+     * @param uniqueRecordId идентификатор записи справочника
+     * @return иерархия родительских элементов
+     */
+    List<Long> getParentsHierarchy(Long uniqueRecordId);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей

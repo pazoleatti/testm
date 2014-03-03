@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,6 +52,15 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return refBookUtils.getChildrenRecords(getRefBookId(), getTableName(), parentRecordId, pagingParams, filter, sortAttribute, true);
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        if (tableName.equals(DEPARTMENT_TABLE_NAME)) {
+            return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
