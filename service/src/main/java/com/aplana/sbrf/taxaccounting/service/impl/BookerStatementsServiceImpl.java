@@ -188,6 +188,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             if (row.getRowNum() == 9) {
                 while (cells.hasNext()) {
                     Cell cell = cells.next();
+	                if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
+			         && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
+		                throw new ServiceException(BAD_FILE_MSG);
+	                }
                     int colNum = cell.getColumnIndex();
                     String colName = cell.getStringCellValue().trim();
                     if ((colNum == 1 && !colName.equals(ATTRIBUTE_ACCOUNT_NO))
