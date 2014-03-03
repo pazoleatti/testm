@@ -152,7 +152,7 @@ public class RefBookUtils extends AbstractDao {
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
 
-        ps.appendQuery(" CONNECT BY PRIOR id = PARENT_ID ");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR id = PARENT_ID ");
         ps.appendQuery(" START WITH ");
         ps.appendQuery(parentId == null ? " PARENT_ID is null ":" PARENT_ID = "+parentId);
 
