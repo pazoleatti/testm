@@ -148,17 +148,17 @@ public class DeclarationTemplateDaoTest {
 
 	@Test
 	public void getActiveDeclarationTemplateIdTest() {
-		assertEquals(2, declarationTemplateDao.getActiveDeclarationTemplateId(1));
+        assertEquals(1, declarationTemplateDao.getActiveDeclarationTemplateId(1, 1));
 	}
 
 	@Test(expected = DaoException.class)
 	public void getActiveDeclarationTemplateIdMoreThanOneTest() {
-		declarationTemplateDao.getActiveDeclarationTemplateId(2);
+        declarationTemplateDao.getActiveDeclarationTemplateId(3, 3);
 	}
 
 	@Test(expected = DaoException.class)
 	public void getActiveDeclarationTemplateIdEmptyTest() {
-		declarationTemplateDao.getActiveDeclarationTemplateId(3);
+        declarationTemplateDao.getActiveDeclarationTemplateId(3, 1);
 	}
 
     @Test

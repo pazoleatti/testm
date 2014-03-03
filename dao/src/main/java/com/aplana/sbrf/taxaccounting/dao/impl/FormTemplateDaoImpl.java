@@ -169,8 +169,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     private static String ACTIVE_VERSION_SQL =
             "with templatesByVersion as (Select ID, TYPE_ID, STATUS, VERSION, row_number() over(partition by TYPE_ID order by version) rn from FORM_TEMPLATE where TYPE_ID=?)" +
                     "select ID from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
-                    "left outer join templatesByVersion rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and (versionFrom <= ? and versionTo >= ?)" +
-                    " or (versionFrom <= ? and versionTo is null)";
+                    "left outer join templatesByVersion rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and ((versionFrom <= ? and versionTo >= ?)" +
+                    " or (versionFrom <= ? and versionTo is null))";
 
 	@Override
 	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
@@ -182,7 +182,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     new Object[]{formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
                     new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE});
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Для данного вида налоговой формы %d не найдено активного шаблона налоговой формы.",formTypeId);
+			throw new DaoException("Для данного вида налоговой формы %d - %s не найдено активного шаблона налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
 		}catch(IncorrectResultSizeDataAccessException e){
 			throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
