@@ -169,6 +169,17 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void removePeriod() {
+		Dialog.confirmMessage("Удаление периода", "Вы уверены, что хотите удалить период?",
+				new DialogHandler() {
+					@Override
+					public void yes() {
+						checkAndRemovePeriod();
+					}
+				}
+				);
+	}
+
+	private void checkAndRemovePeriod() {
 		if (taxType != TaxType.INCOME) {
 			removeReportPeriod();
 			return;
