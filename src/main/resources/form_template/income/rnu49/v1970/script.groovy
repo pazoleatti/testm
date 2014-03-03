@@ -55,7 +55,7 @@ switch (formDataEvent) {
         addNewRow()
         break
     case FormDataEvent.DELETE_ROW :
-        if (currentDataRow?.getAlias() == null) {
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
         break
@@ -118,11 +118,6 @@ def reportPeriodEndDate = null
 // Отчетный период
 @Field
 def currentReportPeriod = null
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -188,8 +183,8 @@ void calc(def dataRows) {
             price = getGraph8(row, row46, row45)
             amort = getGraph9(row, row46, row45)
             sumIncProfit = getGraph15(row)
-            loss = getGraph16(row)
-            profit = getGraph17(row)
+            profit = getGraph16(row)
+            loss = getGraph17(row)
             usefullLifeEnd = getGraph18(row, row46)
             monthsLoss = getGraph19(row)
             expensesSum = getGraph20(row)
@@ -281,21 +276,24 @@ void logicCheck() {
             logger.error(errorMsg + 'Неправильно указан номер предыдущей записи!')
         }
 
-        // 6. Проверка существования необходимых экземпляров форм (РНУ-46)
-        if (dataRows46 == null || dataRows46.size()==0) {
+        def row45 = getRow45(row, dataRows45)
+        def row46 = getRow46(row, dataRows46)
+
+        // 5,6. Проверка существования необходимых данных (РНУ-45, РНУ-46)
+        if (row45 == null) {
+            logger.error('Отсутствуют данные РНУ-45!!')
+        }
+        if (row46 == null) {
             logger.error('Отсутствуют данные РНУ-46!!')
         }
-
-        def row46 = getRow46(row, dataRows46)
-        def row45 = getRow45(row, dataRows45)
 
         def values = [:]
         values.with {
             price = getGraph8(row, row46, row45)
             amort = getGraph9(row, row46, row45)
             sumIncProfit = getGraph15(row)
-            loss = getGraph16(row)
-            profit = getGraph17(row)
+            profit = getGraph16(row)
+            loss = getGraph17(row)
             usefullLifeEnd = getGraph18(row, row46)
             monthsLoss = getGraph19(row)
             expensesSum = getGraph20(row)
@@ -345,10 +343,6 @@ void logicCheck() {
         if (isSection(dataRows, 'E', row) && (saledPropertyCode != 7 || saleCode != 1)) {
             logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(82, row, 'saledPropertyCode')
-        checkNSI(83, row, 'saleCode')
     }
     // 9. Проверка итоговых значений формы
     for (def section : groups) {
@@ -552,7 +546,7 @@ def DataRow getRow45(DataRow row49, def dataRows45) {
 
 def getStartDate() {
     if (reportPeriodStartDate == null) {
-        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
+        reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
     }
     return reportPeriodStartDate
 }

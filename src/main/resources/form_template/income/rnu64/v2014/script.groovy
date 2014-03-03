@@ -3,7 +3,6 @@ package form_template.income.rnu64.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -137,7 +136,7 @@ void calc() {
 
     if (formData.kind == FormDataKind.PRIMARY) {
         // строка Итого за текущий отчетный (налоговый) период
-        def total =  getDataRow(dataRows, 'total')
+        def total = getDataRow(dataRows, 'total')
         def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
@@ -203,9 +202,11 @@ void logicCheck() {
             loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
         }
         // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
-        def dataRowsPrev = getDataRowsPrev()
-        if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
-            loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+        if (!isConsolidated) {
+            def dataRowsPrev = getDataRowsPrev()
+            if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
+                loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
+            }
         }
     }
 }
@@ -442,7 +443,7 @@ void consolidation() {
                 formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null) {
                         rows.add(row)
-                    } else if (row.getAlias() == 'total' && row.costs!=null) {
+                    } else if (row.getAlias() == 'total' && row.costs != null) {
                         sum += row.costs
                     }
                 }
