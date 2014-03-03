@@ -338,7 +338,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         }
         ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
 
-        ps.appendQuery(" CONNECT BY PRIOR r.id = PARENT_ID");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR r.id = PARENT_ID");
         ps.appendQuery(" START WITH ");
         ps.appendQuery(uniqueRecordId == null ? " PARENT_ID is null" : "PARENT_ID = "+uniqueRecordId);
 
