@@ -456,7 +456,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         ps.appendQuery(fromSql.toString());
-        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery(" where\n  r.ref_book_id = ");
         ps.appendQuery("?");
         ps.addParam(refBookId);
         ps.appendQuery(" and\n  status <> -1\n");
