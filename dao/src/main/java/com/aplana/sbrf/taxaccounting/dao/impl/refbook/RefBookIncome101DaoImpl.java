@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
@@ -200,4 +201,9 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
                 }
         );
     }
+
+	@Override
+	public void deleteRecords(List<Long> uniqueRecordIds) {
+		getJdbcTemplate().update("delete from income_101 where id in " + SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+	}
 }

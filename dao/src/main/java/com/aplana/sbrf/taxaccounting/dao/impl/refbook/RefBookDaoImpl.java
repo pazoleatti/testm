@@ -308,7 +308,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Map<String, RefBookValue> getRecordData(@NotNull Long refBookId, @NotNull Long recordId) {
-
         final RefBook refBook = get(refBookId);
 		final Map<String, RefBookValue> result = refBook.createRecord();
 		getJdbcTemplate().query(SELECT_SINGLE_ROW_VALUES_QUERY, new Object[]{recordId, refBookId}, new int[]{Types.NUMERIC, Types.NUMERIC}, new RowCallbackHandler() {
@@ -356,9 +355,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "with t as (select\n" +
                     "  max(version) version, record_id\n" +
                     "from\n" +
-                    "  ref_book_record\n" +
+                    "  ref_book_record r\n" +
                     "where\n" +
-                    "  ref_book_id = ? and status = 0 and version <= ?\n" +
+                    "  r.ref_book_id = ? and r.status = 0 and r.version <= ? and\n" +
+                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by\n" +
                     "  record_id)\n";
 
@@ -405,6 +405,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(WITH_STATEMENT);
 			ps.addParam(refBookId);
 			ps.addParam(version);
+            ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
@@ -1002,6 +1003,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }, refBookId);
         } catch (EmptyResultDataAccessException e) {
             return null;
+        }
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        String sql = "select record_id from ref_book_value where level != 1 and attribute_id in (select id from ref_book_attribute where alias = 'PARENT_ID') " +
+                "start with record_id = ? connect by prior reference_value = record_id order by level desc";
+        try {
+            return getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("record_id");
+                }
+            }, uniqueRecordId);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
         }
     }
 

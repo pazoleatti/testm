@@ -66,4 +66,10 @@ public interface RefBookIncome101Dao {
      * @param records
      */
     void updateRecords(List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Удалить записи
+	 * @param uniqueRecordIds идентификаторы записей
+	 */
+	void deleteRecords(List<Long> uniqueRecordIds);
 }

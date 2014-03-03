@@ -82,10 +82,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             records = getJdbcTemplate().query(
                     sql.toString(),
                     new Object[] {
+		                    filter.getFromSearchDate(),
+		                    filter.getFromSearchDate(),
+		                    filter.getToSearchDate(),
                             filter.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
                             filter.getStartIndex() + filter.getCountOfRecords()
                     },
                     new int[] {
+		                    Types.DATE,
+		                    Types.DATE,
+		                    Types.DATE,
                             Types.NUMERIC,
                             Types.NUMERIC
                     },
@@ -94,6 +100,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }else{
             sql.append(" order by ordDat.rn");
             records = getJdbcTemplate().query(sql.toString(),
+		            new Object[] {
+			            filter.getFromSearchDate(),
+			            filter.getFromSearchDate(),
+			            filter.getToSearchDate()},
+		            new int[] {
+				            Types.DATE,
+				            Types.DATE,
+				            Types.DATE,
+		            },
                     new AuditRowMapper());
         }
 
@@ -164,11 +179,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
-		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
-				(formatter.format(filter.getFromSearchDate()))
-				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-				(formatter.format(new Date(filter.getToSearchDate().getTime() + oneDayTime)))
-				.append("', '").append(dbDateFormat).append("')");
+		sql.append(" WHERE (? is null or (log_date BETWEEN ? AND (? + interval '1' day)))");
 
 		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
             List<Long> userList = filter.getUserIds();
@@ -252,6 +263,18 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
 		appendSelectWhereClause(sql, filter, "");
-		return getJdbcTemplate().queryForInt(sql.toString());
+		return getJdbcTemplate().queryForInt(
+				sql.toString(),
+				new Object[] {
+					filter.getFromSearchDate(),
+					filter.getFromSearchDate(),
+					filter.getToSearchDate()
+				},
+				new int[] {
+						Types.DATE,
+						Types.DATE,
+						Types.DATE,
+				}
+		);
 	}
 }

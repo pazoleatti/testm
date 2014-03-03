@@ -84,6 +84,11 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     }
 
     @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        return refBookUtils.getParentsHierarchy(OKTMO_TABLE_NAME, uniqueRecordId);
+    }
+
+    @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
         return dao.getRecordData(getTableName(), refBookId, recordId);
     }

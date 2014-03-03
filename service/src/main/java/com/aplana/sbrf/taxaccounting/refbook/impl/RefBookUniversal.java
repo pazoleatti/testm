@@ -71,7 +71,12 @@ public class RefBookUniversal implements RefBookDataProvider {
 		return refBookDao.getChildrenRecords(refBookId, parentRecordId, version, pagingParams, filter, sortAttribute);
 	}
 
-	@Override
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        return refBookDao.getParentsHierarchy(uniqueRecordId);
+    }
+
+    @Override
 	public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams,
 			String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
 		return refBookDao.getRecords(refBookId, version, pagingParams, filter, sortAttribute, isSortAscending);
@@ -312,6 +317,19 @@ public class RefBookUniversal implements RefBookDataProvider {
             List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
             if (errors.size() > 0){
                 throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
+            }
+
+            RefBookRecord refBookRecord = new RefBookRecord();
+            refBookRecord.setRecordId(uniqueRecordId);
+            refBookRecord.setValues(records);
+
+            //Проверка корректности значений атрибутов
+            errors = refBookUtils.checkRefBookAtributeValues(attributes, Arrays.asList(refBookRecord));
+            if (errors.size() > 0){
+                for (String error : errors) {
+                    logger.error(error);
+                }
+                throw new ServiceException("Обнаружено некорректное значение атрибута");
             }
 
             RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.refbook.impl.AbstractReadOnlyRefBook;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,5 +80,10 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
         }
 
         throw new IllegalArgumentException("There does not exist a record with ID = "+recordId);
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        throw new UnsupportedOperationException();
     }
 }

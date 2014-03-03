@@ -191,7 +191,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                         result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
                                         RefBookDataTokens.refBookData :
                                         RefBookDataTokens.refBookHierData
-                                ) + ";id=" + refBookId;
+                                ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
                                 getView().setBackAction(href);
                                 editFormPresenter.setRecordId(result.getRecordId());
 							}
