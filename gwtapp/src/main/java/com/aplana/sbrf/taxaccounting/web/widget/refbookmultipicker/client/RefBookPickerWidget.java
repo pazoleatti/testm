@@ -96,10 +96,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onValueChange(final ValueChangeEvent<Date> dateValueChangeEvent) {
-                Date d = dateValueChangeEvent.getValue();
-                if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
-                    versionDateBox.setValue(startDate, false);
+            public void onValueChange(final ValueChangeEvent<Date> event) {
+                Date d = event.getValue();
+                if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
+                    versionDateBox.setValue(startDate != null ? startDate : endDate, false);
                 }
                 state.setVersionDate(versionDateBox.getValue());
                 refBookView.reloadOnDate(versionDateBox.getValue());
@@ -109,8 +109,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
                 Date d = new Date(dateShowRangeEvent.getStart().getTime());
-                while (d.before(dateShowRangeEvent.getEnd())) {
-                    if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
+                while (d.before(dateShowRangeEvent.getEnd()) || d.equals(dateShowRangeEvent.getEnd())) {
+                    if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
                         versionDateBox.getDatePicker().setTransientEnabledOnDates(false, d);
                     }
                     CalendarUtil.addDaysToDate(d, 1);
