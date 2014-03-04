@@ -38,7 +38,6 @@ import java.text.SimpleDateFormat
  * графа 21 - taxSumToPay
  *
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -426,7 +425,7 @@ void logicCheck() {
          * Проверка льготы
          * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
-        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.numberValue in [20210, 20220, 20230]) {
+        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
             def region = getRegionByOKTMO(row.okato, errorMsg)
             query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
             if (getRecord(7, query, reportDate) == null) {

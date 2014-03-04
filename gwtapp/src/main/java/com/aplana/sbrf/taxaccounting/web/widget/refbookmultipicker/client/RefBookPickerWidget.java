@@ -180,6 +180,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.getSetIds().clear();
         }
         clearSearchPattern();
+        updateUIState();
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
@@ -331,9 +332,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void updateUIState() {
         String defValue = "";
-        if (state.getSetIds() != null) {
+        String countValue = "Выбрано: 0";
+        if (state.getSetIds() != null && !state.getSetIds().isEmpty()) {
             defValue = refBookView.getDereferenceValue();
+            countValue = "Выбрано: " + state.getSetIds().size();
         }
+        selectionCountLabel.setText(countValue);
         textBox.setText(defValue);
         textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
         updateLabelValue();

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.server;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportAction;
 import com.aplana.sbrf.taxaccounting.web.module.bookerstatements.shared.ImportResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -23,6 +24,8 @@ public class ImportHandler extends AbstractActionHandler<ImportAction, ImportRes
     BookerStatementsService service;
     @Autowired
     BlobDataService blobDataService;
+    @Autowired
+    SecurityService securityService;
 
     public ImportHandler() {
         super(ImportAction.class);
@@ -32,7 +35,7 @@ public class ImportHandler extends AbstractActionHandler<ImportAction, ImportRes
     public ImportResult execute(ImportAction importAction, ExecutionContext executionContext) throws ActionException {
         BlobData blobData = blobDataService.get(importAction.getUuid());
         ImportResult importResult = new ImportResult();
-        service.importXML(blobData.getName(), blobData.getInputStream(), importAction.getReportPeriodId(), importAction.getTypeId(), importAction.getDepartmentId());
+        service.importXML(blobData.getName(), blobData.getInputStream(), importAction.getReportPeriodId(), importAction.getTypeId(), importAction.getDepartmentId(), securityService.currentUserInfo());
         return importResult;
     }
 

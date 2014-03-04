@@ -169,7 +169,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         dataProvider.updateRowCount(size, true);
     }
 
-    @Override
     public void trySelectValues(Set<Long> value) {
         clearSelected(false);
         if (!value.isEmpty()) {

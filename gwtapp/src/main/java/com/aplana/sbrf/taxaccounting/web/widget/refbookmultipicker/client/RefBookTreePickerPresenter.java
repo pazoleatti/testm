@@ -34,6 +34,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         void clearSelected(boolean fireChangeEvent);
 
         void setSelection(List<RefBookTreeItem> values);
+
+        /*
+         * Инициирет открытие итемов по порядку чьи идентификаторы в листе
+         */
+        void openListItems(List<Long> ids);
     }
 
     public RefBookTreePickerPresenter(MyView view) {
@@ -106,6 +111,21 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
+    public void openFor(final Long uniqueRecordId) {
+        GetHierarchyPathAction action = new GetHierarchyPathAction();
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setUniqueRecordId(uniqueRecordId);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<GetHierarchyPathResult>() {
+                    @Override
+                    public void onSuccess(GetHierarchyPathResult result) {
+                        result.getIds().add(uniqueRecordId);
+                        getView().openListItems(result.getIds());
+                    }
+                }, this));
+    }
+
+    @Override
     public void reloadForDate(Date relevanceDate) {
         init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
     }
@@ -124,7 +144,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
         RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem();
-        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallbackNoLock(
+        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {

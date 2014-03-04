@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +17,11 @@ public class RefBookItem implements Serializable {
     private List<RefBookRecordDereferenceValue> refBookRecordDereferenceValues;
 
     public RefBookItem() {
+    }
+
+    public RefBookItem(Long id, String dereferenceValue) {
+        this.id = id;
+        this.dereferenceValue = dereferenceValue;
     }
 
     public RefBookItem(Long id, String dereferenceValue, List<RefBookRecordDereferenceValue> refBookRecordDereferenceValues) {
@@ -46,6 +52,16 @@ public class RefBookItem implements Serializable {
 
     public void setRefBookRecordDereferenceValues(List<RefBookRecordDereferenceValue> refBookRecordDereferenceValues) {
         this.refBookRecordDereferenceValues = refBookRecordDereferenceValues;
+    }
+
+    public void addRecordValues(String dereferenceValue, String valueAttrAlias, Long valueAttrId) {
+        if (dereferenceValue == null) {
+            dereferenceValue = "";
+        }
+        if (refBookRecordDereferenceValues == null) {
+            refBookRecordDereferenceValues = new ArrayList<RefBookRecordDereferenceValue>();
+        }
+        refBookRecordDereferenceValues.add(new RefBookRecordDereferenceValue(valueAttrId, valueAttrAlias, dereferenceValue));
     }
 
     @Override

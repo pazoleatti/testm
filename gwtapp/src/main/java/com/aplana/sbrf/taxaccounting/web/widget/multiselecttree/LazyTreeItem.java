@@ -1,19 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
-import com.google.inject.internal.cglib.proxy.$Dispatcher;
 
 /**
  * Элемент дерева множественного выбора.
@@ -32,7 +21,7 @@ public class LazyTreeItem extends TreeItem {
 
     protected static final String RADIO_BUTTON_GROUP = "LTI_GROUP";
 
-    private boolean isChildLoaded = false;
+    protected Boolean isChildLoaded;
 
     /**
      * Элемент дерева множественного выбора. По-умолчанию создается узел с чекбоксом.
@@ -44,6 +33,7 @@ public class LazyTreeItem extends TreeItem {
     public LazyTreeItem(Long itemId, String name, Boolean multiSelection) {
         this.itemId = itemId;
         this.multiSelection = multiSelection;
+        this.isChildLoaded = false;
 
         label = new Label(name);
 
@@ -125,24 +115,17 @@ public class LazyTreeItem extends TreeItem {
     }
 
     public void addItem(LazyTreeItem item) {
-        item.addItem("Загрузка...");
+        if (item.getChildCount() == 0 && !item.isChildLoaded) {
+            item.addItem("Загрузка...");
+        }
         super.addItem(item);
-        // выравнивание смещения узлов дерева
-//        String lm = item.getElement().getStyle().getMarginLeft();
-//        if (lm != null && !"".equals(lm)) {
-//            lm = lm.replaceAll("px", "");
-//            double tmp = Double.valueOf(lm);
-//            if (tmp > 0.0) {
-//                item.getElement().getStyle().setMarginLeft(tmp + 7.0, Style.Unit.PX);
-//            }
-//        }
     }
 
-    public boolean isChildLoaded() {
+    public Boolean isChildLoaded() {
         return isChildLoaded;
     }
 
-    public void setChildLoaded(boolean isChildLoaded) {
+    public void setChildLoaded(Boolean isChildLoaded) {
         this.isChildLoaded = isChildLoaded;
     }
 

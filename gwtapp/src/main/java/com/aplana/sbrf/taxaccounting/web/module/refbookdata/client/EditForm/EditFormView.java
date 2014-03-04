@@ -51,6 +51,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     private boolean isVersionMode = false;
     private boolean readOnly;
     private boolean isHierarchy = false;
+    private boolean isNeedToReload = false;
 
 	@Inject
 	@UiConstructor
@@ -161,9 +162,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			for (HasValue w : widgets.values()) {
 				w.setValue(null);
 				if (w instanceof UIObject) {
-					if (w instanceof RefBookPickerWidget) {
-                        ((RefBookPickerWidget)w).reload();
-						((RefBookPickerWidget)w).setDereferenceValue("");
+                    if (w instanceof RefBookPickerWidget) {
+                        if (isNeedToReload) {
+                            isNeedToReload = false;
+                            ((RefBookPickerWidget) w).reload();
+                        }
+                        ((RefBookPickerWidget)w).setDereferenceValue("");
                         ((RefBookPickerWidget)w).setEnabled(!readOnly);
 					}
 				}
@@ -173,7 +177,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
 				if (w.getValue() instanceof RefBookPickerWidget) {
                     RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
-                    rbw.reload();
+                    if (isNeedToReload) {
+                        isNeedToReload = false;
+                        rbw.reload();
+                    }
                     rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setSingleValue(recordValue.getReferenceValue());
@@ -349,6 +356,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         this.readOnly = readOnly;
         save.setVisible(!readOnly);
         cancel.setVisible(!readOnly);
+    }
+
+    @Override
+    public void setNeedToReload(boolean b) {
+        isNeedToReload = b;
     }
 
     @UiHandler("save")
