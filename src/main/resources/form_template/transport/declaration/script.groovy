@@ -53,11 +53,13 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(31).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
+    def departmentParamList = getProvider(31).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
 
-    if (departmentParam == null) {
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
+
+    def departmentParam = departmentParamList?.get(0)
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
@@ -76,8 +78,8 @@ def checkAndbildXml() {
     // проверка наличия источников в стутусе принят
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
     if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-         logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
-         return
+        logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
+        return
     }
     // формируем xml
 
@@ -396,7 +398,6 @@ def getRecord(def refBookId, def filter, Date date) {
     return null
 }
 
-
 /** Получение полного справочника */
 def getModRefBookValue(refBookId, filter, date = new Date()) {
     // провайдер для справочника
@@ -412,11 +413,11 @@ def getModRefBookValue(refBookId, filter, date = new Date()) {
 
     // получение связанных данных
     refBook.attributes.each() { RefBookAttribute attr ->
-            def ref = record[attr.alias].referenceValue;
-            if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
-                def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
-                record[attr.alias] = attrProvider.getRecordData(ref);
-            }
+        def ref = record[attr.alias].referenceValue;
+        if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
+            def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
+            record[attr.alias] = attrProvider.getRecordData(ref);
+        }
     }
     record
 }

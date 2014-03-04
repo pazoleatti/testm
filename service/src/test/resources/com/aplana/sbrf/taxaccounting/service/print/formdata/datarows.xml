@@ -9,7 +9,7 @@
         <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России"/>
         <cell alias="interestRate" colSpan="1" rowSpan="1" value="Процентная ставка"/>
         <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="База для расчёта (дни)"/>
-        <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" value="Расчётный период"/>
+        <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" dateValue="2012-01-01"/>
         <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1"
               value="Расчётный период. Начисление/факт. Дата окончания"/>
         <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="Расчётный период. Доначисление. Дата начала"/>

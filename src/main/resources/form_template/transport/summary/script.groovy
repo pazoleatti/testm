@@ -496,7 +496,7 @@ def consolidation() {
                                 row.benefitEndDate.equals(sRow.benefitEndDate)) {
                             def department = departments.get(sources202.indexOf(row))
                             logger.error("Обнаружены несколько разных строк, у которых совпадают " +
-                                    + getIdentGrafsValue(sRow) +
+                                    +getIdentGrafsValue(sRow) +
                                     " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «" +
                                     sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
                             departments.remove(sources202.indexOf(row))
@@ -559,9 +559,8 @@ def consolidation() {
         // пробежимся по форме расставим данные для текущей 202 строки
         dataRows.each { row ->
             // поиск
-            if (v.codeOKATO.equals(row.okato)
-                    && v.identNumber.equals(row.vi)
-                    && v.regNumber.equals(row.regNumber)) {
+            if (v.codeOKATO.equals(row.okato) && v.identNumber.equals(row.vi)
+                    && v.powerVal.equals(row.taxBase) && v.baseUnit.equals(row.taxBaseOkeiUnit)) {
 
                 use = true
                 row.taxBenefitCode = v.taxBenefitCode
@@ -585,10 +584,10 @@ def consolidation() {
     dataRowHelper.save(dataRows)
 }
 
-String getIdentGrafsValue(def row){
+String getIdentGrafsValue(def row) {
     return "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
-            "Идентификационный номер = $row.identNumber, "+
-            "Мощность (величина) = $row.powerVal, "+
+            "Идентификационный номер = $row.identNumber, " +
+            "Мощность (величина) = $row.powerVal, " +
             "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}"
 }
 
@@ -708,7 +707,13 @@ def getMonthCount() {
         if (period == null) {
             logger.error('Не найден отчетный период для налоговой формы.')
         } else {
-            monthCountInPeriod = period.endDate[Calendar.MONTH] - period.startDate[Calendar.MONTH]
+            // 1. Отчетные периоды:
+            //  a.	первый квартал (с января по март включительно) - 3 мес.
+            //  b.	второй квартал (с апреля по июнь включительно) - 3 мес.
+            //  c.	третий квартал (с июля по сентябрь включительно) - 3 мес.
+            // 2. Налоговый период
+            //  a.	год (с января по декабрь включительно) - 12 мес.
+            monthCountInPeriod = period.order < 4 ? 3 : 12
         }
     }
     return monthCountInPeriod
