@@ -124,7 +124,6 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
                 @Override
                 public void close() {
                     super.close();
-                    hide();
                 }
             });
         } else{
@@ -150,7 +149,6 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
                     @Override
                     public void close() {
                         super.close();
-                        hide();
                     }
                 });
             } else {
