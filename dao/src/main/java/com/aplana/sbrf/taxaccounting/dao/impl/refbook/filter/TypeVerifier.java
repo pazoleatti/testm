@@ -57,6 +57,9 @@ public class TypeVerifier {
      * @param operandType
      */
     public void setType(OperandType operandType){
+        if (operandType == OperandType.DATE){
+            operandType = OperandType.STRING;
+        }
         if (left){
             letfType = operandType;
         } else if (right){
@@ -67,15 +70,27 @@ public class TypeVerifier {
     }
 
     /**
-     * Проверка типа
+     * Проверка типа переменной для функции
      *
-     * @param operandType
-     * @param msg
+     * @param ctx
      */
-    public void checkType(OperandType operandType, String msg){
-        if ((left && letfType != operandType) || (right && rightType != operandType)){
-            throw new RuntimeException(msg);
+    public void checkFunctionType(FilterTreeParser.FuncwrapContext ctx){
+        // текущие поддерживаемые функции LOWER и LENGTH, они работают со строковыми и date параметрами
+        OperandType internalType = left ? letfType: rightType;
+
+        // для LOWER и LENGTH мы должны передавать строку либо дату
+        if (ctx.functype().LOWER() != null || ctx.functype().LENGTH() != null){
+            if (internalType != OperandType.DATE && internalType != OperandType.STRING){
+                throw new RuntimeException("Function require a string or date param");
+            }
+        } else if (ctx.functype().TO_CHAR() != null){
+            // функция to_char
+            if (internalType != OperandType.NUMBER){
+                throw new RuntimeException("Function require a number type as param");
+            }
         }
+
+
     }
 
     /**

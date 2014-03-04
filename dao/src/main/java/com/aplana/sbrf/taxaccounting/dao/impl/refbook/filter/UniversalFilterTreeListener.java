@@ -81,12 +81,6 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) { }
 
     @Override
-    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
-
-    @Override
-    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
-
-    @Override
     public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx) {
     }
 
@@ -102,13 +96,17 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
         ps.appendQuery(")");
-        // текущие поддерживаемые функции LOWER и LENGTH, они работают со строковыми параметрами
-        typeVerifier.checkType(OperandType.STRING, "Function require a string param");
+        // проверка типа данных для функции
+        typeVerifier.checkFunctionType(ctx);
+
+
         // установка типа
         if (ctx.functype().LOWER() != null){
             typeVerifier.setType(OperandType.STRING);
         } else if (ctx.functype().LENGTH() != null){
             typeVerifier.setType(OperandType.NUMBER);
+        } else if (ctx.functype().TO_CHAR() != null){
+            typeVerifier.setType(OperandType.STRING);
         }
     }
 
@@ -279,7 +277,8 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
         switch (refBookAttribute.getAttributeType()){
             case STRING: typeVerifier.setType(OperandType.STRING); break;
             case NUMBER: typeVerifier.setType(OperandType.NUMBER); break;
-            case DATE: typeVerifier.setType(OperandType.DATE); break;
+            // в oracle с датой можно работать как со строкой
+            case DATE: typeVerifier.setType(OperandType.STRING); break;
             case REFERENCE: typeVerifier.setType(OperandType.NUMBER); break;
             default: throw new RuntimeException("Unexpected internal alias type");
         }
