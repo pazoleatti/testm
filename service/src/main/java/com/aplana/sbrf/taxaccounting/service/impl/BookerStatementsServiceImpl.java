@@ -1,12 +1,17 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.Income101;
 import com.aplana.sbrf.taxaccounting.model.Income102;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -17,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,8 +36,6 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class BookerStatementsServiceImpl implements BookerStatementsService {
-	private static final long INCOME_101 = 50L;
-    private static final long INCOME_102 = 52L;
 
     private static final String I_101_REPORT_PERIOD_ID = "REPORT_PERIOD_ID";
     private static final String I_101_ACCOUNT = "ACCOUNT";
@@ -87,8 +88,11 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Autowired
     RefBookFactory rbFactory;
 
+    @Autowired
+    AuditService auditService;
+
     @Override
-    public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, Integer departmentId) {
+    public void importXML(String realFileName, InputStream stream, Integer periodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
         if (stream == null) {
             throw new ServiceException(FILE_NULL);
@@ -108,7 +112,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         }
 
         if (typeId == 0) {
-            RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_101);
+            RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome101Dao.REF_BOOK_ID);
             List<Income101> list = importIncome101(stream);
 
             if (list != null && !list.isEmpty()) {
@@ -134,7 +138,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 throw  new ServiceException(NO_DATA_FILE_MSG);
             }
         } else {
-            RefBookDataProvider provider = rbFactory.getDataProvider(INCOME_102);
+            RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
             List<Income102> list = importIncome102(stream);
 
             if (list != null && !list.isEmpty()) {
@@ -155,6 +159,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 throw  new ServiceException(NO_DATA_FILE_MSG);
             }
         }
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, periodId, null, typeId, null, "Импорт бухгалтерской отчетности");
     }
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
@@ -165,7 +170,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
     private List<Income101> importIncome101(InputStream stream) {
         List<Income101> list = new ArrayList<Income101>();
-        HSSFWorkbook wb = null;
+        HSSFWorkbook wb;
         try {
             wb = new HSSFWorkbook(stream);
         } catch (IOException e) {
@@ -270,7 +275,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                                 break;
                         }
                     } catch (IllegalStateException e) {
-                        throw getServiceException(cell.getColumnIndex(), INCOME_101);
+                        throw getServiceException(cell.getColumnIndex(), RefBookIncome101Dao.REF_BOOK_ID);
                     }
                 }
                 if (!endOfFile && isValid) {
@@ -295,7 +300,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         excludeCode.add("20000");
         // выходной лист с моделями для записи в бд
         List<Income102> list = new ArrayList<Income102>();
-        HSSFWorkbook wb = null;
+        HSSFWorkbook wb;
         try {
             wb = new HSSFWorkbook(stream);
         } catch (IOException e) {
@@ -354,7 +359,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                             break;
                     }
                 } catch (IllegalStateException e) {
-                    throw getServiceException(cell.getColumnIndex(), INCOME_102);
+                    throw getServiceException(cell.getColumnIndex(), RefBookIncome102Dao.REF_BOOK_ID);
                 }
             }
             endOfFile = isEndOfFile102(model);
@@ -407,7 +412,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
      */
     private ServiceException getServiceException(int columnIndex, long typeID) {
         String colName = "";
-        if (typeID == INCOME_101) {
+        if (typeID == RefBookIncome101Dao.REF_BOOK_ID) {
             switch (columnIndex) {
                 case 1:
                     colName = ATTRIBUTE_ACCOUNT_NO;
