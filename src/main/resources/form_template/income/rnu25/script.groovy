@@ -215,10 +215,7 @@ void calc() {
         return
     }
 
-    // обновить индексы строк
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(dataRows)
     // итоговые значения по ГРН
     def i = 0
     for (def codeName : totalGroupsName) {
@@ -234,6 +231,7 @@ void calc() {
         dataRows.add(lastRowIndex, subTotalRow)
         i++
     }
+    updateIndexes(dataRows)
     dataRowHelper.save(dataRows)
 }
 
@@ -816,4 +814,11 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// обновить индексы строк
+def updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
 }
