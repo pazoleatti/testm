@@ -54,6 +54,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
             formTemplate.setEdition(rs.getInt("edition"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
+			formTemplate.setMonthlyForm(rs.getBoolean("monthly"));
             formTemplate.setCode(rs.getString("code"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
@@ -84,7 +85,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status " +
+					"select id, version, name, fullname, type_id, edition, fixed_rows, code, script, status, monthly " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -136,13 +137,14 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         // TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
-			"fullname = ?, code = ?, script=?, status=? where id = ?",
+			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, monthly = ?," +
+					" name = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
 			storedEdition,
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
+			formTemplate.isMonthlyForm(),
             formTemplate.getName() != null ? formTemplate.getName() : " ",
             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
 			formTemplate.getCode(),
@@ -157,7 +159,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, monthly, code, status" +
                 " from form_template where status = 0", new FormTemplateMapper(false));
 	}
 
@@ -349,14 +351,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formStyleDao.saveFormStyles(formTemplate);
             columnDao.saveFormColumns(formTemplate);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, code, script, status, type_id) " +
-                    "values (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, monthly, name, fullname, code, script, status, type_id) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
                             formTemplate.getEdition(),
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
+		                    formTemplate.isMonthlyForm(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
                             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
                             formTemplate.getCode() != null?formTemplate.getCode() : "",

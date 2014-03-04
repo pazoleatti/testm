@@ -18,6 +18,7 @@ public class FormTemplate extends IdentityObject<Integer> {
 	private Date version;
 	private int edition;
     private boolean fixedRows;
+	private boolean monthlyForm;
     
     private String name;
     private String fullName;
@@ -338,4 +339,12 @@ public class FormTemplate extends IdentityObject<Integer> {
     public void setFixedRows(boolean fixedRows) {
         this.fixedRows = fixedRows;
     }
+
+	public boolean isMonthlyForm() {
+		return monthlyForm;
+	}
+
+	public void setMonthlyForm(boolean monthlyForm) {
+		this.monthlyForm = monthlyForm;
+	}
 }

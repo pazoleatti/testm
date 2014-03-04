@@ -37,6 +37,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals(1, ft1.getId().intValue());
 		Assert.assertEquals(1, ft1.getType().getId());
 		Assert.assertTrue(ft1.isFixedRows());
+		Assert.assertFalse(ft1.isMonthlyForm());
 		Assert.assertEquals("name_1", ft1.getName());
 		Assert.assertEquals("fullname_1", ft1.getFullName());
 		Assert.assertEquals("code_1", ft1.getCode());
@@ -45,6 +46,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals(2, ft2.getId().intValue());
 		Assert.assertEquals(2, ft2.getType().getId());
 		Assert.assertFalse(ft2.isFixedRows());
+		Assert.assertTrue(ft2.isMonthlyForm());
 		Assert.assertEquals("name_2", ft2.getName());
 		Assert.assertEquals("fullname_2", ft2.getFullName());
 		Assert.assertEquals("code_2", ft2.getCode());
@@ -59,6 +61,7 @@ public class FormTemplateDaoTest {
 	public void testSave() {
 		FormTemplate formTemplate = formTemplateDao.get(1);		
 		formTemplate.setFixedRows(false);
+		formTemplate.setMonthlyForm(true);
 		formTemplate.setVersion(new Date());
 		formTemplate.setName("name_3");
 		formTemplate.setFullName("fullname_3");
@@ -67,6 +70,7 @@ public class FormTemplateDaoTest {
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
 		Assert.assertFalse(formTemplate.isFixedRows());
+		Assert.assertTrue(formTemplate.isMonthlyForm());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
