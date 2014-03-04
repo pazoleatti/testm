@@ -24,10 +24,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 	private final PlaceManager placeManager;
@@ -46,6 +43,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean isVersionMode = false;
     private boolean readOnly;
 
+    public void setNeedToReload() {
+        getView().setNeedToReload(true);
+    }
+
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
@@ -63,6 +64,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void setVersionFrom(Date value);
         void setVersionTo(Date value);
         void setReadOnlyMode(boolean readOnly);
+
+        void setNeedToReload(boolean b);
     }
 
 	@Inject
@@ -79,18 +82,18 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
 		dispatchAsync.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetRefBookAttributesResult>() {
-							@Override
-							public void onSuccess(GetRefBookAttributesResult result) {
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetRefBookAttributesResult>() {
+                            @Override
+                            public void onSuccess(GetRefBookAttributesResult result) {
                                 EditFormPresenter.this.readOnly = readOnly;
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
                                 getView().setReadOnlyMode(readOnly);
 								getView().createInputFields(result.getColumns());
                                 setIsFormModified(false);
-								setEnabled(false);
-							}
-						}, this));
+                                setEnabled(false);
+                            }
+                        }, this));
 	}
 
 	// TODO: отрефакторить, чтобы дата была общая с com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.getRelevanceDate() (Marat Fayzullin 2013-09-15)
@@ -177,12 +180,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(recordId);
+                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
-                valuesToAdd.add(getView().getFieldsValues());
+                valuesToAdd.add(map);
 
                 action.setRecords(valuesToAdd);
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
+
+                final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
 
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
@@ -194,7 +200,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
-                                        UpdateForm.fire(EditFormPresenter.this, true);
+                                        UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                     }
                                 }, this));
 			} else {
@@ -202,9 +208,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(currentUniqueRecordId);
-                action.setValueToSave(getView().getFieldsValues());
+                Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
+                action.setValueToSave(map);
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
+
+                final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 dispatchAsync.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
@@ -215,7 +224,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         setIsFormModified(false);
                                         getView().fillInputFields(null);
                                         setEnabled(false);
-                                        UpdateForm.fire(EditFormPresenter.this, true);
+                                        UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!", new DialogHandler() {
                                                 @Override
@@ -243,6 +252,24 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }
                             }, this));
         }
+    }
+
+    private RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {
+        RecordChanges recordChanges = new RecordChanges();
+        recordChanges.setId(recordId);
+        Long parent = null;
+        if (map.containsKey("PARENT_ID")) {
+            parent = map.get("PARENT_ID").getReferenceValue();
+        }
+        recordChanges.setParentId(parent);
+        String name = null;
+        if (map.containsKey("NAME")) {
+            name = map.get("NAME").getStringValue();
+        }
+        recordChanges.setName(name);
+        recordChanges.setStart(start);
+        recordChanges.setEnd(end);
+        return recordChanges;
     }
 
 	@Override
