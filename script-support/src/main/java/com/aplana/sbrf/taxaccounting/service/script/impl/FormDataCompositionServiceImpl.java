@@ -92,7 +92,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
         // Create form data if doesn't exist.
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
-			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId);
+			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, sformData.getReportPeriodId());
             // Создание формы в том же периоде
 			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(),
                     scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind,

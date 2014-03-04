@@ -8,13 +8,11 @@
 
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.menu.MainMenu" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.signin.SignIn" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.listeditor.ListEditor" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.logarea.LogArea" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.version.ProjectVersion" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.history.History" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.PdfViewerWidget" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.codemirror.CodeMirror" />
-	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.RefBookPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.RefBookMultiPicker" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.widget.periodpicker.PeriodPicker" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.VersionHistory" />
@@ -35,7 +33,6 @@
     <source path="reportperiodpicker"/>
     <source path="incrementbutton"/>
     <source path="fileupload"/>
-    <source path="closabledialog"/>
     <source path="multiselecttree"/>
     <source path="filter"/>
 </module>

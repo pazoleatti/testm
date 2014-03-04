@@ -1,11 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
@@ -13,10 +19,13 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepa
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -27,11 +36,16 @@ import java.util.*;
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
 
+    private static final Log log = LogFactory.getLog(SaveDepartmentCombinedHandler.class);
+
     @Autowired
     private PeriodService reportService;
 
     @Autowired
     private RefBookFactory rbFactory;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);
@@ -40,27 +54,33 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     @Override
     public SaveDepartmentCombinedResult execute(SaveDepartmentCombinedAction action, ExecutionContext executionContext)
             throws ActionException {
+        SaveDepartmentCombinedResult result = new SaveDepartmentCombinedResult();
 
         DepartmentCombined depCombined = action.getDepartmentCombined();
 
         if (depCombined != null
                 && depCombined.getDepartmentId() != null
+                && !depCombined.getDepartmentId().isEmpty()
                 && action.getTaxType() != null
-                && action.getReportPeriodId() != null ){
+                && action.getReportPeriodId() != null) {
 
-            RefBookDataProvider provider = null;
+            if (!reportService.isActivePeriod(action.getReportPeriodId(), depCombined.getDepartmentId().get(0))) {
+                throw new ActionException("Выбранный отчетный период закрыт!");
+            }
 
+            Long refBookId = null;
             switch (action.getTaxType()) {
                 case INCOME:
-                    provider = rbFactory.getDataProvider(33L);
+                    refBookId = 33L;
                     break;
                 case TRANSPORT:
-                    provider = rbFactory.getDataProvider(31L);
+                    refBookId = 31L;
                     break;
                 case DEAL:
-                    provider = rbFactory.getDataProvider(37L);
+                    refBookId = 37L;
                     break;
             }
+            RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
 
             Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
 
@@ -71,7 +91,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             // Общая часть
             paramsMap.put(DepartmentParamAliases.DEPARTMENT_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getDepartmentId())));
             paramsMap.put(DepartmentParamAliases.DICT_REGION_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getDictRegionId())));
-            paramsMap.put(DepartmentParamAliases.OKATO.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getOkato())));
+            paramsMap.put(DepartmentParamAliases.OKTMO.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getOktmo())));
             paramsMap.put(DepartmentParamAliases.INN.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getInn()));
             paramsMap.put(DepartmentParamAliases.KPP.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getKpp()));
             paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCode()));
@@ -101,14 +121,64 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_RATE.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getTaxRate()));
                 paramsMap.put(DepartmentParamAliases.TYPE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getType())));
             }
-            if (depCombined.getRecordId() == null) {
-                provider.insertRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
+
+            // Транспортный налог
+            if (action.getTaxType() == TaxType.TRANSPORT) {
+                paramsMap.put(DepartmentParamAliases.PREPAYMENT.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getPrepayment() ? 1L : 0L));
+            }
+
+            Logger logger = new Logger();
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(paramsMap);
+            record.setRecordId(depCombined.getRecordId());
+
+            // Проверка необходимости редактирования
+            boolean needEdit = false;
+
+            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId();
+            List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(null, filter);
+            if (recordPairs.size() != 0) {
+                //Проверяем, к одному ли элементу относятся версии
+                Set<Long> recordIdSet = new HashSet<Long>();
+                for (Pair<Long, Long> pair : recordPairs) {
+                    recordIdSet.add(pair.getSecond());
+                }
+
+                if (recordIdSet.size() > 1) {
+                    throw new ActionException("Версии настроек, отобраные по фильтру, относятся к разным подразделениям");
+                }
+
+                // Существуют версии настроек для указанного подразделения
+                record.setRecordId(recordPairs.get(0).getSecond());
+            }
+
+            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            recordPairs = provider.checkRecordExistence(calendarFrom.getTime(), filter);
+            if (recordPairs.size() != 0) {
+                needEdit = true;
+                // Запись нашлась
+                if (recordPairs.size() != 1) {
+                    throw new ActionException("Найдено несколько настроек для подразделения ");
+                }
+                depCombined.setRecordId(recordPairs.get(0).getFirst());
+            }
+
+            if (!needEdit) {
+                provider.createRecordVersion(logger, calendarFrom.getTime(), null, Arrays.asList(record));
             } else {
-                provider.updateRecords(calendarFrom.getTime(), Arrays.asList(paramsMap));
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);
+            }
+
+            // Запись ошибок в лог при наличии
+            if (!logger.getEntries().isEmpty()) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    result.setHasError(true);
+                }
             }
         }
-
-        return new SaveDepartmentCombinedResult();
+        return result;
     }
 
     @Override

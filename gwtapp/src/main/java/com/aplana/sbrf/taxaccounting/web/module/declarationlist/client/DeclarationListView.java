@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
+import java.util.Map;
 
 public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
@@ -38,6 +39,8 @@ public class DeclarationListView extends
 	private DeclarationDataSearchOrdering sortByColumn;
 
 	private boolean isAscSorting;
+
+    private Map<Integer, String> departmentFullNames;
 
 	@UiField
 	Panel filterContentPanel;
@@ -71,7 +74,7 @@ public class DeclarationListView extends
 		TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
 			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.getDepartmentName();
+				return departmentFullNames.get(object.getDepartmentId());
 			}
 		};
 
@@ -89,21 +92,7 @@ public class DeclarationListView extends
 			}
 		};
 
-		TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.getDeclarationType();
-			}
-		};
-
-		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.isAccepted() ? "Принята" : "Создана";
-			}
-		};
-
-		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> linkColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> declarationTypeColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
 				new AbstractCell<DeclarationDataSearchResultItem>() {
 
 					@Override
@@ -117,7 +106,7 @@ public class DeclarationListView extends
 								+ DeclarationDataTokens.declarationData + ";"
 								+ DeclarationDataTokens.declarationId + "="
 								+ declaration.getDeclarationDataId() + "\">"
-								+ declaration.getTaxType().getName() + "</a>");
+								+ declaration.getDeclarationType() + "</a>");
 					}
 				}) {
 			@Override
@@ -127,11 +116,17 @@ public class DeclarationListView extends
 			}
 		};
 
+		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+			@Override
+			public String getValue(DeclarationDataSearchResultItem object) {
+				return object.isAccepted() ? "Принята" : "Создана";
+			}
+		};
+
+		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение"));
-		declarationTable.addColumn(linkColumn, getHeader("Вид налога"));
 		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год"));
 		declarationTable.addColumn(reportPeriodColumn, getHeader("Период"));
-		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
 
         declarationTable.setPageSize(pager.getPageSize());
@@ -163,9 +158,10 @@ public class DeclarationListView extends
     }
 
     @Override
-    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records) {
+    public void setTableData(int start, long totalCount, List<DeclarationDataSearchResultItem> records, Map<Integer, String> departmentFullNames) {
         declarationTable.setRowCount((int) totalCount);
         declarationTable.setRowData(start, records);
+        this.departmentFullNames = departmentFullNames;
     }
 
     @Override

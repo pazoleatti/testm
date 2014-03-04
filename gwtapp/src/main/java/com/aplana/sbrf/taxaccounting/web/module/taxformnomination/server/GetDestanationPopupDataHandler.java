@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +56,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         result.setAvailableDepartments(availableDepartmentSet);
 
         // Все подразделения
-        result.setDepartments(departmentService.listAll());
+        result.setDepartments(availableDepartmentList);
 
         // Исполнители доступные пользователю
         Set<Integer> availablePerformersSet = new HashSet<Integer>();
@@ -69,10 +67,7 @@ class GetDestanationPopupDataHandler extends AbstractActionHandler<GetDestanatio
         result.setAvailablePerformers(availablePerformersSet);
 
         // Все подразделения
-        result.setPerformers(departmentService.listAll());
-
-        // типы форм
-        result.setFormDataKinds(Arrays.asList(FormDataKind.values()));
+        result.setPerformers(availablePerformersList);
 
         return result;
     }

@@ -39,8 +39,14 @@ public class FilterTreeListenerTest {
 
         RefBookAttribute attributeString = new RefBookAttribute();
         attributeString.setAttributeType(RefBookAttributeType.STRING);
+
+        RefBookAttribute dateAlias = new RefBookAttribute();
+        dateAlias.setAttributeType(RefBookAttributeType.DATE);
+
         when(refBook.getAttribute("Alias123")).thenReturn(attributeNumber);
         when(refBook.getAttribute("AliasStringType11")).thenReturn(attributeString);
+        when(refBook.getAttribute("dateAlias")).thenReturn(dateAlias);
+
     }
 
     @Test
@@ -223,6 +229,7 @@ public class FilterTreeListenerTest {
         Filter.getFilterQuery("LOWER(AliasStringType11) > 5", simpleFilterTreeListener);
     }
 
+    @Test
     public void complexExpr2(){
         SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
@@ -233,6 +240,58 @@ public class FilterTreeListenerTest {
         assertTrue(result.getQuery().toString().equals("LOWER(AliasStringType11) = LOWER(?)"));
         assertTrue(result.getParams().size() == 1);
         assertTrue(result.getParams().get(0).equals(new String("\"Сбербанк КИБ\" ЗАО ")));
+    }
+
+    @Test
+    public void recordIdTest(){
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        simpleFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("AliasStringType11 like '123' AND Record_id = 1", simpleFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("AliasStringType11 like ? AND id = 1"));
+        assertTrue(result.getParams().size() == 1);
+        assertTrue(result.getParams().get(0).equals(new String("123")));
+    }
+
+    @Test
+    public void recordIdTestUniversal(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 = 123 AND Record_id = 1", universalFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("aAlias123.NUMBER_value = 123 AND id = 1"));
+    }
+
+    @Test
+    public void toCharTest(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 = 123 AND TO_CHAR(Alias123) like '123%' AND TO_CHAR(12) LIKE '12' ", universalFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("aAlias123.NUMBER_value = 123 AND TO_CHAR(aAlias123.NUMBER_value) like ? AND TO_CHAR(12) LIKE ?"));
+        assertTrue(result.getParams().size() == 2);
+        assertTrue(result.getParams().get(0).equals(new String("123%")));
+        assertTrue(result.getParams().get(1).equals(new String("12")));
+    }
+
+
+    @Test
+    public void dateLikeTest(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("dateAlias like '123%'", universalFilterTreeListener);
+        assertTrue(result.getQuery().toString().equals("adateAlias.DATE_value like ?"));
+        assertTrue(result.getParams().size() == 1);
+        assertTrue(result.getParams().get(0).equals(new String("123%")));
     }
 }
 

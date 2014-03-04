@@ -117,10 +117,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains("error")) {
+				if (!event.getResults().toLowerCase().contains("error ")) {
 					getUiHandlers().save();
 				}
 				else {
+                    uploadJrxmlForm.reset();
 					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst("error ", ""));
 				}
 			}
@@ -196,7 +197,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiHandler("activateVersion")
     public void onActivatetButton(ClickEvent event){
         if (getUiHandlers() != null)
-            getUiHandlers().activate();
+            getUiHandlers().activate(false);
     }
 
 }

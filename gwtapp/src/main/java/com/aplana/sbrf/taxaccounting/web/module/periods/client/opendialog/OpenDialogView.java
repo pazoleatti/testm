@@ -1,16 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import com.aplana.gwt.client.Spinner;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookMultiPickerModalWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,7 +52,7 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
     DateMaskBoxPicker term;
 
 	@UiField
-    RefBookMultiPickerModalWidget period;
+    RefBookPickerWidget period;
 
     @UiField
     CheckBox correctPeriod;
@@ -113,7 +116,13 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		hide();
+        Dialog.confirmMessage("Отмена операции открытия периода", "Отменить операцию открытия периода?", new DialogHandler() {
+            @Override
+            public void yes() {
+                hide();
+                super.yes();    //To change body of overridden methods use File | Settings | File Templates.
+            }
+        });
 	}
 
     @UiHandler("correctPeriod")
@@ -126,12 +135,12 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
                 yearPnl.setVisible(false);
         termPnl.setVisible(true);
         period.setTitle("Период корректировки");
-        periodLbl.setText("Период корректировки");
+        periodLbl.setText("Период корректировки:");
         } else {
                 yearPnl.setVisible(true);
         termPnl.setVisible(false);
         period.setTitle("Период");
-        periodLbl.setText("Период");
+        periodLbl.setText("Период:");
         }
     }
 
@@ -140,6 +149,8 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
         departmentPicker.setValue(null);
         period.setValue(null, true);
         period.setDereferenceValue(null);
+	    Date current = new Date();
+	    period.setPeriodDates(current, current);
         balancePeriod.setValue(false);
         correctPeriod.setValue(false, true);
         onCorrectPeriodButton();

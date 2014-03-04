@@ -49,7 +49,17 @@ public class RefBookIncome101 implements RefBookDataProvider {
     }
 
     @Override
+    public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -137,7 +147,7 @@ public class RefBookIncome101 implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        dao.deleteRecords(uniqueRecordIds);
     }
 
     @Override

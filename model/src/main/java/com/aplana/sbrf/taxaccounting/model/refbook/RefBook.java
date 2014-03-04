@@ -18,17 +18,23 @@ public class RefBook implements Serializable {
 
 	private static final Long serialVersionUID = 1L;
 
-    public final static String RECORD_ID_ALIAS = "record_id";
+    public static final String RECORD_ID_ALIAS = "record_id";
 
-	public final static String RECORD_PARENT_ID_ALIAS = "parent_id";
+	public static final String RECORD_PARENT_ID_ALIAS = "PARENT_ID";
 
-    public final static String RECORD_VERSION_FROM_ALIAS = "record_version_from";
+    public static final String RECORD_VERSION_FROM_ALIAS = "record_version_from";
     public static final String REF_BOOK_VERSION_FROM_TITLE = "Дата начала актуальности";
     public static final int REF_BOOK_VERSION_FROM_WIDTH = 6;
 
-    public final static String RECORD_VERSION_TO_ALIAS = "record_version_to";
+    public static final String RECORD_VERSION_TO_ALIAS = "record_version_to";
     public static final String REF_BOOK_VERSION_TO_TITLE = "Дата окончания актуальности";
     public static final int REF_BOOK_VERSION_TO_WIDTH = 6;
+
+	public static final String RECORD_SORT_ALIAS = "row_number_over";
+
+    public static final Long DEPARTMENT_CONFIG_TRANSPORT = 31L;
+    public static final Long DEPARTMENT_CONFIG_PROFIT = 33L;
+    public static final Long DEPARTMENT_CONFIG_UKS = 37L;
 
 	/** Код справочника */
 	private Long id;
@@ -118,17 +124,18 @@ public class RefBook implements Serializable {
 	}
 
 	/**
-	 * Возвращает атрибут по его псевдониму
+	 * Возвращает атрибут по его псевдониму. Регистронезависимый поиск
 	 * @param alias
+	 * @throws IllegalArgumentException в случае, если искомого атрибута нет в справочнике
 	 * @return
 	 */
-	public RefBookAttribute getAttribute(String alias) {
+	public RefBookAttribute getAttribute(final String alias) {
 		if (alias == null) {
 			throw new IllegalArgumentException("Attribute alias must be defined");
 		}
 
 		for(RefBookAttribute attribute : attributes) {
-			if (alias.equals(attribute.getAlias())) {
+			if (alias.toLowerCase().equals(attribute.getAlias().toLowerCase())) {
 				return attribute;
 			}
 		}
@@ -170,7 +177,9 @@ public class RefBook implements Serializable {
 	public Map<String, RefBookValue> createRecord() {
 		Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
 		result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
-		result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		if (isHierarchic()) {
+			result.put(RefBook.RECORD_PARENT_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, null));
+		}
 		for (RefBookAttribute attribute : getAttributes()) {
 			result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), null));
 		}

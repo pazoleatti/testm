@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
-import com.aplana.sbrf.taxaccounting.dao.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -9,12 +8,11 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -22,12 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
@@ -47,25 +42,7 @@ public class DataRowDaoImplTest {
 
 	@Before
 	public void cleanDataRow() {
-        /**
-         * Т.к. hsqldb не поддерживает запрос который мы используем в дао
-         * пришлось немного закостылять этот момент. Заапрувлено Ф.Маратом.
-         */
-        // мок утилитного сервиса
-        BDUtils dbUtilsMock = mock(BDUtils.class);
-        when(dbUtilsMock.getNextDataRowIds(anyLong())).thenAnswer(new Answer<List<Long>>() {
-            @Override
-            public List<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
-				List<Long> ids = new ArrayList<Long>();
-				Object[] args = invocationOnMock.getArguments();
-				int count = ((Long) args[0]).intValue();
-                for (int i = 0; i < count; i++) {
-					ids.add(cnt++);
-                }
-                return ids;
-            }
-        });
-        ReflectionTestUtils.setField(dataRowDao, "dbUtils", dbUtilsMock);
+        ReflectionTestUtils.setField(dataRowDao, "dbUtils", BDUtilsMock.getBDUtils());
 
 		FormData fd = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();

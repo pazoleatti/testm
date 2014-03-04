@@ -25,7 +25,8 @@ public class FormPerformerDaoTest {
 	public void getTest() {
 		FormDataPerformer performer = formPerformerDao.get(1);
 		assertEquals("name1", performer.getName());
-		assertEquals("phone1", performer.getPhone());
+        assertEquals("phone1", performer.getPhone());
+        assertEquals(Integer.valueOf(2), performer.getPrintDepartmentId());
 	}
 
 	@Test
@@ -39,10 +40,12 @@ public class FormPerformerDaoTest {
 		FormDataPerformer performer = new FormDataPerformer();
 		performer.setName("MyNameUpdate");
 		performer.setPhone("MyPhoneUpdate");
+        performer.setPrintDepartmentId(1);
 		formPerformerDao.save(1,performer);
 		performer = formPerformerDao.get(1);
 		assertEquals("MyNameUpdate", performer.getName());
 		assertEquals("MyPhoneUpdate", performer.getPhone());
+        assertEquals(Integer.valueOf(1), performer.getPrintDepartmentId());
 
 	}
 
@@ -51,10 +54,12 @@ public class FormPerformerDaoTest {
 		FormDataPerformer performer = new FormDataPerformer();
 		performer.setName("MyNameInsert");
 		performer.setPhone("MyPhoneInsert");
+        performer.setPrintDepartmentId(1);
 		assertNull(formPerformerDao.get(2));
 		formPerformerDao.save(2,performer);
 		assertEquals("MyNameInsert", performer.getName());
 		assertEquals("MyPhoneInsert", performer.getPhone());
+        assertEquals(Integer.valueOf(1), performer.getPrintDepartmentId());
 
 
 	}

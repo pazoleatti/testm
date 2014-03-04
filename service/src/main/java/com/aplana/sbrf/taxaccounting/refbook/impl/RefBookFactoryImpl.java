@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookFormDataKind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,9 @@ public class RefBookFactoryImpl implements RefBookFactory {
     }
 
     @Override
-    public List<RefBook> getAll(boolean onlyVisible, RefBookType type) {
-        Integer typeId = type == null ? null : type.getId();
-        return onlyVisible ? refBookDao.getAllVisible(typeId) : refBookDao.getAll(typeId);
+    public List<RefBook> getAll(boolean onlyVisible) {
+		//TODO: избавиться от лишнего аргумента null (Marat Fayzullin 10.02.2014)
+        return onlyVisible ? refBookDao.getAllVisible(null) : refBookDao.getAll(null);
     }
 
     @Override
@@ -47,7 +48,11 @@ public class RefBookFactoryImpl implements RefBookFactory {
     @Override
     public RefBookDataProvider getDataProvider(Long refBookId) {
         if (RefBookDepartment.REF_BOOK_ID.equals(refBookId)) {
-            return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
+            //return applicationContext.getBean("refBookDepartment", RefBookDataProvider.class);
+            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            refBookSimple.setRefBookId(RefBookSimpleReadOnly.DEPARTMENT_REF_BOOK_ID);
+            refBookSimple.setTableName(RefBookSimpleReadOnly.DEPARTMENT_TABLE_NAME);
+            return refBookSimple;
         } else if (RefBookIncome101.REF_BOOK_ID.equals(refBookId)) {
 			return applicationContext.getBean("refBookIncome101", RefBookDataProvider.class);
         } else if (RefBookIncome102.REF_BOOK_ID.equals(refBookId)) {
@@ -65,9 +70,16 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
 			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
 			return refBookSimple;
-        } else if(RefBookSimpleReadOnly.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
-            return applicationContext.getBean("RefBookOktmo", RefBookDataProvider.class);
-		} else {
+        } else if(RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {  //  Справочник "ОКТМО"
+            RefBookBigDataProvider dataProvider = (RefBookBigDataProvider) applicationContext.getBean("RefBookBigDataProvider", RefBookDataProvider.class);
+            dataProvider.setRefBookId(refBookId);
+            if (RefBookBigDataProvider.OKTMO_REF_BOOK_ID.equals(refBookId)) {
+                dataProvider.setTableName(RefBookBigDataProvider.OKTMO_TABLE_NAME);
+            }
+            return dataProvider;
+		} else if (RefBookFormDataKind.REF_BOOK_ID.equals(refBookId)) {
+            return (RefBookFormDataKind) applicationContext.getBean("refBookFormDataKind", RefBookFormDataKind.class);
+        } else{
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);
 			return refBookUniversal;

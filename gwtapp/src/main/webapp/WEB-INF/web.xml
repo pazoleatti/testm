@@ -31,6 +31,24 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <filter>
+        <filter-name>compatibilityFilter</filter-name>
+        <filter-class>com.aplana.sbrf.taxaccounting.web.mvc.CompatibilityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>compatibilityFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>compatibilityFilter</filter-name>
+        <filter-class>com.aplana.sbrf.taxaccounting.web.mvc.CompatibilityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>compatibilityFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <servlet>
   		<servlet-name>mvc-dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -67,11 +85,6 @@
 		<error-code>403</error-code>
 		<location>/WEB-INF/jsp/forbidden.jsp</location>
 	</error-page>
-
-    <error-page>
-        <error-code>404</error-code>
-        <location>/Main.jsp</location>
-    </error-page>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>

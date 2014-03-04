@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
@@ -35,6 +36,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private ColumnDao columnDao;
 	@Autowired
 	private FormStyleDao formStyleDao;
+
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
+
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
 	private class FormTemplateMapper implements RowMapper<FormTemplate> {
@@ -54,9 +59,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
             formTemplate.setEdition(rs.getInt("edition"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
-			formTemplate.setMonthlyForm(rs.getBoolean("monthly"));
             formTemplate.setCode(rs.getString("code"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            formTemplate.setMonthly(rs.getBoolean("monthly"));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
 			if (deepFetch) {
@@ -137,14 +142,13 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         // TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, monthly = ?," +
-					" name = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
+			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
+			"fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
 			storedEdition,
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
-			formTemplate.isMonthlyForm(),
             formTemplate.getName() != null ? formTemplate.getName() : " ",
             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
 			formTemplate.getCode(),
@@ -159,26 +163,30 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, monthly, code, status" +
+		return getJdbcTemplate().query("select id, version, name, fullname, type_id, edition, fixed_rows, code, status, monthly" +
                 " from form_template where status = 0", new FormTemplateMapper(false));
 	}
 
+    private static String ACTIVE_VERSION_SQL =
+            "with templatesByVersion as (Select ID, TYPE_ID, STATUS, VERSION, row_number() over(partition by TYPE_ID order by version) rn from FORM_TEMPLATE where TYPE_ID=?)" +
+                    "select ID from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
+                    "left outer join templatesByVersion rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and (versionFrom <= ? and versionTo >= ?)" +
+                    " or (versionFrom <= ? and versionTo is null)";
+
 	@Override
-	public int getActiveFormTemplateId(int formTypeId) {
+	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
 		JdbcTemplate jt = getJdbcTemplate();
-		FormTemplate form;
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 		try {
-			form =jt.queryForObject(
-                    "select * from form_template where type_id = ? and status = ?",
-                    new Object[]{formTypeId, 0},
-                    new int[]{Types.NUMERIC, Types.NUMERIC},
-                    new FormTemplateMapper(false)
-            );
-			return form.getId();
+			return jt.queryForInt(
+                    ACTIVE_VERSION_SQL,
+                    new Object[]{formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE});
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Для данного вида налоговой формы %d не найдено активного шаблона налоговой формы.",formTypeId);
 		}catch(IncorrectResultSizeDataAccessException e){
-			throw new DaoException("Для даного вида налоговой формы %d найдено несколько активных шаблонов налоговой формы.",formTypeId);
+			throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
+                    formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
 		}
 	}
 
@@ -351,15 +359,14 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formStyleDao.saveFormStyles(formTemplate);
             columnDao.saveFormColumns(formTemplate);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, monthly, name, fullname, code, script, status, type_id) " +
-                    "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, code, script, status, type_id) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
                             formTemplate.getEdition(),
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
-		                    formTemplate.isMonthlyForm(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
                             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
                             formTemplate.getCode() != null?formTemplate.getCode() : "",
@@ -390,6 +397,17 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
+    }
+
+    @Override
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
+    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+        try {
+            return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus, formTemplateId);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при обновлении статуса версии " + formTemplateId, e);
+            throw new DaoException("Ошибка при обновлении статуса версии", e);
         }
     }
 }

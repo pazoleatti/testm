@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client.archive;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.google.gwt.editor.client.Editor;
@@ -44,10 +46,17 @@ public class AuditArchiveDialogView extends PopupViewWithUiHandlers<AuditArchive
 
     @UiHandler("archiveButton")
     public void onArchiveButton(ClickEvent event){
-        hide();
-        if( getUiHandlers()!= null){
-            getUiHandlers().onArchiveButtonClick();
-        }
+        Dialog.confirmMessage("Подтверждение", "При архиварации, данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
+            @Override
+            public void yes() {
+                super.yes();
+                hide();
+                if( getUiHandlers()!= null){
+                    getUiHandlers().onArchiveButtonClick();
+                }
+            }
+        });
+
     }
 
 }

@@ -46,6 +46,13 @@ public interface ReportPeriodService {
     Calendar getStartDate(int reportPeriodId);
 
     /**
+     * Возвращает календарную дату начала отчетного периода
+     * @param reportPeriodId
+     * @return
+     */
+    Calendar getCalendarStartDate(int reportPeriodId);
+
+    /**
      * Возвращает дату конца отчетного периода
      * @param reportPeriodId
      * @return

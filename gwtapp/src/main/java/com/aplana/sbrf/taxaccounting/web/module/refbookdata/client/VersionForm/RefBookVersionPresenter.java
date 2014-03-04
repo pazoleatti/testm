@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -68,6 +69,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		RefBookDataRow getSelectedRow();
         void setTitleDetails(String uniqueAttrValues);
         void setBackAction(String url);
+        void setReadOnlyMode(boolean readOnly);
     }
 
 	@Inject
@@ -169,7 +171,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                editFormPresenter.init(refBookId);
+                                getView().setReadOnlyMode(result.isReadOnly());
+                                editFormPresenter.init(refBookId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookVersionPresenter.this);
 							}
 						}, this));
@@ -184,7 +187,12 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 							public void onSuccess(GetNameResult result) {
 								getView().setRefBookNameDesc(result.getName());
                                 getView().setTitleDetails(result.getUniqueAttributeValues());
-                                getView().setBackAction("#"+RefBookDataTokens.refBookData+";id=" + refBookId);
+                                String href = "#" + (
+                                        result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
+                                        RefBookDataTokens.refBookData :
+                                        RefBookDataTokens.refBookHierData
+                                ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
+                                getView().setBackAction(href);
                                 editFormPresenter.setRecordId(result.getRecordId());
 							}
 						}, this));
@@ -214,6 +222,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 								public void onSuccess(GetRefBookRecordVersionResult result) {
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
+                                    if (!result.getDataRows().isEmpty()) {
+                                        getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    }
 								}
 							}, RefBookVersionPresenter.this));
 		}

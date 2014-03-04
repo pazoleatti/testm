@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 public enum DepartmentParamAliases {
     DEPARTMENT_ID,
     DICT_REGION_ID,
-    OKATO,
+    OKTMO,
     INN,
     KPP,
     TAX_ORGAN_CODE,
@@ -30,5 +30,6 @@ public enum DepartmentParamAliases {
     OBLIGATION,
     TYPE,
     SUM_TAX,
-    SUM_DIVIDENDS;
+    SUM_DIVIDENDS,
+    PREPAYMENT;
 }

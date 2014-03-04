@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
 
@@ -18,8 +19,8 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
-            width: 64px;
+            margin:  8px 10px 8px 0 !important;
+            width: 75px;
         }
     </ui:style>
 
@@ -49,7 +50,8 @@
                     <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ValueListBox width="100%" ui:field="formDataKind" />
+                    <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" searchEnabled="false"
+                                           isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -58,7 +60,16 @@
                     <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="formTypeId" showTooltip="true"/>
+                    <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false" multiSelect="false" width="100%"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="140px" wordWrap="false" text="Месяц:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <dw:ValueListBox width="100%" ui:field="formMonth"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -67,7 +78,7 @@
                     <g:Label/>
                 </g:cell>
                 <g:Button addStyleNames="{style.footerButton}" ui:field="continueButton" text="Создать"/>
-                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Отмена"/>
+                <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>

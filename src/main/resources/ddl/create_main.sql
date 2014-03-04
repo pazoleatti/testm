@@ -16,6 +16,8 @@ comment on column ref_book_oktmo.parent_id is 'Идентификатор род
 comment on column ref_book_oktmo.version is 'Версия. Дата актуальности записи';
 comment on column ref_book_oktmo.status is 'Статус записи(0-обычная запись, -1-удаленная, 1-черновик, 2-фиктивная)';
 comment on column ref_book_oktmo.record_id is 'Идентификатор строки справочника. Может повторяться у разных версий';
+
+create sequence seq_ref_book_oktmo start with 300000 increment by 100;
 --------------------------------------------------------------------------------------------------------------
 
 create table configuration (
@@ -65,7 +67,8 @@ create table form_template (
   code varchar2(600) not null,
   script clob,
   data_headers clob,
-  status number(1) default 0 not null
+  status number(1) default 0 not null,
+  monthly number(1) default 0 not null
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -82,6 +85,7 @@ comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
 comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -152,7 +156,8 @@ create table ref_book_attribute (
   width number(9) default 15 not null,
   required number(1) default 0 not null,
   is_unique number(1) default 0 not null,
-  sort_order number(9)
+  sort_order number(9),
+  format number(2)
 );
 comment on table ref_book_attribute is 'Атрибут справочника';
 comment on column ref_book_attribute.id is 'Уникальный идентификатор';
@@ -169,6 +174,7 @@ comment on column ref_book_attribute.width is 'Ширина столбца. Ис
 comment on column ref_book_attribute.required is 'Признак обязательности поля (1 - обязательно; 0 - нет)';
 comment on column ref_book_attribute.is_unique is 'Признак уникальности значения атрибута справочника (1 - должно быть уникальным; 0 - нет)';
 comment on column ref_book_attribute.sort_order is 'Определяет порядок сортировки по умолчанию';
+comment on column ref_book_attribute.format is 'Формат. (Для дат: 0 - "", 1 - "dd.MM.yyyy", 2 - "MM.yyyy", 3 - "MMMM yyyy", 4 - "yyyy", 5 - "dd.MM")';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_record (
   id number(18) not null,
@@ -217,7 +223,8 @@ create table form_column (
   attribute_id number(18),
   format number(2),
   filter varchar2(1000),
-  parent_column_id number(9)
+  parent_column_id number(9),
+  attribute_id2 number(18)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -234,6 +241,7 @@ comment on column form_column.format is 'Формат';
 comment on column form_column.filter is 'Условие фильтрации элементов справочника';
 comment on column form_column.max_length IS 'Максимальная длина строки';
 comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
+comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -273,7 +281,7 @@ comment on column report_period.ord is 'Номер отчетного перио
 comment on column report_period.dict_tax_period_id is 'Ссылка на справочник отчетных периодов';
 comment on column report_period.start_date is 'Дата начала отчетного периода';
 comment on column report_period.end_date is 'Дата окончания отчетного периода';
-comment on column report_period.calendar_start_date is 'Дата фактического начала периода';
+comment on column report_period.calendar_start_date is 'Календарная дата начала отчетного периода';
 
 create sequence seq_report_period start with 100;
 ----------------------------------------------------------------------------------------------------
@@ -405,7 +413,6 @@ create table form_data (
   id number(18) not null,
   form_template_id number(9) not null,
   department_id number(9) not null,
-  print_department_id number(9),
   state number(9) not null,
   kind number(9) not null,
   report_period_id number(9) not null,
@@ -416,7 +423,6 @@ comment on table form_data is 'Данные по налоговым формам
 comment on column form_data.id is 'Первичный ключ';
 comment on column form_data.form_template_id is 'Идентификатор шаблона формы';
 comment on column form_data.department_id is 'Идентификатор подраздения';
-comment on column form_data.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data.state is 'Код состояния';
 comment on column form_data.kind is 'Тип налоговой формы (1 - Первичная, 2 - Консолидированная, 3 - Сводная, 4 - Форма УНП, 5 - Выходная)';
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
@@ -444,12 +450,14 @@ create sequence seq_form_data_signer start with 10000;
 create table form_data_performer (
   form_data_id number(18) not null,
   name varchar2(200) not null,
-  phone varchar2(40)
+  phone varchar2(40),
+  print_department_id number(9)
 );
 comment on table form_data_performer is 'Исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';
 comment on column form_data_performer.name is 'ФИО исполнителя';
 comment on column form_data_performer.phone is 'Телефон';
+comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
 --------------------------------------------------------------------------------------------------
 create table data_row (
   id number(18) not null,

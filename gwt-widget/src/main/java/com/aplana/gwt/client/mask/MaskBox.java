@@ -1,6 +1,7 @@
 package com.aplana.gwt.client.mask;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -61,7 +62,7 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
                     try {
                         setValue(parser.parse(getText()), true);
                     } catch (ParseException e) {
-                        if (textPicture == null || !textPicture.equals(getText())) {
+                        if (textPicture == null || !textPicture.equals(getText()) || textPicture.equals(maskListener.getMaskPicture())) {
                             addExceptionStyle();
                         }
                     }
@@ -71,6 +72,10 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
             maskListener.setMask(mask);
 
         textPicture = getTextPicture();
+    }
+
+    public void trySetValue(){
+        BlurEvent.fireNativeEvent(Document.get().createBlurEvent(), this);
     }
 
     public void setMask(String mask) {

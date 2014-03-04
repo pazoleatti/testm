@@ -13,6 +13,7 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
 	
 	private Integer formDataKindId;
 
+    private Integer monthId;
 
 	public Integer getFormDataTypeId() {
 		return formDataTypeId;
@@ -53,8 +54,15 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
 		this.formDataKindId = formDataKindId;
 	}
 
+    public Integer getMonthId() {
+        return monthId;
+    }
 
-	@Override
+    public void setMonthId(Integer monthId) {
+        this.monthId = monthId;
+    }
+
+    @Override
 	public String getName() {
 		return "Создание налоговой формы";
 	}

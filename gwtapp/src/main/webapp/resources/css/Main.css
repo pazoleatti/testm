@@ -192,63 +192,12 @@ h3{
     padding: 2px 0px 2px 0px !important;
     text-align: center;
 }
-.dialogCaption {
-    width: 100%;
-}
-.closeDialogButton {
-    float: right;
-    margin-right: 3px;
-}
 
-.AplanaMultiListBoxItem {
+.aplana-MultiListBoxItem {
     margin-top: 4px;
     margin-left: 7px;
     display: block;
     cursor: default;
-}
-
-.AplanaModalWindow {
-    border: 1px solid #646464 !important;
-    border-spacing: 0px !important;
-}
-
-.AplanaModalWindow .caption {
-
-    height: 29px;
-    vertical-align: middle;
-    background-color: #808080;
-    color: #FFFFFF;
-    cursor: move;
-}
-
-.AplanaModalWindow .closeButton {
-    float: right;
-    margin: 5px;
-    height: 17px;
-    width: 17px;
-    cursor: pointer;
-}
-
-.AplanaModalWindow .OverrideCenter {
-    border-spacing: 0px !important;
-    padding: 0px !important;
-    background-color: #FFFFFF;
-}
-
-.AplanaModalWindow .icon {
-    margin: 5px 6px;
-    height: 17px;
-    width: 17px;
-    float: left;
-}
-
-.AplanaModalWindow .captionTitle{
-    margin-top: 6px;
-    float: right;
-}
-
-.AplanaModalWindow .captionTitlePanel{
-    float: left;
 }
 
 .footerButton {

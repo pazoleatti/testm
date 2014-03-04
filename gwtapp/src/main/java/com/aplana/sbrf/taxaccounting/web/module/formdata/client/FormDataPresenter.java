@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
@@ -28,10 +29,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
 
@@ -103,6 +101,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public void onCellModified(DataRow<Cell> dataRow) {
 		modifiedRows.add(dataRow);
 	}
+
+    @Override
+    public void onStartLoad() {
+        LockInteractionEvent.fire(this, true);
+    }
+
+    @Override
+    public void onEndLoad() {
+        LockInteractionEvent.fire(this, false);
+    }
 
     @Override
 	public void onSelectRow() {
@@ -209,7 +217,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onSaveClicked() {
 		SaveFormDataAction action = new SaveFormDataAction();
-		action.setFormData(formData);
+        action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
@@ -256,7 +264,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onDeleteFormClicked() {
         final FormDataPresenter t = this;
-        Dialog.confirmMessage("Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
+        Dialog.confirmMessage("Подтверждение", "Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
             @Override
             public void yes() {
                 DeleteFormDataAction action = new DeleteFormDataAction();
@@ -329,9 +337,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(GetFormDataResult result) {
 
-                                LogAddEvent.fire(FormDataPresenter.this,
-                                        result.getUuid());
-                                
+                                // если нет сообщений для показа то не обращаться к логгеру, по причине того что при обращении логгер очищается
+                                if (result.getUuid() != null){
+                                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                                }
+
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
                     			
@@ -370,7 +380,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 .getTaxType(),
                                         result.getFormData().getKind()
                                                 .getName(),
-                                        result.getDepartmenName(),
+                                        result.getDepartmenFullName(),
                                         buildPeriodName(result),
                                         result.getFormData().getState()
                                                 .getName(),

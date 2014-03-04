@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.LogSystemFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessPrintEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.event.LogBusinessSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.shared.*;
 import com.google.inject.Inject;
@@ -23,6 +25,7 @@ import java.util.Set;
 public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusinessFilterPresenter.MyView> implements HistoryBusinessUIHandler {
 
     private DispatchAsync dispatchAsync;
+    private LogSystemAuditFilter previousLogSystemAuditFilter;
 
     @Inject
     public HistoryBusinessFilterPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
@@ -45,28 +48,34 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
 
     @Override
     public void onSearchClicked() {
+        previousLogSystemAuditFilter = getView().getDataFilter();
+        getView().edit(previousLogSystemAuditFilter);
         LogBusinessSearchEvent.fire(this);
     }
 
     public interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler> {
+
+        void init();
         // Получение значений фильтра
-        LogBusinessFilterValues getDataFilter();
+        LogSystemAuditFilter getDataFilter();
 
         void setDepartments(List<Department> list, Set<Integer> availableValues);
 
-        void setFormTypeId(Map<Integer, String> formTypesMap);
+        /*void setFormTypeId(List<Long> formTypeIds);*/
 
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
-
-        void setFormDataKind(List<FormDataKind> list);
 
         void setFormDataTaxType(List<TaxType> taxTypeList);
 
         void setReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        boolean isChangeFilter();
+        void edit(LogSystemAuditFilter auditFilter);
+        void clear();
     }
 
     public void initFilterData() {
-
+        getView().init();
+        previousLogSystemAuditFilter = getView().getDataFilter();
         GetHistoryBusinessFilterAction action = new GetHistoryBusinessFilterAction();
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetHistoryBusinessFilterResult>() {
@@ -75,16 +84,32 @@ public class HistoryBusinessFilterPresenter extends PresenterWidget<HistoryBusin
                     public void onSuccess(GetHistoryBusinessFilterResult result) {
                         LogSystemFilterAvailableValues avaliableValues = result.getAvailableValues();
                         getView().setDepartments(avaliableValues.getDepartments(), avaliableValues.getDepartmentIds());
-                        getView().setFormTypeId(avaliableValues.getFormTypeMapIds());
+                        /*getView().setFormTypeId(Lists.transform(avaliableValues.getFormTypeIds(), new Function<Integer, Long>() {
+                            @Override
+                            public Long apply(@Nullable Integer integer) {
+                                if (integer == null)
+                                    return null;
+                                return Long.valueOf(integer);
+                            }
+                        }));*/
                         getView().setDeclarationType(avaliableValues.getDeclarationMapIds());
-                        getView().setFormDataKind(avaliableValues.getFormDataKinds());
                         getView().setFormDataTaxType(avaliableValues.getTaxTypes());
                     }
                 }, this));
 
     }
 
-    public LogBusinessFilterValues getLogSystemFilter() {
-        return getView().getDataFilter();
+    public LogSystemAuditFilter getLogSystemFilter() {
+        return isFilterChange() ? previousLogSystemAuditFilter : getView().getDataFilter();
+    }
+
+    public boolean isFilterChange(){
+        return getView().isChangeFilter();
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clear();
     }
 }

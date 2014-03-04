@@ -20,8 +20,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -41,11 +43,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 	private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
 	private static final String FORM_NOT_FOUND_MESSAGE = "Налоговая форма с id = %d не найдена в БД";
 
-    private static final String dbDateFormat = "YYYYMMDD";
-    private static final String dateFormat = "yyyyMMdd";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-
-	private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
+    private static final class LogBusinessRowMapper implements RowMapper<LogBusiness> {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
 			LogBusiness log = new LogBusiness();
@@ -85,12 +83,15 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
             log.setUser(userDao.getUser(rs.getInt("user_id")));
             log.setRoles(rs.getString("roles"));
-            log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            /*log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));*/
             log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             log.setDeclarationType(rs.getInt("declaration_type_id") != 0 ? declarationTypeDao.get(rs.getInt("declaration_type_id")) : null);
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
             log.setNote(rs.getString("note"));
             log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+            int departmentId = rs.getInt("form_data_id") != 0?rs.getInt("fd_department_id") : rs.getInt("dd_department_id");
+            String s = departmentDao.getParentsHierarchy(departmentId);
+            log.setDepartmentName(s != null ? s : departmentDao.getDepartment(departmentId).getName());
             return log;
         }
     }
@@ -127,31 +128,40 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
         names.put("departmentId", filter.getDepartmentId());
-        names.put("userId", filter.getUserId());
+        names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
-        names.put("toDate", filter.getToSearchDate());
+        names.put("toDate", new Date(filter.getToSearchDate().getTime()));
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
-        StringBuilder sql = new StringBuilder("select * from (select fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
+        StringBuilder sql = new StringBuilder("select * from (select fd.department_id as fd_department_id, dd.department_id as dd_department_id, fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
                 "rownum as rn from log_business lb ");
         sql.append("left join form_data fd on lb.form_data_id=fd.\"ID\" ");
         sql.append("left join form_template ftemp on fd.form_template_id=ftemp.\"ID\" ");
         sql.append("left join form_type ft on ftemp.type_id=ft.\"ID\" ");
-        sql.append("left join department dep on lb.user_department_id=dep.\"ID\" ");
         sql.append("left join sec_user su on lb.user_id=su.\"ID\" ");
         sql.append("left join REPORT_PERIOD rp on fd.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
         sql.append("left join declaration_data dd on lb.declaration_data_id=dd.\"ID\" ");
+        sql.append("left join department dep on dd.department_id=dep.\"ID\" and fd.department_id=dep.\"ID\" ");
         sql.append("left join declaration_template dtemp on dd.declaration_template_id=dtemp.\"ID\" ");
         sql.append("left join declaration_type dt on dtemp.declaration_type_id=dt.\"ID\" ");
-        sql.append(" WHERE lb.log_date BETWEEN TO_DATE('").append
-                (formatter.format(filter.getFromSearchDate()))
-                .append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-                (formatter.format(filter.getToSearchDate()))
-                .append("', '").append(dbDateFormat).append("')");
-        sql.append(filter.getDepartmentId() == null?"":" and lb.user_department_id = :departmentId");
-        sql.append(filter.getUserId() == null ? "" : " and lb.user_id = :userId");
+        sql.append(" WHERE lb.log_date between :fromDate and :toDate + interval '1' day");
+        sql.append(filter.getDepartmentId() == null?"":" and fd.department_id = :departmentId or dd.department_id = :departmentId ");
+        if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
+
+            List<Long> userList = filter.getUserIds();
+            String userSql = "";
+            for(Long temp : userList){
+                if (userSql.equals("")){
+                    userSql = temp.toString();
+                }
+                else{
+                    userSql = userSql + ", " + temp.toString();
+                }
+            }
+            sql.append(" AND user_id in ").append("(").append(userSql).append(")");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())
@@ -241,9 +251,11 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
     private int getCount(List<Long> formDataIds, List<Long> declarationDataIds,Map<String, Object> names) {
         StringBuilder sql = new StringBuilder("select count(*) from log_business where");
-        sql.append(" log_date between :fromDate and :toDate");
+        sql.append(" log_date between :fromDate and :toDate + interval '1' day");
         sql.append(names.get("departmentId") == null? "" :" and user_department_id = :departmentId");
-        sql.append(names.get("userId") == null ? "" : " and user_id = :userId");
+        if (names.get("userId") !=null&&!((List<Long>)names.get("userId")).isEmpty()){
+            sql.append(" and user_id in (:userId)");
+        }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
             sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())

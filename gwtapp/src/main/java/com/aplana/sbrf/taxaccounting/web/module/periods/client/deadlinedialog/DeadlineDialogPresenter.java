@@ -116,6 +116,7 @@ public class DeadlineDialogPresenter extends PresenterWidget<DeadlineDialogPrese
                     public void onSuccess(UpdateDepartmentDeadlineResult result) {
                         getView().hideButtons();
 	                    UpdateForm.fire(DeadlineDialogPresenter.this);
+	                    getView().hide();
                     }
                 }, DeadlineDialogPresenter.this)
         );

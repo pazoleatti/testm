@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
-import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +23,16 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 	private DepartmentService departmentService;
 
 	@Autowired
-	private FormTypeDao formTypeDao;
+	private FormTypeService formTypeService;
 
     @Autowired
     private FormDataAccessService formDataAccessService;
+
+    @Autowired
+    private FormTemplateService formTemplateService;
+
+    @Autowired
+    private PeriodService reportPeriodService;
 
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
@@ -69,9 +72,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         result.setKinds(kinds);
 
         // Вид налоговой формы
-        List<FormType> formTypesList = formTypeDao.getByTaxType(taxType);
+        TemplateFilter filter = new TemplateFilter();
+        filter.setActive(true);
+        filter.setTaxType(taxType);
+        List<FormType> formTypesList = formTypeService.getByFilter(filter);
         Collections.sort(formTypesList, new FormTypeAlphanumericComparator());
-        result.setFormTypeIds(formTypesList);
+        result.setFormType(formTypesList);
 
         // Подразделения
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
@@ -82,6 +88,42 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
 
 		return result;
+	}
+
+    @Override
+    public List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType) {
+        TemplateFilter filter = new TemplateFilter();
+        filter.setActive(true);
+        filter.setTaxType(taxType);
+        List<FormType> formTypesList = formTypeService.getByFilter(filter);
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+        ArrayList<FormType> resultList = new ArrayList<FormType>();
+        for (FormType type : formTypesList){
+            for (FormTemplate formTemplate : formTemplateService.getFormTemplateVersionsByStatus(type.getId(), VersionedObjectStatus.NORMAL)){
+                Date templateEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
+                if (templateEndDate != null){
+                    if ((formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) >= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0)
+                            || (templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) <= 0)
+                            || (formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <=0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0)) {
+                        resultList.add(type);
+                    }
+                }
+                else{
+                    if (formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
+                            || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0)
+                        resultList.add(type);
+                }
+            }
+        }
+        Collections.sort(resultList, new FormTypeAlphanumericComparator());
+        return resultList;
+    }
+
+	@Override
+	public List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo) {
+		List<FormDataKind> kinds = new ArrayList<FormDataKind>(FormDataKind.values().length);
+		kinds.addAll(formDataAccessService.getAvailableFormDataKind(userInfo, asList(taxType)));
+		return formTypeService.getFormTypes(departmentId, reportPeriodId, taxType, kinds);
 	}
 
     /**
@@ -95,21 +137,23 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         List<Integer> departments = formDataFilter.getDepartmentIds();
         if (departments == null || departments.isEmpty()) {
             departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(formDataFilter.getTaxType()));
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()));
         }
         formDataDaoFilter.setDepartmentIds(departments);
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
         if (formDataFilter.getFormDataKind() != null) {
-            formDataDaoFilter.setFormDataKind(asList(formDataFilter.getFormDataKind()));
+            List<FormDataKind> list = new ArrayList<FormDataKind>(FormDataKind.values().length);
+            for(Long id: formDataFilter.getFormDataKind()){
+                list.add(FormDataKind.fromId(id.intValue()));
+            }
+            formDataDaoFilter.setFormDataKind(list);
         } else {
             formDataDaoFilter.setFormDataKind(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
         }
         // Вид форм
-        if (formDataFilter.getFormTypeId() != null) {
-            formDataDaoFilter.setFormTypeIds(asList(formDataFilter.getFormTypeId()));
-        }
+        formDataDaoFilter.setFormTypeIds(formDataFilter.getFormTypeId());
         // Состояние
         if (formDataFilter.getFormState() != null) {
             formDataDaoFilter.setStates(asList(formDataFilter.getFormState()));
@@ -148,7 +192,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
             formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS);
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(formDataFilter.getTaxType())));
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values())));
         } else {
             throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
         }

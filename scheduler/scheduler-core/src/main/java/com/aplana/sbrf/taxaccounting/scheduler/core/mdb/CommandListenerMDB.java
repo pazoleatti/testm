@@ -10,7 +10,7 @@ import javax.ejb.TransactionManagementType;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
-@MessageDriven(
+/*@MessageDriven(
         activationConfig = {@ActivationConfigProperty(
                 propertyName = "destinationType",
                 propertyValue = "javax.jms.Queue"
@@ -19,7 +19,7 @@ import javax.jms.MessageListener;
                 propertyValue = "jms/transportQueue"
         )}
 )
-@TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionManagement(TransactionManagementType.CONTAINER)*/
 public class CommandListenerMDB implements MessageListener {
     private static final Log LOG = LogFactory.getLog(CommandListenerMDB.class);
 

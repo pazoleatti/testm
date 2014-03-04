@@ -1,12 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
+import com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
@@ -14,7 +21,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -26,6 +35,16 @@ public class AuditDaoTest {
 
     @Autowired
     private AuditDao auditDao;
+
+    @Before
+    public void init() {
+        Department dep = new Department();
+        dep.setId(1);
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
+        when(departmentDao.getDepartment(1)).thenReturn(dep);
+        ReflectionTestUtils.setField(auditDao, "departmentDao", departmentDao);
+    }
 
     @Test
     public void testGet() {
@@ -78,7 +97,9 @@ public class AuditDaoTest {
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
         filter.setFormTypeId(1);
-        filter.setUserId(1L);
+        List<Long> userList = new ArrayList<Long>();
+        userList.add(1L);
+        filter.setUserIds(userList);
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 
@@ -99,6 +120,20 @@ public class AuditDaoTest {
         assertEquals(1, logSearchResultItem.getUserDepartment().getId());
         assertEquals(2, records.getTotalCount());
     }
+
+	@Test
+	public void getLogsNull() {
+		LogSystemFilter filter = new LogSystemFilter();
+//		filter.setCountOfRecords(10);
+//		filter.setStartIndex(0);
+//		filter.setFormTypeId(1);
+		filter.setFromSearchDate(null);
+		filter.setToSearchDate(null);
+		filter.setTaxType(TaxType.TRANSPORT);
+
+		PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
+		assertFalse(records.isEmpty());
+	}
 
     @Test
     public void testRemove(){
@@ -131,6 +166,11 @@ public class AuditDaoTest {
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 
-        assertEquals(0, auditDao.getLogs(filter).size());
+        assertEquals(1, auditDao.getLogs(filter).size());
+    }
+
+    @Test
+    public void testGetDate(){
+        assertNotNull(auditDao.lastArchiveDate());
     }
 }

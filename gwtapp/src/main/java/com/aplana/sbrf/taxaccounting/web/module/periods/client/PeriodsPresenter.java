@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -19,7 +20,6 @@ import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreat
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -57,6 +57,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		TableRow getSelectedRow();
         void setCanChangeDepartment(boolean canChange);
 		void setCanChangeDeadline(boolean canChangeDeadline);
+		void setCanEdit(boolean canEdit);
 	}
 
 	private final TaPlaceManager placeManager;
@@ -129,7 +130,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         } else if ((getView().getFromYear() == null)
 				|| (getView().getToYear() == null)
 				|| (getView().getFromYear() > getView().getToYear())){
-			Dialog.warningMessage("Интервал периода поиска указан неверно!");
+			Dialog.warningMessage("Внимание","Интервал периода поиска указан неверно!");
 		} else {
 			find();
 		}
@@ -168,6 +169,30 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 
 	@Override
 	public void removePeriod() {
+
+		CanRemovePeriodAction action = new CanRemovePeriodAction();
+		action.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+		dispatcher.execute(action, CallbackUtils
+				.defaultCallback(new AbstractCallback<CanRemovePeriodResult>() {
+					@Override
+					public void onSuccess(CanRemovePeriodResult result) {
+						if (result.isCanRemove()) {
+							removeReportPeriod();
+						} else {
+							Dialog.confirmMessage("При удалении периода будут удалены все данные по бухгалтерской отчётности, " +
+									"относящиеся к удаляемому периоду. Вы уверены, что хотите удалить период?",
+									new DialogHandler() {
+										@Override
+										public void yes() {
+											removeReportPeriod();
+										}
+									});
+						}
+					}
+				}, PeriodsPresenter.this));
+	}
+
+	private void removeReportPeriod() {
 		RemovePeriodAction requestData = new RemovePeriodAction();
 		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
 		requestData.setTaxType(taxType);
@@ -218,6 +243,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
                         getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
                         getView().setCanChangeDepartment(result.canChangeDepartment());
+						getView().setCanEdit(result.isCanEdit());
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
 						openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
 						find();

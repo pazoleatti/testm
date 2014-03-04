@@ -11,7 +11,7 @@ import java.util.List;
 public class LogSystemFilter implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Long userId;
+    private List<Long> userIds;
     private List<Integer> reportPeriodIds;
     private FormDataKind formKind;
     private TaxType taxType;
@@ -41,12 +41,12 @@ public class LogSystemFilter implements Serializable {
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
 
-    public Long getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 
     public List<Integer> getReportPeriodIds() {

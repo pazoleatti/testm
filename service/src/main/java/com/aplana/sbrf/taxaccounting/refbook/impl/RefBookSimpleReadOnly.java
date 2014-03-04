@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +30,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	// Справочник "Системные роли"
 	public static final Long SEC_ROLE_REF_BOOK_ID = 95L;
 	public static final String SEC_ROLE_TABLE_NAME = "SEC_ROLE";
-    // Справочник "ОКТМО"
-    public static final Long OKTMO_REF_BOOK_ID = 96L;
-    public static final String OKTMO_TABLE_NAME = "REF_BOOK_OKTMO";
+    // Справочник "Подразделения"
+    public static final Long DEPARTMENT_REF_BOOK_ID = 30L;
+    public static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
 
 	@Autowired
 	private RefBookUtils refBookUtils;
@@ -46,6 +47,20 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter,
 			RefBookAttribute sortAttribute, boolean isSortAscending) {
 		return refBookUtils.getRecords(getRefBookId(), getTableName(), pagingParams, filter, sortAttribute, isSortAscending, getWhereClause());
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return refBookUtils.getChildrenRecords(getRefBookId(), getTableName(), parentRecordId, pagingParams, filter, sortAttribute, true);
+    }
+
+    @Override
+    public List<Long> getParentsHierarchy(Long uniqueRecordId) {
+        if (tableName.equals(DEPARTMENT_TABLE_NAME)) {
+            return refBookUtils.getParentsHierarchy(DEPARTMENT_TABLE_NAME, uniqueRecordId);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override

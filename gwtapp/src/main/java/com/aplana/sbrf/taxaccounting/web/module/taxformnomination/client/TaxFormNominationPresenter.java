@@ -25,6 +25,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +46,8 @@ public class TaxFormNominationPresenter
         // загрузка подразделений
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
 
+        void setDepartments(List<Integer> department);
+
         // Инициализация
         void init(TaxType nType, boolean isForm);
 
@@ -53,9 +56,9 @@ public class TaxFormNominationPresenter
         void setTaxFormKind(List<FormType> formTypes);
 
         // установка данные в таблицу отображающую данные вкладки "Назначение деклараций"
-        void setDataToFormTable(List<FormTypeKind> departmentFormTypes);
+        void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
         // установка данные в таблицу отображающую данные вкладки "Назначение налоговых форм"
-        void setDataToDeclarationTable(List<FormTypeKind> departmentFormTypes);
+        void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes, Map<Integer, String> departmentFullNames);
 
         // получение данных
         boolean isForm();
@@ -75,6 +78,14 @@ public class TaxFormNominationPresenter
          * Обновление линков редактировать/отменить назначение
          */
         void updatePanelAnchors();
+
+        public void updateDeclarationPanelAnchors();
+        /**
+         * Обновление страницы
+         */
+        void onReveal();
+
+        void clearFilter();
     }
 
     private TaxType taxType;
@@ -157,7 +168,7 @@ public class TaxFormNominationPresenter
                 .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(result.getTableData());
+                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         getView().updatePanelAnchors();
                     }
                 }, this));
@@ -169,7 +180,8 @@ public class TaxFormNominationPresenter
 		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
                     @Override
                     public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(result.getTableData());
+                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updateDeclarationPanelAnchors();
                     }
                 }, this));
     }
@@ -202,7 +214,7 @@ public class TaxFormNominationPresenter
                     @Override
                     public void onSuccess(GetTableDataResult result) {
                         if (result.getTableData() != null)
-                            getView().setDataToFormTable(result.getTableData());
+                            getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
                         // ??
                     }
                 }, this));
@@ -245,8 +257,12 @@ public class TaxFormNominationPresenter
 	@Override
 	public void onUpdateTable(UpdateTable event) {
         if (getView().isForm()){
+            if (event.getDepartments() != null){
+                getView().setDepartments(event.getDepartments());
+            }
             reloadFormTableData();
         } else {
+	        getView().setDepartments(event.getDepartments());
             reloadDeclarationTableData();
         }
 	}
@@ -262,8 +278,56 @@ public class TaxFormNominationPresenter
                             @Override
                             public void onSuccess(DeleteFormsSourceResult result) {
                                 LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+                                if (result.getUuid() != null){
+                                    Dialog.errorMessage("Ошибка", "Невозможно снять назначение налоговой формы, т. к. назначение является приемником данных / назначение является источником данных");
+                                }
                                 reloadFormTableData();
                             }
                         }, this));
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().onReveal();
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().clearFilter();
+    }
+
+    @Override
+    public void onFormRangeChange(final int start, int length) {
+        GetTableDataAction action = getTableDataAction();
+        action.setCount(length);
+        action.setStartIndex(start);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToFormTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updatePanelAnchors();
+                    }
+                }, this));
+    }
+
+
+    @Override
+    public void onDeclarationRangeChange(final int start, int length) {
+        GetTableDataAction action = getTableDataAction();
+        action.setCount(length);
+        action.setStartIndex(start);
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
+                    @Override
+                    public void onSuccess(GetTableDataResult result) {
+                        getView().setDataToDeclarationTable(start, result.getTotalCount(), result.getTableData(), result.getDepartmentFullNames());
+                        getView().updateDeclarationPanelAnchors();
+                    }
+                }, this));
     }
 }

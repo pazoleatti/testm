@@ -5,15 +5,15 @@
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client"
-             xmlns:a='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
+             xmlns:a="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
     <ui:style>
         .content {
             margin: 20px;
         }
 
-        .content tr{
+        .content tr {
             width: 480px;
         }
 
@@ -24,65 +24,68 @@
         }
 
         .footerButton {
-            margin:  8px 10px 8px 0px !important;
+            margin: 8px 10px 8px 0 !important;
             width: 74px;
         }
 
-        .labels{
+        .labels {
             text-align: right;
             width: 150px;
             padding-right: 5px;
         }
 
-        .rowMiddle td{
-            /*выравние по вертикали все строчки */
-            vertical-align: middle !important;
-        }
-
-        .datePo{
-            padding-left:  10px;
+        .datePo {
+            padding-left: 10px;
             padding-right: 10px;
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Редактирование назначения налоговых форм" >
-        <g:VerticalPanel height="100%" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" ui:field="modalWindowTitle">
+        <g:VerticalPanel height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
-<!--            Понадобится в версии 0.3.7
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
-                    <g:Label text="Период с" addStyleNames="{style.labels}"/>
-                    <d:DateMaskBoxPicker width="110px"/>
-                    <g:Label text="по " addStyleNames="{style.datePo}"/>
-                    <d:CustomDateBox width="104px"/>
-                </g:HorizontalPanel>-->
+                <!--Понадобится в версии 0.3.7
+                    <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}" visible="false">
+                        <g:Label text="Период с" addStyleNames="{style.labels}"/>
+                        <d:DateMaskBoxPicker width="110px"/>
+                        <g:Label text="по " addStyleNames="{style.datePo}"/>
+                        <d:DateMaskBoxPicker width="104px"/>
+                    </g:HorizontalPanel>
+                -->
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение" modal="true" multiselection="true" width="300px"/>
+                    <a:DepartmentPickerPopupWidget labelWordWrap="false" ui:field="departmentPicker"
+                                                   header="Выберите подразделение" modal="true" multiselection="true"
+                                                   width="300px"/>
                 </g:HorizontalPanel>
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Тип налоговой формы" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox ui:field="formDataKind" width="300px"/>
+                    <r:RefBookPickerWidget labelWordWrap="false" ui:field="formDataKind" attributeIdInt="837"
+                                           searchEnabled="false"
+                                           isHierarchical="false" multiSelect="false" width="300px"/>
                 </g:HorizontalPanel>
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Вид налоговой формы" addStyleNames="{style.labels}"/>
-                    <r:RefBookMultiPickerModalWidget ui:field="formTypeId" attributeIdInt="835" modal="true" multiSelect="true" width="300px"/>
+                    <r:RefBookPickerWidget labelWordWrap="false" ui:field="formTypeId" attributeIdInt="835"
+                                           isHierarchical="false" multiSelect="true" width="300px"/>
                 </g:HorizontalPanel>
 
-                <g:HorizontalPanel spacing="1" addStyleNames="{style.rowMiddle}">
+                <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" header="Выберите исполнителя" modal="true" multiselection="false" width="300px"/>
+                    <a:DepartmentPickerPopupWidget labelWordWrap="false" ui:field="performersPickerWidget"
+                                                   header="Выберите исполнителя" modal="true" multiselection="false"
+                                                   width="300px"/>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
 
             <style:Bar addStyleNames="{style.footerPanel}">
                 <style:RightBar>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="editButton" text="Изменить"/>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="createButton" text="Создать"/>
-                    <g:Button addStyleNames="{style.footerButton}"  ui:field="cancelButton" text="Закрыть"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="editButton" text="Изменить"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="createButton" text="Создать"/>
+                    <g:Button addStyleNames="{style.footerButton}" ui:field="cancelButton" text="Закрыть"/>
                 </style:RightBar>
             </style:Bar>
 

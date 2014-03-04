@@ -26,7 +26,7 @@
         </g:cell>
 
         <g:cell verticalAlignment="middle">
-            <g:Button ui:field="apply" text="Поиск"/>
+            <g:Button ui:field="apply" text="Найти"/>
         </g:cell>
     </g:HorizontalPanel>
 

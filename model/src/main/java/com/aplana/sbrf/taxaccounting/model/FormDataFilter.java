@@ -15,10 +15,10 @@ public class FormDataFilter implements Serializable{
 	private List<Integer> departmentIds;
 
 	/*Пример: Сведения о транспортных средствах, Расчет суммы налога, DEMO*/
-	private Integer formTypeId;
+	private List<Long> formTypeId;
 
 	/*Пример: Первичная, консалидированная, сводная, сводная банка*/
-    private FormDataKind formDataKind;
+    private List<Long> formDataKind;
 
 	private TaxType taxType;
 
@@ -37,6 +37,8 @@ public class FormDataFilter implements Serializable{
 
 	private Boolean returnState;
 
+    // месяцы
+    private Months formMonth;
 
 	public List<Integer> getDepartmentIds() {
 		return departmentIds;
@@ -46,23 +48,23 @@ public class FormDataFilter implements Serializable{
 		this.departmentIds = departmentIds;
 	}
 
-	public Integer getFormTypeId() {
+	public List<Long> getFormTypeId() {
 		return formTypeId;
 	}
 
-	public void setFormTypeId(Integer formTypeId) {
+	public void setFormTypeId(List<Long> formTypeId) {
 		this.formTypeId = formTypeId;
 	}
 
-	public FormDataKind getFormDataKind() {
-		return formDataKind;
-	}
+    public List<Long> getFormDataKind() {
+        return formDataKind;
+    }
 
-	public void setFormDataKind(FormDataKind formDataKind) {
-		this.formDataKind = formDataKind;
-	}
+    public void setFormDataKind(List<Long> formDataKind) {
+        this.formDataKind = formDataKind;
+    }
 
-	public TaxType getTaxType() {
+    public TaxType getTaxType() {
 		return taxType;
 	}
 
@@ -125,5 +127,12 @@ public class FormDataFilter implements Serializable{
 	public void setReportPeriodIds(List<Integer> reportPeriodIds) {
 		this.reportPeriodIds = reportPeriodIds;
 	}
-	
+
+    public Months getFormMonth() {
+        return formMonth;
+    }
+
+    public void setFormMonth(Months formMonth) {
+        this.formMonth = formMonth;
+    }
 }

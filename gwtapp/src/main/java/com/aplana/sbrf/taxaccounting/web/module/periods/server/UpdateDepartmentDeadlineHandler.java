@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.model.Notification;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.UpdateDepartmentDeadlineAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.UpdateDepartmentDeadlineResult;
@@ -35,6 +32,9 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
     @Autowired
     private DepartmentService departmentService;
 
+	@Autowired
+	private TAUserService userService;
+
     public UpdateDepartmentDeadlineHandler() {
         super(UpdateDepartmentDeadlineAction.class);
     }
@@ -44,16 +44,11 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
         UpdateDepartmentDeadlineResult result = new UpdateDepartmentDeadlineResult();
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         TAUserInfo userInfo = securityService.currentUserInfo();
-
-        String text = "%s назначил новый срок сдачи отчетности подразделению %s для %s в периоде %s %s года: %s";
+        String text = "%s назначил подразделению %s новый срок сдачи отчетности для %s в периоде %s %s года: %s";
         List<Notification> notifications = new ArrayList<Notification>();
-        for (DepartmentPair pair : action.getDepartments()) {
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            Department receiver =
-		            pair.getParentDepartmentId() == null
-		            ? null
-		            : departmentService.getDepartment(pair.getParentDepartmentId());
-
+	    for (DepartmentPair pair : action.getDepartments()) {
+            action.getTaxType().getName();
+            char taxType = action.getTaxType().getCode();
             Notification notification = new Notification();
             notification.setCreateDate(new Date());
             notification.setDeadline(action.getDeadline());
@@ -61,7 +56,7 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setSenderDepartmentId(pair.getDepartmentId());
             notification.setReceiverDepartmentId(pair.getParentDepartmentId());
             notification.setText(String.format(text,
-                    userInfo.getUser().getName(), receiver == null ? "" : receiver.getName(), action.getTaxType().getName(),
+                    userInfo.getUser().getName(), departmentService.getParentsHierarchy(pair.getDepartmentId()), TaxTypeCase.fromCode(taxType).getGenitive(),
                     action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
 
             notifications.add(notification);

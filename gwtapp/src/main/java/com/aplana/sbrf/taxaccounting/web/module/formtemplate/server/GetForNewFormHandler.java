@@ -26,7 +26,7 @@ public class GetForNewFormHandler extends AbstractActionHandler<GetForNewFormAct
     @Override
     public GetForNewFormResult execute(GetForNewFormAction action, ExecutionContext context) throws ActionException {
         GetForNewFormResult result = new GetForNewFormResult();
-        result.setRefBookList(refBookFactory.getAll(false, null));
+        result.setRefBookList(refBookFactory.getAll(false));
         return result;
     }
 

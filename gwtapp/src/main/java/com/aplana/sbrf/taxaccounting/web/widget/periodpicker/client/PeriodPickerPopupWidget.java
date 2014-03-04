@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.adapters.TakesValueEditor;
@@ -14,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
@@ -45,15 +45,16 @@ public class PeriodPickerPopupWidget extends Composite implements
 	Panel panel;
 	
 	@UiField
-	HasText text;
+    TextBox text;
 	 
 	
-	private List<Integer> value;
+	private List<Integer> value =  new LinkedList<Integer>();
 	
 	private TakesValueEditor<List<Integer>> editor;
 	
 	private Map<Integer, String> dereferenceValue;
 	private Map<Integer, Pair<Date, Date>> reportPeriodDates;
+	private Map<Integer, Integer> reportPeriodYears;
 
 	public PeriodPickerPopupWidget(){
 		periodPicker = new PeriodPickerWidget();
@@ -72,9 +73,11 @@ public class PeriodPickerPopupWidget extends Composite implements
     public void setPeriods(List<ReportPeriod> periods) {
         dereferenceValue = new HashMap<Integer, String>();
         reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
+	    reportPeriodYears = new HashMap<Integer, Integer>();
         for (ReportPeriod reportPeriod : periods) {
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
             reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
+	        reportPeriodYears.put(reportPeriod.getId(), reportPeriod.getTaxPeriod().getYear());
         }
         periodPicker.setPeriods(periods);
     }
@@ -86,7 +89,8 @@ public class PeriodPickerPopupWidget extends Composite implements
 
     @Override
     public List<Integer> getValue() {
-        return this.value;
+        Collections.sort(value);
+        return new ArrayList<Integer>(value);
     }
 
     @Override
@@ -96,7 +100,10 @@ public class PeriodPickerPopupWidget extends Composite implements
 
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
-        this.value = value;
+        this.value.clear();
+        if(value != null){
+            this.value.addAll(value);
+        }
         dereference(this.value);
         if (fireEvents){
             ValueChangeEvent.fire(this, this.value);
@@ -154,24 +161,13 @@ public class PeriodPickerPopupWidget extends Composite implements
             for (Integer val : value) {
                 String name = dereferenceValue.get(val);
                 if (name != null){
-                    strings.add(name);
+                    strings.add(reportPeriodYears.get(val) + ":" + name);
                 }
             }
         }
-        String txt = joinListToString(strings);
+        String txt = TextUtils.joinListToString(strings);
         this.text.setText(txt);
-        ((UIObject) this.text).setTitle(txt);
-    }
-
-    private String joinListToString(Collection<String> strings) {
-        if ((strings == null) || strings.isEmpty()) {
-            return "";
-        }
-        StringBuilder s = new StringBuilder();
-        for (String name : strings) {
-            s.append(name + "; ");
-        }
-        return s.toString();
+        this.text.setTitle(TextUtils.generateTextBoxTitle(txt));
     }
 
 	@Override

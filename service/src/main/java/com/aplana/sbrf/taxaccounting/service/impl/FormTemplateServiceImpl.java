@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -64,7 +65,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	@Override
 	public FormTemplate get(int formTemplateId) {
-		return formTemplateDao.get(formTemplateId);
+        try {
+            return formTemplateDao.get(formTemplateId);
+        }catch (DaoException e){
+            throw new ServiceException("Обновление статуса версии.", e);
+        }
 	}
 
     @Transactional(readOnly = false)
@@ -77,8 +82,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	}
 
 	@Override
-	public int getActiveFormTemplateId(int formTypeId) {
-		return formTemplateDao.getActiveFormTemplateId(formTypeId);
+	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
+		return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
 	}
 
 	@Override
@@ -271,6 +276,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
+    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+        return formTemplateDao.updateVersionStatus(versionStatus, formTemplateId);
+    }
+
+    @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
 		ObjectLock<Integer> objectLock = lockDao.getObjectLock(formTemplateId, FormTemplate.class);
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
@@ -370,5 +380,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }
 
         return statusList;
+    }
+
+    @Override
+    public boolean isMonthly(int formId) {
+        FormTemplate formTemplate = formTemplateDao.get(formId);
+        return formTemplate.isMonthly();
     }
 }

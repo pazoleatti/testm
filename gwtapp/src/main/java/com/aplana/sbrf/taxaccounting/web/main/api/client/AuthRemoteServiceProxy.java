@@ -6,6 +6,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.rpc.impl.RemoteServiceProxy;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.client.rpc.impl.RpcStatsContext;
@@ -23,65 +24,74 @@ import com.google.gwt.user.client.rpc.impl.Serializer;
  * @see com.google.gwt.user.client.rpc.impl.RemoteServiceProxy
  */
 public class AuthRemoteServiceProxy extends RemoteServiceProxy {
-	/**
-	 * Переопределен стандартный конструктор.
-	 *
-	 * @see com.google.gwt.user.client.rpc.impl.RemoteServiceProxy#RemoteServiceProxy(String, String, String, com.google.gwt.user.client.rpc.impl.Serializer)
-	 */
-	protected AuthRemoteServiceProxy(
-			String moduleBaseURL, String remoteServiceRelativePath,
-			String serializationPolicyName, Serializer serializer
-	) {
-		super(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, serializer);
-	}
+    /**
+     * Переопределен стандартный конструктор.
+     *
+     * @see com.google.gwt.user.client.rpc.impl.RemoteServiceProxy#RemoteServiceProxy(String, String, String, com.google.gwt.user.client.rpc.impl.Serializer)
+     */
+    protected AuthRemoteServiceProxy(
+            String moduleBaseURL, String remoteServiceRelativePath,
+            String serializationPolicyName, Serializer serializer
+    ) {
+        super(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, serializer);
+    }
 
-	/**
-	 * Этот метод создает обработчик ответа, который мы и переопределяем. Чтобы долго не возиться, я просто взял
-	 * обработчик, получаемый, стандартным способом и использовал его в качестве делегата для своего обработчика.
-	 *
-	 * @see com.google.gwt.user.client.rpc.impl.RemoteServiceProxy#doCreateRequestCallback(com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader, String, com.google.gwt.user.client.rpc.impl.RpcStatsContext, com.google.gwt.user.client.rpc.AsyncCallback)
-	 */
-	@Override
-	protected <T> RequestCallback doCreateRequestCallback(
-			RequestCallbackAdapter.ResponseReader responseReader, String methodName,
-			RpcStatsContext statsContext, AsyncCallback<T> callback
-	) {
-		// Получаем делегата. Ему мы будем передавать ответ, если не будем знать что делать.
-		final RequestCallback delegate = super.doCreateRequestCallback(responseReader, methodName, statsContext, callback);
+    /**
+     * Этот метод создает обработчик ответа, который мы и переопределяем. Чтобы долго не возиться, я просто взял
+     * обработчик, получаемый, стандартным способом и использовал его в качестве делегата для своего обработчика.
+     *
+     * @see com.google.gwt.user.client.rpc.impl.RemoteServiceProxy#doCreateRequestCallback(com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader, String, com.google.gwt.user.client.rpc.impl.RpcStatsContext, com.google.gwt.user.client.rpc.AsyncCallback)
+     */
+    @Override
+    protected <T> RequestCallback doCreateRequestCallback(
+            RequestCallbackAdapter.ResponseReader responseReader, String methodName,
+            RpcStatsContext statsContext, final AsyncCallback<T> callback
+    ) {
+        // Получаем делегата. Ему мы будем передавать ответ, если не будем знать что делать.
+        final RequestCallback delegate = super.doCreateRequestCallback(responseReader, methodName, statsContext, callback);
 
-		// А вот это уже наш обработчик.
-		return new RequestCallback() {
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				if (response == null) {
-					throw new IllegalArgumentException("Response can't be null.");
-				}
+        // А вот это уже наш обработчик.
+        return new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                if (response == null) {
+                    throw new IllegalArgumentException("Response can't be null.");
+                }
 
-				// Получаем стутус и тип ответа.
-				int status = response.getStatusCode();
-				String contentType = response.getHeader("Content-Type");
+                // Получаем стутус и тип ответа.
+                int status = response.getStatusCode();
+                String contentType = response.getHeader("Content-Type");
 
-				// Можно включить, для отладки.
-				// GWT.log("Get response with code "+ status+" and ContentType=\""+contentType+"\"");
+                // Можно включить, для отладки.
+                // GWT.log("Get response with code "+ status+" and ContentType=\""+contentType+"\"");
 
-				// Если ответ 200 ОК и тип HTML, релоадим страницу, так чтобы попать на страницу авторизации.
-				if (status == Response.SC_OK && contentType != null && contentType.contains("html")) {
-					// Illegal content type. Redirect to auth page.
-					Dialog.infoMessage("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
-					Window.Location.reload();
-				} else {
-					// Во всех остальных случаях, пусть разбирается стандартный обраблотчик.
-					delegate.onResponseReceived(request, response);
-				}
-			}
+                // Если ответ 200 ОК и тип HTML, релоадим страницу, так чтобы попать на страницу авторизации.
+                if (status == Response.SC_OK && contentType != null && contentType.contains("html")) {
+                    // Illegal content type. Redirect to auth page.
+                    Dialog.infoMessage("Ваша рабочая сессия истекла. Вы будете перенаправлены на форму авторизации.");
+                    Window.Location.reload();
+                /*
+                 * Если ответ 403, заменяем текст сообщения, т.к. по умолчанию берет с /WEB-INF/jsp/forbidden.jsp
+                 * и отображается вместе с HTML тегами.
+                 * Закоментировал, т.к. на стенде не работает этот вариант.
+                 */
+//                } else if (status == Response.SC_FORBIDDEN) {
+//                    String encoded = "Доступ запрещен!";
+//                    Throwable caught = new StatusCodeException(status, encoded);
+//                    callback.onFailure(caught);
+                } else {
+                    // Во всех остальных случаях, пусть разбирается стандартный обраблотчик.
+                    delegate.onResponseReceived(request, response);
+                }
+            }
 
-			/**
-			 * Обработку ошибок поручаем делегату, т.е. стандартному обработчику.
-			 */
-			@Override
-			public void onError(Request request, Throwable exception) {
-				delegate.onError(request, exception);
-			}
-		};
-	}
+            /**
+             * Обработку ошибок поручаем делегату, т.е. стандартному обработчику.
+             */
+            @Override
+            public void onError(Request request, Throwable exception) {
+                delegate.onError(request, exception);
+            }
+        };
+    }
 }

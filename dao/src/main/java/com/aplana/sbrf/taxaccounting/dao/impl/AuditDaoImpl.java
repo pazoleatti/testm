@@ -4,9 +4,13 @@ import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,6 +40,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
 	private static final String dateFormat = "yyyyMMdd HH:mm:ss";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+    //Т.к. в базе при построении запросы часы/минуты/секунды присваиваются значения 00:00:00
+    //соответственно поиск только за прошлый день поучается и надо прибавить один день, чтобы получить поиск за текущий
+    private static final int oneDayTime = 24 * 60 * 60 * 1000;
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
@@ -65,15 +72,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
-		sql.append(" order by ls.id desc,");
-		sql.append(" rp.start_date desc,");
-		sql.append(" rp.end_date desc,");
-		sql.append(" rp.ord desc,");
-		sql.append(" dep.name asc,");
-		sql.append(" dt.name asc,");
-		sql.append(" ft.name asc,");
-		sql.append(" ls.form_kind_id asc,");
-		sql.append(" su.name asc ");
+        sql.append(" order by ls.log_date desc");
 
 		sql.append(") dat) ordDat");
         List<LogSearchResultItem> records;
@@ -83,10 +82,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             records = getJdbcTemplate().query(
                     sql.toString(),
                     new Object[] {
+		                    filter.getFromSearchDate(),
+		                    filter.getFromSearchDate(),
+		                    filter.getToSearchDate(),
                             filter.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
                             filter.getStartIndex() + filter.getCountOfRecords()
                     },
                     new int[] {
+		                    Types.DATE,
+		                    Types.DATE,
+		                    Types.DATE,
                             Types.NUMERIC,
                             Types.NUMERIC
                     },
@@ -95,6 +100,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }else{
             sql.append(" order by ordDat.rn");
             records = getJdbcTemplate().query(sql.toString(),
+		            new Object[] {
+			            filter.getFromSearchDate(),
+			            filter.getFromSearchDate(),
+			            filter.getToSearchDate()},
+		            new int[] {
+				            Types.DATE,
+				            Types.DATE,
+				            Types.DATE,
+		            },
                     new AuditRowMapper());
         }
 
@@ -147,15 +161,38 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 });
     }
 
-    private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
-		sql.append(" WHERE log_date BETWEEN TO_DATE('").append
-				(formatter.format(filter.getFromSearchDate()))
-				.append("', '").append(dbDateFormat).append("')").append(" AND TO_DATE('").append
-				(formatter.format(filter.getToSearchDate()))
-				.append("', '").append(dbDateFormat).append("')");
+    @Override
+    public Date lastArchiveDate() {
+        try {
+            return getJdbcTemplate().queryForObject("select log_date from log_system where event_id = 601", Date.class);
+        } catch (EmptyResultDataAccessException e){
+            logger.warn("Не найдено записей об архивации.", e);
+            return null;
+        } catch (IncorrectResultSizeDataAccessException e){
+            logger.error("Найдено больше одной записи об архивировании.", e);
+            throw new DaoException("Найдено больше одной записи об архивировании.", e);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении даты последней архивации", e);
+            throw new DaoException("Ошибка при получении даты последней архивации", e);
+        }
 
-		if (filter.getUserId() != null) {
-			sql.append(" AND user_id = ").append(filter.getUserId());
+    }
+
+    private void appendSelectWhereClause(StringBuilder sql, LogSystemFilter filter, String prefix) {
+		sql.append(" WHERE (? is null or (log_date BETWEEN ? AND (? + interval '1' day)))");
+
+		if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()) {
+            List<Long> userList = filter.getUserIds();
+            String userSql = "";
+            for(Long temp : userList){
+                if (userSql.equals("")){
+                    userSql = temp.toString();
+                }
+                else{
+                    userSql = userSql + ", " + temp.toString();
+                }
+            }
+            sql.append(String.format(" AND %suser_id in ", prefix)).append("(").append(userSql).append(")");
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
@@ -187,7 +224,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filter.getTaxType() != null){
-            sql.append(String.format(" AND %stax_type = ", prefix.equals("")?"":"tp.")).append("'" + filter.getTaxType().getCode() + "'");
+            sql.append(String.format(" AND %stax_type = ", prefix.equals("") ? "" : "tp.")).append("'").append(filter.getTaxType().getCode()).append("'");
         }
 
 		if (filter.getDepartmentId() != null) {
@@ -206,6 +243,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
 			log.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+            log.setDepartmentName(rs.getInt("department_id")!=0?departmentDao.getParentsHierarchy(rs.getInt("department_id")):log.getDepartment().getName());
 			log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             if(rs.getInt("declaration_type_id") != 0)
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
@@ -225,6 +263,18 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
 		appendSelectWhereClause(sql, filter, "");
-		return getJdbcTemplate().queryForInt(sql.toString());
+		return getJdbcTemplate().queryForInt(
+				sql.toString(),
+				new Object[] {
+					filter.getFromSearchDate(),
+					filter.getFromSearchDate(),
+					filter.getToSearchDate()
+				},
+				new int[] {
+						Types.DATE,
+						Types.DATE,
+						Types.DATE,
+				}
+		);
 	}
 }

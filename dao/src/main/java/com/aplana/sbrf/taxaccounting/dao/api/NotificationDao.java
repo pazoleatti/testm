@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 
 import java.util.List;
 
@@ -54,4 +55,32 @@ public interface NotificationDao {
      * @param departments группа подразделений, связки подразделение-родительское подразделение
      */
     void deleteList(int reportPeriodId, List<DepartmentPair> departments);
+
+	/**
+	 * Получить список идентификаторов оповещений для подразделения - получателя
+	 * @param departmentId подразделение - получатель
+	 * @return список идентификаторов оповещений
+	 */
+	List<Integer> listForDepartment(int departmentId);
+
+	/**
+	 * Получить оповещение по его идентификатору
+	 * @param id идентификатор оповещения
+	 * @return оповещение
+	 */
+	Notification get(int id);
+
+	/**
+	 * Получить список оповещений по фильтру
+	 * @param filter фильтр
+	 * @return список идентификаторов оповещений
+	 */
+	List<Integer> getByFilter(NotificationsFilterData filter);
+
+	/**
+	 * Получить количество оповещений по фильтру
+	 * @param filter фильтр
+	 * @return количество оповещений
+	 */
+	int getCountByFilter(NotificationsFilterData filter);
 }

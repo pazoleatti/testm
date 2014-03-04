@@ -6,12 +6,30 @@ import java.util.List;
 
 public class GetRefBookAttributesResult implements Result {
 	List<RefBookColumn> columns;
+    private boolean readOnly;
+    private Integer refBookType;
 
-	public List<RefBookColumn> getColumns() {
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public List<RefBookColumn> getColumns() {
 		return columns;
 	}
 
 	public void setColumns(List<RefBookColumn> columns) {
 		this.columns = columns;
 	}
+
+    public Integer getRefBookType() {
+        return refBookType;
+    }
+
+    public void setRefBookType(Integer refBookType) {
+        this.refBookType = refBookType;
+    }
 }

@@ -69,11 +69,12 @@ public class PrintingServiceImpl implements PrintingService {
         FormDataReport data = new FormDataReport();
         FormData formData = formDataDao.get(formDataId);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
-        Department department =  departmentDao.getDepartment(formData.getPrintDepartmentId());
+        Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
+                formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
 
         data.setData(formData);
-        data.setDepartment(department);
+        data.setDepartmentName(departmentDao.getParentsHierarchy(department.getId()));
         data.setFormTemplate(formTemplate);
         data.setReportPeriod(reportPeriod);
         data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
@@ -84,7 +85,7 @@ public class PrintingServiceImpl implements PrintingService {
         RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                 getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
         try {
-            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,isShowChecked, dataRows, refBookValue);
+            FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
             return builder.createReport();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

@@ -88,7 +88,7 @@
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <g:Button text="Сохранить" ui:field="saveButton"/>
                     <g:Button text="Сбросить" ui:field="resetButton"/>
-                    <g:Button text="Отмена" ui:field="cancelButton"/>
+                    <g:Button text="Отменить" ui:field="cancelButton"/>
                     <g:Button text="Ввести в действие" ui:field="activateVersion"/>
                 </g:HorizontalPanel>
 
@@ -107,7 +107,7 @@
                             </g:HorizontalPanel>
                         </g:cell>
                         <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Период актульности с"/>
+                            <g:Label width="150px" text="Период актуальности с"/>
                             <g:HorizontalPanel width="300px">
                                 <w:YearMaskBox ui:field="versionDateBegin" width="134px"/>
                                 <g:cell horizontalAlignment="center">

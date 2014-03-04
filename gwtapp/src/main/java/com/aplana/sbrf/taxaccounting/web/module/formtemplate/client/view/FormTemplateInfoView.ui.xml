@@ -2,34 +2,52 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
 
-	<ui:style>
-		.formStyle {
-			background-color: #949494;
-			padding: 15px;
-			margin: 30px;
-			color: white;
-			border-color: #828282;
-		}
-	</ui:style>
+    <ui:style>
+        .formStyle {
+            background-color: #949494;
+            padding: 15px;
+            margin: 30px;
+            color: white;
+            border-color: #828282;
+        }
+        .margin5{
+            margin-right: 5px;
+        }
+    </ui:style>
 
-	<g:SimplePanel width="100%" height="100%">
+    <g:SimplePanel width="100%" height="100%">
 
-		<g:FlowPanel styleName="{style.formStyle}">
+        <g:FlowPanel styleName="{style.formStyle}">
 
-			<g:HorizontalPanel>
-				<g:Label width="300px">Период актульности с</g:Label>
-				<!--<g:TextBox width="100px" ui:field="versionBox" />-->
-                <w:YearMaskBox ui:field="versionDateBegin"/>
-                <g:Label width="100px">1 января</g:Label>
-                <g:Label width="300px">по</g:Label>
-                <w:YearMaskBox ui:field="versionDateEnd"/>
-                <g:Label width="100px">31 декабря</g:Label>
-			</g:HorizontalPanel>
+            <g:HorizontalPanel>
+                <g:cell>
+                    <g:Label width="300px">Период актуальности с</g:Label>
+                </g:cell>
+                <g:cell>
+                    <g:HorizontalPanel width="500px">
+                        <g:cell verticalAlignment="middle">
+                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateBegin"/>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label addStyleNames="{style.margin5}" width="60px">1 января</g:Label>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label addStyleNames="{style.margin5}" width="30px">по</g:Label>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle">
+                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateEnd"/>
+                        </g:cell>
+                        <g:cell verticalAlignment="middle" horizontalAlignment="ALIGN_RIGHT">
+                            <g:Label width="70px">31 декабря</g:Label>
+                        </g:cell>
+                    </g:HorizontalPanel>
+                </g:cell>
+            </g:HorizontalPanel>
 
-			<g:HorizontalPanel>
-				<g:Label width="300px">Фиксированный набор строк</g:Label>
-				<g:CheckBox ui:field="fixedRowsCheckBox" />
-			</g:HorizontalPanel>
+            <g:HorizontalPanel>
+                <g:Label width="300px">Фиксированный набор строк</g:Label>
+                <g:CheckBox ui:field="fixedRowsCheckBox"/>
+            </g:HorizontalPanel>
 
             <g:HorizontalPanel>
                 <g:Label width="300px">Признак ежемесячной формы</g:Label>
@@ -41,18 +59,18 @@
 				<g:TextBox width="500px" ui:field="nameBox" />
 			</g:HorizontalPanel>
 
-			<g:HorizontalPanel height="30px">
-				<g:Label width="300px">Полное наименование формы</g:Label>
-				<g:TextBox width="500px" ui:field="fullnameBox" />
-			</g:HorizontalPanel>
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Полное наименование формы</g:Label>
+                <g:TextBox width="500px" ui:field="fullnameBox"/>
+            </g:HorizontalPanel>
 
-			<g:HorizontalPanel height="30px">
-				<g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
-				<g:TextBox width="500px" ui:field="codeBox" />
-			</g:HorizontalPanel>
+            <g:HorizontalPanel height="30px">
+                <g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
+                <g:TextBox width="500px" ui:field="codeBox"/>
+            </g:HorizontalPanel>
 
-		</g:FlowPanel>
-	</g:SimplePanel>
+        </g:FlowPanel>
+    </g:SimplePanel>
 
 
 </ui:UiBinder>

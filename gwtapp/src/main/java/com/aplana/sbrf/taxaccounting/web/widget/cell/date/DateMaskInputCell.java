@@ -17,6 +17,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
+import com.google.gwt.user.client.Window;
 
 import java.util.Date;
 
@@ -32,6 +33,7 @@ public class DateMaskInputCell extends
 
 	public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 	public static final String DEFAULT_DATE_MASK = "99.99.9999";
+    public static final String CHECKED_EMPTY_VALUE = "__.__.____";
 
 	private ValueUpdater<Date> valueUpdater;
 	private Context context;
@@ -566,14 +568,14 @@ public class DateMaskInputCell extends
 	private boolean isInputIsCorrect(Element parent){
 		InputElement input = (InputElement) parent.getFirstChild();
 		String inputted = input.getValue();
-		try{
-			if (inputted.length() > dateFormat.length()) {
-				throw new IllegalArgumentException();
-			}
-			DateTimeFormat.getFormat(dateFormat).parseStrict(inputted);
-		} catch (IllegalArgumentException ex){
-			return false;
-		}
+        try{
+            if (inputted.length() > dateFormat.length()) {
+                throw new IllegalArgumentException();
+            }
+            DateTimeFormat.getFormat(dateFormat).parseStrict(inputted);
+        } catch (IllegalArgumentException ex){
+            return false;
+        }
 		return true;
 	}
 
@@ -585,7 +587,7 @@ public class DateMaskInputCell extends
 	private static boolean isBlank(Element parent) {
 		InputElement input = (InputElement) parent.getFirstChild();
 		String text = input.getValue();
-		return text == null || text.trim().isEmpty();
+		return text.equals(CHECKED_EMPTY_VALUE) || text == null || text.trim().isEmpty();
 	}
 
 	private void commitIfValueIsCorrect(Context context, Element parent, Date value, ViewData viewData, ValueUpdater<Date> valueUpdater){

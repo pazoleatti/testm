@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.List;
 
@@ -25,7 +23,7 @@ public interface FormTypeDao {
      * Список только активных версий с полем status = 0
 	 * @return список видов налоговых форм
 	 */
-    List<FormType> getAll();
+    List<Integer> getAll();
 
     /**
      * Получить все существующие виды налоговых форм по виду налога
@@ -44,5 +42,6 @@ public interface FormTypeDao {
     int save(FormType formType);
 
     void delete(int formTypeId);
-	
+
+	List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind);
 }

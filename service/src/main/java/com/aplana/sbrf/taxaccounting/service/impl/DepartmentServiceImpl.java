@@ -148,16 +148,16 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
             retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
             // все дочерние подразделения для подразделения пользователя (включая его)
             for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
                 retList.add(dep.getId());
             }
-            retList.addAll(getExecutorsDepartments(retList));
+            retList.addAll(getExecutorsDepartments(retList, taxTypes));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -195,7 +195,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         // подразделение, которому назначена налоговая форма
         retList.add(departmentDao.getDepartment(formData.getDepartmentId()).getId());
         // подразделения которые назначены исполнителями для налоговой формы
-        retList.addAll(getExecutorsDepartments(retList));
+        retList.addAll(getExecutorsDepartments(retList, formData.getFormType().getId()));
         return retList;
     }
 
@@ -231,7 +231,28 @@ public class DepartmentServiceImpl implements DepartmentService {
 		return result;
 	}
 
-	private List<Integer> getExecutorsDepartments(List<Integer> departments) {
-        return departmentDao.getPerformers(departments);
+    @Override
+    public List<Department> getDepartmentForSudir() {
+        ArrayList<Department> departments = new ArrayList<Department>();
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
+        departments.addAll(departmentDao.getDepartmentsByType(DepartmentType.MANAGEMENT.getCode()));
+        return departments;
     }
+
+    @Override
+    public String getParentsHierarchy(Integer departmentId) {
+        if (departmentId.equals(0)) {
+            return departmentDao.getDepartment(departmentId).getName();
+        }
+
+        return departmentDao.getParentsHierarchy(departmentId);
+    }
+
+    private List<Integer> getExecutorsDepartments(List<Integer> departments, int formType) {
+        return departmentDao.getPerformers(departments, formType);
+    }
+
+	private List<Integer> getExecutorsDepartments(List<Integer> departments, List<TaxType> taxTypes) {
+		return departmentDao.getPerformers(departments, taxTypes);
+	}
 }

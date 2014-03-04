@@ -20,8 +20,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -77,8 +79,8 @@ public class GetDeclarationDataHandler
 		result.setDeclarationType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
 				.getType().getName());
-		result.setDepartment(departmentService.getDepartment(
-				declaration.getDepartmentId()).getName());
+		result.setDepartment(departmentService.getParentsHierarchy(
+				declaration.getDepartmentId()));
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(
                 declaration.getReportPeriodId());
 		result.setReportPeriod(reportPeriod.getName());

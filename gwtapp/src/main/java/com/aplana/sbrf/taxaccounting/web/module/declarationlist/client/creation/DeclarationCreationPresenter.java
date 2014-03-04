@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
@@ -51,6 +48,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 
 	private DispatchAsync dispatcher;
 	private PlaceManager placeManager;
+
+	private TaxType taxType;
 
 	@Inject
 	public DeclarationCreationPresenter(final EventBus eventBus, final MyView view,
@@ -150,6 +149,25 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		}
 	}
 
+	@Override
+	public void onDepartmentChange() {
+		if (getView().getSelectedDepartment().isEmpty() || getView().getSelectedReportPeriod().isEmpty()) {
+			return;
+		}
+		GetDeclarationTypeAction action = new GetDeclarationTypeAction();
+		action.setTaxType(taxType);
+
+		action.setDepartmentId(getView().getSelectedDepartment().get(0));
+		action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
+
+		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
+			@Override
+			public void onSuccess(GetDeclarationTypeResult result) {
+				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
+			}
+		}, this) );
+	}
+
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
 		if(filter.getDeclarationTypeId() == null){
 			MessageEvent.fire(this, "Для создания декларации необходимо выбрать вид декларации");
@@ -175,12 +193,12 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
         GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(dataFilter.getTaxType());
+	    this.taxType = dataFilter.getTaxType();
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getFilterValues().getDepartmentIds());
-                getView().setAcceptableReportPeriods(result.getPeriods());
-                getView().setAcceptableDeclarationTypes(result.getFilterValues().getDeclarationTypes());
+                getView().setAcceptableReportPeriods(result.getPeriodsForCreation());
                 setDeclarationFilter(dataFilter);
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }

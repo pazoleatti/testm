@@ -4,7 +4,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -41,14 +40,15 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
      * объект-компаньен, реализует функционал
      * работы с внешними справочниками
      */
-    private ForeignKeyResolver forignKeyResolver;
+    private ForeignKeyResolver foreignKeyResolver;
 
     private TypeVerifier typeVerifier;
 
     @PostConstruct
     public void init(){
-        forignKeyResolver = applicationContext.getBean("foreignKeyResolver", ForeignKeyResolver.class);
+        foreignKeyResolver = applicationContext.getBean("foreignKeyResolver", ForeignKeyResolver.class);
         typeVerifier = applicationContext.getBean(TypeVerifier.class);
+        typeVerifier.setForeignKeyResolver(foreignKeyResolver);
     }
 
     public PreparedStatementData getPs() {
@@ -57,7 +57,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     public void setPs(PreparedStatementData ps) {
         this.ps = ps;
-        forignKeyResolver.setPs(ps);
+        foreignKeyResolver.setPs(ps);
     }
 
     public RefBook getRefBook() {
@@ -66,7 +66,8 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     public void setRefBook(RefBook refBook) {
         this.refBook = refBook;
-        forignKeyResolver.setRefBook(refBook);
+        typeVerifier.setRefBook(refBook);
+        foreignKeyResolver.setRefBook(refBook);
     }
 
 
@@ -79,12 +80,6 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     }
 
 	@Override public void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx) { }
-
-    @Override
-    public void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
-
-    @Override
-    public void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx) {}
 
     @Override
     public void enterAlias(@NotNull FilterTreeParser.AliasContext ctx) {
@@ -102,14 +97,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
     @Override
     public void exitFuncwrap(@NotNull FilterTreeParser.FuncwrapContext ctx) {
         ps.appendQuery(")");
-        // текущие поддерживаемые функции LOWER и LENGTH, они работают со строковыми параметрами
-        typeVerifier.checkType(OperandType.STRING, "Function require a string param");
-        // установка типа
-        if (ctx.functype().LOWER() != null){
-            typeVerifier.setType(OperandType.STRING);
-        } else if (ctx.functype().LENGTH() != null){
-            typeVerifier.setType(OperandType.NUMBER);
-        }
+        typeVerifier.exitFuncwrap(ctx);
     }
 
 	@Override public void enterOperand_type(@NotNull FilterTreeParser.Operand_typeContext ctx) {
@@ -129,7 +117,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitString(@NotNull FilterTreeParser.StringContext ctx) {
-        typeVerifier.setType(OperandType.STRING);
+        typeVerifier.exitString(ctx);
     }
 
     @Override public void enterQuery(@NotNull FilterTreeParser.QueryContext ctx) {
@@ -138,7 +126,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
 	@Override
     public void exitQuery(@NotNull FilterTreeParser.QueryContext ctx) {
-        forignKeyResolver.setSqlPartsOfJoin();
+        foreignKeyResolver.setSqlPartsOfJoin();
     }
 
     @Override
@@ -148,7 +136,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitInternlAlias(@NotNull FilterTreeParser.InternlAliasContext ctx) {
-        setAliasType(refBook.getAttribute(ctx.getText()));
+        typeVerifier.exitInternlAlias(ctx);
     }
 
     @Override
@@ -158,12 +146,12 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void exitNumber(@NotNull FilterTreeParser.NumberContext ctx) {
-        typeVerifier.setType(OperandType.NUMBER);
+        typeVerifier.exitNumber(ctx);
     }
 
     @Override
     public void enterRoperand(@NotNull FilterTreeParser.RoperandContext ctx) {
-        typeVerifier.startCatchRightType();
+        typeVerifier.enterRoperand(ctx);
     }
 
     @Override
@@ -171,12 +159,12 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        typeVerifier.reset();
+        typeVerifier.enterStandartExpr(ctx);
     }
 
     @Override
     public void exitStandartExpr(@NotNull FilterTreeParser.StandartExprContext ctx) {
-        typeVerifier.verifyTypes(ctx);
+        typeVerifier.exitStandartExpr(ctx);
     }
 
 	@Override public void enterWithbrakets(@NotNull FilterTreeParser.WithbraketsContext ctx) {
@@ -193,12 +181,12 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        forignKeyResolver.enterEAliasNode(ctx.ALIAS().getText());
+        foreignKeyResolver.enterEAliasNode(ctx.ALIAS().getText());
     }
 
     @Override
     public void exitEAlias(@NotNull FilterTreeParser.EAliasContext ctx) {
-        forignKeyResolver.exitEAliasNode();
+        foreignKeyResolver.exitEAliasNode();
     }
 
     @Override
@@ -209,7 +197,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterLoperand(@NotNull FilterTreeParser.LoperandContext ctx) {
-        typeVerifier.startCatchLeftType();
+        typeVerifier.enterLoperand(ctx);
     }
 
     @Override
@@ -217,12 +205,12 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        forignKeyResolver.enterExternalAliasNode(ctx.ALIAS().getText());
+        foreignKeyResolver.enterExternalAliasNode(ctx.ALIAS().getText());
     }
 
     @Override
     public void exitExternalAlias(@NotNull FilterTreeParser.ExternalAliasContext ctx) {
-        setAliasType(forignKeyResolver.getLastRefBookAttribute());
+        typeVerifier.exitExternalAlias(ctx);
     }
 
     @Override
@@ -233,8 +221,7 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 
     @Override
     public void enterIsNullExpr(@NotNull FilterTreeParser.IsNullExprContext ctx) {
-        // хотя это совсем не играет роли, чтоб исключить исплючение
-        typeVerifier.startCatchLeftType();
+        typeVerifier.enterIsNullExpr(ctx);
     }
 
     @Override
@@ -261,23 +248,17 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
 	@Override public void visitErrorNode(@NotNull ErrorNode node) { }
 
     private String buildAliasStr(String alias){
-        StringBuffer sb = new StringBuffer();
-        sb.append("a");
-        sb.append(alias);
-        sb.append(".");
-        sb.append(refBook.getAttribute(alias).getAttributeType().toString());
-        sb.append("_value");
+        if (alias.equalsIgnoreCase(RefBook.RECORD_ID_ALIAS)){
+            return "id";
+        } else {
+            StringBuffer sb = new StringBuffer();
+            sb.append("a");
+            sb.append(alias);
+            sb.append(".");
+            sb.append(refBook.getAttribute(alias).getAttributeType().toString());
+            sb.append("_value");
 
-        return sb.toString();
-    }
-
-    private void setAliasType(RefBookAttribute refBookAttribute){
-        switch (refBookAttribute.getAttributeType()){
-            case STRING: typeVerifier.setType(OperandType.STRING); break;
-            case NUMBER: typeVerifier.setType(OperandType.NUMBER); break;
-            case DATE: typeVerifier.setType(OperandType.DATE); break;
-            case REFERENCE: typeVerifier.setType(OperandType.NUMBER); break;
-            default: throw new RuntimeException("Unexpected internal alias type");
+            return sb.toString();
         }
     }
 }

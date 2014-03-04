@@ -1,14 +1,15 @@
 /*
     blob_data.id = '8891efea-5d2d-4f0e-bc63-6349f354b48d'
+    ref_book_id = 4
     Коды субъектов Российской Федерации
  */
 package refbook.region
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.log.Logger
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
@@ -18,7 +19,6 @@ import java.text.SimpleDateFormat
 
 /**
  * Cкрипт справочника «Коды субъектов Российской Федерации»
- * TODO требуются доработки в БД
  *
  * @author Levykin
  */
@@ -30,14 +30,14 @@ switch (formDataEvent) {
 
 @Field
 def lstOkatoDefinition = ['Ненецкий автономный округ': '1110',
-        'Ханты - Мансийский автономный округ': '71100',
-        'Ямало - Ненецкий автономный округ': '71140']
+        'Ханты-Мансийский автономный округ - Югра': '71100',
+        'Ямало-Ненецкий автономный округ': '71140']
 
 // Получение строки для фильтрации записей по кодам ОКАТО
 def getFilterString(def tempList) {
     def retVal = ''
     tempList?.each { okato ->
-        retVal <<= "OKATO='$okato' or "
+        retVal <<= "OKATO='${okato.stringValue.padRight(11,"0")}' or "
     }
     if (tempList != null && !tempList.isEmpty()) {
         retVal = retVal.substring(0, retVal.length() - 3)
@@ -49,7 +49,9 @@ def getFilterString(def tempList) {
 void importFromXML() {
     println("Import Region: Start " + System.currentTimeMillis())
     // Текущая дата - используется для ссылки на записи справочника "ОКАТО"
-    def actualDate =  new GregorianCalendar(2012, Calendar.JANUARY, 1) // "01.01.2012" Версия для добавляемых записей
+    // "01.01.2012" Версия для добавляемых записей
+    def actualDate = new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime()
+    println("Import Region: Import date = " + new SimpleDateFormat("dd.MM.yyyy").format(actualDate))
     def dataProvider = refBookFactory.getDataProvider(4L)
     def dataProviderOKATO = refBookFactory.getDataProvider(3L)
     def reader = null
@@ -122,6 +124,7 @@ void importFromXML() {
         reader?.close()
     }
 
+    // Список требуемых кодов ОКАТО
     def okatoList = []
 
     if (!addRecordList.isEmpty()) {
@@ -138,106 +141,186 @@ void importFromXML() {
                 }
             }
             if (map.containsKey('OKATO_DEFINITION')) {
-                map.OKATO_DEFINITION.value = map.OKATO_DEFINITION.stringValue.padRight(11, '0')
                 okatoList.add(map.OKATO_DEFINITION)
             }
         }
 
         println("Import Region: okatoList.size = " + okatoList.size())
-        println("Import Region: okatoList = " + okatoList)
 
         // Поиск записей ОКАТО
+        def actualOkatoRecordMap = [:]
         if (!okatoList.isEmpty()) {
             // Актуальные записи ОКАТО
             def actualOkatoRecordList = dataProviderOKATO.getRecords(actualDate, null, getFilterString(okatoList), null)
-
             println("Import Region: Current OKATO found record count = " + actualOkatoRecordList?.size())
 
             // Построение Map для списка актуальных записей
-            def actualOkatoRecordMap = [:]
             actualOkatoRecordList.each { actualMap ->
-                actualOkatoRecordMap.put(actualMap.OKATO, actualMap)
-            }
-
-            // Список записей для сохранения
-            def addList = []
-
-            // Список id записей для удаления
-            def delList = []
-
-            // Список id записей для обновления
-            def updList = []
-
-            // Подстановка ссылок на ОКАТО
-            for (def map : addRecordList) {
-                def okato = map.OKATO_DEFINITION?.stringValue
-                if (okato != null) {
-                    def actuaOkatolMap = actualOkatoRecordMap.get(okato)
-
-                    if (actuaOkatolMap == null) {
-                        logger.error("Для элемента «${map.NAME.stringValue}» ТФ «Коды субъектов Российской Федерации», " +
-                                "в справочнике «Коды ОКАТО» не найдено соответствующее значение. " +
-                                "Загрузка справочника не выполнена.")
-                        return
-                    } else {
-                        map.OKATO = new RefBookValue(RefBookAttributeType.REFERENCE,
-                                actuaOkatolMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
-                    }
-                }
-            }
-
-            // TODO Подстановка ссылок на ОКТМО
-
-            // Актуальные записи Регионов
-            def actualRegionRecordList = dataProvider.getRecords(actualDate, null, null, null)
-
-            println("Import Region: Current Region found record count = " + actualRegionRecordList?.size())
-
-            // Построение Map для списка актуальных записей
-            def actualRegionRecordMap = [:]
-            actualRegionRecordList.each { actualMap ->
-                actualRegionRecordMap.put(actualMap.CODE, actualMap)
-            }
-
-            // Сравнение
-            addRecordList.each { map ->
-                def code = map.CODE.stringValue
-                def actualMap = actualRegionRecordMap.get(code)
-                if (actualMap == null) {
-                    // Запись новая
-                    addList.add(map)
-                } else {
-                    // Запись обновляемая
-                    if (map.NAME.stringValue != actualMap.NAME.stringValue
-                            || map?.OKATO_DEFINITION?.stringValue != actualMap.OKATO_DEFINITION?.stringValue
-                            || map.OKATO.stringValue != actualMap.OKATO?.stringValue) { // TODO проверять новые атрибуты
-                        // Новая запись отличается от имеющейся
-                        if (true) { // TODO Условие (Нужна функция. Делает Д. Лошкарев.)
-                            delList.add(actualMap)
-                            addList.add(map)
-                        } else {
-                            updList.add(map)
-                        }
-                    }
-                }
-            }
-
-            println(">>>>>>>> delList = ${delList.size()} addList = ${addList.size()} updList = ${updList.size()}")
-
-            // Сохранение изменений в БД
-            if (!delList.isEmpty()) {
-                // dataProvider.updateRecordsVersionEnd(logger, actualDate, delList)
-            }
-            if (!addList.isEmpty()) {
-                // dataProvider.createRecordVersion(logger, null, actualDate, null, addList)
-            }
-            if (!updList.isEmpty()) {
-                // TODO Метод обновления записей
+                actualOkatoRecordMap.put(actualMap.OKATO.stringValue, actualMap)
             }
         }
-    }
 
-    // TODO ОКТМО
+        // Актуальный справочник регионов (для подстановки ОКТМО)
+        def actualRegionList = dataProvider.getRecords(actualDate, null, null, null)
+        println("Import Region: Current Region found record count = " + actualRegionList?.size())
+        def actualRegionMap = [:]
+        actualRegionList?.each { map ->
+            actualRegionMap.put(map.CODE.stringValue, map)
+        }
+
+        // Подстановка ссылок на ОКАТО
+        for (def map : addRecordList) {
+            def okato = map.OKATO_DEFINITION?.stringValue
+            if (okato != null && okato != '') {
+                okato = okato.padRight(11,'0')
+                def actuaOkatolMap = actualOkatoRecordMap.get(okato)
+
+                if (actuaOkatolMap == null) {
+                    logger.error("Для элемента «${map.NAME.stringValue}» ТФ «Коды субъектов Российской Федерации», " +
+                            "в справочнике «Коды ОКАТО» не найдено значение, соответствующее коду «$okato». " +
+                            "Загрузка справочника не выполнена.")
+                    return
+                } else {
+                    map.OKATO = new RefBookValue(RefBookAttributeType.REFERENCE,
+                            actuaOkatolMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                }
+            }
+
+            // Подстановка ссылок на ОКТМО (из предыдущей версии)
+            def actualValue = actualRegionMap.get(map.CODE.stringValue)
+            if (actualValue != null) {
+                map.OKTMO = new RefBookValue(RefBookAttributeType.REFERENCE,
+                        actualValue.OKTMO?.referenceValue)
+                map.OKTMO_DEFINITION = new RefBookValue(RefBookAttributeType.STRING,
+                        actualValue.OKTMO_DEFINITION?.stringValue)
+            }
+        }
+
+        // Список записей для добавления
+        def addList = []
+
+        // Список id записей для удаления
+        def delList = []
+
+        // Список id записей для обновления
+        def updList = []
+
+        // Актуальные записи Регионов
+        //def actualRegionRecordList = dataProvider.getRecords(actualDate, null, null, null)
+
+        //println("Import Region: Current Region found record count = " + actualRegionRecordList?.size())
+
+        // Код -> RECORD_ID
+        def recIdMap = [:]
+
+        // Построение Map для списка актуальных записей
+        //def actualRegionRecordMap = [:]
+        actualRegionList?.each { actualMap ->
+            //actualRegionRecordMap.put(actualMap.CODE.stringValue, actualMap)
+            recIdMap.put(actualMap.CODE.stringValue, actualMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
+        }
+
+        def addRecordMap = [:]
+
+        // Сравнение
+        addRecordList.each { map ->
+            def code = map.CODE.stringValue
+            def actualMap = actualRegionMap.get(code)
+            if (actualMap == null) {
+                // Запись новая
+                addList.add(map)
+            } else {
+                // Запись обновляемая
+                if (map.NAME.stringValue != actualMap.NAME.stringValue
+                        || map.OKATO_DEFINITION?.stringValue != actualMap.OKATO_DEFINITION?.stringValue
+                        || map.OKATO?.numberValue != actualMap.OKATO?.numberValue
+                        || map.OKTMO_DEFINITION?.stringValue != actualMap.OKTMO_DEFINITION?.stringValue
+                        || map.OKTMO?.numberValue != actualMap.OKTMO?.numberValue
+                ) {
+                    // Код отладки. Сравнение.
+//                    def ch = ''
+//                    if (map.NAME.stringValue != actualMap.NAME.stringValue) {
+//                        ch = 'NAME'
+//                    } else if (map.OKATO_DEFINITION?.stringValue != actualMap.OKATO_DEFINITION?.stringValue) {
+//                        ch = 'OKATO_DEFINITION'
+//                    } else if (map.OKATO?.numberValue != actualMap.OKATO?.numberValue) {
+//                        ch = 'OKATO'
+//                    } else if (map.OKTMO_DEFINITION?.stringValue != actualMap.OKTMO_DEFINITION?.stringValue) {
+//                        ch = 'OKTMO_DEFINITION'
+//                    } else if (map.OKTMO?.numberValue != actualMap.OKTMO?.numberValue) {
+//                        ch = 'OKTMO'
+//                    }
+//                    println("changed " + map.CODE.stringValue + " " + ch + " old = " + actualMap + " new = " + map)
+                    addList.add(map)
+                }
+            }
+            addRecordMap.put(code, map)
+        }
+
+        // Проверка добавляемых на совпадение версий
+        def checkIds = []
+        addList.each { map ->
+            def code = map.CODE.stringValue
+            def actualValue = actualRegionMap.get(code)
+            if (actualValue != null) {
+                checkIds.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+            }
+        }
+
+        if (!checkIds.isEmpty()) {
+            // Получение версий для проверяемых записей
+            def versionMap = dataProvider.getRecordsVersionStart(checkIds)
+            addList.each { map ->
+                def code = map.CODE.stringValue
+                def actualValue = actualRegionMap.get(code)
+                if (actualValue != null) {
+                    def recordId = actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue
+                    def recVersion = versionMap.get(recordId)
+                    if (recVersion.equals(actualDate)) {
+                        println("Import Region: Found update code = " + code)
+                        map.put(RefBook.RECORD_ID_ALIAS, actualValue.get(RefBook.RECORD_ID_ALIAS))
+                        updList.add(map)
+                    }
+                }
+            }
+
+            // Обновляемые не должны добавляться
+            addList.removeAll(updList)
+        }
+
+        // Поиск неактуальных (есть в справочнике, но нет в файле)
+        actualRegionList?.each { actualMap ->
+            if (!addRecordMap.containsKey(actualMap.CODE.stringValue)) {
+                delList.add(actualMap.get(RefBook.RECORD_ID_ALIAS).numberValue)
+            }
+        }
+
+        println("Import Region: Delete count = ${delList.size()}, Add count = ${addList.size()}, " +
+                "Update count = ${updList.size()}")
+
+        // Сохранение изменений в БД
+        if (!delList.isEmpty()) {
+            dataProvider.updateRecordsVersionEnd(logger, actualDate, delList)
+        }
+        if (!addList.isEmpty()) {
+            //            def addCreateRecordList = []
+            //            addList.each { map ->
+            //                def rbRecord = new RefBookRecord()
+            //                rbRecord.setRecordId(recIdMap.get(map.CODE.stringValue))
+            //                rbRecord.setValues(map)
+            //                addCreateRecordList.add(rbRecord)
+            //            }
+            // dataProvider.createRecordVersion(logger, actualDate, null, addCreateRecordList)
+            dataProvider.insertRecords(actualDate, addList)
+        }
+        if (!updList.isEmpty()) {
+//            updList.each { map ->
+//                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
+//            }
+            println(updList)
+            dataProvider.updateRecords(actualDate, updList)
+        }
+    }
 
     println("Import Region: End " + System.currentTimeMillis())
     if (!logger.containsLevel(LogLevel.ERROR)) {

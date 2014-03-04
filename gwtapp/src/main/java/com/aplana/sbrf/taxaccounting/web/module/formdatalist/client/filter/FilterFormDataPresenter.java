@@ -1,18 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
@@ -22,6 +10,11 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPresenter.MyView> implements FilterFormDataUIHandlers {
 
@@ -35,13 +28,11 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		
 		// Установка доступных значений
 
-		void setKindList(List<FormDataKind> list);
-
 		void setFormStateList(List<WorkflowState> list);
 
 		void setReturnStateList(List<Boolean> list);
 
-		void setFormTypesMap(List<FormType> formTypes);
+        public void setFilter(String filter);
 
 		void setDepartments(List<Department> list, Set<Integer> availableValues);
 
@@ -49,6 +40,10 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 
 		void setElementNames(Map<FormDataElementName, String> names);
 
+        // Установить фильтр для типов налоговых форм
+        void setKindFilter(List<FormDataKind> dataKinds);
+
+        void clean();
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -68,7 +63,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 		getView().setDataFilter(formDataFilter);
 	}
 
-	public void initFilter(final TaxType taxType, final FormDataFilter filter) {
+	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
 		dispatchAsync.execute(action, CallbackUtils
@@ -76,9 +71,9 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 					@Override
 					public void onSuccess(GetFilterDataResult result) {
 						FormDataFilterAvailableValues filterValues = result.getFilterValues();
+                        getView().setKindFilter(kindListResult.getDataKinds());
 						getView().setDepartments(result.getDepartments(), filterValues.getDepartmentIds());
-						getView().setKindList(filterValues.getKinds());
-						getView().setFormTypesMap(filterValues.getFormTypes());
+                        getView().setFilter("TAX_TYPE='" + taxType.getCode() + "'");
 						getView().setReportPeriods(result.getReportPeriods());
 						getView().setFormStateList(Arrays.asList(WorkflowState.values()));
 						getView().setReturnStateList(Arrays.asList(new Boolean[]{ Boolean.TRUE, Boolean.FALSE }));

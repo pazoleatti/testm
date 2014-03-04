@@ -14,14 +14,16 @@ public class TableModel implements Serializable {
     private Long id;
     private String name;
     private RefBookType refBookType;
+	private boolean readOnly;
 
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, RefBookType refBookType) {
+    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly) {
         setId(id);
         setName(name);
         setType(refBookType);
+		setReadOnly(readOnly);
     }
 
     public String getName() {
@@ -33,8 +35,8 @@ public class TableModel implements Serializable {
     }
 
     public RefBookType getType() {
-        return refBookType;
-    }
+		return refBookType;
+	}
 
     public void setType(RefBookType refBookType) {
         this.refBookType = refBookType;
@@ -47,4 +49,12 @@ public class TableModel implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
 }

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Сервис для работы с отчетными периодами
@@ -220,4 +221,29 @@ public interface PeriodService {
 	 * @return
 	 */
 	PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(TaxType taxType, int year, boolean balancePeriod, long departmentId, long dictionaryTaxPeriodId);
+
+    /**
+     * Получает список месяцев, в зависимости от выбранного периода
+     *
+     * @param reportPeriodId идентификатор отчетного период
+     * @return
+     */
+    List<Months> getAvailableMonthList(int reportPeriodId);
+
+	/**
+	 * http://conf.aplana.com/pages/viewpage.action?pageId=11382680
+	 * @param user пользователь
+	 * @param taxType тип периода
+	 * @return множество отчетных периодов
+	 */
+	Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType);
+
+    /**
+     * Список открытых периодов
+     * @param taxType тип налога
+     * @param departmentList подразделения
+     * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
+     * @return список отчетных периодов
+     */
+    List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
 }

@@ -57,6 +57,8 @@ public final class ScriptUtils {
 
     private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
 
+    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -559,7 +561,7 @@ public final class ScriptUtils {
             if (currentString.toString().trim().equalsIgnoreCase(referenceString.trim())) {
                 continue;
             }
-            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString));
+            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString.toString()));
         }
     }
 
@@ -783,5 +785,10 @@ public final class ScriptUtils {
             return "";
         }
         return value;
+    }
+
+    /** Выдать сообщение что импорт не предусмотрен. */
+    public static void noImport(Logger logger) {
+        logger.error(IMPORT_IS_NOT_PROVIDED);
     }
 }

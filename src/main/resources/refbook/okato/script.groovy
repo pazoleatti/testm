@@ -215,14 +215,10 @@ void importFromXML() {
             def actualName = actualValue?.NAME?.stringValue
             if (actualName == null || !actualName.equals(value.NAME.stringValue)) {
                 // Если запись новая или отличная от имеющейся, то добавляем новую версию
-                //println(" actualName = " + actualName + " value.NAME.stringValue = " + value.NAME.stringValue)
                 addList.add(value)
                 if (actualName != null) {
+                    // Если запись уже была то запоминаем record_id
                     recIdMap.put(okato, actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
-                    //value.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, ))
-//                    // Если такой код ОКАТО уже был, то старая запись должна отметиться как удаленная
-//                    println("delete OKATO " + okato)
-//                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
             }
         }
@@ -249,9 +245,6 @@ void importFromXML() {
                     if (recVersion.equals(version)) {
                         println("Import OKATO: Found update okato = " + okato)
                         updList.add(map)
-                        // Обновляемые не должны удаляться
-//                        println("Remove from delList " + okato)
-//                        delList.remove(recordId)
                     }
                 }
             }
@@ -277,7 +270,6 @@ void importFromXML() {
 
             // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые
             if (!delList.isEmpty()) {
-
                 dataProvider.updateRecordsVersionEnd(logger, version, delList)
             }
 
@@ -295,24 +287,22 @@ void importFromXML() {
                 tempList = []
                 addList.each { record ->
                     if (tempList.size() < 500) {
-                        def rbRecord = new RefBookRecord()
-                        rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
-                        rbRecord.setValues(record)
-                        tempList.add(rbRecord)
+                        //def rbRecord = new RefBookRecord()
+                        //rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
+                        //rbRecord.setValues(record)
+                        //tempList.add(rbRecord)
+                        tempList.add(record)
                     } else {
-                        dataProvider.createRecordVersion(logger, version, null, tempList)
+                        // dataProvider.createRecordVersion(logger, version, null, tempList)
+                        dataProvider.insertRecords(version, tempList)
                         tempList.clear()
                     }
                 }
                 if (!tempList.isEmpty()) {
-                    dataProvider.createRecordVersion(logger, version, null, tempList)
+                    //dataProvider.createRecordVersion(logger, version, null, tempList)
+                    dataProvider.insertRecords(version, tempList)
                     tempList.clear()
                 }
-//                addList.each { record ->
-//                    dataProvider.createRecordVersion(logger, /*recIdMap.get(record.OKATO.stringValue)*/null, version, null,
-//                            asList(record))
-//                }
-
             }
             println("Import OKATO: DB update/create end " + System.currentTimeMillis())
         }

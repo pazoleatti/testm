@@ -33,8 +33,8 @@ public interface RefBookDao {
 	 * Загружает список всех справочников
 	 * @return
      * @param typeId тип справочника
-     *               0 - внутренний
-     *               1 - внешний
+     *               0 - линейный
+     *               1 - иерархический
      *               null - все
 	 */
 	List<RefBook> getAll(Integer typeId);
@@ -43,8 +43,8 @@ public interface RefBookDao {
 	 * Загружает список всех справочников
 	 * @return
      * @param typeId тип справочника
-     *               0 - внутренний
-     *               1 - внешний
+	 *               0 - линейный
+	 *               1 - иерархический
      *               null - все
 	 */
 	List<RefBook> getAllVisible(Integer typeId);
@@ -52,9 +52,10 @@ public interface RefBookDao {
 	/**
 	 * Ищет справочник по коду атрибута
 	 * @param attributeId код атрибута, входящего в справочник
+	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если справочник не найден
 	 * @return
 	 */
-	RefBook getByAttribute(long attributeId);
+	RefBook getByAttribute(Long attributeId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности
@@ -80,6 +81,14 @@ public interface RefBookDao {
 	PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
 		String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
 
+    /**
+     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param filter
+     * @return пары идентификатор версии элемента - идентификаторидентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, String filter);
+
 	/**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *
@@ -99,6 +108,7 @@ public interface RefBookDao {
 	 * @param refBookId код справочника
 	 * @param recordId код строки справочника
 	 * @return
+	 * @throws org.springframework.dao.EmptyResultDataAccessException если строка не найдена
 	 */
 	Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId);
 
@@ -209,15 +219,6 @@ public interface RefBookDao {
     List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
-     * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
-     * @param versionFrom дата актуальности новой версии
-     * @param attributes атрибуты справочника
-     * @param records новые значения полей элемента справочника
-     * @return ссылочные атрибуты в порядке?
-     */
-    boolean isReferenceValuesCorrect(Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
      * @param refBookId идентификатор справочника
      * @param recordId идентификатор записи справочника (без учета версий)
@@ -233,21 +234,9 @@ public interface RefBookDao {
      * @param recordPairs записи, у которых совпали уникальные атрибуты
      * @param versionFrom дата начала актуальности новой версии
      * @param versionTo дата конца актуальности новой версии
+     * @return список идентификаторов записей, в которых есть пересечение
      */
-    void checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
-
-    /**
-     * Изменение периода актуальности для указанной версии
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     * @param version новая дата начала актуальности
-     */
-    void updateVersionRelevancePeriod(Long uniqueRecordId, Date version);
-
-    /**
-     * Удаление версии
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     */
-    void deleteVersion(Long uniqueRecordId);
+    List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
@@ -256,15 +245,15 @@ public interface RefBookDao {
      * @param versionFrom дата начала актуальности новой версии
      * @return есть ссылки на версию?
      */
-    boolean isVersionUsed(Long uniqueRecordId, Date versionFrom);
+    boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      * @param uniqueRecordIds список идентификаторов версий записей
-     * @return есть ссылки на версию?
+     * @return результаты проверки. Сообщения об ошибках
      */
-    boolean isVersionUsed(List<Long> uniqueRecordIds);
+    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
 
     /**
      * Возвращает данные о версии следующей за указанной
@@ -281,11 +270,6 @@ public interface RefBookDao {
      * @return
      */
     Long getRecordId(Long uniqueRecordId);
-    /**
-     * Удаляет указанные версии записи из справочника
-     * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
-     */
-    void deleteRecordVersions(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии
@@ -324,6 +308,22 @@ public interface RefBookDao {
      * @return идентификатор версии - дата начала периода актуальности
      */
     Map<Long,Date> getRecordsVersionStart(List<Long> uniqueRecordIds);
+
+    /**
+     * Проверяет есть ли дочерние элементы для указанных версий записей
+     * @param refBookId код справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return возвращает список дат начала периода актуальности, для версий у которых были найдены дочерние элементы. Либо null, если их нет
+     */
+    List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает список идентификаторов элементов справочника, являющихся родительскими  по иерархии вверх для указанного элемента
+     * Список упорядочен и начинается с главного корневого элемента
+     * @param uniqueRecordId идентификатор записи справочника
+     * @return иерархия родительских элементов
+     */
+    List<Long> getParentsHierarchy(Long uniqueRecordId);
 
     /**
      * Создает новые записи в справочнике

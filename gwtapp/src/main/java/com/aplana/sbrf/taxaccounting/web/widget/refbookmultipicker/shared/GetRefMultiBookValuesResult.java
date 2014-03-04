@@ -8,8 +8,17 @@ public class GetRefMultiBookValuesResult implements Result {
 	private static final long serialVersionUID = 1099858218534060155L;
 	
 	private PagingResult<RefBookItem> page;
+    private String uuid;
 
-	public PagingResult<RefBookItem> getPage() {
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public PagingResult<RefBookItem> getPage() {
 		return page;
 	}
 

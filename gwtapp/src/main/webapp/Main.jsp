@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8,chrome=1">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<title>АС "Учёт налогов"</title>
 

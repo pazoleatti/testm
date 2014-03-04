@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRo
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,6 +42,10 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
     Label titleDetails;
     @UiField
     LinkAnchor backAction;
+    @UiField
+    LinkButton addRow;
+    @UiField
+    LinkButton deleteRow;
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -194,7 +199,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-        Dialog.confirmMessage("Удалить выбранную запись справочника?", new DialogHandler() {
+        Dialog.confirmMessage("Удаление версии элемента справочника", "Удалить выбранную версию элемента справочника?", new DialogHandler() {
             @Override
             public void yes() {
                 if (getUiHandlers() != null) {
@@ -214,6 +219,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             }
         });
 	}
+
+    @Override
+    public void setReadOnlyMode(boolean readOnly) {
+        addRow.setVisible(!readOnly);
+        deleteRow.setVisible(!readOnly);
+    }
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
 		switch (alignment) {

@@ -30,8 +30,10 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
 	@Override
 	public GetRefBookAttributesResult execute(GetRefBookAttributesAction action, ExecutionContext executionContext) throws ActionException {
-		List<RefBookAttribute> attributes = refBookFactory.get(action.getRefBookId()).getAttributes();
+        RefBook refBook = refBookFactory.get(action.getRefBookId());
+		List<RefBookAttribute> attributes = refBook.getAttributes();
         GetRefBookAttributesResult result = new GetRefBookAttributesResult();
+        result.setRefBookType(refBook.getType());
 		List<RefBookColumn> columns = new ArrayList<RefBookColumn>();
 		for (RefBookAttribute attribute : attributes) {
 			RefBookColumn col = new RefBookColumn();
@@ -39,12 +41,14 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 			col.setAlias(attribute.getAlias());
 			col.setAttributeType(attribute.getAttributeType());
 			col.setName(attribute.getName());
+            col.setRefBookName(refBookFactory.get(attribute.getRefBookId()).getName());
 			col.setRefBookAttributeId(attribute.getRefBookAttributeId());
 			col.setWidth(attribute.getWidth());
 			col.setAlignment(getHorizontalAlignment(attribute));
             col.setRequired(attribute.isRequired());
 			columns.add(col);
 		}
+        result.setReadOnly(refBook.isReadOnly());
 		result.setColumns(columns);
 		return result;
 	}
