@@ -143,13 +143,14 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         // TODO: создание новых версий формы потребует инсертов в form_template
 		getJdbcTemplate().update(
 			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
-			"fullname = ?, code = ?, script=?, status=? where id = ?",
+			" monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
 			storedEdition,
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
             formTemplate.getName() != null ? formTemplate.getName() : " ",
+			formTemplate.isMonthly(),
             formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
 			formTemplate.getCode(),
             formTemplate.getScript() != null ? formTemplate.getScript() : " ",

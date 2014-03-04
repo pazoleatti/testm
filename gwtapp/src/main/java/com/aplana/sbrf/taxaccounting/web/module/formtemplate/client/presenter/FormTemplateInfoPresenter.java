@@ -58,7 +58,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
         formTemplateExt = event.getFormTemplateExt();
         formTemplate = formTemplateExt.getFormTemplate();
 		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
-                formTemplate.isMonthlyForm(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getCode());
+                formTemplate.isMonthly(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getCode());
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 
 	@Override
 	public void setMonthlyForm(boolean monthlyForm) {
-		formTemplate.setMonthlyForm(monthlyForm);
+		formTemplate.setMonthly(monthlyForm);
 	}
 
 	@Override

@@ -1,4 +1,3 @@
-
 create table ref_book_oktmo (
   id number(18) not null,
   code varchar2(4000) not null,
@@ -61,7 +60,6 @@ create table form_template (
   is_active number(1) default 1 not null,
   edition number(9) not null,
   fixed_rows number(1) not null,
-  monthly number(1) not null,
   name varchar2(600) not null,
   fullname varchar2(600) not null,
   code varchar2(600) not null,
@@ -78,7 +76,6 @@ comment on column form_template.type_id is 'Идентификатор вида 
 comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
 comment on column form_template.edition is 'Номер редакции записи';
 comment on column form_template.fixed_rows is 'Признак использования фиксированных строк: 0 - используется фиксированный набор строк, 1 - есть возможность добавлять и удалять строки из формы.';
-comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 comment on column form_template.name is 'Наименование формы';
 comment on column form_template.fullname is 'Полное наименование формы';
 comment on column form_template.code is 'Номер формы';

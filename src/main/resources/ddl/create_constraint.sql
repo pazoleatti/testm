@@ -17,7 +17,6 @@ alter table form_template add constraint form_template_fk_type_id foreign key (t
 alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
-alter table form_template add constraint form_template_chk_monthly check(monthly in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table form_style add constraint form_style_pk primary key (id);
