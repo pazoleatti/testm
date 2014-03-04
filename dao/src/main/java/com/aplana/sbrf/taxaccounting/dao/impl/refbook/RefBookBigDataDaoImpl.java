@@ -105,7 +105,9 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
     }
 
     private static final String WITH_STATEMENT =
-            "with t as (select max(version) version, record_id from %s where status = 0 and version <= ? group by record_id)\n";
+            "with t as (select max(version) version, record_id from %s r where status = 0 and version <= ?  and\n" +
+                    "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
+                    "group by record_id)\n";
 
     private static final String RECORD_VERSIONS_STATEMENT =
             "with currentRecord as (select id, record_id, version from %s where id=?),\n" +
@@ -133,7 +135,8 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         PreparedStatementData ps = new PreparedStatementData();
 
         if (version != null) {
-            ps.appendQuery(String.format(WITH_STATEMENT, tableName));
+            ps.appendQuery(String.format(WITH_STATEMENT, tableName, tableName));
+            ps.addParam(version);
             ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, tableName, tableName));
@@ -245,7 +248,8 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         PreparedStatementData ps = new PreparedStatementData();
 
         if (version != null) {
-            ps.appendQuery(String.format(WITH_STATEMENT, tableName));
+            ps.appendQuery(String.format(WITH_STATEMENT, tableName, tableName));
+            ps.addParam(version);
             ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, tableName, tableName));
@@ -334,7 +338,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         }
         ps.appendQuery("(r.version = t.version and r.record_id = t.record_id)");
 
-        ps.appendQuery(" CONNECT BY PRIOR r.id = PARENT_ID");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR r.id = PARENT_ID");
         ps.appendQuery(" START WITH ");
         ps.appendQuery(uniqueRecordId == null ? " PARENT_ID is null" : "PARENT_ID = "+uniqueRecordId);
 

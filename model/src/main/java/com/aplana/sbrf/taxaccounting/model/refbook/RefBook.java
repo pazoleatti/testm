@@ -249,7 +249,7 @@ public class RefBook implements Serializable {
 			Collections.sort(defaultSort, new Comparator<RefBookAttribute>() {
 				@Override
 				public int compare(RefBookAttribute o1, RefBookAttribute o2) {
-					return o1.getSortOrder() - o2.getSortOrder();
+					return o2.getSortOrder() - o1.getSortOrder();
 				}
 			});
 		}

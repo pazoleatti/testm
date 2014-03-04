@@ -88,6 +88,9 @@ public class LogBusinessServiceImpl implements LogBusinessService {
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
                 declarationDataIds =
                         declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                if (formDataIds.isEmpty() && declarationDataIds.isEmpty()){
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
+                }
                 break;
         }
 

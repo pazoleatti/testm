@@ -1107,7 +1107,7 @@ def getCalcTotalRow() {
     setTotalStyle(totalRow)
     // графа  4, 5, 6, 9, 10, 12, 13
     ['nominalPriceSecurities', 'salePrice', 'acquisitionPrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each { alias ->
-        totalRow.getCell(alias).setValue(getSum(alias))
+        totalRow.getCell(alias).setValue(getSum(alias), null)
     }
     return totalRow
 }

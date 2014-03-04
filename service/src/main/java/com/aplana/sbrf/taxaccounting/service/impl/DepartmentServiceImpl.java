@@ -248,6 +248,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getParentsHierarchy(departmentId);
     }
 
+	@Override
+	public String getParentsHierarchyShortNames(Integer departmentId) {
+		if (departmentId.equals(0)) {
+			return departmentDao.getDepartment(departmentId).getShortName();
+		}
+
+		return departmentDao.getParentsHierarchyShortNames(departmentId);
+	}
+
     private List<Integer> getExecutorsDepartments(List<Integer> departments, int formType) {
         return departmentDao.getPerformers(departments, formType);
     }
