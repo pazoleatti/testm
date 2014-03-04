@@ -91,7 +91,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         try {
             String ACTIVE_VERSION_SQL = "with templatesByVersion as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number() " +
                     (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +
-                    " rn from declaration_template where DECLARATION_TYPE_ID = ?)" +
+                    " rn from declaration_template where DECLARATION_TYPE_ID = ? and status in (0, 1, 2))" +
                     "select ID from (select rv.ID ID, rv.STATUS, rv.DECLARATION_TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
                     "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and ((versionFrom <= ? and versionTo >= ?)" +
                     " or (versionFrom <= ? and versionTo is null))";
