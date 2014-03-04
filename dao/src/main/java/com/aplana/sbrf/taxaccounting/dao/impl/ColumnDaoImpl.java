@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     @Autowired
     private BDUtils bdUtils;
 
-	private final static class ColumnMapper implements RowMapper<Column> {
+    @Autowired
+    private RefBookDao refBookDao;
+
+	private class ColumnMapper implements RowMapper<Column> {
 		public Column mapRow(ResultSet rs, int index) throws SQLException {
 			final Column result;
 			String type = rs.getString("type");
@@ -46,6 +51,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				    result = new RefBookColumn();
     				((RefBookColumn)result).setRefBookAttributeId(attributeId);
                     ((RefBookColumn)result).setFilter(filter);
+                    RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    ((RefBookColumn)result).setHierarchical(refBook.getType() == 1);
+                    ((RefBookColumn)result).setNameAttributeId(refBook.getAttribute("NAME").getId());
                 } else {
                     result = new ReferenceColumn();
                     ((ReferenceColumn)result).setRefBookAttributeId(attributeId);
