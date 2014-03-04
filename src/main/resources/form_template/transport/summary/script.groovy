@@ -489,8 +489,6 @@ def consolidation() {
                         (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
                                 && el.powerVal.equals(sRow.powerVal) && el.baseUnit.equals(sRow.baseUnit))
                     }
-                    // «Графа 9» принимает значение «графы 11» формы-источника
-                    newRow.taxBaseOkeiUnit = sRow.baseUnit
                     if (contains != null) {
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
@@ -498,10 +496,10 @@ def consolidation() {
                                 row.benefitStartDate.equals(sRow.benefitStartDate) &&
                                 row.benefitEndDate.equals(sRow.benefitEndDate)) {
                             def department = departments.get(sources202.indexOf(row))
-                            logger.error("Обнаружены несколько разных строк, у которых совпадают Код ОКТМО = " + sRow.codeOKATO
-                                    + ", Идентификационный номер = " + sRow.identNumber + ", Регистрационный знак=" + sRow.regNumber
-                                    + " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «"
-                                    + sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
+                            logger.error("Обнаружены несколько разных строк, у которых совпадают " +
+                                    + getIdentGrafsValue(sRow) +
+                                    " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «" +
+                                    sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
                             departments.remove(sources202.indexOf(row))
                             sources202.remove(sRow)
                         }
@@ -579,14 +577,20 @@ def consolidation() {
             logger.warn("Для строки " + cnt + " в форме \"Сведения о льготируемых транспортных средствах, по которым " +
                     "уплачивается транспортный налог\" подразделения " + department.name + " указана льгота для  " +
                     "транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по " +
-                    "которым уплачивается транспортный налог\" . Код ОКТМО = " + v.codeOKATO + ", Идентификационный номер = "
-                    + v.identNumber + ", Регистрационный знак=" + v.regNumber + "!")
+                    "которым уплачивается транспортный налог\". " + getIdentGrafsValue(v) + "!")
         }
     }
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
     dataRowHelper.save(dataRows)
+}
+
+String getIdentGrafsValue(def row){
+    return "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
+            "Идентификационный номер = $row.identNumber, "+
+            "Мощность (величина) = $row.powerVal, "+
+            "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}"
 }
 
 // Расчет графы 12 при консолидации
