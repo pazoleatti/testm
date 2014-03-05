@@ -433,7 +433,7 @@ int getCountDaysOfYear() {
 /**
  * Метод возвращает значение для графы 12
  * Логика выделена в отдельный метод так как
- * логика используется при расчетах и при логических проверкат
+ * логика используется при расчетах и при логических проверках
  * @param row
  */
 def calculateColumn12(DataRow row){
@@ -477,7 +477,7 @@ def calculateColumn12(DataRow row){
         } else {
             // Иначе
             // «графа 12» = («графа 7» ? «графа 11») ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
-            return (row.acquisitionPrice?:0 * row.rateBR?:0) * ((row.part2REPODate?:0 - row.part1REPODate?:0) / countDaysOfYear) / 100
+            return (row.acquisitionPrice?:0 * row.rateBR?:0) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
         }
     } else if (row.outcome == 0){
         //  Если «графа 10» = 0, то «графа 12» = 0
