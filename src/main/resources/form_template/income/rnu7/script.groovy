@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -132,6 +133,10 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
+        dataRows.eachWithIndex{ row, index ->
+            row.setIndex(index + 1)
+        }
+
         dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -145,24 +150,23 @@ void calc() {
 
         // посчитать "итого по коду"
         def totalRows = [:]
-        def tmp = null
+        def code = null
         def sum = 0, sum2 = 0
         dataRows.eachWithIndex { row, i ->
-            if (tmp == null) {
-                tmp = row.code
+            if (code == null) {
+                code = getKnu(row.code)
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                def code = getKnu(tmp)
+            if (code != getKnu(row.code)) {
                 totalRows.put(i, getNewRow(code, sum, sum2))
                 sum = 0
                 sum2 = 0
+                code = getKnu(row.code)
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
             if (i == dataRows.size() - 1) {
                 sum += (row.taxAccountingRuble ?: 0)
                 sum2 += (row.ruble ?: 0)
-                def code = getKnu(row.code)
                 def totalRowCode = getNewRow(code, sum, sum2)
                 totalRows.put(i + 1, totalRowCode)
                 sum = 0
@@ -170,7 +174,6 @@ void calc() {
             }
             sum += (row.taxAccountingRuble ?: 0)
             sum2 += (row.ruble ?: 0)
-            tmp = row.code
         }
 
         // добавить "итого по коду" в таблицу
@@ -191,7 +194,7 @@ def BigDecimal calc8(DataRow row) {
     if (isRubleCurrency(row.currencyCode)) {
         return 1
     }
-    return getRate(row.date, row.currencyCode)
+    return getRate(row.date, row.currencyCode)?.setScale(4, BigDecimal.ROUND_HALF_UP)
 }
 
 def BigDecimal calc10(DataRow row) {
@@ -211,7 +214,12 @@ def BigDecimal calc12(DataRow row) {
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    return res.getRecords().get(0).RATE.numberValue
+    if(res.getRecords().isEmpty()) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+        throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
+    } else {
+        return res.getRecords().get(0)?.RATE?.numberValue
+    }
 }
 
 // Проверка валюты currencyCode на рубли
@@ -307,7 +315,7 @@ void logicCheck() {
         }
 
         // 4. Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету
-        if (row.taxAccountingRuble > 0 && row.ruble > 0) {
+        if (row.taxAccountingRuble && row.ruble) {
             logger.warn(errorMsg + 'Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.')
         }
 

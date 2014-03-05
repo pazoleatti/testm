@@ -330,7 +330,7 @@ def getRegionByOKTMO(def oktmo) {
     } else if (oktmo3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 1) + "%'"
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 2) + "%'"
         def record = getRecord(4, filter, new Date())
         if (record != null) {
             return record
