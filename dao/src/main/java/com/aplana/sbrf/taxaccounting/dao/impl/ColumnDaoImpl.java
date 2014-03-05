@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     ((RefBookColumn)result).setFilter(filter);
                     RefBook refBook = refBookDao.getByAttribute(attributeId);
                     ((RefBookColumn)result).setHierarchical(refBook.getType() == 1);
-                    ((RefBookColumn)result).setNameAttributeId(refBook.getAttribute("NAME").getId());
+                    RefBookAttribute refBookAttribute;
+                    try {
+                        refBookAttribute = refBook.getAttribute("NAME");
+                    } catch (IllegalArgumentException e) {
+                        refBookAttribute = null;
+                    }
+                    ((RefBookColumn) result).setNameAttributeId(refBookAttribute != null ? refBook.getAttribute("NAME").getId() : attributeId);
                 } else {
                     result = new ReferenceColumn();
                     ((ReferenceColumn)result).setRefBookAttributeId(attributeId);
