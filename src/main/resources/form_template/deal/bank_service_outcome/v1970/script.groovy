@@ -1,11 +1,11 @@
-package form_template.deal.bank_service_income.v1970
+package form_template.deal.bank_service_outcome.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 398 - Оказание услуг (доходы) (21)
+ * 399 - Оказание услуг (расходы) (22)
  *
  * @author Stanislav Yasinskiy
  */
@@ -201,7 +201,7 @@ void importData() {
     def headerMapping = [
             (xml.row[0].cell[1]): 'ИНН/ КИО',
             (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
-            (xml.row[0].cell[3]): 'Сумма доходов Банка, руб.',
+            (xml.row[0].cell[3]): 'Сумма расходов Банка, руб.',
             (xml.row[0].cell[4]): 'Номер договора',
             (xml.row[0].cell[5]): 'Дата договора',
             (xml.row[0].cell[6]): 'Вид услуг',
