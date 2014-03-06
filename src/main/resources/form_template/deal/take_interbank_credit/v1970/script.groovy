@@ -67,7 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'count'
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'inn', 'countryName', 'countryCode', 'docNum', 'docDate',
+def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'countryName', 'docNum', 'docDate',
         'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
