@@ -2,10 +2,13 @@ package com.aplana.gwt.client;
 
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -156,6 +159,15 @@ public class ModalWindow extends DialogBox implements CanHide {
             hideHandler.OnHide(this);
         }
         super.onPreviewNativeEvent(event);
+    }
+
+    public void center() {
+        super.center();
+        OpenModalWindowEvent.fire(this);
+    }
+
+    public HandlerRegistration addOpenModalWindowHandler(OpenModalWindowEvent.OpenHandler handler) {
+        return this.addHandler(handler, OpenModalWindowEvent.getType());
     }
 
     private boolean isCloseEvent(NativeEvent event) {

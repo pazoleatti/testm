@@ -77,10 +77,6 @@ def checkAndbildXml() {
 
     // проверка наличия источников в стутусе принят
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-    if (formDataCollection == null || formDataCollection.records.isEmpty()) {
-        logger.error('Отсутствуют выходные или сводные налоговые формы в статусе "Принят". Формирование декларации невозможно.')
-        return
-    }
     // формируем xml
 
     // Получить параметры по транспортному налогу
@@ -146,16 +142,13 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     }
                 }
 
-
-
-
                 ТрНалНД() {
                     СумНалПУ("КБК": "18210604011021000110") {
                         /*
                         * Получить сводную НФ по трансп. со статусом принята
                         * Сгруппировать строки сводной налоговой формы по атрибуту «Код по ОКТМО». (okato)
                         */
-                        def formData = formDataCollection.find(departmentId, 200, FormDataKind.SUMMARY)
+                        def formData = formDataCollection?.find(departmentId, 200, FormDataKind.SUMMARY)
                         def rowsData
                         if (formData == null) {
                             //logger.error("Не удалось получить сводную НФ по трансп. со статусом принята")
@@ -164,7 +157,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             dataRowsHelper = formDataService.getDataRowHelper(formData)
                             rowsData = dataRowsHelper.getAllCached()
                         }
-                        System.out.print("formData == null ->" + (formData == null))
+                        // System.out.print("formData == null ->" + (formData == null))
                         // Формирование данных для СумПУ
                         def resultMap = [:]
                         rowsData.each { row ->
@@ -190,7 +183,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 // вспомогательный taxBase
                                 resultMap[row.okato].taxBase += row.taxBase ?: 0
                                 def taxRate = getRefBookValue(41, row.taxRate, 'VALUE')?.value
-                                def boolean obligation = (departmentParamTransport.OBLIGATION == 1)
+                                def boolean obligation = (departmentParamTransport?.OBLIGATION?.CODE?.numberValue == 1)
                                 // вспомогательный taxRate
                                 resultMap[row.okato].taxRate += taxRate ?: 0
                                 // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
@@ -337,7 +330,7 @@ def getRegionByOKTMO(def oktmo) {
     } else if (oktmo3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, new Date());
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 1) + "%'"
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 2) + "%'"
         def record = getRecord(4, filter, new Date())
         if (record != null) {
             return record
@@ -490,9 +483,6 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
-    if (record.REORG_KPP == null || record.REORG_KPP.stringValue == null || record.REORG_KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП реорганизованного обособленного подразделения»")
-    }
     if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
@@ -513,10 +503,10 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.02')) {
         errorList.add("«Версия формата»")
     }
-    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_01')) {
+    if (record.APP_VERSION == null || record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_02')) {
         errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
