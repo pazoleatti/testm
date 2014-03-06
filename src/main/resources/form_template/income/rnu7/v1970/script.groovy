@@ -303,11 +303,6 @@ void logicCheck() {
             loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
-        // +2. Проверка заполнения граф 9, 11 (переехало сюда из проверок перед рассчетами)
-        if (row.taxAccountingCurrency > 0 && row.accountingCurrency > 0) {
-            loggerError(errorMsg + "Графы 9 и 11 одновременно содержат ненулевое значение!")
-        }
-
         // 3. Проверка на нулевые значения
         if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&
                 !(row.accountingCurrency) && !(row.ruble)) {
