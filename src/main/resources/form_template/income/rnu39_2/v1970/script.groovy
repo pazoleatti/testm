@@ -9,12 +9,15 @@ import groovy.transform.Field
  * Форма "(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 2(квартальный)"
  * formTemplateId=337
  *
+ * Очень похожа с формой РНУ-39.1 - чтз одинаковое, различие в составе подразделов
+ *
  * @author rtimerbaev
  */
 
-// графа 1  - currencyCode
-// графа 2  - issuer
-// графа 3  - regNumber
+// графа    - fix
+// графа 1  - currencyCode          - зависит от графы 2 - атрибут 810 CODE_CUR «Цифровой код валюты выпуска», справочника 84 «Ценные бумаги»
+// графа 2  - issuer                - атрибут 809 ISSUER «Эмитент», справочника 84 «Ценные бумаги»
+// графа 3  - regNumber             - зависит от графы 2 - атрибут 813 REG_NUM «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
 // графа 4  - amount
 // графа 5  - cost
 // графа 6  - shortPositionOpen
@@ -53,6 +56,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicCheck()
         break
     case FormDataEvent.COMPOSE :
         consolidation()
@@ -76,53 +80,44 @@ def refBookCache = [:]
 @Field
 def allColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon', 'couponIncome', 'totalPercIncome']
 
-// Редактируемые атрибуты (графа 1..13)
+// Редактируемые атрибуты (графа 2, 4..13)
 @Field
-def editableColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
+def editableColumns = ['issuer', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1..6, 8..13 - 7 графа необязательная для раздела А)
+// Обязательно заполняемые атрибуты (графа 2, 4..7, 10..15 - 7 графа необязательная для раздела А)
+// TODO (Ramil Timerbaev) неясности в чтз про графу 8, 9
 @Field
-def nonEmptyColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon', 'couponIncome']
+def nonEmptyColumns = [/*"issuer",*/ "amount", "cost", "shortPositionOpen",  // TODO (Ramil Timerbaev): Раскомментировать после появления значений в справочнике
+        "shortPositionClose", /*"pkdSumOpen", "pkdSumClose",*/ "maturityDatePrev", "maturityDateCurrent",
+        "currentCouponRate", "incomeCurrentCoupon", "couponIncome", "totalPercIncome"]
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 5, 8, 9, 14, 15)
 @Field
-def totalColumns = ['amount', 'cost', 'pkdSumOpen', 'pkdSumClose', 'couponIncome', 'totalPercIncome']
+def totalColumns = ["amount", "cost", "pkdSumOpen", "pkdSumClose", "couponIncome", "totalPercIncome"]
 
 // список алиасов подразделов
 @Field
 def sections = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
 def currentDate = new Date()
 
 //// Обертки методов
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
@@ -134,11 +129,6 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 def addRow() {
@@ -172,8 +162,8 @@ void calc() {
     // отсортировать/группировать
     sort(dataRows)
 
-    def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)?.time
-    def dateEnd =  reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def dateStart = getReportPeriodStartDate()
+    def dateEnd =  getReportPeriodEndDate()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -195,23 +185,21 @@ void calc() {
             lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow), null)
         }
     }
+
     dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def reportDay = reportPeriodService.getMonthReportDate(formData.reportPeriodId, formData.periodOrder)?.time
-    def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)?.time
-    def dateEnd =  reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def dateStart = getReportPeriodStartDate()
+    def dateEnd = getReportPeriodEndDate()
 
-    // список проверяемых столбцов (графа 1..13)
-    def requiredColumns = nonEmptyColumns
     // алиасы графов для арифметической проверки (графа 14, 15)
     def arithmeticCheckAlias = ['couponIncome', 'totalPercIncome']
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
+    // 7 графа необязательная для раздела А
+    def nonEmptyColumnsA = nonEmptyColumns - 'shortPositionClose'
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -223,34 +211,26 @@ void logicCheck() {
 
         // 1. Проверка даты первой части сделки
         if (row.shortPositionOpen > reportDay) {
-            logger.error(errorMsg + 'неверно указана дата первой части сделки!')
+            logger.error(errorMsg + 'Неверно указана дата первой части сделки!')
         }
 
         // 2. Проверка даты второй части сделки
         // Графа 7 (раздел А) = не заполнена;
         // Графа 7 (раздел Б) - принадлежит отчётному периоду
-        if ((isA && row.shortPositionClose != null) ||
-                (!isA && row.shortPositionClose < dateStart || dateEnd < row.shortPositionClose)) {
-            logger.error(errorMsg + 'неверно указана дата второй части сделки!')
+        if ((isA && row.shortPositionClose != null) || (!isA && row.shortPositionClose > reportDay)) {
+            logger.error(errorMsg + 'Неверно указана дата второй части сделки!')
         }
 
         // для раздела А графа 7 необязательна
-        if (isA) {
-            requiredColumns -= 'shortPositionClose'
-        } else {
-            requiredColumns += 'shortPositionClose'
-        }
         // 3. Обязательность заполнения поля графа 1..13
-        checkNonEmptyColumns(row, index, requiredColumns, logger, true)
+        checkNonEmptyColumns(row, index, (isA ? nonEmptyColumnsA : nonEmptyColumns), logger, true)
 
         // 4. Арифметическая проверка графы 14 и 15
-        needValue['couponIncome'] = calc14(row, dateStart, dateEnd, isA)
-        needValue['totalPercIncome'] = calc15(row, isA)
+        // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
+        def needValue = [:]
+        needValue.couponIncome = calc14(row, dateStart, dateEnd, isA)
+        needValue.totalPercIncome = calc15(row, isA)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        // Проверки соответствия НСИ
-        // 1. Проверка кода валюты со справочным (графа 1)
-        checkNSI(15, row, 'currencyCode')
     }
 
     // 5. Проверка итоговых значений для подраздела 1..5 раздела А и Б
@@ -302,11 +282,6 @@ void consolidation() {
     }
     dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/** Проверка является ли строка итоговой. */
-def isTotal(def row) {
-    return row != null && row.getAlias() != null && row.getAlias().contains('total')
 }
 
 /** Проверка принадлежит ли строка разделу A. */
@@ -367,32 +342,28 @@ def getNewRow() {
  * @param isA принадлежит ли строка разделу A (для раздела А графа 7 необязательна)
  */
 def calc14(def row, def dateStart, def dateEnd, def isA) {
-    if (row.currencyCode == null || row.amount == null || row.cost == null || row.shortPositionOpen == null ||
+    if (row.amount == null || row.cost == null || row.shortPositionOpen == null ||
             (!isA && row.shortPositionClose == null) || row.maturityDatePrev == null ||
             row.maturityDateCurrent == null || row.currentCouponRate == null || row.incomeCurrentCoupon == null ) {
         return null
     }
-    def tmp
-
+    def tmp = 0
     if ((isA && dateStart <= row.maturityDateCurrent && row.maturityDateCurrent <= dateEnd) ||
             (!isA && row.shortPositionOpen <= row.maturityDateCurrent && row.maturityDateCurrent <= row.shortPositionClose)) {
         // справочник 15 "Общероссийский классификатор валют", атрибут 64 CODE - "Код валюты. Цифровой"
-        def record15code = getRefBookValue(15, row.currencyCode)?.CODE?.value
-        if (record15code == '810') {
+        def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
+        if (currencyCode == '810') {
             tmp = row.amount * row.incomeCurrentCoupon
         } else {
             def t = row.maturityDateCurrent - row.maturityDatePrev
             // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-            def record22 = getRefBookRecord(22, 'CODE_NUMBER', row.currencyCode.toString(), row.maturityDateCurrent,
-                    row.getIndex(), getColumnName(row, 'currencyCode'), true)
+            def record22 = getRefBookRecord(22, 'CODE_NUMBER', currencyCode, row.maturityDateCurrent, row.getIndex(), getColumnName(row, 'currencyCode'), true)
             if (record22 == null) {
                 return null
             } else {
                 tmp = roundValue(row.currentCouponRate * row.cost * t / 360, 2) * record22.RATE.value
             }
         }
-    } else {
-        tmp = 0
     }
     return roundValue(tmp, 2)
 }
@@ -402,22 +373,14 @@ def calc14(def row, def dateStart, def dateEnd, def isA) {
  *
  * @param row строка
  * @param isA принадлежит ли строка разделу A (для раздела А графа 7 необязательна)
- * @return
  */
 def calc15(def row, def isA) {
-    if (row.couponIncome == null || row.pkdSumClose == null) {
+    if (row.couponIncome == null || row.pkdSumClose == null || row.pkdSumOpen == null) {
         return null
     }
     return (isA ? row.couponIncome : row.pkdSumClose + row.couponIncome - row.pkdSumOpen)
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -442,14 +405,19 @@ void sort(def dataRows) {
     // отсортировать строки каждого раздела
     sortRows.each { sectionRows ->
         sectionRows.sort { def a, def b ->
-            // графа 1  - currencyCode (справочник)
-            // графа 2  - issuer
-            if (a.currencyCode == b.currencyCode) {
-                return a.issuer <=> b.issuer
+            // графа 1  - currencyCode (зависимое поле)
+            // графа 2  - issuer (справочник 84)
+            def recordA = getRefBookValue(84, a.issuer)
+            def recordB = getRefBookValue(84, b.issuer)
+            def valueA = recordA?.CODE_CUR?.value
+            def valueB = recordB?.CODE_CUR?.value
+            if (valueA != valueB) {
+                return valueA <=> valueB
+            } else {
+                valueA = recordA?.ISSUER?.value
+                valueB = recordB?.ISSUER?.value
+                return valueA <=> valueB
             }
-            def codeA = getRefBookValue(15, a.currencyCode)?.CODE?.value
-            def codeB = getRefBookValue(15, b.currencyCode)?.CODE?.value
-            return codeA <=> codeB
         }
     }
 }
@@ -459,4 +427,18 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+}
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
 }

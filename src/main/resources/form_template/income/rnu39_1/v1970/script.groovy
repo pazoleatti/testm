@@ -4,18 +4,22 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
  * Форма "(РНУ-39.1) Регистр налогового учёта процентного дохода по коротким позициям. Отчёт 1(месячный)
  * formTemplateId=336
  *
+ * Очень похожа с формой РНУ-39.2 - чтз одинаковое, различие в составе подразделов
+ *
  * @author bkinzyabulatov
  * @author Dmitriy Levykin
  *
- * Графа 1  currencyCode        Код валюты номинала Справочник 15 Атрибут 64 CODE
- * Графа 2  issuer              Эмитент
- * Графа 3  regNumber           Номер государственной регистрации Справочник 84 Атрибут 813 REG_NUM
+ * Графа    fix
+ * Графа 1  currencyCode        Код валюты номинала               - зависит от графы 2 - атрибут 810 CODE_CUR «Цифровой код валюты выпуска», справочника 84 «Ценные бумаги»
+ * Графа 2  issuer              Эмитент                           - атрибут 809 ISSUER «Эмитент», справочника 84 «Ценные бумаги»
+ * Графа 3  regNumber           Номер государственной регистрации - зависит от графы 2 - атрибут 813 REG_NUM «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
  * Графа 4  amount              Количество облигаций (шт.)
  * Графа 5  cost                Номинальная стоимость лота (руб.коп.)
  * Графа 6  shortPositionOpen   Дата открытия короткой позиции
@@ -75,30 +79,20 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-//Все аттрибуты
-@Field
-def allColumns = ["currencyCode", "issuer", "regNumber", "amount", "cost", "shortPositionOpen", "shortPositionClose",
-        "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent", "currentCouponRate",
-        "incomeCurrentCoupon", "couponIncome", "totalPercIncome"]
-
-// Поля, для которых подсчитываются итоговые значения
+// Поля, для которых подсчитываются итоговые значения (графа 4, 5, 8, 9, 14, 15)
 @Field
 def totalColumns = ["amount", "cost", "pkdSumOpen", "pkdSumClose", "couponIncome", "totalPercIncome"]
 
-// Редактируемые атрибуты
+// Редактируемые атрибуты (графа 2, 4..13)
 @Field
-def editableColumns = ["currencyCode", "issuer", "regNumber", "amount", "cost", "shortPositionOpen",
-        "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
-        "currentCouponRate", "incomeCurrentCoupon"]
+def editableColumns = ['issuer', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
 
-// Обязательно заполняемые атрибуты
+// Обязательно заполняемые атрибуты (графа 2, 4..7, 10..15 - 7 графа необязательная для раздела А)
+// TODO (Ramil Timerbaev) неясности в чтз про графу 8, 9
 @Field
-def nonEmptyColumns = ["currencyCode", "issuer", /*"regNumber",*/ "amount", "cost", "shortPositionOpen",  // TODO Левыкин: Раскомментировать после появления значений в справочнике
-        "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
+def nonEmptyColumns = [/*"issuer",*/ "amount", "cost", "shortPositionOpen",  // TODO Левыкин: Раскомментировать после появления значений в справочнике
+        "shortPositionClose", /*"pkdSumOpen", "pkdSumClose",*/ "maturityDatePrev", "maturityDateCurrent",
         "currentCouponRate", "incomeCurrentCoupon", "couponIncome", "totalPercIncome"]
-
-@Field
-def sortColumns = ["currencyCode", "issuer"]
 
 @Field
 def autoFillColumns = ["couponIncome", "totalPercIncome"]
@@ -106,10 +100,13 @@ def autoFillColumns = ["couponIncome", "totalPercIncome"]
 @Field
 def groups = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4']
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -117,58 +114,54 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
-    def dFrom = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
-    def dTo = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-
+    def dFrom = getReportPeriodStartDate()
+    def dTo = getReportPeriodEndDate()
     def reportDateNextDay = dTo + 1
+    def nonEmptyColumnsA = nonEmptyColumns - 'shortPositionClose' // 7 графа необязательная для раздела А
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
+        def isInASector = isInASector(dataRows, row)
 
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        // 1. Обязательность заполнения полей (графа 2, 4..7, 10..15)
+        checkNonEmptyColumns(row, index, (isInASector ? nonEmptyColumnsA : nonEmptyColumns), logger, true)
 
+        // 2. Проверка даты первой части сделки
         if (row.shortPositionOpen > reportDateNextDay) {
             logger.error(errorMsg + "Неверно указана дата первой части сделки!")
         }
-        if ((isInASector(dataRows, row) && row.shortPositionClose == null) || (!isInASector(dataRows, row) && row.shortPositionClose > reportDateNextDay)) {
+        // 3. Проверка даты второй части сделки
+        if ((isInASector && row.shortPositionClose != null) || (!isInASector && row.shortPositionClose > reportDateNextDay)) {
             logger.error(errorMsg + "Неверно указана дата второй части сделки!")
         }
 
+        // 4. Арифметическая проверка вычислимых граф (графа  14, 15)
         def values = [:]
-        values.couponIncome = round(calc14(dataRows, row, (dFrom..dTo)))
-        values.totalPercIncome = round(calc15(dataRows, row))
-
+        values.couponIncome = calc14(dataRows, row, (dFrom..dTo))
+        values.totalPercIncome = calc15(dataRows, row)
         checkCalc(row, autoFillColumns, values, logger, true)
-        // Проверки соответствия НСИ
-        checkNSI(15, row, 'currencyCode')
-        // checkNSI(84, row, 'regNumber') // TODO Левыкин: Раскомментировать после появления значений в справочнике
     }
 
-    // Проверка итоговых значений формы
+    // 5. Арифметическая проверка строк промежуточных итогов (Проверка итоговых значений формы)
     for (def section : groups) {
-        firstRow = getDataRow(dataRows, section)
-        lastRow = getDataRow(dataRows, 'total' + section)
-        def columnNames = ""
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, 'total' + section)
+        def columnNames = []
         for (def column : totalColumns) {
             if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
-                if (columnNames != "") {
-                    columnNames += ", "
-                }
-                columnNames += "\"${getColumnName(lastRow, column)}\""
+                columnNames.add(getColumnName(lastRow, column))
             }
         }
-        if (columnNames != "") {
+        if (!columnNames.isEmpty()) {
             def index = lastRow.getIndex()
             def errorMsg = "Строка $index: "
-            logger.error(errorMsg + "Неверно рассчитано итоговое значение граф: $columnNames!")
+            logger.error(errorMsg + "Неверно рассчитано итоговое значение граф: ${columnNames.join(', ')}!")
         }
     }
 }
@@ -177,39 +170,17 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def sortRows = []
+    // отсортировать/группировать
+    sort(dataRows)
 
-    groups.each { section ->
-        def from = getDataRow(dataRows, section).getIndex()
-        def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
-        if (from <= to) {
-            sortRows.add(dataRows[from..to])
-        }
-    }
-
-    sortRows.each {
-        it.sort { DataRow a, DataRow b ->
-
-            def aD = getRefBookValue(15, a.currencyCode)?.CODE?.stringValue
-            def bD = getRefBookValue(15, b.currencyCode)?.CODE?.stringValue
-            if (aD != bD) {
-                return aD<=>bD
-            } else {
-                aD = a.issuer
-                bD = b.issuer
-                return aD<=>bD
-            }
-        }
-    }
-
-    def dFrom = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
-    def dTo = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    def dFrom = getReportPeriodStartDate()
+    def dTo = getReportPeriodEndDate()
 
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
         if (row.getAlias() == null) {
-            row.couponIncome = round(calc14(dataRows, row, (dFrom..dTo)))
-            row.totalPercIncome = round(calc15(dataRows, row))
+            row.couponIncome = calc14(dataRows, row, (dFrom..dTo))
+            row.totalPercIncome = calc15(dataRows, row)
         }
     }
 
@@ -307,46 +278,49 @@ void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
 
 BigDecimal calc14(def dataRows, def row, def period) {
     def boolean condition = false
-    if (isInASector(dataRows, row) && row.maturityDateCurrent != null && row.maturityDateCurrent in period) {
+    def isInASector = isInASector(dataRows, row)
+    if (isInASector && row.maturityDateCurrent != null && row.maturityDateCurrent in period) {
         condition = true
-    } else if (row.maturityDateCurrent != null && row.shortPositionOpen != null && row.shortPositionClose != null &&
-            row.maturityDateCurrent in ((row.shortPositionOpen)..(row.shortPositionClose))) {
+    } else if (!isInASector && row.maturityDateCurrent != null && row.shortPositionOpen != null && row.shortPositionClose != null &&
+            row.maturityDateCurrent in (row.shortPositionOpen..row.shortPositionClose)) {
         condition = true
     }
-
     if (!condition) {
-        return 0
+        return round(0)
     }
 
-    if (getRefBookValue(15, row.currencyCode)?.CODE?.stringValue == '810') {
+    def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
+    if (currencyCode == '810') {
         if (row.amount == null || row.incomeCurrentCoupon == null) {
             return null
         }
-        return row.amount * row.incomeCurrentCoupon
+        return round(row.amount * row.incomeCurrentCoupon)
     } else {
         if (row.currentCouponRate == null || row.cost == null || row.maturityDateCurrent == null ||
-            row.maturityDatePrev == null || row.currencyCode == null) {
+                row.maturityDatePrev == null || currencyCode == null) {
             return null
         }
         def String cellName = getColumnName(row, 'currencyCode')
-        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "${row.currencyCode}",
+        // TODO (Ramil Timerbaev) проверить
+        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', currencyCode,
                 row.maturityDateCurrent, row.getIndex(), cellName, logger, true)
         def rate = record?.RATE?.numberValue
         if (rate == null) {
             return null
         }
+        System.out.println('====== record = ' + record) // TODO (Ramil Timerbaev)
         return round(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 * rate)
     }
 }
 
 BigDecimal calc15(def dataRows, def row) {
+    def tmp = null
     if (isInASector(dataRows, row)) {
-        return row.couponIncome
+        tmp = row.couponIncome
     } else if (row.pkdSumClose != null && row.couponIncome != null && row.pkdSumOpen != null) {
-        return row.pkdSumClose + row.couponIncome - row.pkdSumOpen
-    } else {
-        return null
+        tmp =  row.pkdSumClose + row.couponIncome - row.pkdSumOpen
     }
+    return round(tmp)
 }
 
 boolean isInASector(def dataRows, def row) {
@@ -367,4 +341,44 @@ def getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
         return 0
     }
     return summ(formData, rows, new ColumnRange(columnAlias, from, to))
+}
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
+
+void sort(def dataRows) {
+    def sortRows = []
+    groups.each { section ->
+        def from = getDataRow(dataRows, section).getIndex()
+        def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
+        if (from <= to) {
+            sortRows.add(dataRows[from..to])
+        }
+    }
+    sortRows.each {
+        it.sort { DataRow a, DataRow b ->
+            def recordA = getRefBookValue(84, a.issuer)
+            def recordB = getRefBookValue(84, b.issuer)
+            def valueA = recordA?.CODE_CUR?.value
+            def valueB = recordB?.CODE_CUR?.value
+            if (valueA != valueB) {
+                return valueA <=> valueB
+            } else {
+                valueA = recordA?.ISSUER?.value
+                valueB = recordB?.ISSUER?.value
+                return valueA <=> valueB
+            }
+        }
+    }
 }
