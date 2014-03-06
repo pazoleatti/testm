@@ -199,7 +199,7 @@ void importData() {
     def headerMapping = [
             (xml.row[0].cell[1]): 'ИНН/ КИО',
             (xml.row[0].cell[2]): 'Страна регистрации',
-            (xml.row[0].cell[3]): 'Сумма доходов Банка, руб.',
+            (xml.row[0].cell[3]): 'Сумма расходов Банка, руб.',
             (xml.row[0].cell[4]): 'Номер договора',
             (xml.row[0].cell[5]): 'Дата договора',
             (xml.row[0].cell[6]): 'Количество',
