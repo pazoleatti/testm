@@ -12,10 +12,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
+import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -116,7 +113,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 getUiHandlers().onSort(sortColumns.get(event.getColumn()), !event.isSortAscending());
             }
         });
-
+        cellTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         //        cellTable.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
 //            @Override
 //            public void onLoadingStateChanged(LoadingStateChangeEvent event) {

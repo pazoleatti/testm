@@ -293,16 +293,29 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public Set<H> getSelectedItems() {
+        List<H> hs = new ArrayList<H>();
+        findAllChild(hs, null);
+        for (H h : hs) {
+            ensureSelection(h);
+        }
         return Collections.unmodifiableSet(selectionModel.getSelectedSet());
     }
 
+    /**
+     * Очистка модели выделенности
+     */
     public void clearSelection() {
         for (H item : selectionModel.getSelectedSet()) {
+            //очищаем цвет
             item.setItemState(null);
         }
         selectionModel.clear();
     }
 
+    /**
+     * Открытие нодов всех родителей по иерархрии вверх у чилда
+     * @param child чилд
+     */
     public void openAllParent(H child){
         H parent = (H)child.getParentItem();
         if(parent != null){

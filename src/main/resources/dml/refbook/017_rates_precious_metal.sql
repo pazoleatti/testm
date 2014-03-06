@@ -1,4 +1,4 @@
---Курс драгоценного металла
+-- Справочник "Коды драгоценных металлов"
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,1,90,to_date('01.01.2012','dd.mm.yyyy'),0);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE)
 (select
