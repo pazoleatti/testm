@@ -293,7 +293,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
+            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
             builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
