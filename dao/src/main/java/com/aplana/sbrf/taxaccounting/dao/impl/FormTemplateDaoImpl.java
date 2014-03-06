@@ -291,8 +291,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
+            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
+            builder.append(" and status in (:statusList) order by version) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
