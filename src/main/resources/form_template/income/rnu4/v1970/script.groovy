@@ -10,9 +10,13 @@ import groovy.transform.Field
  * (РНУ-4) Простой регистр налогового учёта «доходы»
  * formTemplateId=316
  *
- * @author auldanov
- * @author Stanislav Yasinskiy
  */
+
+// 1 rowNumber № пп
+// 2 code      Код налогового учета
+// 3 balance   Номер
+// 4 name      Наименование счёта
+// 5 sum       Сумма дохода за отчётный квартал
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -25,7 +29,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -46,7 +50,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        // logicCheck() TODO Уточнить когда будет постановка, нужны ли logicCheck() и calc()
         break
 }
 
@@ -62,9 +67,17 @@ def refBookCache = [:]
 @Field
 def editableColumns = ['balance', 'sum']
 
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNumber', 'code', 'name']
+
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNumber', 'balance', 'sum']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -75,6 +88,13 @@ def totalColumns = ['sum']
 def currentDate = new Date()
 
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -269,4 +289,112 @@ void consolidation() {
     }
     dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Код налогового учета',
+            (xml.row[0].cell[3]): 'Балансовый счёт',
+            (xml.row[0].cell[5]): 'Сумма дохода за отчётный квартал',
+            (xml.row[1].cell[3]): 'Номер',
+            (xml.row[1].cell[4]): 'Наименование счёта',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[2]): '2',
+            (xml.row[2].cell[3]): '3',
+            (xml.row[2].cell[4]): '4',
+            (xml.row[2].cell[5]): '5'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк TODO Уточнитиь когда будет постановка
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        // Зависимая
+
+        // графа 3
+        newRow.balance = getRecordIdImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+
+        // графа 4
+        // Зависимая
+
+        // графа 5
+        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }
