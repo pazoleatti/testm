@@ -492,22 +492,21 @@ def calculateColumn12(DataRow row){
  * @param row
  */
 def calculateColumn13(DataRow row){
-    if(row.rateBR == null){
-        return 0
-    }
+    def tmp = null
     if (row.outcome > 0){
         // Если «графа 10» > 0, то:
-        if (row.outcome <= row.rateBR){
+        if (row.outcome <= row.outcome269st){
             // Если «графа 10» ? «графа 12», то:  «графа 13» = «графа 10»
-            row.outcomeTax = row.outcome
+            tmp = row.outcome
         }else{
             // 2.   Если «графа 10» > «графа 12», то: «графа 13» = «графа 12»
-            row.outcomeTax = row.rateBR
+            tmp = row.outcome269st
         }
     }else if (row.outcome == 0){
         // Если «графа 10» = 0, то «графа 13» = 0
-        row.rateBR = 0
+        tmp = 0
     }
+    return tmp
 }
 
 /**
