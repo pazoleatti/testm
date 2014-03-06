@@ -90,12 +90,10 @@ def totalColumns = ['startCost', 'amortizationMonth', 'amortizationSinceYear', '
 @Field
 def currentDate = new Date()
 
-//// Обертки методов
+@Field
+def isBalance = null
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
+//// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -111,11 +109,23 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (!isMonthBalance() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
+}
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
+def isMonthBalance() {
+    if (isBalance == null) {
+        // Отчётный период
+        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
+            isBalance = false
+        } else {
+            isBalance = (formData.periodOrder - 1) % 3 == 0
+        }
+    }
+    return isBalance
 }
 
 //// Кастомные методы
@@ -154,8 +164,8 @@ void calc() {
         // Удаление подитогов
         deleteAllAliased(dataRows)
 
-        def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-        def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
+        def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+        def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
 
         def dataOld = null
         if (formData.kind != FormDataKind.PRIMARY) {
@@ -179,9 +189,9 @@ void calc() {
             // для граф 10 и 11
             prevValues = getPrev10and11(dataOld, row)
             // графа 10
-            row.amortizationSinceYear = calc10(row, reportDateStart, reportDate, prevValues[0])
+            row.amortizationSinceYear = calc10(row, dateStart, endDate, prevValues[0])
             // графа 11
-            row.amortizationSinceUsed = calc11(row, reportDateStart, reportDate, prevValues[1])
+            row.amortizationSinceUsed = calc11(row, dateStart, endDate, prevValues[1])
         }
     }
 
@@ -220,18 +230,18 @@ def BigDecimal calc9(def row) {
 }
 
 // Ресчет графы 10
-def BigDecimal calc10(def row, def reportDateStart, def reportDate, def oldRow10) {
+def BigDecimal calc10(def row, def dateStart, def dateEnd, def oldRow10) {
     Calendar buyDate = calc10and11(row)
-    if (buyDate != null && reportDateStart != null && reportDate != null && row.amortizationMonth != null)
-        return row.amortizationMonth + ((buyDate.get(Calendar.MONTH) == Calendar.JANUARY || (buyDate.after(reportDateStart) && buyDate.before(reportDate))) ? 0 : ((oldRow10 == null) ? 0 : oldRow10))
+    if (buyDate != null && dateStart != null && dateEnd != null && row.amortizationMonth != null)
+        return row.amortizationMonth + ((buyDate.get(Calendar.MONTH) == Calendar.JANUARY || (buyDate.after(dateStart) && buyDate.before(dateEnd))) ? 0 : ((oldRow10 == null) ? 0 : oldRow10))
     return null
 }
 
 // Ресчет графы 11
-def BigDecimal calc11(def row, def reportDateStart, def reportDate, def oldRow11) {
+def BigDecimal calc11(def row, def dateStart, def dateEnd, def oldRow11) {
     Calendar buyDate = calc10and11(row)
-    if (buyDate != null && reportDateStart != null && reportDate != null && row.amortizationMonth != null)
-        return row.amortizationMonth + ((buyDate.after(reportDateStart) && buyDate.before(reportDate)) ? 0 : ((oldRow11 == null) ? 0 : oldRow11))
+    if (buyDate != null && dateStart != null && dateEnd != null && row.amortizationMonth != null)
+        return row.amortizationMonth + ((buyDate.after(dateStart) && buyDate.before(dateEnd)) ? 0 : ((oldRow11 == null) ? 0 : oldRow11))
     return null
 }
 
@@ -246,10 +256,6 @@ Calendar calc10and11(def row) {
 }
 
 def logicCheck() {
-    if (formData.periodOrder == null) {
-        throw new ServiceException("Месячная форма создана как квартальная!")
-    }
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
@@ -260,10 +266,9 @@ def logicCheck() {
         if (formData.kind != FormDataKind.PRIMARY) {
             dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
         }
-        // Отчетная дата
-        def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-        //Начальная дата отчетного периода
-        def reportDateStart = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
+        def dateEnd = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+        def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
 
         // алиасы графов для арифметической проверки
         def arithmeticCheckAlias = ['depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
@@ -298,8 +303,8 @@ def logicCheck() {
                 needValue['depreciationRate'] = calc8(row)
                 needValue['amortizationMonth'] = calc9(row)
                 prevValues = getPrev10and11(dataOld, row)
-                needValue['amortizationSinceYear'] = calc10(row, reportDateStart, reportDate, prevValues[0])
-                needValue['amortizationSinceUsed'] = calc11(row, reportDateStart, reportDate, prevValues[1])
+                needValue['amortizationSinceYear'] = calc10(row, dateStart, dateEnd, prevValues[0])
+                needValue['amortizationSinceUsed'] = calc11(row, dateStart, dateEnd, prevValues[1])
                 checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
             }
         }
