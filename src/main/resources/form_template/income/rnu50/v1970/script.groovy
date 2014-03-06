@@ -28,7 +28,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
-        if (formData.kind == FormDataKind.CONSOLIDATED) {
+        if (formData.kind != FormDataKind.CONSOLIDATED) {
             // если форма консолидированная то не надо брать данные из рну 49
             consolidationFrom49()
         }
@@ -45,6 +45,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        calc()
+        logicCheck()
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -139,8 +141,6 @@ void consolidation() {
         consolidationFrom49()
         logger.info('Формирование первичной формы РНУ-50 прошло успешно.')
     }
-    calc()
-    logicCheck()
 }
 
 void consolidationFrom49() {
@@ -182,14 +182,9 @@ void checkCreation() {
         // проверка наличия формы рну 49 в статусе подготовлена или выше (но не создана)
         def formData49 = getFormDataRNU49()
         if (formData49 == null || formData49.state != WorkflowState.ACCEPTED) {
-            logger.error("Отсутствует или не находится в статусе «Принята» форма «${formTypeService.get(312).name}» за текущий отчетный период!")
+            logger.error("Отсутствует или не находится в статусе «Подготовлена» или выше форма «${formTypeService.get(312).name}» за текущий отчетный период!")
             return
         }
-    }
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
     }
     formDataService.checkUnique(formData, logger)
 }
@@ -208,7 +203,7 @@ def getDataRowsRNU49() {
 
 def getStartDate() {
     if (reportPeriodStartDate == null) {
-        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
+        reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
     }
     return reportPeriodStartDate
 }

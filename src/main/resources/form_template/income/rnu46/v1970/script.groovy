@@ -50,7 +50,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, isMonthBalace() ? balanceColumns : editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, isMonthBalance() ? balanceColumns : editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -95,11 +95,6 @@ def nonEmptyColumns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup', '
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
@@ -112,7 +107,7 @@ def formDataPrev = null // Форма предыдущего месяца
 @Field
 def dataRowHelperPrev = null // DataRowHelper формы предыдущего месяца
 @Field
-def isBalace = null
+def isBalance = null
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 @Field
@@ -132,7 +127,7 @@ FormData getFormDataPrev() {
 def getDataRowHelperPrev() {
     if (dataRowHelperPrev == null) {
         def formDataPrev = getFormDataPrev()
-        if (formDataPrev != null) {
+        if (!isMonthBalance() && formDataPrev != null && formDataPrev.state == WorkflowState.ACCEPTED) {
             dataRowHelperPrev = formDataService.getDataRowHelper(formDataPrev)
         }
     }
@@ -140,16 +135,16 @@ def getDataRowHelperPrev() {
 }
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
-def isMonthBalace() {
-    if (isBalace == null) {
+def isMonthBalance() {
+    if (isBalance == null) {
         // Отчётный период
         if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalace = false
+            isBalance = false
         } else {
-            isBalace = (formData.periodOrder - 1) % 3 == 0
+            isBalance = (formData.periodOrder - 1) % 3 == 0
         }
     }
-    return isBalace
+    return isBalance
 }
 
 // Алгоритмы заполнения полей формы
@@ -169,13 +164,13 @@ void calc() {
     def reportDate = getReportDate()
     def Calendar reportDateC = Calendar.getInstance()
     reportDateC.setTime(reportDate)
-    def reportMounth = reportDateC.get(Calendar.MONTH)
+    def reportMonth = reportDateC.get(Calendar.MONTH)
 
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
-    if (!isMonthBalace() && formData.kind == FormDataKind.PRIMARY) {
-        if (getFormDataPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED) {
-            logger.error("Не найдены экземпляры ${formTypeService.get(342).name} за прошлый отчетный период!")
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        if (getDataRowHelperPrev() == null) {
+            logger.error("Не найдены экземпляры \"${formTypeService.get(342).name}\" за прошлый отчетный период!")
         } else {
             dataPrev = getDataRowHelperPrev()
         }
@@ -188,7 +183,7 @@ void calc() {
         // Графа 1
         row.rowNumber = ++rowNumber
 
-        if (isMonthBalace() || formData.kind != FormDataKind.PRIMARY) {
+        if (isMonthBalance() || formData.kind != FormDataKind.PRIMARY) {
             // Для периода ввода остатков расчитывается только порядковый номер
             continue;
         }
@@ -217,7 +212,7 @@ void calc() {
         row.amortMonth = calc14(row, prevRow, endDate)
 
         // Графа 11, 15, 16
-        def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
+        def calc11and15and16 = calc11and15and16(reportMonth, row, prevRow)
         row.cost10perTaxPeriod = calc11and15and16[0]
         row.amortTaxPeriod = calc11and15and16[1]
         row.amortExploitation = calc11and15and16[2]
@@ -327,11 +322,7 @@ Date calc18(def row) {
 
 // Логические проверки
 void logicCheck() {
-    if (formData.periodOrder == null) {
-        throw new ServiceException("Месячная форма создана как квартальная!")
-    }
-
-    if (isMonthBalace()) {
+    if (isMonthBalance()) {
         // В периоде ввода остатков нет лог. проверок
         return
     }
@@ -354,7 +345,7 @@ void logicCheck() {
     def Set<String> invSet = new HashSet<String>()
 
     // Отчет за предыдущий месяц
-    if (formData.kind == FormDataKind.PRIMARY && (getDataRowHelperPrev() == null || getFormDataPrev().state != WorkflowState.ACCEPTED)) {
+    if (formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
         logger.error('Отсутствуют данные за прошлые отчетные периоды!')
     }
 
@@ -362,7 +353,7 @@ void logicCheck() {
     def reportDate = getReportDate()
     def Calendar reportDateC = Calendar.getInstance()
     reportDateC.setTime(reportDate)
-    def reportMounth = reportDateC.get(Calendar.MONTH)
+    def reportMonth = reportDateC.get(Calendar.MONTH)
 
     for (def row : dataRows) {
         def map = null
@@ -425,7 +416,7 @@ void logicCheck() {
             needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
             needValue['amortNorm'] = calc13(row)
             needValue['amortMonth'] = calc14(row, prevRow, endDate)
-            def calc11and15and16 = calc11and15and16(reportMounth, row, prevRow)
+            def calc11and15and16 = calc11and15and16(reportMonth, row, prevRow)
             needValue['cost10perTaxPeriod'] = calc11and15and16[0]
             needValue['amortTaxPeriod'] = calc11and15and16[1]
             needValue['amortExploitation'] = calc11and15and16[2]

@@ -1,13 +1,15 @@
-package form_template.deal.take_corporate_credit.v1970
+package form_template.deal.take_interbank_credit.v1970
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 397 - Привлечение корпоративных кредитов и депозитов (20)
+ * 402 - Привлечение межбанковских кредитов и депозитов (23)
  *
- * @author Stanislav Yasinskiy
+ * @author LHaziev
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -57,16 +59,16 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['fullNamePerson', 'sum', 'docNumber', 'docDate', 'dealDate']
+def editableColumns = ['fullNamePerson', 'docNum', 'docDate', 'dealNumber', 'dealDate', 'sum', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'count', 'price', 'cost']
+def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'count', 'price', 'total']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'countryName', 'sum', 'docNumber', 'docDate', 'count',
-        'price', 'cost', 'dealDate']
+def nonEmptyColumns = ['rowNumber', 'fullNamePerson', 'inn', 'countryName', 'countryCode', 'docNum', 'docDate',
+        'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -77,6 +79,11 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -139,31 +146,34 @@ void logicCheck() {
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
-        def docDateCell = row.getCell('docDate')
-
-        // Проверка количества
-        if (row.count != 1) {
-            def msg = row.getCell('count').column.name
-            logger.warn("Строка $rowNum: В графе «$msg» может быть указано только значение «1»!")
-        }
         // Проверка доходов
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')
-        def costCell = row.getCell('cost')
+        def totalCell = row.getCell('total')
         def msgSum = sumCell.column.name
+        // Проверка цены
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
-        if (costCell.value != sumCell.value) {
-            def msg = costCell.column.name
+        // Проверка стоимости
+        if (totalCell.value != sumCell.value) {
+            def msg = totalCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
-        // Корректность даты совершения сделки
-        def dealDateCell = row.getCell('dealDate')
-        if (docDateCell.value > dealDateCell.value) {
-            def msg1 = dealDateCell.column.name
+        // Корректность даты сделки относительно даты договора
+        def docDateCell = row.getCell('docDate')
+        def dealDoneDateCell = row.getCell('dealDoneDate')
+        if (docDateCell.value > dealDoneDateCell.value) {
+            def msg1 = dealDoneDateCell.column.name
             def msg2 = docDateCell.column.name
+            logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
+        }
+        // Корректность даты сделки относительно даты заключения
+        def dealDateCell = row.getCell('dealDate')
+        if (dealDateCell.value > dealDoneDateCell.value) {
+            def msg1 = dealDoneDateCell.column.name
+            def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
     }
@@ -172,8 +182,12 @@ void logicCheck() {
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    def int index = 1
+    def dataRows = dataRowHelper.allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
+
+    def index = 1
     for (row in dataRows) {
         // Порядковый номер строки
         row.rowNumber = index++
@@ -182,10 +196,11 @@ void calc() {
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Стоимость"
-        row.cost = row.sum
+        row.total = row.sum
 
         // Расчет полей зависимых от справочников
-        row.countryName = getRefBookValue(9, row.fullNamePerson)?.COUNTRY?.referenceValue
+        def map = getRefBookValue(9, row.fullNamePerson)
+        row.countryName = map?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
 }
@@ -194,28 +209,34 @@ void calc() {
 void importData() {
     def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 2)
 
     def headerMapping = [
             (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Страна регистрации',
-            (xml.row[0].cell[3]): 'Сумма расходов Банка, руб.',
+            (xml.row[0].cell[2]): 'Наименование страны регистрации',
+            (xml.row[0].cell[3]): 'Код страны регистрации по классификатору ОКСМ',
             (xml.row[0].cell[4]): 'Номер договора',
             (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Количество',
-            (xml.row[0].cell[7]): 'Цена',
-            (xml.row[0].cell[8]): 'Стоимость',
-            (xml.row[0].cell[9]): 'Дата совершения сделки',
+            (xml.row[0].cell[6]): 'Номер сделки',
+            (xml.row[0].cell[7]): 'Дата заключения сделки',
+            (xml.row[0].cell[8]): 'Количество',
+            (xml.row[0].cell[9]): 'Сумма расходов Банка по данным бухгалтерского учета, руб.',
+            (xml.row[0].cell[10]): 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.',
+            (xml.row[0].cell[11]): 'Итого стоимость без учета НДС, акцизов и пошлины, руб.',
+            (xml.row[0].cell[12]): 'Дата совершения сделки',
             (xml.row[2].cell[0]): 'гр. 2',
             (xml.row[2].cell[1]): 'гр. 3',
-            (xml.row[2].cell[2]): 'гр. 4',
-            (xml.row[2].cell[3]): 'гр. 5',
-            (xml.row[2].cell[4]): 'гр. 6',
-            (xml.row[2].cell[5]): 'гр. 7',
-            (xml.row[2].cell[6]): 'гр. 8',
-            (xml.row[2].cell[7]): 'гр. 9',
-            (xml.row[2].cell[8]): 'гр. 10',
-            (xml.row[2].cell[9]): 'гр. 11'
+            (xml.row[2].cell[2]): 'гр. 4.1',
+            (xml.row[2].cell[3]): 'гр. 4.2',
+            (xml.row[2].cell[4]): 'гр. 5',
+            (xml.row[2].cell[5]): 'гр. 6',
+            (xml.row[2].cell[6]): 'гр. 7',
+            (xml.row[2].cell[7]): 'гр. 8',
+            (xml.row[2].cell[8]): 'гр. 9',
+            (xml.row[2].cell[9]): 'гр.10',
+            (xml.row[2].cell[10]): 'гр. 11',
+            (xml.row[2].cell[11]): 'гр. 12',
+            (xml.row[2].cell[12]): 'гр. 13'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -228,7 +249,7 @@ void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    def int xmlIndexRow = -1
+    def xmlIndexRow = -1
     def int rowOffset = 3
     def int colOffset = 2
 
@@ -259,6 +280,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def xmlIndexCol = 0
+
         // графа 1
         newRow.rowNumber = xmlIndexRow - headRowCount
 
@@ -272,7 +294,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
             }
         }
         xmlIndexCol++
@@ -281,34 +303,54 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
+            if ((text != null && !text.isEmpty() && !text.equals(map?.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.NAME?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
             }
         }
         xmlIndexCol++
 
         // графа 5
-        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        if (map != null) {
+            def text = row.cell[xmlIndexCol].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+            }
+        }
         xmlIndexCol++
 
         // графа 6
-        newRow.docNumber = row.cell[xmlIndexCol].text()
+        newRow.docNum = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
         // графа 7
+
         newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
-        // графа 8 newRow.count =
+        // графа 8
+        newRow.dealNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
-        // графа 9 newRow.price =
+
+        // графа 9
+        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
-        // графа 10 newRow.cost =
+
+        // графа 10
         xmlIndexCol++
 
         // графа 11
-        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 12
+        xmlIndexCol++
+        // графа 13
+        xmlIndexCol++
+
+        // графа 14
+        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }
