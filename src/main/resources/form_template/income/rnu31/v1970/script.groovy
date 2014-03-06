@@ -27,6 +27,10 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
+        // TODO убрать когда появится механизм назначения periodOrder при создании формы
+        if (formData.periodOrder == null) {
+            return
+        }
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
@@ -89,7 +93,10 @@ void logicCheck() {
     // 22. Обязательность заполнения полей графы 3..12
     checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-    if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY) {
+    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
+    def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
+
+    if (formData.periodOrder > 1) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
 
@@ -100,8 +107,6 @@ void logicCheck() {
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
         if (rowOld != null) {
-            // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
-            def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
             for (def column : editableColumns) {
                 if (row.getCell(column).value < rowOld.getCell(column).value) {
                     def securitiesType = row.securitiesType

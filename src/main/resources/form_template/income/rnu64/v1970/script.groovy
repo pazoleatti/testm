@@ -3,7 +3,6 @@ package form_template.income.rnu64.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -19,8 +18,9 @@ import groovy.transform.Field
  * 2. date - Дата сделки
  * 3. part - Часть сделки Справочник
  * 4. dealingNumber - Номер сделки
- * -5. bondKind - Вид ценных бумаг //графу удалили
- * 5. costs - Затраты (руб.коп.)
+ * 5. bondKind - Вид ценных бумаг
+ * 6. costs - Затраты (руб.коп.)
+ *
  */
 
 @Field
@@ -71,9 +71,6 @@ switch (formDataEvent) {
 }
 
 @Field
-def refBookCache = [:]
-
-@Field
 def recordCache = [:]
 
 @Field
@@ -84,11 +81,11 @@ def isBalancePeriod
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'date', 'part', 'dealingNumber', 'costs']
+def allColumns = ['number', 'fix', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['date', 'part', 'dealingNumber', 'costs']
+def editableColumns = ['date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 @Field
 def sortColumns = ['date', 'dealingNumber']
@@ -97,7 +94,7 @@ def sortColumns = ['date', 'dealingNumber']
 def totalColumns = ['costs']
 
 @Field
-def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
+def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'bondKind', 'costs']
 
 // Автозаполняемые атрибуты
 @Field
@@ -105,7 +102,7 @@ def autoFillColumns = ['number']
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
@@ -137,12 +134,12 @@ void calc() {
 
     if (formData.kind == FormDataKind.PRIMARY) {
         // строка Итого за текущий отчетный (налоговый) период
-        def total =  getDataRow(dataRows, 'total')
+        def total = getDataRow(dataRows, 'total')
         def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
 
-    dataRowHelper.update(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def getDataRowsPrev() {
@@ -161,8 +158,8 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
     def totalRow = null
     def totalQuarterRow = null
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
-    def dTo = getEndDate()
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+    def dTo = getReportPeriodEndDate()
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         // 1. Проверка на заполнение поля
@@ -195,19 +192,16 @@ void logicCheck() {
     }
     def testRows = dataRows.findAll { it -> it.getAlias() == null }
     // проверка на наличие итоговых строк, иначе будет ошибка
-    if (totalQuarterRow == null || totalRow == null) {
+    //if (totalQuarterRow != null && totalRow != null) {
         // 5. Проверка итоговых значений за текущий квартал
         def testRow = formData.createDataRow()
         calcTotalSum(testRows, testRow, totalColumns)
-        if (totalQuarterRow == null || totalQuarterRow != null && totalQuarterRow.costs != testRow.costs) {
+        if (totalQuarterRow.costs != testRow.costs) {
             loggerError('Итоговые значения за текущий квартал рассчитаны неверно!')
+            // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
+            loggerError('Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!')
         }
-        // 6. Проверка итоговых значений за текущий отчётный (налоговый) период
-        def dataRowsPrev = getDataRowsPrev()
-        if (totalRow == null || totalRow != null && totalRow.costs != getTotalValue(dataRows, dataRowsPrev)) {
-            loggerError('Итоговые значения за текущий отчётный (налоговый ) период рассчитаны неверно!')
-        }
-    }
+   // }
 }
 
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
@@ -218,7 +212,7 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
         prevQuarterTotalRow = getDataRow(dataRowsPrev, "total")
     }
     if (prevQuarterTotalRow != null) {
-        return (quarterRow.costs ?: 0) + prevQuarterTotalRow.costs ?: 0
+        return (quarterRow.costs ?: 0) + (prevQuarterTotalRow.costs ?: 0)
     } else {
         return quarterRow.costs ?: 0
     }
@@ -232,14 +226,12 @@ void importData() {
         return
     }
     String charset = ""
-    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
-    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
-            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
+    if (formDataEvent == FormDataEvent.MIGRATION) {
         if (!fileName.contains('.xml')) {
             logger.error('Формат файла должен быть *.xml')
             return
         }
-    } else {
+    } else if (formDataEvent == FormDataEvent.IMPORT) {
         if (!fileName.contains('.r')) {
             logger.error('Формат файла должен быть *.rnu')
             return
@@ -321,7 +313,7 @@ def addData(def xml, def fileName) {
         tmp = null
         if (getCellValue(row, indexCol, type, true) != null && getCellValue(row, indexCol, type).trim() != '') {
             tmp = formDataService.getRefBookRecordIdImport(60, recordCache, providerCache, 'CODE',
-                    getCellValue(row, indexCol, type), getEndDate(), indexRow, indexCol, logger, false)
+                    getCellValue(row, indexCol, type), getReportPeriodEndDate(), indexRow, indexCol, logger, false)
         }
         newRow.part = tmp
         indexCol++
@@ -331,25 +323,26 @@ def addData(def xml, def fileName) {
         indexCol++
 
         // графа 5
-        // TODO bondKind выпилена из РНУ, а из файла для импорта?
+        newRow.bondKind = getCellValue(row, indexCol, type, true)
         indexCol++
 
         // графа 6
         newRow.costs = getNumber(getCellValue(row, indexCol, type), indexRow, indexCol)
         newRows.add(newRow)
     }
-    dataRowHelper.save(newRows)
+    def totalRow = null
 
     // итоговая строка
     if (totalRecords.size() >= 1) {
         def row = totalRecords[0]
-        def totalRow = formData.createDataRow()
+        totalRow = getCleanTotalRow(true)
         // графа 5
-        totalRow.costs = getNumber(getCellValue(row, 5, type), indexRow, 5)
-        return totalRow
-    } else {
-        return null
+        totalRow.costs = getNumber(getCellValue(row, 6, type), indexRow, 6)
+        newRows.add(totalRow)
+        newRows.add(getCleanTotalRow(false))
     }
+    dataRowHelper.save(newRows)
+    return totalRow
 }
 
 /** Для получения данных из RNU или XML */
@@ -390,22 +383,27 @@ void checkTotalRow(def totalRow) {
 
 /** Получить итоговую строку с суммами. */
 def getCalcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.getCell("fix").setColSpan(4)
-    totalRow.fix = "Итоги"
-    totalRow.setAlias("total")
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
+    def totalRow = getCleanTotalRow(true)
     def from = 0
-    def to = dataRows.size() - 1
-    def sum
+    def to = dataRows.size() - 2
+    def BigDecimal sum
     if (from > to) {
         sum = 0
     } else {
         sum = summ(formData, dataRows, new ColumnRange('costs', from, to))
     }
-    totalRow.costs = sum
+    totalRow.costs = sum?.setScale(2, BigDecimal.ROUND_HALF_UP)
+    return totalRow
+}
+
+def getCleanTotalRow(boolean isQuarter) {
+    def totalRow = formData.createDataRow()
+    totalRow.getCell("fix").setColSpan(4)
+    totalRow.fix = isQuarter ? "Итого за текущий квартал" : "Итого за текущий отчетный (налоговый) период"
+    totalRow.setAlias(isQuarter ? "totalQuarter" : "total")
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
     return totalRow
 }
 
@@ -425,13 +423,6 @@ def isBalancePeriod() {
     return isBalancePeriod
 }
 
-def getEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    }
-    return reportPeriodEndDate
-}
-
 void consolidation() {
     def rows = []
     def sum = 0
@@ -442,7 +433,7 @@ void consolidation() {
                 formDataService.getDataRowHelper(source).getAllCached().each { row ->
                     if (row.getAlias() == null) {
                         rows.add(row)
-                    } else if (row.getAlias() == 'total' && row.costs!=null) {
+                    } else if (row.getAlias() == 'total' && row.costs != null) {
                         sum += row.costs
                     }
                 }
@@ -468,4 +459,11 @@ void prevPeriodCheck() {
         //throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         logger.warn("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

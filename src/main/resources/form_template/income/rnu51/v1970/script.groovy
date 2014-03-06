@@ -92,7 +92,7 @@ def allColumns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisi
 @Field
 def editableColumns = ['tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
         'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'redemptionValue',
-        'priceInFactPerc', 'priceInFactRub', 'expensesOnSale']
+        'priceInFactPerc', 'priceInFactRub', 'expensesOnSale', 'marketPriceInPerc1']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -300,8 +300,10 @@ def BigDecimal calc12(def row) {
 }
 
 def BigDecimal calc16(def row) {
-    // TODO Левыкин: Для всех остальных случаев значение графы не изменяется?
-    return row.redemptionValue > 0 ? 100 : row.marketPriceInPerc1
+    if (row.redemptionValue != null && row.redemptionValue > 0) {
+        return 100
+    }
+    return row.marketPriceInPerc1
 }
 
 def BigDecimal calc17(def row) {

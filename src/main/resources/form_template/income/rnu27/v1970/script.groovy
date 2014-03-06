@@ -72,12 +72,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         prevPeriodCheck()
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
@@ -96,8 +94,10 @@ switch (formDataEvent) {
         if (!hasError()) {
             def data = formDataService.getDataRowHelper(formData)
             def dataRows = data.getAllCached()
+            addAllStatic(dataRows)
             def total = getCalcTotalRow(dataRows)
-            data.insert(total, dataRows.size() + 1)
+            dataRows.add(total)
+            data.save(dataRows)
         }
         break
 }
@@ -145,11 +145,7 @@ def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCours
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
+def endDate = null
 
 //// Обертки методов
 
@@ -157,14 +153,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -179,11 +175,17 @@ def getNumber(def value, def indexRow, def indexCol) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated
-            && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
+}
+
+def getMessageLP1(def list, def lable){
+    StringBuilder sb = new StringBuilder(lable)
+    for (tradeNumber in list) {
+        sb.append(" " + tradeNumber.toString() + ",")
+    }
+    return  sb.substring(0, sb.length() - 1).toString()
 }
 
 def logicCheck() {
@@ -210,28 +212,17 @@ def logicCheck() {
                     }
                     if (count == 0) {
                         notFound.add(rowPrev.tradeNumber)
-                    }
-                    if (count != 0 && count != 1) {
+                    } else if (count > 1) {
                         foundMany.add(rowPrev.tradeNumber)
                     }
                 }
             }
         }
         if (!notFound.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in notFound) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(notFound, "Отсутствуют строки с номерами сделок:"))
         }
         if (!foundMany.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in foundMany) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(foundMany, "Существует несколько строк с номерами сделок:"))
         }
     }
 
@@ -388,14 +379,6 @@ DataRow getPrevRowWithoutAlias(def dataRows, DataRow row) {
         }
     }
     throw new IllegalArgumentException()
-}
-
-/**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (tmp ? tmp.getTime() + 1 : null)
 }
 
 /**
@@ -817,7 +800,7 @@ void setTotalStyle(def row) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = getReportPeriodEndDate()
 
     def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -1103,4 +1086,11 @@ DataRow<Cell> getRow(int i, def dataRows) {
     } else {
         return null
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

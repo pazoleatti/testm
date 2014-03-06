@@ -51,7 +51,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        // logicCheck() TODO Уточнить когда будет постановка, нужны ли logicCheck() и calc()
+        calc()
+        logicCheck()
         break
 }
 

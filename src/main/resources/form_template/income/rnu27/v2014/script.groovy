@@ -72,12 +72,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-// после принятия из подготовлена
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         prevPeriodCheck()
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
@@ -96,8 +94,10 @@ switch (formDataEvent) {
         if (!hasError()) {
             def data = formDataService.getDataRowHelper(formData)
             def dataRows = data.getAllCached()
+            addAllStatic(dataRows)
             def total = getCalcTotalRow(dataRows)
-            data.insert(total, dataRows.size() + 1)
+            dataRows.add(total)
+            data.save(dataRows)
         }
         break
 }
@@ -118,7 +118,7 @@ def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = allColumns - ['number']
+def editableColumns = allColumns - ['number', 'fix', 'marketQuotationInRub']
 
 // Автозаполняемые атрибуты
 @Field
@@ -145,11 +145,7 @@ def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCours
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
+def endDate = null
 
 //// Обертки методов
 
@@ -157,14 +153,14 @@ def currentDate = new Date()
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -181,9 +177,16 @@ def getNumber(def value, def indexRow, def indexCol) {
 void prevPeriodCheck() {
     if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated
             && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
+}
+
+def getMessageLP1(def list, def lable){
+    StringBuilder sb = new StringBuilder(lable)
+    for (tradeNumber in list) {
+        sb.append(" " + tradeNumber.toString() + ",")
+    }
+    return  sb.substring(0, sb.length() - 1).toString()
 }
 
 def logicCheck() {
@@ -215,28 +218,17 @@ def logicCheck() {
                     }
                     if (count == 0) {
                         notFound.add(rowPrev.tradeNumber)
-                    }
-                    if (count != 0 && count != 1) {
+                    } else if (count > 1) {
                         foundMany.add(rowPrev.tradeNumber)
                     }
                 }
             }
         }
         if (!notFound.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in notFound) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(notFound, "Отсутствуют строки с номерами сделок:"))
         }
         if (!foundMany.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Отсутствуют строки с номерами сделок :")
-            for (tradeNumber in foundMany) {
-                sb.append(" " + tradeNumber.toString() + ",")
-            }
-            String message = sb.toString()
-            logger.warn(message.substring(0, message.length() - 1))
+            logger.warn(getMessageLP1(foundMany, "Существует несколько строк с номерами сделок:"))
         }
     }
 
@@ -364,9 +356,9 @@ def logicCheck() {
     }
 
     // LC • Проверка корректности заполнения РНУ
-    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null && checkAlias(dataPrevRows, 'itogo') && checkAlias(dataRows, 'itogo')) {
-        DataRow itogoPrev = data.getDataRow(dataPrevRows, 'itogo')
-        DataRow itogo = data.getDataRow(dataRows, 'itogo')
+    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null && checkAlias(dataPrevRows, 'total') && checkAlias(dataRows, 'total')) {
+        def itogoPrev = data.getDataRow(dataPrevRows, 'total')
+        def itogo = data.getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
             loggerError("РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
@@ -393,14 +385,6 @@ DataRow getPrevRowWithoutAlias(def dataRows, DataRow row) {
         }
     }
     throw new IllegalArgumentException()
-}
-
-/**
- * Получить отчетную дату.
- */
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return (tmp ? tmp.getTime() + 1 : null)
 }
 
 /**
@@ -488,7 +472,7 @@ void addAllStatic(def dataRows) {
  */
 def calcItogIssuer(int i) {
     def newRow = formData.createDataRow()
-    newRow.getCell('issuer').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoIssuer#'.concat(i ? i.toString() : ""))
 
     String tIssuer = 'Эмитент'
@@ -499,7 +483,7 @@ def calcItogIssuer(int i) {
         }
     }
 
-    newRow.issuer = tIssuer?.concat(' Итог')
+    newRow.fix = tIssuer?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -532,7 +516,7 @@ def calcItogIssuer(int i) {
 def calcItogRegNumber(int i) {
     // создаем итоговую строку ГРН
     def newRow = formData.createDataRow()
-    newRow.getCell('regNumber').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoRegNumber#'.concat(i ? i.toString() : ""))
 
     String tRegNumber = 'ГРН'
@@ -543,7 +527,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.regNumber = tRegNumber?.concat(' Итог')
+    newRow.fix = tRegNumber?.concat(' Итог')
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -757,7 +741,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.reserveCalcValue - row.reserveCalcValuePrev, 2)
+            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
         } else {
             return (BigDecimal) 0
         }
@@ -825,7 +809,7 @@ void setTotalStyle(def row) {
  * @param xml данные
  */
 def addData(def xml) {
-    Date date = new Date()
+    Date date = getReportPeriodEndDate()
 
     def cache = [:]
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -1084,7 +1068,8 @@ def hasError() {
 def getCalcTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
-    newRow.issuer = "Общий итог"
+    newRow.getCell("fix").colSpan = 2
+    newRow.fix = "Общий итог"
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -1110,4 +1095,11 @@ DataRow<Cell> getRow(int i, def dataRows) {
     } else {
         return null
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
 }

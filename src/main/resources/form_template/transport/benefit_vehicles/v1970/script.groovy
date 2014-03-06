@@ -3,7 +3,11 @@ package form_template.transport.benefit_vehicles.v1970
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
+
+import java.text.SimpleDateFormat
 
 /**
  * Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
@@ -61,7 +65,14 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
 def refBookCache = [:]
+
+@Field
+def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 // Редактируемые атрибуты
 @Field
@@ -177,6 +188,18 @@ def logicCheck() {
             }
         }
         checkedRows.add(row)
+
+        /**
+         * Проверка льготы
+         * Проверка осуществляется только для кодов 20210, 20220, 20230
+         */
+        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
+            def region = getRegionByOKTMO(row.codeOKATO, errorMsg)
+            query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
+            if (getRecord(7, query, reportDate) == null) {
+                logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+            }
+        }
     }
 
     // 6. Проверка наличия формы предыдущего периода
@@ -196,6 +219,81 @@ def logicCheck() {
         logger.warn("Данные ТС из предыдущих отчётных периодов не были скопированы. В Системе " +
                 "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
     }
+}
+
+/**
+ * Получение региона по коду ОКТМО
+ */
+def getRegionByOKTMO(def oktmoCell, def errorMsg) {
+    def reportDate = getReportDate()
+
+    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue.substring(0, 2)
+    if (oktmo3.equals("719")) {
+        return getRecord(4, 'CODE', '89', null, null, reportDate);
+    } else if (oktmo3.equals("718")) {
+        return getRecord(4, 'CODE', '86', null, null, reportDate);
+    } else if (oktmo3.equals("118")) {
+        return getRecord(4, 'CODE', '83', null, null, reportDate);
+    } else {
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 2) + "%'"
+        def record = getRecord(4, filter, reportDate)
+        if (record != null) {
+            return record
+        } else {
+            logger.error(errorMsg + "Не удалось определить регион по коду ОКТМО")
+            return null;
+        }
+    }
+}
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = sdf.format(date)
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                return refBookCache.get(recordId)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def provider
+    if (!providerCache.containsKey(refBookId)) {
+        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
+    }
+    provider = providerCache.get(refBookId)
+
+    def records = provider.getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null)
+            refBookCache.put(recordId, retVal)
+        return retVal
+    }
+    return null
+}
+
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    return reportPeriodService.getReportDate(formData.reportPeriodId)?.time
 }
 
 def String checkPrevPeriod(def reportPeriod) {

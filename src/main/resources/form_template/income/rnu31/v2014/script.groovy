@@ -89,6 +89,9 @@ void logicCheck() {
     // 22. Обязательность заполнения полей графы 3..12
     checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
+    def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
+
     if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
@@ -100,8 +103,6 @@ void logicCheck() {
 
         // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
         if (rowOld != null) {
-            // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
-            def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
             for (def column : editableColumns) {
                 if (row.getCell(column).value < rowOld.getCell(column).value) {
                     def securitiesType = row.securitiesType
@@ -143,12 +144,13 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+            def sourceFormData = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
                 def sourceRow = getDataRow(sourceDataRows, 'total')
                 editableColumns.each { alias ->
-                    row.getCell(alias).setValue(sourceRow.getCell(alias).value, row.getIndex())
+                    row.getCell(alias).setValue(sourceRow.getCell(alias).value + row.getCell(alias).getValue(), row.getIndex())
                 }
             }
         }

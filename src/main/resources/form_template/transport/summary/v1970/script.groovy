@@ -38,7 +38,6 @@ import java.text.SimpleDateFormat
  * графа 21 - taxSumToPay
  *
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -153,6 +152,13 @@ def getRecord(def refBookId, def filter, Date date) {
     return null
 }
 
+/**
+ * Получить отчетную дату.
+ */
+def getReportDate() {
+    return reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+}
+
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
@@ -176,6 +182,9 @@ def calc() {
 
     def int monthCountInPeriod = getMonthCount()
 
+    // Отчетная дата
+    def reportDate = getReportDate()
+
     /** Уменьшающий процент. */
     def reducingPerc
     /** Пониженная ставка. */
@@ -197,7 +206,7 @@ def calc() {
          * если это значение не задано.
          */
         if (row.taxBaseOkeiUnit == null) {
-            row.taxBaseOkeiUnit = getRecord(12, 'CODE', '251', index, getColumnName(row, 'taxBaseOkeiUnit'), new Date())?.record_id?.numberValue
+            row.taxBaseOkeiUnit = getRecord(12, 'CODE', '251', index, getColumnName(row, 'taxBaseOkeiUnit'), reportDate)?.record_id?.numberValue
         }
 
         /*
@@ -235,25 +244,24 @@ def calc() {
              * 3. код = соответствует 2м двум символом кода ТС && регион указан
              * 4. код = соответствует 2м двум символом кода ТС && регион НЕ указан
              */
-
-            def regionSqlPartID = " and DICT_REGION_ID = " + region.record_id
+            def regionSqlPartID = " and DICT_REGION_ID = " + region?.record_id?.numberValue
             def regionSqlPartNull = " and DICT_REGION_ID is null"
             def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
             def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
 
             // вариант 1
-            def record = getRecord(41, queryLikeStrictly + regionSqlPartID, new Date())
+            def record = getRecord(41, queryLikeStrictly + regionSqlPartID, reportDate)
             // вариант 2
             if (record == null) {
-                record = getRecord(41, queryLikeStrictly + regionSqlPartNull, new Date())
+                record = getRecord(41, queryLikeStrictly + regionSqlPartNull, reportDate)
             }
             // вариант 3
             if (record == null) {
-                record = getRecord(41, queryLike + regionSqlPartID, new Date())
+                record = getRecord(41, queryLike + regionSqlPartID, reportDate)
             }
             // вариант 4
             if (record == null) {
-                record = getRecord(41, queryLike + regionSqlPartNull, new Date())
+                record = getRecord(41, queryLike + regionSqlPartNull, reportDate)
             }
 
             if (record != null) {
@@ -302,7 +310,7 @@ def calc() {
                 if (row.taxBenefitCode) {
                     // запрос по выборке данных из справочника
                     def query = "TAX_BENEFIT_ID = " + row.taxBenefitCode + " and DICT_REGION_ID = " + region.record_id
-                    def record = getRecord(7, query, new Date())
+                    def record = getRecord(7, query, reportDate)
 
                     if (record == null) {
                         logger.error(errorMsg + "Ошибка при получении параметров налоговых льгот.")
@@ -417,10 +425,10 @@ void logicCheck() {
          * Проверка льготы
          * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
-        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.numberValue in [20210, 20220, 20230]) {
+        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
             def region = getRegionByOKTMO(row.okato, errorMsg)
             query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, new Date()) == null) {
+            if (getRecord(7, query, reportDate) == null) {
                 logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
             }
         }
@@ -431,16 +439,18 @@ void logicCheck() {
  * Получение региона по коду ОКТМО
  */
 def getRegionByOKTMO(def oktmoCell, def errorMsg) {
+    def reportDate = getReportDate()
+
     def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue.substring(0, 2)
     if (oktmo3.equals("719")) {
-        return getRecord(4, 'CODE', '89', null, null, new Date());
+        return getRecord(4, 'CODE', '89', null, null, reportDate);
     } else if (oktmo3.equals("718")) {
-        return getRecord(4, 'CODE', '86', null, null, new Date());
+        return getRecord(4, 'CODE', '86', null, null, reportDate);
     } else if (oktmo3.equals("118")) {
-        return getRecord(4, 'CODE', '83', null, null, new Date());
+        return getRecord(4, 'CODE', '83', null, null, reportDate);
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 1) + "%'"
-        def record = getRecord(4, filter, new Date())
+        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 2) + "%'"
+        def record = getRecord(4, filter, reportDate)
         if (record != null) {
             return record
         } else {
@@ -478,8 +488,6 @@ def consolidation() {
                         (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
                                 && el.powerVal.equals(sRow.powerVal) && el.baseUnit.equals(sRow.baseUnit))
                     }
-                    // «Графа 9» принимает значение «графы 11» формы-источника
-                    newRow.taxBaseOkeiUnit = sRow.baseUnit
                     if (contains != null) {
                         DataRow<Cell> row = contains
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
@@ -487,10 +495,10 @@ def consolidation() {
                                 row.benefitStartDate.equals(sRow.benefitStartDate) &&
                                 row.benefitEndDate.equals(sRow.benefitEndDate)) {
                             def department = departments.get(sources202.indexOf(row))
-                            logger.error("Обнаружены несколько разных строк, у которых совпадают Код ОКТМО = " + sRow.codeOKATO
-                                    + ", Идентификационный номер = " + sRow.identNumber + ", Регистрационный знак=" + sRow.regNumber
-                                    + " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «"
-                                    + sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
+                            logger.error("Обнаружены несколько разных строк, у которых совпадают " +
+                                    +getIdentGrafsValue(sRow) +
+                                    " для форм «Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог» в подразделениях «" +
+                                    sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
                             departments.remove(sources202.indexOf(row))
                             sources202.remove(sRow)
                         }
@@ -551,9 +559,8 @@ def consolidation() {
         // пробежимся по форме расставим данные для текущей 202 строки
         dataRows.each { row ->
             // поиск
-            if (v.codeOKATO.equals(row.okato)
-                    && v.identNumber.equals(row.vi)
-                    && v.regNumber.equals(row.regNumber)) {
+            if (v.codeOKATO.equals(row.okato) && v.identNumber.equals(row.vi)
+                    && v.powerVal.equals(row.taxBase) && v.baseUnit.equals(row.taxBaseOkeiUnit)) {
 
                 use = true
                 row.taxBenefitCode = v.taxBenefitCode
@@ -568,14 +575,20 @@ def consolidation() {
             logger.warn("Для строки " + cnt + " в форме \"Сведения о льготируемых транспортных средствах, по которым " +
                     "уплачивается транспортный налог\" подразделения " + department.name + " указана льгота для  " +
                     "транспортного средства, не указанного в одной из форм \"Сведения о транспортных средствах, по " +
-                    "которым уплачивается транспортный налог\" . Код ОКТМО = " + v.codeOKATO + ", Идентификационный номер = "
-                    + v.identNumber + ", Регистрационный знак=" + v.regNumber + "!")
+                    "которым уплачивается транспортный налог\". " + getIdentGrafsValue(v) + "!")
         }
     }
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
     dataRowHelper.save(dataRows)
+}
+
+String getIdentGrafsValue(def row) {
+    return "Код ОКТМО = ${getRefBookValue(96, row.codeOKATO)?.CODE?.stringValue}, " +
+            "Идентификационный номер = $row.identNumber, " +
+            "Мощность (величина) = $row.powerVal, " +
+            "Мощность (ед. измерения) = ${getRefBookValue(12, row.baseUnit)?.CODE?.stringValue}"
 }
 
 // Расчет графы 12 при консолидации
@@ -694,7 +707,13 @@ def getMonthCount() {
         if (period == null) {
             logger.error('Не найден отчетный период для налоговой формы.')
         } else {
-            monthCountInPeriod = period.endDate[Calendar.MONTH] - period.startDate[Calendar.MONTH]
+            // 1. Отчетные периоды:
+            //  a.	первый квартал (с января по март включительно) - 3 мес.
+            //  b.	второй квартал (с апреля по июнь включительно) - 3 мес.
+            //  c.	третий квартал (с июля по сентябрь включительно) - 3 мес.
+            // 2. Налоговый период
+            //  a.	год (с января по декабрь включительно) - 12 мес.
+            monthCountInPeriod = period.order < 4 ? 3 : 12
         }
     }
     return monthCountInPeriod
