@@ -109,8 +109,7 @@ def sortColumns = ["contragent", "assignContractDate", "assignContractNumber"]
 // TODO Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income",
-        "result"]
+        "amount", "amountForReserve", "repaymentDate", "income", "result"]
 
 //// Кастомные методы
 void logicCheck(){
@@ -164,7 +163,7 @@ void logicCheck(){
         if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0){
             loggerError(errorMsg + "Все суммы по операции нулевые!")
         }
-        if (row.dateOfAssignment < row.repaymentDate){
+        if (row.dateOfAssignment != null && row.dateOfAssignment < row.repaymentDate) {
             loggerError(errorMsg + "Неверно указана дата погашения основного долга!")
         }
         if (row.amount > 0 && row.income > 0 && row.repaymentDate == null &&
