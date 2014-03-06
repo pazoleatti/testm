@@ -80,7 +80,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void showRefresh(boolean show) {
-		dateBox.setVisible(show);
+		//dateBox.setVisible(show);
 		refreshButton.setVisible(show);
 		dateBox.setEnabled(show);
 	}
