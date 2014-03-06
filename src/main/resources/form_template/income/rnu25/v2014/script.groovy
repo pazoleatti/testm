@@ -218,6 +218,8 @@ void calc() {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+
+    updateIndexes(dataRows)
     // итоговые значения по ГРН
     def i = 0
     for (def codeName : totalGroupsName) {
@@ -233,6 +235,7 @@ void calc() {
         dataRows.add(lastRowIndex, subTotalRow)
         i++
     }
+    updateIndexes(dataRows)
     dataRowHelper.save(dataRows)
 }
 
@@ -846,5 +849,12 @@ def loggerError(def msg) {
         logger.warn(msg)
     } else {
         logger.error(msg)
+    }
+}
+
+// обновить индексы строк
+def updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
     }
 }

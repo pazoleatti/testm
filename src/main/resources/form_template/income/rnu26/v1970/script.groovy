@@ -34,11 +34,15 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         calc()
         logicCheck()
         break
@@ -56,7 +60,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        prevPeriodCheck()
+        if (!prevPeriodCheck()){
+            return
+        }
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -199,7 +205,7 @@ void calc() {
 
     for (row in dataRows) {
         row.rowNumber = ++number
-        if (!getBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+        if (!getBalancePeriod()) {
             // графа 8
             row.reserveCalcValuePrev = calc8(row, dataOld)
 
@@ -930,11 +936,12 @@ void loggerError(def msg) {
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
-void prevPeriodCheck() {
+boolean prevPeriodCheck() {
     if (!getBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        return false
     }
-
+    return true
 }
 
 void migration() {

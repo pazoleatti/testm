@@ -121,7 +121,7 @@ def totalSumColumns = ['execFirstPart', 'execSecondPart', 'requestAmount', 'liab
 
 // Дата окончания отчетного периода
 @Field
-def endDate = null
+def reportPeriodEndDate = null
 
 // Текущая дата
 @Field
@@ -131,6 +131,11 @@ def currentDate = new Date()
 def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 //// Обертки методов
+
+// Проверка НСИ
+boolean checkNSI(def refBookId, def row, def alias) {
+    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -143,7 +148,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 boolean required = true) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
+            currentDate, rowIndex, cellName, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
@@ -247,6 +252,12 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // Проверки соответствия НСИ
+        // 1. Проверка соответствия справочнику «Вид сделки» (графа 2.2)
+        checkNSI(91, row, 'transactionKind')
+
+        // 2. Проверка соответствия справочнику «Типы сделок» (графа 2.4)
+        checkNSI(16, row, 'transactionType')
+
         // 3. Проверка курса валюты	(графа 5.2)
         if (row.transactionDate != null && row.course != null &&
                 getRecord(22, "RATE = $row.course", row.transactionDate) == null) {
@@ -255,6 +266,10 @@ void logicCheck() {
             def attrName = rb.getAttribute('RATE').getName()
             logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
         }
+
+        // 4. Проверка значения процентной ставки
+        checkNSI(72, row, 'interestRateValue')
+        checkNSI(72, row, 'liabilityInterestRateValue')
     }
 
     // 5. Арифметические проверки расчета итоговой строки
@@ -351,7 +366,7 @@ def calc14_1(def row) {
             row.liabilityExecSecondPart == null || row.requestAmount == null || row.liabilityAmount == null) {
         return null
     }
-    def tmp = 0
+    def tmp
     if (row.execFirstPart + row.execSecondPart + row.liabilityExecFirstPart + row.liabilityExecSecondPart > 0 &&
             row.requestAmount + row.liabilityAmount > 0) {
         tmp = row.execFirstPart + row.execSecondPart + row.liabilityExecFirstPart +
@@ -365,7 +380,7 @@ def calc14_2(def row) {
             row.liabilityExecSecondPart == null || row.requestAmount == null || row.liabilityAmount == null) {
         return null
     }
-    def tmp = 0
+    def tmp
     if (row.execFirstPart + row.execSecondPart + row.liabilityExecFirstPart + row.liabilityExecSecondPart < 0 &&
             row.requestAmount + row.liabilityAmount < 0) {
         tmp = row.execFirstPart + row.execSecondPart + row.liabilityExecFirstPart +
@@ -477,11 +492,9 @@ def calc15(def row) {
                 def type2 = getRefBookValue(16, row.transactionType)?.TYPE?.value
                 if (type2 == 'покупка' && tmp2 > row.maxPrice) {
                     value15_1 = 0
-                    // TODO (Ramil Timerbaev) что за графа 2.7 (пока сказали использовать 2.6)
+                    // TODO (Ramil Timerbaev) что за графа 2.7
                     value15_2 = (row.income + row.outcome) * (row.course - row.maxPrice + row.coursSecondPart) /
-                            (row.course -
-                                    row.coursSecondPart // тут по чтз графа 2.7
-                            ) - (row.income + row.outcome)
+                            (row.course - row.XXXX) - (row.income + row.outcome)
                 } else if (type2 == 'покупка' && tmp2 <= row.minPrice) {
                     value15_1 = 0
                     value15_2 = 0
@@ -489,11 +502,9 @@ def calc15(def row) {
                     value15_1 = 0
                     value15_2 = 0
                 } else if (type2 == 'продажа' && tmp2 <= row.minPrice) {
-                    // TODO (Ramil Timerbaev) что за графа 2.7 (пока сказали использовать 2.6)
+                    // TODO (Ramil Timerbaev) что за графа 2.7
                     value15_1 = (row.income + row.outcome) * (row.minPrice + row.coursSecondPart - row.course) /
-                            (
-                            row.coursSecondPart // тут по чтз графа 2.7
-                                    - row.course) - (row.income + row.outcome)
+                            (row.XXXX - row.course) - (row.income + row.outcome)
                 }
             }
         }
@@ -510,6 +521,7 @@ def calc15(def row) {
  * return итоговая строка
  */
 def addData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
     def newRows = []
@@ -666,11 +678,4 @@ def getRecord(def refBookId, def filter, Date date) {
         return retVal
     }
     return null
-}
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    }
-    return endDate
 }

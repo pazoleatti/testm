@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -117,35 +118,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    // 3. Проверка наличия экземпляров форм за 3 года (В текущем подразделении созданы формы РНУ-7
-    // за последние три года. Все формы в статусе «Принята»
-    def from = new GregorianCalendar()
-    from.setTime(getStartDate())
-    from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
-    def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from.time, getStartDate())
-    def lostReportPeriods = []
-    for (reportPeriod in reportPeriods) {
-        def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
-        if (findFormData != null && findFormData.id == formData.id) {
-            continue
-        }
-        if (findFormData == null || findFormData.state != WorkflowState.ACCEPTED) {
-            lostReportPeriods.add(reportPeriod.name + ' ' + reportPeriod.calendarStartDate.format('yyyy'))
-        }
-    }
-    if (!lostReportPeriods.isEmpty()) {
-        def formName = formData.formType.name
-        def periods = lostReportPeriods.join(', ')
-        logger.warn("Не найдены экземпляры «$formName» за: $periods!")
-    }
-}
-
 //// Кастомные методы
 
 // Алгоритмы заполнения полей формы
@@ -161,6 +133,10 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
+        dataRows.eachWithIndex{ row, index ->
+            row.setIndex(index + 1)
+        }
+
         dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -174,24 +150,23 @@ void calc() {
 
         // посчитать "итого по коду"
         def totalRows = [:]
-        def tmp = null
+        def code = null
         def sum = 0, sum2 = 0
         dataRows.eachWithIndex { row, i ->
-            if (tmp == null) {
-                tmp = row.code
+            if (code == null) {
+                code = getKnu(row.code)
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                def code = getKnu(tmp)
+            if (code != getKnu(row.code)) {
                 totalRows.put(i, getNewRow(code, sum, sum2))
                 sum = 0
                 sum2 = 0
+                code = getKnu(row.code)
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
             if (i == dataRows.size() - 1) {
                 sum += (row.taxAccountingRuble ?: 0)
                 sum2 += (row.ruble ?: 0)
-                def code = getKnu(row.code)
                 def totalRowCode = getNewRow(code, sum, sum2)
                 totalRows.put(i + 1, totalRowCode)
                 sum = 0
@@ -199,7 +174,6 @@ void calc() {
             }
             sum += (row.taxAccountingRuble ?: 0)
             sum2 += (row.ruble ?: 0)
-            tmp = row.code
         }
 
         // добавить "итого по коду" в таблицу
@@ -220,7 +194,7 @@ def BigDecimal calc8(DataRow row) {
     if (isRubleCurrency(row.currencyCode)) {
         return 1
     }
-    return getRate(row.date, row.currencyCode)
+    return getRate(row.date, row.currencyCode)?.setScale(4, BigDecimal.ROUND_HALF_UP)
 }
 
 def BigDecimal calc10(DataRow row) {
@@ -240,7 +214,12 @@ def BigDecimal calc12(DataRow row) {
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    return res.getRecords().get(0).RATE.numberValue
+    if(res.getRecords().isEmpty()) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+        throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
+    } else {
+        return res.getRecords().get(0)?.RATE?.numberValue
+    }
 }
 
 // Проверка валюты currencyCode на рубли
@@ -276,7 +255,6 @@ def getTotalRow(def alias, def title) {
 
 // Логические проверки
 void logicCheck() {
-    prevPeriodCheck()
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
     if (dataRows.isEmpty()) {
         return
@@ -331,15 +309,13 @@ void logicCheck() {
         }
 
         // 3. Проверка на нулевые значения
-        if (row.taxAccountingCurrency == 0 &&
-                row.taxAccountingRuble == 0 &&
-                row.accountingCurrency == 0 &&
-                row.ruble == 0) {
+        if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&
+                !(row.accountingCurrency) && !(row.ruble)) {
             loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 4. Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету
-        if (!((row.taxAccountingRuble > 0 && !(row.ruble)) || (!(row.taxAccountingRuble) && row.ruble > 0))) {
+        if (row.taxAccountingRuble && row.ruble) {
             logger.warn(errorMsg + 'Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.')
         }
 
@@ -365,9 +341,9 @@ void logicCheck() {
                         c10 += (rowSum.taxAccountingRuble?:0)
                     }
                 }
-                if (!(c10 > c12)) {
-                    loggerError(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
-                            'для документа %s от %s!', row.docNumber as String, row.docDate as String)
+                if (c10 < c12) {
+                    logger.warn(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
+                            'для документа %s от %s!', row.docNumber as String, dateFormat.format(row.docDate))
                 }
             }
             if (row.taxAccountingRuble > 0 && row.code != null) {
@@ -406,7 +382,7 @@ void logicCheck() {
 
         // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
-        if (row.docDate != null) {
+        if (row.ruble && row.docDate != null) {
             date = row.docDate as Date
             from = new GregorianCalendar()
             from.setTime(date)
@@ -422,8 +398,7 @@ void logicCheck() {
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                         // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
                         if (findRow.code == row.code && findRow.docNumber == row.docNumber
-                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble != null
-                                && findRow.taxAccountingRuble > 0) {
+                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble > 0) {
                             isFind = true
                             sum += findRow.taxAccountingRuble
                             periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
@@ -432,8 +407,8 @@ void logicCheck() {
                 }
             }
             if (!(sum > row.ruble)) {
-                logger.warn(errorMsg + 'Операция в налоговом учете имеет сумму, меньше чем указано ' +
-                        'в бухгалтерском учете! См. РНУ-7 в отчетных периодах: %s.', periods.join(", "))
+                logger.warn(errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
+                        "в бухгалтерском учете!" + (isFind ? " См. РНУ-7 в отчетных периодах: ${periods.join(", ")}." : ""))
             }
             if (!isFind) {
                 logger.warn('Операция, указанная в строке %s, в налоговом учете за последние 3 года не проходила!',
