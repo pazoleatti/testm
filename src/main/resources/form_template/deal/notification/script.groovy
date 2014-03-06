@@ -1,4 +1,4 @@
-package form_template.deal.notification
+package form_template.deal.notification.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -43,11 +43,13 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    def departmentParamList = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
 
-    if (departmentParam == null) {
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
+
+    def departmentParam = departmentParamList?.get(0)
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
@@ -177,7 +179,7 @@ void generateXML() {
                         if (row.getAlias() != null) {
                             continue
                         }
-						
+
                         // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
                                 НомПорСд: row.dealNum1
@@ -220,7 +222,7 @@ void generateXML() {
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
                             def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType).CODE.numberValue : null
-							
+
                             // Раздел 1Б. Сведения о предмете сделки (группы однородных сделок)
                             СвПредмСд(
                                     ТипПредСд: dealType
@@ -275,8 +277,8 @@ void generateXML() {
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
                                 address = map.ADDRESS.stringValue
                             }
-							
-							// Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
+
+                            // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
                                     [НомПорСд: row.dealMemberNum] +
                                             [ПрОрг: organInfo] +
