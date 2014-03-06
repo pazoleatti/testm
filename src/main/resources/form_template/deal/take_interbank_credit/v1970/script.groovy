@@ -285,8 +285,8 @@ void addData(def xml, int headRowCount) {
         newRow.rowNumber = xmlIndexRow - headRowCount
 
         // графа 2
-        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        def map = getRefBookValue(9, newRow.fullName)
+        newRow.fullNamePerson = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def map = getRefBookValue(9, newRow.fullNamePerson)
         xmlIndexCol++
 
         // графа 3
@@ -321,7 +321,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 6
-        newRow.docNumber = row.cell[xmlIndexCol].text()
+        newRow.docNum = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
         // графа 7
