@@ -183,7 +183,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                 // вспомогательный taxBase
                                 resultMap[row.okato].taxBase += row.taxBase ?: 0
                                 def taxRate = getRefBookValue(41, row.taxRate, 'VALUE')?.value
-                                def boolean obligation = (departmentParamTransport?.OBLIGATION?.CODE?.numberValue == 1)
+                                def boolean obligation = (departmentParamTransport?.PREPAYMENT?.numberValue == 1)
                                 // вспомогательный taxRate
                                 resultMap[row.okato].taxRate += taxRate ?: 0
                                 // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.

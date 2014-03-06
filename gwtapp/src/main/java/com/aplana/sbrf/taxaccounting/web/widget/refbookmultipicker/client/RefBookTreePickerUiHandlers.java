@@ -30,7 +30,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void reload();
 
-    void openFor(Long uniqueRecordId);
+    void openFor(Long uniqueRecordId, boolean isChild);
 
     void reloadForDate(Date version);
 }
