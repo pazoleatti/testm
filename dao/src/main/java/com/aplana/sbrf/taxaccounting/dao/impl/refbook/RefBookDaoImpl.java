@@ -162,7 +162,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, boolean isHierarchical) {
 		RefBookAttribute defaultSort = refBook.getSortAttribute();
 		if (isSupportOver()) {
 			// row_number() over (order by ... asc\desc)
@@ -171,11 +171,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 				String sortAlias = sortAttribute == null ? defaultSort.getAlias() : sortAttribute.getAlias();
 				RefBookAttributeType sortType = sortAttribute == null ? defaultSort.getAttributeType() : sortAttribute.getAttributeType();
 
-				ps.appendQuery("a");
-				ps.appendQuery(sortAlias);
-				ps.appendQuery(".");
-				ps.appendQuery(sortType.toString());
-				ps.appendQuery("_value ");
+                if (isHierarchical) {
+                    ps.appendQuery(sortAlias);
+                } else {
+                    ps.appendQuery("a");
+                    ps.appendQuery(sortAlias);
+                    ps.appendQuery(".");
+                    ps.appendQuery(sortType.toString());
+                    ps.appendQuery("_value ");
+                }
 			} else {
 				ps.appendQuery("id");
 			}
@@ -428,7 +432,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending, false);
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -522,20 +526,46 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery(" SELECT ");
 
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true);
+        ps.appendQuery(",");
+
+        // выбираем все алиасы + row_number_over
+        List<String> aliases = new ArrayList<String>(attributes.size()+1);
+        aliases.add("record_id");
+        //aliases.add("rownum ");
+        //aliases.add(RefBook.RECORD_SORT_ALIAS);
+        for (RefBookAttribute attr: attributes){
+            aliases.add(attr.getAlias());
+        }
+        ps.appendQuery(StringUtils.join(aliases.toArray(), ','));
+        ps.appendQuery(" FROM");
+        ps.appendQuery("(select distinct \n");
+        ps.appendQuery(" CONNECT_BY_ROOT  r.id as \"RECORD_ID\", \n");
+        if (version == null) {
+            ps.appendQuery("  t.version as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_FROM_ALIAS);
+            ps.appendQuery("\",\n");
+
+            ps.appendQuery("  t.versionEnd as \"");
+            ps.appendQuery(RefBook.RECORD_VERSION_TO_ALIAS);
+            ps.appendQuery("\",\n");
+        }
+
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
             String alias = attribute.getAlias();
-            ps.appendQuery(", CONNECT_BY_ROOT a");
+            ps.appendQuery(" CONNECT_BY_ROOT  a");
             ps.appendQuery(alias);
             ps.appendQuery(".");
             ps.appendQuery(attribute.getAttributeType().toString());
             ps.appendQuery("_value as \"");
             ps.appendQuery(alias);
             ps.appendQuery("\"");
-
-            fromSql.append(" left join ref_book_value a");
+            if (i < attributes.size() - 1) {
+                ps.appendQuery(",\n");
+            }
+            fromSql.append("  left join ref_book_value a");
             fromSql.append(alias);
             fromSql.append(" on a");
             fromSql.append(alias);
@@ -543,6 +573,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append(alias);
             fromSql.append(".attribute_id = ");
             fromSql.append(attribute.getId());
+            fromSql.append("\n");
         }
 
         // добавляем join'ы относящиеся к фильтру
@@ -579,6 +610,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(" = ");
             ps.appendQuery(parentId.toString());
         }
+        ps.appendQuery(")");
 
         if (pagingParams != null) {
 			ps.appendQuery(" WHERE ");
