@@ -7,9 +7,10 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -27,6 +28,8 @@ import java.util.Set;
 public class ImportServiceImpl implements ImportService {
 
     private static final String XLS = "xls";
+    private static final String XLSX = "xlsx";
+    private static final String XLSM = "xlsm";
     private static final String RNU = "rnu";
     private static final String XML = "xml";
     private static final String DEFAULT_CHARSET = "UTF-8";
@@ -57,8 +60,8 @@ public class ImportServiceImpl implements ImportService {
         // Получение расширения файла
         String format = getFileExtension(fileName.trim());
 
-        if (XLS.equals(format)) {
-            return getXMLStringFromXLS(inputStream, null, null, null);
+        if (XLS.equals(format) || XLSX.equals(format) || XLSM.equals(format)) {
+            return getXMLStringFromXLS(inputStream, null, null, null, !XLS.equals(format));
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -97,8 +100,8 @@ public class ImportServiceImpl implements ImportService {
         // Получение расширения файла
         String format = getFileExtension(fileName.trim());
 
-        if (XLS.equals(format)) {
-            return getXMLStringFromXLS(inputStream, startStr, endStr, columnsCount);
+        if (XLS.equals(format) || XLSX.equals(format) || XLSM.equals(format)) {
+            return getXMLStringFromXLS(inputStream, startStr, endStr, columnsCount, !XLS.equals(format));
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -169,11 +172,13 @@ public class ImportServiceImpl implements ImportService {
      * @param startStr     начало таблицы (шапка первой колонки)
      * @param endStr       конец табцицы (надпись "итого" или значения после таблицы)
      * @param columnsCount количество колонок в таблице
+     * @param isCompressed true для xlsx и xlsm, false для xls
      */
-    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount) throws IOException {
-        HSSFWorkbook workbook;
-        workbook = new HSSFWorkbook(inputStream);
-        HSSFSheet sheet = workbook.getSheetAt(0);
+    private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount,
+                                       boolean isCompressed) throws IOException {
+        Workbook workbook = isCompressed ? new XSSFWorkbook(inputStream) : new HSSFWorkbook(inputStream);
+
+        Sheet sheet = workbook.getSheetAt(0);
 
         // позиция начала таблицы
         Point firstP = findCellCoordinateByValue(sheet, startStr);
@@ -203,7 +208,7 @@ public class ImportServiceImpl implements ImportService {
         for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i ++)
         {
             indexRow++;
-            HSSFRow row = sheet.getRow(i);
+            Row row = sheet.getRow(i);
 
             // брать строки с позиции начала таблицы
             if (indexRow < firstP.getY()) {
@@ -228,7 +233,7 @@ public class ImportServiceImpl implements ImportService {
      * @param sheet  лист XLS
      * @param firstP начало таблицы
      */
-    Set<Integer> getSkipCol(HSSFSheet sheet, Point firstP) {
+    Set<Integer> getSkipCol(Sheet sheet, Point firstP) {
         Set<Integer> value = new HashSet<Integer>();
         // Список объединенных столбцов
         Set<Integer> mergeRegion = new HashSet<Integer>();
@@ -251,7 +256,7 @@ public class ImportServiceImpl implements ImportService {
 
         for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
             indexRow += 1;
-            HSSFRow row = sheet.getRow(i);
+            Row row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }
@@ -267,7 +272,7 @@ public class ImportServiceImpl implements ImportService {
             for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
                 indexCol++;
                 // получить значение ячейки
-                HSSFCell cell = row.getCell(j);
+                Cell cell = row.getCell(j);
                 if (cell == null) {
                     continue;
                 }
@@ -315,7 +320,7 @@ public class ImportServiceImpl implements ImportService {
      * @param colP         номер ячейки с которой брать данные
      * @param columnsCount количество столбцов в таблице
      */
-    private String getRowString(HSSFRow row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
+    private String getRowString(Row row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
             return "<row/>";
         }
@@ -349,15 +354,15 @@ public class ImportServiceImpl implements ImportService {
      * @param cell ячейка
      * @return значение в виде строки
      */
-    private String getCellValue(HSSFCell cell) {
+    private String getCellValue(Cell cell) {
         if (cell == null) {
             return null;
         }
         String value = null;
         int type = cell.getCellType();
-        if (type == HSSFCell.CELL_TYPE_STRING) {
+        if (type == Cell.CELL_TYPE_STRING) {
             value = StringUtils.cleanString(cell.getRichStringCellValue().toString());
-        } else if (type == HSSFCell.CELL_TYPE_NUMERIC) {
+        } else if (type == Cell.CELL_TYPE_NUMERIC) {
             if (DateUtil.isCellDateFormatted(cell)) {
                 // дата
                 Date date = cell.getDateCellValue();
@@ -379,10 +384,16 @@ public class ImportServiceImpl implements ImportService {
                     value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
                 }
             }
-        } else if (type == HSSFCell.CELL_TYPE_FORMULA) {
-            HSSFFormulaEvaluator evaluator = new HSSFFormulaEvaluator(cell.getSheet().getWorkbook());
+        } else if (type == Cell.CELL_TYPE_FORMULA) {
+            FormulaEvaluator evaluator;
+            if (cell instanceof HSSFCell) {
+                evaluator = new HSSFFormulaEvaluator((HSSFWorkbook)cell.getSheet().getWorkbook());
+            } else {
+                evaluator = new XSSFFormulaEvaluator((XSSFWorkbook)cell.getSheet().getWorkbook());
+            }
             value = getCellValue(evaluator.evaluateInCell(cell));
-        } else if (type == HSSFCell.CELL_TYPE_BLANK) {
+
+        } else if (type == Cell.CELL_TYPE_BLANK) {
             value = null;
         }
         return value;
@@ -394,7 +405,7 @@ public class ImportServiceImpl implements ImportService {
      * @param sheet страница эксель файла
      * @param value значение для поиска
      */
-    private Point findCellCoordinateByValue(HSSFSheet sheet, String value) {
+    private Point findCellCoordinateByValue(Sheet sheet, String value) {
         if (value == null) {
             return null;
         }
@@ -406,7 +417,7 @@ public class ImportServiceImpl implements ImportService {
         for (int i = sheet.getFirstRowNum();  i <= sheet.getLastRowNum() && !isFind ; i++) {
             firstRow++;
             firstCol = -1;
-            HSSFRow row = sheet.getRow(i);
+            Row row = sheet.getRow(i);
             if (row == null) {
                 continue;
             }
