@@ -14,42 +14,46 @@ public final class Date_CustomFieldSerializer extends
 		CustomFieldSerializer<Date> {
 
 	/**
-	 * Сброс/восстановление UTC
-	 * 
-	 * @param time
-	 * @param plus
-	 * 
-	 * @return
+	 * @param streamReader a SerializationStreamReader instance
+	 * @param instance the instance to be deserialized
 	 */
-	private static long offsetUTC(long time, boolean plus) {
-		// * 
-		// Получение текущего сдвига. Нужно будет придумать другой способ,
-		// без вызова deprecated методов
-		Date getOffsetDate = new Date();
-		long offset = getOffsetDate.getTimezoneOffset() * 60000;
-		// *
-		return time + (plus ? offset : -offset);
-	}
-
 	public static void deserialize(SerializationStreamReader streamReader,
-			Date instance) {
+	                               Date instance) {
 		// No fields
 	}
 
 	public static Date instantiate(SerializationStreamReader streamReader)
 			throws SerializationException {
-		long time = streamReader.readLong();
-		return new Date(offsetUTC(time, true));
+		String[] arr = streamReader.readString().split("\\.");
+		Integer[] intArr = new Integer[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			intArr[i] = Integer.valueOf(arr[i]);
+		}
+		@SuppressWarnings("deprecation")
+		Date d = new Date(intArr[0], intArr[1], intArr[2], intArr[3], intArr[4], intArr[5]);
+		return d;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void serialize(SerializationStreamWriter streamWriter,
-			Date instance) throws SerializationException {
-		streamWriter.writeLong(offsetUTC(instance.getTime(), false));
+	                             Date instance) throws SerializationException {
+		String date = instance.getYear() + "." +
+				instance.getMonth() + '.' +
+				instance.getDate() + '.';
+
+		if (instance instanceof java.sql.Date) {
+			date += "0.0.0";
+		} else {
+			date += instance.getHours() + "." +
+			instance.getMinutes() + '.' +
+			instance.getSeconds();
+		}
+		streamWriter.writeString(date);
 	}
 
 	@Override
 	public void deserializeInstance(SerializationStreamReader streamReader,
-			Date instance) throws SerializationException {
+	                                Date instance) throws SerializationException {
 		deserialize(streamReader, instance);
 	}
 
@@ -66,7 +70,7 @@ public final class Date_CustomFieldSerializer extends
 
 	@Override
 	public void serializeInstance(SerializationStreamWriter streamWriter,
-			Date instance) throws SerializationException {
+	                              Date instance) throws SerializationException {
 		serialize(streamWriter, instance);
 	}
 }
