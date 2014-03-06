@@ -140,10 +140,18 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void save(List<DataRow<Cell>> dataRows) {
+        updateIndexes(dataRows);
         FormDataUtils.cleanValueOners(dataRows);
 		dataRowDao.saveRows(fd, dataRows);
         FormDataUtils.setValueOners(dataRows);
         this.dataRows = dataRows;
+    }
+
+    void updateIndexes(List<DataRow<Cell>> dataRows) {
+        Integer index = 1;
+        for(DataRow<Cell> row: dataRows) {
+            row.setIndex(index++);
+        }
     }
 
     @Override
