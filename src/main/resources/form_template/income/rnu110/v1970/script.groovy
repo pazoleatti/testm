@@ -28,7 +28,9 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -78,22 +80,17 @@ def editableColumns = ['personName', 'date', 'code', 'baseNumber', 'baseDate', '
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = allColumns
+def nonEmptyColumns = allColumns - ['fix']
 
-// Сумируемые колонки в фиксированной с троке
+// Сумируемые колонки в фиксированной строке
 @Field
-def totalColumns = ['rent', 'rentMarket', 'factRentSum', 'marketRentSum', 'addRentSum']
+def totalColumns = ['factRentSum', 'marketRentSum', 'addRentSum']
 
 // Текущая дата
 @Field
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -133,7 +130,8 @@ def getRNU(def id) {
         def Map<String, Long> map = new HashMap<String, Long>()
         for (def rowOld : data.getAllCached()) {
             if (rowOld.getAlias() != null) {
-                map.put(rowOld.fix.replace('Итого по КНУ ', ''), rowOld.sum)
+                if (id == 316) map.put(rowOld.fix.replace('Итого по КНУ ', ''), rowOld.sum)
+                else if (id == 318) map.put(rowOld.helper.replace('Итого по КНУ ', ''), rowOld.ruble) // TODO временно, что бы расчет проходил
             }
         }
         return map
@@ -253,7 +251,7 @@ def logicCheck() {
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
             // 2. Проверка на уникальность поля «№ пп»
-            if (++i != row.number) {
+            if (++i != row.rowNumber) {
                 logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
             }
 
@@ -267,31 +265,10 @@ def logicCheck() {
             if (row.marketRentSum != null && row.factRentSum != null && row.addRentSum != row.marketRentSum - row.factRentSum) {
                 logger.error(errorMsg + "Неверно рассчитана графа \"Сумма доначисления арендной платы до рыночного уровня арендной ставки\"!")
             }
-
-            // 5. Арифметическая проверка итоговых значений по Взаимозависимым  лицам (резидентам оффшорных зон)
-            if (row.personName != null && !totalGroupsName.contains(row.personName)) {
-                totalGroupsName.add(row.personName)
-            }
-
-            //Проверки соответствия НСИ
-            checkNSI(28, row, 'code')
         }
 
-        if (hasTotal) {
-            // 5. Проверка итоговых значений по кодам классификации расхода
-            for (def personName : totalGroupsName) {
-                def totalRowAlias = 'total' + personName
-                if (!checkAlias(dataRows, totalRowAlias)) {
-                    logger.error("Итоговые значения по наименованию взаимозависимого лица (резидента оффшорной зоны) $personName не рассчитаны! Необходимо расчитать данные формы.")
-                }
-                def row = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), totalRowAlias)
-                for (def alias : totalColumns) {
-                    if (calcSumByCode(personName, alias) != row.getCell(alias).getValue()) {
-                        logger.error("Итоговые значения по наименованию взаимозависимого лица (резидента оффшорной зоны) $personName рассчитаны неверно!")
-                    }
-                }
-            }
-        }
+        // 5. Арифметическая проверка итоговых значений по Взаимозависимым  лицам (резидентам оффшорных зон)
+        checkTotalSum(dataRows, totalColumns, logger, true)
     }
 }
 
@@ -330,7 +307,7 @@ def getNewRow(def alias, def totalColumns, def sums) {
     newRow.fix = 'Итого по ' + alias
     newRow.getCell('fix').colSpan = 6
     allColumns.each {
-        row.getCell(it).setStyleAlias('Контрольные суммы')
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     return newRow
 }

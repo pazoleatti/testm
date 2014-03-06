@@ -24,6 +24,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 
 	@UiField
 	CheckBox fixedRowsCheckBox;
+
+	@UiField
+	CheckBox monthlyCheckBox;
 	
 	@UiField
 	TextBox nameBox;
@@ -40,10 +43,11 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(Date version, Date versionEnd, boolean fixedRows, String name, String fullName, String code) {
+	public void setViewData(Date version, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String code) {
         versionDateBegin.setValue(version);
         versionDateEnd.setValue(versionEnd);
 		fixedRowsCheckBox.setValue(fixedRows);
+		monthlyCheckBox.setValue(monthlyForm);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
 		codeBox.setValue(code);
@@ -53,6 +57,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	public void onFlush() {
 		getUiHandlers().setRangeRelevanceVersion(versionDateBegin.getValue(), versionDateEnd.getValue());
 		getUiHandlers().setFixedRows(fixedRowsCheckBox.getValue());
+		getUiHandlers().setMonthlyForm(monthlyCheckBox.getValue());
 		getUiHandlers().setName(nameBox.getValue());
 		getUiHandlers().setFullname(fullnameBox.getValue());
 		getUiHandlers().setCode(codeBox.getValue());

@@ -21,17 +21,6 @@ public interface FilterTreeListener extends ParseTreeListener {
 	void exitNobrakets(@NotNull FilterTreeParser.NobraketsContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link FilterTreeParser#strtype}.
-	 * @param ctx the parse tree
-	 */
-	void enterStrtype(@NotNull FilterTreeParser.StrtypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FilterTreeParser#strtype}.
-	 * @param ctx the parse tree
-	 */
-	void exitStrtype(@NotNull FilterTreeParser.StrtypeContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link FilterTreeParser#alias}.
 	 * @param ctx the parse tree
 	 */

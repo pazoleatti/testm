@@ -116,21 +116,19 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         if (searchPattern != null && !searchPattern.trim().isEmpty()) {
 
             for (RefBookAttribute attribute : refBook.getAttributes()) {
-                if (RefBookAttributeType.STRING.equals(attribute.getAttributeType())) {
+                if (RefBookAttributeType.STRING.equals(attribute.getAttributeType()) || RefBookAttributeType.DATE.equals(attribute.getAttributeType())) {
                     if (resultSearch.length() > 0) {
                         resultSearch.append(" or ");
                     }
                     resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
                             .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                }/*
-                 * else if
-				 * (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType
-				 * ()) && isNumeric(searchPattern)){ if (resultSearch.length() >
-				 * 0){ resultSearch.append(" or "); }
-				 * resultSearch.append(attribute
-				 * .getAlias()).append("=").append("\"" + searchPattern + "\"");
-				 * }
-				 */
+                } else if (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType())) {
+                    if (resultSearch.length() > 0) {
+                        resultSearch.append(" or ");
+                    }
+                    resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
+                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                }
             }
 
         }

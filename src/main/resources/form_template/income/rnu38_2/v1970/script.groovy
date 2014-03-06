@@ -10,6 +10,7 @@ import groovy.transform.Field
  * formTemplateId=335
  *
  * TODO:
+ *      - логических проверок в чтз нет, в скрипте сказали пока оставить проверки
  *      - импорт и миграция
  *
  * @author rtimerbaev
@@ -45,10 +46,9 @@ switch (formDataEvent) {
 @Field
 def allColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome']
 
+// TODO (Ramil Timerbaev) логических проверок в чтз нет, в скрипте сказали пока оставить проверки
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -83,12 +83,11 @@ void consolidation() {
     // удалить все строки и собрать из источников их строки
     dataRows.clear()
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceDataRowHelper = formDataService.getDataRowHelper(source)
-            def sourceDataRows = sourceDataRowHelper.allCached
-            if (it.formTypeId == formData.getFormType().getId()) {
+            def sourceDataRows = formDataService.getDataRowHelper(source)?.allCached
+            if (it.formTypeId == formData.formType.id) {
                 // Консолидация данных из первичной рну-38.2 в консолидированную рну-38.2.
                 sourceDataRows.each { row ->
                     dataRows.add(row)

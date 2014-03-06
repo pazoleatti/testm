@@ -49,10 +49,15 @@
                 <g:CheckBox ui:field="fixedRowsCheckBox"/>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Наименование формы</g:Label>
-                <g:TextBox width="500px" ui:field="nameBox"/>
+            <g:HorizontalPanel>
+                <g:Label width="300px">Признак ежемесячной формы</g:Label>
+                <g:CheckBox ui:field="monthlyCheckBox" />
             </g:HorizontalPanel>
+
+			<g:HorizontalPanel height="30px">
+				<g:Label width="300px">Наименование формы</g:Label>
+				<g:TextBox width="500px" ui:field="nameBox" />
+			</g:HorizontalPanel>
 
             <g:HorizontalPanel height="30px">
                 <g:Label width="300px">Полное наименование формы</g:Label>

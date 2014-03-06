@@ -148,11 +148,8 @@ def editableColumns = ['balanceNumber', 'operationType', 'signContractor', 'cont
 @Field
 def nonEmptyColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
         'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
-        'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
-        'marketPriceInRub', 'costAcquisition', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD',
-        'realizationPriceInPerc', 'realizationPriceInRub', 'marketPriceRealizationInPerc',
-        'marketPriceRealizationInRub', 'costRealization', 'lossRealization', 'totalLoss', 'averageWeightedPrice',
-        'termIssue', 'termHold', 'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult',
+        'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'realizationDate',
+        'tradeDate2', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'realizationResult',
         'excessSellingPrice']
 
 @Field
@@ -394,16 +391,6 @@ void logicCheck() {
             excessSellingPrice = getGraph38(values)
         }
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
-
-        checkNSI(29, row, 'balanceNumber', true)
-        checkNSI(87, row, 'operationType', false)
-        checkNSI(88, row, 'signContractor', false)
-        checkNSI(89, row, 'securityKind', false)
-        checkNSI(62, row, 'signSecurity', false)
-        checkNSI(15, row, 'currencyCode', true)
-        checkNSI(15, row, 'currencyName', false)
-        checkNSI(15, row, 'currencyCodeTrade', true)
-        checkNSI(15, row, 'currencyNameTrade', true)
     }
     // 7.
     calcOrCheckTotalDataRows(dataRows, true)
@@ -606,7 +593,7 @@ BigDecimal getGraph37(def row) {
     if (isDiscountBond(row)&& row.costRealization != null && row.totalLoss != null && row.interestIncomeInRub != null) {
             return row.costRealization - row.totalLoss - row.interestIncomeInRub
     }
-    if (isCouponBound(row) && row.costRealization != null && row.totalLos != null) {
+    if (isCouponBound(row) && row.costRealization != null && row.totalLoss != null) {
         return row.costRealization - row.totalLoss
     }
     return null

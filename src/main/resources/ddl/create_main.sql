@@ -1,4 +1,3 @@
-
 create table ref_book_oktmo (
   id number(18) not null,
   code varchar2(4000) not null,
