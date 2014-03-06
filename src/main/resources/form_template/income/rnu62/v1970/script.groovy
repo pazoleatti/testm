@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -35,19 +36,27 @@ import java.math.RoundingMode
  * Графа 18 sum                 Сумма дисконта начисленного за отчётный период (руб.)
  */
 
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, arithmeticCheckAlias)
+        def columns = (isBalancePeriod ? allColumns - 'rowNumber' : editableColumns)
+        formDataService.addRow(formData, currentDataRow, columns, arithmeticCheckAlias)
         break
     case FormDataEvent.DELETE_ROW:
         if (!currentDataRow?.getAlias()?.contains('itg')) {
@@ -80,10 +89,6 @@ def providerCache = [:]
 def recordCache = [:]
 @Field
 def refBookCache = [:]
-
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
 
 //Все аттрибуты
 @Field
@@ -132,7 +137,7 @@ BigDecimal getCourse(def row, def date) {
     def isRuble = isRubleCurrency(currency)
     if (date != null && currency != null && !isRuble) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-                'CODE_NUMBER', currency, date, row.getIndex(), getColumnName(row, "currencyCode"), logger, false)
+                'CODE_NUMBER', currency.toString(), date, row.getIndex(), getColumnName(row, "currencyCode"), logger, false)
         return res?.RATE?.numberValue
     } else if (isRuble) {
         return 1;
@@ -189,15 +194,22 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // Проверка на заполнение поля
+        // Проверка заполнения граф
+        if (!isRubleCurrency(row.currencyCode)) {
+            nonEmptyColumns = nonEmptyColumns - 'sumEndInCurrency'
+        }
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
+        // Проверка даты совершения операции и границ отчетного периода
         if (row.operationDate != null && (row.operationDate.compareTo(dFrom) < 0 || row.operationDate.compareTo(dTo) > 0)) {
             loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
+
+        // Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
             loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
+        // Проверка на нулевые значения
         if (isZeroEmpty(row.sumStartInCurrency) &&
                 isZeroEmpty(row.sumStartInRub) &&
                 isZeroEmpty(row.sumEndInCurrency) &&
@@ -205,6 +217,7 @@ void logicCheck() {
                 isZeroEmpty(row.sum)) {
             loggerError(errorMsg + "Все суммы по операции нулевые!")
         }
+        // Проверка существования необходимых экземпляров форм
         if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             def rowPrev = getRowPrev(dataRowsPrev, row)
             if (rowPrev == null) {
@@ -248,7 +261,7 @@ void calc() {
         sortRows(dataRows, sortColumns)
     }
 
-    // Номер последний строки предыдущей формы
+    // Номер последней строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
@@ -361,7 +374,7 @@ def BigDecimal calc17(def row) {
                     tmp = null
                 }
             } else {
-                //TODO "второй строкой"?
+                //TODO "второй строкой"? Округление?
                 if (row.sumStartInRub != null && row.rateBROperationDate != null && row.sellingPrice != null && row.rateBRBillDate != null) {
                     tmp = (row.sellingPrice * (row.rateBROperationDate - row.rateBRBillDate)) + row.sumStartInRub
                 } else {
@@ -393,7 +406,7 @@ def getDataRowsPrev() {
     def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
-        logger.error("Не найдены экземпляры РНУ-71.2 за прошлый отчетный период!")
+        logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
     } else {
         return formDataService.getDataRowHelper(formDataPrev)?.allCached
     }
@@ -410,6 +423,13 @@ def isBalancePeriod() {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
+}
+
+/** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
+void prevPeriodCheck() {
+    if (!isBalancePeriod() && !formDataService.existAcceptedFormDataPrev(formData, formData.departmentId)) {
+        throw new ServiceException('Не найдены экземпляры РНУ-62 за прошлый отчетный период!')
+    }
 }
 
 def loggerError(def msg) {
