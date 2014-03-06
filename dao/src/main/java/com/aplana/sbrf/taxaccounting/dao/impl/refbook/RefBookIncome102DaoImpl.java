@@ -57,7 +57,8 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long recordId) {
-        return getJdbcTemplate().queryForObject(String.format("select * from %s where id = ?", TABLE_NAME),
+        return getJdbcTemplate().queryForObject(String.format("select ID as "+RefBook.RECORD_ID_ALIAS+", REPORT_PERIOD_ID, OPU_CODE, TOTAL_SUM, ITEM_NAME, DEPARTMENT_ID" +
+                " from %s where id = ?", TABLE_NAME),
                 new RefBookValueMapper(refBookDao.get(REF_BOOK_ID)),
                 recordId);
     }

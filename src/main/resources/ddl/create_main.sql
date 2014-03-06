@@ -1,4 +1,3 @@
-
 create table ref_book_oktmo (
   id number(18) not null,
   code varchar2(4000) not null,
@@ -39,7 +38,7 @@ comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 
-create sequence seq_form_type;
+create sequence seq_form_type start with 100;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -81,7 +80,7 @@ comment on column form_template.fullname is 'Полное наименовани
 comment on column form_template.code is 'Номер формы';
 comment on column form_template.script is 'Скрипт, реализующий бизнес-логику налоговой формы';
 comment on column form_template.data_headers is 'Описание заголовка таблицы';
-comment on column form_template.status is 'Статус версии (0 - действующая версия; 1 - удаленная версия, 2 - черновик версии, 3 - фиктивная версия)';
+comment on column form_template.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
