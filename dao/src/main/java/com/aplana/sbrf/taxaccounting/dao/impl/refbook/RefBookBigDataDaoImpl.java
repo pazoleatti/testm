@@ -608,9 +608,9 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             "values (?, ?, ?, ?, %s)";
 
     @Override
-    public void createRecordVersion(String tableName, Long refBookId, final Date version, final VersionedObjectStatus status, final List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(String tableName, Long refBookId, final Date version, final VersionedObjectStatus status, final List<RefBookRecord> records) {
         if (records == null || records.isEmpty()) {
-            return;
+            return null;
         }
 
         RefBook refBook = refBookDao.get(refBookId);
@@ -676,7 +676,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         );
 
         getJdbcTemplate().batchUpdate(sql, batchRefBookRecordsPS);
-
+        return refBookRecordIds;
     }
 
     private static final String UPDATE_REF_BOOK_OKTMO_SQL = "update %s set %s where id = ?";

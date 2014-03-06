@@ -722,12 +722,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public void createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
+    public List<Long> createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
 			final List<RefBookRecord> records) {
         List<Object[]> listValues = new ArrayList<Object[]>();
 
         if (records == null || records.isEmpty()) {
-            return;
+            return null;
         }
 
         RefBook refBook = get(refBookId);
@@ -796,6 +796,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 status.getId()
         ), batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
+        return refBookRecordIds;
     }
 
     private static final String INSERT_FAKE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
