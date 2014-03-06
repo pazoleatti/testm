@@ -6,6 +6,7 @@ import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
@@ -140,6 +141,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 }
             }
         });
+
+        modalPanel.addOpenModalWindowHandler(new OpenModalWindowEvent.OpenHandler() {
+            @Override
+            public void onOpen(OpenModalWindowEvent event) {
+                refBookView.load(state);
+            }
+        });
         // оставлю для примера
 //        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
 //            @Override
@@ -165,7 +173,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiHandler("pickImageButton")
     void onSelectButtonClicked(ClickEvent event) {
         prevState.setValues(state);
-        refBookView.load(state);
         modalPanel.center();
     }
 
