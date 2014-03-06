@@ -710,14 +710,13 @@ public class FlexiblePager extends AbstractPager {
     /**  Обновить количество строк на странице в локальном хранилище браузера. */
     private void updateRowsCountOnPage() {
         if (rowsCountOnPage.getValue() != null) {
-            setPageSize(rowsCountOnPage.getValue());
             Storage storage = Storage.getLocalStorageIfSupported();
             if (storage != null) {
                 storage.setItem("tax-rowsCountOnPage_" + type, String.valueOf(rowsCountOnPage.getValue()));
             }
-            if (getPage() != 0) {
-                firstPage();
-            }
+            getDisplay().setVisibleRange(new Range(0, getPageSize()));
+            setPageSize(getPageSize());
+
         }
     }
 

@@ -17,14 +17,19 @@ public class Date_CustomFieldSerializerTest{
 	private static class TestSerializationStreamReader implements SerializationStreamReader{
 		
 		long l;
+		String str;
 		
 		public void setL(long l){
 			this.l = l;
 		}
+
+		public void setStr(String str) {
+			this.str = str;
+		}
 		
 		@Override
 		public String readString() throws SerializationException {
-			return null;
+			return str;
 		}
 		
 		@Override
@@ -82,14 +87,19 @@ public class Date_CustomFieldSerializerTest{
 	private static class TestSerializationStreamWriter implements SerializationStreamWriter {
 		
 		long l;
+		String str;
 		
 		public long getL(){
 			return l;
 		}
+
+		public String getStr() {
+			return str;
+		}
 		
 		@Override
 		public void writeString(String value) throws SerializationException {
-			//
+			str = value;
 		}
 		
 		@Override
@@ -152,9 +162,9 @@ public class Date_CustomFieldSerializerTest{
 		TestSerializationStreamWriter writer = new TestSerializationStreamWriter();
 		new Date_CustomFieldSerializer().serializeInstance(writer, date);
 		TestSerializationStreamReader reader = new TestSerializationStreamReader();
-		reader.setL(writer.getL());
+		reader.setStr(writer.getStr());
 		Date result = new Date_CustomFieldSerializer().instantiateInstance(reader);
-		Assert.assertEquals(date, result);
+		Assert.assertEquals(date.toString(), result.toString());
 	}
 
 }
