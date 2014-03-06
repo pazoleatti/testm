@@ -144,7 +144,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
+    def retValue = parseNumber(value, indexRow, indexCol, logger, true)
+    if (formDataEvent == FormDataEvent.MIGRATION && retValue == null) {
+        retValue = 0
+    }
+    return retValue
 }
 
 // Признак периода ввода остатков.
