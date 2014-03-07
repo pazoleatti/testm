@@ -43,11 +43,13 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    def departmentParamList = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
 
-    if (departmentParam == null) {
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
     }
+
+    def departmentParam = departmentParamList?.get(0)
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
