@@ -155,6 +155,11 @@ void logicCheck() {
         // Проверка заполнения доходов и расходов Банка
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')
+        if (incomeSumCell.value != null && outcomeSumCell.value != null) {
+            def msgIn = incomeSumCell.column.name
+            def msgOut = outcomeSumCell.column.name
+            logger.warn("Строка $rowNum: Графы «$msgIn» и «$msgOut» не могут быть одновременно заполнены!")
+        }
         if (incomeSumCell.value == null && outcomeSumCell.value == null) {
             def msgIn = incomeSumCell.column.name
             def msgOut = outcomeSumCell.column.name

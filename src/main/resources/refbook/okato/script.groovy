@@ -206,9 +206,6 @@ void importFromXML() {
             actualRecordMap.put(actualMap.OKATO.stringValue, actualMap)
         }
 
-        // ОКАТО -> RECORD_ID
-        def recIdMap = [:]
-
         // Поиск добавляемых и поиск обновляемых среди добавляемых (при совпадении версий)
         addMap?.each { okato, value ->
             def actualValue = actualRecordMap.get(okato)
@@ -218,7 +215,7 @@ void importFromXML() {
                 addList.add(value)
                 if (actualName != null) {
                     // Если запись уже была то запоминаем record_id
-                    recIdMap.put(okato, actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
             }
         }
@@ -287,19 +284,13 @@ void importFromXML() {
                 tempList = []
                 addList.each { record ->
                     if (tempList.size() < 500) {
-                        //def rbRecord = new RefBookRecord()
-                        //rbRecord.setRecordId(recIdMap.get(record.OKATO.stringValue))
-                        //rbRecord.setValues(record)
-                        //tempList.add(rbRecord)
                         tempList.add(record)
                     } else {
-                        // dataProvider.createRecordVersion(logger, version, null, tempList)
                         dataProvider.insertRecords(version, tempList)
                         tempList.clear()
                     }
                 }
                 if (!tempList.isEmpty()) {
-                    //dataProvider.createRecordVersion(logger, version, null, tempList)
                     dataProvider.insertRecords(version, tempList)
                     tempList.clear()
                 }

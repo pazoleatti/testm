@@ -50,6 +50,13 @@ public interface DepartmentDao {
      */
     String getParentsHierarchy(Integer departmentId);
 
+	/**
+	 * Возвращает путь в иерархии до указанного подразделения используя сокращеные наименования
+	 * @param departmentId подразделение до которого строится иерархия
+	 * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
+	 */
+	String getParentsHierarchyShortNames(Integer departmentId);
+
     /**
      * Получить список всех подразделений
      * @return список всех подразделений

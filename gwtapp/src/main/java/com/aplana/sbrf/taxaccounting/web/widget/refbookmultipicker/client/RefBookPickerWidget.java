@@ -6,6 +6,7 @@ import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
+import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
@@ -96,10 +97,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onValueChange(final ValueChangeEvent<Date> dateValueChangeEvent) {
-                Date d = dateValueChangeEvent.getValue();
-                if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
-                    versionDateBox.setValue(startDate, false);
+            public void onValueChange(final ValueChangeEvent<Date> event) {
+                Date d = event.getValue();
+                if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
+                    versionDateBox.setValue(startDate != null ? startDate : endDate, false);
                 }
                 state.setVersionDate(versionDateBox.getValue());
                 refBookView.reloadOnDate(versionDateBox.getValue());
@@ -109,8 +110,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
                 Date d = new Date(dateShowRangeEvent.getStart().getTime());
-                while (d.before(dateShowRangeEvent.getEnd())) {
-                    if (RefBookPickerUtils.isCorrectDate(startDate, endDate, d)) {
+                while (d.before(dateShowRangeEvent.getEnd()) || d.equals(dateShowRangeEvent.getEnd())) {
+                    if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
                         versionDateBox.getDatePicker().setTransientEnabledOnDates(false, d);
                     }
                     CalendarUtil.addDaysToDate(d, 1);
@@ -140,6 +141,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 }
             }
         });
+
+        modalPanel.addOpenModalWindowHandler(new OpenModalWindowEvent.OpenHandler() {
+            @Override
+            public void onOpen(OpenModalWindowEvent event) {
+                refBookView.load(state);
+            }
+        });
         // оставлю для примера
 //        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
 //            @Override
@@ -165,7 +173,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiHandler("pickImageButton")
     void onSelectButtonClicked(ClickEvent event) {
         prevState.setValues(state);
-        refBookView.load(state);
         modalPanel.center();
     }
 
@@ -180,6 +187,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.getSetIds().clear();
         }
         clearSearchPattern();
+        updateUIState();
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
@@ -331,9 +339,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void updateUIState() {
         String defValue = "";
-        if (state.getSetIds() != null) {
+        String countValue = "Выбрано: 0";
+        if (state.getSetIds() != null && !state.getSetIds().isEmpty()) {
             defValue = refBookView.getDereferenceValue();
+            countValue = "Выбрано: " + state.getSetIds().size();
         }
+        selectionCountLabel.setText(countValue);
         textBox.setText(defValue);
         textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
         updateLabelValue();
@@ -401,6 +412,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setManualUpdate(boolean isManualUpdate) {
         this.isManualUpdate = isManualUpdate;
+    }
+
+    @Override
+    public boolean isHierarchical() {
+        return isHierarchical;
     }
 
     @Override

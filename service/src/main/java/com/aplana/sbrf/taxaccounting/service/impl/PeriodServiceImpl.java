@@ -390,7 +390,7 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 
 		if (checkBeforeRemove(departments, reportPeriodId, logs)) {
-			removePeriodWithLog(reportPeriodId, departments, logs);
+			removePeriodWithLog(reportPeriodId, departments, taxType, logs);
 		}
 	}
 
@@ -438,7 +438,7 @@ public class PeriodServiceImpl implements PeriodService{
 		return canRemove;
 	}
 
-	private void removePeriodWithLog(int reportPeriodId, List<Integer> departmentId, List<LogEntry> logs) {
+	private void removePeriodWithLog(int reportPeriodId, List<Integer> departmentId, TaxType taxType, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
 			departmentReportPeriodDao.delete(reportPeriodId, id);
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
@@ -456,25 +456,27 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 
 		if (canRemoveReportPeriod) {
-			RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
-			Date endDate = getEndDate(reportPeriodId).getTime();
-			PagingResult<Map<String, RefBookValue>> result101 =  dataProvider.getRecords(endDate, null, null, null);
-			List<Long> ids101 = new ArrayList<Long>();
-			for (Map<String, RefBookValue> r : result101) {
-				ids101.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-			}
-			if (!ids101.isEmpty()) {
-				dataProvider.deleteRecordVersions(null, ids101);
-			}
+			if (taxType == TaxType.INCOME) { // Бух.отчетность существует только для INCOME
+				RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
+				Date endDate = getEndDate(reportPeriodId).getTime();
+				PagingResult<Map<String, RefBookValue>> result101 =  dataProvider.getRecords(endDate, null, null, null);
+				List<Long> ids101 = new ArrayList<Long>();
+				for (Map<String, RefBookValue> r : result101) {
+					ids101.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+				}
+				if (!ids101.isEmpty()) {
+					dataProvider.deleteRecordVersions(null, ids101);
+				}
 
-			dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
-			PagingResult<Map<String, RefBookValue>> result102 =  dataProvider.getRecords(endDate, null, null, null);
-			List<Long> ids102 = new ArrayList<Long>();
-			for (Map<String, RefBookValue> r : result102) {
-				ids102.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-			}
-			if (!ids102.isEmpty()) {
-				dataProvider.deleteRecordVersions(null, ids102);
+				dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
+				PagingResult<Map<String, RefBookValue>> result102 =  dataProvider.getRecords(endDate, null, null, null);
+				List<Long> ids102 = new ArrayList<Long>();
+				for (Map<String, RefBookValue> r : result102) {
+					ids102.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+				}
+				if (!ids102.isEmpty()) {
+					dataProvider.deleteRecordVersions(null, ids102);
+				}
 			}
 			reportPeriodDao.remove(reportPeriodId);
 		}

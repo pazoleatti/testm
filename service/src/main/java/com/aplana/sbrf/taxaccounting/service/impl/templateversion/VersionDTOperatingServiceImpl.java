@@ -146,6 +146,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setEdition(0);
         declarationTemplate.setType(type);
+	    declarationTemplate.setName("FAKE");
         return declarationTemplate;
     }
 

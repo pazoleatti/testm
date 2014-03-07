@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event;
 
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RecordChanges;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
@@ -29,6 +30,14 @@ public class UpdateForm extends
 		source.fireEvent(event);
 	}
 
+    public static void fire(HasHandlers source,	boolean success, RecordChanges recordChanges) {
+        UpdateForm event = new UpdateForm();
+        event.setRecordChanges(recordChanges);
+        event.setSuccess(success);
+        source.fireEvent(event);
+    }
+
+    private RecordChanges recordChanges;
 	private boolean success;
 
 	public UpdateForm() {
@@ -51,4 +60,12 @@ public class UpdateForm extends
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
+
+    public RecordChanges getRecordChanges() {
+        return recordChanges;
+    }
+
+    public void setRecordChanges(RecordChanges recordChanges) {
+        this.recordChanges = recordChanges;
+    }
 }

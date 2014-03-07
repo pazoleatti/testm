@@ -30,8 +30,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private final Log logger = LogFactory.getLog(getClass());
 
-    //По идее должно чуток ускорить работу
-
     private int rowNumber = 9;
     /*private int cellNumber = 0;*/
     private boolean isShowChecked;
@@ -59,10 +57,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         private CellStyleBuilder() {
             for (Column column : formTemplate.getColumns()){
-                this.createCellStyle(CellType.STRING, column.getAlias());
-                this.createCellStyle(CellType.DATE, column.getAlias());
-                this.createCellStyle(CellType.BIGDECIMAL, column.getAlias());
-                this.createCellStyle(CellType.EMPTY, column.getAlias());
                 this.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header");
             }
         }

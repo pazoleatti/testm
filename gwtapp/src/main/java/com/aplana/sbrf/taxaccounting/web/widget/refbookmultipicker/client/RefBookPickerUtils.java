@@ -36,14 +36,14 @@ public class RefBookPickerUtils {
     };
 
     /**
-     * Проверка вхождения даты в ограничивающий период
+     * Проверка невхождения даты в ограничивающий период
      *
      * @param startDate наччало огр периода
      * @param endDate   коннец огр периода
      * @param current   дату которую проверяют
-     * @return тру если входит, иначе фолс
+     * @return тру если не входит, иначе фолс
      */
-    public static Boolean isCorrectDate(Date startDate, Date endDate, Date current) {
+    public static Boolean isNotCorrectDate(Date startDate, Date endDate, Date current) {
         return (startDate != null && current.before(startDate)) || (endDate != null && current.after(endDate));
     }
 
