@@ -213,6 +213,11 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
+    public void reload(List<Long> needToSelectIds) {
+
+    }
+
+    @Override
     public void find(String searchPattern) {
         getUiHandlers().find(searchPattern);
         refresh();
