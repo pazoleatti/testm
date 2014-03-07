@@ -30,7 +30,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -403,7 +403,7 @@ void addData(def xml, int headRowCount) {
         newRow.income = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 6
-        newRow.outcome = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.outcome = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
