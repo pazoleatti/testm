@@ -14,6 +14,10 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
     public RefBookTreeItem() {
     }
 
+    public RefBookTreeItem(Long id, String dereferenceValue) {
+        super(id, dereferenceValue);
+    }
+
     public RefBookTreeItem getParent() {
         return parent;
     }
@@ -52,7 +56,7 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
         sb.append(", parent=").append(parent);
         sb.append(", hasChild=").append(hasChild);
         sb.append(", canBeSelected=").append(canBeSelected);
-        sb.append(", refBookRecordDereferenceValues=").append(getDereferenceValue());
+        sb.append(", refBookRecordDereferenceValues=").append(getRefBookRecordDereferenceValues());
         sb.append(", dereferenceValue='").append(getDereferenceValue()).append('\'');
         sb.append('}');
         return sb.toString();

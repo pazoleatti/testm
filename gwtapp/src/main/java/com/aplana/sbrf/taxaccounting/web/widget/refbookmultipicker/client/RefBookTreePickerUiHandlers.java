@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBoo
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Интерфейс для взаимодествия
@@ -26,9 +27,32 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
      */
     void loadForItem(RefBookUiTreeItem uiTreeItem);
 
+    /**
+     * Загрузка дерева с указанием фильтра
+     * @param searchPattern строка поиска
+     */
     void find(String searchPattern);
 
+    /**
+     * Перезагрузка верхушки дерева
+     */
     void reload();
 
+    /**
+     * Перезагрузка верхушки дерева с нужными для выделения ид
+     */
+    void reload(List<Long> needToSelectIds);
+
+    /**
+     * Загружает списко ид родителей ваверх по иерархии начиная с uniqueRecordId и открывает их последовательно
+     * @param uniqueRecordId идентификатор итема
+     * @param isChild не включать uniqueRecordId в списко открытия
+     */
+    void openFor(Long uniqueRecordId, boolean isChild);
+
+    /**
+     * Перезагрузить дерево
+     * @param version дата версии на которую загружить итемы
+     */
     void reloadForDate(Date version);
 }

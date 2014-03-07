@@ -1,19 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookIncome101;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.mockito.Mockito.*;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
-import java.io.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Тест для импорта бух отчетности из xml файла смотри com.aplana.sbrf.taxaccounting.service.BookerStatementsService
@@ -51,53 +53,56 @@ public class BookerStatementsServiceImplTest {
         RefBookDataProvider provider102 = mock(RefBookDataProvider.class);
         when(refBookFactory.getDataProvider(REFBOOK_INCOME_102)).thenReturn(provider102);
         ReflectionTestUtils.setField(service, "rbFactory", refBookFactory);
+
+        AuditService auditService = mock(AuditService.class);
+        ReflectionTestUtils.setField(service, "auditService", auditService);
     }
 
     @Test(expected = ServiceException.class)
     public void importEmptyXml() {
-        service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
-        service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID);
+        service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        service.importXML("test.xls", getEmptyStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void importInvalidXml() {
-        service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
-        service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID);
+        service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        service.importXML("test.xls", getInvalidStream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void nullReportPeriod() {
-        service.importXML("test.xls", get101Stream(), null, TYPE_INCOME_101, DEPARTMENT_ID);
+        service.importXML("test.xls", get101Stream(), null, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void nullStream() {
-        service.importXML("test.xls", null, REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
+        service.importXML("test.xls", null, REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void nullName() {
-        service.importXML(null, get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
+        service.importXML(null, get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void invalidPeriod() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_INVALID, TYPE_INCOME_101, DEPARTMENT_ID);
+        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_INVALID, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void closedPeriod() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_CLOSED, TYPE_INCOME_101, DEPARTMENT_ID);
+        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_CLOSED, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void invalidType() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INVALID, DEPARTMENT_ID);
+        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INVALID, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void invalidDepartment() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_INVALID);
+        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_INVALID, new TAUserInfo());
     }
 
     /**
@@ -105,8 +110,8 @@ public class BookerStatementsServiceImplTest {
      */
     @Test
     public void importValidXml() {
-        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID);
-        service.importXML("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID);
+        service.importXML("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        service.importXML("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
     }
 
     private static InputStream getEmptyStream() {

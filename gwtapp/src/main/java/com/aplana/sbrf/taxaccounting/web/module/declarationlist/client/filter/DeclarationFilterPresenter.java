@@ -84,6 +84,11 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                             }
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}
+
+					    @Override
+					    public void onFailure(Throwable caught) {
+						    DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
+					    }
 					}, this));
 	}
 

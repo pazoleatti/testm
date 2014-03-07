@@ -60,8 +60,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	}
 
 	@Override
-	public int getActiveDeclarationTemplateId(int declarationTypeId) {
-		return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId);
+	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
+		return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
 	}
 
 	@Override

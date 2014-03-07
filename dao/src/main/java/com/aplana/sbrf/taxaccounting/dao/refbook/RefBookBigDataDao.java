@@ -185,7 +185,7 @@ public interface RefBookBigDataDao {
      * @param records список новых записей
      * @return идентификатор записи справочника (без учета версий)
      */
-    void createRecordVersion(String tableName, Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
+    List<Long> createRecordVersion(String tableName, Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
 
     /**
      * Обновляет значения атрибутов у указанной версии

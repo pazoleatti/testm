@@ -121,7 +121,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
-    public void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         throw new UnsupportedOperationException();
     }
 

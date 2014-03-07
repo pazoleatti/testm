@@ -162,7 +162,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending) {
+	private void appendSortClause(PreparedStatementData ps, RefBook refBook, RefBookAttribute sortAttribute, boolean isSortAscending, boolean isHierarchical) {
 		RefBookAttribute defaultSort = refBook.getSortAttribute();
 		if (isSupportOver()) {
 			// row_number() over (order by ... asc\desc)
@@ -171,11 +171,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 				String sortAlias = sortAttribute == null ? defaultSort.getAlias() : sortAttribute.getAlias();
 				RefBookAttributeType sortType = sortAttribute == null ? defaultSort.getAttributeType() : sortAttribute.getAttributeType();
 
-				ps.appendQuery("a");
-				ps.appendQuery(sortAlias);
-				ps.appendQuery(".");
-				ps.appendQuery(sortType.toString());
-				ps.appendQuery("_value ");
+                if (isHierarchical) {
+                    ps.appendQuery(sortAlias);
+                } else {
+                    ps.appendQuery("a");
+                    ps.appendQuery(sortAlias);
+                    ps.appendQuery(".");
+                    ps.appendQuery(sortType.toString());
+                    ps.appendQuery("_value ");
+                }
 			} else {
 				ps.appendQuery("id");
 			}
@@ -220,6 +224,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
             ps.appendQuery(WITH_STATEMENT);
             ps.addParam(refBookId);
+            ps.addParam(version);
             ps.addParam(version);
         } else {
             fromSql.append("  ref_book_record r\n");
@@ -355,9 +360,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "with t as (select\n" +
                     "  max(version) version, record_id\n" +
                     "from\n" +
-                    "  ref_book_record\n" +
+                    "  ref_book_record r\n" +
                     "where\n" +
-                    "  ref_book_id = ? and status = 0 and version <= ?\n" +
+                    "  r.ref_book_id = ? and r.status = 0 and r.version <= ? and\n" +
+                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by\n" +
                     "  record_id)\n";
 
@@ -404,6 +410,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(WITH_STATEMENT);
 			ps.addParam(refBookId);
 			ps.addParam(version);
+            ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
@@ -425,7 +432,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
+		appendSortClause(ps, refBook, sortAttribute, isSortAscending, false);
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -454,7 +461,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         ps.appendQuery(fromSql.toString());
-        ps.appendQuery("where\n  r.ref_book_id = ");
+        ps.appendQuery(" where\n  r.ref_book_id = ");
         ps.appendQuery("?");
         ps.addParam(refBookId);
         ps.appendQuery(" and\n  status <> -1\n");
@@ -511,6 +518,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(WITH_STATEMENT);
             ps.addParam(refBookId);
             ps.addParam(version);
+            ps.addParam(version);
         } else {
             ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
@@ -518,14 +526,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         ps.appendQuery(" SELECT ");
 
-		appendSortClause(ps, refBook, sortAttribute, isSortAscending);
-		ps.appendQuery(",");
+        appendSortClause(ps, refBook, sortAttribute, isSortAscending, true);
+        ps.appendQuery(",");
 
         // выбираем все алиасы + row_number_over
         List<String> aliases = new ArrayList<String>(attributes.size()+1);
         aliases.add("record_id");
         //aliases.add("rownum ");
-		//aliases.add(RefBook.RECORD_SORT_ALIAS);
+        //aliases.add(RefBook.RECORD_SORT_ALIAS);
         for (RefBookAttribute attr: attributes){
             aliases.add(attr.getAlias());
         }
@@ -594,7 +602,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         // выборка иерархического исправочника
-        ps.appendQuery(" CONNECT BY PRIOR r.id = aPARENT_ID.REFERENCE_value ");
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR r.id = aPARENT_ID.REFERENCE_value ");
         ps.appendQuery("START WITH aPARENT_ID.REFERENCE_value ");
         if (parentId == null){
             ps.appendQuery(" is null ");
@@ -602,7 +610,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(" = ");
             ps.appendQuery(parentId.toString());
         }
-
         ps.appendQuery(")");
 
         if (pagingParams != null) {
@@ -715,12 +722,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public void createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
+    public List<Long> createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
 			final List<RefBookRecord> records) {
         List<Object[]> listValues = new ArrayList<Object[]>();
 
         if (records == null || records.isEmpty()) {
-            return;
+            return null;
         }
 
         RefBook refBook = get(refBookId);
@@ -789,6 +796,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 status.getId()
         ), batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
+        return refBookRecordIds;
     }
 
     private static final String INSERT_FAKE_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
@@ -1313,7 +1321,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join (select number_value, record_id from periodCodes where alias='D') d on d.record_id=p.record_id";
 
     public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
-        List<String> results = new ArrayList<String>();
+        Set<String> results = new HashSet<String>();
         //Проверка использования в справочниках
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
@@ -1377,7 +1385,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             //do nothing
         }
-        return results;
+        return new ArrayList<String>(results);
     }
 
     private String reverseDepartmentPath(String departmentPath) {

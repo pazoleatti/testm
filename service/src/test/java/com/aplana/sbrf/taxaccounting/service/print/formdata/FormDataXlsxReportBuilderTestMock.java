@@ -46,7 +46,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		Column colNum5 = new NumericColumn();
 		Column colNum6 = new StringColumn();
 		Column colNum7 = new StringColumn();
-		Column colNum8 = new StringColumn();
+		Column colNum8 = new DateColumn();
 		
 		Column colStr9 = new StringColumn();
 		Column colStr10 = new NumericColumn();
@@ -122,6 +122,8 @@ public class FormDataXlsxReportBuilderTestMock {
         colDate17.setWidth(10);
         colDate18.setWidth(10);
         colDate19.setWidth(0);
+
+        ((DateColumn)colNum8).setFormatId(Formats.NONE.getId());
 
 		
 		columns.add(colNum);

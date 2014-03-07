@@ -21,6 +21,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -204,7 +205,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     }
 
     private void lineinRefBook() {
-        fPicker.setPeriodDates(null, new Date());
+        Date date  = new Date();
+        fPicker.setPeriodDates(null, date);
         fPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
@@ -265,7 +267,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     }
 
     private void heirarRefBook() {
-        hPicker.setPeriodDates(null, new Date());
+        Date date  = new Date();
+        hPicker.setPeriodDates(new Date(date.getTime() - 1000000L), new Date(date.getTime() + 1000000L));
         hPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {

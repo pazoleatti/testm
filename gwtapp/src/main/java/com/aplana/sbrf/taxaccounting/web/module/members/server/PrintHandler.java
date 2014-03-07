@@ -46,9 +46,7 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 			TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
 			fullUser.setDepartment(user.getDepartment());
 			fullUser.setUser(user.getUser());
-			String fullDepartment = getFullDepartment(user.getDepartment());
-			fullDepartment = fullDepartment.substring(1);
-			fullUser.setFullDepartmentPath(fullDepartment);
+			fullUser.setFullDepartmentPath(departmentService.getParentsHierarchyShortNames(user.getDepartment().getId()));
 			page.add(fullUser);
 		}
 		String filePath = printingService.generateExcelUsers(page);
@@ -65,14 +63,4 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 
 	@Override
 	public void undo(PrintAction printAction, PrintResult printResult, ExecutionContext executionContext) throws ActionException {}
-
-	String getFullDepartment(Department department) {
-
-		StringBuilder fullDepartment = new StringBuilder();
-		fullDepartment.insert(0, "/" + department.getName());
-		if (department.getParentId() != null) {
-			fullDepartment.insert(0, getFullDepartment(departmentService.getDepartment(department.getParentId())));
-		}
-		return fullDepartment.toString();
-	}
 }

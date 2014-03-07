@@ -12,7 +12,11 @@ public class RefBookColumn extends Column {
 
 	private long refBookAttributeId;
 
+    private long nameAttributeId;
+
 	private String filter;
+
+    private boolean isHierarchical = false;
 
 	private static Formatter formatter = new Formatter() {
 		@Override
@@ -44,7 +48,23 @@ public class RefBookColumn extends Column {
 		this.filter = filter;
 	}
 
-	@Override
+    public boolean isHierarchical() {
+        return isHierarchical;
+    }
+
+    public void setHierarchical(boolean isHierarchical) {
+        this.isHierarchical = isHierarchical;
+    }
+
+    public long getNameAttributeId() {
+        return nameAttributeId;
+    }
+
+    public void setNameAttributeId(long nameAttributeId) {
+        this.nameAttributeId = nameAttributeId;
+    }
+
+    @Override
 	public Formatter getFormatter() {
 		return formatter;
 	}

@@ -121,7 +121,7 @@ public interface RefBookDao {
 	 * @param records список новых записей
      * @return идентификатор записи справочника (без учета версий)
 	 */
-	void createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
+	List<Long> createRecordVersion(Long refBookId, Date version, VersionedObjectStatus status, List<RefBookRecord> records);
 
     /**
      * Создает фиктивную запись, являющуюся датой окончания периода актуальности какой то версии

@@ -83,6 +83,10 @@ def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
 
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -168,6 +172,8 @@ void calculationBasicSum(def dataRows) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
+            } else {
+                row.rnu5Field5Accepted = 0
             }
         }
     }
@@ -189,9 +195,10 @@ void calculationControlGraphs(def dataRows) {
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
             continue
         }
-        if (row.rnu7Field10Sum && row.rnu7Field12Accepted && row.rnu7Field12PrevTaxPeriod) {
+        if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
+                && row.getCell('rnu7Field12PrevTaxPeriod').isEditable()) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
-            tmp = round(row.rnu7Field10Sum - (row.rnu7Field12Accepted - row.rnu7Field12PrevTaxPeriod), 2)
+            tmp = round((row.rnu7Field10Sum ?: 0) - ((row.rnu7Field12Accepted ?: 0) - (row.rnu7Field12PrevTaxPeriod ?: 0)), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
@@ -232,7 +239,7 @@ void calculationControlGraphs(def dataRows) {
 
 /** Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка. */
 def consolidationBank(def dataRows) {
-    System.out.println("consolidationBank")
+    println("consolidationBank")
 
     // очистить форму
     dataRows.each { row ->
@@ -269,7 +276,8 @@ def consolidationBank(def dataRows) {
 
 /** Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП. */
 void consolidationSummary(def dataRows) {
-    System.out.println("consolidationSummary")
+    println("consolidationSummary")
+
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
@@ -291,6 +299,7 @@ void consolidationSummary(def dataRows) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
             def formDataOld = formDataService.find(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId())
+            // println("prevFormData = "+formDataOld)
             dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
@@ -317,13 +326,13 @@ void consolidationSummary(def dataRows) {
         }
     }
 
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    System.out.println("ololo")
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        System.out.println("ololo")
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
-            def date = new Date()
+            // println("child source =" + child)
             def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
             switch (child.formType.id) {
             // рну 7
@@ -332,9 +341,9 @@ void consolidationSummary(def dataRows) {
                             (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
-                        System.out.println("row.consumptionTypeId = ${row.consumptionTypeId}")
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, date)
-                        System.out.println("recordId = ${recordId}")
+
+                        // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -362,7 +371,9 @@ void consolidationSummary(def dataRows) {
                     ((2..106) + (109..211)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, date)
+                        // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
+
                         // сумма графы 5 рну-5
                         def sum5 = 0
                         if (recordId != null) {
@@ -391,8 +402,8 @@ def isBank() {
 
 /** Получить сумму диапазона строк определенного столбца. */
 def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = getDataRow(dataRows, rowFromAlias).getIndex()
-    def to = getDataRow(dataRows, rowToAlias).getIndex()
+    def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
+    def to = getDataRow(dataRows, rowToAlias).getIndex() - 1
     if (from > to) {
         return 0
     }
@@ -453,7 +464,7 @@ def getFormDataRNU14() {
 def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def resultAlias) {
     def sum = 0
     for (row in dataRowsChild) {
-        System.out.println("value1 = ${value1} row[alias1] = ${row[alias1]}")
+        //println("value1 = ${value1} row[alias1] = ${row[alias1]}")
         if (value1 == row[alias1]) {
             sum += (row[resultAlias] ?: 0)
         }
