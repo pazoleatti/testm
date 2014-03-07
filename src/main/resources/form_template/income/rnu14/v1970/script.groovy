@@ -261,7 +261,7 @@ def getXML(def String startStr, def String endStr) {
 void importData() {
     def xml = getXML('КНУ', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 2)
 
     def headerMapping = [
             (xml.row[0].cell[0]): 'КНУ',
@@ -295,10 +295,11 @@ void addData(def xml, int headRowCount) {
     def dataRows = dataRowHelper.allCached
 
     def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
 
     // графа 4 строки 5
-    if (xml.row[headRowCount+5] != null) {
-        dataRows[4].normBase = parseNumber(xml.row[headRowCount+5].cell[3].text(), headRowCount+5, 3 + colOffset, logger, false)
+    if (xml.row[headRowCount + 5] != null) {
+        dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, false)
     } else {
         dataRows[4].normBase = null
     }
