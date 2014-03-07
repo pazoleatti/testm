@@ -441,7 +441,7 @@ def getModRefBookValue(refBookId, filter, date = getReportPeriodEndDate()) {
 
     // получение связанных данных
     refBook.attributes.each() { RefBookAttribute attr ->
-        def ref = record[attr.alias].referenceValue;
+        def ref = record[attr.alias]?.referenceValue;
         if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
             def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
             record[attr.alias] = attrProvider.getRecordData(ref);
@@ -498,7 +498,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKTMO == null || record.OKTMO.referenceValue == null) {
+    if (record.OKTMO == null || record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКТМО»")
     }
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
@@ -510,13 +510,13 @@ List<String> getErrorDepartment(record) {
     if (record.TAX_ORGAN_CODE == null || record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE.referenceValue == null) {
+    if (record.OKVED_CODE == null || record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.referenceValue == null) {
+    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
     if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
@@ -528,7 +528,7 @@ List<String> getErrorDepartment(record) {
     if (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
-    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE.referenceValue == null) {
+    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
     errorList
