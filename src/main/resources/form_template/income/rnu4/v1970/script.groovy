@@ -366,7 +366,7 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк TODO Уточнитиь когда будет постановка
+        // Пропуск итоговых строк
         if (row.cell[0].text() == null || row.cell[0].text() == '') {
             continue
         }
