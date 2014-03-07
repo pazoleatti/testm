@@ -32,6 +32,7 @@ alter table blob_data add constraint blob_data_chk_type check (type in (0, 1));
 
 alter table ref_book add constraint ref_book_pk primary key (id);
 alter table ref_book add constraint ref_book_fk_script_id foreign key (script_id) references blob_data(id);
+alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 alter table ref_book add constraint ref_book_chk_type check (type in (0, 1));
 alter table ref_book add constraint ref_book_chk_read_only check (read_only in (0, 1));
 
