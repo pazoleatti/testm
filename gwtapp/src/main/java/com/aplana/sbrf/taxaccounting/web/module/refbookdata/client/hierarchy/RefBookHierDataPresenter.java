@@ -159,11 +159,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         if (result.isException()) {
                             Dialog.errorMessage("Удаление всех версий элемента справочника",
                                     "Обнаружены фатальные ошибки!");
+                        } else {
+                            editFormPresenter.show(null);
+                            editFormPresenter.setEnabled(false);
+                            editFormPresenter.setNeedToReload();
+                            getView().deleteItem(selected);
                         }
-                        editFormPresenter.show(null);
-                        editFormPresenter.setEnabled(false);
-                        editFormPresenter.setNeedToReload();
-                        getView().deleteItem(selected);
                     }
                 }, this));
     }
