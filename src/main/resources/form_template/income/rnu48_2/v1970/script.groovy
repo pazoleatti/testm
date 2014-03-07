@@ -109,7 +109,7 @@ BigDecimal calcTotal(def dataRows) {
     dataRows.each { row ->
         sum += (row.getAlias() != 'total' ? (row.summ ?: 0) : 0)
     }
-    return round(sum, 2)
+    return sum?.setScale(2, RoundingMode.HALF_UP)
 }
 
 def checkRNU48_1() {
@@ -121,9 +121,4 @@ def checkRNU48_1() {
 def getFormDataRNU48_1() {
     def form = formDataService.find(343, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
-}
-
-// Округление
-def BigDecimal round(BigDecimal value, def int precision = 2) {
-    return value?.setScale(precision, RoundingMode.HALF_UP)
 }
