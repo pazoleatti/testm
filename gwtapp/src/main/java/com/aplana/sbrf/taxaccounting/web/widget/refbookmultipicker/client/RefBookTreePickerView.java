@@ -183,11 +183,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         if (iterator != null && iterator.hasNext()) {
             Long aLong = iterator.next();
             RefBookUiTreeItem uiTreeItem = getUiTreeItem(aLong);
-            if (uiTreeItem.isChildLoaded()) {
-                uiTreeItem.setState(true);
-            } else {
-                uiTreeItem.setState(true);
-                return;
+            if (uiTreeItem != null) {
+                if (uiTreeItem.isChildLoaded()) {
+                    uiTreeItem.setState(true);
+                } else {
+                    uiTreeItem.setState(true);
+                    return;
+                }
             }
         } else {
             if (isOpeningOperation) {          // Если это операция лейзи-открывания
