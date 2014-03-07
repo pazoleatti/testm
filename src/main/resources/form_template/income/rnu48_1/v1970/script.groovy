@@ -18,7 +18,7 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
         logicCheck()
@@ -73,15 +73,6 @@ def nonEmptyColumns = ['number', 'inventoryNumber', 'usefulDate', 'amount']
 @Field
 def totalColumns = ['amount']
 
-void checkCreation() {
-    //проверка периода ввода остатков
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-    formDataService.checkUnique(formData, logger)
-}
-
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -104,7 +95,10 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.getAllCached()
 
-    def reportPeriodRange = getReportPeriodRange()
+    def periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+    def periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    def reportPeriodRange = periodStartDate..periodEndDate
+
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -131,11 +125,4 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, newRow, totalColumns)
     return newRow
-}
-
-def getReportPeriodRange() {
-    def periodStartsDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
-    def periodEndsDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-
-    return periodStartsDate..periodEndsDate
 }
