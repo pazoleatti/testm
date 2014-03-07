@@ -130,6 +130,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
                 }
             }
+
         }
     }
 
@@ -172,7 +173,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void onSelectionChanged() {
         if (getView().getSelectedId() != null) {
-
             recordId = getView().getSelectedId();
             editFormPresenter.show(recordId);
         }
