@@ -92,7 +92,7 @@ def editableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', '
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['number', 'code']
+def autoFillColumns = ['number', 'kny']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -556,7 +556,7 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк TODO Уточнитиь когда будет постановка
+        // Пропуск итоговых строк
         if (row.cell[0].text() == null || row.cell[0].text() == '') {
             continue
         }
@@ -590,7 +590,7 @@ void addData(def xml, int headRowCount) {
         newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
 
         // графа 7
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)//
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
 
         // графа 8
         newRow.rateOfTheBankOfRussia = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
