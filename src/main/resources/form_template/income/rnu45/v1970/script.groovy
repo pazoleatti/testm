@@ -43,7 +43,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {

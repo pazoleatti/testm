@@ -79,7 +79,12 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
 def refBookCache = [:]
+
 
 // Редактируемые атрибуты
 @Field
@@ -109,8 +114,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
-//// Кастомные методы
-
 @Field
 def formDataPrev = null // Форма предыдущего месяца
 @Field
@@ -123,6 +126,15 @@ def format = new SimpleDateFormat('dd.MM.yyyy')
 def check17 = format.parse('01.01.2006')
 @Field
 def lastDay2001 = format.parse('31.12.2001')
+
+//// Кастомные методы
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Получение формы предыдущего месяца
 FormData getFormDataPrev() {
@@ -635,7 +647,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
         // графа 4
         newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-            xmlIndexCol++
+        xmlIndexCol++
         // графа 5
         newRow.amortGroup =  getRecordIdImport(71, 'GROUP', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
