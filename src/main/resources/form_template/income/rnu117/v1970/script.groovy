@@ -2,15 +2,18 @@ package form_template.income.rnu117.v1970
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
+
+import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения"
  * formTemplateId=370
  *
  * @author bkinzyabulatov
- * TODO заполнение граф 7.1, 7.2 - вручную или автоматом
- * TODO 7.1 - справочник форвардных курсов?
  *
  * fix
  * Графа 1    rowNumber           № пп
@@ -72,6 +75,10 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
 def refBookCache = [:]
 
 // Все аттрибуты
@@ -98,6 +105,9 @@ def arithmeticCheckAlias = ["income", "outcome", "deviationMinPrice", "deviation
 def nonEmptyColumns = ["rowNumber", "transactionNumber", "transactionKind", "contractor", "transactionDate",
         "transactionEndDate", "resolveDate", "transactionType", "courseFix", "course", "minPrice", "maxPrice",
         "request", "liability", "income", "outcome", "deviationMinPrice", "deviationMaxPrice"]
+
+@Field
+def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 //// Обертки методов
 // Разыменование записи справочника
@@ -132,6 +142,15 @@ void logicCheck() {
 
         calc10(row, values)
         calc11(row, values)
+
+        // Проверка курса валюты	(графа 7.2)
+        if (row.resolveDate != null && row.course != null &&
+                getRecord(22, "RATE = $row.course", row.resolveDate) == null) {
+            RefBook rb = refBookFactory.get(22)
+            def rbName = rb.getName()
+            def attrName = rb.getAttribute('RATE').getName()
+            logger.error(errorMsg + "В справочнике «$rbName» не найдено значение «${row.course}», соответствующее атрибуту «$attrName»!")
+        }
 
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
     }
@@ -281,4 +300,48 @@ void calc11(def row, def result) {
             result.deviationMinPrice = null
             result.deviationMaxPrice = null
     }
+}
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ *
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = sdf.format(date)
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                return refBookCache.get(recordId)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def provider
+    if (!providerCache.containsKey(refBookId)) {
+        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
+    }
+    provider = providerCache.get(refBookId)
+
+    def records = provider.getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null)
+            refBookCache.put(recordId, retVal)
+        return retVal
+    }
+    return null
 }

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -40,7 +41,6 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -51,7 +51,7 @@ switch (formDataEvent) {
         def cols = (getBalancePeriod() ?
             ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
             : editableColumns)
-        formDataService.addRow(formData, currentDataRow, cols, null)
+        formDataService.addRow(formData, currentDataRow, cols, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -72,7 +72,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -88,6 +90,10 @@ def refBookCache = [:]
 @Field
 def editableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
 
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['number', 'kny']
+
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia']
@@ -95,6 +101,10 @@ def nonEmptyColumns = ['number', 'date', 'code', 'docNumber', 'docDate', 'curren
 // Сумируемые колонки в фиксированной с троке
 @Field
 def totalColumns = ['taxAccountingRuble', 'ruble']
+
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
 
 // Текущая дата
 @Field
@@ -109,6 +119,13 @@ def endDate = null
 
 //// Обертки методов
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 def Date date, boolean required = true) {
@@ -119,36 +136,6 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-boolean prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return true
-    }
-    // 3. Проверка наличия экземпляров форм за 3 года (В текущем подразделении созданы формы РНУ-6
-    // за последние три года. Все формы в статусе «Принята»
-    def from = new GregorianCalendar()
-    from.setTime(getStartDate())
-    from.set(Calendar.YEAR, from.get(Calendar.YEAR) - 3)
-    def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from.time, getStartDate())
-    def lostReportPeriods = []
-    for (reportPeriod in reportPeriods) {
-        def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
-        if (findFormData != null && findFormData.id == formData.id) {
-            continue
-        }
-        if (findFormData == null || findFormData.state != WorkflowState.ACCEPTED) {
-            lostReportPeriods.add(reportPeriod.name + ' ' + reportPeriod.calendarStartDate.format('yyyy'))
-        }
-    }
-    if (!lostReportPeriods.isEmpty()) {
-        def formName = formData.formType.name
-        def periods = lostReportPeriods.join(', ')
-        logger.warn("Не найдены экземпляры «$formName» за: $periods!")
-    }
-    return true
 }
 
 //// Кастомные методы
@@ -166,6 +153,10 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
+        dataRows.eachWithIndex{ row, index ->
+            row.setIndex(index + 1)
+        }
+
         dataRows = dataRowHelper.getAllCached() // не убирать, группировка падает
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
@@ -181,24 +172,23 @@ void calc() {
 
         // посчитать "итого по коду"
         def totalRows = [:]
-        def tmp = null
+        def code = null
         def sum = 0, sum2 = 0
         dataRows.eachWithIndex { row, i ->
-            if (tmp == null) {
-                tmp = row.code
+            if (code == null) {
+                code = getKnu(row.code)
             }
             // если код расходы поменялся то создать новую строку "итого по коду"
-            if (tmp != row.code) {
-                def code = getKnu(tmp)
+            if (code != getKnu(row.code)) {
                 totalRows.put(i, getNewRow(code, sum, sum2))
                 sum = 0
                 sum2 = 0
+                code = getKnu(row.code)
             }
             // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
             if (i == dataRows.size() - 1) {
                 sum += (row.taxAccountingRuble ?: 0)
                 sum2 += (row.ruble ?: 0)
-                def code = getKnu(row.code)
                 def totalRowCode = getNewRow(code, sum, sum2)
                 totalRows.put(i + 1, totalRowCode)
                 sum = 0
@@ -206,7 +196,6 @@ void calc() {
             }
             sum += (row.taxAccountingRuble ?: 0)
             sum2 += (row.ruble ?: 0)
-            tmp = row.code
         }
 
         // добавить "итого по коду" в таблицу
@@ -227,7 +216,7 @@ def BigDecimal calc8(DataRow row) {
     if (isRubleCurrency(row.currencyCode)) {
         return 1
     }
-    return getRate(row.date, row.currencyCode)
+    return getRate(row.date, row.currencyCode).setScale(4, BigDecimal.ROUND_HALF_UP)
 }
 
 def BigDecimal calc10(DataRow row) {
@@ -247,7 +236,12 @@ def BigDecimal calc12(DataRow row) {
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    return res.getRecords().get(0).RATE.numberValue
+    if(res.getRecords().isEmpty()) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+        throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
+    } else {
+        return res.getRecords().get(0)?.RATE?.numberValue
+    }
 }
 
 // Проверка валюты currencyCode на рубли
@@ -319,22 +313,15 @@ void logicCheck() {
             loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
-        // +2. Проверка заполнения граф 9, 11 (переехало сюда из проверок перед рассчетами)
-        if (row.taxAccountingCurrency > 0 && row.accountingCurrency > 0) {
-            loggerError(errorMsg + "Графы 9 и 11 одновременно содержат ненулевое значение!")
-        }
-
         // 3. Проверка на нулевые значения
-        if (row.taxAccountingCurrency == 0 &&
-                row.taxAccountingRuble == 0 &&
-                row.accountingCurrency == 0 &&
-                row.ruble == 0) {
+        if (!(row.taxAccountingCurrency) && !(row.taxAccountingRuble) &&
+                !(row.accountingCurrency) && !(row.ruble)) {
             loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 4. Проверка, что не отображаются данные одновременно по бухгалтерскому и по налоговому учету
-        if (row.taxAccountingRuble != null && row.ruble != null && row.taxAccountingRuble != 0 && row.ruble != 0) {
-            logger.warn(errorMsg + 'одновременно указаны данные по налоговому  «%s» и бухгалтерскому «%s» учету.',
+        if (row.taxAccountingRuble && row.ruble) {
+            logger.warn(errorMsg + 'Одновременно указаны данные по налоговому  «%s» и бухгалтерскому «%s» учету.',
                     row.getCell('taxAccountingRuble').column.name, row.getCell('ruble').column.name)
         }
 
@@ -361,9 +348,9 @@ void logicCheck() {
                             c10 += (rowSum.taxAccountingRuble?:0)
                         }
                     }
-                    if (!(c10 > c12)) {
+                    if (c10 < c12) {
                         loggerError(errorMsg + 'Сумма данных бухгалтерского учёта превышает сумму начисленных платежей ' +
-                                'для документа %s от %s!', row.docNumber as String, row.docDate as String)
+                                'для документа %s от %s!', row.docNumber as String, dateFormat.format(row.docDate))
                     }
                 }
                 if (row.taxAccountingRuble > 0 && row.code != null) {
@@ -392,7 +379,7 @@ void logicCheck() {
 
         // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
-        if (row.docDate != null) {
+        if (row.ruble && row.docDate != null) {
             date = row.docDate as Date
             from = new GregorianCalendar()
             from.setTime(date)
@@ -409,8 +396,7 @@ void logicCheck() {
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
                         // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
                         if (findRow.code == row.code && findRow.docNumber == row.docNumber
-                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble != null
-                                && findRow.taxAccountingRuble > 0) {
+                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble > 0) {
                             isFind = true
                             sum += findRow.taxAccountingRuble
                             periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
@@ -419,8 +405,8 @@ void logicCheck() {
                 }
             }
             if (!(sum > row.ruble)) {
-                logger.warn(errorMsg + 'Операция в налоговом учете имеет сумму, меньше чем указано ' +
-                        'в бухгалтерском учете! См. РНУ-7 в отчетных периодах: %s.', periods.join(", "))
+                logger.warn(errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
+                        "в бухгалтерском учете!" + (isFind ? " См. РНУ-6 в отчетных периодах: ${periods.join(", ")}." : ""))
             }
             if (!isFind) {
                 logger.warn('Операция, указанная в строке %s, в налоговом учете за последние 3 года не проходила!',
@@ -434,7 +420,7 @@ void logicCheck() {
         def rowList = uniq456.get(map)
         if (rowList.size() > 1) {
             loggerError("Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
-                    "счета=%s, документа № %s от %s.", refBookService.getStringValue(27, map.get(4), 'NUMBER').toString(),
+                    "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, map.get(4), 'NUMBER').toString(),
                     map.get(5).toString(), dateFormat.format(map.get(6)))
         }
     }
@@ -478,4 +464,151 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Код налогового учета',
+            (xml.row[0].cell[3]): 'Дата совершения операции',
+            (xml.row[0].cell[4]): 'Балансовый счёт (номер)',
+            (xml.row[0].cell[5]): 'Первичный документ',
+            (xml.row[0].cell[7]): 'Код валюты',
+            (xml.row[0].cell[8]): 'Курс Банка России (руб.)',
+            (xml.row[0].cell[9]): 'Сумма дохода в налоговом учёте ',
+            (xml.row[0].cell[11]): 'Сумма дохода в бухгалтерском учёте ',
+            (xml.row[1].cell[5]): 'Номер',
+            (xml.row[1].cell[6]): 'Дата',
+            (xml.row[1].cell[9]): 'Валюта',
+            (xml.row[1].cell[10]): 'Рубли',
+            (xml.row[1].cell[11]): 'Валюта',
+            (xml.row[1].cell[12]): 'Рубли',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[2]): '2',
+            (xml.row[2].cell[3]): '3',
+            (xml.row[2].cell[4]): '4',
+            (xml.row[2].cell[5]): '5',
+            (xml.row[2].cell[6]): '6',
+            (xml.row[2].cell[7]): '7',
+            (xml.row[2].cell[8]): '8',
+            (xml.row[2].cell[9]): '9',
+            (xml.row[2].cell[10]): '10',
+            (xml.row[2].cell[11]): '11',
+            (xml.row[2].cell[12]): '12'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 1
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        // Зависимая
+
+        // графа 3
+        newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
+
+        // графа 4
+        newRow.code = getRecordIdImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+
+        // графа 5
+        newRow.docNumber = row.cell[5].text()
+
+        // графа 6
+        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
+
+        // графа 7
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
+
+        // графа 8
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+
+        // графа 9
+        newRow.taxAccountingCurrency = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+
+        // графа 10
+        newRow.taxAccountingRuble = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, false)
+
+        // графа 11
+        newRow.accountingCurrency = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+
+        // графа 12
+        newRow.ruble = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }

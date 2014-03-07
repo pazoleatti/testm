@@ -64,7 +64,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -88,6 +90,10 @@ def nonEmptyColumns = ['rowNumber', 'inventoryNumber', 'name', 'buyDate', 'usefu
 // Сумируемые колонки в фиксированной с троке
 @Field
 def totalColumns = ['startCost', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNumber', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
 // Текущая дата
 @Field
@@ -325,4 +331,146 @@ def getPrev10and11(def dataOld, def row) {
             }
         }
     return [null, null]
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Инвентарный номер',
+            (xml.row[0].cell[3]): 'Наименование',
+            (xml.row[0].cell[4]): 'Дата приобретения',
+            (xml.row[0].cell[5]): 'Срок полезного использования (мес.)',
+            (xml.row[0].cell[6]): 'Дата истечения срока полезного использования',
+            (xml.row[0].cell[7]): 'Первоначальная стоимость (руб.)',
+            (xml.row[0].cell[8]): 'Норма амортизации (% в мес.)',
+            (xml.row[0].cell[9]): 'Сумма начисленной амортизации за месяц (руб.)',
+            (xml.row[0].cell[10]): 'Сумма начисленной амортизации с начала года (руб.)',
+            (xml.row[0].cell[11]): 'Сумма начисленной амортизации с даты ввода в эксплуатацию (руб.)',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7',
+            (xml.row[1].cell[8]): '8',
+            (xml.row[1].cell[9]): '9',
+            (xml.row[1].cell[10]): '10',
+            (xml.row[1].cell[11]): '11'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def xmlIndexCol = 0
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // fix
+        xmlIndexCol++
+        // графа 2
+        newRow.inventoryNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 3
+        newRow.name = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 4
+        newRow.buyDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 5
+        newRow.usefulLife = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 6
+        newRow.expirationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 7
+        newRow.startCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 8
+        newRow.depreciationRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 9
+        newRow.amortizationMonth = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 10
+        newRow.amortizationSinceYear = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 11
+        newRow.amortizationSinceUsed = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }
