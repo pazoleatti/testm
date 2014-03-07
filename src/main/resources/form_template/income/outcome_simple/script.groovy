@@ -172,6 +172,8 @@ void calculationBasicSum(def dataRows) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
+            } else {
+                row.rnu5Field5Accepted = 0
             }
         }
     }
@@ -193,9 +195,10 @@ void calculationControlGraphs(def dataRows) {
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
             continue
         }
-        if (row.rnu7Field10Sum && row.rnu7Field12Accepted && row.rnu7Field12PrevTaxPeriod) {
+        if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
+                && row.getCell('rnu7Field12PrevTaxPeriod').isEditable()) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
-            tmp = round(row.rnu7Field10Sum - (row.rnu7Field12Accepted - row.rnu7Field12PrevTaxPeriod), 2)
+            tmp = round((row.rnu7Field10Sum ?: 0) - ((row.rnu7Field12Accepted ?: 0) - (row.rnu7Field12PrevTaxPeriod ?: 0)), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
@@ -399,8 +402,8 @@ def isBank() {
 
 /** Получить сумму диапазона строк определенного столбца. */
 def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = getDataRow(dataRows, rowFromAlias).getIndex()
-    def to = getDataRow(dataRows, rowToAlias).getIndex()
+    def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
+    def to = getDataRow(dataRows, rowToAlias).getIndex() - 1
     if (from > to) {
         return 0
     }
