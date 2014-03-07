@@ -18,7 +18,7 @@ public enum UniqueAttributeCombination {
     /** Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта */
     SBRF_ACCORD_CLASSIFIER(29L, Arrays.asList(150L, 151L, 152L, 153L, 154L)),
     /** Ставки транспортного налога */
-    TRANSPORT_TAX_RATES(41L, Arrays.asList(411L, 412L, 423L, 414L, 415L, 417L, 418L)),
+    TRANSPORT_TAX_RATES(41L, Arrays.asList(411L, 412L, 413L, 414L, 415L, 417L, 418L)),
     /** Оборотная ведомость (Форма 0409101-СБ) */
     TURNOVER_STATEMENT(50L, Arrays.asList(501L, 502L)),
     /** Отчет о прибылях и убытках (Форма 0409102-СБ) */
