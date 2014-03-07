@@ -48,7 +48,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -229,4 +231,77 @@ def getFormDataComplex() {
 // Получить данные формы "доходы простые" (id = 301)
 def getFormDataSimple() {
     return formDataService.find(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('КНУ', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'КНУ',
+            (xml.row[0].cell[1]): 'Вид нормируемых расходов',
+            (xml.row[0].cell[2]): 'Сумма расходов по данным налогового учёта',
+            (xml.row[0].cell[3]): 'Норматив, установленный законодателем',
+            (xml.row[0].cell[5]): 'Предельная сумма расходов, учитываемая для целей налогообложения',
+            (xml.row[0].cell[6]): 'Сумма расхода, рассчитанная по установленным нормам',
+            (xml.row[1].cell[3]): 'База для расчёта нормы расходов',
+            (xml.row[1].cell[4]): 'коэффициент',
+            (xml.row[1].cell[6]): 'в пределах утверждённых норм',
+            (xml.row[1].cell[7]): 'сверх утверждённых норм',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+
+    // графа 4 строки 5
+    if (xml.row[headRowCount + 5] != null) {
+        dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, false)
+    } else {
+        dataRows[4].normBase = null
+    }
+    dataRowHelper.update(dataRows)
 }
