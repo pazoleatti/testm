@@ -318,7 +318,7 @@ def getFieldFromPreviousMonth(def dataRows, def alias, def field) {
     if (dataRows != null) {
         def row = getDataRow(dataRows, alias)
         if (row != null) {
-            return row[field]
+            return row[field]?:BigDecimal.ZERO
         }
     }
     return BigDecimal.ZERO
