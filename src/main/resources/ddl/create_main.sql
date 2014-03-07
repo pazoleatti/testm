@@ -65,7 +65,8 @@ create table form_template (
   code varchar2(600) not null,
   script clob,
   data_headers clob,
-  status number(1) default 0 not null
+  status number(1) default 0 not null,
+  monthly number(1) default 0 not null
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
