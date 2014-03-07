@@ -127,6 +127,9 @@ void calc() {
             sum6 = 0
             sum7 = 0
             for (rowSum in dataRowHelper.getAllCached()) {
+                if (!rowSum.getCell('consumptionBuhSumAccepted').isEditable() || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
+                    continue
+                }
                 String knySum
                 String kny
                 if (rowSum.getCell('consumptionTypeId').hasValueOwner()) {
