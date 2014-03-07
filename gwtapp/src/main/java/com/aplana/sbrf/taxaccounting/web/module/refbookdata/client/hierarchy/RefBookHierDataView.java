@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,6 +21,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,7 +54,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @Inject
     public RefBookHierDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-
 
         relevanceDate.setValue(new Date());
 
@@ -115,6 +118,25 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         } else {
             return null;
         }
+    }
+
+    @Override
+    public RefBookTreeItem getSelectedItem() {
+        List<RefBookTreeItem> refBookTreeItems = refbookDataTree.getSelectionValues();
+        if (refBookTreeItems.size() == 1) {
+            return refBookTreeItems.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteItem(Long id){
+        refbookDataTree.deleteRecord(id);
+    }
+
+    @Override
+    public void updateItem(Long id, Long newParentId, String newName){
+        refbookDataTree.updateRecord(id, newParentId, newName);
     }
 
     @Override

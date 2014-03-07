@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -65,6 +67,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         Long getSelectedId();
 
+        RefBookTreeItem getSelectedItem();
+
+        void deleteItem(Long id);
+
+        void updateItem(Long id, Long newParentId, String newName);
+
         Date getRelevanceDate();
 
         void setReadOnlyMode(boolean readOnly);
@@ -102,7 +110,27 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onUpdateForm(UpdateForm event) {
-        getView().reload();
+        if (event.isSuccess()) {
+            RecordChanges rc = event.getRecordChanges();
+            RefBookTreeItem selectedItem = getView().getSelectedItem();
+            if (RefBookPickerUtils.isNotCorrectDate(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
+                getView().deleteItem(rc.getId());
+            } else {
+                if (selectedItem != null) {
+                    String sName = selectedItem.getDereferenceValue();
+                    Long sParentId = selectedItem.getParent() != null ? selectedItem.getParent().getId() : null;
+
+                    if (RefBookPickerUtils.itWasChange(sName, rc.getName()) ||
+                            RefBookPickerUtils.itWasChange(sParentId, rc.getParentId())) {
+                        // обновляем если только есть изменения
+                        getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
+                    }
+                } else {
+                    // добавление записи rc.getId() ==null
+                    getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
+                }
+            }
+        }
     }
 
     @Override
@@ -119,7 +147,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onDeleteRowClicked() {
         DeleteRefBookRowAction action = new DeleteRefBookRowAction();
         action.setRefBookId(refBookDataId);
-        action.setRecordsId(Arrays.asList(getView().getSelectedId()));
+        final Long selected = getView().getSelectedId();
+        action.setRecordsId(Arrays.asList(selected));
         action.setDeleteVersion(false);
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<DeleteRefBookRowResult>() {
@@ -130,11 +159,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         if (result.isException()) {
                             Dialog.errorMessage("Удаление всех версий элемента справочника",
                                     "Обнаружены фатальные ошибки!");
+                        } else {
+                            editFormPresenter.show(null);
+                            editFormPresenter.setEnabled(false);
+                            editFormPresenter.setNeedToReload();
+                            getView().deleteItem(selected);
                         }
-                        editFormPresenter.show(null);
-                        editFormPresenter.setEnabled(false);
-
-                        getView().reload();
                     }
                 }, this));
     }
@@ -142,6 +172,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void onSelectionChanged() {
         if (getView().getSelectedId() != null) {
+
             recordId = getView().getSelectedId();
             editFormPresenter.show(recordId);
         }
@@ -151,6 +182,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onRelevanceDateChanged() {
         editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
         editFormPresenter.show(null);
+        editFormPresenter.setNeedToReload();
         editFormPresenter.setEnabled(false);
         getView().load();
     }

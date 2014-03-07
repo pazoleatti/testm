@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBoo
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -24,7 +25,8 @@ import java.util.*;
  * @author aivanov
  */
 public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerUiHandlers>
-        implements RefBookTreePickerPresenter.MyView, RefBookView {
+        implements RefBookTreePickerPresenter.MyView, RefBookView, HasVisibility {
+
 
     interface Binder extends UiBinder<Widget, RefBookTreePickerView> {
     }
@@ -33,11 +35,18 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     @UiField(provided = true)
     LazyTree<RefBookUiTreeItem> tree;
+    @UiField
+    ScrollPanel scrollPanel;
 
     private Set<Long> longList = new LinkedHashSet<Long>();
 
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
+
+    /* флаг что идет операция последовательного открывания веток */
+    private boolean isOpeningOperation = false;
+    /* итератор для последовательного автоматического открывания веток с загрузкой*/
+    private Iterator<Long> iterator;
 
     public RefBookTreePickerView() {
         this(false);
@@ -91,34 +100,131 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values) {
         for (RefBookTreeItem value : values) {
-            tree.addTreeItem(uiTreeItem, new RefBookUiTreeItem(value, multiSelect));
+            RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
+            tree.addTreeItem(uiTreeItem, item);
         }
+        tryOpen();
     }
 
     @Override
     public List<RefBookTreeItem> getSelectionValues() {
-        List<RefBookTreeItem> refBookTreeItems = new ArrayList<RefBookTreeItem>();
+        List<RefBookTreeItem> refBookTreeItems = new LinkedList<RefBookTreeItem>();
         for (RefBookUiTreeItem uiItem : getSelectedSet()) {
             refBookTreeItems.add(uiItem.getRefBookTreeItem());
         }
         return refBookTreeItems;
     }
 
-    @Override
-    public void trySelectValues(Set<Long> value) {
+    /**
+     * Попытка выделить
+     * @param preudoItems
+     */
+    private void trySelectValues(List<RefBookTreeItem> preudoItems) {
+        for (RefBookTreeItem pseudoItem : preudoItems) {
+            String itemName = RefBookPickerUtils.getDereferenceValue(pseudoItem.getRefBookRecordDereferenceValues(), "NAME");
+            if (pseudoItem.getId() != null) {
+                RefBookUiTreeItem uiTreeItem = getUiTreeItem(pseudoItem.getId());
+                if (uiTreeItem != null) {
+                    tree.setSelected(uiTreeItem, true);
+                }
+            } else if (itemName != null) {
+                RefBookUiTreeItem uiTreeItem = getUiTreeItem(itemName);
+                if (uiTreeItem != null) {
+                    tree.setSelected(uiTreeItem, true);
+                }
+            }
+        }
     }
 
     @Override
     public void setSelection(List<RefBookTreeItem> values) {
         if (values != null) {
+            clearSelected(false);
             if (!values.isEmpty()) {
-                clearSelected(false);
                 for (RefBookTreeItem item : values) {
                     tree.setSelected(new RefBookUiTreeItem(item, multiSelect), true);
                 }
-                widgetFireChangeEvent(getSelectedIds());
+                ensureVisibleSelectedItem();
+            }
+            widgetFireChangeEvent(getSelectedIds());
+        }
+    }
+
+    @Override
+    public void openListItems(List<Long> ids) {
+        iterator = ids.iterator();
+        isOpeningOperation = true;
+        tryOpen();
+    }
+
+    /**
+     * Последовательная загрузка родителей первого выделенного элемента и фокусировка на него в дереве
+     */
+    @Override
+    public void ensureVisibleSelectedItem() {
+        if (tree.isAttached()) {
+            RefBookUiTreeItem selectItem = getSelectedItem();
+            Long aLong = selectItem != null && selectItem.getRefBookTreeItem() != null ? selectItem.getRefBookTreeItem().getId() : null;
+            if (aLong != null) {
+                getUiHandlers().openFor(aLong, true);
+            } else {
+                ensureVisible(selectItem);
             }
         }
+    }
+
+    /**
+     * Если в итераторе есть идентификаторы которые еще необходимо открыть дерево будет пытаться их открыть
+     * Если ветка уже была загружена, он просто откроет и продолжится открывание
+     * Если ветка не загружена, то он откроет, начнется подгрузка, и после подгрузки будет
+     * продолжение алгоритма открывания см RefBookTreePickerView#insertChildrens()
+     */
+    private void tryOpen() {
+        if (iterator != null && iterator.hasNext()) {
+            Long aLong = iterator.next();
+            RefBookUiTreeItem uiTreeItem = getUiTreeItem(aLong);
+            if (uiTreeItem != null) {
+                if (uiTreeItem.isChildLoaded()) {
+                    uiTreeItem.setState(true);
+                } else {
+                    uiTreeItem.setState(true);
+                    return;
+                }
+            }
+        } else {
+            if (isOpeningOperation) {          // Если это операция лейзи-открывания
+                isOpeningOperation = false;    // то отключаем этот участок така
+                // когда открывание закончилось
+                RefBookUiTreeItem selectedItem = getSelectedItem();
+                if (selectedItem != null) {
+                    ensureVisible(selectedItem);
+                }
+            }
+        }
+    }
+
+    /**
+     * Сделать выделенный итем видимым на компоненте
+     * @param item итем
+     */
+    private void ensureVisible(final RefBookUiTreeItem item) {
+        // так как отрисовка запаздывает и координаты сетятся чуть позже используем поторяющееся выполнения обновления
+        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                int scroll = scrollPanel.getVerticalScrollPosition();
+                int maxScroll = scrollPanel.getMaximumVerticalScrollPosition();
+                int offsetTop = item.getElement().getOffsetTop();
+                int absTop = item.getElement().getAbsoluteTop();
+                if (scroll == 0 && maxScroll == 0) {
+                    return false;
+                }
+                scrollPanel.setVerticalScrollPosition(offsetTop);
+
+                boolean isScrolled = (absTop != 0) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
+                return !isScrolled;
+            }
+        }, 500);
     }
 
     @Override
@@ -161,6 +267,142 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     private Set<RefBookUiTreeItem> getSelectedSet() {
         return tree.getSelectedItems();
+    }
+
+    private RefBookUiTreeItem getSelectedItem() {
+        Iterator<RefBookUiTreeItem> it = tree.getSelectedItems().iterator();
+        return it.hasNext() ? it.next() : null;
+    }
+
+    private RefBookUiTreeItem getUiTreeItem(Long id) {
+        List<RefBookUiTreeItem> fi = new LinkedList<RefBookUiTreeItem>();
+        tree.findAllChild(fi, null);
+
+        for (RefBookUiTreeItem item : fi) {
+            if (item.getRefBookTreeItem().getId().equals(id)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private RefBookUiTreeItem getUiTreeItem(String defererenceName) {
+        if (defererenceName != null) {
+            List<RefBookUiTreeItem> fi = new LinkedList<RefBookUiTreeItem>();
+            tree.findAllChild(fi, null);
+
+            for (RefBookUiTreeItem item : fi) {
+                if (RefBookPickerUtils.getDereferenceValue(item.getRefBookTreeItem().getRefBookRecordDereferenceValues(), "NAME").equals(defererenceName)) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Удаление загруженной записи из дерева
+     *
+     * @param id идентификатор записи (не итема)
+     */
+    public void deleteRecord(Long id) {
+        if (id != null) {
+            for (RefBookUiTreeItem item : getSelectedSet()) {
+                if (item.getRefBookTreeItem().getId().equals(id)) {
+                    tree.removeItem(item);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Обновление записи
+     * поиск идет по реальным идентификаторам записи
+     *
+     * @param id          идентификатор записи (не итема)
+     * @param newParentId новый ид родителя, может быть нулом тогда переместиться вверх дерева
+     * @param name        имя, может быть нулл если не меняется
+     */
+    public void updateRecord(Long id, Long newParentId, String name) {
+        if (id != null) {                                           // редактирование записи
+            RefBookUiTreeItem uiTreeItem = getUiTreeItem(id);       // поиск итема которй обновили
+            RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem() != null ? uiTreeItem.getRefBookTreeItem().getParent() : null;
+
+            if (RefBookPickerUtils.itWasChange(name, uiTreeItem.getName())) {
+                // Если изменилось наименование
+                uiTreeItem.getRefBookTreeItem().setDereferenceValue(name);
+                uiTreeItem.setName(name);
+            }
+
+            if ((newParentId == null && parent == null) ||
+                    (newParentId != null && parent != null && newParentId.equals(parent.getId()))) {
+                // Если парент не изменился
+            } else {
+                // иначе
+                tree.removeItem(uiTreeItem);        // удаляем выделеный итем
+                if (newParentId == null) {
+                    // если добавляется в корень
+                    uiTreeItem.getRefBookTreeItem().setParent(null);
+                    tree.addTreeItem(uiTreeItem);
+                    ensureVisible(uiTreeItem);
+                } else {
+                    // если добавляется в другой итем
+                    RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);     // поиск итема нового родителя в загруженых итемах
+                    if (newParentUiTreeItem != null) {
+                        // новый итем был уже загружен
+                        uiTreeItem.getRefBookTreeItem().setParent(newParentUiTreeItem.getRefBookTreeItem());    // обновляем ссылку на родителя
+
+                        if (newParentUiTreeItem.isChildLoaded()) {
+                            // итем уже открывался и загружал своих чилдов
+                            tree.addTreeItem(newParentUiTreeItem, uiTreeItem);
+                            tree.openAllParent(uiTreeItem);     // открываем всех родителей итемак
+                            ensureVisible(uiTreeItem);
+                        } else {
+                            // иначе открывает, редактируемый итем уже появится при загрузке
+                            isOpeningOperation = true;
+                            newParentUiTreeItem.setState(true);
+                        }
+                    } else {
+                        // если не загружен то узнаем его путь до иерархии вверх
+                        // получаем лист ид - путь от рута до родителя чилда
+                        // 1, 2, 3
+                        // и последовательно открываем
+                        getUiHandlers().openFor(newParentId, false);
+                    }
+                }
+            }
+        } else {
+            //  добавление записи
+            // TODO нужно подумать как выделять новый итем, ведь идентификатор не известен.
+            if (newParentId == null) {
+                // добавление в главный корень
+                reload();
+//                RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
+//                treeItem.addRecordValues(name, "NAME", null);
+//                trySelectValues(Arrays.asList(treeItem));
+            } else {
+                RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);
+                if (newParentUiTreeItem != null) {
+                    tree.openAllParent(newParentUiTreeItem);
+
+                    if (newParentUiTreeItem.isChildLoaded()) {
+                        // Чилды были уже загружены, значит нужно перезагрузить, удаляем старые
+                        tree.removeChildItems(newParentUiTreeItem);
+                    }
+                    newParentUiTreeItem.setState(true, true);       // и снова открываем, чилды загужаются
+//                    RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
+//                    treeItem.addRecordValues(name, "NAME", null);
+//                    trySelectValues(Arrays.asList(treeItem));
+                } else {
+                    getUiHandlers().openFor(newParentId, false);
+//                    RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
+//                    treeItem.addRecordValues(name, "NAME", null);
+//                    trySelectValues(Arrays.asList(treeItem));
+                }
+            }
+
+        }
     }
 
     @Override
@@ -223,5 +465,13 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void fireEvent(GwtEvent<?> event) {
         asWidget().fireEvent(event);
+    }
+
+    public boolean isVisible(){
+        return scrollPanel.isVisible();
+    }
+
+    public void setVisible(boolean visible){
+        scrollPanel.setVisible(visible);
     }
 }

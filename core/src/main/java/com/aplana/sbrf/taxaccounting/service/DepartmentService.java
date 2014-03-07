@@ -164,4 +164,11 @@ public interface DepartmentService {
      * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
      */
     String getParentsHierarchy(Integer departmentId);
+
+	/**
+	 * Возвращает путь в иерархии до указанного подразделения использую краткое имя подразделения
+	 * @param departmentId подразделение до которого строится иерархия
+	 * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
+	 */
+	String getParentsHierarchyShortNames(Integer departmentId);
 }

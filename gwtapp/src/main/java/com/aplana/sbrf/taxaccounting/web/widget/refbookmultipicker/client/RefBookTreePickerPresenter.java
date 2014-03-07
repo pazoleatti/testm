@@ -31,9 +31,18 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
         List<RefBookTreeItem> getSelectionValues();
 
+        void ensureVisibleSelectedItem();
+
         void clearSelected(boolean fireChangeEvent);
 
         void setSelection(List<RefBookTreeItem> values);
+
+        Set<Long> getSelectedIds();
+
+        /*
+         * Инициирет открытие итемов по порядку чьи идентификаторы в листе
+         */
+        void openListItems(List<Long> ids);
     }
 
     public RefBookTreePickerPresenter(MyView view) {
@@ -57,12 +66,12 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void reload(){
+    public void reload() {
         load();
     }
 
     /* Загрузка верхушки дерева */
-    private void load(){
+    private void load() {
         if (ps.getRefBookAttrId() == null) {
             return;
         }
@@ -79,14 +88,29 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         }, this));
     }
 
+    /**
+     * Проверка и выделение переданных идентификаторов
+     *
+     * @param stateWithIds объект в котором содержится списко идентификаторов которые нужно выделить
+     */
     private void trySelect(PickerState stateWithIds) {
         if (stateWithIds.getSetIds() != null && stateWithIds.getSetIds().size() > 0) {
-            loadingForSelection(stateWithIds.getSetIds());
+            if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())) {
+                // загрузим объекты которые должны быть подсвечены как выделенные
+                loadingForSelection(stateWithIds.getSetIds());
+            } else {
+                getView().ensureVisibleSelectedItem();
+            }
         } else {
             getView().setSelection(new ArrayList<RefBookTreeItem>());
         }
     }
 
+    /**
+     * Загрузка объектов которые будут помешены в модель для выделения
+     *
+     * @param ids ид записей
+     */
     public void loadingForSelection(Collection<Long> ids) {
         if (ps.getRefBookAttrId() == null) {
             return;
@@ -103,6 +127,23 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                     }
                 }, this));
 
+    }
+
+    @Override
+    public void openFor(final Long uniqueRecordId, final boolean isChild) {
+        GetHierarchyPathAction action = new GetHierarchyPathAction();
+        action.setRefBookAttrId(ps.getRefBookAttrId());
+        action.setUniqueRecordId(uniqueRecordId);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<GetHierarchyPathResult>() {
+                    @Override
+                    public void onSuccess(GetHierarchyPathResult result) {
+                        if (!isChild) {
+                            result.getIds().add(uniqueRecordId);
+                        }
+                        getView().openListItems(result.getIds());
+                    }
+                }, this));
     }
 
     @Override
@@ -124,7 +165,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
         RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem();
-        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallbackNoLock(
+        dispatcher.execute(createLoadAction(parent, null), CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {

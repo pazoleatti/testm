@@ -144,7 +144,7 @@ public interface RefBookDataProvider {
      * @param versionTo дата конца актуальности новый версии. Может быть null
      * @param records список новых значений записи справочника
      */
-    void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
+    List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
 
     /**
      * Возвращает значения уникальных атрибутов для конкретной версии записи справочника

@@ -13,6 +13,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -163,11 +164,23 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public void addItem(H item) {
-        item.addItem("Загрузка...");
+        if (item.getChildCount() == 0 && !item.isChildLoaded()) {
+            item.addItem("Загрузка...");
+        }
+        ensureSelection(item);
+        super.addItem(item);
+    }
+
+    /**
+     * Проверка что этот элемент содержится в списке выделенных
+     * Если содержится то выделяем цветом, и переопределяем объект что содержится в списке выделенных
+     * @param item объект для проверки
+     */
+    private void ensureSelection(H item){
         if (selectionModel.isSelected(item)){
             item.setItemState(true);
+            selectionModel.setSelected(item, true);
         }
-        super.addItem(item);
     }
 
     /**
@@ -177,9 +190,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
      * @param item   добавляемый узел
      */
     public void addTreeItem(H parent, H item) {
-        if (selectionModel.isSelected(item)){
-            item.setItemState(true);
-        }
+        ensureSelection(item);
         if (parent != null) {
             parent.addItem(item);
         } else {
@@ -214,14 +225,13 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         super.onBrowserEvent(event);
     }
 
-
     /**
      * Обход по загруженным элементам всего дерева, исключая те элементы которые служат для отображения "Загрузки"
      *
      * @param list список элементов
      * @param item узел для которого ищутся дочерние, если null что ищется с root'a
      */
-    private void findAllChild(List<H> list, H item) {
+    public void findAllChild(List<H> list, H item) {
         if (item == null) {
             if (getItemCount() > 0) {
                 for (int j = 0; j < getItemCount(); j++) {
@@ -283,22 +293,55 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public Set<H> getSelectedItems() {
+        List<H> hs = new ArrayList<H>();
+        findAllChild(hs, null);
+        for (H h : hs) {
+            ensureSelection(h);
+        }
         return Collections.unmodifiableSet(selectionModel.getSelectedSet());
     }
 
+    /**
+     * Очистка модели выделенности
+     */
     public void clearSelection() {
         for (H item : selectionModel.getSelectedSet()) {
+            //очищаем цвет
             item.setItemState(null);
         }
         selectionModel.clear();
     }
 
-//    /**
-//     * Удалить элемент из дерева.
-//     */
-//    public void removeItem(H item) {
-//        item.remove();
-//    }
+    /**
+     * Открытие нодов всех родителей по иерархрии вверх у чилда
+     * @param child чилд
+     */
+    public void openAllParent(H child){
+        H parent = (H)child.getParentItem();
+        if(parent != null){
+            parent.setState(true);
+            openAllParent(parent);
+        }
+    }
+
+    /**
+     * Удалить элемент из дерева.
+     */
+    public void removeItem(H item) {
+        item.remove();
+    }
+
+    /**
+     * Удалить элемент из дерева.
+     */
+    public void removeChildItems(H parent) {
+        for(int i = 0; i < parent.getChildCount(); i++){
+            parent.getChild(i).remove();
+        }
+        parent.setChildLoaded(false);
+        parent.addItem("Загрузка...");
+        parent.setState(false);
+    }
 //
 //    /**
 //     * Удалить элементы из дерева.

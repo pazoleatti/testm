@@ -34,7 +34,7 @@ public interface DeclarationTemplateDao {
 	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */
-	int getActiveDeclarationTemplateId(int declarationTypeId);
+	int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
 	/**
 	 * Сохранить шаблон декларации.
 	 * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован

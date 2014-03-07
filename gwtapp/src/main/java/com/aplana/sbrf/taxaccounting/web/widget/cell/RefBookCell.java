@@ -46,11 +46,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	
 	protected static final SafeHtmlRenderer<String> renderer = SimpleSafeHtmlRenderer.getInstance();
 
-	private RefBookPickerWidget refBookPiker = new RefBookPickerWidget(false, false);
+	private RefBookPickerWidget refBookPiker;
 	
 	private HandlerRegistration changeHandlerRegistration;
 
 	private boolean refBookPikerAlredyInit;
+    private long attrId;
 
 	private ColumnContext columnContext;
 	private RefBookColumn column;
@@ -62,9 +63,10 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		if (template == null) {
 			template = GWT.create(Template.class);
 		}
+        refBookPiker = new RefBookPickerWidget(column.isHierarchical(), false);
 		// Create popup panel
         refBookPiker.setTitle(this.column.getName());
-
+        attrId = column.isHierarchical() ? column.getNameAttributeId() : column.getRefBookAttributeId();
         refBookPiker.addCloseHandler(new CloseHandler<ModalWindow>() {
             public void onClose(CloseEvent<ModalWindow> event) {
                 changeHandlerRegistration.removeHandler();
@@ -94,7 +96,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			
 			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
 			if (!refBookPikerAlredyInit) {
-                refBookPiker.load(column.getRefBookAttributeId(), column.getFilter(), columnContext.getStartDate(),
+                refBookPiker.load(attrId, column.getFilter(), columnContext.getStartDate(),
                         columnContext.getEndDate());
 				refBookPikerAlredyInit = true;
 			}
@@ -115,7 +117,12 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					@SuppressWarnings("unchecked")
 					DataRow<Cell> dataRow = (DataRow<Cell>) context.getKey();
 					Cell cell = dataRow.getCell(RefBookCell.this.column.getAlias());
-					cell.setRefBookDereference(refBookPiker.getDereferenceValue());
+
+                    if (refBookPiker.isHierarchical()) {
+                        cell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(column.getRefBookAttributeId()));
+                    } else {
+                        cell.setRefBookDereference(refBookPiker.getDereferenceValue());
+                    }
 
 					setValue(context, parent, value);
 

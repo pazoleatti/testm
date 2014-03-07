@@ -119,7 +119,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         try {
             //long allTime = System.nanoTime();
             RefBook refBook = refBookDao.get(refBookId);
@@ -196,7 +196,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
 
             //Создание настоящей и фиктивной версии
-            createVersions(versionFrom, versionTo, records, countIds, logger);
+            return createVersions(versionFrom, versionTo, records, countIds, logger);
             //System.out.println("all: "+((double)(System.nanoTime()-allTime)/1000000000.0)+"s");
         } catch (Exception e) {
             if (logger != null) {
@@ -210,7 +210,7 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     }
 
-    private void createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
+    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
 
@@ -240,7 +240,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
         }
 
-        refBookDao.createRecordVersion(refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
+        return refBookDao.createRecordVersion(refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
     }
 
     /**

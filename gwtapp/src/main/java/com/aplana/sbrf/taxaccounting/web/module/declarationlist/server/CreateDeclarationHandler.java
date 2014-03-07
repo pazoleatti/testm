@@ -39,7 +39,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 		CreateDeclarationResult result = new CreateDeclarationResult();
         Logger logger = new Logger();
 		result.setDeclarationId(declarationDataService.create(logger, declarationTemplateService
-				.getActiveDeclarationTemplateId(command.getDeclarationTypeId()), command.getDepartmentId(),
+				.getActiveDeclarationTemplateId(command.getDeclarationTypeId(), command.getReportPeriodId()), command.getDepartmentId(),
 				securityService.currentUserInfo(), command.getReportPeriodId()));
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;

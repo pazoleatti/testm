@@ -46,9 +46,7 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
 		    TAUserFullWithDepartmentPath fullUser = new TAUserFullWithDepartmentPath();
 		    fullUser.setDepartment(user.getDepartment());
 		    fullUser.setUser(user.getUser());
-		    String fullDepartment = getFullDepartment(user.getDepartment());
-		    fullDepartment = fullDepartment.substring(1);
-		    fullUser.setFullDepartmentPath(fullDepartment);
+		    fullUser.setFullDepartmentPath(departmentService.getParentsHierarchyShortNames(user.getDepartment().getId()));
 		    page.add(fullUser);
 	    }
         page.setTotalCount(taUserFulls.getTotalCount());
@@ -59,14 +57,4 @@ public class MembersHandler extends AbstractActionHandler<GetMembersAction, GetM
     @Override
     public void undo(GetMembersAction action, GetMembersResult result, ExecutionContext context) throws ActionException {
     }
-
-	String getFullDepartment(Department department) {
-
-		StringBuilder fullDepartment = new StringBuilder();
-		fullDepartment.insert(0, "/" + department.getName());
-		if (department.getParentId() != null) {
-			fullDepartment.insert(0, getFullDepartment(departmentService.getDepartment(department.getParentId())));
-		}
-		return fullDepartment.toString();
-	}
 }

@@ -14,8 +14,6 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget {
 
-    void trySelectValues(Set<Long> ids);
-
     void load(PickerState pickerState);
 
     void reload();

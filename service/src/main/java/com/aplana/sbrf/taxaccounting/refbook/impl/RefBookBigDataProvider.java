@@ -126,7 +126,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     }
 
     @Override
-    public void createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+    public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         try {
             RefBook refBook = rbDao.get(refBookId);
             List<RefBookAttribute> attributes = refBook.getAttributes();
@@ -184,7 +184,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             }
 
             //Создание настоящей и фиктивной версии
-            createVersions(versionFrom, versionTo, records, countIds, logger);
+            return createVersions(versionFrom, versionTo, records, countIds, logger);
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
@@ -234,7 +234,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
         }
     }
 
-    private void createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
+    private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
         //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
         List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_OKTMO, countIds);
 
@@ -264,7 +264,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             }
         }
 
-        dao.createRecordVersion(getTableName(), refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
+        return dao.createRecordVersion(getTableName(), refBookId, versionFrom, VersionedObjectStatus.NORMAL, records);
     }
 
     /**

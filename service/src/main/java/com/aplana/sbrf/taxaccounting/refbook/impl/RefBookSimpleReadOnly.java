@@ -33,6 +33,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     // Справочник "Подразделения"
     public static final Long DEPARTMENT_REF_BOOK_ID = 30L;
     public static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
+    // Справочник "Пользователи"
+    public static final Long USER_REF_BOOK_ID = 74L;
+    public static final String USER_TABLE_NAME = "SEC_USER";
 
 	@Autowired
 	private RefBookUtils refBookUtils;

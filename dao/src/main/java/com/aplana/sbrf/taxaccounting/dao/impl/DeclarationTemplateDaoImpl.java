@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
+
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
 
 	private final class DeclarationTemplateRowMapper implements RowMapper<DeclarationTemplate> {
 		@Override
@@ -80,22 +85,25 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	}
 
 	@Override
-	public int getActiveDeclarationTemplateId(int declarationTypeId) {
-		JdbcTemplate jt = getJdbcTemplate();
-		DeclarationTemplate declarationTemplate;
-		try {
-			declarationTemplate = jt.queryForObject(
-					"select * from declaration_template where declaration_type_id = ? and is_active = ?",
-					new Object[]{declarationTypeId, 1},
-					new int[]{Types.NUMERIC,Types.NUMERIC},
-					new DeclarationTemplateRowMapper()
-			);
-			return declarationTemplate.getId();
-		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Выбранный вид декларации %d не существует в выбранном периоде.", declarationTypeId);
-		}catch(IncorrectResultSizeDataAccessException e){
-			throw new DaoException("Для даного вида декларации %d найдено несколько активных шаблонов деклараций.", declarationTypeId);
-		}
+	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
+        JdbcTemplate jt = getJdbcTemplate();
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        try {
+            String ACTIVE_VERSION_SQL = "with templatesByVersion as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number() " +
+                    (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +
+                    " rn from declaration_template where DECLARATION_TYPE_ID = ? and status in (0, 1, 2))" +
+                    "select ID from (select rv.ID ID, rv.STATUS, rv.DECLARATION_TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
+                    "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and ((versionFrom <= ? and versionTo >= ?)" +
+                    " or (versionFrom <= ? and versionTo is null))";
+            return jt.queryForInt(ACTIVE_VERSION_SQL,
+                    new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Выбранный вид декларации %d не существует в выбранном периоде.", declarationTypeId);
+        }catch(IncorrectResultSizeDataAccessException e){
+            throw new DaoException("Для даного вида декларации %d найдено несколько активных шаблонов деклараций.", declarationTypeId);
+        }
 	}
 
 	@Override
@@ -285,7 +293,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
+            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
             builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
