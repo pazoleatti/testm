@@ -14,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -158,7 +160,7 @@ public class DeclarationTemplateDaoTest {
 
 	@Test(expected = DaoException.class)
 	public void getActiveDeclarationTemplateIdEmptyTest() {
-        declarationTemplateDao.getActiveDeclarationTemplateId(3, 1);
+        declarationTemplateDao.getActiveDeclarationTemplateId(3, 2);
 	}
 
     @Test
@@ -197,17 +199,26 @@ public class DeclarationTemplateDaoTest {
     }
 
     @Test
-    public void testGetNearestDTVersionIdRight(){
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
-
+    public void testGetDTVersionEndDate(){
         Calendar calendar = Calendar.getInstance();
         calendar.set(2012, Calendar.JANUARY, 1);
-        Date actualBeginVersion = calendar.getTime();
+        Date actualBeginVersion = new Date(calendar.getTime().getTime());
         calendar.clear();
 
-        Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, list, actualBeginVersion));
+        calendar.set(2013, Calendar.DECEMBER, 31, 0, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, 1, actualBeginVersion));
+
+    }
+
+    @Test
+    public void testGetNearestDTVersionIdRight(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2012, Calendar.JANUARY, 1);
+        Date actualBeginVersion = new Date(calendar.getTime().getTime());
+        calendar.clear();
+
+        Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, actualBeginVersion));
 
     }
 
@@ -243,5 +254,13 @@ public class DeclarationTemplateDaoTest {
     @Test
     public void getBadDeclarationTemplateScriptTest(){
         assertEquals("", declarationTemplateDao.getDeclarationTemplateScript(100));
+    }
+
+    @Test
+    public void testFindFTVersionIntersections() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+
+        Assert.assertEquals(1, declarationTemplateDao.findFTVersionIntersections(1, 0, dateFormat.parse("2015.01.01"), dateFormat.parse("2014.12.31")).size());
+        Assert.assertEquals(2, declarationTemplateDao.findFTVersionIntersections(1, 0, dateFormat.parse("2013.01.01"), dateFormat.parse("2015.12.31")).size());
     }
 }

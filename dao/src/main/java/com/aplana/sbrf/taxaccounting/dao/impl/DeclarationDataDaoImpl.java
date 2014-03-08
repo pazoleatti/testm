@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -294,19 +295,20 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public List<Long> findDeclarationDataByFormTemplate(int templateId) {
+    public List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate) {
         try {
             return getJdbcTemplate().queryForList(
-                    "select id from declaration_data where declaration_template_id = ?",
-                    new Object[] {templateId},
-                    new int[] {Types.NUMERIC},
+                    "SELECT id FROM declaration_data WHERE declaration_template_id = ? AND report_period_id IN" +
+                            " (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
+                    new Object[] {templateId, startDate},
+                    new int[] {Types.NUMERIC, Types.DATE},
                     Long.class
             );
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-            logger.error(String.format("Ошибка поиска НФ для заданного шаблона %d", templateId), e);
-            throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", templateId);
+            logger.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
+            throw new DaoException("Ошибка поиска деклараций для заданного шаблона %d", templateId);
         }
     }
 

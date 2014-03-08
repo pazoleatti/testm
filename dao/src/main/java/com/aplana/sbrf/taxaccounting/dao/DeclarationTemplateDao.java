@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.Date;
@@ -80,13 +81,33 @@ public interface DeclarationTemplateDao {
     List<Integer> getDeclarationTemplateVersions(int decTypeId, int decTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
 
     /**
+     * Метод для поиска пересечений версий макетов в указанных датах
+     * @param formTypeId вид шаблона
+     * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
+     * @param statusList статус формы
+     * @param actualStartVersion дата начала
+     * @param actualEndVersion дата окончания
+     * @return список пеересечений
+     */
+    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+
+    /**
+     * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
+     * @param templateId идентификатор версии макета
+     * @param typeId идентификатор вида налога
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return дата окончания
+     */
+    Date getDTVersionEndDate(int templateId, int typeId, Date actualBeginVersion);
+
+    /**
      * Поиск версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
      * @param typeId идентификатор вида налога
      * @param statusList список статусов макатеов, которые искать
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
+    int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии

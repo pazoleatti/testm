@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.templateversion;
 
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
@@ -7,10 +8,10 @@ import java.util.Date;
 /**
  * User: avanteev
  */
-public interface VersionOperatingService<T> {
-    void isUsedVersion(T template, Date versionActualDateEnd, Logger logger);
-    void isCorrectVersion(T template, Date versionActualDateEnd, Logger logger);
-    void isIntersectionVersion(T template, Date versionActualDateEnd, Logger logger);
-    void createNewVersion(T template, Date versionActualDateEnd, Logger logger);
-    void cleanVersions(int templateId, Date versionActualDateEnd, Logger logger);
+public interface VersionOperatingService {
+    void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
+    void isCorrectVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
+    void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
+    void createNewVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
+    void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
 }
