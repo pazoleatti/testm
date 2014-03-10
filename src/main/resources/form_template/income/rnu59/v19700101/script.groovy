@@ -427,7 +427,7 @@ def calculateColumn11(DataRow row, def rateDate){
  */
 int getCountDaysOfYear() {
     Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
-    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
+    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 366 : 365
 }
 
 /**
@@ -478,6 +478,7 @@ def calculateColumn12(DataRow row){
     }
     def diff65 = row.part2REPODate - row.part1REPODate
     diff65 = diff65 == 0 ? 1 : diff65
+    logger.warn("coefficient="+coefficient +"; diff65 =" + diff65 + "; countDaysOfYear ="+countDaysOfYear)
     return (row.acquisitionPrice * row.rateBR * coefficient) * (diff65 / countDaysOfYear) / 100
 }
 

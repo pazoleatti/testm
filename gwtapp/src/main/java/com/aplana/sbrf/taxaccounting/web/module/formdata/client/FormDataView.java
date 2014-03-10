@@ -398,6 +398,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		title.setTitle(formType);
 		formKindLabel.setText(formKind);
         departmentIdLabel.setText(departmentId);
+        departmentIdLabel.setTitle(departmentId);
 		reportPeriodLabel.setText(reportPeriod);
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
