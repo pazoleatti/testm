@@ -730,8 +730,7 @@ create table template_changes (
  declaration_template_id number(9),
  event number(1),
  author number(9) not null,
- date_event date,
- edition_number number(9)
+ date_event date
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
@@ -740,7 +739,6 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
-comment on column template_changes.edition_number is 'Номер версии';
 
  create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------
