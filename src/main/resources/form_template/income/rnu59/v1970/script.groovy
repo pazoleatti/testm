@@ -440,49 +440,45 @@ def calculateColumn12(DataRow row){
     if(row.rateBR == null){
         return 0
     }
-    Date date01_09_2008 = new Date(1220227200000)       // 1220227200000 - 01.09.2008 00:00 GMT
-    Date date31_12_2009 = new Date(1262217600000)       // 1262217600000 - 31.12.2009 00:00 GMT
-    Date date01_01_2011 = new Date(1293840000000)       // 1293840000000 - 01.01.2011 00:00 GMT
-    Date date31_12_2012 = new Date(1356912000000)       // 1356912000000 - 31.12.2012 00:00 GMT
-    Date date01_01_2010 = new Date(1262282400000)       // 1262282400000 - 01.01.2010 00:00 GMT
+    Date date01_09_2008 = new Date(1220205600000)       // 1220227200000 - 01.09.2008 00:00 GMT
+    Date date31_12_2009 = new Date(1262199600000)       // 1262217600000 - 31.12.2009 00:00 GMT
+    Date date01_01_2011 = new Date(1293822000000)       // 1293840000000 - 01.01.2011 00:00 GMT
+    Date date31_12_2012 = new Date(1356894000000)       // 1356912000000 - 31.12.2012 00:00 GMT
+    Date date01_01_2010 = new Date(1262286000000)       // 1262282400000 - 01.01.2010 00:00 GMT
     Date date30_06_2010 = new Date(1277834400000)       // 1277834400000 - 30.06.2010 00:00 GMT
-    Date date01_11_2009 = new Date(1257012000000)       // 1257012000000 - 01.11.2009 00:00 GMT
+    Date date01_11_2009 = new Date(1257015600000)       // 1257012000000 - 01.11.2009 00:00 GMT
+
+    def currencyCode = getCurrency(row.currencyCode)
+    def coefficient = 0
     // Если «графа 10» > 0 И«графа 3» = 810, то:
-    if (row.outcome > 0 && getCurrency(row.currencyCode) == '810'){
-        if (row.part2REPODate.compareTo(date01_09_2008) >= 0 && row.part2REPODate.compareTo(date31_12_2009) <=0){
-            // 1.   Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
-            // «графа 12» = («графа 7» ? «графа 11» ? 1,5) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
-            return (row.acquisitionPrice * row.rateBR * 1.5) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        } else if (row.part2REPODate.compareTo(date01_01_2010) >= 0 && row.part2REPODate.compareTo(date30_06_2010) <=0 && row.part1REPODate.compareTo(date01_11_2009) <= 0){
-            // 2.   Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 И «графа 5» < 01.11.2009, то:
-            // «графа 12» = («графа 7» ? «графа 11» ? 2) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
-            return (row.acquisitionPrice * row.rateBR * 2) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        } else if (row.part2REPODate.compareTo(date01_01_2010) >= 0 && row.part2REPODate.compareTo(date31_12_2012)){
-            // 3.   Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
-            // «графа 12» = («графа 7» ? «графа 11» ? 1,8) ? ((«графа6» - «графа5») / 365(366)) / 100.
-            return (row.acquisitionPrice * row.rateBR * 1.1) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        } else{
-            // 4.   Иначе:
-            //«графа 12» = («графа 7» ? «графа 11» ? 1,1) х ((«графа 6» - «графа 5») / 365 (366)) / 100;
-            return (row.acquisitionPrice * row.rateBR * 1.1) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
-        }
-    } else if (row.outcome != null && row.outcome > 0 && getCurrency(row.currencyCode) != '810'){ // Если «графа 10» > 0 И «графа 3» ? 810, то:
-        if (row.part2REPODate.compareTo(date01_01_2011) >= 0 && row.part2REPODate.compareTo(date31_12_2012)){
-            //Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012, то:
-            // «графа 12» = («графа 7» ? «графа 11» ? 0,8) ? ((«графа 6» - «графа 5») / 365 (366)) / 100.
-            // При этом, если «графа 6» = «графе 5», то («графа 6» - «графа 5») =1
-            def diff65 = row.part2REPODate - row.part1REPODate
-            diff65 = diff65 == 0 ? 1:diff65
-            return (row.acquisitionPrice?:0 * row.rateBR?:0 * 0.8) * (diff65 / countDaysOfYear) / 100
+    if (row.outcome > 0 && currencyCode == '810') {
+        if (date01_09_2008 <= row.part2REPODate && row.part2REPODate <= date31_12_2009) {
+            // 1.   Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то: 1,5
+            coefficient = 1.5
+        } else if (date01_01_2010 <= row.part2REPODate && row.part2REPODate <= date30_06_2010 && row.part1REPODate < date01_11_2009) {
+            // 2.   Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 И «графа 5» < 01.11.2009, то: 2
+            coefficient = 2
+        } else if (date01_01_2010 <= row.part2REPODate && row.part2REPODate <= date31_12_2012) {
+            // 3.   Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то: 1,8
+            coefficient = 1.8
         } else {
-            // Иначе
-            // «графа 12» = («графа 7» ? «графа 11») ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
-            return (row.acquisitionPrice?:0 * row.rateBR?:0) * ((row.part2REPODate - row.part1REPODate) / countDaysOfYear) / 100
+            // 4.   Иначе: 1,1
+            coefficient = 1.1
         }
-    } else if (row.outcome == 0){
+    } else if (row.outcome > 0 && currencyCode != '810') { // Если «графа 10» > 0 И «графа 3» ? 810, то:
+        if (date01_01_2011 <= row.part2REPODate && row.part2REPODate <= date31_12_2012) {
+            //Если «графа 6» принадлежит периоду с 01.01.2011 по 31.12.2012, то: 0,8
+            coefficient = 0.8
+        } else {
+            coefficient = 1
+        }
+    } else if (row.outcome == 0) {
         //  Если «графа 10» = 0, то «графа 12» = 0
         return 0
     }
+    def diff65 = row.part2REPODate - row.part1REPODate
+    diff65 = diff65 == 0 ? 1 : diff65
+    return (row.acquisitionPrice * row.rateBR * coefficient) * (diff65 / countDaysOfYear) / 100
 }
 
 /**
@@ -492,22 +488,21 @@ def calculateColumn12(DataRow row){
  * @param row
  */
 def calculateColumn13(DataRow row){
-    if(row.rateBR == null){
-        return 0
-    }
+    def tmp = null
     if (row.outcome > 0){
         // Если «графа 10» > 0, то:
-        if (row.outcome <= row.rateBR){
+        if (row.outcome <= row.outcome269st){
             // Если «графа 10» ? «графа 12», то:  «графа 13» = «графа 10»
-            row.outcomeTax = row.outcome
+            tmp = row.outcome
         }else{
             // 2.   Если «графа 10» > «графа 12», то: «графа 13» = «графа 12»
-            row.outcomeTax = row.rateBR
+            tmp = row.outcome269st
         }
     }else if (row.outcome == 0){
         // Если «графа 10» = 0, то «графа 13» = 0
-        row.rateBR = 0
+        tmp = 0
     }
+    return tmp
 }
 
 /**

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -75,10 +76,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-					"select id, is_active, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
-					new Object[] { declarationTemplateId },
-					new DeclarationTemplateRowMapper()
-			);
+                    "select id, is_active, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
+                    new Object[]{declarationTemplateId},
+                    new DeclarationTemplateRowMapper()
+            );
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
 		}
@@ -93,8 +94,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                     (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +
                     " rn from declaration_template where DECLARATION_TYPE_ID = ? and status in (0, 1, 2))" +
                     "select ID from (select rv.ID ID, rv.STATUS, rv.DECLARATION_TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
-                    "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) where STATUS = 0 and ((versionFrom <= ? and versionTo >= ?)" +
-                    " or (versionFrom <= ? and versionTo is null))";
+                    "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) " +
+                    "where STATUS = 0 and ((TRUNC(versionFrom, 'DD') <= ? and TRUNC(versionTo, 'DD') >= ?) or (TRUNC(versionFrom, 'DD') <= ? and versionTo is null))";
             return jt.queryForInt(ACTIVE_VERSION_SQL,
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
                     new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}
@@ -281,20 +282,91 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion) {
+    public List<IntersectionSegment> findFTVersionIntersections(int typeId, int templateId, Date actualStartVersion, Date actualEndVersion) {
+        String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number()" + (isSupportOver()? " over(partition by DECLARATION_TYPE_ID order by version)" : " over()") +
+                " rn from DECLARATION_TEMPLATE where DECLARATION_TYPE_ID = :typeId AND status in (0,1,2)) " +
+                " select * " +
+                " from (select rv.ID ID, rv.STATUS, rv.VERSION versionFrom," +
+                " CASE " +
+                " WHEN rv2.STATUS in (0,1) THEN rv2.version - interval '1' day" +
+                " WHEN  rv2.STATUS = 2 THEN rv2.version" +
+                " END versionTo" +
+                " from segmentIntersection rv " +
+                " left outer join segmentIntersection rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) where";
+
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", typeId);
+        valueMap.put("actualStartVersion", actualStartVersion);
+        valueMap.put("actualEndVersion", actualEndVersion);
+        valueMap.put("templateId", templateId);
+
+        StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
+        if (actualEndVersion != null)
+            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion) " +
+                    " OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
+        else
+            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
+        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null)");
+        if (templateId != 0)
+            builder.append(" and ID <> :templateId");
+        try {
+            return getNamedParameterJdbcTemplate().query(builder.toString(), valueMap, new RowMapper<IntersectionSegment>() {
+                @Override
+                public IntersectionSegment mapRow(ResultSet resultSet, int i) throws SQLException {
+                    IntersectionSegment segment = new IntersectionSegment();
+                    segment.setTemplateId(resultSet.getInt("ID"));
+                    segment.setStatus(VersionedObjectStatus.getStatusById(resultSet.getInt("STATUS")));
+                    segment.setBeginDate(resultSet.getDate("versionFrom"));
+                    segment.setEndDate(resultSet.getDate("versionTo"));
+                    return segment;
+                }
+            });
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при получении списка версий макетов.", e);
+        }
+    }
+
+    @Override
+    public Date getDTVersionEndDate(int templateId, int typeId, Date actualBeginVersion) {
+        try {
+            if (actualBeginVersion == null)
+                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+
+            Map<String, Object> valueMap =  new HashMap<String, Object>();
+            valueMap.put("templateId", templateId);
+            valueMap.put("typeId", typeId);
+            valueMap.put("actualBeginVersion", actualBeginVersion);
+
+            StringBuilder builder = new StringBuilder("select * from (select");
+            builder.append(" CASE" +
+                    " WHEN status in (0,1) THEN version - INTERVAL '1' day" +
+                    " WHEN status = 2 THEN version" +
+                    " END");
+            builder.append(" from declaration_template where declaration_type_id = :typeId");
+            builder.append(" and version > :actualBeginVersion");
+            builder.append(" and status in (0,1,2) and id <> :templateId order by version) where rownum = 1");
+            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Date.class);
+        } catch(EmptyResultDataAccessException e){
+            return null;
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибки при получении ближайшей версии.", e);
+        }
+    }
+
+    @Override
+    public int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
             Map<String, Object> valueMap =  new HashMap<String, Object>();
             valueMap.put("typeId", typeId);
-            valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from declaration_template where declaration_type_id = :typeId");
             builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
+            builder.append(" and status in (0,1,2) order by version) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;

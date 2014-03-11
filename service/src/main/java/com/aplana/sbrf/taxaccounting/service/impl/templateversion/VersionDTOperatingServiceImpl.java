@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.templateversion;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -20,12 +19,14 @@ import java.util.List;
  */
 @Service("declarationTemplateOperatingService")
 @Transactional
-public class VersionDTOperatingServiceImpl implements VersionOperatingService<DeclarationTemplate> {
+public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" периоде %s для макета!";
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
+    @Autowired
+    private DeclarationTypeService declarationTypeService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
@@ -38,10 +39,10 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
     private Calendar calendar = Calendar.getInstance();
 
     @Override
-    public void isUsedVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
-        if (template.getStatus() == VersionedObjectStatus.DRAFT)
+    public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        if (status == VersionedObjectStatus.DRAFT)
             return;
-        List<Long> ddIds = declarationDataService.getDeclarationDataLisByVersionTemplate(template.getId());
+        List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         if (!ddIds.isEmpty()){
             for(Long id: ddIds) {
                 DeclarationData declarationData = declarationDataDao.get(id);
@@ -55,21 +56,22 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
     }
 
     @Override
-    public void isCorrectVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
+    public void isCorrectVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void isIntersectionVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
+    public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        SegmentIntersection newIntersection = new SegmentIntersection();
-        newIntersection.setBeginDate(template.getVersion());
+        IntersectionSegment newIntersection = new IntersectionSegment();
+        newIntersection.setBeginDate(versionActualDateStart);
         newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(template.getId() != null?template.getId() : 0);
-        newIntersection.setStatus(template.getStatus());
-        List<SegmentIntersection> segmentIntersections = declarationTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
+        newIntersection.setTemplateId(templateId);
+        newIntersection.setStatus(status);
+        List<IntersectionSegment> segmentIntersections =
+                declarationTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
-            for (SegmentIntersection intersection : segmentIntersections){
+            for (IntersectionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
@@ -82,7 +84,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                         }
                         // Варианты 7,8
                         else if(compareResult == 1 || compareResult == -5){
-                            isUsedVersion(declarationTemplateService.get(intersection.getTemplateId()), null, logger);
+                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(),
+                                    newIntersection.getBeginDate(), intersection.getEndDate(), logger);
                             if (logger.containsLevel(LogLevel.ERROR)){
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
@@ -97,8 +100,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                         //Пересечений нет
                         else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
                             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
-                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getEndDate(), logger);
-                            DeclarationTemplate formTemplate =  createFakeTemplate(date, template.getType());
+                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
+                                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
+                            DeclarationTemplate formTemplate =  createFakeTemplate(date, newIntersection.getTypeId());
                             declarationTemplateService.save(formTemplate);
                         }
                         break;
@@ -118,8 +122,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
                 }
             }
         } else if (newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), newIntersection.getEndDate(), logger);
-            DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, template.getType());
+            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
+                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
+            DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, typeId);
             declarationTemplateService.save(declarationTemplate);
         }
     }
@@ -127,12 +132,12 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
 
 
     @Override
-    public void createNewVersion(DeclarationTemplate template, Date versionActualDateEnd, Logger logger) {
-        isIntersectionVersion(template, versionActualDateEnd, logger);
+    public void createNewVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        isIntersectionVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
     }
 
     @Override
-    public void cleanVersions(int templateId, Date versionActualDateEnd, Logger logger) {
+    public void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         if (templateId == 0)
             return;
         DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId, VersionedObjectStatus.FAKE);
@@ -140,12 +145,12 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService<De
             declarationTemplateService.delete(declarationTemplateFake);
     }
 
-    private DeclarationTemplate createFakeTemplate(Date date, DeclarationType type){
+    private DeclarationTemplate createFakeTemplate(Date date, int typeId){
         DeclarationTemplate declarationTemplate =  new DeclarationTemplate();
         declarationTemplate.setVersion(date);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setEdition(0);
-        declarationTemplate.setType(type);
+        declarationTemplate.setType(declarationTypeService.get(typeId));
 	    declarationTemplate.setName("FAKE");
         return declarationTemplate;
     }

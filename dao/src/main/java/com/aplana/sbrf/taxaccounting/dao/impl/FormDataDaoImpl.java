@@ -1,26 +1,27 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -161,15 +162,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 			formDataSignerDao.saveSigners(formDataId, formData.getSigners());
 		}
 		return formDataId;
-	}
-	
-	@Override
-	public List<Long> listFormDataIdByType(int typeId) {
-		return getJdbcTemplate()
-				.queryForList(
-						"select id from form_data fd where exists (select 1 from form_template ft where ft.id = fd.form_template_id and ft.type_id = ?)",
-						new Object[] { typeId }, new int[] { Types.NUMERIC },
-						Long.class);
 	}
 
 	@Override
@@ -322,6 +314,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
         if (getJdbcTemplate().update("update form_data set period_order=? where id=?", periodOrder, id) == 0) {
             throw new DaoException(String.format(MSG_FORM_NOT_FOUND, id));
+        }
+    }
+
+    @Override
+    public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
+        try {
+            return getJdbcTemplate().queryForList("SELECT fd.id FROM form_data fd WHERE fd.form_template_id = ? AND report_period_id IN" +
+                    " (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
+                    new Object[]{templateId, startDate},
+                    Long.class);
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>();
+        } catch (DataAccessException e){
+            logger.error("Ошибка при поиске используемых версий", e);
+            throw new DaoException("Ошибка при поиске используемых версий", e);
         }
     }
 }

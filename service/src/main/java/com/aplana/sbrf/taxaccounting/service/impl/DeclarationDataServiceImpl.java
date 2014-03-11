@@ -468,8 +468,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
     @Override
-    public List<Long> getDeclarationDataLisByVersionTemplate(int declarationTemplateId) {
-        return declarationDataDao.findDeclarationDataByFormTemplate(declarationTemplateId);
+    public List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate) {
+        return declarationDataDao.findDeclarationDataByFormTemplate(declarationTemplateId, startDate);
     }
 
     private byte[] getBytesFromInputstream(String blobId){

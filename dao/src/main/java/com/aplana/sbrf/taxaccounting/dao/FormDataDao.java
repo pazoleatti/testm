@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,14 +46,6 @@ public interface FormDataDao {
 	 *         в случае уже существующей - совпадает с полем id объекта formData
 	 */
 	long save(FormData formData);
-
-	/**
-	 * Возвращает список идентификаторов данных по налоговым формам, имеющих указанный тип
-	 *
-	 * @param typeId тип налоговой формы
-	 * @return список идентификаторов данных по налоговым формам, удовлетворяющих запросу
-	 */
-	List<Long> listFormDataIdByType(int typeId);
 
 	/**
 	 * Удалить запись о данных по налоговой форме
@@ -113,4 +106,6 @@ public interface FormDataDao {
 	void updateState(long id, WorkflowState workflowState);
 
     void updatePeriodOrder(long id, int periodOrder);
+
+    List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
 }

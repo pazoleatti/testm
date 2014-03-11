@@ -4,12 +4,22 @@ import java.util.Date;
 
 /**
  * User: avanteev
+ * Класс, представляющий собой описание пересечения для версий макетов
  */
-public class SegmentIntersection implements Comparable {
+public class IntersectionSegment implements Comparable {
     private Date beginDate;
     private Date endDate;
     private int templateId;
     private VersionedObjectStatus status;
+    private int typeId;
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
+    }
 
     public Date getBeginDate() {
         return beginDate;
@@ -45,7 +55,7 @@ public class SegmentIntersection implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        SegmentIntersection intersection = (SegmentIntersection)o;
+        IntersectionSegment intersection = (IntersectionSegment)o;
         int summand = 0;
         if (endDate == null && intersection.getEndDate() != null){
             summand = 5;
