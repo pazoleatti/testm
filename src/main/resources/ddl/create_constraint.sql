@@ -77,6 +77,7 @@ alter table form_column add constraint form_column_chk_filt_parent check ((type=
 alter table department add constraint department_pk primary key (id);
 alter table department add constraint dept_fk_parent_id foreign key (parent_id) references department(id);
 alter table department add constraint dept_chk_type check(type in (1, 2, 3, 4, 5));
+alter table department add constraint department_chk_parent_id check ((type = 1 and parent_id is null) or (type <> 1 and parent_id is not null));
 
 alter table report_period add constraint report_period_pk primary key(id);
 alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
@@ -133,7 +134,7 @@ alter table form_data_signer add constraint form_data_signer_fk_formdata foreign
 
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
 alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
-alter table form_data_performer add constraint formdata_performer_fk_print_dep_id foreign key (print_department_id) references department(id);
+alter table form_data_performer add constraint formdata_performer_fk_dept foreign key (print_department_id) references department(id);
 
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;

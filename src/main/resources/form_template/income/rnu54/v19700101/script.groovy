@@ -183,8 +183,8 @@ void calc() {
             } else if (a > 0) {
                 b = a
             }
-            row.income = b
-            row.outcome = c
+            row.outcome = b
+            row.income = c
         }
 
         // графа 11
@@ -342,31 +342,31 @@ def logicalCheck() {
                 b = a
             }
             // графа 9
-            if (row.income != b) {
+            if (row.income != c) {
                 name = getColumnName(row, 'income')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // графа 10
-            if (row.outcome != c) {
+            if (row.outcome != b) {
                 name = getColumnName(row, 'outcome')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 11
-            def col11 = roundTo2(calc11Value(row, row.part2REPODate))
+            def col11 = roundTo2(calc11Value(row, reportDate))
             if (col11 != null && col11 != row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 12
-            if (row.outcome269st != calc12(row, daysInYear, course, someDate, reportDate)) {
+            if (row.outcome269st != roundTo2(calc12(row, daysInYear, course, someDate, reportDate))) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 13
-            if (row.outcomeTax != calc13(row)) {
+            if (row.outcomeTax != roundTo2(calc13(row))) {
                 name = getColumnName(row, 'outcomeTax')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -419,7 +419,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calc11Value(row, row.part2REPODate))
+            def col11 = roundTo2(calc11Value(row, reportDate))
             if (col11 != null && col11 != row.rateBR) {
                 loggerError(errorMsg + 'неверно указана ставка Банка России!')//TODO вернуть error
                 return false

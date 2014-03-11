@@ -336,6 +336,7 @@ comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
+comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
 
 create sequence seq_declaration_type start with 100;
 -----------------------------------------------------------------------------------------------------------------------------------
