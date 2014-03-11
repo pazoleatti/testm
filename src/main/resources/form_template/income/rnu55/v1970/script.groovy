@@ -444,7 +444,7 @@ def getXML(def String startStr, def String endStr) {
 void importData() {
     def xml = getXML('№ пп', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
