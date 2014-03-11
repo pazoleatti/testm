@@ -165,15 +165,15 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                         if (formDataMap[reportPeriod.order] != null) {
                             // «Своя» сводная есть и «Принята»
                             rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()
-                        }
 
-                        // Заполнение данных предыдущих кварталов
-                        if (reportPeriod.order > 1) {
-                            ((reportPeriod.order - 1)..1).each { order ->
-                                reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
-                                formDataMap[order] = formDataService.find(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id)
-                                if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
-                                    rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
+                            // Заполнение данных предыдущих кварталов
+                            if (reportPeriod.order > 1) {
+                                ((reportPeriod.order - 1)..1).each { order ->
+                                    reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
+                                    formDataMap[order] = formDataService.find(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id)
+                                    if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
+                                        rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
+                                    }
                                 }
                             }
                         }
