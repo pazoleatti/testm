@@ -39,8 +39,6 @@ switch (formDataEvent) {
 @Field
 def allColumns = ["amount", "percIncome"]
 
-//// Кастомные методы
-
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -96,11 +94,10 @@ void consolidation() {
         totalRowB[it] = 0
     }
     totalRow.percIncome = 0
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceData = formDataService.getDataRowHelper(source)
-            def sourceRows = sourceData.allCached
+            def sourceRows = formDataService.getDataRowHelper(source).allCached
 
             def totalRowASource = getDataRow(sourceRows, 'totalA')
             totalRowA.amount += totalRowASource.amount
@@ -114,8 +111,8 @@ void consolidation() {
         }
     }
     dataRowHelper.save(dataRows)
-    // Консолидация данных из первичной рну-36.2 в консолидированную рну-36.2.
     if (formData.kind == FormDataKind.CONSOLIDATED) {
+        // Консолидация данных из первичной рну-36.2 в консолидированную рну-36.2.
         logger.info('Формирование консолидированной формы прошло успешно.')
     } else {
         // Консолидация данных из первичной рну-36.1 в первичную рну-36.2.
