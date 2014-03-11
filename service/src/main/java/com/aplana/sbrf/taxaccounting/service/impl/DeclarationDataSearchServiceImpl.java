@@ -40,7 +40,7 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
 	public DeclarationDataFilterAvailableValues getFilterAvailableValues(TAUserInfo userInfo, TaxType taxType) {
 		DeclarationDataFilterAvailableValues result = new DeclarationDataFilterAvailableValues();
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-            if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+            if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP) && userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                 List<Department> departmentList = departmentService.getTBDepartments(userInfo.getUser());
                 if (departmentList.size() != 1) {
                     throw new AccessDeniedException("Ошибка назначения подразделения для роли «Контролёр НС»");

@@ -78,6 +78,8 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
      */
     void setManualUpdate(boolean isManualUpdate);
 
+    boolean isHierarchical();
+
     /**
      * регистрация события после закрытия модального окна
      * @param handler

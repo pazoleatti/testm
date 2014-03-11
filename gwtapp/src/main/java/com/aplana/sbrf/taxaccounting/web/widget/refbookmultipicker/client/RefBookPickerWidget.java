@@ -415,6 +415,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
+    public boolean isHierarchical() {
+        return isHierarchical;
+    }
+
+    @Override
     public void setTitle(String title) {
         if (modalPanel != null) {
             modalPanel.setText(title);

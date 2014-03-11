@@ -127,6 +127,9 @@ void calc() {
             sum6 = 0
             sum7 = 0
             for (rowSum in dataRowHelper.getAllCached()) {
+                if (!rowSum.getCell('consumptionBuhSumAccepted').isEditable() || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
+                    continue
+                }
                 String knySum
                 String kny
                 if (rowSum.getCell('consumptionTypeId').hasValueOwner()) {
@@ -140,8 +143,8 @@ void calc() {
                     kny = row.getCell('consumptionTypeId').value
                 }
                 if (kny == knySum) {
-                    sum6 += rowSum.consumptionBuhSumAccepted
-                    sum7 += rowSum.consumptionBuhSumPrevTaxPeriod
+                    sum6 += (rowSum.consumptionBuhSumAccepted ?: 0)
+                    sum7 += (rowSum.consumptionBuhSumPrevTaxPeriod ?: 0)
                 }
             }
             tmp = round(row.consumptionTaxSumS - (sum6 - sum7), 2)

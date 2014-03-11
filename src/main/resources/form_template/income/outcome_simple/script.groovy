@@ -40,14 +40,16 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // Принять из "Создано"
         logicCheck()
         break
-    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // Принять из "Создано"
+        logicCheck()
+        checkRnu14Accepted()
+        break
     case FormDataEvent.COMPOSE:
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper?.allCached
@@ -172,6 +174,8 @@ void calculationBasicSum(def dataRows) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
+            } else {
+                row.rnu5Field5Accepted = 0
             }
         }
     }
@@ -193,9 +197,10 @@ void calculationControlGraphs(def dataRows) {
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
             continue
         }
-        if (row.rnu7Field10Sum && row.rnu7Field12Accepted && row.rnu7Field12PrevTaxPeriod) {
+        if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
+                && row.getCell('rnu7Field12PrevTaxPeriod').isEditable()) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
-            tmp = round(row.rnu7Field10Sum - (row.rnu7Field12Accepted - row.rnu7Field12PrevTaxPeriod), 2)
+            tmp = round((row.rnu7Field10Sum ?: 0) - ((row.rnu7Field12Accepted ?: 0) - (row.rnu7Field12PrevTaxPeriod ?: 0)), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = (tmp < 0 ? message : value.toString())
         }
@@ -296,8 +301,7 @@ void consolidationSummary(def dataRows) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
             def formDataOld = formDataService.find(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId())
-            // println("prevFormData = "+formDataOld)
-            dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
+            dataRowsOld = (formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
                 ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
@@ -399,8 +403,8 @@ def isBank() {
 
 /** Получить сумму диапазона строк определенного столбца. */
 def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
-    def from = getDataRow(dataRows, rowFromAlias).getIndex()
-    def to = getDataRow(dataRows, rowToAlias).getIndex()
+    def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
+    def to = getDataRow(dataRows, rowToAlias).getIndex() - 1
     if (from > to) {
         return 0
     }
@@ -648,4 +652,15 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+// для уроня Банка:	проверка наличия и принятия РНУ-14
+void checkRnu14Accepted() {
+    if (!isBank()) {
+        return
+    }
+    def formData14 = getFormDataRNU14()
+    if (formData14 == null || formData14.state != WorkflowState.ACCEPTED) {
+        logger.error("Принятие сводной налоговой формы невозможно, т.к. форма РНУ-14 не сформирована или имеет статус, отличный от «Принята»")
+    }
 }

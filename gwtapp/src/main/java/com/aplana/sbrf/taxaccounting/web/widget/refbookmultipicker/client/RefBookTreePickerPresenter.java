@@ -57,7 +57,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
             ps.setValues(newState);
-            load();
+            load(null);
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
@@ -67,11 +67,20 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void reload() {
-        load();
+        load(null);
+    }
+
+    @Override
+    public void reload(List<Long> needToSelectIds) {
+        load(needToSelectIds);
     }
 
     /* Загрузка верхушки дерева */
-    private void load() {
+    private void load(List<Long> needToSelectIds) {
+        if (needToSelectIds != null) {
+            ps.getSetIds().clear();
+            ps.getSetIds().addAll(needToSelectIds);
+        }
         if (ps.getRefBookAttrId() == null) {
             return;
         }

@@ -1321,7 +1321,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join (select number_value, record_id from periodCodes where alias='D') d on d.record_id=p.record_id";
 
     public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
-        List<String> results = new ArrayList<String>();
+        Set<String> results = new HashSet<String>();
         //Проверка использования в справочниках
         String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, in);
@@ -1385,7 +1385,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             //do nothing
         }
-        return results;
+        return new ArrayList<String>(results);
     }
 
     private String reverseDepartmentPath(String departmentPath) {
