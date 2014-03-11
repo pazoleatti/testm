@@ -36,11 +36,9 @@
                 </g:VerticalPanel>
             </g:cell>
             <g:cell>
-                <g:VerticalPanel>
-                    <pager:FlexiblePager ui:field="pager"
-                                         location="CENTER" showFastForwardButton="false"
-                                         fastForwardRows="0" showLastPageButton="true" type="declarationList"/>
-                </g:VerticalPanel>
+                <pager:FlexiblePager ui:field="pager"
+                                     location="CENTER" showFastForwardButton="false"
+                                     fastForwardRows="0" showLastPageButton="true" type="declarationList"/>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">
