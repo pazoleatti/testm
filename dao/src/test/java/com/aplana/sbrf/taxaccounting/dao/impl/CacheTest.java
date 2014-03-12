@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager;
 import com.aplana.sbrf.taxaccounting.cache.KeyWrapper;
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
@@ -24,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,9 @@ public class CacheTest {
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
 
+	@Autowired
+	private BlobDataDao blobDataDao;
+
     private static String FORM_TYPE_JNDI = "services/cache/aplana/taxaccounting/FormType";
     private static String FORM_TEMPLATE_JNDI = "services/cache/aplana/taxaccounting/FormTemplate";
     private static String DECLARATION_TYPE_JNDI = "services/cache/aplana/taxaccounting/DeclarationType";
@@ -64,6 +70,8 @@ public class CacheTest {
     private static String USER_JNDI = "services/cache/aplana/taxaccounting/User";
     private static String PERMANENT_DATA_JNDI = "services/cache/aplana/taxaccounting/PermanentData";
     private static String DATA_BLOBS_CACHE_JNDI = "services/cache/aplana/taxaccounting/DataBlobsCache";
+
+	private static final String SAMPLE_BLOB_ID = UUID.randomUUID().toString();
 
     @BeforeClass
     public static void initContext() throws NamingException {
@@ -81,8 +89,17 @@ public class CacheTest {
     }
 
     @Before
-    public void init(){
+    public void init() throws UnsupportedEncodingException {
         cacheManager = applicationContext.getBean(ExtendedSimpleCacheManager.class);
+		// генерим тестовый блоб
+		String sampleBlobData = "sample text";
+		BlobData blob = new BlobData();
+		blob.setCreationDate(new Date());
+		blob.setDataSize(sampleBlobData.length());
+		blob.setUuid(SAMPLE_BLOB_ID);
+		blob.setType(0);
+		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
+		blobDataDao.create(blob);
     }
 
     @Test
@@ -138,21 +155,18 @@ public class CacheTest {
         declarationTemplate.setActive(true);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
-        String uuid1 = UUID.randomUUID().toString();
-        declarationTemplate.setJrxmlBlobId(uuid1);
+        declarationTemplate.setJrxmlBlobId(SAMPLE_BLOB_ID);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-
         declarationTemplateDao.save(declarationTemplate);
 
         DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
         assertEquals(1, savedDeclarationTemplate.getId().intValue());
 
         //Проверка заполнения uuid
-        String uuid2 = UUID.randomUUID().toString();
-        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), uuid2);
-        assertEquals(uuid2, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
+        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), SAMPLE_BLOB_ID);
+        assertEquals(SAMPLE_BLOB_ID, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
 
         //Проверка кэширования тела скрипта
         declarationTemplateDao.getDeclarationTemplateScript(1);
