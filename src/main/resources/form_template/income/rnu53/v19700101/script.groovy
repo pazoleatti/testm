@@ -227,7 +227,7 @@ void calc() {
                 tmp = calc12Value(row, 1.1, reportDate, daysInYear)
             }
         } else if (row.outcome > 0 && currency != '810') {
-            if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
+            if (inPeriod(lastDayReportPeriod, '01.01.2011', '31.12.2012')) {
                 tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
             } else {
                 tmp = calc12Value(row, 1, reportDate, daysInYear) * course
@@ -371,6 +371,7 @@ def logicalCheck() {
             }
 
             // графа 12
+            // TODO переделать расчет как в рну-54
             def currency = getCurrency(row.currencyCode)
             if (row.outcome == 0) {
                 tmp = 0
@@ -385,13 +386,13 @@ def logicalCheck() {
                     tmp = calc12Value(row, 1.1, reportDate, daysInYear)
                 }
             } else if (row.outcome > 0 && currency != '810') {
-                if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
+                if (inPeriod(lastDayReportPeriod, '01.01.2011', '31.12.2012')) {
                     tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
                 } else {
                     tmp = calc12Value(row, 1, reportDate, daysInYear) * course
                 }
             }
-            if (row.outcome269st != tmp) {
+            if (row.outcome269st != roundTo2(tmp)) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -404,7 +405,7 @@ def logicalCheck() {
             } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
                 tmp = row.outcome269st
             }
-            if (row.outcomeTax != tmp) {
+            if (row.outcomeTax !=  roundTo2(tmp)) {
                 name = getColumnName(row, 'outcomeTax')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }

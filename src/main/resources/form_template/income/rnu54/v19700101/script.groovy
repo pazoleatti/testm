@@ -206,8 +206,9 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
             || daysInYear == null || course == null || someDate == null) {
         return 0
     }
+    def currency = getCurrency(row.currencyCode)
     def tmp = 0
-    if (row.outcome > 0 && row.currencyCode == '810') {
+    if (row.outcome > 0 && currency == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -217,8 +218,8 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && row.currencyCode != '810') {
-        if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
+    } else if (row.outcome > 0 && currency != '810') {
+        if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
             tmp = calc12Value(row, 1, reportDate, daysInYear) * course
@@ -235,7 +236,6 @@ def BigDecimal calc13(def row) {
         } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
             tmp = row.outcome269st
         }
-
     }
     return tmp
 }
