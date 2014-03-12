@@ -162,15 +162,18 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                         // Данные текущего квартала
                         reportPeriodMap[reportPeriod.order] = reportPeriod
                         formDataMap[reportPeriod.order] = formDataCollection?.find(departmentId, 200, FormDataKind.SUMMARY)
-                        rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()
+                        if (formDataMap[reportPeriod.order] != null) {
+                            // «Своя» сводная есть и «Принята»
+                            rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()
 
-                        // Заполнение данных предыдущих кварталов
-                        if (reportPeriod.order > 1) {
-                            ((reportPeriod.order - 1)..1).each { order ->
-                                reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
-                                formDataMap[order] = formDataService.find(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id)
-                                if (formDataMap[order] != null) {
-                                    rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
+                            // Заполнение данных предыдущих кварталов
+                            if (reportPeriod.order > 1) {
+                                ((reportPeriod.order - 1)..1).each { order ->
+                                    reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
+                                    formDataMap[order] = formDataService.find(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id)
+                                    if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
+                                        rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
+                                    }
                                 }
                             }
                         }
@@ -441,7 +444,7 @@ def getModRefBookValue(refBookId, filter, date = getReportPeriodEndDate()) {
 
     // получение связанных данных
     refBook.attributes.each() { RefBookAttribute attr ->
-        def ref = record[attr.alias].referenceValue;
+        def ref = record[attr.alias]?.referenceValue;
         if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
             def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
             record[attr.alias] = attrProvider.getRecordData(ref);
@@ -498,7 +501,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKTMO == null || record.OKTMO.referenceValue == null) {
+    if (record.OKTMO == null || record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКТМО»")
     }
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
@@ -510,13 +513,13 @@ List<String> getErrorDepartment(record) {
     if (record.TAX_ORGAN_CODE == null || record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE.referenceValue == null) {
+    if (record.OKVED_CODE == null || record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.referenceValue == null) {
+    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
     if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
@@ -528,7 +531,7 @@ List<String> getErrorDepartment(record) {
     if (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
-    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE.referenceValue == null) {
+    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
     errorList

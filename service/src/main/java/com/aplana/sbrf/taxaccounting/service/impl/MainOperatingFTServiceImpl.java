@@ -28,7 +28,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     @Autowired
     @Qualifier("formTemplateOperatingService")
-    private VersionOperatingService<FormTemplate> versionOperatingService;
+    private VersionOperatingService versionOperatingService;
 
     @Autowired
     private FormTemplateService formTemplateService;
@@ -46,13 +46,17 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         Date dbVersionBeginDate = formTemplateService.get(formTemplate.getId()).getVersion();
         Date dbVersionEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
 
-        if ((dbVersionEndDate != null && (dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ||
-                dbVersionEndDate.compareTo(templateActualEndDate) !=0)) || templateActualEndDate != null || dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0 ){
-            versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
+        if (dbVersionBeginDate.compareTo(formTemplate.getVersion()) !=0
+                || (dbVersionEndDate != null && templateActualEndDate == null)
+                || (dbVersionEndDate == null && templateActualEndDate != null)
+                || (dbVersionEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) != 0) ){
+            versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(),
+                    formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger);
         }
 
-        versionOperatingService.isUsedVersion(formTemplate, templateActualEndDate, logger);
+        versionOperatingService.isUsedVersion(formTemplate.getId(), formTemplate.getType().getId(),
+                formTemplate.getStatus(), formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
         int id = formTemplateService.save(formTemplate);
 
@@ -70,10 +74,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         type.setName(formTemplate.getName() != null ? formTemplate.getName() : "");
         int formTypeId = formTypeService.save(type);
         formTemplate.getType().setId(formTypeId);
-        versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
-        checkError(logger);
         formTemplate.setEdition(1);//т.к. первый
         formTemplate.setStatus(VersionedObjectStatus.NORMAL);
+        versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL,
+                formTemplate.getVersion(), templateActualEndDate, logger);
+        checkError(logger);
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
@@ -83,9 +88,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate formTemplate = (FormTemplate)template;
-        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
-        checkError(logger);
-        versionOperatingService.isIntersectionVersion(formTemplate, templateActualEndDate, logger);
+        /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);
+        checkError(logger);*/
+        versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
+                formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
         formTemplate.setStatus(VersionedObjectStatus.DRAFT);
         formTemplate.setEdition(formTemplateService.versionTemplateCount(formTemplate.getType().getId()) + 1);
@@ -101,7 +107,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (formTemplates != null && !formTemplates.isEmpty()){
             for (FormTemplate formTemplate : formTemplates){
-                versionOperatingService.isUsedVersion(formTemplate, null, logger);
+                versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
                             logEntryService.save(logger.getEntries()));
@@ -118,11 +124,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     public void deleteVersionTemplate(int templateId, Date templateActualEndDate, Logger logger, TAUser user) {
         FormTemplate template = formTemplateService.get(templateId);
         Date dateEndActualize = formTemplateService.getFTEndDate(templateId);
-        versionOperatingService.isUsedVersion(template, dateEndActualize, logger);
+        versionOperatingService.isUsedVersion(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
                     logEntryService.save(logger.getEntries()));
-        versionOperatingService.cleanVersions(templateId, dateEndActualize, logger);
+        versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
         formTemplateService.delete(template);
         if (formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
@@ -135,10 +141,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     @Override
     public boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force) {
-        FormTemplate formTemplate = formTemplateService.get(templateId);
+        FormTemplate template = formTemplateService.get(templateId);
 
-        if (formTemplate.getStatus() == VersionedObjectStatus.NORMAL){
-            versionOperatingService.isUsedVersion(formTemplate, null, logger);
+        if (template.getStatus() == VersionedObjectStatus.NORMAL){
+            versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(), template.getStatus(),
+                    template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT.getId(), templateId);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);

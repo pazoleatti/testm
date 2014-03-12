@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,5 +88,5 @@ public interface DeclarationDataDao {
      */
     void update(DeclarationData declarationData);
 
-    List<Long> findDeclarationDataByFormTemplate(int templateId);
+    List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
 }

@@ -9,6 +9,19 @@ import groovy.transform.Field
  *
  * @author Stanislav Yasinskiy
  */
+
+// 1.  rowNumber        № п/п
+// 2.  fullNamePerson   Полное наименование юридического лица с указанием ОПФ
+// 3.  inn              ИНН/КИО
+// 4.  countryName      Страна регистрации
+// 5.  sum              Сумма доходов Банка, руб.
+// 6.  docNumber        Номер договора
+// 7.  docDate          Дата договора
+// 8.  count            Количество
+// 9.  price            Цена
+// 10. cost             Стоимость
+// 11. dealDate         Дата совершения сделки
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -229,8 +242,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def int xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 2
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1

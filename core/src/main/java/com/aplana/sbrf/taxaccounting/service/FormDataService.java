@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -189,9 +190,11 @@ public interface FormDataService {
     void checkDestinations(long formDataId);
 
     /**
-     * Ищет налоговые формы, которые использует данную версию макета
+     * Ищет налоговые формы, которые использует данную версию макета, у которых период от #startDate
+     * http://conf.aplana.com/pages/viewpage.action?pageId=11377482
      * @param formTemplateId идентификатор версии
-     * @return список НФ
+     * @param startDate дата начала актуализации
+     * @return список идентификаторов НФ
      */
-    List<Long> getFormDataLisByVersionTemplate(int formTemplateId);
+    List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
 }

@@ -1,6 +1,7 @@
 package form_template.income.rnu16.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -50,7 +51,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -167,4 +170,91 @@ void logicCheck() {
 
 def String getKnu(def code) {
     return getRefBookValue(28, code)?.CODE?.stringValue
+}
+
+/* Получение импортируемых данных */
+
+void importData() {
+
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Код налогового учета',
+            (xml.row[0].cell[3]): 'Вид (наименование) дохода',
+            (xml.row[0].cell[4]): 'Сумма дохода за отчетный период',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+/* Заполнить форму данными */
+
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1
+    def int rowOffset = 10
+    def int colOffset = 1
+
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        /* Пропуск строк шапок */
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        /* Пропуск итоговых строк */
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        /* Графа 1 */
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        /* Графа 2 */
+        /* Автозаполняемое */
+
+        /* Графа 3 */
+        newRow.incomeType = getRecordIdImport(28, 'TYPE_INCOME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+
+        /* Графа 4 */
+        newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+
+    dataRowHelper.save(rows)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

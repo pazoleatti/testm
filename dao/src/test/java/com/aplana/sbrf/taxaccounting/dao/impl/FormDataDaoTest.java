@@ -12,6 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
 // Нужно написать нормальные тесты на получение сохранение FormData и проверить поля
 
@@ -223,5 +226,11 @@ public class FormDataDaoTest {
     public void testFindFormDataByFormTemplate(){
         Assert.assertEquals(4, formDataDao.findFormDataByFormTemplate(1).size());
         Assert.assertTrue(formDataDao.findFormDataByFormTemplate(10000).isEmpty());
+    }
+
+    @Test
+    public void testGetFormDataListInActualPeriodByTemplate() throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+        Assert.assertEquals(4, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
     }
 }

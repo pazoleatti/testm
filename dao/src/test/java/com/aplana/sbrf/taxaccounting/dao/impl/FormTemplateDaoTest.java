@@ -13,10 +13,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Vitalii Samolovskikh
@@ -185,15 +189,24 @@ public class FormTemplateDaoTest {
     }
 
     @Test
+    public void testGetFTVersionEndDate(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.JANUARY, 1);
+        Date actualStartVersion = new Date(calendar.getTime().getTime());
+
+        //Сверка
+        calendar.set(2014, Calendar.DECEMBER, 31, 0, 0, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Assert.assertEquals(calendar.getTime(), formTemplateDao.getFTVersionEndDate(2, 2, actualStartVersion));
+    }
+
+    @Test
     public void testGetNearestFTVersionIdRight(){
         Calendar calendar = Calendar.getInstance();
         calendar.set(2013, Calendar.JANUARY, 1);
-        Date actualStartVersion = calendar.getTime();
+        Date actualStartVersion = new Date(calendar.getTime().getTime());
 
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
-        Assert.assertEquals(3, formTemplateDao.getNearestFTVersionIdRight(2, list, actualStartVersion));
+        Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdRight(2, actualStartVersion));
     }
 
     @Test
@@ -205,7 +218,7 @@ public class FormTemplateDaoTest {
         List<Integer> list = new ArrayList<Integer>();
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
-        Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdLeft(2, list, actualStartVersion));
+        Assert.assertEquals(0, formTemplateDao.getNearestFTVersionIdLeft(2, list, actualStartVersion));
     }
 
     @Test
@@ -242,5 +255,17 @@ public class FormTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(1, formTemplateDao.versionTemplateCount(1, list));
+    }
+
+    @Test
+    public void testFindFTVersionIntersections() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        Assert.assertEquals(1, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2014.12.31")).size());
+        Assert.assertEquals(2, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2015.12.31")).size());
+    }
+
+    @Test
+    public void getActiveDeclarationTemplateIdTest() {
+        assertEquals(2, formTemplateDao.getActiveFormTemplateId(2, 4));
     }
 }

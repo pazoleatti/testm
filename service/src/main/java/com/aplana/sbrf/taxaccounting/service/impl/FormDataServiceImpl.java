@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -665,7 +666,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public List<Long> getFormDataLisByVersionTemplate(int formTemplateId) {
-        return formDataDao.findFormDataByFormTemplate(formTemplateId);
+    public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
+        return formDataDao.getFormDataListInActualPeriodByTemplate(templateId, startDate);
     }
 }

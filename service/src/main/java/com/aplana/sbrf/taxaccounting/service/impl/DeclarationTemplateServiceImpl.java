@@ -127,7 +127,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public List<DeclarationTemplate> getByFilter(TemplateFilter filter) {
         List<DeclarationTemplate> templates = new ArrayList<DeclarationTemplate>();
         for (Integer id : declarationTemplateDao.getByFilter(filter)) {
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             templates.add(declarationTemplateDao.get(id));
         }
         return templates;
@@ -139,68 +138,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
         List<Integer> declarationTemplateIds =  declarationTemplateDao.getDeclarationTemplateVersions(formTypeId, 0, statusList, null, null);
         List<DeclarationTemplate> declarationTemplates = new ArrayList<DeclarationTemplate>();
-        //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
         for (Integer id : declarationTemplateIds)
             declarationTemplates.add(declarationTemplateDao.get(id));
         return declarationTemplates;
     }
 
     @Override
-    public List<SegmentIntersection> findFTVersionIntersections(DeclarationTemplate declarationTemplate, Date actualEndVersion, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
-
-        int decFormTypeId = declarationTemplate.getType().getId();
-        List<SegmentIntersection> segmentIntersections = new LinkedList<SegmentIntersection>();
-
-        /*Date actualBeginVersion = addCalendar(Calendar.DAY_OF_YEAR, -1, formTemplate.getVersion());*/
-        List<Integer> formTemplateVersionIds = new ArrayList<Integer>();
-        formTemplateVersionIds.addAll(declarationTemplateDao.getDeclarationTemplateVersions(decFormTypeId,
-                declarationTemplate.getId() != null && declarationTemplate.getId() != 0 ? declarationTemplate.getId() : 0,
-                statusList, declarationTemplate.getVersion(), actualEndVersion));
-
-        if (!formTemplateVersionIds.isEmpty()){
-            for (int i =0; i<formTemplateVersionIds.size() - 1; i++){
-                SegmentIntersection segmentIntersection = new SegmentIntersection();
-                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-                DeclarationTemplate beginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i));
-                DeclarationTemplate endTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(i++));
-                segmentIntersection.setStatus(beginTemplate.getStatus());
-                segmentIntersection.setBeginDate(beginTemplate.getVersion());
-                segmentIntersection.setEndDate(addCalendar(Calendar.DAY_OF_YEAR, -1, endTemplate.getVersion().getTime()));
-                segmentIntersection.setTemplateId(beginTemplate.getId());
-
-                segmentIntersections.add(segmentIntersection);
-            }
-
-            SegmentIntersection lastSegmentIntersection = new SegmentIntersection();
-            DeclarationTemplate lastBeginTemplate = declarationTemplateDao.get(formTemplateVersionIds.get(formTemplateVersionIds.size() - 1));
-            int idRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, lastBeginTemplate.getVersion());
-
-            lastSegmentIntersection.setStatus(lastBeginTemplate.getStatus());
-            lastSegmentIntersection.setBeginDate(lastBeginTemplate.getVersion());
-            lastSegmentIntersection.setEndDate(getDTEndDate(idRight));
-            lastSegmentIntersection.setTemplateId(lastBeginTemplate.getId());
-            segmentIntersections.add(lastSegmentIntersection);
-            return segmentIntersections;
-        }
-
-        /*if (!formTemplateVersionIds.isEmpty() || formTemplate.getId() != null)
-            return formTemplateVersionIds;*/
-        //Поиск только "левее" даты актуализации версии, т.к. остальные пересечения попали в предыдущую выборку
-        int idLeft = declarationTemplateDao.getNearestDTVersionIdLeft(decFormTypeId, statusList, declarationTemplate.getVersion());
-        if (idLeft != 0){
-            DeclarationTemplate beginTemplate = declarationTemplateDao.get(idLeft);
-            int idLeftRight = declarationTemplateDao.getNearestDTVersionIdRight(decFormTypeId, statusList, beginTemplate.getVersion());
-
-            SegmentIntersection segmentIntersection = new SegmentIntersection();
-            segmentIntersection.setStatus(beginTemplate.getStatus());
-            segmentIntersection.setBeginDate(beginTemplate.getVersion());
-            segmentIntersection.setEndDate(getDTEndDate(idLeftRight));
-            segmentIntersection.setTemplateId(beginTemplate.getId());
-
-            segmentIntersections.add(segmentIntersection);
-        }
-        return segmentIntersections;
+    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+        return declarationTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 
     @Override
@@ -219,7 +164,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         List<Integer> statusList = createStatusList(status);
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
+        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
         if (id == 0)
             return null;
         return declarationTemplateDao.get(id);
@@ -232,15 +177,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), statusList, declarationTemplate.getVersion());
-        if (id == 0)
-            return null;
-        DeclarationTemplate templateEnd = declarationTemplateDao.get(id);
-        if (templateEnd.getStatus() == VersionedObjectStatus.FAKE){
-            return templateEnd.getVersion();
-        }else {
-            return addCalendar(Calendar.DAY_OF_YEAR, -1, templateEnd.getVersion().getTime());
-        }
+        return declarationTemplateDao.getDTVersionEndDate(declarationTemplateId, declarationTemplate.getType().getId(), declarationTemplate.getVersion());
     }
 
     @Override

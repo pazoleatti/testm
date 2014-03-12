@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +19,15 @@ import java.util.List;
  */
 @Service(value = "formTemplateOperatingService")
 @Transactional
-public class VersionFTOperatingServiceImpl implements VersionOperatingService<FormTemplate> {
+public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     public static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" периоде %s для макета!";
 
     @Autowired
     private FormDataDao formDataDao;
+
+    @Autowired
+    private FormTypeService formTypeService;
 
     @Autowired
     private FormTemplateService formTemplateService;
@@ -44,10 +44,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
     private Calendar calendar = Calendar.getInstance();
 
     @Override
-    public void isUsedVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
-        if (template.getStatus() == VersionedObjectStatus.DRAFT)
+    public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        if (status == VersionedObjectStatus.DRAFT)
             return;
-        List<Long> fdIds = formDataService.getFormDataLisByVersionTemplate(template.getId());
+        List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         if (!fdIds.isEmpty()){
             for(Long id: fdIds) {
                 FormData formData = formDataDao.getWithoutRows(id);
@@ -61,21 +61,22 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
     }
 
     @Override
-    public void isCorrectVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
+    public void isCorrectVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void isIntersectionVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
+    public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        SegmentIntersection newIntersection = new SegmentIntersection();
-        newIntersection.setBeginDate(template.getVersion());
+        IntersectionSegment newIntersection = new IntersectionSegment();
+        newIntersection.setBeginDate(versionActualDateStart);
         newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(template.getId() != null?template.getId() : 0);
-        newIntersection.setStatus(template.getStatus());
-        List<SegmentIntersection> segmentIntersections = formTemplateService.findFTVersionIntersections(template, versionActualDateEnd);
+        newIntersection.setTemplateId(templateId);
+        newIntersection.setStatus(status);
+        List<IntersectionSegment> segmentIntersections =
+                formTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
-            for (SegmentIntersection intersection : segmentIntersections){
+            for (IntersectionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
@@ -88,7 +89,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                         }
                         // Варианты 7,8
                         else if(compareResult == 1 || compareResult == -5){
-                            isUsedVersion(formTemplateService.get(intersection.getTemplateId()), null, logger);
+                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(), newIntersection.getBeginDate(),
+                                    intersection.getEndDate(), logger);
                             if (logger.containsLevel(LogLevel.ERROR)){
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
@@ -102,9 +104,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                         //2 Шаг. Система проверяет наличие даты окончания актуальности.
                         //Пересечений нет
                         else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
-                            cleanVersions(newIntersection.getTemplateId(), versionActualDateEnd, logger);
-                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
-                            FormTemplate formTemplate =  createFakeTemplate(date, template.getType());
+                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
+                                    newIntersection.getBeginDate(), intersection.getEndDate(), logger);
+                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime());
+                            FormTemplate formTemplate =  createFakeTemplate(date, typeId);
                             formTemplateService.save(formTemplate);
                         }
                         break;
@@ -113,7 +116,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                         //Варианты 15
                         if (compareResult == -2){
                             FormTemplate formTemplate = formTemplateService.get(intersection.getTemplateId());
-                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
+                            formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime()));
                             formTemplateService.save(formTemplate);
                         }
                         //Варианты 16,19,20
@@ -124,20 +127,21 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
                 }
             }
         } else if(newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), versionActualDateEnd, logger);
-            FormTemplate formTemplate =  createFakeTemplate(versionActualDateEnd, template.getType());
+            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
+                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
+            FormTemplate formTemplate =  createFakeTemplate(newIntersection.getEndDate(), typeId);
             formTemplateService.save(formTemplate);
         }
 
     }
 
     @Override
-    public void createNewVersion(FormTemplate template, Date versionActualDateEnd, Logger logger) {
-        isIntersectionVersion(template, versionActualDateEnd, logger);
+    public void createNewVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        isIntersectionVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
     }
 
     @Override
-    public void cleanVersions(int templateId, Date versionActualDateEnd, Logger logger) {
+    public void cleanVersions(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         if (templateId == 0)
             return;
         FormTemplate formTemplateFake = formTemplateService.getNearestFTRight(templateId, VersionedObjectStatus.FAKE);
@@ -145,12 +149,12 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService<Fo
             formTemplateService.delete(formTemplateFake);
     }
 
-    private FormTemplate createFakeTemplate(Date date, FormType formType){
+    private FormTemplate createFakeTemplate(Date date, int formTypeId){
         FormTemplate formTemplate =  new FormTemplate();
         formTemplate.setVersion(date);
         formTemplate.setStatus(VersionedObjectStatus.FAKE);
         formTemplate.setEdition(0);
-        formTemplate.setType(formType);
+        formTemplate.setType(formTypeService.get(formTypeId));
         formTemplate.setName("fake");
         formTemplate.setFullName("fake");
         formTemplate.setCode("fake");

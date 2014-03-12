@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.Date;
@@ -88,13 +85,33 @@ public interface FormTemplateDao {
     List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
 
     /**
+     * Метод для поиска пересечений версий макетов в указанных датах
+     * @param formTypeId вид шаблона
+     * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
+     * @param statusList статус формы
+     * @param actualStartVersion дата начала
+     * @param actualEndVersion дата окончания
+     * @return список пеересечений
+     */
+    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+
+    /**
+     * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
+     * @param templateId идентификатор версии шаблона, чтобы он сам себя не выбрал
+     * @param formTypeId идентификатор вида налога
+     * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
+     * @return дату окончания версии
+     */
+    Date getFTVersionEndDate(int templateId, int formTypeId, Date actualBeginVersion);
+
+    /**
      * Поиск версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
      * @param formTypeId идентификатор вида налога
      * @param statusList список статусов макатеов, которые искать
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
+    int getNearestFTVersionIdRight(int formTypeId, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии

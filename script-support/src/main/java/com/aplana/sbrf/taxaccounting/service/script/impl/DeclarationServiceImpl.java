@@ -115,14 +115,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		return stringBuilder.toString();
 	}
 	
-	/**
-	 * Возвращает список налоговых форм, являющихся источником для указанной декларации и находящихся в статусе
-	 * "Создана"
-	 *
-	 * @param declarationData декларация
-	 * @return список НФ-источников в статусе "Принята"
-	 */
-	@Override
+    @Override
 	public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
 		int departmentId = declarationData.getDepartmentId();
 		int declarationTemplateId = declarationData.getDeclarationTemplateId();

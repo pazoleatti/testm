@@ -106,7 +106,13 @@ public interface FormTemplateService {
      */
     List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
-    List<SegmentIntersection> findFTVersionIntersections(FormTemplate formTemplate, Date actualEndVersion, VersionedObjectStatus... status);
+    /**
+     * Метод для поиска пересечений версий макетов в указанных датах
+     * @param formTemplate версия макета
+     * @param actualEndVersion дата окончания версии макета
+     * @return список пеересечений
+     */
+    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.

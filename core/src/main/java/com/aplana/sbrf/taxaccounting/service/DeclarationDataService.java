@@ -37,7 +37,7 @@ public interface DeclarationDataService {
 	
 	/**
 	 * Получить декларацию
-	 * @param declarationDataId
+	 * @param declarationDataId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @return объект декларации
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
@@ -126,5 +126,5 @@ public interface DeclarationDataService {
 	 */
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
-    List<Long> getDeclarationDataLisByVersionTemplate(int declarationTemplateId);
+    List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 }

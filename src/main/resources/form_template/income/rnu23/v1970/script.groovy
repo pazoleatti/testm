@@ -77,9 +77,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        // TODO (Ramil Timerbaev)
-        // calc()
-        // logicCheck()
+        calc()
+        logicCheck()
         break
     case FormDataEvent.MIGRATION:
         migration()
@@ -370,53 +369,94 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-/** Получение импортируемых данных. */
-void importData() {
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
-
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-
-    // TODO (Ramil Timerbaev) поправить формат на правильный
-    if (!fileName.contains('.r')) {
-        logger.error('Формат файла должен быть *.r??')
-        return
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
     }
-
-    // TODO (Ramil Timerbaev) поправить параметры
-    def xmlString = importService.getData(is, fileName, 'cp866')
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
+    return xml
+}
 
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(xml)
 
-        // рассчитать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
-        }
-    } catch (Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
+/** Получение импортируемых данных. */
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Номер договора',
+            (xml.row[0].cell[2]): 'Дата договора',
+            (xml.row[0].cell[3]): 'Сумма гарантии',
+            (xml.row[0].cell[4]): 'Дата совершения операции',
+            (xml.row[0].cell[5]): 'Курс Банка России',
+            (xml.row[0].cell[6]): 'Процентная ставка',
+            (xml.row[0].cell[7]): 'База для расчёта (дни)',
+            (xml.row[0].cell[8]): 'Расчётный период',
+            (xml.row[0].cell[12]): 'Сумма в налоговом учёте',
+            (xml.row[0].cell[14]): 'Сумма в бухгалтерском учёте',
+            (xml.row[0].cell[16]): 'Сумма доначисления',
+            (xml.row[1].cell[8]): 'начисление/факт',
+            (xml.row[1].cell[10]): 'доначисление',
+            (xml.row[1].cell[12]): 'валюта',
+            (xml.row[1].cell[13]): 'рубли',
+            (xml.row[1].cell[14]): 'валюта',
+            (xml.row[1].cell[15]): 'рубли',
+            (xml.row[1].cell[16]): 'предыдущий период',
+            (xml.row[1].cell[18]): 'отчётный период',
+            (xml.row[2].cell[8]): 'дата начала',
+            (xml.row[2].cell[9]): 'дата окончания',
+            (xml.row[2].cell[10]): 'дата начала',
+            (xml.row[2].cell[11]): 'дата окончания',
+            (xml.row[2].cell[16]): 'валюта',
+            (xml.row[2].cell[17]): 'рубли',
+            (xml.row[2].cell[18]): 'валюта',
+            (xml.row[2].cell[19]): 'рубли',
+            (xml.row[3].cell[0]): '1',
+            (xml.row[3].cell[1]): '2',
+            (xml.row[3].cell[2]): '3',
+            (xml.row[3].cell[3]): '4',
+            (xml.row[3].cell[4]): '5',
+            (xml.row[3].cell[5]): '6',
+            (xml.row[3].cell[6]): '7',
+            (xml.row[3].cell[7]): '8',
+            (xml.row[3].cell[8]): '9',
+            (xml.row[3].cell[9]): '10',
+            (xml.row[3].cell[10]): '11',
+            (xml.row[3].cell[11]): '12',
+            (xml.row[3].cell[12]): '13',
+            (xml.row[3].cell[13]): '14',
+            (xml.row[3].cell[14]): '15',
+            (xml.row[3].cell[15]): '16',
+            (xml.row[3].cell[16]): '17',
+            (xml.row[3].cell[17]): '18',
+            (xml.row[3].cell[18]): '19',
+            (xml.row[3].cell[19]): '20'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 3)
+
+
+
 }
 
 void migration() {
@@ -541,135 +581,85 @@ def getNewRow() {
  *
  * return итоговая строка
  */
-def addData(def xml) {
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
 
-    def newRows = []
-    def index = 0
-    def int rowIndex = 1
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
 
-    // TODO (Ramil Timerbaev) поправить получение строк если загружать из *.rnu или *.xml
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
     for (def row : xml.row) {
-        index++
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        def newRow = getNewRow()
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-
-        def indexCell = 0
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
 
         // графа 1
-        newRow.number = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
-        newRow.contract = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.contract =    row.cell[1].text()
 
         // графа 3
-        newRow.contractDate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.contractDate    = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
 
         // графа 4
-        newRow.amountOfTheGuarantee = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.amountOfTheGuarantee = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, false)
 
         // графа 5
-        newRow.dateOfTransaction = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.dateOfTransaction = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
 
         // графа 6
-        newRow.rateOfTheBankOfRussia = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.rateOfTheBankOfRussia  = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 7
-        newRow.interestRate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.interestRate = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         // графа 8
-        newRow.baseForCalculation = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.baseForCalculation = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
 
         // графа 9
-        newRow.accrualAccountingStartDate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.accrualAccountingStartDate =  parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
 
         // графа 10
-        newRow.accrualAccountingEndDate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.accrualAccountingEndDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
 
         // графа 11
-        newRow.preAccrualsStartDate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.preAccrualsStartDate =   parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
 
         // графа 12
-        newRow.preAccrualsEndDate = getNumber(row.cell[indexCell].text())
-        index++
+        newRow.preAccrualsEndDate =    parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
 
-        // графа 13
-        newRow.incomeCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 14
-        newRow.incomeRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 15
-        newRow.accountingCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 16
-        newRow.accountingRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 17
-        newRow.preChargeCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 18
-        newRow.preChargeRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 19
-        newRow.taxPeriodCurrency = getNumber(row.cell[indexCell].text())
-        index++
-
-        // графа 20
-        newRow.taxPeriodRuble = getNumber(row.cell[indexCell].text())
-        index++
-
-        newRows.add(newRow)
+        rows.add(newRow)
     }
-    dataRowHelper.insert(newRows, 1)
-
-    // итоговая строка
-    if (xml.rowTotal.size() > 0) {
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-        index = 12
-
-        // TODO (Ramil Timerbaev) поправить/уточнить
-        // графа 13
-        total.incomeCurrency = getNumber(row.cell[index++].text())
-        // графа 14
-        total.incomeRuble = getNumber(row.cell[index++].text())
-        // графа 15
-        total.accountingCurrency = getNumber(row.cell[index++].text())
-        // графа 16
-        total.accountingRuble = getNumber(row.cell[index++].text())
-        // графа 17
-        total.preChargeCurrency = getNumber(row.cell[index++].text())
-        // графа 18
-        total.preChargeRuble = getNumber(row.cell[index++].text())
-        // графа 19
-        total.taxPeriodCurrency = getNumber(row.cell[index++].text())
-        // графа 20
-        total.taxPeriodRuble = getNumber(row.cell[index++].text())
-
-        return total
-    } else {
-        return null
-    }
+    dataRowHelper.save(rows)
 }
 
 /**
