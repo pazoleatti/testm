@@ -6,8 +6,15 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import com.aplana.sbrf.taxaccounting.service.script.ImportService;
+import groovy.util.XmlSlurper;
+import groovy.util.slurpersupport.GPathResult;
 import org.springframework.util.StringUtils;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -533,10 +540,10 @@ public final class ScriptUtils {
     /**
      * Проверка заголовка импортируемого файла на соответствие размерности
      *
-     * @param currentColSize
-     * @param currentRowSize
-     * @param referenceColSize
-     * @param referenceRowSize
+     * @param currentColSize - количество столбцов в текущих данных
+     * @param currentRowSize - количество строк в текущих данных
+     * @param referenceColSize - количество ожидаемых столбцов
+     * @param referenceRowSize - количество ожидаемых строк
      */
     public static void checkHeaderSize(int currentColSize, int currentRowSize, int referenceColSize, int referenceRowSize) {
         if (currentColSize < referenceColSize) {
@@ -790,5 +797,49 @@ public final class ScriptUtils {
     /** Выдать сообщение что импорт не предусмотрен. */
     public static void noImport(Logger logger) {
         logger.error(IMPORT_IS_NOT_PROVIDED);
+    }
+
+    /**
+     * Получение xml с общими проверками
+     */
+    public static GPathResult getXML(BufferedInputStream inputStream, ImportService importService, String fileName, String startStr, String endStr) {
+        fileName = fileName != null ? fileName.toLowerCase() : null;
+        if (fileName == null || fileName == "") {
+            throw new ServiceException("Имя файла не должно быть пустым");
+        }
+
+        if (inputStream == null) {
+            throw new ServiceException("Поток данных пуст");
+        }
+
+        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
+            throw new ServiceException("Выбранный файл не соответствует формату xlsx/xlsm!");
+        }
+
+        String xmlString = null;
+        try {
+            xmlString = importService.getData(inputStream, fileName, "windows-1251", startStr, endStr);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        if (xmlString == null) {
+            throw new ServiceException("Отсутствие значения после обработки потока данных");
+        }
+
+        GPathResult xml = null;
+        try {
+            xml = new XmlSlurper().parseText(xmlString);
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (SAXException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (ParserConfigurationException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        if (xml == null) {
+            throw new ServiceException("Отсутствие значения после обработки потока данных");
+        }
+
+        return xml;
     }
 }
