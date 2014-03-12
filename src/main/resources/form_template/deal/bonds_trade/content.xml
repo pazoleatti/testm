@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>384</id>
         <name>Реализация и приобретение ценных бумаг</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Реализация и приобретение ценных бумаг</name>
-    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с реализацией и приобретением ценных бумаг</fullName>
-    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» марта 2013  № ___</code>
+    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с
+        реализацией и приобретением ценных бумаг
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» марта 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -35,6 +38,8 @@
         <name>Наименование контрагента и ОПФ</name>
         <order>3</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +49,18 @@
         <name>Режим переговорных сделок</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>63</nameAttributeId>
         <refBookAttributeId>63</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
         <id>18099</id>
         <name>ИНН/КИО контрагента</name>
         <order>5</order>
         <width>7</width>
+        <parentId>18097</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -62,15 +70,19 @@
         <name>Страна местонахождения контрагента</name>
         <order>6</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>contraCountryCode</alias>
         <checking>false</checking>
         <id>18101</id>
         <name>Код страны местонахождения контрагента</name>
         <order>7</order>
         <width>5</width>
+        <parentId>18100</parentId>
+        <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>transactionSumCurrency</alias>
@@ -89,6 +101,8 @@
         <name>Валюта расчетов по сделке</name>
         <order>9</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>64</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -174,22 +188,24 @@
         <name>Тип сделки</name>
         <order>18</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>69</nameAttributeId>
         <refBookAttributeId>69</refBookAttributeId>
     </columns>
-    <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10849</id>
-        <italic>false</italic>
-    </styles>
     <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10705</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10849</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

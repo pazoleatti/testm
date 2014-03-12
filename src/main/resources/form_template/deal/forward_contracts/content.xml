@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>391</id>
         <name>Поставочные срочные сделки, базисным активом которых является иностранная валюта</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Поставочные срочные сделки, базисным активом которых является иностранная валюта</name>
-    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по признанным Контролируемыми сделками поставочным срочным сделкам, базисным активом которых является иностранная валюта</fullName>
-    <code>ПРИЛОЖЕНИЕ 3|к Распоряжению|от «__» апреля 2013  № ___</code>
+    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по признанным Контролируемыми сделками
+        поставочным срочным сделкам, базисным активом которых является иностранная валюта
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 3|к Распоряжению|от «__» апреля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -35,15 +38,18 @@
         <name>Полное наименование с указанием ОПФ</name>
         <order>3</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>inn</alias>
         <checking>false</checking>
         <id>18075</id>
         <name>ИНН/КИО</name>
         <order>4</order>
         <width>7</width>
+        <parentId>18074</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -53,15 +59,18 @@
         <name>Наименование страны регистрации</name>
         <order>5</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <id>18077</id>
         <name>Код страны регистрации по классификатору ОКСМ</name>
         <order>6</order>
         <width>5</width>
+        <parentId>18076</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -116,6 +125,8 @@
         <name>Код валюты по сделке</name>
         <order>12</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>65</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -125,6 +136,8 @@
         <name>Код страны происхождения предмета сделки по классификатору ОКСМ</name>
         <order>13</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>51</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -186,19 +199,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10856</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10712</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10856</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

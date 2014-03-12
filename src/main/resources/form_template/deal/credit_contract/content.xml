@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>385</id>
         <name>Уступка прав требования по кредитным договорам</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Уступка прав требования по кредитным договорам</name>
-    <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с операциями уступки прав требования по кредитным договорам</fullName>
-    <code>ПРИЛОЖЕНИЕ 4|к Распоряжению|от «__» апреля 2013  № ___</code>
+    <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с операциями уступки
+        прав требования по кредитным договорам
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 4|к Распоряжению|от «__» апреля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -26,15 +29,18 @@
         <name>Полное наименование с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
         <id>18115</id>
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
+        <parentId>18114</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,6 +50,8 @@
         <name>Страна регистрации</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -71,6 +79,8 @@
         <name>Код единицы измерения по ОКЕИ</name>
         <order>7</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>58</nameAttributeId>
         <refBookAttributeId>57</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -113,19 +123,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10850</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10706</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10850</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>200</id>
         <name>Расчёт суммы налога по каждому транспортному средству</name>
@@ -35,6 +36,8 @@
         <name>Код по ОКТМО</name>
         <order>3</order>
         <width>11</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +47,18 @@
         <name>Код вида транспортного средства (ТС)</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>423</nameAttributeId>
         <refBookAttributeId>422</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>tsType</alias>
         <checking>false</checking>
         <id>204</id>
         <name>Вид ТС</name>
         <order>5</order>
         <width>20</width>
+        <parentId>203</parentId>
         <refBookAttributeId>423</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -99,6 +105,8 @@
         <name>Единица измерения налоговой базы по ОКЕИ</name>
         <order>10</order>
         <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>58</nameAttributeId>
         <refBookAttributeId>57</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -108,6 +116,8 @@
         <name>Экологический класс</name>
         <order>11</order>
         <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>401</nameAttributeId>
         <refBookAttributeId>400</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -147,6 +157,8 @@
         <name>Налоговая ставка</name>
         <order>15</order>
         <width>9</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>416</nameAttributeId>
         <refBookAttributeId>416</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -167,6 +179,8 @@
         <order>17</order>
         <width>5</width>
         <filter>CODE = 30200 OR CODE = 20210 OR CODE = 20220 OR CODE = 20230</filter>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>16</nameAttributeId>
         <refBookAttributeId>15</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -218,19 +232,19 @@
         <precision>0</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <id>11702</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемое поле</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10543</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>11702</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

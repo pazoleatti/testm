@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>383</id>
         <name>Сделки РЕПО</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Сделки РЕПО</name>
-    <fullName>Отчет в отношении доходов и расходов по сделкам РЕПО ОАО «Сбербанк России», признанных Контролируемыми сделками</fullName>
-    <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от «__» марта 2013  № ___</code>
+    <fullName>Отчет в отношении доходов и расходов по сделкам РЕПО ОАО «Сбербанк России», признанных Контролируемыми
+        сделками
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от «__» марта 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -26,15 +29,18 @@
         <name>Полное наименование юридического лица с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
         <id>18026</id>
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
+        <parentId>18025</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +50,18 @@
         <name>Наименование страны регистрации</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <id>18028</id>
-        <name>Код страны по классификатору  ОКСМ</name>
+        <name>Код страны по классификатору ОКСМ</name>
         <order>5</order>
         <width>5</width>
+        <parentId>18027</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -98,6 +107,8 @@
         <name>Режим переговорных сделок</name>
         <order>10</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>63</nameAttributeId>
         <refBookAttributeId>63</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -155,6 +166,8 @@
         <name>Код валюты расчетов по сделке</name>
         <order>16</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>64</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -187,19 +200,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10848</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10704</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10848</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

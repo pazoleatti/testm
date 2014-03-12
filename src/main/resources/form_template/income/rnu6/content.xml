@@ -1,13 +1,20 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>318</id>
-        <name>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления</name>
+        <name>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения
+            метода начисления
+        </name>
         <status>NORMAL</status>
         <taxType>INCOME</taxType>
     </type>
     <fixedRows>false</fixedRows>
-    <name>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления</name>
-    <fullName>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода начисления</fullName>
+    <name>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения метода
+        начисления
+    </name>
+    <fullName>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения
+        метода начисления
+    </fullName>
     <code>РНУ-6</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
@@ -28,13 +35,14 @@
         <width>0</width>
         <maxLength>1000</maxLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>kny</alias>
         <checking>false</checking>
         <id>16614</id>
         <name>Код налогового учета</name>
         <order>3</order>
         <width>6</width>
+        <parentId>16633</parentId>
         <refBookAttributeId>140</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">

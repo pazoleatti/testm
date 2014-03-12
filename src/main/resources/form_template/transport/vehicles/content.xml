@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>201</id>
         <name>Сведения о транспортных средствах, по которым уплачивается транспортный налог</name>
@@ -26,15 +27,18 @@
         <name>Код ОКТМО</name>
         <order>2</order>
         <width>11</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>regionName</alias>
         <checking>false</checking>
         <id>17557</id>
         <name>Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)</name>
         <order>3</order>
         <width>12</width>
+        <parentId>17556</parentId>
         <refBookAttributeId>841</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +48,18 @@
         <name>Код вида ТС</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>423</nameAttributeId>
         <refBookAttributeId>422</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>tsType</alias>
         <checking>false</checking>
         <id>17559</id>
         <name>Вид ТС</name>
         <order>5</order>
         <width>10</width>
+        <parentId>17558</parentId>
         <refBookAttributeId>423</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -80,6 +87,8 @@
         <name>Экологический класс</name>
         <order>8</order>
         <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>401</nameAttributeId>
         <refBookAttributeId>400</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -108,6 +117,8 @@
         <name>Мощность (ед. измерения)</name>
         <order>11</order>
         <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>58</nameAttributeId>
         <refBookAttributeId>57</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">

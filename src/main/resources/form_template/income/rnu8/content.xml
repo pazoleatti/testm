@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>320</id>
         <name>(РНУ-8) Простой регистр налогового учёта «Требования»</name>
@@ -6,8 +7,8 @@
         <taxType>INCOME</taxType>
     </type>
     <fixedRows>false</fixedRows>
-    <name>(РНУ-8) Простой регистр налогового учёта «Требования»  </name>
-    <fullName>(РНУ-8) Простой регистр налогового учёта «Требования»  </fullName>
+    <name>(РНУ-8) Простой регистр налогового учёта «Требования»</name>
+    <fullName>(РНУ-8) Простой регистр налогового учёта «Требования»</fullName>
     <code>РНУ-8</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
@@ -28,13 +29,14 @@
         <width>0</width>
         <maxLength>255</maxLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
         <checking>false</checking>
         <id>17301</id>
         <name>Код налогового учета</name>
         <order>3</order>
         <width>18</width>
+        <parentId>17302</parentId>
         <refBookAttributeId>140</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +46,18 @@
         <name>Номер</name>
         <order>4</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>350</nameAttributeId>
         <refBookAttributeId>350</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>name</alias>
         <checking>false</checking>
         <id>17303</id>
         <name>Наименование счёта</name>
         <order>5</order>
         <width>10</width>
+        <parentId>17302</parentId>
         <refBookAttributeId>142</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -76,19 +81,19 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <id>10341</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10161</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10341</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

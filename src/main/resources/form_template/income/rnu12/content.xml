@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>364</id>
         <name>(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам</name>
@@ -28,13 +29,14 @@
         <width>0</width>
         <maxLength>1000</maxLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
         <checking>false</checking>
         <id>17307</id>
         <name>Код налогового учёта</name>
         <order>3</order>
         <width>10</width>
+        <parentId>17309</parentId>
         <refBookAttributeId>130</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -53,6 +55,8 @@
         <name>Символ ОПУ (номер)</name>
         <order>5</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>134</nameAttributeId>
         <refBookAttributeId>134</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">

@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>387</id>
         <name>Предоставление корпоративного кредита</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Предоставление корпоративного кредита</name>
-    <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением корпоративных кредитов</fullName>
-    <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от «__» апреля 2013  № ___</code>
+    <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением
+        корпоративных кредитов
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от «__» апреля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -26,15 +29,18 @@
         <name>Полное наименование юридического лица с указанием ОПФ</name>
         <order>2</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>inn</alias>
         <checking>false</checking>
         <id>18003</id>
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
+        <parentId>18002</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,6 +50,8 @@
         <name>Страна регистрации</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -114,19 +122,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10852</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10708</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10852</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

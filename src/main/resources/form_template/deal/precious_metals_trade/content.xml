@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>394</id>
         <name>Купля-продажа драгоценных металлов</name>
@@ -7,8 +8,10 @@
     </type>
     <fixedRows>false</fixedRows>
     <name>Купля-продажа драгоценных металлов</name>
-    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с операциями купли-продажи драгоценных металлов</fullName>
-    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» апреля 2013  № ___</code>
+    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с
+        операциями купли-продажи драгоценных металлов
+    </fullName>
+    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» апреля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -35,6 +38,8 @@
         <name>Полное наименование с указанием ОПФ</name>
         <order>3</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +49,18 @@
         <name>Признак взаимозависимости</name>
         <order>4</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>inn</alias>
         <checking>false</checking>
         <id>18142</id>
         <name>ИНН/КИО</name>
         <order>5</order>
         <width>7</width>
+        <parentId>18140</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -62,15 +70,18 @@
         <name>Наименование страны регистрации</name>
         <order>6</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <id>18144</id>
         <name>Код страны по классификатору ОКСМ</name>
         <order>7</order>
         <width>5</width>
+        <parentId>18143</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -116,6 +127,8 @@
         <name>Направленности сделок</name>
         <order>12</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>46</nameAttributeId>
         <refBookAttributeId>46</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -125,6 +138,8 @@
         <name>Признак физической поставки драгоценного металла</name>
         <order>13</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>44</nameAttributeId>
         <refBookAttributeId>44</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -134,6 +149,8 @@
         <name>Наименование драгоценного металла</name>
         <order>14</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>42</nameAttributeId>
         <refBookAttributeId>40</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -143,6 +160,8 @@
         <name>Внешнеторговая сделка</name>
         <order>15</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
         <refBookAttributeId>250</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -152,6 +171,8 @@
         <name>Код страны по классификатору ОКСМ (цифровой)</name>
         <order>16</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -161,6 +182,8 @@
         <name>Регион (код)</name>
         <order>17</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>10</nameAttributeId>
         <refBookAttributeId>9</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -188,6 +211,8 @@
         <name>Код страны по классификатору ОКСМ (цифровой)</name>
         <order>20</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -197,6 +222,8 @@
         <name>Регион (код)</name>
         <order>21</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>10</nameAttributeId>
         <refBookAttributeId>9</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -224,6 +251,8 @@
         <name>Код условия поставки</name>
         <order>24</order>
         <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>627</nameAttributeId>
         <refBookAttributeId>626</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -295,19 +324,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <id>10859</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10715</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>10859</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

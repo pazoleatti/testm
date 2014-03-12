@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
     <type>
         <id>317</id>
         <name>(РНУ-5) Простой регистр налогового учёта «расходы»</name>
@@ -28,13 +29,14 @@
         <width>0</width>
         <maxLength>255</maxLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
         <checking>false</checking>
         <id>16594</id>
         <name>Код налогового учёта</name>
         <order>3</order>
         <width>10</width>
+        <parentId>16595</parentId>
         <refBookAttributeId>130</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -44,15 +46,18 @@
         <name>Балансовый счёт. Номер</name>
         <order>4</order>
         <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>360</nameAttributeId>
         <refBookAttributeId>360</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>name</alias>
         <checking>false</checking>
         <id>16596</id>
         <name>Балансовый счёт. Наименование</name>
         <order>5</order>
         <width>20</width>
+        <parentId>16595</parentId>
         <refBookAttributeId>132</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -66,19 +71,19 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <id>10330</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <id>10260</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10330</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
