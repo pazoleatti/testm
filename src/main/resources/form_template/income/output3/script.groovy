@@ -74,7 +74,7 @@ void calc() {
 
         for (def row in dataRows) {
             // графа 2
-            row.okatoCode = "45293554000"
+            row.okatoCode = "45397000"
             // графа 3
             def paymentType = getRefBookValue(24, row.paymentType)?.CODE?.stringValue
             if ('1'.equals(paymentType)) {
