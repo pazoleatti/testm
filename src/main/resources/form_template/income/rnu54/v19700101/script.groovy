@@ -295,12 +295,12 @@ def logicalCheck() {
             course = getCourse(row.currencyCode, reportDate)
 
             // 2. Проверка даты первой части РЕПО (графа 7)
-            if (row.part1REPODate > reportDate) {
+            if (row.part1REPODate >= reportDate) {
                 loggerError(errorMsg + 'неверно указана дата первой части сделки!')//TODO вернуть error
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
-            if (row.part2REPODate <= reportDate) {
+            if (row.part2REPODate < reportDate) {
                 loggerError(errorMsg + 'неверно указана дата второй части сделки!')//TODO вернуть error
                 return false
             }
