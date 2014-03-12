@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 401 - Привлечение гарантий 
+ * 401 - Привлечение гарантий (24)
  * (похож на "Предоставление гарантий")
  *
  * @author Vyacheslav Petrov
@@ -72,7 +72,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'inn', 'countryName', 'docNumber', 'docDate', 'dealNumber',
+def nonEmptyColumns = ['rowNumber', 'fullName', 'docNumber', 'docDate', 'dealNumber',
         'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
@@ -84,11 +84,6 @@ def reportPeriodEndDate = null
 def currentDate = new Date()
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -119,16 +114,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
+    if (!fileName.endsWith('.xlsx')) {
         throw new ServiceException('Выбранный файл не соответствует формату xls!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -143,44 +138,39 @@ void logicCheck() {
         return
     }
 
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    def dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def rowNum = row.getIndex()
 
+        // 1. Обязательность заполнения графы 1-12
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
         def dealDateCell = row.getCell('dealDate')
 
-
-        // Проверка доходности
         def sumCell = row.getCell('sum')
         def priceCell = row.getCell('price')
         def totalCell = row.getCell('total')
         def msgSum = sumCell.column.name
+        // 2. Проверка цены
         if (priceCell.value != sumCell.value) {
             def msg = priceCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
+        // 3. Проверка стоимости
         if (totalCell.value != sumCell.value) {
             def msg = totalCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
-        // Корректность даты совершения сделки
+        // 4. Корректность даты совершения сделки
         def dealDoneDateCell = row.getCell('dealDoneDate')
         if (dealDoneDateCell.value < dealDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-        // Проверки соответствия НСИ
-        checkNSI(9, row, "fullName")
     }
-
     checkItog(dataRows)
 }
 
@@ -206,9 +196,9 @@ void checkItog(def dataRows) {
     }, new CheckGroupSum() {
         @Override
         String check(DataRow<Cell> row1, DataRow<Cell> row2) {
-            if (row1.price != row2.price) {
+            /*if (row1.price != row2.price) {
                 return getColumnName(row1, 'price')
-            }
+            }*/
             if (row1.total != row2.total) {
                 return getColumnName(row1, 'total')
             }
@@ -221,7 +211,7 @@ void checkItog(def dataRows) {
 }
 
 // Алгоритмы заполнения полей формы
-void    calc() {
+void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     if (dataRows.isEmpty()) {
@@ -242,11 +232,6 @@ void    calc() {
         row.price = row.sum
         // Расчет поля "Итого"
         row.total = row.sum
-
-        // Расчет полей зависимых от справочников
-        def map = getRefBookValue(9, row.fullName)
-        row.inn = map?.INN_KIO?.stringValue
-        row.countryName = map?.COUNTRY?.referenceValue
     }
 
     // Добавление подитов
@@ -270,19 +255,19 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     newRow.setAlias('itg#'.concat(i.toString()))
 
     // Расчеты подитоговых значений
-    def BigDecimal sumItg = 0, priceitg = 0, totalItg = 0
+    def BigDecimal sumItg = 0, /*priceitg = 0,*/ totalItg = 0
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         def row = dataRows.get(j)
         def sum = row.sum
-        def price = row.price
+        //def price = row.price
         def total = row.total
 
         sumItg += sum != null ? sum : 0
-        priceitg += price != null ? price : 0
+        //priceitg += price != null ? price : 0
         totalItg += total != null ? total : 0
     }
     newRow.sum = sumItg
-    newRow.price = priceitg
+   // newRow.price = priceitg
     newRow.total = totalItg
 
     return newRow
@@ -319,7 +304,7 @@ void importData() {
             (xml.row[0].cell[4]): 'Дата договора',
             (xml.row[0].cell[5]): 'Номер сделки',
             (xml.row[0].cell[6]): 'Дата сделки',
-            (xml.row[0].cell[7]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',
+            (xml.row[0].cell[7]): 'Сумма расходов Банка по данным бухгалтерского учета, руб.',
             (xml.row[0].cell[8]): 'Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.',
             (xml.row[0].cell[9]): 'Итого стоимость без учета НДС, акцизов и пошлины, руб.',
             (xml.row[0].cell[10]): 'Дата совершения сделки',
@@ -347,8 +332,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 2
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -391,7 +376,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
             }
         }
         xmlIndexCol++
@@ -407,9 +392,9 @@ void addData(def xml, int headRowCount) {
                 }
             }
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
+            if ((text != null && !text.isEmpty() && !text.equals(map?.NAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.NAME?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
             }
         }
         xmlIndexCol++
