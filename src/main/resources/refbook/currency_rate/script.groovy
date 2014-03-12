@@ -19,8 +19,6 @@ import java.text.SimpleDateFormat
  *
  * @author Stanislav Yasinskiy
  */
-
-
 switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXML()
@@ -30,20 +28,19 @@ switch (formDataEvent) {
 void importFromXML() {
     def final REFBOOK_ID = 22
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
-    def refBook = refBookFactory.get(REFBOOK_ID)
     def SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
     def reader = null
-    def Date version = null  //дата актуальности
+    def Date version = null  // дата актуальности
     def boolean currencySector = false // флаг присутствия в секции с курсами
     def Map<String, RefBookValue> recordsMap // аттрибут и его значение
     def List<Map<String, RefBookValue>> insertList = new ArrayList<Map<String, RefBookValue>>() // новые записи
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>() // измененные записи
     def Long code = null // код валюты
     def Double rate = null // курс валюты
+    def BigDecimal lotSize = 1
     def Map<String, Number> recordsDB = new HashMap<String, Number>() // записи в БД
 
     try {
-
         def XMLInputFactory factory = XMLInputFactory.newInstance();
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
@@ -62,7 +59,7 @@ void importFromXML() {
                     }
                 }
 
-                //Дошли до секции с курсами
+                // Дошли до секции с курсами
                 if (reader.getName().equals(QName.valueOf("CurrencyRates"))) {
                     currencySector = true
                 }
@@ -79,9 +76,20 @@ void importFromXML() {
                     }
                 }
 
+                // LotSize
+                if (currencySector && reader.getName().equals(QName.valueOf("LotSize"))) {
+                    def String val = reader.getElementText()?.trim()
+                    def tmp = val.replaceAll(",", ".").replace(" ", "")
+                    if (tmp.matches("-?\\d+(\\.\\d+)?")) {
+                        lotSize = new BigDecimal(tmp)
+                    } else {
+                        throw new ServiceException("Ошибка получения значения атрибута «LotSize», равного \"$tmp\"")
+                    }
+                }
+
                 // Курс валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Rate"))) {
-                    rate = reader.getElementText().toDouble()
+                    rate = new BigDecimal(reader.getElementText())
                 }
             }
 
@@ -91,13 +99,14 @@ void importFromXML() {
                 recordsMap.put("CODE_NUMBER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
                 recordsMap.put("NAME", new RefBookValue(RefBookAttributeType.REFERENCE, code))
                 recordsMap.put("CODE_LETTER", new RefBookValue(RefBookAttributeType.REFERENCE, code))
-                recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate))
+                recordsMap.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, rate/lotSize))
                 if (recordsDB.containsKey(code)) {
                     recordsMap.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordsDB.get(code)))
                     updateList.add(recordsMap)
                 } else {
                     insertList.add(recordsMap)
                 }
+                lotSize = 1
             }
 
             reader.next()
