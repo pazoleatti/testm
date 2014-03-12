@@ -463,14 +463,16 @@ create table data_row (
   form_data_id number(18) not null,
   alias varchar2(20),
   ord number(14,0) not null,
-  type number(1) not null
+  type number(1) not null,
+  manual number(1) default 0 not null
 );
 comment on table data_row is 'Строки данных налоговых форм';
 comment on column data_row.alias is 'Идентификатор строки';
 comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
 comment on column data_row.id is 'Код строки для доступа из скриптов';
 comment on column data_row.ord is 'Номер строки в форме';
-comment on column data_row.type is 'тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
+comment on column data_row.type is 'Тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
+comment on column data_row.manual is 'Режим ввода данных (0 - обычная запись; 1 - версия ручного ввода)';
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------
