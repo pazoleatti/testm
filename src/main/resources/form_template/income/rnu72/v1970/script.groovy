@@ -56,7 +56,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -189,4 +191,104 @@ def BigDecimal calc9(def tmp) {
         return null
     }
     return ((BigDecimal)(tmp >= 0 ? tmp : 0)).setScale(2, BigDecimal.ROUND_HALF_UP)
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Дата',
+            (xml.row[0].cell[3]): 'Номинал права требования, закладной',
+            (xml.row[0].cell[4]): 'Цена приобретения права требования, закладной',
+            (xml.row[0].cell[5]): 'Доход (выручка) от реализации финансовых услуг',
+            (xml.row[0].cell[6]): 'Стоимость права требования, закладной, подлежащая отнесению на расходы в соответствии с п.3 ст. 279 НК РФ',
+            (xml.row[0].cell[7]): 'Стоимость права требования, закладной, списанных за счёт резервов',
+            (xml.row[0].cell[8]): 'Убыток',
+            (xml.row[0].cell[9]): 'Прибыль',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7',
+            (xml.row[1].cell[8]): '8',
+            (xml.row[1].cell[9]): '9'
+
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+
+        // графа 1
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+
+        // графа 3
+        newRow.nominal = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, false)
+
+        // графа 4
+        newRow.price = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+
+        // графа 5
+        newRow.income = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+
+        // графа 6
+        newRow.cost279 = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+
+        // графа 7
+        newRow.costReserve = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }
