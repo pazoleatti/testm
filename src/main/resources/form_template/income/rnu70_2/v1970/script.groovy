@@ -2,6 +2,7 @@ package form_template.income.rnu70_2.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -72,7 +73,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -97,7 +100,7 @@ def editableColumns = ['name', 'inn', 'number', 'date', 'cost', 'repaymentDate',
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns =  allColumns - editableColumns//['financialResult1', 'rateBR', 'perc', 'loss', 'financialResult2', 'maxLoss', 'financialResultAdjustment']
+def autoFillColumns = allColumns - editableColumns//['financialResult1', 'rateBR', 'perc', 'loss', 'financialResult2', 'maxLoss', 'financialResultAdjustment']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -116,6 +119,10 @@ def groupColums = ['name', 'number', 'date']
 @Field
 def totalColumns = ['income', 'financialResult1', 'perc', 'loss', 'financialResultAdjustment']
 
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
 // Дата начала отчетного периода
 @Field
 def startDate
@@ -123,6 +130,13 @@ def startDate
 // Дата окончания отчетного периода
 @Field
 def reportDate
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
@@ -517,7 +531,7 @@ def getCalcTotalNameRow(def row, def dataRows) {
         newRow.getCell(it).editable = false
     }
     for (column in totalColumns) {
-        newRow.getCell(column).value = new BigDecimal(0)
+        newRow."$column" = new BigDecimal(0)
     }
 
     // идем от текущей позиции вверх и ищем нужные строки
@@ -531,7 +545,7 @@ def getCalcTotalNameRow(def row, def dataRows) {
 
             for (column in totalColumns) {
                 if (srow?.get(column) != null) {
-                    newRow.getCell(column).value = newRow.getCell(column).value + (BigDecimal) srow.get(column)
+                    newRow."$column" = newRow.getCell(column).value + (BigDecimal) srow.get(column)
                 }
             }
         }
@@ -578,4 +592,175 @@ DataRow<Cell> getRow(int i, def dataRows) {
     } else {
         return null
     }
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 19, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Наименование контрагента',
+            (xml.row[0].cell[2]): 'ИНН (его аналог)',
+            (xml.row[0].cell[3]): 'Договор цессии',
+            (xml.row[0].cell[5]): 'Стоимость права требования',
+            (xml.row[0].cell[6]): 'Дата погашения основного долга',
+            (xml.row[0].cell[7]): 'Дата уступки права требования',
+            (xml.row[0].cell[8]): 'Доход (выручка) от уступки права требования',
+            (xml.row[0].cell[9]): 'Финансовый результат уступки права требования',
+            (xml.row[0].cell[10]): 'Валюта долгового обязательства',
+            (xml.row[0].cell[11]): 'Ставка Банка России',
+            (xml.row[0].cell[12]): 'Ставка процента, установленная соглашением сторон',
+            (xml.row[0].cell[13]): 'Проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
+            (xml.row[0].cell[14]): 'Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
+            (xml.row[0].cell[15]): 'Рыночная цена прав требования для целей налогообложения',
+            (xml.row[0].cell[16]): 'Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения',
+            (xml.row[0].cell[17]): 'Максимальная сумма убытка, рассчитанного исходя из рыночной цены для целей налогообложения',
+            (xml.row[0].cell[18]): 'Корректировка финансового результата',
+            (xml.row[1].cell[3]): 'Номер',
+            (xml.row[1].cell[4]): 'Дата',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9',
+            (xml.row[2].cell[9]): '10',
+            (xml.row[2].cell[10]): '11',
+            (xml.row[2].cell[11]): '12',
+            (xml.row[2].cell[12]): '13',
+            (xml.row[2].cell[13]): '14',
+            (xml.row[2].cell[14]): '15',
+            (xml.row[2].cell[15]): '16',
+            (xml.row[2].cell[16]): '17',
+            (xml.row[2].cell[17]): '18',
+            (xml.row[2].cell[18]): '19'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        newRow.name = row.cell[1].text()
+
+        // графа 3
+        newRow.inn = row.cell[2].text()
+
+        // графа 4
+        newRow.number = row.cell[3].text()
+
+        // графа 5
+        newRow.date = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
+
+        // графа 6
+        newRow.cost = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+
+        // графа 7
+        newRow.repaymentDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
+
+        // графа 8
+        newRow.concessionsDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+
+        // графа 9
+        newRow.income = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+
+        // графа 10
+
+        // графа 11
+        if (row.cell[10].text() == "Российский рубль") { //TODO http://jira.aplana.com/browse/SBRFACCTAX-6288
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", xlsIndexRow, 10 + colOffset)
+        } else {
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[10].text(), xlsIndexRow, 10 + colOffset)
+        }
+
+        // графа 12
+
+        // графа 13
+        newRow.interestRate = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+
+        // графа 14
+
+        // графа 15
+
+        // графа 16
+        newRow.marketPrice = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }

@@ -10,26 +10,21 @@ import groovy.transform.Field
  * formTemplateId=338
  *
  * @author auldanov
- *
- * TODO
- *      - в чтз обязательные только графа 1, 2, аналитик сказала сделать все обязательными
  */
 
-// графа 1  - number                - Номер территориального банка - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
-// графа 2  - name                  - Наименование территориального банка / подразделения Центрального аппарата - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - issuer                - Эмитент
-// графа 4  - registrationNumber    - Номер государственной регистрации
-// графа 5  - buyDate               - Дата приобретения
-// графа 6  - cost                  - Номинальная стоимость (ед. валюты)
-// графа 7  - bondsCount            - Количество облигаций (шт.)
-// графа 8  - upCost                - Средневзвешенная цена одной бумаги на дату размещения (ед.вал.)
-// графа 9  - circulationTerm       - Срок обращения условиям выпуска (дни)
-// графа 10 - percent               - Процентный доход (руб.коп.)
-// графа 11 - currencyCode          - Код валюты номинала - атрибут 64 - CODE - "Код валюты. Цифровой", справочник 15 "Общероссийский классификатор валют"
+// графа    - fix
+// графа 1  - number                - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
+// графа 2  - name                  - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
+// графа 3  - issuer                - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
+// графа 4  - registrationNumber    - зависит от графы 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
+// графа 5  - buyDate
+// графа 6  - cost
+// графа 7  - bondsCount
+// графа 8  - upCost
+// графа 9  - circulationTerm
+// графа 10 - percent
+// графа 11 - currencyCode          - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочника 84 «Ценные бумаги»
 
-/**
- * Выполнение действий по событиям
- */
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         formDataService.checkUnique(formData, logger)
@@ -55,6 +50,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        logicCheck()
         break
     case FormDataEvent.COMPOSE :
         consolidation()
@@ -76,22 +72,21 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'name', 'issuer', 'registrationNumber', 'buyDate', 'cost',
+def allColumns = ['fix', 'number', 'name', 'issuer', 'registrationNumber', 'buyDate', 'cost',
         'bondsCount', 'upCost', 'circulationTerm', 'percent', 'currencyCode']
 
-// Редактируемые атрибуты (графа 2..9, 11)
+// Редактируемые атрибуты (графа 2, 3, 5..9)
 @Field
-def editableColumns = ['name', 'issuer', 'registrationNumber', 'buyDate', 'cost',
-        'bondsCount', 'upCost', 'circulationTerm', 'currencyCode']
+def editableColumns = ['name', 'issuer', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1..11)
+// TODO (Ramil Timerbaev) сделать обязательным графу 3, когда появятся данные в справочнике "ценные бумаги"
+// Проверяемые на пустые значения атрибуты (графа 2, 3, 5..10)
 @Field
-def nonEmptyColumns = ['number', 'name', 'issuer', 'registrationNumber', 'buyDate',
-        'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent', 'currencyCode']
+def nonEmptyColumns = ['name', /*'issuer',*/ 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 7, 10)
 @Field
@@ -103,7 +98,7 @@ def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 // Текущая дата
 @Field
@@ -111,47 +106,15 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            currentDate, rowIndex, cellName, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required = true) {
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            day, rowIndex, cellName, logger, required)
-}
-
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 /** Добавить новую строку. */
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def newRow = getNewRow()
     def index
 
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
@@ -166,25 +129,24 @@ def addRow() {
             index = getDataRow(dataRows, 'total' + alias).getIndex()
         }
     }
-    dataRowHelper.insert(newRow, index)
+    dataRowHelper.insert(getNewRow(), index)
 }
 
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    // отсортировать/группировать
+    sort(dataRows)
+
+    def lastDay = getReportPeriodEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        // графа 1
-        row.number = row.name
         // графа 10
         row.percent = calc10(row, lastDay)
     }
-
-    sort(dataRows)
 
     // посчитать итоги по разделам
     sections.each { section ->
@@ -198,12 +160,9 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
-    def lastDay = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    def lastDay = getReportPeriodEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -214,35 +173,13 @@ void logicCheck() {
         // 1. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // TODO (Ramil Timerbaev)
-        if (row.bondsCount == 0) {
-            def name = row.getCell('bondsCount').column.name
-            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-        }
-        if (row.circulationTerm == 0) {
-            def name = row.getCell('circulationTerm').column.name
-            logger.error(errorMsg + "деление на ноль: \"$name\" имеет нулевое значение.")
-        }
-
-        // 2. Проверка наименования террбанка
-        if (row.number != row.name) {
-            logger.error(errorMsg + 'номер территориального банка не соответствует названию.')
-        }
-
-        // 3. Арифметическая проверка графы 10
+        // 2. Арифметическая проверка графы 10
+        def needValue = [:]
         needValue['percent'] = calc10(row, lastDay)
         checkCalc(row, ['percent'], needValue, logger, true)
-
-        // Проверки соответствия НСИ
-        // 1. Проверка актуальности поля «Номер территориального банка»	(графа 1)
-        checkNSI(30, row, 'number')
-        // 2. Проверка актуальности поля «Наименование территориального банка / подразделения Центрального аппарата» (графа 2)
-        checkNSI(30, row, 'name')
-        // 3. Проверка актуальности поля «Код валюты номинала» (графа 3)
-        checkNSI(15, row, 'currencyCode')
     }
 
-    // 4. Арифметическая проверка строк промежуточных итогов (графа 7, 10)
+    // 3. Арифметическая проверка строк промежуточных итогов (графа 7, 10)
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
@@ -273,12 +210,11 @@ void consolidation() {
     updateIndexes(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        if (it.formTypeId == formData.formType.id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRowHelper = formDataService.getDataRowHelper(source)
-                def sourceDataRows = sourceDataRowHelper.allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 // копирование данных по разделам
                 sections.each { section ->
                     copyRows(sourceDataRows, dataRows, section, 'total' + section)
@@ -289,10 +225,6 @@ void consolidation() {
     dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
-
-/*
- * Вспомогательные методы.
- */
 
 /**
  * Копировать заданный диапозон строк из источника в приемник.
@@ -328,11 +260,7 @@ def getNewRow() {
     return newRow
 }
 
-/**
- * Отсорировать данные (по графе 1, 2).
- *
- * @param data данные нф (хелпер)
- */
+/** Отсорировать данные (по графе 1, 2). */
 void sort(def dataRows) {
     // список со списками строк каждого раздела для сортировки
     def sortRows = []
@@ -351,17 +279,13 @@ void sort(def dataRows) {
         sectionRows.sort { def a, def b ->
             // графа 1  - number (справочник)
             // графа 2  - name (справочник)
-
-            def recordA = getRefBookValue(30, a.number)
-            def recordB = getRefBookValue(30, b.number)
-
+            def recordA = getRefBookValue(30, a.name)
+            def recordB = getRefBookValue(30, b.name)
             def numberA = recordA?.SBRF_CODE?.value
             def numberB = recordB?.SBRF_CODE?.value
-
-            def nameA = recordA?.NAME?.value
-            def nameB = recordB?.NAME?.value
-
             if (numberA == numberB) {
+                def nameA = recordA?.NAME?.value
+                def nameB = recordB?.NAME?.value
                 return nameA <=> nameB
             }
             return numberA <=> numberB
@@ -401,22 +325,26 @@ def roundValue(def value, int precision) {
  * @param lastDay последний день отчетного месяца
  */
 def calc10(def row, def lastDay) {
-    def tmp
     if (row.buyDate == null || row.cost == null || row.bondsCount == null || row.upCost == null ||
-            row.circulationTerm == null || row.upCost == null) {
+            row.circulationTerm == null || row.upCost == null || row.bondsCount == 0 || row.circulationTerm == 0) {
         return null
     }
-    if (row.bondsCount == 0 || row.circulationTerm == 0) {
-        return null
-    }
+    def tmp
     tmp = ((row.cost / row.bondsCount) - row.upCost) * ((lastDay - row.buyDate) / row.circulationTerm) * row.bondsCount
     tmp = roundValue(tmp, 2)
 
     // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-    def record22 = getRefBookRecord(22, 'CODE_NUMBER', row.currencyCode.toString(), lastDay, row.getIndex(),
-            row.getCell('currencyCode').column.name, true)
+    def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
+    def String cellName = getColumnName(row, 'currencyCode')
+    // TODO (Ramil Timerbaev) проверить (как и в рну 39.1)
+    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
+            'CODE_NUMBER', currencyCode, lastDay, row.getIndex(), cellName, logger, true)
+    def rate = record?.RATE?.numberValue
+    if (rate == null) {
+        return null
+    }
 
-    tmp = tmp * record22.RATE.value
+    tmp = tmp * rate
     return roundValue(tmp, 2)
 }
 
@@ -425,4 +353,11 @@ void updateIndexes(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
 }

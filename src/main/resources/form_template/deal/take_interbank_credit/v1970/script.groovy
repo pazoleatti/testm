@@ -11,6 +11,22 @@ import groovy.transform.Field
  *
  * @author LHaziev
  */
+
+// 1.  rowNumber        № п/п
+// 2.  fullNamePerson   Полное наименование юридического лица с указанием ОПФ
+// 3.  inn              ИНН/КИО
+// 4.  countryName      Наименование страны регистрации
+// 5.  countryCode      Код страны регистрации по классификатору ОКСМ
+// 6.  docNum           Номер договора
+// 7.  docDate          Дата договора
+// 8.  dealNumber       Номер сделки
+// 9.  dealDate         Дата заключения сделки
+// 10. count            Количество
+// 11. sum              Сумма расходов Банка по данным бухгалтерского учета, руб.
+// 12. price            Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+// 13. total            Итого стоимость без учета НДС, акцизов и пошлины, руб.
+// 14. dealDoneDate     Дата совершения сделки
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
