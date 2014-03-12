@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
@@ -75,8 +74,6 @@ public class PeriodServiceImpl implements PeriodService{
     	// TODO: Нужно получить последний открытый для этого подразделения и типа налога.
     	return null;
     }
-    
-    
 
 	@Override
 	public boolean isActivePeriod(int reportPeriodId, long departmentId) {
@@ -130,26 +127,28 @@ public class PeriodServiceImpl implements PeriodService{
 			Number ord = record.get("ORD").getNumberValue();
 
 			if (name == null || name.isEmpty() || ord == null
-					|| record.get("START_DATE").getDateValue() == null || record.get("END_DATE").getDateValue() == null) {
+					|| record.get("START_DATE").getDateValue() == null
+					|| record.get("END_DATE").getDateValue() == null
+					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
-			Calendar start = new GregorianCalendar();
+			Calendar start = Calendar.getInstance();
 			start.setTime(record.get("START_DATE").getDateValue());
 			start.set(Calendar.YEAR, year);
-			Date startDate = start.getTime();
 
-			Calendar end = new GregorianCalendar();
+			Calendar end = Calendar.getInstance();
 			end.setTime(record.get("END_DATE").getDateValue());
 			end.set(Calendar.YEAR, year);
-			Date endDate = end.getTime();
+
+			Calendar calendarDate = Calendar.getInstance();
+			calendarDate.setTime(record.get("CALENDAR_START_DATE").getDateValue());
+			calendarDate.set(Calendar.YEAR, year);
 
 			newReportPeriod.setName(name);
 			newReportPeriod.setOrder(ord.intValue());
-			newReportPeriod.setStartDate(startDate);
-			newReportPeriod.setEndDate(endDate);
-
-			// TODO: установить правильный calendar_start_date http://conf.aplana.com/pages/viewpage.action?pageId=9570811 (Marat Fayzullin 2014-01-22)
-			newReportPeriod.setCalendarStartDate(startDate);
+			newReportPeriod.setStartDate(start.getTime());
+			newReportPeriod.setEndDate(end.getTime());
+			newReportPeriod.setCalendarStartDate(calendarDate.getTime());
 
 			reportPeriodDao.save(newReportPeriod);
 		} else {
@@ -220,6 +219,12 @@ public class PeriodServiceImpl implements PeriodService{
 	private void saveOrUpdate(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
 		DepartmentReportPeriod dp = departmentReportPeriodDao.get(departmentReportPeriod.getReportPeriod().getId(),
 				departmentReportPeriod.getDepartmentId());
+        String balance;
+        if (departmentReportPeriod.isBalance()) {
+            balance = "ввод остатков ";
+        } else {
+            balance = "";
+        }
 		if (dp == null) { //не существует
 			departmentReportPeriodDao.save(departmentReportPeriod);
 		} else if (!dp.isActive()) { // существует и не открыт
@@ -230,9 +235,9 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 		if (logs != null) {
 			int year = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
-			logs.add(new LogEntry(LogLevel.INFO,"Создан период" + " \"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
-					" за " + year + " год "
-					+ "для подразделения \" " +
+			logs.add(new LogEntry(LogLevel.INFO,"\"" + departmentReportPeriod.getReportPeriod().getName() + "\" " +
+					" за " + year + " год " + balance
+					+ "открыт для \" " +
 					departmentService.getDepartment(departmentReportPeriod.getDepartmentId().intValue()).getName()+ "\""));
 		}
 	}
@@ -378,6 +383,22 @@ public class PeriodServiceImpl implements PeriodService{
 				}
 			}
 			return PeriodStatusBeforeOpen.NOT_EXIST;
+		}
+	}
+
+	@Override
+	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
+		List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType));
+		getPeriodsByTaxTypeAndDepartments(taxType, departments);
+		if (user.hasRole(TARole.ROLE_CONTROL_UNP)
+				|| user.hasRole(TARole.ROLE_CONTROL_NS)
+				|| user.hasRole(TARole.ROLE_CONTROL)
+				) {
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+		} else if (user.hasRole(TARole.ROLE_OPER)) {
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+		} else {
+			return Collections.EMPTY_SET;
 		}
 	}
 
@@ -583,28 +604,12 @@ public class PeriodServiceImpl implements PeriodService{
         return monthsList;
     }
 
-    @Override
-    public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
-        List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType));
-        getPeriodsByTaxTypeAndDepartments(taxType, departments);
-        if (user.hasRole(TARole.ROLE_CONTROL_UNP)
-                || user.hasRole(TARole.ROLE_CONTROL_NS)
-                || user.hasRole(TARole.ROLE_CONTROL)
-                ) {
-            return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
-        } else if (user.hasRole(TARole.ROLE_OPER)) {
-            return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
-        } else {
-            return Collections.EMPTY_SET;
-        }
-    }
-
     /**
      * Получить упорядоченный список месяцев соответствующий налоговому периоду с кодом code.
      * @param code код налогового периода
      * @return список месяцев в налоговом периоде.
      */
-    List<Months> getReportPeriodMonthList(String code) {
+    private List<Months> getReportPeriodMonthList(String code) {
 
         int start = 0;
         int end = 0;

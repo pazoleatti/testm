@@ -117,8 +117,8 @@ public interface FormTemplateService {
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param formTemplate
-     * @return
+     * @param formTemplate макет для удаления
+     * @return идентификатор удаленного объекта
      */
     int delete(FormTemplate formTemplate);
 
