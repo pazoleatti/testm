@@ -88,7 +88,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
                     public void onSuccess(CheckPeriodStatusResult result) {
                         switch (result.getStatus()) {
                             case OPEN:
-                                Dialog.infoMessage("Периорд уже открыт!");
+                                Dialog.infoMessage("Период уже открыт!");
                                 break;
                             case NOT_EXIST:
                                 open(openFilterData);
