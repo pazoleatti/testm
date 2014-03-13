@@ -70,7 +70,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
         break
 }
 
@@ -180,10 +180,6 @@ def calc3_6(def rows, def group) {
 
 /** Логические проверки (таблица 149) */
 void logicCheck() {
-    if (formData.periodOrder == null) {
-        throw new ServiceException("Месячная форма создана как квартальная!")
-    }
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
@@ -422,4 +418,71 @@ def loggerError(def msg) {
     } else {
         logger.error(msg)
     }
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Амортизационные группы', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'Амортизационные группы',
+            (xml.row[0].cell[1]): 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ',
+            (xml.row[0].cell[3]): 'Сумма начисленной амортизации',
+            (xml.row[1].cell[1]): 'За отчётный месяц',
+            (xml.row[1].cell[2]): 'С начала налогового периода',
+            (xml.row[1].cell[3]): 'За отчётный месяц',
+            (xml.row[1].cell[4]): 'С начала налогового периода',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[3].cell[0]): '0 Группа',
+            (xml.row[4].cell[0]): '1 Группа',
+            (xml.row[5].cell[0]): '2 Группа',
+            (xml.row[6].cell[0]): '3 Группа',
+            (xml.row[7].cell[0]): '4 Группа',
+            (xml.row[8].cell[0]): '5 Группа',
+            (xml.row[9].cell[0]): '6 Группа',
+            (xml.row[10].cell[0]): '7 Группа',
+            (xml.row[11].cell[0]): '8 Группа',
+            (xml.row[12].cell[0]): '9 Группа',
+            (xml.row[13].cell[0]): '10 Группа',
+            (xml.row[14].cell[0]): 'Итого по нормативу 10%',
+            (xml.row[15].cell[0]): 'Итого по нормативу 30%',
+            (xml.row[16].cell[0]): 'Суммы начисленной амортизации в отношении амортизируемых ОС, используемых для работы в условиях агрессивной среды',
+            (xml.row[17].cell[0]): 'Суммы начисленной амортизации в отношении амортизируемых ОС, используемых для работы в условиях повышенной сменности',
+            (xml.row[18].cell[0]): 'Суммы начисленной амортизации в отношении амортизируемых основных средств, являющихся предметом договора финансовой аренды (лизинга) Банка',
+            (xml.row[19].cell[0]): 'Сумма начисленной амортизации на сумму капитальных вложений в предоставленные в аренду (безвозмездное пользование) объекты ОС в форме неотделимых улучшений, произведённых арендатором с согласия Банка'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+
+    for(int i=1; i<=17; i++) {
+        if (xml.row[headRowCount + i] != null) {
+            dataRows[i - 1].sumCurrentPeriodTotal = parseNumber(xml.row[headRowCount + i].cell[1].text(), rowOffset + headRowCount + i, 1 + colOffset, logger, false)
+            dataRows[i - 1].sumTaxPeriodTotal = parseNumber(xml.row[headRowCount + i].cell[2].text(), rowOffset + headRowCount + i, 2 + colOffset, logger, false)
+            dataRows[i - 1].amortPeriod = parseNumber(xml.row[headRowCount + i].cell[3].text(), rowOffset + headRowCount + i, 3 + colOffset, logger, false)
+            dataRows[i - 1].amortTaxPeriod = parseNumber(xml.row[headRowCount + i].cell[4].text(), rowOffset + headRowCount + i, 4 + colOffset, logger, false)
+        } else {
+            dataRows[i - 1].sumCurrentPeriodTotal = null
+            dataRows[i - 1].sumTaxPeriodTotal = null
+            dataRows[i - 1].amortPeriod = null
+            dataRows[i - 1].amortTaxPeriod = null
+        }
+    }
+
+    dataRowHelper.update(dataRows)
 }

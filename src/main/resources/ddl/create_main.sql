@@ -38,7 +38,7 @@ comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 
-create sequence seq_form_type;
+create sequence seq_form_type start with 100;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -128,7 +128,8 @@ create table ref_book (
   script_id varchar2(36),
   visible number(1) default 1 not null,
   type number(1) default 0 not null,
-  read_only number(1) default 0 not null
+  read_only number(1) default 0 not null,
+  region_attribute_id number(18,0)
 );
 
 comment on table ref_book is 'Справочник';
@@ -138,6 +139,7 @@ comment on column ref_book.script_id is 'Идентификатор связан
 comment on column ref_book.visible is 'Признак видимости';
 comment on column ref_book.type is 'Тип справочника (0 - Линейный, 1 - Иерархический)';
 comment on column ref_book.read_only is 'Только для чтения (0 - редактирование доступно пользователю; 1 - редактирование недоступно пользователю)';
+comment on column ref_book.region_attribute_id is 'При его наличии справочник считается региональным. Указывает на атрибут, по которому определяется принадлежность к региону';
 ------------------------------------------------------------------------------------------------------
 create table ref_book_attribute (
   id number(18) not null,
@@ -461,14 +463,16 @@ create table data_row (
   form_data_id number(18) not null,
   alias varchar2(20),
   ord number(14,0) not null,
-  type number(1) not null
+  type number(1) not null,
+  manual number(1) default 0 not null
 );
 comment on table data_row is 'Строки данных налоговых форм';
 comment on column data_row.alias is 'Идентификатор строки';
 comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
 comment on column data_row.id is 'Код строки для доступа из скриптов';
 comment on column data_row.ord is 'Номер строки в форме';
-comment on column data_row.type is 'тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
+comment on column data_row.type is 'Тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
+comment on column data_row.manual is 'Режим ввода данных (0 - обычная запись; 1 - версия ручного ввода)';
 
 create sequence seq_data_row start with 10000;
 ---------------------------------------------------------------------------------------------------

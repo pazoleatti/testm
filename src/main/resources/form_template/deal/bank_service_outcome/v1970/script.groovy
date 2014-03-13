@@ -9,6 +9,19 @@ import groovy.transform.Field
  *
  * @author Stanislav Yasinskiy
  */
+
+// 1. rowNum            № п/п
+// 2. jurName           Полное наименование юридического лица с указанием ОПФ
+// 3. innKio            ИНН/КИО
+// 4. countryCode       Код страны по классификатору ОКСМ
+// 5. bankIncomeSum     Сумма расходов Банка, руб.
+// 6. contractNum       Номер договора
+// 7. contractDate      Дата договора
+// 8. serviceName       Вид услуг
+// 9. price             Цена
+// 10. cost             Стоимость
+// 11. transactionDate  Дата совершения сделки
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -319,3 +332,17 @@ void addData(def xml, int headRowCount) {
     }
     dataRowHelper.save(rows)
 }
+
+/*
+insert into  FORM_COLUMN values (19753,	'№ п/п', 399,	1,	'rowNum', 'N',	4,	0,	15,	0, null, null, null, null, null);
+insert into  FORM_COLUMN values (19754,	'Полное наименование юридического лица с указанием ОПФ', 399,	2,	'jurName', 'R',	10,	null,	null,	0, null, 32, null, null, null);
+insert into  FORM_COLUMN values (19755,	'ИНН/КИО', 399,	3,	'innKio', 'R',	7,	null,	null,	0, null, 37, null, 19754, null);
+insert into  FORM_COLUMN values (19756,	'Код страны по классификатору ОКСМ', 399,	4,	'countryCode', 'R',	5,	null,	null,	0, null, 50, null, null, null);
+insert into  FORM_COLUMN values (19757,	'Сумма расходов Банка, руб.', 399,	5,	'bankIncomeSum', 'N',	9,	0,	15,	0, null, null, null, null, null);
+insert into  FORM_COLUMN values (19758,	'Номер договора', 399,	6,	'contractNum', 'S',	5,	null,	128,	0, null, null, null, null, null);
+insert into  FORM_COLUMN values (19759,	'Дата договора', 399,	7,	'contractDate', 'D',	7,	null,	null,	0, 0, null, null, null, null);
+insert into  FORM_COLUMN values (19760,	'Вид услуг', 399,	8,	'serviceName', 'R',	5,	null,	null,	0, null, 60, null, null, null);
+insert into  FORM_COLUMN values (19761,	'Цена', 399,	9,	'price', 'N',	9,	0,	15,	0, null, null, null, null, null);
+insert into  FORM_COLUMN values (19762,	'Стоимость', 399,	10,	'cost', 'N',	9,	0,	15,	0, null, null, null, null, null);
+insert into  FORM_COLUMN values (19763,	'Дата совершения сделки', 399,	11,	'transactionDate', 'D',	7,	null,	null,	0, 0, null, null, null, null);
+*/
