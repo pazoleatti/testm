@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
  * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
@@ -63,9 +64,8 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
     case FormDataEvent.MIGRATION:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-        }
+        calc()
+        logicCheck()
         break
 }
 
@@ -89,6 +89,10 @@ def allColumns = ['number', 'fix', 'date', 'part', 'dealingNumber', 'costs']
 @Field
 def editableColumns = ['date', 'part', 'dealingNumber', 'costs']
 
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['number']
+
 @Field
 def sortColumns = ['date', 'dealingNumber']
 
@@ -97,10 +101,6 @@ def totalColumns = ['costs']
 
 @Field
 def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
-
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = ['number']
 
 // Дата окончания отчетного периода
 @Field
@@ -225,132 +225,130 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
     }
 }
 
-/** Получение импортируемых данных. */
-void importData() {
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
-    String charset = ""
-    // TODO в дальнейшем убрать возможность загружать RNU для импорта!
-    if (formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml') ||
-            formDataEvent == FormDataEvent.MIGRATION && fileName.contains('.xml')) {
-        if (!fileName.contains('.xml')) {
-            logger.error('Формат файла должен быть *.xml')
-            return
-        }
-    } else {
-        if (!fileName.contains('.r')) {
-            logger.error('Формат файла должен быть *.rnu')
-            return
-        }
-        charset = 'cp866'
+        throw new ServiceException('Имя файла не должно быть пустым')
     }
     def is = ImportInputStream
     if (is == null) {
-        logger.error('Поток данных пуст')
-        return
+        throw new ServiceException('Поток данных пуст')
     }
-    def xmlString = importService.getData(is, fileName, charset)
-    if (xmlString == null || xmlString == '') {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(xml, fileName)
-        // рассчитать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
-        }
-    } catch (Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
+    return xml
 }
 
-/** Заполнить форму данными. */
-def addData(def xml, def fileName) {
+/** Получение импортируемых данных. */
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Дата сделки',
+            (xml.row[0].cell[3]): 'Часть сделки',
+            (xml.row[0].cell[4]): 'Номер сделки',
+            (xml.row[0].cell[5]): 'Вид ценных бумаг',
+            (xml.row[0].cell[6]): 'Затраты (руб.коп.)',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def newRows = []
 
-    def records
-    def totalRecords
-    def type
-    if (formDataEvent == FormDataEvent.MIGRATION ||
-            formDataEvent == FormDataEvent.IMPORT && fileName.contains('.xml')) {
-        records = xml.exemplar.table.detail.record
-        totalRecords = xml.exemplar.table.total.record
-        type = 1 // XML
-    } else {
-        records = xml.row
-        totalRecords = xml.rowTotal
-        type = 2 // RNU
-    }
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
 
-    def indexRow = 0
-    for (def row : records) {
-        indexRow++
-        def indexCol = 0
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
         def newRow = formData.createDataRow()
-        newRow.setIndex(indexRow)
-
-        // графа 2..5
+        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        // графа 1
-        newRow.number = getNumber(getCellValue(row, indexCol, type), indexRow, indexCol)
-        indexCol++
-
-        // графа 2
-        newRow.date = getDate(getCellValue(row, indexCol, type), indexRow, indexCol)
-        indexCol++
-
-        // графа 3 - справочник 60 "Части сделок"
-        tmp = null
-        if (getCellValue(row, indexCol, type, true) != null && getCellValue(row, indexCol, type).trim() != '') {
-            tmp = formDataService.getRefBookRecordIdImport(60, recordCache, providerCache, 'CODE',
-                    getCellValue(row, indexCol, type), getEndDate(), indexRow, indexCol, logger, false)
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
-        newRow.part = tmp
-        indexCol++
 
-        // графа 4
-        newRow.dealingNumber = getCellValue(row, indexCol, type, true)
-        indexCol++
+        // графа 1 - № пп
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
-        // графа 5
-        // TODO bondKind выпилена из РНУ, а из файла для импорта?
-        indexCol++
+        // графа 2 - Дата сделки
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
 
-        // графа 6
-        newRow.costs = getNumber(getCellValue(row, indexCol, type), indexRow, indexCol)
-        newRows.add(newRow)
+        // графа 3 - Часть сделки
+        newRow.part =  getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+
+        // графа 4 - Номер сделки
+        newRow.dealingNumber = row.cell[4].text()
+
+        // графа 5 - Вид ценных бумаг
+        newRow.bondKind = row.cell[5].text()
+
+        // графа 6 - Затраты (руб.коп.)
+        newRow.costs = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+
+        rows.add(newRow)
     }
-    dataRowHelper.save(newRows)
 
-    // итоговая строка
-    if (totalRecords.size() >= 1) {
-        def row = totalRecords[0]
-        def totalRow = formData.createDataRow()
-        // графа 5
-        totalRow.costs = getNumber(getCellValue(row, 5, type), indexRow, 5)
-        return totalRow
-    } else {
-        return null
-    }
+    // Добавляем итоговые строки
+    def existRows = dataRowHelper.allSaved
+    rows.add(getDataRow(existRows, 'totalQuarter'))
+    rows.add(getDataRow(existRows, 'total'))
+    dataRowHelper.save(rows)
 }
 
 /** Для получения данных из RNU или XML */
