@@ -478,7 +478,6 @@ def calculateColumn12(DataRow row){
     }
     def diff65 = row.part2REPODate - row.part1REPODate
     diff65 = diff65 == 0 ? 1 : diff65
-    logger.warn("coefficient="+coefficient +"; diff65 =" + diff65 + "; countDaysOfYear ="+countDaysOfYear)
     return (row.acquisitionPrice * row.rateBR * coefficient) * (diff65 / countDaysOfYear) / 100
 }
 
