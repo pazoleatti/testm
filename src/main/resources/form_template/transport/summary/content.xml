@@ -223,7 +223,7 @@
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxSumToPay</alias>
-        <checking>true</checking>
+        <checking>false</checking>
         <id>221</id>
         <name>Исчисленная сумма налога, подлежащая уплате в бюджет</name>
         <order>22</order>
