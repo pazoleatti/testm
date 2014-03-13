@@ -68,10 +68,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     /* Вьюха которая принимает параметры, загружает и отображает записи из справочника */
     private RefBookView refBookView;
 
-    /* Даты ограничевающего периода */
-    private Date startDate;
-    private Date endDate;
-
     /* Состояние виджета которые было перед нажатием кнопки "Выбрать"*/
     private PickerState prevState = new PickerState();
     /* Текущее состояние виджета */
@@ -98,24 +94,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(final ValueChangeEvent<Date> event) {
-                Date d = event.getValue();
-                if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
-                    versionDateBox.setValue(startDate != null ? startDate : endDate, false);
-                }
                 state.setVersionDate(versionDateBox.getValue());
                 refBookView.reloadOnDate(versionDateBox.getValue());
-            }
-        });
-        versionDateBox.getDatePicker().addShowRangeHandler(new ShowRangeHandler<Date>() {
-            @Override
-            public void onShowRange(final ShowRangeEvent<Date> dateShowRangeEvent) {
-                Date d = new Date(dateShowRangeEvent.getStart().getTime());
-                while (d.before(dateShowRangeEvent.getEnd()) || d.equals(dateShowRangeEvent.getEnd())) {
-                    if (RefBookPickerUtils.isNotCorrectDate(startDate, endDate, d)) {
-                        versionDateBox.getDatePicker().setTransientEnabledOnDates(false, d);
-                    }
-                    CalendarUtil.addDaysToDate(d, 1);
-                }
             }
         });
 
@@ -388,8 +368,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     @Override
     public void setPeriodDates(Date startDate, Date endDate) {
-        this.startDate = startDate;
-        this.endDate = endDate;
+        versionDateBox.setLimitDates(startDate, endDate);
         state.setVersionDate(endDate != null ? endDate : startDate);
         versionDateBox.setValue(state.getVersionDate());
     }

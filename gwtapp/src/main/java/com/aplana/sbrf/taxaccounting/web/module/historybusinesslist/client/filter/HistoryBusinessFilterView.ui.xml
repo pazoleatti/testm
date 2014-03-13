@@ -45,7 +45,7 @@
                             <g:Label text="От:" width="70px"/>
                         </g:cell>
                         <g:cell height="26px">
-                            <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px"/>
+                            <d:DateMaskBoxPicker ui:field="fromSearchDate" width="148px" canBeEmpty="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel>
@@ -53,7 +53,7 @@
                             <g:Label text="До:" width="70px"/>
                         </g:cell>
                         <g:cell height="26px">
-                            <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px"/>
+                            <d:DateMaskBoxPicker ui:field="toSearchDate" width="148px" canBeEmpty="true"/>
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel>

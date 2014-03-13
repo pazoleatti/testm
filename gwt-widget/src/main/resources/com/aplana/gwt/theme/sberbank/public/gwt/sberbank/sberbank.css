@@ -1177,6 +1177,7 @@ a, a:visited, a:hover {
 
 .datePickerDayIsDisabled {
     color: #C0C0C0;
+    text-decoration: line-through;
 }
 
 .datePickerDayIsHighlighted {

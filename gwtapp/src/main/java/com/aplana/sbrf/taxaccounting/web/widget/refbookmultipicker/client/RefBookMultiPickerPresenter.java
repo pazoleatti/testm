@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -158,9 +159,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     }
 
     private boolean isNeedReloadHeaders(PickerState newPs) {
-        return RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
-                RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate());
+        return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
     }
 
     private void setNewState(PickerState newPs) {
@@ -174,11 +175,11 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     /* Проверка на изменения входных параметров*/
     private boolean isNewParams(PickerState newPs) {
         Boolean hasChange =
-                RefBookPickerUtils.itWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
-                        RefBookPickerUtils.itWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                        RefBookPickerUtils.itWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
-                        RefBookPickerUtils.itWasChange(ps.getFilter(), newPs.getFilter()) ||
-                        RefBookPickerUtils.itWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
+                WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
+                        WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
+                        WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                        WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
+                        WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
 
 
         if (hasChange) {

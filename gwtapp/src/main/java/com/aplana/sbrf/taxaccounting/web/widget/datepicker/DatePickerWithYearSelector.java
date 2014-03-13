@@ -3,6 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.google.gwt.user.datepicker.client.DefaultCalendarView;
 
+/**
+ * Касмотный селектор даты c выбором года
+ * @author srybakov
+ */
 public class DatePickerWithYearSelector extends DatePicker {
 
 	public DatePickerWithYearSelector() {

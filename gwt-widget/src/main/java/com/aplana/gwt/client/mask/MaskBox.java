@@ -60,9 +60,9 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
             addBlurHandler(new BlurHandler() {
                 public void onBlur(BlurEvent event) {
                     try {
-                        setValue(parser.parse(getText()), true);
+                        setValue(getText().equals(textPicture) ? null : parser.parse(getText()), true);
                     } catch (ParseException e) {
-                        if (textPicture == null || !textPicture.equals(getText()) || textPicture.equals(maskListener.getMaskPicture())) {
+                        if (textPicture == null || !textPicture.equals(getText())) {
                             addExceptionStyle();
                         }
                     }
@@ -74,6 +74,9 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
         textPicture = getTextPicture();
     }
 
+    /**
+     * Ручной сброс фокуса
+     */
     public void trySetValue(){
         BlurEvent.fireNativeEvent(Document.get().createBlurEvent(), this);
     }

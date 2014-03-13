@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.Picker
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.*;
@@ -315,7 +316,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             if (uiTreeItem != null) {                               // редактирование записи
                 RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem() != null ? uiTreeItem.getRefBookTreeItem().getParent() : null;
 
-                if (RefBookPickerUtils.itWasChange(name, uiTreeItem.getName())) {
+                if (WidgetUtils.isWasChange(name, uiTreeItem.getName())) {
                     // Если изменилось наименование
                     uiTreeItem.getRefBookTreeItem().setDereferenceValue(name);
                     uiTreeItem.setName(name);
