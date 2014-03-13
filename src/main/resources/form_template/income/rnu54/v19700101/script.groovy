@@ -183,7 +183,9 @@ void calc() {
             } else if (a > 0) {
                 b = a
             }
+            // графа 10
             row.outcome = b
+            // графа 9
             row.income = c
         }
 
@@ -225,7 +227,7 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
             tmp = calc12Value(row, 1, reportDate, daysInYear) * course
         }
     }
-    return tmp
+    return roundTo2(tmp)
 }
 
 def BigDecimal calc13(def row) {
@@ -622,8 +624,7 @@ def calc12Value(def row, def coef, def reportDate, def days) {
     if (row.salePrice == null || row.rateBR == null || coef == null || reportDate == null || row.part1REPODate == null || days == null) {
         return 0
     }
-    def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return roundTo2(tmp)
+    return (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
 }
 
 /**
@@ -751,9 +752,21 @@ def getColumnName(def row, def alias) {
 def calcAForColumn9or10(def row, def reportDate, def course) {
     if (row.acquisitionPrice != null && row.salePrice != null && reportDate != null && course != null
             && row.part1REPODate != null && row.part2REPODate != null && row.part2REPODate != row.part1REPODate) {
+
+        // DEBUG
+        // logger.info("((" + row.acquisitionPrice + " - " + row.salePrice + ") " +
+                //"* (" + reportDate.format("dd.MM.yyyy") + " - " + row.part1REPODate.format("dd.MM.yyyy") + ")" +
+               //" / (" + row.part2REPODate.format("dd.MM.yyyy") + " - " + row.part1REPODate.format("dd.MM.yyyy") + ")) * " + course)
+
         // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
         def tmp = ((row.acquisitionPrice - row.salePrice) *
                 (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+
+        // DEBUG
+        //logger.info(" дата1 = " + 1*(reportDate - row.part1REPODate))
+        //logger.info(" дата2 = " + 1*(row.part2REPODate - row.part1REPODate))
+        //logger.info(" tmp = " + tmp)
+
         return roundTo2(tmp)
     } else {
         return null

@@ -150,22 +150,23 @@ void checkBeforeCalc(DataRowHelper form) {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    DataRowHelper data = getData(formData)
+    def dataRowHelper = getData(formData)
+    def dataRows = dataRowHelper.allCached
 
     // удалить строку "итого"
     def delRow = []
-    getRows(data).each { row ->
+    dataRows.each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        data.delete(row)
+        dataRowHelper.delete(row)
     }
 
     // отсортировать/группировать
     if (formDataEvent != FormDataEvent.IMPORT) {
-        sort(data)
+        sort(dataRowHelper)
     }
 
     /** Отчетная дата. */
@@ -173,7 +174,7 @@ void calc() {
     /** Последний день отчетного периода */
     def lastDayReportPeriod = getReportPeriodEndDate()
 
-    checkBeforeCalc(data)
+    checkBeforeCalc(dataRowHelper)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return  // Расчитывать не можем
     }
@@ -191,7 +192,7 @@ void calc() {
     def tmp = 0
     def a, b, c
 
-    for (def row : getRows(data)) {
+    for (def row : dataRows) {
 
         // графа 9, 10 - при импорте не рассчитывать эти графы
         if (formDataEvent != FormDataEvent.IMPORT) {
@@ -209,7 +210,6 @@ void calc() {
             row.outcome = b
         }
 
-        def currency = getCurrency(row.currencyCode)
         // графа 11
         row.rateBR = roundTo2(calc11(row, lastDayReportPeriod))
 
@@ -226,12 +226,12 @@ void calc() {
         }
         row.outcomeTax = roundTo2(tmp)
     }
-    data.save(getRows(data))
+    dataRowHelper.save(dataRows)
 
     // строка итого
-    if (getRows(data).size() > 0) {
+    if (dataRows.size() > 0) {
         def totalRow = getCalcTotalRow()
-        insert(data, totalRow)
+        insert(dataRowHelper, totalRow)
     }
 }
 
@@ -420,7 +420,7 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
             tmp = calc12Value(row, 1, reportDate, daysInYear) * course
         }
     }
-    return tmp
+    return roundTo2(tmp)
 }
 
 /**
@@ -581,8 +581,7 @@ def getDate(def value, def format) {
  * @paam days количество дней в году
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
-    def tmp = (row.acquisitionPrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return roundTo2(tmp)
+    return (row.acquisitionPrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
 }
 
 /**
