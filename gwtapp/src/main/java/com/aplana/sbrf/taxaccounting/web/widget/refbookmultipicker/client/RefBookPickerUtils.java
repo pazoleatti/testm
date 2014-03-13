@@ -36,18 +36,6 @@ public class RefBookPickerUtils {
     };
 
     /**
-     * Проверка невхождения даты в ограничивающий период
-     *
-     * @param startDate наччало огр периода
-     * @param endDate   коннец огр периода
-     * @param current   дату которую проверяют
-     * @return тру если не входит, иначе фолс
-     */
-    public static Boolean isNotCorrectDate(Date startDate, Date endDate, Date current) {
-        return (startDate != null && current.before(startDate)) || (endDate != null && current.after(endDate));
-    }
-
-    /**
      * Поиск разименноованного значения для атрибута записи справочника по идентификатору атрибута
      *
      * @param recordDereferenceValues recordDereferenceValues разименновоннаые значения атрибутов у записи справоника
@@ -82,12 +70,5 @@ public class RefBookPickerUtils {
             }
         }
         return null;
-    }
-
-    public static boolean itWasChange(Object before, Object after) {
-        return (before == null && after != null)
-                || (before != null && after == null)
-                || (before != null && after != null &&
-                ((before instanceof Date && after instanceof Date) ? ((Date) before).compareTo(((Date) after)) != 0 : !before.equals(after)));
     }
 }

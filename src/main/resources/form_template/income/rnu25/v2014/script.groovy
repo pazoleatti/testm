@@ -73,6 +73,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         importData()
         calc()
+        logicCheck()
         break
     case FormDataEvent.MIGRATION :
         migration()
@@ -425,25 +426,6 @@ void logicCheck() {
     }
 }
 
-/** Получение импортируемых данных. */
-void importData() {
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(getXML())
-
-        // рассчитать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
-        }
-    } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
-}
-
 void migration() {
     importData()
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -664,119 +646,114 @@ def calc13(def row) {
     return roundTo2(tmp < 0 ? -tmp : 0)
 }
 
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- *
- * return итоговая строка
+/*
+ * Получение импортируемых данных
  */
-def addData(def xml) {
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Государственный регистрационный номер',
+            (xml.row[0].cell[3]): 'Номер сделки',
+            (xml.row[0].cell[4]): 'Размер лота на предыдущую отчетную дату, шт.',
+            (xml.row[0].cell[5]): 'Размер лота на текущую отчетную дату, шт.',
+            (xml.row[0].cell[6]): 'Расчётная величина резерва на предыдущую отчётную дату, руб.коп.',
+            (xml.row[0].cell[7]): 'Стоимость по цене приобретения, руб.коп.',
+            (xml.row[0].cell[8]): 'Признак ценной бумаги на текущую отчётную дату',
+            (xml.row[0].cell[9]): 'Рыночная котировка одной облигации, руб.коп.',
+            (xml.row[0].cell[10]): 'Стоимость по рыночной котировке, руб.коп.',
+            (xml.row[0].cell[11]): 'Расчётная величина резерва на текущую отчётную дату, руб.коп.',
+            (xml.row[0].cell[12]): 'Создание резерва, руб.коп.',
+            (xml.row[0].cell[13]): 'Восстановление резерва, руб.коп.',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7',
+            (xml.row[1].cell[8]): '8',
+            (xml.row[1].cell[9]): '9',
+            (xml.row[1].cell[10]): '10',
+            (xml.row[1].cell[11]): '11',
+            (xml.row[1].cell[12]): '12',
+            (xml.row[1].cell[13]): '13',
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+/* Заполнить форму данными */
+
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    dataRows.clear()
 
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    def indexRow = 0
+    def xmlIndexRow = -1
+    def int rowOffset = 10
+    def int colOffset = 1
+
+    def rows = []
+    def int rowIndex = 1
+
     for (def row : xml.row) {
-        def newRow = getNewRow()
-        newRow.setIndex(++indexRow)
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        def indexCell = 1
+        /* Пропуск строк шапок */
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
 
-        // графа 1
-        newRow.rowNumber = indexRow
-        indexCell++
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
 
-        // графа 2
-        newRow.regNumber = row.cell[indexCell].text()
-        indexCell++
+        /* Пропуск итоговых строк */
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
 
-        // графа 3
-        newRow.tradeNumber = row.cell[indexCell].text()
-        indexCell++
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
 
-        // графа 4
-        newRow.lotSizePrev = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 1 */
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
-        // графа 5
-        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 2 */
+        newRow.regNumber = row.cell[2].text()
 
-        // графа 6
-        newRow.reserve = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 3 */
+        newRow.tradeNumber = row.cell[3].text()
 
-        // графа 7
-        newRow.cost = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 4 */
+        newRow.lotSizePrev = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
 
-        // графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[indexCell].text(), indexRow, indexCell + 1, true)
-        indexCell++
+        /* Графа 5 */
+        newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
 
-        // графа 9
-        newRow.marketQuotation = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 7 */
+        newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
 
-        // графа 10
-        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 8 */
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset, false)
 
-        // графа 11
-        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
+        /* Графа 9 */
+        newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
 
-        // графа 12
-        newRow.reserveCreation = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-        indexCell++
-
-        // графа 13
-        newRow.reserveRecovery = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        dataRows.add(newRow)
+        rows.add(newRow)
     }
-    dataRowHelper.save(dataRows)
-
-    // итоговая строка
-    if (xml.rowTotal.size() == 1) {
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-        def indexCell
-
-        // графа 4
-        indexCell = 4
-        total.lotSizePrev = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 5
-        indexCell = 5
-        total.lotSizeCurrent = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 7
-        indexCell = 7
-        total.cost = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 10
-        indexCell = 10
-        total.costOnMarketQuotation = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 11
-        indexCell = 11
-        total.reserveCalcValue = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 12
-        indexCell = 12
-        total.reserveCreation = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        // графа 13
-        indexCell = 13
-        total.reserveRecovery = getNumber(row.cell[indexCell].text(), indexRow, indexCell + 1)
-
-        return total
-    } else {
-        return null
-    }
+    dataRowHelper.save(rows)
 }
 
 /** Получить признак ценной бумаги. */
@@ -812,33 +789,6 @@ void checkTotalRow(def totalRow) {
         def columns = errorColums.join(', ')
         loggerError("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
-}
-
-// Получение xml с общими проверками
-def getXML() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-
-    if (!fileName.contains('.r')) {
-        throw new ServiceException('Формат файла должен быть *.rnu')
-    }
-
-    def xmlString = importService.getData(is, fileName, 'cp866')
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */

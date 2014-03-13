@@ -51,6 +51,9 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5));
 
+--TODO (Marat Fayzullin 07.03.2014) добавить ограничение, при этом, чтобы корректно работал скрипт drop_main.sql
+--alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
+
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
@@ -139,6 +142,7 @@ alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord, type);
 alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
+alter table data_row add constraint data_row_chk_manual check (manual in (0, 1));
 
 alter table cell_style add constraint cell_style_pk primary key (row_id, column_id);
 alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column (id);

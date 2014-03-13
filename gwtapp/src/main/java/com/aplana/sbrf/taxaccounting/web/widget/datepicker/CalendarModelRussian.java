@@ -2,7 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.google.gwt.user.datepicker.client.CalendarModel;
 
-public class CalendarModelRussian extends CalendarModel{
+/**
+ * Касмотная модель для календаря
+ * @author sgoryachkin
+ */
+public class CalendarModelRussian extends CalendarModel {
 
     private final static String[] DAYS_OF_WEEK = {"Вск","Пн","Вт","Ср","Чт","Пт","Сб"};
     private final static String[] MONTHS_OF_YEAR_RUS = {"Янв","Фев","Март","Апр","Май","Июнь","Июль","Авг","Сен","Окт","Нояб","Дек"};

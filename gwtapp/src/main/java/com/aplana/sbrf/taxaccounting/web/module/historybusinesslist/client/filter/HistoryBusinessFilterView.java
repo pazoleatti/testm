@@ -229,16 +229,13 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @UiHandler("search")
     void onSearchButtonClicked(ClickEvent event) {
-        Date fromDate = fromSearchDate.getDateBox().getRawValue();
-        Date toDate = toSearchDate.getDateBox().getRawValue();
-
-        if (fromDate == null || toDate == null) {
-            Dialog.errorMessage("Ошибка", "Укажите корректную дату");
+        if (fromSearchDate.getValue() == null || toSearchDate.getValue() == null) {
+            Dialog.errorMessage("Укажите корректную дату");
             return;
         }
 
         if (fromSearchDate.getValue().compareTo(toSearchDate.getValue()) > 0) {
-            Dialog.errorMessage("Ошибка", "Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
+            Dialog.errorMessage("Операция \"Получение списка журнала аудита\" не выполнена. Дата \"От\" должна быть меньше или равна дате \"До\"");
             return;
         }
 

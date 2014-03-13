@@ -54,9 +54,11 @@ public abstract class DateMaskBoxAbstract extends MaskBox<Date> {
             super.setValue(value, false);
             setText(value == null ? getTextPicture() : format.format(value));
             removeExceptionStyle();
-        }
-        if (fireEvents) {
-            ValueChangeEvent.fire(this, value);
+            if (fireEvents) {
+                ValueChangeEvent.fire(this, value);
+            }
+        } else {
+            addExceptionStyle();
         }
     }
 

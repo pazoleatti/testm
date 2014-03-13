@@ -8,6 +8,10 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.datepicker.client.CalendarModel;
 import com.google.gwt.user.datepicker.client.MonthSelector;
 
+/**
+ * Касмотный селектор даты c выбором года и месяца
+ * @author srybakov
+ */
 public  class MonthAndYearSelector extends MonthSelector {
 
 	private static final String BASE_NAME = "datePicker" ;

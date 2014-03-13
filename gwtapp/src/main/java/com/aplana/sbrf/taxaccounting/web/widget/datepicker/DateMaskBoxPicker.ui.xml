@@ -1,5 +1,5 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui">
     <ui:style>
         .imageStyle {
@@ -18,14 +18,14 @@
             float: left;
         }
 
-        .textBox{
+        .textBox {
             float: left;
             height: 15px;
             vertical-align: text-bottom;
             width: 100%;
         }
 
-        .main{
+        .main {
             padding: 0;
             min-width: 100px;
             min-height: 21px;

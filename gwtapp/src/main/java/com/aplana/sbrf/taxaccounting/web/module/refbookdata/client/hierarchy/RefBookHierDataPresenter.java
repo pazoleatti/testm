@@ -12,8 +12,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -113,15 +113,15 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         if (event.isSuccess()) {
             RecordChanges rc = event.getRecordChanges();
             RefBookTreeItem selectedItem = getView().getSelectedItem();
-            if (RefBookPickerUtils.isNotCorrectDate(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
+            if (!WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
                 getView().deleteItem(rc.getId());
             } else {
                 if (selectedItem != null) {
                     String sName = selectedItem.getDereferenceValue();
                     Long sParentId = selectedItem.getParent() != null ? selectedItem.getParent().getId() : null;
 
-                    if (RefBookPickerUtils.itWasChange(sName, rc.getName()) ||
-                            RefBookPickerUtils.itWasChange(sParentId, rc.getParentId())) {
+                    if (WidgetUtils.isWasChange(sName, rc.getName()) ||
+                            WidgetUtils.isWasChange(sParentId, rc.getParentId())) {
                         // обновляем если только есть изменения
                         getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
                     }

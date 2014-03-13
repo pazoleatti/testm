@@ -564,13 +564,22 @@ void addData(def xml, int headRowCount) {
         newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         /* Графа 2 */
-        /* Автозаполняемая */
+        /* Зависимая */
+        def id = getRecordIdImport(27, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+        def map = formDataService.getRefBookValue(27, id, refBookCache)
+        if (map != null) {
+            def text = row.cell[2].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(27).getName() + "»!")
+            }
+        }
 
         /* Графа 3 */
         newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
 
         /* Графа 4 */
-        newRow.code = getRecordIdImport(27, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+        newRow.code = id
 
         /* Графа 5 */
         newRow.docNumber = row.cell[5].text()

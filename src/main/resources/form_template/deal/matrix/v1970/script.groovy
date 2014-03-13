@@ -315,6 +315,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             val13 = '019'
             break
         case 379:
+        case 398:
             val13 = '016'
             break
         case 383:
@@ -333,14 +334,23 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             break
         case 386:
         case 388:
+        case 401:
+        case 403:
             val13 = '003'
             break
         case 387:
         case 389:
+        case 402:
             val13 = '012'
             break
         case 390:
             val13 = '017'
+            break
+        case 397:
+            val13 = '004'
+            break
+        case 399:
+            // TODO [13/03/14 12:57:03] Евгений Ломоносов: тут ждем ответа от заказчика
             break
     }
     if (val13 != null) {
@@ -410,6 +420,20 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
                 val14 = '026'
             }
             break
+        case 397:
+            val14 = '007'
+            break
+        case 398:
+        case 399:
+            val14 = '028'
+            break
+        case 402:
+            val14 = '020'
+            break
+        case 401:
+        case 403:
+            val14 = '002'
+            break
     }
 
     if (val14 != null) {
@@ -451,6 +475,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.income = srcRow.sum
             break
         case 382:
+        case 398:
             row.income = srcRow.bankIncomeSum
             break
         case 381:
@@ -495,16 +520,23 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             row.outcome = srcRow.expensesSum
             break
         case 380:
+        case 397:
+        case 402:
+        case 401:
             row.outcome = srcRow.sum
             break
         case 390:
         case 391:
         case 394:
+        case 403:
             row.outcome = srcRow.outcomeSum
             break
         case 392:
         case 393:
             row.outcome = srcRow.consumptionSum
+            break
+        case 399:
+            row.outcome = srcRow.bankIncomeSum
             break
     }
 
@@ -576,6 +608,22 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 394:
             row.dealSubjectName = 'Купля-продажа драгоценного металла'
             break
+        case 397:
+            row.dealSubjectName = 'Привлечение денежных средств'
+            break
+        case 398:
+            row.dealSubjectName = 'Предоставление лицензий на программное обеспечение'
+            break
+        case 402:
+            row.dealSubjectName = 'Привлечение денежных средств в межбанковские кредиты'
+            break
+        case 401:
+        case 403:
+            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и другиг инструментов торгового финансирования)'
+            break
+        case 399:
+            // TODO [13/03/14 12:57:03] Евгений Ломоносов: тут ждем ответа от заказчика
+            break
     }
 
     // Графа 26
@@ -600,7 +648,7 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         } else if ("А99".equals(innerCode)) {
            code = '17 5220 4'
         }
-        if(code !=null)
+        if (code != null)
             row.dealSubjectCode2 = getRecordId(68, 'CODE', code)
     }
 
@@ -807,6 +855,12 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
             case 389:
             case 393:
             case 394:
+            case 397:
+            case 398:
+            case 399:
+            case 402:
+            case 401:
+            case 403:
                 val41 = '796'
                 break
         }
@@ -853,6 +907,12 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 388:
         case 389:
         case 394:
+        case 397:
+        case 398:
+        case 399:
+        case 402:
+        case 401:
+        case 403:
             row.price = srcRow.price
             break
         case 383:
@@ -875,6 +935,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 382:
         case 387:
         case 392:
+        case 397:
+        case 398:
+        case 399:
             row.total = srcRow.cost
             break
         case 383:
@@ -895,6 +958,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 394:
+        case 402:
+        case 401:
+        case 403:
             row.total = srcRow.total
             break
         case 393:
@@ -954,6 +1020,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 380:
         case 381:
         case 386:
+        case 398:
+        case 399:
+        case 402:
             row.countryCode3 = srcRow.countryCode
             break
         case 384:
@@ -965,6 +1034,9 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 394:
+        case 397:
+        case 401:
+        case 403:
             row.countryCode3 = srcRow.countryName
             break
     }
@@ -975,6 +1047,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 377:
         case 382:
         case 383:
+        case 398:
+        case 399:
             row.organName = srcRow.jurName
             break
         case 375:
@@ -982,6 +1056,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 380:
         case 381:
         case 387:
+        case 397:
+        case 402:
             row.organName = srcRow.fullNamePerson
             break
         case 384:
@@ -998,6 +1074,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
         case 390:
         case 391:
         case 394:
+        case 401:
+        case 403:
             row.organName = srcRow.fullName
             break
     }
@@ -1018,8 +1096,8 @@ DataRow<Cell> buildRow(DataRow<Cell> srcRow, FormType type) {
 
         // Графа 10
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
-        // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является резидентом Сколково» = 1,
-        // то заполняется значением «1».    В ином случае не Не заполняется.
+        // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является
+        // резидентом Сколково» = 1, то заполняется значением «1». В ином случае заполняется значением «0».
         row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : recNoId
     }
 

@@ -21,7 +21,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -359,7 +358,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     }
 
     private void testMaskBox() {
-
+        boxDatePicker.setLimitDates(new Date(2014 - 1900, 3 - 1, 1), new Date(2014 - 1900, 3 - 1, 27));
+        //boxDatePicker.setValue(new Date(2013 - 1900, 2, 1));
         checkBoxNull.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
