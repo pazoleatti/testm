@@ -187,7 +187,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
     private void cancelPick() {
         state.setValues(prevState);
-        refBookView.load(state);
+        //refBookView.load(state);
         searchTextBox.setText(state.getSearchPattern());
         versionDateBox.setValue(state.getVersionDate());
         modalPanel.hide();

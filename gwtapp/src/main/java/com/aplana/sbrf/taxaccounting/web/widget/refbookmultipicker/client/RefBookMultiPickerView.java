@@ -281,10 +281,14 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     @Override
     public void refresh() {
-        if (pager.getPage() != 0) {
-            pager.firstPage();
-        } else {
-            cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
+        if (asWidget().getElement().getOffsetWidth() > 0) {
+            // когда вьха уже разместилась в дереве DOM у она получает физическую ширину
+            // по ней и определем что таблица отображается на странице
+            if (pager.getPage() != 0) {
+                pager.firstPage();
+            } else {
+                cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
+            }
         }
     }
 
