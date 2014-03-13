@@ -82,7 +82,7 @@ void generateXML() {
     // Код формы отчетности по КНД
     def String KND = '1110025'
 
-    def okato = departmentParam.OKATO?.referenceValue != null ? getRefBookValue(3, departmentParam.OKATO?.referenceValue).OKATO.stringValue : null
+    def okato = departmentParam.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue).CODE.stringValue : null
     def okvedCode = departmentParam.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE?.referenceValue).CODE.stringValue : null
     def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue).CODE.stringValue : null
     def matrixRecords = formDataCollection.getRecords()
@@ -303,7 +303,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKATO?.referenceValue == null) {
+    if (record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКАТО»")
     }
     if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
