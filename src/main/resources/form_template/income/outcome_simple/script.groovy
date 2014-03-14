@@ -87,7 +87,11 @@ def format = new SimpleDateFormat('dd.MM.yyyy')
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
+
+// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+@Field
+def rbIncome102 = null
 
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
@@ -220,14 +224,17 @@ void calculationControlGraphs(def dataRows) {
         row.opuSumByTableP = tmp
 
         // графа 13
-        def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
-        if (income102 == null || income102.isEmpty()) {
+        // получить отчет о прибылях и убытках
+        def date = getReportPeriodEndDate()
+        def filter = "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}"
+        def income102Records = getRefBookIncome102()?.getRecords(date, null, filter, null)
+        row.opuSumTotal = 0
+        if (income102Records == null || income102Records.isEmpty()) {
             income102NotFound += row.getIndex() + 2
-            tmp = 0
-        } else {
-            tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
         }
-        row.opuSumTotal = tmp
+        for (income102 in income102Records) {
+            row.opuSumTotal += income102.TOTAL_SUM.numberValue
+        }
 
         // графа 14
         row.difference = (row.opuSumByEnclosure2?:0) + (row.opuSumByTableP?:0) - (row.opuSumTotal?:0)
@@ -327,8 +334,6 @@ void consolidationSummary(def dataRows) {
         }
     }
 
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -344,7 +349,7 @@ void consolidationSummary(def dataRows) {
                         def row = getDataRow(dataRows, alias)
 
                         // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -373,7 +378,7 @@ void consolidationSummary(def dataRows) {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
                         // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 5 рну-5
                         def sum5 = 0
@@ -663,4 +668,18 @@ void checkRnu14Accepted() {
     if (formData14 == null || formData14.state != WorkflowState.ACCEPTED) {
         logger.error("Принятие сводной налоговой формы невозможно, т.к. форма РНУ-14 не сформирована или имеет статус, отличный от «Принята»")
     }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getRefBookIncome102() {
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102
 }
