@@ -134,6 +134,14 @@ def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 
         'R58', 'R59', 'R60', 'R61', 'R62', 'R63', 'R64', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R71', 'R72',
         'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84']
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+@Field
+def rbIncome102 = null
+
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -307,8 +315,8 @@ def getIncome101Data(def row) {
     def account = row.accountingRecords
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
     def refDataProvider = refBookFactory.getDataProvider(50)
-    def date = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    def records = refDataProvider.getRecords(date, null,  "ACCOUNT = '$account'", null)
+    def date = getReportPeriodEndDate()
+    def records = refDataProvider.getRecords(date, null, "ACCOUNT = '$account' AND DEPARTMENT_ID = ${formData.departmentId}", null)
     return records?.getRecords()
 }
 
@@ -318,8 +326,6 @@ void calc4to5(def dataRows) {
 
     rowsAliasesFor4to5.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
-        // получить отчет о прибылях и убытках
-        final income102Data = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
 
         // графа 11
         row.logicalCheck = getLogicalCheckFor4to5(row)
@@ -328,7 +334,7 @@ void calc4to5(def dataRows) {
         // графа 14
         row.opuSumByTableD = getOpuSumByTableDFor4to5(row, incomeSimpleDataRows)
         // графа 15
-        row.opuSumTotal = getOpuSumTotalFor4to5(row, income102Data)
+        row.opuSumTotal = getOpuSumTotalFor4to5(row)
         // графа 16
         row.difference = getDifferenceFor4to5(row)
     }
@@ -341,16 +347,16 @@ def getDifferenceFor4to5(def row) {
 }
 
 // Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
-def getOpuSumTotalFor4to5(def row, def income102Data) {
-    if (income102Data) {
-        return income102Data.sum { income102Row ->
-            if (income102Row.opuCode == row.accountingRecords) {
-                return (income102Row.totalSum ?: 0)
-            }
-            return 0
-        }
+def getOpuSumTotalFor4to5(def row) {
+    // получить отчет о прибылях и убытках
+    def date = getReportPeriodEndDate()
+    def filter = "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}"
+    def income102Records = getRefBookIncome102()?.getRecords(date, null, filter, null)
+    def tmp = 0
+    for (income102 in income102Records) {
+        tmp += income102.TOTAL_SUM.numberValue
     }
-    return 0
+    return tmp
 }
 
 // Графа 14. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
@@ -542,4 +548,18 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getRefBookIncome102() {
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102
 }
