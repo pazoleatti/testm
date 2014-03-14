@@ -197,8 +197,8 @@ public class DepartmentReportPeriodDaoImplTest {
 
 	@Test
 	public void isPeriodActiveTest() {
-		assertTrue(departmentReportPeriodDao.isPeriodActive(2, 1));
-		assertFalse(departmentReportPeriodDao.isPeriodActive(2, 2));
+		assertTrue(departmentReportPeriodDao.isPeriodOpen(2, 1));
+		assertFalse(departmentReportPeriodDao.isPeriodOpen(2, 2));
 	}
 
 }

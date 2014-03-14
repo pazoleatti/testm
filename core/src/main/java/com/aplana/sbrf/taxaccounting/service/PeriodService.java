@@ -253,5 +253,5 @@ public interface PeriodService {
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @return  признак активности периода для подразделения
 	 */
-	boolean isPeriodActive(int departmentId, long reportPeriodId);
+	boolean isPeriodOpen(int departmentId, long reportPeriodId);
 }

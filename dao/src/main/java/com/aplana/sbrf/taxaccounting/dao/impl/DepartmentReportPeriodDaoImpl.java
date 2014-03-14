@@ -125,7 +125,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	}
 
 	@Override
-	public boolean isPeriodActive(int departmentId, long reportPeriodId) {
+	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
 		int is_active = getJdbcTemplate().queryForInt(
 				"select is_active from department_report_period where department_id = ? and report_period_id = ?",
 				new Object[] {departmentId, reportPeriodId},

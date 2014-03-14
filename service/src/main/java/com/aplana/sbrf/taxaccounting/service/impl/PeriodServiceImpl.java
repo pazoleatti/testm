@@ -652,7 +652,7 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	@Override
-	public boolean isPeriodActive(int departmentId, long reportPeriodId) {
-		return departmentReportPeriodDao.isPeriodActive(departmentId, reportPeriodId);
+	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
+		return departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId);
 	}
 }
