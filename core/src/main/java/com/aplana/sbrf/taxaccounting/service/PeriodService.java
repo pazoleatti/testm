@@ -246,4 +246,12 @@ public interface PeriodService {
      * @return список отчетных периодов
      */
     List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
+
+	/**
+	 * Получить признак активности периода для подразделения
+	 * @param departmentId идентификатор подразделения
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @return  признак активности периода для подразделения
+	 */
+	boolean isPeriodActive(int departmentId, long reportPeriodId);
 }

@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +20,8 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DepartmentReportPeriodDaoImplTest.xml" })
@@ -194,6 +193,12 @@ public class DepartmentReportPeriodDaoImplTest {
 				reportPeriod1.getId(), 1l);
 
 		assertEquals(true, departmentReportPeriod.isActive());
+	}
+
+	@Test
+	public void isPeriodActiveTest() {
+		assertTrue(departmentReportPeriodDao.isPeriodActive(2, 1));
+		assertFalse(departmentReportPeriodDao.isPeriodActive(2, 2));
 	}
 
 }
