@@ -57,7 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         if (!isBank()) {
-            calcTotal()
+            calcTotal(null)
         }
         break
     case FormDataEvent.IMPORT:
