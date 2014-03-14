@@ -61,6 +61,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         void load();
 
+        void loadAndSelect();
+
         void reload();
 
         void setRefBookNameDesc(String desc);
@@ -210,7 +212,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         }
                         getView().setAttributeId(attrId);
                         editFormPresenter.init(refBookDataId, result.isReadOnly());
-                        getView().load();
+                        getView().loadAndSelect();
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
                     }
                 }, this));
