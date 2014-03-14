@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 import java.text.SimpleDateFormat
@@ -87,6 +88,9 @@ def resetColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTax
 def rowsNotCalc = ['R1', 'R53', 'R54', 'R156']
 
 @Field
+def totalColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']
+
+@Field
 def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49, 51, 52] + (65..70) + [139] + (142..151) + (153..155))
 
 @Field
@@ -130,48 +134,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    // КНУ 40001
     def row40001 = getDataRow(dataRows, 'R53')
-    row40001.rnu6Field10Sum = 0
-    row40001.rnu6Field12Accepted = 0
-    row40001.rnu6Field12PrevTaxPeriod = 0
-    row40001.rnu4Field5Accepted = 0
-    (2..52).each {
-        def row = getDataRow(dataRows, "R$it")
-
-        // «графа 5» =сумма значений  «графы 5» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field10Sum = (row40001.rnu6Field10Sum ?: 0) + (row.rnu6Field10Sum ?: 0)
-
-        // «графа 6» =сумма значений  «графы 6» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field12Accepted = (row40001.rnu6Field12Accepted ?: 0) + (row.rnu6Field12Accepted ?: 0)
-
-        // «графа 7» =сумма значений  «графы 7» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu6Field12PrevTaxPeriod = (row40001.rnu6Field12PrevTaxPeriod ?: 0) + (row.rnu6Field12PrevTaxPeriod ?: 0)
-
-        // «графа 8» =сумма значений  «графы 8» для строк с 2 по 52 (раздел «Доходы от реализации»)
-        row40001.rnu4Field5Accepted = (row40001.rnu4Field5Accepted ?: 0) + (row.rnu4Field5Accepted ?: 0)
-    }
-
-    // КНУ 40002
     def row40002 = getDataRow(dataRows, 'R156')
-    row40002.rnu6Field10Sum = 0
-    row40002.rnu6Field12Accepted = 0
-    row40002.rnu6Field12PrevTaxPeriod = 0
-    row40002.rnu4Field5Accepted = 0
-    (55..155).each {
-        def row = getDataRow(dataRows, "R$it")
-
-        // «графа 5» =сумма значений  «графы 5» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40002.rnu6Field10Sum = (row40002.rnu6Field10Sum ?: 0) + (row.rnu6Field10Sum ?: 0)
-
-        // «графа 6» =сумма значений  «графы 6» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40002.rnu6Field12Accepted = (row40002.rnu6Field12Accepted ?: 0) + (row.rnu6Field12Accepted ?: 0)
-
-        // «графа 7» =сумма значений  «графы 7» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40002.rnu6Field12PrevTaxPeriod = (row40002.rnu6Field12PrevTaxPeriod ?: 0) + (row.rnu6Field12PrevTaxPeriod ?: 0)
-
-        // «графа 8» =сумма значений  «графы 8» для строк с 55 по 155 (раздел «Внереализационные доходы»)
-        row40002.rnu4Field5Accepted = (row40002.rnu4Field5Accepted ?: 0) + (row.rnu4Field5Accepted ?: 0)
+    totalColumns.each{ alias ->
+        row40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
+        row40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
     }
 
     def refBookIncome102 = refBookFactory.getDataProvider(52L)
@@ -263,6 +230,16 @@ void logicCheck() {
             checkRequiredColumns(row, nonEmptyColumns)
         }
     }
+    def row40001 = getDataRow(dataRows, 'R53')
+    def row40002 = getDataRow(dataRows, 'R156')
+    def need40001 = [:]
+    def need40002 = [:]
+    totalColumns.each{ alias ->
+        need40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
+        need40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
+    }
+    checkTotalSum(row40001, need40001)
+    checkTotalSum(row40002, need40002)
 }
 
 // Консолидация формы
@@ -592,4 +569,26 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+/** Получить сумму диапазона строк определенного столбца. */
+def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
+    def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
+    def to = getDataRow(dataRows, rowToAlias).getIndex() - 1
+    if (from > to) {
+        return 0
+    }
+    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
+}
+
+void checkTotalSum(totalRow, needRow){
+    def errorColumns = []
+    totalColumns.each { totalColumn ->
+        if (totalRow[totalColumn] != needRow[totalColumn]) {
+            errorColumns += "\"" + getColumnName(totalRow, totalColumn) + "\""
+        }
+    }
+    if (!errorColumns.isEmpty()){
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
+    }
 }
