@@ -89,7 +89,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                             return;
                         }
-                        // Варианты 7,8,7a
+                        // Варианты 7,8
                         else if(compareResult == 1 || compareResult == -5){
                             isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(), newIntersection.getBeginDate(),
                                     intersection.getEndDate(), logger);
