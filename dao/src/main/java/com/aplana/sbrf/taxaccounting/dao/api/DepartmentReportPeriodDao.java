@@ -70,7 +70,13 @@ public interface DepartmentReportPeriodDao {
 	 * @return true - существует, false - не существует
 	 */
 	boolean existForDepartment(Integer departmentId, long reportPeriodId);
-	
 
+	/**
+	 * Получить признак активности периода для подразделения
+	 * @param departmentId идентификатор подразделения
+	 * @param reportPeriodId идентификатор отчетного периода
+	 * @return  признак активности периода для подразделения
+	 */
+	boolean isPeriodOpen(int departmentId, long reportPeriodId);
 	
 }

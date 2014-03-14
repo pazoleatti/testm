@@ -650,4 +650,9 @@ public class PeriodServiceImpl implements PeriodService{
 	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
 		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
 	}
+
+	@Override
+	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
+		return departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId);
+	}
 }

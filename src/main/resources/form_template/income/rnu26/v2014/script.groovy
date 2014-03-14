@@ -71,15 +71,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        importDataXLS()
+        importData()
         if (!prevPeriodCheck()){
             return
         }
         calc()
         logicCheck()
-        break
-    case FormDataEvent.MIGRATION:
-        migration()
         break
 }
 
@@ -469,55 +466,6 @@ void logicCheck() {
 }
 
 /**
- * Получение импортируемых данных.
- */
-void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
-
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
-
-    if (!fileName. toLowerCase().contains('.r')) {
-        logger.error('Формат файла должен быть *.rnu')
-        return
-    }
-
-    def xmlString = importService.getData(is, fileName, 'cp866')
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-
-        // расчетать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
-        }
-    } catch (Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
-    }
-}
-
-/**
  * Получить сумму столбца.
  */
 def getSum(def data, def columnAlias) {
@@ -677,132 +625,6 @@ def BigDecimal calc17(def row) {
         return roundValue((tmp < 0 ? tmp.abs() : 0), 2)
     }
     return null
-}
-
-/**
- * Заполнить форму данными.
- *
- * @param xml данные
- */
-def addData(def xml) {
-    Date date = getReportPeriodEndDate()
-    def cache = [:]
-    def data = formDataService.getDataRowHelper(formData)
-    data.clear()
-    def newRows = []
-    def indexRow = 0
-
-    for (def row : xml.row) {
-        def newRow = getNewRow()
-        newRow.setIndex(++indexRow)
-
-        def indexCell = 1
-
-        newRow.rowNumber = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 2
-        newRow.issuer = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 3
-        newRow.shareType = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 4
-        newRow.tradeNumber = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 5
-        newRow.currency = getRecords(15, 'CODE_2', row.cell[indexCell].text(), date, cache)
-        indexCell++
-
-        // графа 6
-        newRow.lotSizePrev = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 7
-        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 8
-        newRow.reserveCalcValuePrev = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 9
-        newRow.cost = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 10
-        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text(), date, cache)
-        indexCell++
-
-        // графа 11
-        newRow.marketQuotation = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 12
-        newRow.rubCourse = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 13
-        newRow.marketQuotationInRub = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 14
-        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 15
-        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 16
-        newRow.reserveCreation = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-        indexCell++
-
-        // графа 17
-        newRow.reserveRecovery = getNumber(row.cell[indexCell].text(), indexRow, indexCell)
-
-        newRows.add(newRow)
-    }
-    data.insert(newRows, 1)
-
-    // итоговая строка
-    indexRow = 0
-    if (xml.rowTotal.size() == 1) {
-        indexRow++
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-
-        // графа 6
-        total.lotSizePrev = getNumber(row.cell[6].text(), indexRow, 6)
-
-        // графа 7
-        total.lotSizeCurrent = getNumber(row.cell[7].text(), indexRow, 7)
-
-        // графа 8
-        total.reserveCalcValuePrev = getNumber(row.cell[8].text(), indexRow, 8)
-
-        // графа 9
-        total.cost = getNumber(row.cell[9].text(), indexRow, 9)
-
-        // графа 14
-        total.costOnMarketQuotation = getNumber(row.cell[14].text(), indexRow, 14)
-
-        // графа 15
-        total.reserveCalcValue = getNumber(row.cell[15].text(), indexRow, 15)
-
-        // графа 16
-        total.reserveCreation = getNumber(row.cell[16].text(), indexRow, 16)
-
-        // графа 17
-        total.reserveRecovery = getNumber(row.cell[17].text(), indexRow, 17)
-
-        return total
-    } else {
-        return null
-    }
 }
 
 /**
@@ -967,7 +789,7 @@ def getReportPeriodEndDate() {
     return endDate
 }
 // Получение импортируемых данных
-void importDataXLS() {
+void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 1)
@@ -1011,11 +833,11 @@ void importDataXLS() {
 
     checkHeaderEquals(headerMapping)
 
-    addDataXLS(xml, 1)
+    addData(xml, 1)
 }
 
 // Заполнить форму данными
-void addDataXLS(def xml, int headRowCount) {
+void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
