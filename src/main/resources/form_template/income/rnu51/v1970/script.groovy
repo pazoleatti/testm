@@ -48,7 +48,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -69,6 +69,15 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        def fileName = UploadFileName?.toLowerCase()
+        if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
+            importDataXLS()
+            calc()
+            logicCheck()
+        } else {
+            importData()
+        }
+        break
     case FormDataEvent.MIGRATION:
         importData()
         break
@@ -93,6 +102,9 @@ def allColumns = ['rowNumber', 'tradeNumber', 'singSecurirty', 'issue', 'acquisi
 def editableColumns = ['tradeNumber', 'singSecurirty', 'issue', 'acquisitionDate', 'saleDate', 'amountBonds',
         'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc', 'marketPriceInRub', 'redemptionValue',
         'priceInFactPerc', 'priceInFactRub', 'expensesOnSale', 'marketPriceInPerc1']
+
+@Field
+def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -759,4 +771,210 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Получение импортируемых данных
+void importDataXLS() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 22, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Код сделки',
+            (xml.row[0].cell[2]): 'Признак ценной бумаги',
+            (xml.row[0].cell[3]): 'Выпуск',
+            (xml.row[0].cell[4]): 'Дата приобретения, закрытия короткой позиции',
+            (xml.row[0].cell[5]): 'Дата реализации, погашения, прочего выбытия, открытия короткой позиции',
+            (xml.row[0].cell[6]): 'Количество облигаций (шт.)',
+            (xml.row[0].cell[7]): 'Цена приобретения (руб.коп.)',
+            (xml.row[0].cell[8]): 'Расходы по приобретению (руб.коп.)',
+            (xml.row[0].cell[9]): 'Рыночная цена на дату приобретения',
+            (xml.row[0].cell[11]): 'Цена приобретения для целей налогообложения (руб.коп.)',
+            (xml.row[0].cell[12]): 'Стоимость погашения (руб.коп.)',
+            (xml.row[0].cell[13]): 'Фактическая цена реализации',
+            (xml.row[0].cell[15]): 'Рыночная цена на дату реализации',
+            (xml.row[0].cell[17]): 'Цена реализации (выбытия) для целей налогообложения (руб.коп.)',
+            (xml.row[0].cell[18]): 'Расходы по реализации (выбытию) (руб.коп.)',
+            (xml.row[0].cell[19]): 'Всего расходы (руб. коп.)',
+            (xml.row[0].cell[20]): 'Прибыль (+), убыток (-) от реализации (погашения) (руб.коп.)',
+            (xml.row[0].cell[21]): 'Превышение цены реализации для целей налогообложения над ценой реализации (руб.коп.)',
+            (xml.row[1].cell[9]): 'В % к номиналу',
+            (xml.row[1].cell[10]): 'В рублях и коп.',
+            (xml.row[1].cell[13]): 'В % к номиналу',
+            (xml.row[1].cell[14]): 'В рублях и коп.',
+            (xml.row[1].cell[15]): 'В % к номиналу',
+            (xml.row[1].cell[16]): 'В рублях и коп.',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9',
+            (xml.row[2].cell[9]): '10',
+            (xml.row[2].cell[10]): '11',
+            (xml.row[2].cell[11]): '12',
+            (xml.row[2].cell[12]): '13',
+            (xml.row[2].cell[13]): '14',
+            (xml.row[2].cell[14]): '15',
+            (xml.row[2].cell[15]): '16',
+            (xml.row[2].cell[16]): '17',
+            (xml.row[2].cell[17]): '18',
+            (xml.row[2].cell[18]): '19',
+            (xml.row[2].cell[19]): '20',
+            (xml.row[2].cell[20]): '21',
+            (xml.row[2].cell[21]): '22'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addDataXLS(xml, 2)
+}
+
+// Заполнить форму данными
+void addDataXLS(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
+    def totalTwoRow = getDataRow(dataRows, 'itogo')
+    // Обнуление итогов
+    totalColumns.each {
+        totalOneRow[it] = 0
+        totalTwoRow[it] = 0
+    }
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        int fileColIndex = 0
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 2 - справочник 61 "Коды сделок"
+        newRow.tradeNumber = getRecordIdImport(61, 'CODE', row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset)
+        fileColIndex++
+
+        // графа 3 - справочник 62 "Признаки ценных бумаг"
+        newRow.singSecurirty = getRecordIdImport(62, 'CODE', row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset)
+        fileColIndex++
+
+        // графа 4
+        newRow.issue = row.cell[fileColIndex].text()
+        fileColIndex++
+
+        // графа 5
+        newRow.acquisitionDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 6
+        newRow.saleDate = parseDate(row.cell[fileColIndex].text(), 'dd.MM.yyyy', xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 7
+        newRow.amountBonds = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 8
+        newRow.acquisitionPrice = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 9
+        newRow.costOfAcquisition = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 10
+        newRow.marketPriceInPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 11
+        newRow.marketPriceInRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 12
+        newRow.acquisitionPriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 13
+        newRow.redemptionValue = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 14
+        newRow.priceInFactPerc = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 15
+        newRow.priceInFactRub = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 16
+        newRow.marketPriceInPerc1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 17
+        newRow.marketPriceInRub1 = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 18
+        newRow.salePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 19
+        newRow.expensesOnSale = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 20
+        newRow.expensesTotal = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 21
+        newRow.profit = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+        fileColIndex++
+
+        // графа 22
+        newRow.excessSalePriceTax = parseNumber(row.cell[fileColIndex].text(), xlsIndexRow, fileColIndex + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    rows.add(totalOneRow)
+    rows.add(totalTwoRow)
+    dataRowHelper.save(rows)
 }
