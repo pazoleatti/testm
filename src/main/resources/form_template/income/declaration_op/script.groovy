@@ -99,7 +99,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def okato = getRefBookValue(3, incomeParams?.OKATO?.value)?.OKATO?.value
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def appVersion = incomeParams?.APP_VERSION?.value
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
@@ -270,7 +270,7 @@ void generateXML() {
                     // 0..n // всегда один
                     НалПУАв(
                             ТипНП : typeNP,
-                            ОКТМО : okato) {
+                            ОКТМО : oktmo) {
 
                         // 0..1
                         ФедБдж(
@@ -298,7 +298,7 @@ void generateXML() {
                         НалПУМес(
                                 [ТипНП : typeNP] +
                                         (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКТМО : okato]) {
+                                        [ОКТМО : oktmo]) {
 
                             def avPlat1 = empty
                             def avPlat2 = empty
@@ -376,7 +376,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKATO == null || record.OKATO.referenceValue == null) {
+    if (record.OKTMO == null || record.OKTMO.referenceValue == null) {
         errorList.add("«ОКТМО»")
     }
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
