@@ -82,8 +82,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     case NORMAL:
                     case DRAFT:
                         compareResult = newIntersection.compareTo(intersection);
-                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10
-                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 || compareResult == -7 || compareResult == -1){
+                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10, 1a, 2a, 3a
+                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
+                                compareResult == -7 || compareResult == -1 || compareResult == 16 || compareResult == -11 ||
+                                compareResult == 11 || compareResult == -16 || compareResult == 10){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                             return;
                         }
@@ -102,7 +104,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                                         intersection.getTemplateId());
                         }
                         //2 Шаг. Система проверяет наличие даты окончания актуальности.
-                        //Пересечений нет
+                        /*  Пересечений нет
+                            По идее такого варианта быть не должно, об этом заботится метод FormTemplateService.findFTVersionIntersections
+                        */
                         else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
                             cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
                                     newIntersection.getBeginDate(), intersection.getEndDate(), logger);
@@ -119,8 +123,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime()));
                             formTemplateService.save(formTemplate);
                         }
-                        //Варианты 16,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1){
+                        //Варианты 16,18a,19,20
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
                             formTemplateService.delete(formTemplateService.get(intersection.getTemplateId()));
                         }
                         break;

@@ -77,15 +77,17 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                     case NORMAL:
                     case DRAFT:
                         compareResult = newIntersection.compareTo(intersection);
-                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10
-                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 || compareResult == -7 || compareResult == -1){
+                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10, 1a, 2a, 3a
+                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
+                                compareResult == -7 || compareResult == -1 || compareResult == 16 || compareResult == -11 ||
+                                compareResult == 11 || compareResult == -16 || compareResult == 10){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                             return;
                         }
                         // Варианты 7,8
                         else if(compareResult == 1 || compareResult == -5){
-                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(),
-                                    newIntersection.getBeginDate(), intersection.getEndDate(), logger);
+                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(), newIntersection.getBeginDate(),
+                                    intersection.getEndDate(), logger);
                             if (logger.containsLevel(LogLevel.ERROR)){
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
@@ -114,8 +116,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
                             declarationTemplateService.save(formTemplate);
                         }
-                        //Варианты 16,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1){
+                        //Варианты 16,18a,19,20
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
                             declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
                         }
                         break;
