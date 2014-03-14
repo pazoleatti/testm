@@ -221,7 +221,7 @@ void calc() {
         // Графа 13
         if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in chRows)) {
             row.opuSumTotal = 0
-            def income102Records = refBookIncome102.getRecords(dateEnd, null, "OPU_CODE = '${row.accountingRecords}'", null)
+            def income102Records = refBookIncome102.getRecords(dateEnd, null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
             for (income102 in income102Records) {
                 row.opuSumTotal += income102.TOTAL_SUM.numberValue
             }
@@ -229,7 +229,7 @@ void calc() {
 
         if (row.getAlias() in chRows) {
             row.opuSumTotal = 0
-            for (income101 in refBookIncome101.getRecords(dateEnd, null, "ACCOUNT = '${row.accountingRecords}'", null)) {
+            for (income101 in refBookIncome101.getRecords(dateEnd, null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)) {
                 row.opuSumTotal += income101.DEBET_RATE.numberValue
             }
         }

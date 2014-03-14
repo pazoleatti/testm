@@ -82,6 +82,14 @@ def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', '
 def notImportSum = ['R1', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12', 'R13', 'R15', 'R16', 'R17', 'R27', 'R29',
         'R67', 'R68', 'R71']
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+@Field
+def rbIncome102 = null
+
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -166,14 +174,17 @@ void calc() {
                     'rnu5Field5Accepted', row.consumptionBuhSumAccountNumber)
 
             // графа 15
-            def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
-            if (income102 == null || income102.isEmpty()) {
+            // получить отчет о прибылях и убытках
+            def date = getReportPeriodEndDate()
+            def filter = "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}"
+            def income102Records = getRefBookIncome102()?.getRecords(date, null, filter, null)
+            row.opuSumTotal = 0
+            if (income102Records == null || income102Records.isEmpty()) {
                 income102NotFound += getIndex(row)
-                tmp = 0
-            } else {
-                tmp = ((income102[0] != null) ? income102[0].getTotalSum() : 0)
             }
-            row.opuSumTotal = tmp
+            for (income102 in income102Records) {
+                row.opuSumTotal += income102.TOTAL_SUM.numberValue
+            }
 
             // графа 16
             row.difference = (getValue(row.opuSumByEnclosure3) + getValue(row.opuSumByTableP)) - getValue(row.opuSumTotal)
@@ -520,4 +531,18 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getRefBookIncome102() {
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102
 }
