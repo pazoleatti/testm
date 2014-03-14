@@ -523,8 +523,8 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             "  when (status=0 and nextversion is null and version < ?) then 2\n" +
             "  when (status=2 and (? is not null and version > ? and version < ? and nextversion > ?)) then 3\n" +
             "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and ? is null and version > ?) or \n" +
-            "  \t(nextversion is null and version > ?)\n" +
+            "  \t(nextversion is not null and ? is null and version >= ?) or \n" +
+            "  \t(nextversion is null and version >= ?)\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
