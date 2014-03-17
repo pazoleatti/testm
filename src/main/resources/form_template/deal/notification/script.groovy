@@ -247,22 +247,27 @@ void generateXML() {
                                                 [СтоимИтог: row.total] +
                                                 (row.dealDoneDate != null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
                                 ) {
-                                    def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1).CODE.stringValue : '000'
+                                    def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1).CODE.stringValue : null
                                     def String region1 = row.region1 != null ? getRefBookValue(4, row.region1).CODE.stringValue : null
-                                    МестОтпрТов(
-                                            [ОКСМ: countryCode1] +
-                                                    (region1 != null ? [КодРегион: region1] : [:]) +
-                                                    (row.city1 != null ? [Город: row.city1] : [:]) +
-                                                    (row.locality1 != null ? [НаселПункт: row.locality1] : [:])
-                                    )
-                                    def String countryCode2 = row.countryCode2 != null ? getRefBookValue(10, row.countryCode2).CODE.stringValue : '000'
+
+                                    if (countryCode1 != null || region1 != null || row.city1 != null || row.locality1 != null) {
+                                        МестОтпрТов(
+                                                (countryCode1 != null ? [ОКСМ: countryCode1] : [:]) +
+                                                        (region1 != null ? [КодРегион: region1] : [:]) +
+                                                        (row.city1 != null ? [Город: row.city1] : [:]) +
+                                                        (row.locality1 != null ? [НаселПункт: row.locality1] : [:])
+                                        )
+                                    }
+                                    def String countryCode2 = row.countryCode2 != null ? getRefBookValue(10, row.countryCode2).CODE.stringValue : null
                                     def String region2 = row.region2 != null ? getRefBookValue(4, row.region2).CODE.stringValue : null
-                                    МестСовСд(
-                                            [ОКСМ: countryCode2] +
-                                                    (region2 != null ? [КодРегион: region2] : [:]) +
-                                                    (row.city2 != null ? [Город: row.city2] : [:]) +
-                                                    (row.locality2 != null ? [НаселПункт: row.locality2] : [:])
-                                    )
+                                    if (countryCode2 != null || region2 != null || row.city2 != null || row.locality2 != null) {
+                                        МестСовСд(
+                                                (countryCode2 != null ? [ОКСМ: countryCode2] : [:]) +
+                                                        (region2 != null ? [КодРегион: region2] : [:]) +
+                                                        (row.city2 != null ? [Город: row.city2] : [:]) +
+                                                        (row.locality2 != null ? [НаселПункт: row.locality2] : [:])
+                                        )
+                                    }
                                 }
                             }
                             def String organInfo = row.organInfo != null ? getRefBookValue(70, row.organInfo).CODE.numberValue : null

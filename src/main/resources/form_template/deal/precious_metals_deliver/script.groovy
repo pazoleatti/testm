@@ -65,8 +65,7 @@ def editableColumns = ['name', 'dependence', 'dealType', 'contractNum', 'contrac
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode1', 'dealType', 'signTransaction', 'count', 'priceOne',
-        'totalNds']
+def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode1', 'signTransaction', 'count', 'priceOne', 'totalNds']
 
 // Группируемые атрибуты
 @Field

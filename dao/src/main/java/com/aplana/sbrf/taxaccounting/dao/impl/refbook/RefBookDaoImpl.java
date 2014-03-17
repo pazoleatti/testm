@@ -1070,10 +1070,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  \t))\n" +
             "  )) then 1\n" +
             "  when (status=0 and nextversion is null and version < ?) then 2\n" +
-            "  when (status=2 and (? is not null and version > ? and version < ? and nextversion > ?)) then 3\n" +
+            "  when (status=2 and (? is not null and version >= ? and version < ? and nextversion > ?)) then 3\n" +
             "  when (status=2 and (\n" +
             "  \t(nextversion is not null and ? is null and version > ?) or \n" +
-            "  \t(nextversion is null and version > ?)\n" +
+            "  \t(nextversion is null and version >= ?)\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -1400,7 +1400,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return result.toString();
     }
 
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version  = " +
+            "   (select min(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and version > ?)),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day as versionEnd from nextVersion nv, nextVersionEnd nve";
 

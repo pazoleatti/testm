@@ -223,6 +223,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     @Override
     public void load(PickerState pickerState) {
+        System.out.println("init");
         getUiHandlers().init(pickerState);
     }
 
@@ -283,6 +284,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             }
         }
         return null;
+    }
+
+    public void selectFirstItenOnLoad(){
+        getUiHandlers().selectFirstItenOnLoad();
     }
 
     /**

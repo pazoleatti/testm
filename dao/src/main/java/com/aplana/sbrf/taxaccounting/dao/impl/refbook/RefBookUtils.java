@@ -161,16 +161,22 @@ public class RefBookUtils extends AbstractDao {
         simpleFilterTreeListener.setRefBook(refBook);
         simpleFilterTreeListener.setPs(filterPS);
 
+        ps.appendQuery(")");
+
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
+            if (parentId == null) {
+                ps.appendQuery("PARENT_ID is null or (");
+            }
             ps.appendQuery(filterPS.getQuery().toString());
             if (filterPS.getParams().size() > 0) {
                 ps.addParam(filterPS.getParams());
             }
+            if (parentId == null) {
+                ps.appendQuery(")");
+            }
         }
-
-        ps.appendQuery(")");
 
         if (pagingParams != null) {
 			ps.appendQuery(" WHERE ");
