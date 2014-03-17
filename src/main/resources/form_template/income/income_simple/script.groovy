@@ -97,9 +97,22 @@ def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49, 51, 
 def rows8 = ((2..52) + (55..155))
 
 @Field
+def chRows = ['R118', 'R119', 'R141', 'R142']
+
+@Field
 def formatY = new SimpleDateFormat('yyyy')
 @Field
 def format = new SimpleDateFormat('dd.MM.yyyy')
+
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+@Field
+def rbIncome101 = null
+
+@Field
+def rbIncome102 = null
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -141,10 +154,6 @@ void calc() {
         row40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
     }
 
-    def refBookIncome102 = refBookFactory.getDataProvider(52L)
-    def refBookIncome101 = refBookFactory.getDataProvider(50L)
-    def dateEnd = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // Лог. проверка
     dataRows.each { row ->
         if (['R2', 'R3', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R17', 'R18', 'R19', 'R20', 'R22', 'R24', 'R28',
@@ -173,7 +182,7 @@ void calc() {
         }
 
         // Графа 12
-        if (!rowsNotCalc.contains(row.getAlias())) {
+        if (!(row.getAlias() in rowsNotCalc)) {
             def sum8Column = 0
             dataRows.each {
                 if (it.accountNo == row.accountNo) {
@@ -183,12 +192,10 @@ void calc() {
             row.opuSumByTableD = sum8Column
         }
 
-        def chRows = ['R118', 'R119', 'R141', 'R142']
-
         // Графа 13
-        if (!rowsNotCalc.contains(row.getAlias()) && !(row.getAlias() in chRows)) {
+        if (!(row.getAlias() in (rowsNotCalc + chRows))) {
             row.opuSumTotal = 0
-            def income102Records = refBookIncome102.getRecords(dateEnd, null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+            def income102Records = getIncome102Data(row)
             for (income102 in income102Records) {
                 row.opuSumTotal += income102.TOTAL_SUM.numberValue
             }
@@ -196,7 +203,8 @@ void calc() {
 
         if (row.getAlias() in chRows) {
             row.opuSumTotal = 0
-            for (income101 in refBookIncome101.getRecords(dateEnd, null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)) {
+            def income101Records = getIncome101Data(row)
+            for (income101 in income101Records) {
                 row.opuSumTotal += income101.DEBET_RATE.numberValue
             }
         }
@@ -220,6 +228,24 @@ void calc() {
     dataRowHelper.update(dataRows)
 }
 
+// Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
+def getIncome101Data(def row) {
+    // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
+    if (rbIncome101 == null) {
+        rbIncome101 = refBookFactory.getDataProvider(50L)
+    }
+    return rbIncome101?.getRecords(getReportPeriodEndDate(), null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+}
+
+// Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
+def getIncome102Data(def row) {
+    // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -230,6 +256,21 @@ void logicCheck() {
             checkRequiredColumns(row, nonEmptyColumns)
         }
     }
+    dataRows.each {row ->
+        if (row.getAlias() in chRows) {
+            def income101Records = getIncome101Data(row)
+            if (!income101Records || income101Records.isEmpty()) {
+                logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+            }
+        }
+        if (!(row.getAlias() in (rowsNotCalc + chRows))) {
+            def income102Records = getIncome102Data(row)
+            if (!income102Records || income102Records.isEmpty()) {
+                logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+            }
+        }
+    }
+
     def row40001 = getDataRow(dataRows, 'R53')
     def row40002 = getDataRow(dataRows, 'R156')
     def need40001 = [:]
@@ -592,3 +633,11 @@ void checkTotalSum(totalRow, needRow){
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
     }
 }
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
