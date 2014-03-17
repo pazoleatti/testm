@@ -74,9 +74,7 @@
                             <g:Label width="130px" text="Подразделение:"/>
                         </g:cell>
                         <g:cell height="26px"  width="100%">
-                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree"
-                                                           header="Выберите подразделение" multiselection="false"
-                                                           modal="true" width="100%"/>
+                            <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" width="100%" multiselection="false" />
                         </g:cell>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel>

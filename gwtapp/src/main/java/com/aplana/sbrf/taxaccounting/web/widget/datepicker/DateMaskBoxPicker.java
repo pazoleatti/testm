@@ -1,13 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.LeafValueEditor;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ShowRangeEvent;
 import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -38,29 +36,13 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
 
-    public static interface Icons extends ClientBundle {
-        @Source("clear.png")
-        public ImageResource clearBtn();
-
-        @Source("clear_disable.png")
-        public ImageResource clearBtnDisable();
-
-        @Source("calendar_picker.png")
-        public ImageResource calPickerBtn();
-
-        @Source("calendar_picker_disable.png")
-        public ImageResource calPickerBtnDisable();
-    }
-
     @UiField
     DateMaskBox dateBox;
     @UiField
     Image calendarImage,
             clearImage;
     @UiField
-    HTMLPanel mainPanel;
-
-    Icons iconsRecources = GWT.create(Icons.class);
+    HorizontalPanel mainPanel;
 
     protected static int POPUP_PANEL_WIDTH_CHECK = 160;
     protected static int POPUP_PANEL_HEIDHT_CHECK = 166;
@@ -78,6 +60,45 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     public DateMaskBoxPicker() {
         initWidget(ourUiBinder.createAndBindUi(this));
+
+        MouseOverHandler mouseOverHandler = new MouseOverHandler() {
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                if (canBeEmpty && dateBox.getValue()!= null) {
+                    clearImage.setUrl(WidgetUtils.iconUrl);
+                    clearImage.setTitle("Очистить выбор");
+                    setPointerCursor(clearImage.getElement(), true);
+                }
+            }
+        };
+        MouseOutHandler mouseOutHandler = new MouseOutHandler() {
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                if (event.getRelatedTarget()!= null && !event.getRelatedTarget().equals(
+                        clearImage.getElement())) {
+                    clearImage.setUrl(WidgetUtils.dummyUrl);
+                    clearImage.setTitle("");
+                    setPointerCursor(clearImage.getElement(), false);
+                }
+            }
+        };
+
+        dateBox.addMouseOverHandler(mouseOverHandler);
+        dateBox.addMouseOutHandler(mouseOutHandler);
+        calendarImage.addMouseOverHandler(mouseOverHandler);
+        calendarImage.addMouseOutHandler(mouseOutHandler);
+        clearImage.addMouseOverHandler(mouseOverHandler);
+        clearImage.addMouseOutHandler(new MouseOutHandler() {
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                if (event.getRelatedTarget()!= null && !event.getRelatedTarget().equals(dateBox.getElement()) &&
+                        !event.getRelatedTarget().equals(calendarImage.getElement())) {
+                    clearImage.setUrl(WidgetUtils.dummyUrl);
+                    clearImage.setTitle("");
+                    setPointerCursor(clearImage.getElement(), false);
+                }
+            }
+        });
 
         dateBox.setMayBeNull(canBeEmpty);
         clearImage.setVisible(canBeEmpty);
@@ -272,11 +293,9 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     public void setEnabled(boolean enabled) {
         this.widgetEnabled = enabled;
         dateBox.setEnabled(enabled);
-        calendarImage.setResource(enabled ? iconsRecources.calPickerBtn() : iconsRecources.calPickerBtnDisable());
+        calendarImage.setUrl(enabled ? "resources/img/picker/calendar-icon.png" : "resources/img/picker/calendar-icon-disable.png");
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
-        clearImage.setVisible(getValue() != null && enabled && canBeEmpty);
-        clearImage.setResource(enabled ? iconsRecources.clearBtn() : iconsRecources.clearBtnDisable());
-        clearImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
+        clearImage.setVisible(false);
     }
 
     @Override

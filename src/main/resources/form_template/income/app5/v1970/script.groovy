@@ -52,7 +52,10 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        logicCheckBeforeCalc()
+        calc()
+        logicCheck()
         break
 }
 
@@ -96,6 +99,13 @@ def currentDate = new Date()
 def endDate = null
 
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -283,4 +293,97 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 7, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Территориальный банк',
+            (xml.row[0].cell[3]): 'Подразделение территориального банка',
+            (xml.row[0].cell[4]): 'КПП',
+            (xml.row[0].cell[5]): 'Средняя остаточная стоимость амортизируемого имущества (руб.)',
+            (xml.row[0].cell[6]): 'Среднесписочная численность работников (чел.)',
+            (xml.row[0].cell[7]): 'Начислено налога в бюджет субъекта (руб.)',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+
+        // графа 1
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+
+        // графа 3
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+
+        // графа 4
+
+        // графа 5
+        newRow.avepropertyPricerageCost = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+
+        // графа 6
+        newRow.workersCount = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+
+        // графа 7
+        newRow.subjectTaxCredit = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }

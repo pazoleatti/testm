@@ -119,8 +119,15 @@ public class MaskBox<T> extends ValueBox<T> implements LeafValueEditor<T> {
         setReadOnly(!enabled);
         if (!enabled) {
             unsinkEvents(Event.KEYEVENTS);
-        } else
+            unsinkEvents(Event.MOUSEEVENTS);
+            unsinkEvents(Event.BUTTON_LEFT);
+            unsinkEvents(Event.FOCUSEVENTS);
+        } else {
             sinkEvents(Event.KEYEVENTS);
+            sinkEvents(Event.MOUSEEVENTS);
+            sinkEvents(Event.BUTTON_LEFT);
+            sinkEvents(Event.FOCUSEVENTS);
+        }
     }
 
     protected boolean isEqualsTextPicture(String value) {

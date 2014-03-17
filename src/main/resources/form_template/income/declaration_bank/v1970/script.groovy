@@ -213,7 +213,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def okato = getRefBookValue(3, incomeParams?.OKATO?.value)?.OKATO?.value
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -619,7 +619,7 @@ void generateXML() {
                     // 0..n // всегда один
                     НалПУАв(
                             ТипНП : typeNP,
-                            ОКТМО : okato) {
+                            ОКТМО : oktmo) {
 
                         def nalPu = (nalDoplFB != 0 ? nalDoplFB : -nalUmenFB)
                         // 0..1
@@ -652,7 +652,7 @@ void generateXML() {
                         НалПУМес(
                                 [ТипНП : typeNP] +
                                         (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКТМО : okato]) {
+                                        [ОКТМО : oktmo]) {
 
                             def avPlat1 = empty
                             def avPlat2 = empty
@@ -1799,7 +1799,7 @@ List<String> getErrorDepartment(record) {
     if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKATO == null || record.OKATO.value == null) {
+    if (record.OKTMO == null || record.OKTMO.value == null) {
         errorList.add("«Код по ОКТМО»")
     }
     if (record.INN == null || record.INN.value == null || record.INN.value.isEmpty()) {

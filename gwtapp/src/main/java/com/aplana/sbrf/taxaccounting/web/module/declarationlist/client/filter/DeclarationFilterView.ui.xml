@@ -39,7 +39,7 @@
             <g:Label text="Подразделение:" addStyleNames="{margin.right5}"/>
         </g:cell>
         <g:cell width="24%">
-            <dep:DepartmentPickerPopupWidget width="100%" header="Выберите подразделение" multiselection="true" ui:field="departmentPicker" modal="true"/>
+            <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
         </g:cell>
         <g:cell horizontalAlignment="right">
             <g:Label wordWrap="false" text="Период:" addStyleNames="{margin.left10}, {margin.right5}"/>

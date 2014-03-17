@@ -89,8 +89,7 @@
                                    verticalAlignment="middle">
                     <g:Label width="100px" text="Подразделение:"/>
                     <g:cell width="100%">
-                        <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение"
-                                                           modal="true" multiselection="true" width="100%"
+                        <a:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"
                                                            addStyleNames="{style.filterWidgets}"/>
                     </g:cell>
                     <g:HTML addStyleNames="{style.verSep}"/>

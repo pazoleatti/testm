@@ -35,6 +35,8 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
         void setSelection(List<RefBookItem> values);
 
+        Set<Long> getSelectedIds();
+
         void refresh();
     }
 
@@ -49,14 +51,13 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     public void init(final PickerState newState) {
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
-            setNewState(newState);
+            ps.setValues(newState);
             if (ps.getRefBookAttrId() == null) {
                 return;
             }
             if (ps.getVersionDate() == null) {
                 return;
             }
-
             dispatcher.execute(new InitRefBookMultiAction(ps.getRefBookAttrId()),
                     CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
                         @Override
@@ -69,7 +70,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                     }, this));
         } else {
             //иначе просто сеттим
-            setNewState(newState);
+            ps.setValues(newState);
             trySelect(newState);
             getView().refresh();
         }
@@ -77,7 +78,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     private void trySelect(PickerState stateWithIds){
         if (stateWithIds.getSetIds()!= null && stateWithIds.getSetIds().size() > 0) {
-            loadingForSelection(stateWithIds.getSetIds());
+            if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())){
+                loadingForSelection(stateWithIds.getSetIds());
+            }
         } else {
             getView().setSelection(new ArrayList<RefBookItem>());
         }
@@ -98,7 +101,6 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
             return;
         }
         final int offset = startIndex;
-
         GetRefBookMultiValuesAction action = getRowsLoadAction(new PagingParams(offset + 1, maxRows), null);
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
@@ -118,7 +120,6 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         if (ps.getVersionDate() == null) {
             return;
         }
-
         GetRefBookMultiValuesAction action = getRowsLoadAction(null, new ArrayList<Long>(ids));
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
@@ -162,14 +163,6 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
                 WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
-    }
-
-    private void setNewState(PickerState newPs) {
-        ps.setRefBookAttrId(newPs.getRefBookAttrId());
-        ps.setFilter(newPs.getFilter());
-        ps.setSearchPattern(newPs.getSearchPattern());
-        ps.setVersionDate(newPs.getVersionDate());
-        ps.setMultiSelect(newPs.isMultiSelect());
     }
 
     /* Проверка на изменения входных параметров*/

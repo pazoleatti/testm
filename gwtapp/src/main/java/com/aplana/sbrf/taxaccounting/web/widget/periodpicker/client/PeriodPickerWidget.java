@@ -11,11 +11,11 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 
+/**
+ * Компонент дерево для отображения периодов
+ * @author unknown
+ */
 public class PeriodPickerWidget extends SimpleTree implements PeriodPicker{
-
-    public PeriodPickerWidget(){
-        this(false);
-    }
 
     public PeriodPickerWidget(boolean multiselect){
         super("Выберите период", multiselect);

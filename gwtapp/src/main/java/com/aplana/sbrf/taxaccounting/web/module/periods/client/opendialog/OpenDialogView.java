@@ -34,9 +34,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	DepartmentPickerPopupWidget departmentPicker;
 
 	@UiField
-	Label departmentPickerRO;
-
-	@UiField
 	Button continueButton;
 
 	@UiField
@@ -76,7 +73,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable) {
 		departmentPicker.setAvalibleValues(departments, avalDepartments);
 		departmentPicker.setEnabled(enable);
-		departmentPickerRO.setText(selectedDepartments.get(0).getDepartmentName());
 	}
 
 	@Override
@@ -159,7 +155,6 @@ public class OpenDialogView extends PopupViewWithUiHandlers<OpenDialogUiHandlers
 
 	@Override
 	public void setCanChangeDepartment(boolean canChange) {
-		departmentPicker.setVisible(canChange);
-		departmentPickerRO.setVisible(!canChange);
+		departmentPicker.setEnabled(canChange);
 	}
 }
