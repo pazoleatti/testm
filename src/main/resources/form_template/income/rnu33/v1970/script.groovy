@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 // графа 1  - rowNumber
 // графа 2  - code                              атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
 // графа 3  - valuablePaper                     атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
-// графа 4  - issue                             атрибут 814 - ISSUE - «Выпуск», из справочника «Ценные бумаги»
+// графа 4  - issue                             атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги»
 // графа 5  - purchaseDate
 // графа 6  - implementationDate
 // графа 7  - bondsCount
@@ -85,7 +85,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -109,9 +111,10 @@ def editableColumns = ['code', 'valuablePaper', 'issue', 'purchaseDate', 'implem
 @Field
 def autoFillColumns = allColumns - editableColumns
 
+// TODO (Ramil Timerbaev) справочник "Ценные бумаги" пуст, поэтому убрал обязательность графы 4 "Выпуск"
 // Проверяемые на пустые значения атрибуты (графа 1..27)
 @Field
-def nonEmptyColumns = ['rowNumber', 'code', 'valuablePaper', 'issue', 'purchaseDate', 'implementationDate', 'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+def nonEmptyColumns = ['rowNumber', 'code', 'valuablePaper', /*'issue',*/ 'purchaseDate', 'implementationDate', 'bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc', 'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice', 'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement', 'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 7..9, 13, 15, 17..20, 25..27)
 @Field
@@ -121,6 +124,10 @@ def totalSumColumns = ['bondsCount', 'purchaseCost', 'costs', 'redemptionVal', '
 @Field
 def isBalancePeriod
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -128,9 +135,24 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
     return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 void calc() {
@@ -208,8 +230,8 @@ void logicCheck() {
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 13)
-        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.redemptionVal != 100) {
+        // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
+        if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.exercisePrice != 100) {
             logger.error(errorMsg + 'Неверно указана цена в процентах при погашении!')
         }
 
@@ -331,11 +353,11 @@ def getTotalRow(def currentMonthRow) {
             newRow.getCell(alias).setValue(tmp1 + tmp2, null)
         }
     } else if (formData.kind == FormDataKind.CONSOLIDATED) {
-        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-            if (it.formTypeId == formData.getFormType().getId()) {
+        departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+            if (it.formTypeId == formData.formType.id) {
                 def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
-                    formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                    formDataService.getDataRowHelper(source).allCached.each { row ->
                         if (row.getAlias() == 'total') {
                             totalSumColumns.each { alias ->
                                 def tmp1 = (currentMonthRow.getCell(alias).value ?: 0)
@@ -494,4 +516,177 @@ def prevPeriodCheck() {
         }
     }
     return true
+}
+
+// Получение импортируемых данных
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    def xml = getXML(ImportInputStream, importService, fileName, '№ пп', 'Итого за текущий месяц')
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 27, 3)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : '№ пп',
+            (xml.row[0].cell[1]) : 'Код сделки',
+            (xml.row[0].cell[2]) : 'Признак ценной бумаги',
+            (xml.row[0].cell[3]) : 'Выпуск',
+            (xml.row[0].cell[4]) : 'Дата приобретения, закрытия короткой позиции',
+            (xml.row[0].cell[5]) : 'Дата реализации, погашения, прочего выбытия, открытия короткой позиции',
+
+            (xml.row[0].cell[6]) : 'Количество сквитованных облигаций, шт.',
+            (xml.row[0].cell[7]) : 'Цена приобретения, руб.коп.',
+            (xml.row[0].cell[8]) : 'Расходы, по приобретению, руб.коп.',
+            (xml.row[0].cell[9]) : 'Рыночная цена на дату приобретения',
+            (xml.row[0].cell[11]): 'Цена приобретения для целей налогообложения, руб. коп.',
+            (xml.row[0].cell[12]): 'Стоимость погашения, руб.коп.',
+            (xml.row[0].cell[13]): 'Цена реализации',
+            (xml.row[0].cell[15]): 'Рыночная цена',
+            (xml.row[0].cell[17]): 'Цена реализации (выбытия) для целей налогообложения, руб.коп.',
+            (xml.row[0].cell[18]): 'Расходы по реализации (выбытию), руб.коп.',
+            (xml.row[0].cell[19]): 'Всего расходы, руб.коп.',
+            (xml.row[0].cell[20]): 'Показатели для расчёта поцентного дохода за время владения сквитованными облигациями',
+            (xml.row[0].cell[24]): 'Процентный доход, полученный за время владения сквитованными облигациями, руб.коп.',
+            (xml.row[0].cell[25]): 'Прибыль (+), убыток (-) от реализации (погашения) за вычетом процентного дохода, руб.коп.',
+            (xml.row[0].cell[26]): 'Превышение цены реализации для целей налогообложения над ценой реализации, руб.коп.',
+
+            (xml.row[1].cell[9]) : '% к номиналу',
+            (xml.row[1].cell[10]): 'руб.коп.',
+            (xml.row[1].cell[13]): '% к номиналу',
+            (xml.row[1].cell[14]) : 'руб.коп.',
+            (xml.row[1].cell[15]) : '% к номиналу',
+            (xml.row[1].cell[16]) : 'руб.коп.',
+            (xml.row[1].cell[20]) : 'Номинал одной бумаги, руб.коп.',
+            (xml.row[1].cell[21]) : 'Средневзвешенная цена одной бумаги на дату размещения, руб.коп.',
+            (xml.row[1].cell[22]) : 'Срок обращения согласно условиям выпуска, дней',
+            (xml.row[1].cell[23]) : 'Срок владения сквитованными облигациями, дней',
+    ]
+
+    (1..27).each { index ->
+        headerMapping.put((xml.row[2].cell[index - 1]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 0 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
+        newRow.code = getRecordIdImport(61, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset, true)
+        // графа 3 - атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
+        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[2].text(), xlsIndexRow, 1 + colOffset, true)
+        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги»
+        newRow.issue = getRecordIdImport(84, 'ISSUE', row.cell[3].text(), xlsIndexRow, 1 + colOffset, true)
+        // графа 5
+        newRow.purchaseDate = getDate(row.cell[4].text(), xlsIndexRow, 0 + colOffset)
+        // графа 6
+        newRow.implementationDate = getDate(row.cell[5].text(), xlsIndexRow, 0 + colOffset)
+        // графа 7
+        newRow.bondsCount = getNumber(row.cell[6].text(), xlsIndexRow, 0 + colOffset)
+        // графа 8
+        newRow.purchaseCost = getNumber(row.cell[7].text(), xlsIndexRow, 0 + colOffset)
+        // графа 9
+        newRow.costs = getNumber(row.cell[8].text(), xlsIndexRow, 0 + colOffset)
+        // графа 10
+        newRow.marketPriceOnDateAcquisitionInPerc = getNumber(row.cell[9].text(), xlsIndexRow, 0 + colOffset)
+        // графа 11
+        newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[10].text(), xlsIndexRow, 0 + colOffset)
+
+        // графа 13
+        newRow.redemptionVal = getNumber(row.cell[12].text(), xlsIndexRow, 0 + colOffset)
+        // графа 14
+        newRow.exercisePrice = getNumber(row.cell[13].text(), xlsIndexRow, 0 + colOffset)
+        // графа 15
+        newRow.exerciseRuble = getNumber(row.cell[14].text(), xlsIndexRow, 0 + colOffset)
+        // графа 16
+        newRow.marketPricePercent = getNumber(row.cell[15].text(), xlsIndexRow, 0 + colOffset)
+        // графа 17
+        newRow.marketPriceRuble = getNumber(row.cell[16].text(), xlsIndexRow, 0 + colOffset)
+
+        // графа 19
+        newRow.costsRetirement = getNumber(row.cell[18].text(), xlsIndexRow, 0 + colOffset)
+
+        // графа 21
+        newRow.parPaper = getNumber(row.cell[20].text(), xlsIndexRow, 0 + colOffset)
+        // графа 22
+        newRow.averageWeightedPricePaper = getNumber(row.cell[21].text(), xlsIndexRow, 0 + colOffset)
+        // графа 23
+        newRow.issueDays = getNumber(row.cell[22].text(), xlsIndexRow, 0 + colOffset)
+
+        rows.add(newRow)
+    }
+
+    // удалить нефиксированные строки
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        // поправить индексы, потому что они после изменения не пересчитываются
+        updateIndexes(dataRows)
+    }
+
+    // добавить итоговые строки
+    dataRows.each { row ->
+        rows.add(row)
+    }
+
+    dataRowHelper.save(rows)
+}
+
+/** Поправить индексы. */
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
 }

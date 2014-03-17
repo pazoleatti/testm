@@ -381,17 +381,27 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
-
-        // графа 2
-        // Зависимая
-
         // графа 3
         newRow.balance = getRecordIdImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        def map = getRefBookValue(28, newRow.balance)
+
+        // графа 2
+        if (map != null) {
+            def text = row.cell[2].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 2 " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
+        }
 
         // графа 4
-        // Зависимая
+        if (map != null) {
+            def text = row.cell[4].text()
+            if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 4 " +
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+            }
+        }
 
         // графа 5
         newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)

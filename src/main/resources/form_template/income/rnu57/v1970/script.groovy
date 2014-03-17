@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
+import java.math.RoundingMode
+
 /**
  * (РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
  * formTemplateId=353
@@ -26,12 +28,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
 
         break
     case FormDataEvent.DELETE_ROW:
-        if (currentDataRow?.getAlias() != null) {
-            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -50,7 +52,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -93,6 +97,11 @@ def nonEmptyColumns = ['number', 'bill', 'purchaseDate', 'purchasePrice', 'purch
 def totalColumns = ['purchaseOutcome', 'implementationOutcome', 'percent', 'implementationpPriceTax', 'allIncome',
         'implementationPriceUp']
 
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['number', 'purchasePrice', 'purchaseOutcome', 'price', 'percent', 'implementationpPriceTax',
+        'allIncome', 'implementationPriceUp', 'income']
+
 //// Обертки методов
 
 // Проверка НСИ
@@ -134,6 +143,9 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
+        // Удаление итогов
+        deleteAllAliased(dataRows)
+
         // сортируем
         dataRowHelper.save(dataRows.sort { it.bill })
 
@@ -165,13 +177,10 @@ void calc() {
             // графа 14
             row.income = calc14(row)
         }
-        dataRowHelper.save(dataRows)
     }
 
-    // пересчитываем строки итого
-    calcTotalSum(dataRows, getDataRow(dataRows, 'total'), totalColumns)
-
-    dataRowHelper.update(dataRows)
+    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRowHelper.save(dataRows)
 }
 
 def getRNU(def id) {
@@ -183,7 +192,7 @@ def getRNU(def id) {
 
 def getRnuSourceRow(def rnuSourceDataRows, DataRow row) {
     for (def sourceRow : rnuSourceDataRows) {
-        if (sourceRow.bill == row.bill) {
+        if (sourceRow.getAlias() == null && sourceRow.bill != null && sourceRow.bill == row.bill) {
             return sourceRow
         }
     }
@@ -194,9 +203,9 @@ def BigDecimal calc4(DataRow sourceRow) {
     if (sourceRow == null || sourceRow.nominal == null) {
         return null
     }
-    def currencyRate = getCurrencyRate(sourceRow.currency, sourceRow.buyDate)
+    def currencyRate = getCurrencyRate(sourceRow, sourceRow.buyDate)
     if (currencyRate != null) {
-        return sourceRow.nominal * currencyRate
+        return (sourceRow.nominal * currencyRate)?.setScale(2, RoundingMode.HALF_UP)
     }
     return null
 }
@@ -217,7 +226,7 @@ def BigDecimal calc9(DataRow row, DataRow rnu55DataRow, DataRow rnu56DataRow) {
             return 0
         }
         if (rnu56DataRow.maturity > row.implementationDate) {
-            def currencyRate = getCurrencyRate(rnu56DataRow.currency, row.implementationDate)
+            def currencyRate = getCurrencyRate(rnu56DataRow, row.implementationDate)
             if (rnu56DataRow.nominal == null || rnu56DataRow.price == null || rnu56DataRow.buyDate == null
                     || row.implementationDate == null || currencyRate == null) {
                 return null
@@ -226,13 +235,13 @@ def BigDecimal calc9(DataRow row, DataRow rnu55DataRow, DataRow rnu56DataRow) {
             def k = rnu56DataRow.price
             def t = rnu56DataRow.maturity - rnu56DataRow.buyDate
             def d = row.implementationDate - rnu56DataRow.buyDate
-            return ((n - k) / t * d + k) * currencyRate
+            return (((n - k) / t * d + k) * currencyRate)?.setScale(2, RoundingMode.HALF_UP)
         }
     }
     if (rnu55DataRow != null) {
-        def currencyRate = getCurrencyRate(rnu55DataRow.currency, row.implementationDate)
+        def currencyRate = getCurrencyRate(rnu55DataRow, row.implementationDate)
         if (rnu55DataRow.nominal != null && currencyRate != null) {
-            return rnu55DataRow.nominal * currencyRate
+            return (rnu55DataRow.nominal * currencyRate)?.setScale(2, RoundingMode.HALF_UP)
         }
     }
 }
@@ -302,13 +311,12 @@ def BigDecimal calc14(def row) {
     return row.implementationpPriceTax - row.allIncome
 }
 
-def getCurrencyRate(def currency, def date) {
-    if (currency == null || date == null) {
+def getCurrencyRate(def row, def date) {
+    if (row.currency == null || date == null) {
         return null
     }
-    if (!isRubleCurrency(currency)) {
-        def res = refBookFactory.getDataProvider(22).getRecords(date, null, 'CODE_NUMBER=' + currency, null);
-        return (res.getRecords().isEmpty() ? null : res.getRecords().get(0).RATE.getNumberValue())
+    if (!isRubleCurrency(row.currency)) {
+        return getRecord(22, 'CODE_NUMBER', "${row.currency}", row.number?.intValue(), getColumnName(row, 'currency'), date)?.RATE?.numberValue
     } else {
         return 1;
     }
@@ -401,4 +409,158 @@ def calcTotalRow(def dataRows) {
     calcTotalSum(dataRows, totalRow, totalColumns)
 
     return totalRow
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 14, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Вексель',
+            (xml.row[0].cell[2]): 'Дата приобретения',
+            (xml.row[0].cell[3]): 'Цена приобретения',
+            (xml.row[0].cell[4]): 'Расходы, связанные с приобретением',
+            (xml.row[0].cell[5]): 'Дата реализации (погашения)',
+            (xml.row[0].cell[6]): 'Цена реализации (погашения)',
+            (xml.row[0].cell[7]): 'Расходы, связанные с реализацией',
+            (xml.row[0].cell[8]): 'Расчётная цена',
+            (xml.row[0].cell[9]): 'Процентный доход, учтённый в целях налогообложения (для дисконтных векселей)',
+            (xml.row[0].cell[10]): 'Цена реализации (погашения) для целей налогообложения (для дисконтных векселей без процентного дохода)',
+            (xml.row[0].cell[11]): 'Всего расходы по реализации (погашению)',
+            (xml.row[0].cell[12]): 'Превышение цены реализации для целей налогообложения над ценой реализации',
+            (xml.row[0].cell[13]): 'Прибыль (убыток) от реализации (погашения)',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[1]): '2',
+            (xml.row[1].cell[2]): '3',
+            (xml.row[1].cell[3]): '4',
+            (xml.row[1].cell[4]): '5',
+            (xml.row[1].cell[5]): '6',
+            (xml.row[1].cell[6]): '7',
+            (xml.row[1].cell[7]): '8',
+            (xml.row[1].cell[8]): '9',
+            (xml.row[1].cell[9]): '10',
+            (xml.row[1].cell[10]): '11',
+            (xml.row[1].cell[11]): '12',
+            (xml.row[1].cell[12]): '13',
+            (xml.row[1].cell[13]): '14'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def xmlIndexCol = 0
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 1
+        xmlIndexCol++
+        // графа 2
+        newRow.bill = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+        // графа 3
+        newRow.purchaseDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 4
+        newRow.purchasePrice =  parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 5
+        newRow.purchaseOutcome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 6
+        newRow.implementationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 7
+        newRow.implementationPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 8
+        newRow.implementationOutcome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 9
+        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 10
+        newRow.percent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 11
+        newRow.implementationpPriceTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 12
+        newRow.allIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 13
+        newRow.implementationPriceUp = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // графа 14
+        newRow.income = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }
