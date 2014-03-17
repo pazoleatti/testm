@@ -80,6 +80,9 @@ def resetColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTax
         'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
+def totalColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+
+@Field
 def formatY = new SimpleDateFormat('yyyy')
 
 @Field
@@ -152,6 +155,16 @@ void logicCheck() {
     dataRows.each {row ->
          checkRequiredColumns(row, nonEmptyColumns)
     }
+    def row50001 = getDataRow(dataRows, 'R107')
+    def row50002 = getDataRow(dataRows, 'R212')
+    def need50001 = [:]
+    def need50002 = [:]
+    totalColumns.each{ alias ->
+        need50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
+        need50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
+    }
+    checkTotalSum(row50001, need50001)
+    checkTotalSum(row50002, need50002)
 }
 
 void calculationBasicSum(def dataRows) {
@@ -159,7 +172,7 @@ void calculationBasicSum(def dataRows) {
     def row50002 = getDataRow(dataRows, 'R212')
 
     // суммы для графы 5..8
-    ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+    totalColumns.each { alias ->
         row50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
         row50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
     }
@@ -413,7 +426,7 @@ def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAl
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
+    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 /**
@@ -682,4 +695,16 @@ def getRefBookIncome102() {
         rbIncome102 = refBookFactory.getDataProvider(52L)
     }
     return rbIncome102
+}
+
+void checkTotalSum(totalRow, needRow){
+    def errorColumns = []
+    totalColumns.each { totalColumn ->
+        if (totalRow[totalColumn] != needRow[totalColumn]) {
+            errorColumns += "\"" + getColumnName(totalRow, totalColumn) + "\""
+        }
+    }
+    if (!errorColumns.isEmpty()){
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
+    }
 }

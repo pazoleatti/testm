@@ -184,6 +184,9 @@ void logicCheck() {
         // проверка заполнения обязательных полей
         checkRequiredColumns(row, editableColumns)
     }
+    checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
+    checkTotalSum(getDataRow(dataRows, secondTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum))
+
     if (!logger.containsLevel(LogLevel.ERROR)) {
         // контрольные графы
         calc4to5(dataRows)      // рассчет строк 4 и 5
@@ -562,4 +565,10 @@ def getRefBookIncome102() {
         rbIncome102 = refBookFactory.getDataProvider(52L)
     }
     return rbIncome102
+}
+
+void checkTotalSum(totalRow, sum){
+    if (totalRow[totalColumn] != sum) {
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")
+    }
 }

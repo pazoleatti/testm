@@ -57,7 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         if (!isBank()) {
-            calcTotal()
+            calcTotal(null)
         }
         break
     case FormDataEvent.IMPORT:
@@ -73,6 +73,9 @@ def nonEmptyColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPer
 @Field
 def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS', 'logicalCheck',
         'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference']
+
+@Field
+def totalColumn = 'consumptionTaxSumS'
 
 @Field
 def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R1',
@@ -124,7 +127,8 @@ void calc() {
     def formDataSimple = getFormDataSimple()
     def income102NotFound = []
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    for (def row : dataRowHelper.getAllCached()) {
+    def dataRows = dataRowHelper.getAllCached()
+    for (def row : dataRows) {
         // исключить итоговые строки
         if (row.getAlias() in ['R67', 'R93']) {
             continue
@@ -134,7 +138,7 @@ void calc() {
             // ОКРУГЛ( «графа9»-(Сумма 6-Сумма 7);2),
             sum6 = 0
             sum7 = 0
-            for (rowSum in dataRowHelper.getAllCached()) {
+            for (rowSum in dataRows) {
                 if (!rowSum.getCell('consumptionBuhSumAccepted').isEditable() || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
                     continue
                 }
@@ -163,7 +167,7 @@ void calc() {
         if (!isEmpty(row.consumptionBuhSumAccepted) && !isEmpty(row.consumptionBuhSumPrevTaxPeriod)) {
             // графа 13
             if (row.getAlias() in ['R3', 'R11']) {
-                tmp = calcColumn6(['R3', 'R11'])
+                tmp = calcColumn6(datarows, ['R3', 'R11'])
             } else {
                 tmp = row.consumptionBuhSumAccepted
             }
@@ -197,8 +201,8 @@ void calc() {
     }
 
 
-    calcTotal()
-    dataRowHelper.save(dataRowHelper.getAllCached())
+    calcTotal(dataRows)
+    dataRowHelper.save(dataRows)
 }
 
 def logicCheck() {
@@ -210,21 +214,22 @@ def logicCheck() {
             checkRequiredColumns(row, nonEmptyColumns)
         }
     }
+    checkTotalSum(getDataRow(dataRows, 'R67'), getSum(dataRows, totalColumn, 'R2', 'R66'))
+    checkTotalSum(getDataRow(dataRows, 'R93'), getSum(dataRows, totalColumn, 'R69', 'R92'))
 }
 
 /**
  * Расчет итоговых строк.
  */
-void calcTotal() {
+void calcTotal(def rows) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def totalRow1 = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), 'R67')
-    def totalRow2 = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), 'R93')
+    def dataRows = rows ?: dataRowHelper.getAllCached()
+    def totalRow1 = getDataRow(dataRows, 'R67')
+    def totalRow2 = getDataRow(dataRows, 'R93')
 
     // суммы для графы 9
-    ['consumptionTaxSumS'].each { alias ->
-        totalRow1.getCell(alias).setValue(getSum(alias, 'R2', 'R66'), totalRow1.getIndex())
-        totalRow2.getCell(alias).setValue(getSum(alias, 'R69', 'R92'), totalRow2.getIndex())
-    }
+    totalRow1.getCell(totalColumn).setValue(getSum(dataRows, totalColumn, 'R2', 'R66'), totalRow1.getIndex())
+    totalRow2.getCell(totalColumn).setValue(getSum(dataRows, totalColumn, 'R69', 'R92'), totalRow2.getIndex())
 }
 
 /**
@@ -262,7 +267,7 @@ void consolidation() {
                 if (row.getAlias() == null) {
                     continue
                 }
-                def rowResult = dataRowHelper.getDataRow(dataRowHelper.getAllCached(), row.getAlias())
+                def rowResult = getDataRow(dataRowHelper.getAllCached(), row.getAlias())
                 ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
                     if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
                         rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
@@ -293,28 +298,16 @@ def isBank() {
     return isBank
 }
 
-double summ(String columnName, String fromRowA, String toRowA) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def from = dataRowHelper.getDataRowIndex(dataRowHelper.getAllCached(), fromRowA)
-    def to = dataRowHelper.getDataRowIndex(dataRowHelper.getAllCached(), toRowA)
-    if (from > to) {
-        return 0
-    }
-    def result = summ(formData, dataRowHelper.getAllCached(), new ColumnRange(columnName, from, to))
-    return result ?: 0;
-}
-
 /**
  * Получить сумму диапазона строк определенного столбца.
  */
-def getSum(String columnAlias, String rowFromAlias, String rowToAlias) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def from = dataRowHelper.getDataRowIndex(dataRowHelper.getAllCached(), rowFromAlias)
-    def to = dataRowHelper.getDataRowIndex(dataRowHelper.getAllCached(), rowToAlias)
+def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
+    def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
+    def to = getDataRow(dataRows, rowToAlias).getIndex() - 1
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRowHelper.getAllCached(), new ColumnRange(columnAlias, from, to))
+    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 /**
@@ -340,16 +333,11 @@ def isEmpty(def value) {
     return value == null || value == ''
 }
 
-/**
- * Получить значение для графы 13. Сумма значении графы 6 указанных строк
- *
- * @param aliasRows список алиасов значения которых надо просуммировать
- */
-def calcColumn6(def aliasRows) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
+// Получить значение для графы 13. Сумма значении графы 6 указанных строк
+def calcColumn6(def dataRows, def aliasRows) {
     def sum = 0
     aliasRows.each { alias ->
-        sum += dataRowHelper.getDataRow(dataRowHelper.getAllCached(), alias).consumptionBuhSumAccepted
+        sum += getDataRow(dataRows, alias).consumptionBuhSumAccepted
     }
     return sum
 }
@@ -545,4 +533,10 @@ def getRefBookIncome102() {
         rbIncome102 = refBookFactory.getDataProvider(52L)
     }
     return rbIncome102
+}
+
+void checkTotalSum(totalRow, sum){
+    if (totalRow[totalColumn] != sum) {
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")
+    }
 }
