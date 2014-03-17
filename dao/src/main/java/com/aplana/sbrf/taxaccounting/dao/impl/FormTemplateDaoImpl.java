@@ -299,11 +299,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
         if (actualEndVersion != null)
-            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion) " +
+            builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion) " +
                     " OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
-            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
-        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null)");
+            builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
+        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null))");
         if (formTemplateId != 0)
             builder.append(" and ID <> :formTemplateId");
         try {
@@ -329,20 +329,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("templateId", templateId);
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select");
-            builder.append(" CASE" +
+            return new Date(getJdbcTemplate().queryForObject("select * from (select" +
+                    " CASE" +
                     " WHEN status in (0,1) THEN version - INTERVAL '1' day" +
                     " WHEN status = 2 THEN version" +
-                    " END");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) and id <> :templateId order by version) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Date.class);
+                    " END" +
+                    " from form_template where type_id = :typeId and version > ? and status in (0,1,2) and id <> :templateId order by version) where rownum = 1",
+                    new Object[]{formTypeId, actualBeginVersion, templateId},
+                    new int[]{Types.NUMERIC, Types.DATE, Types.NUMERIC},
+                    Date.class).getTime());
         } catch(EmptyResultDataAccessException e){
             return null;
         } catch (DataAccessException e){

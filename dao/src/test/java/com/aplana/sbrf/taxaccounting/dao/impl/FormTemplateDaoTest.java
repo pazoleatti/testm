@@ -182,7 +182,6 @@ public class FormTemplateDaoTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2012, Calendar.JANUARY, 1);
-        Date actualStartVersion = calendar.getTime();
         calendar.clear();
 
         Assert.assertEquals(2, formTemplateDao.getFormTemplateVersions(2, 0, list, null, null).size());
@@ -262,6 +261,7 @@ public class FormTemplateDaoTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
         Assert.assertEquals(1, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2014.12.31")).size());
         Assert.assertEquals(2, formTemplateDao.findFTVersionIntersections(2, 0, dateFormat.parse("2014.01.01"), dateFormat.parse("2015.12.31")).size());
+        Assert.assertEquals(0, formTemplateDao.findFTVersionIntersections(2, 2, dateFormat.parse("2014.01.01"), dateFormat.parse("2014.12.31")).size());
     }
 
     @Test
