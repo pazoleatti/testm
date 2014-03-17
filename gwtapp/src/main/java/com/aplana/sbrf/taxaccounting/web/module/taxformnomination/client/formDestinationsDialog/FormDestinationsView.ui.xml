@@ -55,9 +55,8 @@
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget labelWordWrap="false" ui:field="departmentPicker"
-                                                   header="Выберите подразделение" modal="true" multiselection="true"
-                                                   width="300px"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="300px"
+                                                    labelWordWrap="false"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
@@ -75,9 +74,8 @@
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget labelWordWrap="false" ui:field="performersPickerWidget"
-                                                   header="Выберите исполнителя" modal="true" multiselection="false"
-                                                   width="300px"/>
+                    <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" multiselection="false" width="300px"
+                                                   header="Выберите исполнителя" labelWordWrap="false"/>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
 

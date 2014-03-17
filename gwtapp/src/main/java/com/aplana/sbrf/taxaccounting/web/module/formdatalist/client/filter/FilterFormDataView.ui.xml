@@ -19,8 +19,8 @@
         }
 
         .labelBlockMargin {
+            margin-left: 20px;
             margin-right: 5px;
-            width: 180px;
         }
 
     </ui:style>
@@ -29,8 +29,8 @@
         <g:HorizontalPanel>
             <g:cell>
                 <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl"/>
-                    <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl"/>
+                    <g:Label text="Тип налоговой формы:" ui:field="formDataKindLbl" wordWrap="false"/>
+                    <g:Label text="Вид налоговой формы:" ui:field="formTypeIdLbl" wordWrap="false"/>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell width="33%">
@@ -44,23 +44,21 @@
 
             <g:cell>
                 <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Подразделение: " ui:field="departmentPickerLbl"/>
-                    <g:Label text="Период: " ui:field="reportPeriodIdsLbl"/>
+                    <g:Label text="Подразделение:" ui:field="departmentPickerLbl" wordWrap="false"/>
+                    <g:Label text="Период:" ui:field="reportPeriodIdsLbl" wordWrap="false"/>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell width="33%">
                 <g:VerticalPanel width="100%">
-                    <dep:DepartmentPickerPopupWidget width="100%" ui:field="departmentPicker"
-                                                     multiselection="true" header="Выберите подразделение"
-                                                     modal="true"/>
-                    <per:PeriodPickerPopupWidget multiselect="true" ui:field="reportPeriodIds" width="100%"/>
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%" />
+                    <per:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
                 </g:VerticalPanel>
             </g:cell>
 
             <g:cell>
                 <g:VerticalPanel horizontalAlignment="right" addStyleNames="{style.labelBlockMargin}">
-                    <g:Label text="Состояние: " ui:field="formStateLbl"/>
-                    <g:Label text="Признак возврата: " ui:field="returnStateLbl"/>
+                    <g:Label text="Состояние:" ui:field="formStateLbl" wordWrap="false"/>
+                    <g:Label text="Признак возврата:" ui:field="returnStateLbl" wordWrap="false"/>
                 </g:VerticalPanel>
             </g:cell>
             <g:cell width="33%">

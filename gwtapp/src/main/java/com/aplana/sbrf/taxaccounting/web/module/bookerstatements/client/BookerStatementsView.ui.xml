@@ -57,8 +57,7 @@
                         <g:Label width="105px" text="Подразделение:"/>
                     </g:cell>
                     <g:cell horizontalAlignment="left" width="1%">
-                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение"
-                                                            multiselection="false" modal="true" width="300px" />
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="300px" />
                     </g:cell>
 
                     <g:cell horizontalAlignment="right" width="1%">

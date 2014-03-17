@@ -5,17 +5,33 @@
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
 
     <ui:style>
+        .selected {
+            color: #000000;
+            border-right: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+
+            /*многоточие*/
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+
+        .clearButton {
+            border: 1px solid #009900;
+            border-right-width: 0;
+            border-left-width: 0;
+            vertical-align: middle;
+            display: block;
+            margin-left: -14px;
+        }
+
         .selectButton {
-            border-color: #009900;
-            border-style: solid;
-            border-width: 1px;
+            border: 1px solid #009900;
             vertical-align: middle;
             cursor: pointer;
             display: block;
-        }
-
-        .selected {
-            color: #000000;
         }
     </ui:style>
 
@@ -57,16 +73,16 @@
 
     <g:HTMLPanel>
         <g:HorizontalPanel ui:field="widgetPanel" verticalAlignment="middle">
-            <g:cell width="99%">
-                <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="textBox" width="100%"/>
+            <g:cell width="100%">
+                <g:TextBox ui:field="textBox" readOnly="true" width="100%" addStyleNames="{style.selected}"/>
             </g:cell>
-            <g:cell width="1%">
-                <g:Image ui:field="pickImageButton" styleName="{style.selectButton}"
-                         url="resources/img/reference-16.gif"/>
-            </g:cell>
+            <g:Image ui:field="clearIconButton" addStyleNames="{style.clearButton}"
+                         url="resources/img/picker-icons/clear-icon-dummy.png"/>
+            <g:Image ui:field="pickImageButton" title="Открыть для выбора" addStyleNames="{style.selectButton}"
+                     url="resources/img/picker-icons/refbook-icon.png"/>
         </g:HorizontalPanel>
 
-        <g:HTMLPanel ui:field="testwrap" visible="false">
+        <g:HTMLPanel visible="false">
             <m:ModalWindow ui:field="modalPanel" iconUrl="" title="Выбор из справочника">
                 <g:VerticalPanel spacing="0" addStyleNames="{modal.mainPanel}" verticalAlignment="top">
 

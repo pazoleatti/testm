@@ -33,10 +33,8 @@
                         <g:cell horizontalAlignment="right">
                             <g:Label text="Подразделение: " width="180px"/>
                         </g:cell>
-                        <picker:DepartmentPickerPopupWidget width="100%" header="Подразделение" labelWordWrap="false"
-                                                            ui:field="departmentPicker" multiselection="false"
-                                                            modal="true"/>
-                        <g:Label ui:field="departmentPickerRO"/>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="250px"
+                                                            labelWordWrap="false"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel ui:field="yearPnl" verticalAlignment="middle"
@@ -45,7 +43,7 @@
                             <g:Label text="Год: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="100%"/>
+                            <w:Spinner ui:field="yearBox" minValue="1900" maxValue="2100" width="250px"/>
                         </g:cell>
                     </g:HorizontalPanel>
 
@@ -55,7 +53,7 @@
                             <g:Label ui:field="periodLbl" text="Период: " width="180px"/>
                         </g:cell>
                         <g:cell width="100%" horizontalAlignment="left">
-                            <r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="100%"
+                            <r:RefBookPickerWidget ui:field="period" isHierarchical="false" width="250px"
                                                    attributeIdInt="26"
                                                    multiSelect="false"/>
                         </g:cell>

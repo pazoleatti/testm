@@ -53,8 +53,7 @@
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Подразделение" addStyleNames="{style.labels}"/>
-                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" header="Выберите подразделение"
-                                                   modal="true" multiselection="true" width="250px"/>
+                    <a:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="250px"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
