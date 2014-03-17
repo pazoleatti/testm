@@ -68,14 +68,15 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     @Override
     public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        IntersectionSegment newIntersection = new IntersectionSegment();
-        newIntersection.setBeginDate(versionActualDateStart);
-        newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(templateId);
-        newIntersection.setStatus(status);
+
         List<IntersectionSegment> segmentIntersections =
                 formTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
+            IntersectionSegment newIntersection = new IntersectionSegment();
+            newIntersection.setBeginDate(versionActualDateStart);
+            newIntersection.setEndDate(versionActualDateEnd);
+            newIntersection.setTemplateId(templateId);
+            newIntersection.setStatus(status);
             for (IntersectionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
@@ -123,17 +124,17 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime()));
                             formTemplateService.save(formTemplate);
                         }
-                        //Варианты 16,18a,19,20
+                        //Варианты 16,19,20,18a
                         else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
                             formTemplateService.delete(formTemplateService.get(intersection.getTemplateId()));
                         }
                         break;
                 }
             }
-        } else if(newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
-            FormTemplate formTemplate =  createFakeTemplate(newIntersection.getEndDate(), typeId);
+        } else if(versionActualDateEnd != null){
+            cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
+            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
+            FormTemplate formTemplate =  createFakeTemplate(date, typeId);
             formTemplateService.save(formTemplate);
         }
 

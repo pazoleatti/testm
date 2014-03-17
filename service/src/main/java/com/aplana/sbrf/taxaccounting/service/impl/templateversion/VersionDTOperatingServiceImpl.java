@@ -63,14 +63,15 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     @Override
     public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        IntersectionSegment newIntersection = new IntersectionSegment();
-        newIntersection.setBeginDate(versionActualDateStart);
-        newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(templateId);
-        newIntersection.setStatus(status);
+
         List<IntersectionSegment> segmentIntersections =
                 declarationTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
+            IntersectionSegment newIntersection = new IntersectionSegment();
+            newIntersection.setBeginDate(versionActualDateStart);
+            newIntersection.setEndDate(versionActualDateEnd);
+            newIntersection.setTemplateId(templateId);
+            newIntersection.setStatus(status);
             for (IntersectionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
@@ -123,9 +124,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                         break;
                 }
             }
-        } else if (newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
+        } else if (versionActualDateEnd != null){
+            cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, typeId);
             declarationTemplateService.save(declarationTemplate);
         }
