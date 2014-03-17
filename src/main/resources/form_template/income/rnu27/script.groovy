@@ -112,7 +112,7 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
+def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
