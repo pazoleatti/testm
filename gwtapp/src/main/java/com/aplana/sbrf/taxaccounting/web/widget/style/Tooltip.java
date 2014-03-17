@@ -60,7 +60,7 @@ public class Tooltip extends Composite {
 
         @Override
         public void onMouseOut(MouseOutEvent event) {
-            if(!Element.as(event.getRelatedTarget()).equals(tooltipText.getElement())){
+            if(event.getRelatedTarget()!= null && !Element.as(event.getRelatedTarget()).equals(tooltipText.getElement())){
                 isOnPopup = false;
                 hidePopup();
             } else {

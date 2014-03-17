@@ -28,7 +28,7 @@
         <id>17978</id>
         <name>Полное наименование юридического лица с указанием ОПФ</name>
         <order>2</order>
-        <width>10</width>
+        <width>15</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
@@ -49,7 +49,7 @@
         <id>17980</id>
         <name>Наименование страны регистрации</name>
         <order>4</order>
-        <width>5</width>
+        <width>15</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>54</refBookAttributeId>
@@ -133,19 +133,19 @@
         <formatId>0</formatId>
     </columns>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <id>10703</id>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
         <id>10847</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10703</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
