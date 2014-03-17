@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
@@ -55,7 +56,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -86,6 +89,12 @@ def endDate = null
 // Текущая дата
 @Field
 def currentDate = new Date()
+
+@Field
+def providerCache = [:]
+
+@Field
+def recordCache = [:]
 
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -322,4 +331,169 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
     }
     return endDate
+}
+
+// Получение xml с общими проверками
+def getXML(def String startStr, def String endStr) {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    if (fileName == null || fileName == '') {
+        throw new ServiceException('Имя файла не должно быть пустым')
+    }
+    def is = ImportInputStream
+    if (is == null) {
+        throw new ServiceException('Поток данных пуст')
+    }
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
+    }
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr, null, 2)
+    if (xmlString == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    def xml = new XmlSlurper().parseText(xmlString)
+    if (xml == null) {
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
+    }
+    return xml
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    // получить все строки
+    def rows = dataRowHelper.allCached
+    rows = rows.grep{it.getAlias() != null}
+
+    int rowIndex = 0  // Строки НФ, от 1
+    // индекс для перебора, с учетом пропуска шапки + отсутпа
+    def i = headRowCount
+
+    // проверим что первая строка соответствует шаблону формы
+    if (xml.row[++i].cell[0].text() != "А. Облигации в портфеле банка"){
+        logger.error('Не верный шаблон налоговой формы. Первая строка должна соответствовать строке "А. Облигации в портфеле банка" ')
+        return;
+    } else{
+        // переход к следующей строке
+        rowIndex++
+    }
+
+    // добавить спроки для группы А
+    while( i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "А"'){
+        def newRow = createNewRow(rowIndex)
+        rows.add(rowIndex, newRow)
+        filForm(newRow, xml.row[i], i, colOffset)
+        // переход к следующей строке
+        rowIndex++
+    }
+
+    // Итого «А»
+    if (i >= xml.row.size()){
+        logger.error('Не верный шаблон налоговой формы. Не найдены итоги для части А')
+        return;
+    } else{
+        // переход к следующей строке формы
+        rowIndex++
+        // переход к следующей строке xml'ки
+        i++
+    }
+
+    // проверим что первая строка соответствует шаблону формы
+    if (xml.row[i].cell[0].text() != "Б. Облигации, по которым открыта короткая позиция"){
+        logger.error('Не верный шаблон налоговой формы. Не найдена часть Б. Облигации, по которым открыта короткая позиция')
+        return;
+    } else{
+        // переход к следующей строке формы
+        rowIndex++
+    }
+
+    // добавим строки в часть Б
+    while( i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "Б"'){
+        def newRow = createNewRow(rowIndex)
+        rows.add(rowIndex, newRow)
+        filForm(newRow, xml.row[i], i, colOffset)
+        // переход к следующей строке формы
+        rowIndex++
+    }
+
+    // переход к следующей строке xml'ки
+    i++
+    if (xml.row[i].cell[0].text() != "Итого - процентный доход за вычетом процентного расхода"){
+        logger.error('Не верный шаблон налоговой формы. Последняя строка должна соответствовать строке "Итого - процентный доход за вычетом процентного расхода" ')
+        return;
+    }
+
+    dataRowHelper.save(rows)
+}
+
+/**
+ * Создание новой строки с проставленными стилями
+ * @param rowIndex
+ * @return
+ */
+def createNewRow(def rowIndex){
+    def newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    newRow
+}
+
+/**
+ * Считать данные в форму
+ */
+def filForm(def newRow, def row, int i, int colOffset){
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    // графа 1
+    newRow.series = row.cell[0].text()
+    // графа 2
+    newRow.amount = parseNumber(row.cell[1].text(), i, colOffset, logger, false)
+    // графа 3
+    newRow.nominal = parseNumber(row.cell[2].text(), i, colOffset, logger, false)
+    // графа 4
+    newRow.shortPositionDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", i, colOffset, logger, false)
+    //  графа 5
+    newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[4].text(), reportPeriodEndDate, newRow.getIndex(), 5, logger, true)
+    // графа 6
+    newRow.averageWeightedPrice = parseNumber(row.cell[5].text(), i, colOffset, logger, false)
+    // графа 7
+    newRow.termBondsIssued = parseNumber(row.cell[6].text(), i, colOffset, logger, false)
+    // графа 8
+    newRow.percIncome = parseNumber(row.cell[7].text(), i, colOffset, logger, false)
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML('Серия', null)
+    // проверка шапки таблицы
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'Серия',
+            (xml.row[0].cell[1]): 'Количество, шт.',
+            (xml.row[0].cell[2]): 'Номинал, руб.',
+            (xml.row[0].cell[3]): 'Дата приобретения (открытия короткой позиции)',
+            (xml.row[0].cell[4]): 'Балансовый счёт второго порядка',
+            (xml.row[0].cell[5]): 'Средневзвешенная цена одной облигации на дату, когда выпуск признан размещенным, руб.коп.',
+            (xml.row[0].cell[6]): 'Срок обращения согласно условиям выпуска, дней',
+            (xml.row[0].cell[7]): 'Процентный доход с даты приобретения, руб.коп.',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[1]): '2',
+            (xml.row[1].cell[2]): '3',
+            (xml.row[1].cell[3]): '4',
+            (xml.row[1].cell[4]): '5',
+            (xml.row[1].cell[5]): '6',
+            (xml.row[1].cell[6]): '7',
+            (xml.row[1].cell[7]): '8'
+   ]
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
 }
