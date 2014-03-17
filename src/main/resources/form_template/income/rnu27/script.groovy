@@ -672,7 +672,6 @@ BigDecimal calc12(DataRow row) {
         return null
     }
     return row.rubCourse
-    //return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -980,19 +979,6 @@ def getSign(def sign) {
  */
 def isRubleCurrency(def currencyCode) {
     return getRefBookValue(15, currencyCode)?.CODE?.stringValue == '810'
-}
-
-/**
- * Получить курс валюты
- */
-def getCourse(def currency, def date) {
-    if (currency != null && date != null)
-        if (isRubleCurrency(currency)) {
-            return 1
-        } else {
-            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE.getNumberValue()
-        }
-    return null
 }
 
 def getNewRow() {
