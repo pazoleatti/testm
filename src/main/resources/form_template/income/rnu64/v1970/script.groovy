@@ -207,7 +207,7 @@ void logicCheck() {
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
 def getTotalValue(def dataRows, def dataRowsPrev) {
     try {
-        quarterRow = data.getDataRow(dataRows, 'totalQuarter')
+        quarterRow = getDataRow(dataRows, 'totalQuarter')
     } catch (Exception e) {
         throw new Exception("Отсутствует строка подитогов. " + e.message)
     }
