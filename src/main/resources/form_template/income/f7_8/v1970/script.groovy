@@ -351,6 +351,7 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def dataProvider29 = refBookFactory.getDataProvider(29)
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
     // 5.
     if (formData.periodOrder != 1 && getFormDataPrev() == null) {
@@ -405,9 +406,9 @@ void logicCheck() {
         }
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
-        def record = dataProvider29.getRecords(row.operationDate, null, "BALANCE_ACCOUNT = $row.balanceNumber", null)
+        def record = dataProvider29.getRecords(reportPeriodEndDate, null, "BALANCE_ACCOUNT = '$row.balanceNumber'", null)
         if (record.size()==0) {
-            logger.error("Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
+            logger.error(errorMsg + "Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
         }
 
     }
