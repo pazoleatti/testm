@@ -160,8 +160,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 throw  new ServiceException(NO_DATA_FILE_MSG);
             }
         }
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, periodId, null, typeId == 0 ? null : typeId, null,
-                "Импорт бухгалтерской отчетности. Файл " + realFileName);
+
+        String formStr = typeId == 0 ? "Форма 101" : "Форма 102";
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, periodId, null, null, null,
+                "Импорт бухгалтерской отчетности «" + formStr + "». Файл «" + realFileName + "».");
     }
 
     // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
