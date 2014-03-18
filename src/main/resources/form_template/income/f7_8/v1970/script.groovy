@@ -104,7 +104,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -160,7 +162,17 @@ def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquis
 @Field
 def fixedDate = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.2010')
 
+@Field
+def reportPeriodEndDate
+
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias, def required) {
@@ -338,6 +350,7 @@ void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+    def dataProvider29 = refBookFactory.getDataProvider(29)
 
     // 5.
     if (formData.periodOrder != 1 && getFormDataPrev() == null) {
@@ -391,6 +404,12 @@ void logicCheck() {
             excessSellingPrice = getGraph38(values)
         }
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
+        def record = dataProvider29.getRecords(row.operationDate, null, "BALANCE_ACCOUNT = $row.balanceNumber", null)
+        if (record.size()==0) {
+            logger.error("Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
+        }
+
     }
     // 7.
     calcOrCheckTotalDataRows(dataRows, true)
@@ -647,7 +666,7 @@ def getSignSecurity(def id) {
 }
 
 def getCompareList(DataRow row) {
-    return [getBalanceNumber(row.balanceNumber),
+    return [row.balanceNumber,
             getSignSecurity(row.signSecurity) ,
             getSecurityKind(row.securityKind),
             getSignContractor(row.signContractor),
@@ -656,4 +675,283 @@ def getCompareList(DataRow row) {
 
 def BigDecimal round(BigDecimal value, def int precision = 2) {
     return value?.setScale(precision, RoundingMode.HALF_UP)
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Номер балансового счёта', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 39, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'Номер балансового счёта',
+            (xml.row[0].cell[2]): 'Вид операции (продажа, погашение, открытие \\закрытие короткой позиции)',
+            (xml.row[0].cell[3]): 'Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли, 5 - прочие',
+            (xml.row[0].cell[4]): 'Наименование контрагента',
+            (xml.row[0].cell[5]): 'Наименование ценной бумаги (включая наименование эмитента)',
+            (xml.row[0].cell[6]): 'Серия (выпуск)',
+            (xml.row[0].cell[7]): 'Вид ценной бумаги: 1 - купонная облигация, 2 - дисконтная облигация, 3 - акция',
+            (xml.row[0].cell[8]): 'Признак ценной бумаги: "+" - обращающаяся на ОРЦБ; "-" - необращающаяся на ОРЦБ',
+            (xml.row[0].cell[9]): 'Код валюты бумаги (номинала)',
+            (xml.row[0].cell[10]): 'Наименование валюты бумаги (номинала)',
+            (xml.row[0].cell[11]): 'Номинал 1 бумаги, ед. валюты',
+            (xml.row[0].cell[12]): 'Количество ценных бумаг, шт.',
+            (xml.row[0].cell[13]): 'Дата приобретения, закрытия короткой позиции (8)',
+            (xml.row[0].cell[14]): 'Дата совершения сделки',
+            (xml.row[0].cell[15]): 'Код валюты расчётов по сделке',
+            (xml.row[0].cell[16]): 'Наименование валюты расчётов по сделке',
+            (xml.row[0].cell[17]): 'Стоимость покупки без НКД, рублей (по курсу на дату приобретения)',
+            (xml.row[0].cell[18]): 'Расходы банка, связанные с приобретением, рублей (по курсу на дату приобретения)',
+            (xml.row[0].cell[19]): 'Рыночная цена на дату приобретения',
+            (xml.row[0].cell[21]): 'Стоимость приобретения без НКД в целях налогообложения, рублей (по курсу на дату приобретения)',
+            (xml.row[0].cell[22]): 'Дата реализации (погашения), открытия короткой позиции',
+            (xml.row[0].cell[23]): 'Дата совершения сделки',
+            (xml.row[0].cell[24]): 'Стоимость погашения без НКД, рублей (по курсу на дату признания дохода)',
+            (xml.row[0].cell[25]): 'Цена реализации (без НКД)',
+            (xml.row[0].cell[27]): 'Рыночная цена на дату реализации',
+            (xml.row[0].cell[29]): 'Стоимость реализации (выбытия) без НКД в целях налогообложения, рублей (по курсу на дату признания дохода)',
+            (xml.row[0].cell[30]): 'Расходы банка, связанные с реализацией, рублей (по курсу на дату признания дохода)',
+            (xml.row[0].cell[31]): 'Всего расходы по реализации, =гр.21 + гр.18 + гр.30, рублей',
+            (xml.row[0].cell[32]): 'Средневзвешенная цена 1 бумаги на дату, когда выпуск ценных бумаг признан размещенным, ед. валюты',
+            (xml.row[0].cell[33]): 'Срок обращения согласно условиям выпуска (дни) (для дисконтных облигаций)',
+            (xml.row[0].cell[34]): 'Срок владения ценной бумагой (дни) (для дисконтных облигаций)',
+            (xml.row[0].cell[35]): 'Процентный доход, полученный за время владения дисконтными облигациями',
+            (xml.row[0].cell[37]): 'Прибыль (убыток) от реализации (погашения) для дисконтных облигаций = гр.29-гр.31-гр.36; для купонных облигаций и акций = гр.29-гр.31, рублей',
+            (xml.row[0].cell[38]): 'Превышение цены реализации для целей налогообложения над ценой реализации, рублей',
+            (xml.row[1].cell[19]): '% к номиналу; руб.коп.',
+            (xml.row[1].cell[20]): 'рублей по курсу на дату приобретения',
+            (xml.row[1].cell[25]): '% к номиналу - для облигаций; руб.коп.- для акций',
+            (xml.row[1].cell[26]): 'рублей (по курсу на дату признания дохода)',
+            (xml.row[1].cell[27]): '% к номиналу - для облигаций; руб.коп.- для акций',
+            (xml.row[1].cell[28]): 'рублей по курсу на дату признания дохода',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9',
+            (xml.row[2].cell[9]): '10',
+            (xml.row[2].cell[10]): '11',
+            (xml.row[2].cell[11]): '12',
+            (xml.row[2].cell[12]): '13',
+            (xml.row[2].cell[13]): '14',
+            (xml.row[2].cell[14]): '15',
+            (xml.row[2].cell[15]): '16',
+            (xml.row[2].cell[16]): '17',
+            (xml.row[2].cell[17]): '18',
+            (xml.row[2].cell[18]): '19',
+            (xml.row[2].cell[19]): '20',
+            (xml.row[2].cell[20]): '21',
+            (xml.row[2].cell[21]): '22',
+            (xml.row[2].cell[22]): '23',
+            (xml.row[2].cell[23]): '24',
+            (xml.row[2].cell[24]): '25',
+            (xml.row[2].cell[25]): '26',
+            (xml.row[2].cell[26]): '27',
+            (xml.row[2].cell[27]): '28',
+            (xml.row[2].cell[28]): '29',
+            (xml.row[2].cell[29]): '30',
+            (xml.row[2].cell[30]): '31',
+            (xml.row[2].cell[31]): '32',
+            (xml.row[2].cell[32]): '33',
+            (xml.row[2].cell[33]): '34',
+            (xml.row[2].cell[34]): '35',
+            (xml.row[2].cell[35]): '36',
+            (xml.row[2].cell[36]): '37',
+            (xml.row[2].cell[37]): '38'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    def aliasR = ['1. Еврооблигации 2018 года погашения, полученные в результате реструктуризации ГКО': [getDataRow(dataRows, 'R1')],
+                'R1': [getDataRow(dataRows, 'R1-total')],
+                '2. Прочие еврооблигации и ОВГВЗ': [getDataRow(dataRows, 'R2')],
+                'R2': [getDataRow(dataRows, 'R2-total')],
+                '3. Акции: ОАО «АК Сбербанк России»': [getDataRow(dataRows, 'R3')],
+                'R3': [getDataRow(dataRows, 'R3-total')],
+                '4. Акции: ОАО «ГМК Норильский никель», РАО «ЕЭС России», ОАО «Газпром», ОАО «Мосэнерго», ОАО «НК Роснефть», ОАО «Сургутнефтегаз», ОАО «НК ЛУКойл», ОАО «Ростелеком», ОАО «Татнефть», ОАО «Газпром нефть»': [getDataRow(dataRows, 'R4')],
+                'R4': [getDataRow(dataRows, 'R4-total')],
+                '5. Другие акции и облигации акционерных обществ, включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R5')],
+                'R5': [getDataRow(dataRows, 'R5-total')],
+                '6. Прочие акции и облигации акционерных обществ, не включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R6')],
+                'R6': [getDataRow(dataRows, 'R6-total')],
+                '7. Субфедеральные и муниципальные ценные бумаги, кроме муниципальных ценных бумаг, эмитированных до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R7')],
+                'R7': [getDataRow(dataRows, 'R7-total')],
+                '8. Муниципальные ценные бумаги, эмитированные до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R8')],
+                'R8': [getDataRow(dataRows, 'R8-total')],
+                '9. Прочие ценные бумаги': [getDataRow(dataRows, 'R9')],
+                'R9': [getDataRow(dataRows, 'R9-total')],
+                'R10-11': [getDataRow(dataRows, 'R10'), getDataRow(dataRows, 'R11')]
+    ]
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() != null && row.cell[0].text() != '') {
+            title = row.cell[0].text()
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        def indexCell = 1
+
+        newRow.balanceNumber = row.cell[indexCell].text()//getRecordIdImport(29, 'BALANCE_ACCOUNT', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 2
+        newRow.operationType = getRecordIdImport(87, 'OPERATION_TYPE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 3
+        newRow.signContractor = getRecordIdImport(88, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 4
+        newRow.contractorName = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 5
+        newRow.securityName = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 6
+        newRow.series = row.cell[indexCell].text()
+        indexCell++
+
+        // графа 7
+        newRow.securityKind = getRecordIdImport(89, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 8
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 9
+        newRow.currencyCode = getRecordIdImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 10
+        newRow.currencyName = getRecordIdImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 11
+        newRow.nominal = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 12
+        newRow.amount = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 13
+        newRow.acquisitionDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 14
+        newRow.tradeDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 15
+        newRow.currencyCodeTrade = getRecordIdImport(15, 'CODE_2', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 16
+        newRow.currencyNameTrade = getRecordIdImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        indexCell++
+
+        // графа 17
+        newRow.costWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 18
+        newRow.loss = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 19
+        newRow.marketPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 20
+        newRow.marketPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 21
+        indexCell++
+
+        // графа 22
+        newRow.realizationDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 23
+        newRow.tradeDate2 = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 24
+        newRow.repaymentWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 25
+        newRow.realizationPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 26
+        newRow.realizationPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 27
+        newRow.marketPriceRealizationInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 28
+        newRow.marketPriceRealizationInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        // графа 29
+        indexCell++
+
+        // графа 30
+        newRow.lossRealization = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        indexCell++
+
+        aliasR[title].add(newRow)
+    }
+    aliasR.each{k, v ->
+        rows.addAll(v)
+    }
+    dataRowHelper.save(rows)
 }
