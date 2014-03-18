@@ -206,7 +206,11 @@ void logicCheck() {
 
 // Функция возвращает итоговые значения за текущий отчётный (налоговый) период
 def getTotalValue(def dataRows, def dataRowsPrev) {
-    def quarterRow = getDataRow(dataRows, 'totalQuarter')
+    try {
+        quarterRow = data.getDataRow(dataRows, 'totalQuarter')
+    } catch (Exception e) {
+        throw new Exception("Отсутствует строка подитогов. " + e.message)
+    }
     def prevQuarterTotalRow
     if (dataRowsPrev != null) {
         prevQuarterTotalRow = getDataRow(dataRowsPrev, "total")
@@ -408,11 +412,9 @@ def getCleanTotalRow(boolean isQuarter) {
 }
 
 def loggerError(def msg) {
-    if (isBalancePeriod()) {
-        logger.warn(msg)
-    } else {
-        logger.error(msg)
-    }
+    //TODO вернуть error
+    //logger.error(msg)
+    logger.warn(msg)
 }
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков.
