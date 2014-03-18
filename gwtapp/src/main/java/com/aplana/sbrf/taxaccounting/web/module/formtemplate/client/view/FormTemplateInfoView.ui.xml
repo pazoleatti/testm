@@ -26,7 +26,7 @@
                 <g:cell>
                     <g:HorizontalPanel width="500px">
                         <g:cell verticalAlignment="middle">
-                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateBegin"/>
+                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateBegin" mayBeNull="true"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
                             <g:Label addStyleNames="{style.margin5}" width="60px">1 января</g:Label>
@@ -35,7 +35,7 @@
                             <g:Label addStyleNames="{style.margin5}" width="30px">по</g:Label>
                         </g:cell>
                         <g:cell verticalAlignment="middle">
-                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateEnd"/>
+                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateEnd" mayBeNull="true"/>
                         </g:cell>
                         <g:cell verticalAlignment="middle" horizontalAlignment="ALIGN_RIGHT">
                             <g:Label width="70px">31 декабря</g:Label>

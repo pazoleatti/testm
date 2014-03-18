@@ -76,13 +76,13 @@ switch (formDataEvent) {
             calc()
         }
         break
-    // подготовить/утвердить
+// подготовить/утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         logicCheck()
         break
-    // принятия
+// принятия
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // принять из утверждена
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
@@ -134,6 +134,16 @@ def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 
         'R58', 'R59', 'R60', 'R61', 'R62', 'R63', 'R64', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R71', 'R72',
         'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84']
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+@Field
+def rbIncome101 = null
+
+@Field
+def rbIncome102 = null
+
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -176,6 +186,25 @@ void logicCheck() {
         // проверка заполнения обязательных полей
         checkRequiredColumns(row, editableColumns)
     }
+
+    rowsAliasesFor35to40.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income101Data = getIncome101Data(row)
+        if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+        }
+    }
+    rowsAliasesFor4to5.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
+    }
+
+    checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
+    checkTotalSum(getDataRow(dataRows, secondTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum))
+
     if (!logger.containsLevel(LogLevel.ERROR)) {
         // контрольные графы
         calc4to5(dataRows)      // рассчет строк 4 и 5
@@ -304,12 +333,20 @@ def getOpuSumByTableDFor35to40(def row, def income101Data){
 
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
 def getIncome101Data(def row) {
-    def account = row.accountingRecords
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
-    def refDataProvider = refBookFactory.getDataProvider(50)
-    def date = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
-    def records = refDataProvider.getRecords(date, null,  "ACCOUNT = '$account'", null)
-    return records?.getRecords()
+    if (rbIncome101 == null) {
+        rbIncome101 = refBookFactory.getDataProvider(50L)
+    }
+    return rbIncome101?.getRecords(getReportPeriodEndDate(), null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+}
+
+// Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
+def getIncome102Data(def row) {
+    // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
 }
 
 // Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
@@ -318,8 +355,6 @@ void calc4to5(def dataRows) {
 
     rowsAliasesFor4to5.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
-        // получить отчет о прибылях и убытках
-        final income102Data = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
 
         // графа 11
         row.logicalCheck = getLogicalCheckFor4to5(row)
@@ -328,7 +363,7 @@ void calc4to5(def dataRows) {
         // графа 14
         row.opuSumByTableD = getOpuSumByTableDFor4to5(row, incomeSimpleDataRows)
         // графа 15
-        row.opuSumTotal = getOpuSumTotalFor4to5(row, income102Data)
+        row.opuSumTotal = getOpuSumTotalFor4to5(row)
         // графа 16
         row.difference = getDifferenceFor4to5(row)
     }
@@ -341,16 +376,14 @@ def getDifferenceFor4to5(def row) {
 }
 
 // Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
-def getOpuSumTotalFor4to5(def row, def income102Data) {
-    if (income102Data) {
-        return income102Data.sum { income102Row ->
-            if (income102Row.opuCode == row.accountingRecords) {
-                return (income102Row.totalSum ?: 0)
-            }
-            return 0
-        }
+def getOpuSumTotalFor4to5(def row) {
+    // получить отчет о прибылях и убытках
+    def income102Records = getIncome102Data(row)
+    def tmp = 0
+    for (income102 in income102Records) {
+        tmp += income102.TOTAL_SUM.numberValue
     }
-    return 0
+    return tmp
 }
 
 // Графа 14. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
@@ -542,4 +575,17 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+void checkTotalSum(totalRow, sum){
+    if (totalRow[totalColumn] != sum) {
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")
+    }
 }

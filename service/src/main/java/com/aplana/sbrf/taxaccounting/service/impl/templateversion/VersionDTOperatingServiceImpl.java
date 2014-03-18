@@ -63,29 +63,32 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     @Override
     public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        IntersectionSegment newIntersection = new IntersectionSegment();
-        newIntersection.setBeginDate(versionActualDateStart);
-        newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(templateId);
-        newIntersection.setStatus(status);
-        List<IntersectionSegment> segmentIntersections =
+
+        List<VersionSegment> segmentIntersections =
                 declarationTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
-            for (IntersectionSegment intersection : segmentIntersections){
+            VersionSegment newIntersection = new VersionSegment();
+            newIntersection.setBeginDate(versionActualDateStart);
+            newIntersection.setEndDate(versionActualDateEnd);
+            newIntersection.setTemplateId(templateId);
+            newIntersection.setStatus(status);
+            for (VersionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
                     case DRAFT:
                         compareResult = newIntersection.compareTo(intersection);
-                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10
-                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 || compareResult == -7 || compareResult == -1){
+                        //Варианты 1, 2, 3, 4, 5, 6, 9, 10, 1a, 2a, 3a
+                        if (compareResult == 2 || compareResult == 0 ||compareResult == -2 || compareResult == 7 ||
+                                compareResult == -7 || compareResult == -1 || compareResult == 16 || compareResult == -11 ||
+                                compareResult == 11 || compareResult == -16 || compareResult == 10){
                             logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                             return;
                         }
                         // Варианты 7,8
                         else if(compareResult == 1 || compareResult == -5){
-                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(),
-                                    newIntersection.getBeginDate(), intersection.getEndDate(), logger);
+                            isUsedVersion(intersection.getTemplateId(), intersection.getTypeId(), intersection.getStatus(), newIntersection.getBeginDate(),
+                                    intersection.getEndDate(), logger);
                             if (logger.containsLevel(LogLevel.ERROR)){
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
@@ -114,16 +117,15 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
                             declarationTemplateService.save(formTemplate);
                         }
-                        //Варианты 16,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1){
+                        //Варианты 16,18a,19,20
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
                             declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
                         }
                         break;
                 }
             }
-        } else if (newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
+        } else if (versionActualDateEnd != null){
+            cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, typeId);
             declarationTemplateService.save(declarationTemplate);
         }

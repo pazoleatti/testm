@@ -6,6 +6,32 @@
     <ui:style>
         .selected {
             color: #000000;
+            border-right: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+
+            /*многоточие*/
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+
+        .clearButton {
+            border: 1px solid #009900;
+            border-right-width: 0;
+            border-left-width: 0;
+            vertical-align: middle;
+            cursor: pointer;
+            display: block;
+            margin-left: -14px;
+        }
+
+        .selectButton {
+            border: 1px solid #009900;
+            vertical-align: middle;
+            cursor: pointer;
+            display: block;
         }
 
         .footerPanel {
@@ -23,19 +49,18 @@
         }
     </ui:style>
 
-    <g:FlowPanel width="200px" ui:field="wrappingPanel">
-        <g:HorizontalPanel verticalAlignment="middle" width="100%" ui:field="panel">
+    <g:HTMLPanel ui:field="wrappingPanel">
+        <g:HorizontalPanel ui:field="panel" verticalAlignment="middle" borderWidth="0">
             <g:cell width="100%">
-                <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="text" width="100%"/>
+                <g:TextBox ui:field="text" readOnly="true" width="100%" addStyleNames="{style.selected}"/>
             </g:cell>
-            <g:cell>
-                <g:Button text="..." ui:field="selectButton" width="25px"/>
-            </g:cell>
-            <g:cell>
-                <g:Button text="X" ui:field="clearButton" width="25px"/>
-            </g:cell>
+            <g:Image ui:field="clearButton" addStyleNames="{style.clearButton}"
+                     url="resources/img/picker-icons/clear-icon-dummy.png"/>
+            <g:Image ui:field="selectButton" title="Открыть для выбора" addStyleNames="{style.selectButton}"
+                     url="resources/img/picker-icons/refbook-icon.png"/>
         </g:HorizontalPanel>
-        <g:FlowPanel visible="false">
+
+        <g:HTMLPanel visible="false">
             <m:ModalWindow title="Выбор периода" ui:field="popupPanel" autoHideEnabled="true"
                            width="400px" height="300px">
                 <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
@@ -52,7 +77,7 @@
                     </g:cell>
                 </g:VerticalPanel>
             </m:ModalWindow>
-        </g:FlowPanel>
-    </g:FlowPanel>
+        </g:HTMLPanel>
+    </g:HTMLPanel>
 
 </ui:UiBinder>

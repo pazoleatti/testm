@@ -5,8 +5,9 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -30,18 +31,21 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private static Binder uiBinder = GWT.create(Binder.class);
+    public static String defaultHeader = "Выбор подразделения";
 
     @UiField
-    FlowPanel wrappingPanel;
+    HTMLPanel wrappingPanel;
 
     @UiField
     TextBox selected,
             filter;
 
     @UiField
-    Button selectButton,
-            clearButton,
-            find,
+    Image selectButton,
+            clearButton;
+
+    @UiField
+    Button find,
             cancel,
             ok;
 
@@ -65,23 +69,23 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @UiField
     Label countItems;
 
-    private Boolean doubleState = true;
-    private boolean multiselection;
+    private boolean multiSelect;
     /* Значения id  */
     private List<Integer> value = new LinkedList<Integer>();
     /* Разименованные значения.   */
     private List<String> valueDereference = new LinkedList<String>();
 
     @UiConstructor
-    public DepartmentPickerPopupWidget(String header, final boolean multiselection, boolean modal) {
+    public DepartmentPickerPopupWidget(boolean multiselection) {
         version = new ValueListBox<Date>(new DateTimeFormatRenderer());
         initWidget(uiBinder.createAndBindUi(this));
-        this.multiselection = multiselection;
+        this.multiSelect = multiselection;
         tree.setMultiSelection(multiselection);
         selectChild.setVisible(multiselection);
         itemsInfoPanel.setVisible(multiselection);
-        popupPanel.setModal(modal);
-        setHeader(header);
+        setHeader(defaultHeader);
+
+        WidgetUtils.setMouseBehavior(clearButton, selected, selectButton);
 
         // TODO (Ramil Timerbaev) в "Дата актуальности" пока выставил текущую дату
         setVersion(new Date());
@@ -92,7 +96,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
             public void onValueChange(ValueChangeEvent<List<DepartmentPair>> event) {
                 int size = tree.getValue().size();
                 ok.setEnabled(size > 0);
-                if (multiselection) {
+                if (isMultiSelect()) {
                     countItems.setText(String.valueOf(size));
                 }
             }
@@ -184,6 +188,16 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         setLabelValue(TextUtils.joinListToString(valueDereference));
     }
 
+    @Override
+    public List<Integer> getAvalibleValues() {
+        return tree.getAvalibleValues();
+    }
+
+    @Override
+    public void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments) {
+        tree.setAvailableValues(departments, availableDepartments);
+    }
+
     /**
      * Установить выбранными узлы дерева для указанных подразделений.
      */
@@ -217,21 +231,11 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
     @Override
     public void setSelectButtonFocus(boolean focused) {
-        selectButton.setFocus(focused);
+        selected.setFocus(focused);
     }
 
     @Override
-    public void setAvalibleValues(List<Department> departments, Set<Integer> availableDepartments) {
-        tree.setAvailableValues(departments, availableDepartments);
-    }
-
-    @Override
-    public List<Integer> getAvalibleValues() {
-        return tree.getAvalibleValues();
-    }
-
-    @Override
-    public void clearFilter(){
+    public void clearFilter() {
         filter.setText("");
     }
 
@@ -268,18 +272,13 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         version.setAcceptableValues(versions);
     }
 
-    public Boolean isDoubleState() {
-        return doubleState;
-    }
-
-    public void setDoubleState(Boolean doubleState) {
-        this.doubleState = doubleState;
-    }
-
-
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
+    }
+
+    public boolean isMultiSelect() {
+        return multiSelect;
     }
 
     @Override
@@ -289,9 +288,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectButton.setEnabled(enabled);
-        clearButton.setEnabled(enabled);
-        if (isDoubleState())
-            super.setEnabled(enabled);
+        super.setEnabled(enabled);
     }
 }

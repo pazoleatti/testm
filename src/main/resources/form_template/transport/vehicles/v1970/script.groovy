@@ -47,7 +47,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -69,6 +71,10 @@ switch (formDataEvent) {
 // 16 Сведения об угоне (дата возврата ТС)  -  stealDateEnd
 
 //// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
 @Field
 def refBookCache = [:]
 
@@ -96,6 +102,13 @@ def start = null
 def endDate = null
 
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -331,4 +344,137 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 16, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Код ОКТМО',
+            (xml.row[0].cell[2]): 'Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)',
+            (xml.row[0].cell[3]): 'Код вида ТС',
+            (xml.row[0].cell[4]): 'Вид ТС',
+            (xml.row[0].cell[5]): 'Идентификационный номер',
+            (xml.row[0].cell[6]): 'Марка',
+            (xml.row[0].cell[7]): 'Экологический класс',
+            (xml.row[0].cell[8]): 'Регистрационный знак',
+            (xml.row[0].cell[9]): 'Мощность (величина)',
+            (xml.row[0].cell[10]): 'Мощность (ед. измерения)',
+            (xml.row[0].cell[11]): 'Год изготовления',
+            (xml.row[0].cell[12]): 'Регистрация (дата регистрации)',
+            (xml.row[0].cell[13]): 'Регистрация (дата снятия с регистрации)',
+            (xml.row[0].cell[14]): 'Сведения об угоне (дата начала розыска ТС)',
+            (xml.row[0].cell[15]): 'Сведения об угоне (дата возврата ТС)',
+            (xml.row[1].cell[0]): '1',
+            (xml.row[1].cell[1]): '2',
+            (xml.row[1].cell[2]): '3',
+            (xml.row[1].cell[3]): '4',
+            (xml.row[1].cell[4]): '5',
+            (xml.row[1].cell[5]): '6',
+            (xml.row[1].cell[6]): '7',
+            (xml.row[1].cell[7]): '8',
+            (xml.row[1].cell[8]): '9',
+            (xml.row[1].cell[9]): '10',
+            (xml.row[1].cell[10]): '11',
+            (xml.row[1].cell[11]): '12',
+            (xml.row[1].cell[12]): '13',
+            (xml.row[1].cell[13]): '14',
+            (xml.row[1].cell[14]): '15',
+            (xml.row[1].cell[15]): '16'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset)
+
+        // графа 3
+
+        // графа 4
+        newRow.tsTypeCode = getRecordIdImport(42, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+
+        // графа 5
+
+        // графа 6
+        newRow.identNumber = row.cell[5].text()
+
+        // графа 7
+        newRow.model = row.cell[6].text()
+
+        // графа 8
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
+
+        // графа 9
+        newRow.regNumber = row.cell[8].text()
+
+        // графа 10
+        newRow.powerVal = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+
+        // графа 11
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset)
+
+        // графа 12
+        newRow.year = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
+
+        // графа 13
+        newRow.regDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
+
+        // графа 14
+        newRow.regDateEnd = parseDate(row.cell[13].text(), "dd.MM.yyyy", xlsIndexRow, 13 + colOffset, logger, false)
+
+        // графа 15
+        newRow.stealDateStart = parseDate(row.cell[14].text(), "dd.MM.yyyy", xlsIndexRow, 14 + colOffset, logger, false)
+
+        // графа 16
+        newRow.stealDateEnd = parseDate(row.cell[15].text(), "dd.MM.yyyy", xlsIndexRow, 15 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }

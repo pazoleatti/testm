@@ -178,7 +178,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     " rn from FORM_TEMPLATE where TYPE_ID=? and status in (0,1,2))" +
                     " select ID from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
                     " left outer join templatesByVersion rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) " +
-                    "where STATUS = 0 and ((TRUNC(versionFrom, 'DD') <= ? and TRUNC(versionTo, 'DD') >= ?) or (TRUNC(versionFrom, 'DD') <= ? and versionTo is null))";
+                    " where STATUS = 0 and ((TRUNC(versionFrom, 'DD') <= ? and TRUNC(versionTo, 'DD') >= ?) or (TRUNC(versionFrom, 'DD') <= ? and versionTo is null))";
             return jt.queryForInt(
                     ACTIVE_VERSION_SQL,
                     new Object[]{formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
@@ -249,27 +249,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualBeginVersion, Date actualEndVersion) {
+    public List<Integer> getFormTemplateVersions(int formTypeId, List<Integer> statusList) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", formTypeId);
         valueMap.put("statusList", statusList);
-        valueMap.put("actualStartVersion", actualBeginVersion);
-        valueMap.put("actualEndVersion", actualEndVersion);
-        valueMap.put("formTemplateId", formTemplateId);
 
         StringBuilder builder = new StringBuilder("select id");
         builder.append(" from form_template where type_id = :typeId");
         if (!statusList.isEmpty())
             builder.append(" and status in (:statusList)");
-
-        if (actualBeginVersion != null && actualEndVersion != null)
-            builder.append(" and version between :actualStartVersion and :actualEndVersion");
-        else if (actualBeginVersion != null)
-            builder.append(" and version >= :actualStartVersion");
-
-        if (formTemplateId != 0)
-            builder.append(" and id <> :formTemplateId");
-
 
         builder.append(" order by version, edition");
         try {
@@ -280,37 +268,35 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion) {
         String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number()" + (isSupportOver()? " over(partition by TYPE_ID order by version)" : " over()") +
                 " rn from FORM_TEMPLATE where TYPE_ID = :typeId AND STATUS in (0,1,2)) " +
-                " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, " +
-                " CASE" +
-                " WHEN rv2.STATUS in (0,1) THEN rv2.version - interval '1' day" +
-                " WHEN  rv2.STATUS = 2 THEN rv2.version" +
-                " END versionTo" +
-                " from segmentIntersection rv " +
+                " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo" +
+                " FROM segmentIntersection rv " +
                 " left outer join segmentIntersection rv2 on rv.TYPE_ID = rv2.TYPE_ID and rv.rn+1 = rv2.rn) where";
 
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", formTypeId);
         valueMap.put("actualStartVersion", actualStartVersion);
         valueMap.put("actualEndVersion", actualEndVersion);
-        valueMap.put("formTemplateId", formTemplateId);
+        valueMap.put("templateId", formTemplateId);
 
         StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
+        builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
         if (actualEndVersion != null)
-            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion) " +
-                    " OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
+            builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
-            builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
-        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null)");
+            builder.append(" OR ID = (select id from (select id, row_number() ").
+                    append(isSupportOver() ? " over(partition by TYPE_ID order by version)" : " over()").
+                    append(" rn FROM FORM_TEMPLATE where TRUNC(version, 'DD') > :actualStartVersion AND STATUS in (0,1,2) AND TYPE_ID = :typeId AND id <> :templateId) WHERE rn = 1)");
+        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null))");
         if (formTemplateId != 0)
-            builder.append(" and ID <> :formTemplateId");
+            builder.append(" and ID <> :templateId");
         try {
-            return getNamedParameterJdbcTemplate().query(builder.toString(), valueMap, new RowMapper<IntersectionSegment>() {
+            return getNamedParameterJdbcTemplate().query(builder.toString(), valueMap, new RowMapper<VersionSegment>() {
                 @Override
-                public IntersectionSegment mapRow(ResultSet resultSet, int i) throws SQLException {
-                    IntersectionSegment segment = new IntersectionSegment();
+                public VersionSegment mapRow(ResultSet resultSet, int i) throws SQLException {
+                    VersionSegment segment = new VersionSegment();
                     segment.setTemplateId(resultSet.getInt("ID"));
                     segment.setStatus(VersionedObjectStatus.getStatusById(resultSet.getInt("STATUS")));
                     segment.setBeginDate(resultSet.getDate("versionFrom"));
@@ -329,20 +315,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("templateId", templateId);
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select");
-            builder.append(" CASE" +
-                    " WHEN status in (0,1) THEN version - INTERVAL '1' day" +
-                    " WHEN status = 2 THEN version" +
-                    " END");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) and id <> :templateId order by version) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Date.class);
+            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
+                    " from form_template where type_id = :typeId and version > ? and status in (0,1,2) and id <> :templateId order by version) where rownum = 1",
+                    new Object[]{formTypeId, actualBeginVersion, templateId},
+                    new int[]{Types.NUMERIC, Types.DATE, Types.NUMERIC},
+                    Date.class).getTime());
         } catch(EmptyResultDataAccessException e){
             return null;
         } catch (DataAccessException e){

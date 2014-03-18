@@ -2,43 +2,42 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:mask="urn:import:com.aplana.gwt.client.mask.ui">
     <ui:style>
-        .imageStyle {
-            border: 1px solid #008000;
+        .selected {
             border-right: 0;
-            vertical-align: text-bottom;
-            cursor: pointer;
-            float: left;
-            margin-left: -20px;
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
-        .clearBtn {
-            margin-left: -31px;
-            margin-top: 7px;
-            cursor: pointer;
-            float: left;
+        .clearButton {
+            border: 1px solid #009900;
+            border-right-width: 0;
+            border-left-width: 0;
+            vertical-align: middle;
+            display: block;
+            margin-left: -14px;
         }
 
-        .textBox {
-            float: left;
-            height: 15px;
-            vertical-align: text-bottom;
-            width: 100%;
+        .selectButton {
+            border: 1px solid #009900;
+            vertical-align: middle;
+            cursor: pointer;
+            display: block;
         }
 
         .main {
             padding: 0;
             min-width: 100px;
-            min-height: 21px;
-            line-height: 12px;
         }
     </ui:style>
 
-    <ui:with field="imageResources"
-             type="com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker.Icons"/>
+    <g:HorizontalPanel ui:field="mainPanel" verticalAlignment="middle" addStyleNames="{style.main}">
+        <g:cell width="100%">
+            <mask:DateMaskBox ui:field="dateBox" width="100%" addStyleNames="{style.selected}"/>
+        </g:cell>
+        <g:Image ui:field="clearImage" addStyleNames="{style.clearButton}"
+                 url="resources/img/picker-icons/clear-icon-dummy.png"/>
+        <g:Image ui:field="calendarImage" title="Открыть для выбора" addStyleNames="{style.selectButton}"
+                 url="resources/img/picker-icons/calendar-icon.png"/>
+    </g:HorizontalPanel>
 
-    <g:HTMLPanel ui:field="mainPanel" addStyleNames="{style.main}">
-        <mask:DateMaskBox ui:field="dateBox" addStyleNames="{style.textBox}"/>
-        <g:Image ui:field="clearImage" resource="{imageResources.clearBtn}" styleName="{style.clearBtn}"/>
-        <g:Image ui:field="calendarImage" resource="{imageResources.calPickerBtn}" styleName="{style.imageStyle}"/>
-    </g:HTMLPanel>
 </ui:UiBinder>

@@ -1,11 +1,42 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:m='urn:import:com.aplana.gwt.client'
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:t="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:m="urn:import:com.aplana.gwt.client"
         >
 
     <ui:style>
+        .selected {
+            color: #000000;
+            border-right: 0;
+            margin-top: 0;
+            margin-bottom: 0;
 
+            /*многоточие*/
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+        }
+
+        .clearButton {
+            border: 1px solid #009900;
+            border-right-width: 0;
+            border-left-width: 0;
+            vertical-align: middle;
+            display: block;
+            margin-left: -14px;
+        }
+
+        .selectButton {
+            border: 1px solid #009900;
+            vertical-align: middle;
+            cursor: pointer;
+            display: block;
+        }
+
+    </ui:style>
+
+    <ui:style field="modal">
         .forTree {
             border-style: none !important;
             width: 100% !important;
@@ -19,8 +50,7 @@
         }
 
         .forScroll {
-            border-style: solid;
-            border-width: 1px;
+            border: 1px solid;
             margin: 0 10px;
             background-color: #ffffff;
             width: 600px !important;
@@ -29,11 +59,9 @@
 
         .forMargin0 {
             margin: 0;
-            width: 100%;
         }
 
         .forFind2 {
-            width: 100%;
             margin-top: 8px;
         }
 
@@ -50,40 +78,34 @@
             margin: 0 0 0 10px;
         }
 
-        .selected {
-            color: #000000;
-        }
-
     </ui:style>
 
-    <g:FlowPanel width="200px" ui:field="wrappingPanel">
-        <g:HorizontalPanel verticalAlignment="middle" height="100%" ui:field="panel">
+    <g:HTMLPanel ui:field="wrappingPanel">
+        <g:HorizontalPanel ui:field="panel" verticalAlignment="middle" borderWidth="0">
             <g:cell width="100%">
-                <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="selected" width="100%"/>
+                <g:TextBox ui:field="selected" readOnly="true" width="100%" addStyleNames="{style.selected}"/>
             </g:cell>
-            <g:cell>
-                <g:Button ui:field="selectButton" text="..." width="25px"/>
-            </g:cell>
-            <g:cell>
-                <g:Button text="X" ui:field="clearButton" width="25px"/>
-            </g:cell>
+            <g:Image ui:field="clearButton" addStyleNames="{style.clearButton}"
+                     url="resources/img/picker-icons/clear-icon-dummy.png"/>
+            <g:Image ui:field="selectButton" title="Открыть для выбора" addStyleNames="{style.selectButton}"
+                     url="resources/img/picker-icons/refbook-icon.png"/>
         </g:HorizontalPanel>
-        <g:FlowPanel visible="false">
-            <m:ModalWindow title="Выберите подразделение" ui:field="popupPanel">
-                <g:VerticalPanel addStyleNames="{style.mainVertical}">
+
+        <g:HTMLPanel visible="false">
+            <m:ModalWindow ui:field="popupPanel">
+                <g:VerticalPanel addStyleNames="{modal.mainVertical}">
 
                     <g:HorizontalPanel spacing="10" width="100%">
                         <g:VerticalPanel width="100%">
-                            <g:TextBox ui:field="filter" addStyleNames="{style.forMargin0}"/>
-                            <g:HorizontalPanel addStyleNames="{style.forFind2}">
-                                <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                            <g:TextBox ui:field="filter" width="100%" addStyleNames="{modal.forMargin0}"/>
+                            <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{modal.forFind2}">
+                                <g:cell horizontalAlignment="left" >
                                     <g:CheckBox ui:field="selectChild" text="Включая подчиненные"/>
                                 </g:cell>
-                                <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                                    <g:Label text="Дата актуальности:" wordWrap="false"
-                                             addStyleNames="{style.forVersion}"/>
+                                <g:cell horizontalAlignment="right">
+                                    <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{modal.forVersion}"/>
                                 </g:cell>
-                                <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                <g:cell horizontalAlignment="right">
                                     <g:ValueListBox ui:field="version" width="100%"/>
                                 </g:cell>
                             </g:HorizontalPanel>
@@ -91,15 +113,15 @@
                         <g:Button ui:field="find" text="Найти" width="100%"/>
                     </g:HorizontalPanel>
 
-                    <g:ScrollPanel addStyleNames="{style.forScroll}">
-                        <t:DepartmentTreeWidget ui:field="tree" headerVisible="false" addStyleNames="{style.forTree}"/>
+                    <g:ScrollPanel addStyleNames="{modal.forScroll}">
+                        <t:DepartmentTreeWidget ui:field="tree" headerVisible="false" addStyleNames="{modal.forTree}"/>
                     </g:ScrollPanel>
 
                     <g:HorizontalPanel spacing="10" width="100%">
                         <g:cell horizontalAlignment="left" verticalAlignment="middle">
                             <g:HorizontalPanel ui:field="itemsInfoPanel">
                                 <g:Label ui:field="countItemsLabel" text="Выбрано:"/>
-                                <g:Label ui:field="countItems" addStyleNames="{style.forCountSelected}"/>
+                                <g:Label ui:field="countItems" addStyleNames="{modal.forCountSelected}"/>
                                 <g:Anchor ui:field="showItemsAnchor" text="Показать выбранные" wordWrap="false"
                                           visible="false"/>
                             </g:HorizontalPanel>
@@ -107,14 +129,14 @@
                         <g:cell horizontalAlignment="right" verticalAlignment="middle">
                             <g:HorizontalPanel>
                                 <g:Button ui:field="ok" text="Выбрать"/>
-                                <g:Button ui:field="cancel" text="Закрыть" addStyleNames="{style.forCancel}"/>
+                                <g:Button ui:field="cancel" text="Закрыть" addStyleNames="{modal.forCancel}"/>
                             </g:HorizontalPanel>
                         </g:cell>
                     </g:HorizontalPanel>
 
                 </g:VerticalPanel>
             </m:ModalWindow>
-        </g:FlowPanel>
-    </g:FlowPanel>
+        </g:HTMLPanel>
+    </g:HTMLPanel>
 
 </ui:UiBinder>
