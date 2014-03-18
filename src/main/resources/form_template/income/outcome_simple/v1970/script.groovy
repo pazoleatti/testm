@@ -153,8 +153,16 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper?.allCached
     dataRows.each {row ->
-         checkRequiredColumns(row, nonEmptyColumns)
+        checkRequiredColumns(row, nonEmptyColumns)
     }
+
+    dataRows.each { row ->
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) {
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
+    }
+
     def row50001 = getDataRow(dataRows, 'R107')
     def row50002 = getDataRow(dataRows, 'R212')
     def need50001 = [:]
@@ -208,7 +216,6 @@ void calculationControlGraphs(def dataRows) {
     def value
     def formDataComplex = getFormDataComplex()
     def dataRowsComplex = formDataComplex != null ? formDataService.getDataRowHelper(formDataComplex)?.allCached : null
-    def income102NotFound = []
     for (def row : dataRows) {
         // исключить итоговые строки и пять конечных
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
@@ -238,24 +245,14 @@ void calculationControlGraphs(def dataRows) {
 
         // графа 13
         // получить отчет о прибылях и убытках
-        def date = getReportPeriodEndDate()
-        def filter = "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}"
-        def income102Records = getRefBookIncome102()?.getRecords(date, null, filter, null)
+        def income102Records = getIncome102Data(row)
         row.opuSumTotal = 0
-        if (income102Records == null || income102Records.isEmpty()) {
-            income102NotFound += row.getIndex() + 2
-        }
         for (income102 in income102Records) {
             row.opuSumTotal += income102.TOTAL_SUM.numberValue
         }
 
         // графа 14
         row.difference = (row.opuSumByEnclosure2?:0) + (row.opuSumByTableP?:0) - (row.opuSumTotal?:0)
-    }
-
-    if (!income102NotFound.isEmpty()) {
-        def rows = income102NotFound.join(', ')
-        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
     }
 }
 
@@ -690,11 +687,13 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def getRefBookIncome102() {
+// Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
+def getIncome102Data(def row) {
+    // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
     if (rbIncome102 == null) {
         rbIncome102 = refBookFactory.getDataProvider(52L)
     }
-    return rbIncome102
+    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
 }
 
 void checkTotalSum(totalRow, needRow){
