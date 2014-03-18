@@ -76,13 +76,13 @@ switch (formDataEvent) {
             calc()
         }
         break
-    // подготовить/утвердить
+// подготовить/утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         logicCheck()
         break
-    // принятия
+// принятия
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // принять из утверждена
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
@@ -138,7 +138,9 @@ def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 
 @Field
 def endDate = null
 
-// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+@Field
+def rbIncome101 = null
+
 @Field
 def rbIncome102 = null
 
@@ -184,6 +186,22 @@ void logicCheck() {
         // проверка заполнения обязательных полей
         checkRequiredColumns(row, editableColumns)
     }
+
+    rowsAliasesFor35to40.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income101Data = getIncome101Data(row)
+        if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+        }
+    }
+    rowsAliasesFor4to5.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
+    }
+
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
     checkTotalSum(getDataRow(dataRows, secondTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum))
 
@@ -315,12 +333,20 @@ def getOpuSumByTableDFor35to40(def row, def income101Data){
 
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
 def getIncome101Data(def row) {
-    def account = row.accountingRecords
     // Справочник 50 - "Оборотная ведомость (Форма 0409101-СБ)"
-    def refDataProvider = refBookFactory.getDataProvider(50)
-    def date = getReportPeriodEndDate()
-    def records = refDataProvider.getRecords(date, null, "ACCOUNT = '$account' AND DEPARTMENT_ID = ${formData.departmentId}", null)
-    return records?.getRecords()
+    if (rbIncome101 == null) {
+        rbIncome101 = refBookFactory.getDataProvider(50L)
+    }
+    return rbIncome101?.getRecords(getReportPeriodEndDate(), null, "ACCOUNT = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+}
+
+// Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
+def getIncome102Data(def row) {
+    // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
 }
 
 // Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
@@ -352,9 +378,7 @@ def getDifferenceFor4to5(def row) {
 // Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
 def getOpuSumTotalFor4to5(def row) {
     // получить отчет о прибылях и убытках
-    def date = getReportPeriodEndDate()
-    def filter = "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}"
-    def income102Records = getRefBookIncome102()?.getRecords(date, null, filter, null)
+    def income102Records = getIncome102Data(row)
     def tmp = 0
     for (income102 in income102Records) {
         tmp += income102.TOTAL_SUM.numberValue
@@ -558,13 +582,6 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
-}
-
-def getRefBookIncome102() {
-    if (rbIncome102 == null) {
-        rbIncome102 = refBookFactory.getDataProvider(52L)
-    }
-    return rbIncome102
 }
 
 void checkTotalSum(totalRow, sum){
