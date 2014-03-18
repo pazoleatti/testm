@@ -232,11 +232,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 if ((column.isChecking() && !isShowChecked)){
                     continue;
                 }
-                if (column.getWidth() == 0){
-                    mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);//иначе следующая колонка тоже скрывается, т.к. нет lastCell
-                    /*sheet.setColumnHidden(i, true);*/
-                    continue;
-                }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());
                 Cell workBookcell = mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);
                 workBookcell.setCellStyle(cellStyleBuilder.createCellStyle(CellType.DEFAULT, column.getAlias() + "_header"));
