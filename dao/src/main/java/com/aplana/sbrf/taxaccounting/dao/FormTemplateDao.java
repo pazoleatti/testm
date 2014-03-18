@@ -78,11 +78,10 @@ public interface FormTemplateDao {
     /**
      * Получает список id версий макета по типу шаблона и статусу версии.
      * @param formTypeId вид шаблона
-     * @param formTemplateId идентификатор шаблона, котрый исключить из поиска, если нет такого то 0
      * @param statusList статус формы
      * @return список версий
      */
-    List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
+    List<Integer> getFormTemplateVersions(int formTypeId, List<Integer> statusList);
 
     /**
      * Метод для поиска пересечений версий макетов в указанных датах
@@ -93,7 +92,7 @@ public interface FormTemplateDao {
      * @param actualEndVersion дата окончания
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
 
     /**
      * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии

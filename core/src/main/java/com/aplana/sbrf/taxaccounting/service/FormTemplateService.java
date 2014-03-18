@@ -112,7 +112,7 @@ public interface FormTemplateService {
      * @param actualEndVersion дата окончания версии макета
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.

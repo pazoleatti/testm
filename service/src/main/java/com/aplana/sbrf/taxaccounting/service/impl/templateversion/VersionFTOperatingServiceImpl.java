@@ -69,15 +69,15 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
 
-        List<IntersectionSegment> segmentIntersections =
+        List<VersionSegment> segmentIntersections =
                 formTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
-            IntersectionSegment newIntersection = new IntersectionSegment();
+            VersionSegment newIntersection = new VersionSegment();
             newIntersection.setBeginDate(versionActualDateStart);
             newIntersection.setEndDate(versionActualDateEnd);
             newIntersection.setTemplateId(templateId);
             newIntersection.setStatus(status);
-            for (IntersectionSegment intersection : segmentIntersections){
+            for (VersionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
