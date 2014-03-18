@@ -182,9 +182,13 @@ void calc() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    for (def row : dataRows) {
-        // проверка заполнения обязательных полей
-        checkRequiredColumns(row, editableColumns)
+
+    rowsAliasesFor4to5.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
     }
 
     rowsAliasesFor35to40.each { rowAlias ->
@@ -194,12 +198,10 @@ void logicCheck() {
             logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
         }
     }
-    rowsAliasesFor4to5.each { rowAlias ->
-        def row = getDataRow(dataRows, rowAlias)
-        final income102Data = getIncome102Data(row)
-        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
-        }
+
+    for (def row : dataRows) {
+        // проверка заполнения обязательных полей
+        checkRequiredColumns(row, editableColumns)
     }
 
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))

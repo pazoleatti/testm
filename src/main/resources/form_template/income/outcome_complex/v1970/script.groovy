@@ -205,18 +205,18 @@ void calc() {
 def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-    for (def row in dataRows) {
-        if (rowsCalc.contains(row.getAlias())) {
-            // Проверка обязательных полей
-            checkRequiredColumns(row, nonEmptyColumns)
-        }
-    }
     dataRows.each { row ->
         if (rowsCalc.contains(row.getAlias())) {
             final income102Data = getIncome102Data(row)
             if (!income102Data || income102Data.isEmpty()) {
                 logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
             }
+        }
+    }
+    for (def row in dataRows) {
+        if (rowsCalc.contains(row.getAlias())) {
+            // Проверка обязательных полей
+            checkRequiredColumns(row, nonEmptyColumns)
         }
     }
     checkTotalSum(getDataRow(dataRows, 'R67'), getSum(dataRows, totalColumn, 'R2', 'R66'))
