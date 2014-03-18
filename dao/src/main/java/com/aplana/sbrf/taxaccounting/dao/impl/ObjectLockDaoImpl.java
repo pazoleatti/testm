@@ -52,12 +52,11 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			lock.setUserId(rs.getInt("user_id"));
 			return lock;
 		}
-
 	}
 	
 	@Override
 	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz) {
-		ObjectLock<IdType> lock = getObjectLock(id, clazz, false); 
+		ObjectLock<IdType> lock = getObjectLockInternal(id, clazz);
 		if (lock != null && isLockTimedOut(lock)) {
 			return null;
 		} else {
@@ -66,12 +65,10 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 	}
 
 	private static final String GET_LOCK_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ?";
-	private static final String GET_LOCK_FOR_UPDATE_SQL = "SELECT object_id, class, user_id, lock_time FROM object_lock WHERE object_id = ? AND class = ? FOR UPDATE";
-
-	public <IdType extends Number> ObjectLock<IdType> getObjectLock(IdType id,	Class<? extends IdentityObject<IdType>> clazz, boolean forUpdate) {
+	private <IdType extends Number> ObjectLock<IdType> getObjectLockInternal(IdType id,	Class<? extends IdentityObject<IdType>> clazz) {
 		try {
 			return getJdbcTemplate().queryForObject(
-				forUpdate ? GET_LOCK_FOR_UPDATE_SQL : GET_LOCK_SQL,
+				GET_LOCK_SQL,
 				new ObjectLockRowMapper<IdType>(),
 				id,
 				clazz.getName()
@@ -91,7 +88,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 
 	@Override
 	public <IdType extends Number> void lockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
-		ObjectLock<IdType> lock = getObjectLock(id, clazz, true);
+		ObjectLock<IdType> lock = getObjectLockInternal(id, clazz);
 		String className = clazz.getName();
 		
 		JdbcTemplate jt = getJdbcTemplate();
@@ -164,7 +161,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 	@Override
 	public <IdType extends Number> void unlockObject(IdType id, Class<? extends IdentityObject<IdType>> clazz, int userId) {
 		String className = clazz.getName();		
-		ObjectLock<IdType> lock = getObjectLock(id, clazz, true);
+		ObjectLock<IdType> lock = getObjectLockInternal(id, clazz);
 		if (lock == null) {
 			throw new LockException("Невозможно разблокировать объект типа %s с идентификатором %d, так как он не заблокирован", className, id);
 		} else {
