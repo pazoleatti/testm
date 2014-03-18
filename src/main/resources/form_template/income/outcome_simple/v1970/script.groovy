@@ -152,15 +152,16 @@ void calc() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper?.allCached
-    dataRows.each {row ->
-        checkRequiredColumns(row, nonEmptyColumns)
-    }
 
     dataRows.each { row ->
         final income102Data = getIncome102Data(row)
         if (!income102Data || income102Data.isEmpty()) {
             logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
         }
+    }
+
+    dataRows.each {row ->
+        checkRequiredColumns(row, nonEmptyColumns)
     }
 
     def row50001 = getDataRow(dataRows, 'R107')

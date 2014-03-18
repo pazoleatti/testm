@@ -444,19 +444,32 @@ void addData(def xml, int headRowCount) {
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-        newRow.name = getRecordIdImport(30, 'NAME', row.cell[2].text(), xlsIndexRow, 1 + colOffset, true)
+        def xmlIndexCol = 2
+        newRow.name = getRecordIdImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
         // графа 3 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
-        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[3].text(), xlsIndexRow, 1 + colOffset, true)
+        xmlIndexCol = 3
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
         // графа 5
-        newRow.buyDate = getDate(row.cell[5].text(), xlsIndexRow, 1 + colOffset)
+        xmlIndexCol = 5
+        newRow.buyDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 6
-        newRow.cost = getNumber(row.cell[6].text(), xlsIndexRow, 1 + colOffset)
+        xmlIndexCol = 6
+        newRow.cost = getNumber(row.cell[6].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 7
-        newRow.bondsCount = getNumber(row.cell[7].text(), xlsIndexRow, 1 + colOffset)
+        xmlIndexCol = 7
+        newRow.bondsCount = getNumber(row.cell[7].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 8
-        newRow.upCost = getNumber(row.cell[8].text(), xlsIndexRow, 1 + colOffset)
+        xmlIndexCol = 8
+        newRow.upCost = getNumber(row.cell[8].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 9
-        newRow.circulationTerm = getNumber(row.cell[9].text(), xlsIndexRow, 1 + colOffset)
+        xmlIndexCol = 9
+        newRow.circulationTerm = getNumber(row.cell[9].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         mapRows[sectionIndex].add(newRow)
     }
