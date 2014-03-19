@@ -162,17 +162,17 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         };
 
         logBusinessTable.setPageSize(pager.getPageSize());
-        logBusinessTable.addColumn(dateColumn, dateColumnHeader);
-        logBusinessTable.addColumn(eventColumn, eventColumnHeader);
-        logBusinessTable.addColumn(noteColumn, noteColumnHeader);
-        logBusinessTable.addColumn(reportPeriodColumn, reportPeriodColumnHeader);
-        logBusinessTable.addColumn(departmentColumn, departmentColumnHeader);
-        logBusinessTable.addColumn(typeColumn, typeColumnHeader);
-        logBusinessTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
-        logBusinessTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
-        logBusinessTable.addColumn(userLoginColumn, userLoginColumnHeader);
-        logBusinessTable.addColumn(userRolesColumn, userRolesColumnHeader);
-        logBusinessTable.addColumn(userIpColumn, userIpColumnHeader);
+        logBusinessTable.addResizableColumn(dateColumn, dateColumnHeader);
+        logBusinessTable.addResizableColumn(eventColumn, eventColumnHeader);
+        logBusinessTable.addResizableColumn(noteColumn, noteColumnHeader);
+        logBusinessTable.addResizableColumn(reportPeriodColumn, reportPeriodColumnHeader);
+        logBusinessTable.addResizableColumn(departmentColumn, departmentColumnHeader);
+        logBusinessTable.addResizableColumn(typeColumn, typeColumnHeader);
+        logBusinessTable.addResizableColumn(formDataKindColumn, formDataKindColumnHeader);
+        logBusinessTable.addResizableColumn(formDeclTypeColumn, formTypeColumnHeader);
+        logBusinessTable.addResizableColumn(userLoginColumn, userLoginColumnHeader);
+        logBusinessTable.addResizableColumn(userRolesColumn, userRolesColumnHeader);
+        logBusinessTable.addResizableColumn(userIpColumn, userIpColumnHeader);
         logBusinessTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {

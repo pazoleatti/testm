@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -24,7 +25,7 @@ import java.util.List;
 public class VersionHistoryView extends PopupViewImpl implements VersionHistoryPresenter.MyView {
 
     @UiField
-    CellTable<TemplateChangesExt> versionHistoryCellTable;
+    GenericCellTable<TemplateChangesExt> versionHistoryCellTable;
 
     @Override
     public void fillTemplate(List<TemplateChangesExt> templateChangeses) {
@@ -62,23 +63,23 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
             }
         };
 
-        versionHistoryCellTable.addColumn(linkColumn, "Версия");
+        versionHistoryCellTable.addResizableColumn(linkColumn, "Версия");
 
-        versionHistoryCellTable.addColumn(new TextColumn<TemplateChangesExt>() {
+        versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
                 return String.valueOf(object.getTemplateChanges().getEvent());
             }
         }, "Событие");
 
-        versionHistoryCellTable.addColumn(new TextColumn<TemplateChangesExt>() {
+        versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
                 return object.getTemplateChanges().getEventDate().toString();
             }
         }, "Дата и время события");
 
-        versionHistoryCellTable.addColumn(new TextColumn<TemplateChangesExt>() {
+        versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
                 return object.getTemplateChanges().getAuthor().getName();
