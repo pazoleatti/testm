@@ -55,15 +55,8 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
             formTemplateVersion.setTypeName(formTemplate.getType().getName());
             formTemplateVersion.setVersionNumber(String.valueOf(formTemplate.getEdition()));
             formTemplateVersion.setActualBeginVersionDate(SDF.format(formTemplate.getVersion()));
-
-            if (formTemplates.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
-                formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
-                        SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime())):"");
-                i++;
-            }else {
-                formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
-                        SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
-            }
+            formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
+                    SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
 
             formTemplateVersions.add(formTemplateVersion);
 

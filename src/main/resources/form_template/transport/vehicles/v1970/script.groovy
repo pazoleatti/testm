@@ -394,7 +394,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
@@ -464,7 +463,7 @@ void addData(def xml, int headRowCount) {
         newRow.year = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
 
         // графа 13
-        newRow.regDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+        newRow.regDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
 
         // графа 14
         newRow.regDateEnd = parseDate(row.cell[13].text(), "dd.MM.yyyy", xlsIndexRow, 13 + colOffset, logger, false)

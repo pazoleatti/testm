@@ -49,7 +49,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -98,6 +100,13 @@ def endDate = null
 
 //// Обертки методов
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 // Проверка НСИ
 boolean checkNSI(def refBookId, def row, def alias) {
     return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
@@ -120,7 +129,7 @@ void calc() {
         for (def row in dataRows) {
             row.rowNumber = i++
         }
-        dataRowHelper.update(dataRows);
+        dataRowHelper.save(dataRows);
     }
 }
 
@@ -407,4 +416,105 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Код ОКТМО',
+            (xml.row[0].cell[2]): 'Идентификационный номер',
+            (xml.row[0].cell[3]): 'Регистрационный знак',
+            (xml.row[0].cell[4]): 'Мощность (величина)',
+            (xml.row[0].cell[5]): 'Мощность (ед. измерения)',
+            (xml.row[0].cell[6]): 'Код налоговой льготы',
+            (xml.row[0].cell[7]): 'Использование льготы',
+            (xml.row[1].cell[7]): 'Дата начала',
+            (xml.row[1].cell[8]): 'Дата окончания',
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        // графа 1
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        // графа 2
+        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset)
+
+        // графа 3
+        newRow.identNumber = row.cell[2].text()
+
+        // графа 4
+        newRow.regNumber = row.cell[3].text()
+
+        // графа 5
+        newRow.powerVal = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+
+        // графа 6
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[5].text(), xlsIndexRow, 5 + colOffset)
+
+        // графа 7
+        newRow.taxBenefitCode = getRecordIdImport(6, 'CODE', row.cell[6].text(), xlsIndexRow, 6 + colOffset)
+
+        // графа 8
+        newRow.benefitStartDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+
+        // графа 9
+        newRow.benefitEndDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }

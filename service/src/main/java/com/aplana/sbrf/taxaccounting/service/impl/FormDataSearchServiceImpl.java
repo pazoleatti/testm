@@ -28,12 +28,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     @Autowired
     private FormDataAccessService formDataAccessService;
 
-    @Autowired
-    private FormTemplateService formTemplateService;
-
-    @Autowired
-    private PeriodService reportPeriodService;
-
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
         return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
@@ -89,35 +83,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
 		return result;
 	}
-
-    @Override
-    public List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType) {
-        TemplateFilter filter = new TemplateFilter();
-        filter.setActive(true);
-        filter.setTaxType(taxType);
-        List<FormType> formTypesList = formTypeService.getByFilter(filter);
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
-        ArrayList<FormType> resultList = new ArrayList<FormType>();
-        for (FormType type : formTypesList){
-            for (FormTemplate formTemplate : formTemplateService.getFormTemplateVersionsByStatus(type.getId(), VersionedObjectStatus.NORMAL)){
-                Date templateEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
-                if (templateEndDate != null){
-                    if ((formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) >= 0 && formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0)
-                            || (templateEndDate.compareTo(reportPeriod.getStartDate()) >= 0 && templateEndDate.compareTo(reportPeriod.getEndDate()) <= 0)
-                            || (formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <=0 && templateEndDate.compareTo(reportPeriod.getEndDate()) >= 0)) {
-                        resultList.add(type);
-                    }
-                }
-                else{
-                    if (formTemplate.getVersion().compareTo(reportPeriod.getStartDate()) <= 0
-                            || formTemplate.getVersion().compareTo(reportPeriod.getEndDate()) <= 0)
-                        resultList.add(type);
-                }
-            }
-        }
-        Collections.sort(resultList, new FormTypeAlphanumericComparator());
-        return resultList;
-    }
 
 	@Override
 	public List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo) {
