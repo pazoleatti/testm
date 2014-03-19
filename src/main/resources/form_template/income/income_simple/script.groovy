@@ -260,13 +260,13 @@ void logicCheck() {
         if (row.getAlias() in chRows) {
             def income101Records = getIncome101Data(row)
             if (!income101Records || income101Records.isEmpty()) {
-                logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
             }
         }
         if (!(row.getAlias() in (rowsNotCalc + chRows))) {
             def income102Records = getIncome102Data(row)
             if (!income102Records || income102Records.isEmpty()) {
-                logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
             }
         }
     }
