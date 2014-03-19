@@ -118,7 +118,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,18a,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10){
                             declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
                         }
                         break;
