@@ -1028,6 +1028,35 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, ref_book_id, record_id, version from ref_book_record where id in %s),\n" +
+            "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id),\n" +
+            "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
+            "select distinct id,\n" +
+            "case\n" +
+            "\twhen (versionEnd is not null and ? > versionEnd) then 1\n" +
+            "\twhen ((versionEnd is null or ? <= versionEnd) and ? < versionStart) then -1\n" +
+            "\telse 0\n" +
+            "end as result\n" +
+            "from allRecords";
+
+    @Override
+    public List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        List<Long> ids = new ArrayList<Long>();
+        for (RefBookRecord record : records) {
+            ids.add(record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue());
+        }
+        String sql = String.format(CHECK_PARENT_CONFLICT, SqlUtils.transformToSqlInStatement(ids));
+        final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
+        getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
+            @Override
+            public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
+                return null;
+            }
+        }, versionTo, versionTo, versionFrom);
+        return new ArrayList<Pair<Long, Integer>>(result);
+    }
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {

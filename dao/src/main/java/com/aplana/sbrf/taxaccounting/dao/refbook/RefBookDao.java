@@ -326,6 +326,14 @@ public interface RefBookDao {
     List<Long> getParentsHierarchy(Long uniqueRecordId);
 
     /**
+     * Проверяет существуют ли конфликты в датах актуальности у проверяемых записей и их родительских записей (в иерархических справочниках)
+     * @param versionFrom дата начала актуальности
+     * @param versionTo дата окончания актуальности
+     * @param records проверяемые записи
+     */
+    List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей
