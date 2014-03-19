@@ -20,6 +20,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -135,6 +136,11 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		action.setTaxType(taxType);
 		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
 		action.setReportPeriodId(getView().getFilterData().getReportPeriodIds());
+        List<FormDataKind> kinds = new ArrayList<FormDataKind>();
+        for (Long kindId : getView().getFilterData().getFormDataKind()) {
+            kinds.add(FormDataKind.fromId(kindId.intValue()));
+        }
+        action.setKinds(kinds);
 		dispatchAsync.execute(action, CallbackUtils
 				.wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
 					@Override
