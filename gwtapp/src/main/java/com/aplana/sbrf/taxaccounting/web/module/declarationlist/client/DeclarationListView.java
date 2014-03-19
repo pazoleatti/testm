@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -46,7 +47,7 @@ public class DeclarationListView extends
 	Panel filterContentPanel;
 
 	@UiField
-	CellTable<DeclarationDataSearchResultItem> declarationTable;
+    GenericCellTable<DeclarationDataSearchResultItem> declarationTable;
 
     @UiField
     FlexiblePager pager;
@@ -123,11 +124,11 @@ public class DeclarationListView extends
 			}
 		};
 
-		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации"));
-		declarationTable.addColumn(departmentColumn, getHeader("Подразделение"));
-		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год"));
-		declarationTable.addColumn(reportPeriodColumn, getHeader("Период"));
-		declarationTable.addColumn(stateColumn, getHeader("Состояние"));
+		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации", declarationTypeColumn));
+		declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
+		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
+		declarationTable.addColumn(reportPeriodColumn, getHeader("Период", reportPeriodColumn));
+		declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
 
         declarationTable.setPageSize(pager.getPageSize());
         dataProvider.addDataDisplay(declarationTable);
@@ -194,26 +195,23 @@ public class DeclarationListView extends
         }
     }
 
-	private Header<String> getHeader(final String columnName){
-		Header<String> columnHeader = new Header<String>(new SortingHeaderCell()) {
-			@Override
-			public String getValue() {
-				return columnName;
-			}
-		};
+    private Header<String> getHeader(final String columnName, Column<DeclarationDataSearchResultItem, ?> returnColumn) {
+        GenericCellTable.TableCellResizableHeader resizableHeader;
+        final SortingHeaderCell headerCell = new SortingHeaderCell();
+        resizableHeader = declarationTable.createResizableHeader(columnName, returnColumn, headerCell);
 
-		columnHeader.setUpdater(new ValueUpdater<String>() {
-			@Override
-			public void update(String value) {
-				setAscSorting(!isAscSorting);
-				setSortByColumn(columnName);
-				if (getUiHandlers() != null) {
-					getUiHandlers().onSortingChanged();
-				}
-			}
-		});
-		return columnHeader;
-	}
+        resizableHeader.setUpdater(new ValueUpdater<String>() {
+            @Override
+            public void update(String value) {
+                setAscSorting(headerCell.isAscSort());
+                setSortByColumn(columnName);
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onSortingChanged();
+                }
+            }
+        });
+        return resizableHeader;
+    }
 
 	private void setSortByColumn(String sortByColumn){
 		if ("Подразделение".equals(sortByColumn)){

@@ -209,7 +209,7 @@ def logicCheck() {
         if (rowsCalc.contains(row.getAlias())) {
             final income102Data = getIncome102Data(row)
             if (!income102Data || income102Data.isEmpty()) {
-                logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
             }
         }
     }

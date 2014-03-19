@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryImageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryIndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -25,7 +26,7 @@ public class LogEntriesWidget extends Composite implements LogEntriesView {
 	}
 
 	@UiField
-    CellTable<LogEntry> logCellTable;
+    GenericCellTable<LogEntry> logCellTable;
 
     @UiField
     FlexiblePager pager;
