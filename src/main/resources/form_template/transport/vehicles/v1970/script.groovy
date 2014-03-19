@@ -78,11 +78,11 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-// Редактируемые атрибуты
 @Field
 def copyColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber',
         'powerVal', 'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
 
+// Редактируемые атрибуты
 @Field
 def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber', 'powerVal',
         'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
@@ -120,10 +120,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     if (!dataRows.isEmpty()) {
-        sort()
+        sort(dataRows)
         def i = 1
         for (def row in dataRows) {
             row.rowNumber = i++
@@ -133,9 +133,8 @@ void calc() {
 }
 
 // сортировка ОКТМО - Муниципальное образование - Код вида ТС
-void sort() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.getAllCached().sort { a, b ->
+void sort(def dataRows) {
+    dataRows.sort { a, b ->
         def valA = getRefBookValue(96, a.codeOKATO)?.CODE?.stringValue
         def valB = getRefBookValue(96, b.codeOKATO)?.CODE?.stringValue
         def val = (valA != null && valB != null) ? valA.compareTo(valB) : 0
@@ -149,8 +148,7 @@ void sort() {
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def dFrom = getReportPeriodStartDate()

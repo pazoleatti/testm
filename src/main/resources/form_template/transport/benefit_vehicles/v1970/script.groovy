@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
@@ -98,6 +99,9 @@ def startDate = null
 @Field
 def endDate = null
 
+@Field
+def reportDay = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -105,11 +109,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
 // Разыменование записи справочника
@@ -122,9 +121,9 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
     if (!dataRows.isEmpty()) {
-        sort()
+        sort(dataRows)
         def i = 1
         for (def row in dataRows) {
             row.rowNumber = i++
@@ -134,9 +133,8 @@ void calc() {
 }
 
 // сортировка ОКТМО
-void sort() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.getAllCached().sort { a, b ->
+void sort(def dataRows) {
+    dataRows.sort { a, b ->
         def valA = getRefBookValue(96, a.codeOKATO)?.CODE?.stringValue
         def valB = getRefBookValue(96, b.codeOKATO)?.CODE?.stringValue
         return (valA != null && valB != null) ? valA.compareTo(valB) : 0
@@ -144,8 +142,7 @@ void sort() {
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def dFrom = getReportPeriodStartDate()
     def dTo = getReportPeriodEndDate()
@@ -153,6 +150,7 @@ def logicCheck() {
 
     // Проверенные строки (3-я провека)
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
+
     for (def row in dataRows) {
 
         def index = row.getIndex()
@@ -199,19 +197,19 @@ def logicCheck() {
         checkedRows.add(row)
 
         /**
-         * Проверка льготы
+         * 6. Проверка льготы
          * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
         if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
             def region = getRegionByOKTMO(row.codeOKATO, errorMsg)
             query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, reportDate) == null) {
+            if (getRecord(7, query, getReportDate()) == null) {
                 logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
             }
         }
     }
 
-    // 6. Проверка наличия формы предыдущего периода
+    // 5. Проверка наличия формы предыдущего периода
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def str = ''
@@ -302,7 +300,10 @@ def getRecord(def refBookId, def filter, Date date) {
  * Получить отчетную дату.
  */
 def getReportDate() {
-    return reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    if (reportDay == null) {
+        reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    }
+    return reportDay
 }
 
 def String checkPrevPeriod(def reportPeriod) {

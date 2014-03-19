@@ -36,8 +36,8 @@ import java.text.SimpleDateFormat
  * графа 19 - coefKl
  * графа 20 - benefitSum
  * графа 21 - taxSumToPay
- *
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -87,15 +87,23 @@ def totalColumns = ['calculatedTaxSum', 'benefitSum', 'taxSumToPay']
 @Field
 def sortColumns = ["okato", "tsTypeCode"]
 
-// Автозаполняемые атрибуты
+// Проверяемые на пустые значения атрибуты (графа 1..9, 11..15, 21)
 @Field
-def nonEmptyColumns = ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase']
+def nonEmptyColumns = ['rowNumber', 'okato', 'tsTypeCode', 'tsType', 'vi', 'model', 'regNumber', 'taxBase',
+        'taxBaseOkeiUnit', 'years', 'ownMonths', 'coef362', 'taxRate', 'calculatedTaxSum', 'taxSumToPay']
 
 @Field
 def monthCountInPeriod
 
 @Field
 def sdf = new SimpleDateFormat('dd.MM.yyyy')
+
+@Field
+def reportDay = null
+
+// Надо ли выполнять проверку графы 14 в логических проверка
+@Field
+def needCheckTaxRete = true
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -156,12 +164,10 @@ def getRecord(def refBookId, def filter, Date date) {
  * Получить отчетную дату.
  */
 def getReportDate() {
-    return reportPeriodService.getReportDate(formData.reportPeriodId)?.time
-}
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
+    if (reportDay == null) {
+        reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
+    }
+    return reportDay
 }
 
 /** Алгоритмы заполнения полей формы (9.1.1.8.1) Табл. 45. */
@@ -220,60 +226,8 @@ def calc() {
             placeError(row, 'coef362', ['ownMonths'], errorMsg)
         }
 
-
-        def tsTypeCode
-        /*
-         * Графа 14 (Налоговая ставка)
-         * Скрипт для вычисления налоговой ставки
-         */
-        row.taxRate = null
-        if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-            tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
-
-            // запрос по выборке данных из справочника
-            def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
-                    "and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = " + row.taxBase + "))" +
-                    "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
-                    "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") " +
-                    "and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
-
-            /**
-             * Переберем варианты
-             * 1. код = коду ТС && регион указан
-             * 2. код = коду ТС && регион НЕ указан
-             * 3. код = соответствует 2м двум символом кода ТС && регион указан
-             * 4. код = соответствует 2м двум символом кода ТС && регион НЕ указан
-             */
-            def regionSqlPartID = " and DICT_REGION_ID = " + region?.record_id?.numberValue
-            def regionSqlPartNull = " and DICT_REGION_ID is null"
-            def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
-            def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
-
-            // вариант 1
-            def record = getRecord(41, queryLikeStrictly + regionSqlPartID, reportDate)
-            // вариант 2
-            if (record == null) {
-                record = getRecord(41, queryLikeStrictly + regionSqlPartNull, reportDate)
-            }
-            // вариант 3
-            if (record == null) {
-                record = getRecord(41, queryLike + regionSqlPartID, reportDate)
-            }
-            // вариант 4
-            if (record == null) {
-                record = getRecord(41, queryLike + regionSqlPartNull, reportDate)
-            }
-
-            if (record != null) {
-                row.taxRate = record.record_id.numberValue
-            } else {
-                logger.error("Для заданных параметров ТС («Код вида транспортного средства», «Мощность от», " +
-                        "Мощность до», «Ед. измерения мощности», «Возраст ТС (полных лет)», «Код по ОКТМО») " +
-                        "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС.")
-            }
-        } else {
-            placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
-        }
+        // Графа 14 (Налоговая ставка)
+        row.taxRate = calc14(row, errorMsg)
 
         /*
          * Графа 15 (Сумма исчисления налога) = Расчет суммы исчисления налога
@@ -375,20 +329,21 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
+        // 1. Проверка на заполнение поля (графа 1..9, 11..15, 21)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 13 графа - Поверка на соответствие дат использования льготы
+        // 2. Поверка на соответствие дат использования льготы
         if (row.taxBenefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
             logger.error(errorMsg + "Дата начала(окончания) использования льготы неверная!")
         }
 
-        // 14 граафа - Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
+        // 3. Проверка, что Сумма исчисления налога больше или равна Сумма налоговой льготы
         if (row.calculatedTaxSum != null && row.benefitSum != null
                 && row.calculatedTaxSum < row.benefitSum) {
             logger.error(errorMsg + 'Сумма исчисления налога меньше Суммы налоговой льготы')
         }
 
-        // 15 графа - Проверка Коэффициент Кв
+        // 4. Проверка значения поля Кв
         if (row.coef362 != null) {
             if (row.coef362 < 0.0) {
                 logger.error(errorMsg + 'Коэффициент Кв меньше нуля')
@@ -397,8 +352,8 @@ void logicCheck() {
             }
         }
 
-        // 16 графа - Проверка Коэффициент Кл
-        if (row.coefKl != null) {
+        // 5. Проверка значения поля Кл
+        if (row.taxBenefitCode != null && row.coefKl != null) {
             if (row.coefKl < 0.0) {
                 logger.error(errorMsg + 'Коэффициент Кл меньше нуля')
             } else if (row.coefKl > 1.0) {
@@ -407,9 +362,10 @@ void logicCheck() {
         }
 
         /**
-         * Проверка одновременного не заполнения данных о налоговой льготе
-         *
-         * Если  «графа 16» не заполнена ТО не заполнены графы 17,18,19,20
+         * 6. Проверка одновременного заполнения данных о налоговой льготе
+         * Если «графа 16» заполнена ТО заполнены графы 17, 18, 19, 20
+         * 7. Проверка одновременного не заполнения данных о налоговой льготе
+         * Если «графа 16» не заполнена ТО не заполнены графы 17, 18, 19, 20
          */
         def notNull17_20 = row.benefitStartDate != null && row.benefitEndDate != null && row.coefKl != null && row.benefitSum != null
         if ((row.taxBenefitCode != null) ^ notNull17_20) {
@@ -422,15 +378,22 @@ void logicCheck() {
         }
 
         /**
-         * Проверка льготы
+         * 7. Проверка льготы
          * Проверка осуществляется только для кодов 20210, 20220, 20230
          */
         if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
             def region = getRegionByOKTMO(row.okato, errorMsg)
             query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, reportDate) == null) {
+            if (getRecord(7, query, getReportDate()) == null) {
                 logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
             }
+        }
+
+        // 9. Проверка налоговой ставки ТС
+        // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
+        // приведённой в алгоритме расчёта «графы 14» Табл. 3
+        if (needCheckTaxRete) {
+            calc14(row, errorMsg)
         }
     }
 }
@@ -455,7 +418,7 @@ def getRegionByOKTMO(def oktmoCell, def errorMsg) {
             return record
         } else {
             logger.error(errorMsg + "Не удалось определить регион по коду ОКТМО")
-            return null;
+            return null
         }
     }
 }
@@ -519,6 +482,7 @@ def consolidation() {
                     def newRow = formData.createDataRow()
                     // «Графа 2» принимает значение «графы 2» формы-источника
                     newRow.okato = sRow.codeOKATO
+                    logger.info('======== newRow.okato = ' + newRow.okato) // TODO (Ramil Timerbaev)
                     // «Графа 3» принимает значение «графы 4» формы-источника
                     newRow.tsTypeCode = sRow.tsTypeCode
                     // «Графа 4» принимает значение «графы 5» формы-источника
@@ -733,4 +697,63 @@ void placeError(DataRow row, String alias, ArrayList<String> errorFields, String
         }
     }
     logger.error(errorMsg + "\"${getColumnName(row, alias)}\" не может быть вычислена, т.к. не заполнены поля: $fields.")
+}
+
+/**
+ * Графа 14 (Налоговая ставка)
+ * Скрипт для вычисления налоговой ставки
+ */
+def calc14(def row, def errorMsg) {
+    needCheckTaxRete = false
+    def tsTypeCode
+    if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
+        tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
+
+        // запрос по выборке данных из справочника
+        def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
+                "and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = " + row.taxBase + "))" +
+                "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
+                "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") " +
+                "and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
+
+        /**
+         * Переберем варианты
+         * 1. код = коду ТС && регион указан
+         * 2. код = коду ТС && регион НЕ указан
+         * 3. код = соответствует 2м двум символом кода ТС && регион указан
+         * 4. код = соответствует 2м двум символом кода ТС && регион НЕ указан
+         */
+        def regionSqlPartID = " and DICT_REGION_ID = " + region?.record_id?.numberValue
+        def regionSqlPartNull = " and DICT_REGION_ID is null"
+        def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
+        def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
+
+        def reportDate = getReportDate()
+
+        // вариант 1
+        def record = getRecord(41, queryLikeStrictly + regionSqlPartID, reportDate)
+        // вариант 2
+        if (record == null) {
+            record = getRecord(41, queryLikeStrictly + regionSqlPartNull, reportDate)
+        }
+        // вариант 3
+        if (record == null) {
+            record = getRecord(41, queryLike + regionSqlPartID, reportDate)
+        }
+        // вариант 4
+        if (record == null) {
+            record = getRecord(41, queryLike + regionSqlPartNull, reportDate)
+        }
+
+        if (record != null) {
+            return record.record_id.numberValue
+        } else {
+            logger.error("Для заданных параметров ТС («Код вида транспортного средства», «Мощность от», " +
+                    "Мощность до», «Ед. измерения мощности», «Возраст ТС (полных лет)», «Код по ОКТМО») " +
+                    "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС.")
+        }
+    } else {
+        placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
+    }
+    return null
 }

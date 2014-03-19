@@ -69,7 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         importData()
         calc()
-        // logicCheck() // TODO вернуть после разбора загрузки 4-й графы
+        logicCheck()
         break
 }
 
