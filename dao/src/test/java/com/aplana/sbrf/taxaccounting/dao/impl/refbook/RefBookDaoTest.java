@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.AssertTrue;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -420,7 +419,7 @@ public class RefBookDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), refBook.getAttributes(), records);
+        List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
         assertEquals(2, matches.size());
     }
 

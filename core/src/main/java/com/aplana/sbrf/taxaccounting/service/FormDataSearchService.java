@@ -61,4 +61,6 @@ public interface FormDataSearchService {
     List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType);
 
 	List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo);
+
+    List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo, List<FormDataKind> kinds);
 }

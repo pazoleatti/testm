@@ -4,6 +4,7 @@ import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
@@ -95,8 +96,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Editor.Ignore
     Anchor downloadJrxmlButton;
+    @UiField
+    LinkAnchor returnAnchor;
 
-	@Inject
+    @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -198,6 +201,15 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     public void onActivatetButton(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().activate(false);
+    }
+
+    @UiHandler("returnAnchor")
+    void onReturnAnchor(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().close();
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
 }
