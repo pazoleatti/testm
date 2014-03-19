@@ -1126,25 +1126,7 @@ void sort(def data) {
 void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
-    if (
-            formDataEvent != FormDataEvent.COMPOSE &&
-                    formDataEvent != FormDataEvent.MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_PREPARED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED
-    ) {
-        logger.error(msg)
-    } else {
-        logger.warn(msg)
-    }
+    logger.warn(msg)
 }
 
 def getReportPeriodEndDate() {

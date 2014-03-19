@@ -251,12 +251,6 @@ void logicCheck() {
     def dataRows = dataRowHelper.getAllCached()
 
     dataRows.each {row ->
-        if (!rowsNotCalc.contains(row.getAlias())) {
-            // Проверка обязательных полей
-            checkRequiredColumns(row, nonEmptyColumns)
-        }
-    }
-    dataRows.each {row ->
         if (row.getAlias() in chRows) {
             def income101Records = getIncome101Data(row)
             if (!income101Records || income101Records.isEmpty()) {
@@ -268,6 +262,13 @@ void logicCheck() {
             if (!income102Records || income102Records.isEmpty()) {
                 logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
             }
+        }
+    }
+
+    dataRows.each {row ->
+        if (!rowsNotCalc.contains(row.getAlias())) {
+            // Проверка обязательных полей
+            checkRequiredColumns(row, nonEmptyColumns)
         }
     }
 
