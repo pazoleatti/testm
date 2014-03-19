@@ -377,19 +377,7 @@ void logicCheck() {
             logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
         }
 
-        /**
-         * 7. Проверка льготы
-         * Проверка осуществляется только для кодов 20210, 20220, 20230
-         */
-        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
-            def region = getRegionByOKTMO(row.okato, errorMsg)
-            query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, getReportDate()) == null) {
-                logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
-            }
-        }
-
-        // 9. Проверка налоговой ставки ТС
+        // 8. Проверка налоговой ставки ТС
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
         // приведённой в алгоритме расчёта «графы 14» Табл. 3
         if (needCheckTaxRete) {
@@ -482,7 +470,6 @@ def consolidation() {
                     def newRow = formData.createDataRow()
                     // «Графа 2» принимает значение «графы 2» формы-источника
                     newRow.okato = sRow.codeOKATO
-                    logger.info('======== newRow.okato = ' + newRow.okato) // TODO (Ramil Timerbaev)
                     // «Графа 3» принимает значение «графы 4» формы-источника
                     newRow.tsTypeCode = sRow.tsTypeCode
                     // «Графа 4» принимает значение «графы 5» формы-источника
