@@ -184,7 +184,7 @@ public class FormTemplateDaoTest {
         calendar.set(2012, Calendar.JANUARY, 1);
         calendar.clear();
 
-        Assert.assertEquals(2, formTemplateDao.getFormTemplateVersions(2, 0, list, null, null).size());
+        Assert.assertEquals(2, formTemplateDao.getFormTemplateVersions(2, list).size());
     }
 
     @Test

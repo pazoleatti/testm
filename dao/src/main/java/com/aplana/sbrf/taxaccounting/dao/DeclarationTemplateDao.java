@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.Date;
@@ -89,7 +89,7 @@ public interface DeclarationTemplateDao {
      * @param actualEndVersion дата окончания
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
 
     /**
      * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии

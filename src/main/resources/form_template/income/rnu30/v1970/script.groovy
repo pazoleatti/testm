@@ -1,10 +1,7 @@
 package form_template.income.rnu30.v1970
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -19,7 +16,7 @@ import groovy.transform.Field
 // графа 1  - number
 // графа 2  - debtor
 // графа 3  - provision                             атрибут 822 - CODE - "Код обеспечения", справочник 86 "Обеспечение"
-// графа 4  - nameBalanceAccount                    атрибут 152 - BALANCE_ACCOUNT - «Наименование Балансового счёта» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
+// графа 4  - nameBalanceAccount                    хранит абсолютное значение - атрибут 151 - NAME - «Наименование Балансового счёта» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
 // графа 5  - debt45_90DaysSum
 // графа 6  - debt45_90DaysNormAllocation50per
 // графа 7  - debt45_90DaysReserve
@@ -72,7 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT :
         importData()
         calc()
-        //logicCheck() TODO вернуть после разбора загрузки 4-й графы
+        logicCheck()
         break
 }
 
@@ -112,6 +109,13 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
 }
 
 // Получение числа из строки при импорте
@@ -240,6 +244,7 @@ void logicCheck() {
     // алиасы графов для арифметической проверки (6, 7, 9..11, 13..15)
     def arithmeticCheckAlias = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reserveCurrent', 'calcReserve', 'reserveRecovery']
 
+    def dataProvider = refBookFactory.getDataProvider(29)
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -274,6 +279,15 @@ void logicCheck() {
             // 3. Арифметическая проверка раздела А и Б (графа 13)
             needValue['reserveCurrent'] = calc13AB(row)
             checkCalc(row, ['reserveCurrent'], needValue, logger, true)
+        }
+
+        // проверки НСИ
+        // 1. Проверка значения графы «Наименование балансового счёта» (графа 4)
+        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "NAME = '$row.nameBalanceAccount'", null)
+        if (record == null || record.isEmpty()) {
+            def name = getColumnName(row, 'nameBalanceAccount')
+            def ref = refBookFactory.get(29).name
+            logger.error("Значение графы «$name» отсутствует в справочнике «$ref»")
         }
     }
 
@@ -311,15 +325,7 @@ void consolidation() {
     def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
-    def deleteRows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            deleteRows.add(row)
-        }
-    }
-    dataRows.removeAll(deleteRows)
-    // поправить индексы, потому что они после изменения не пересчитываются
-    updateIndexes(dataRows)
+    deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -463,145 +469,96 @@ void importData() {
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными.
 def addData(def xml, int headRowCount) {
-    endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
     def groupsMap = [
             'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва подразделения ЦА (ТБ, ОСБ)':'A',
-            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва Сбербанка России':'B',
+            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва Сбербанка России':'B'
     ]
 
     def xmlIndexRow = -1 // Строки xml, от 0
     def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
     def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def isFirstRow = true
+    def section = null //название секции
+    def mapRows = [:]
+    mapRows[section] = []
 
-    def rows = dataRowHelper.allCached
-    //удаляем все нефиксированные строки
-    def deleteList = []
-    rows.each {
-        if (it.getAlias() == null){
-            deleteList.add(it)
-        }
-    }
-    rows.removeAll(deleteList)
-
-    def int rowIndex = 1  // Строки НФ, от 1
-
-    def section //название секции на английском
-    def sectionRowsMap = [:]
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
-        if (groupsMap.get(row.cell[0].text()) != null) {
+        if (!isFirstRow && groupsMap.get(row.cell[0].text()) != null) {
             section = groupsMap.get(row.cell[0].text())
+            mapRows[section] = []
             continue
         }
 
         // Пропуск итоговых строк
         if (row.cell[1].text() == null || row.cell[1].text() == '') {
+            isFirstRow = false
             continue
         }
 
-        def xmlIndexCol = 0
+        def xmlIndexCol
 
+        // редактируемые(импортируемые) графы:
+        // первые строки  (графа 2, 3, 4, 5, 8, 12, 16)
+        // раздел А или Б (графа 2,    4,       12, 16)
         def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
         setEdit(newRow, section)
 
-        xmlIndexCol++
-        // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
         // графа 2
-        newRow.debtor = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 3
-        newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
+        newRow.debtor = row.cell[2].text()
 
         // графа 4
-        newRow.nameBalanceAccount = getRecordIdImport(29, 'BALANCE_ACCOUNT', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
+        newRow.nameBalanceAccount = row.cell[4].text()
 
-        // графа 5
-        newRow.debt45_90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
+        if (isFirstRow) {
+            // графа 3
+            xmlIndexCol = 3
+            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
 
-        // графа 6
-        newRow.debt45_90DaysNormAllocation50per = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
+            // графа 5
+            xmlIndexCol = 5
+            newRow.debt45_90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
-        // графа 7
-        newRow.debt45_90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 8
-        newRow.debtOver90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 9
-        newRow.debtOver90DaysNormAllocation100per = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 10
-        newRow.debtOver90DaysReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 11
-        newRow.totalReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
+            // графа 8
+            xmlIndexCol = 8
+            newRow.debtOver90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
 
         // графа 12
+        xmlIndexCol = 12
         newRow.reservePrev = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 13
-        newRow.reserveCurrent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 14
-        newRow.calcReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
-
-        // графа 15
-        newRow.reserveRecovery = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
 
         // графа 16
+        xmlIndexCol = 16
         newRow.useReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
 
-        if (sectionRowsMap.get(section) != null) {
-            sectionRowsMap.get(section).add(newRow)
-        } else {
-            ArrayList<DataRow> newList = new ArrayList<DataRow>()
-            newList.add(newRow)
-            sectionRowsMap.put(section, newList)
-        }
+        mapRows[section].add(newRow)
     }
-    sectionRowsMap.keySet().each { sectionKey ->
-        if (sectionKey != null) {
-            rows.addAll(getDataRow(rows, sectionKey).getIndex(), sectionRowsMap.get(sectionKey))
-            updateIndexes(rows)
-        } else {
-            rows.addAll(0, sectionRowsMap.get(sectionKey))
-            updateIndexes(rows)
-        }
+
+    // удалить нефиксированные строки
+    deleteNotFixedRows(dataRows)
+
+    mapRows.keySet().each { sectionKey ->
+        def insertIndex = (sectionKey != null ? getDataRow(dataRows, sectionKey).getIndex() : 0)
+        dataRows.addAll(insertIndex, mapRows.get(sectionKey))
+        updateIndexes(dataRows)
     }
-    dataRowHelper.save(rows)
+    dataRowHelper.save(dataRows)
 }
 
 def roundValue(def value, int precision) {
@@ -725,4 +682,18 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
+    }
 }
