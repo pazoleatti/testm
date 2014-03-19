@@ -176,7 +176,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        loggerError("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
 }
 
@@ -253,15 +253,15 @@ def logicCheck() {
             }
             if (getSign(row.signSecurity) == "+") {
                 // 6. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) > 0) && row.recovery != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
                 // 7. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) < 0) && row.reserveCreation != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
                 // 8. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev == 0 && (row.reserveCreation != 0 || row.recovery != 0)) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) == 0) && (row.reserveCreation != 0 || row.recovery != 0)) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
             }
@@ -292,11 +292,11 @@ def logicCheck() {
             }
 
             // 15. LC Проверка на заполнение поля «<Наименование поля>»
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, false)//TODO Вернуть фатальность
 
             // 16. Проверка на уникальность поля «№ пп»
             if (number != row.number) {
-                logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+                loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
             if (getCurrency(row.currency) == 'RUR') {
@@ -322,7 +322,7 @@ def logicCheck() {
                         reserveCreation: calc16(row),
                         recovery: calc17(row)
                 ]
-                checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+                checkCalc(row, arithmeticCheckAlias, calcValues, logger, false)//TODO Вернуть фатальность
             }
         }
 
@@ -364,7 +364,7 @@ def logicCheck() {
     }
 
     // 22. Проверка итоговых значений по всей форме
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, false)//TODO Вернуть фатальность
 }
 
 /**
@@ -1056,11 +1056,13 @@ def getCalcTotalRow(def dataRows) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg) {
-    if (isBalancePeriod) {
-        logger.warn(msg)
-    } else {
-        logger.error(msg)
-    }
+    //TODO вернуть
+    //    if (isBalancePeriod) {
+    //        logger.warn(msg)
+    //    } else {
+    //        logger.error(msg)
+    //    }
+    logger.warn(msg)
 }
 
 /**

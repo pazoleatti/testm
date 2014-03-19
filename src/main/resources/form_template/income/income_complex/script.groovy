@@ -307,8 +307,8 @@ def getDifferenceFor35to40(def row) {
 def getOpuSumTotalFor35to40(def row, def income101Data) {
     if (income101Data) {
         return income101Data.sum { income101Row ->
-            if (income101Data.account == row.accountingRecords) {
-                return income101Row.outcomeDebetRemains
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.OUTCOME_DEBET_REMAINS.numberValue?:0)
             } else {
                 return 0
             }
@@ -321,8 +321,8 @@ def getOpuSumTotalFor35to40(def row, def income101Data) {
 def getOpuSumByTableDFor35to40(def row, def income101Data){
     if (income101Data) {
         return income101Data.sum { income101Row ->
-            if (income101Data.account == row.accountingRecords) {
-                return (income101Row.incomeDebetRemains ?: 0)
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.INCOME_DEBET_REMAINS.numberValue ?: 0)
             } else {
                 return 0
             }
