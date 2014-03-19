@@ -250,7 +250,11 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    dataRows.each {row ->
+    for (row in dataRows) {
+        //пропускаем строки где нет 10-й графы
+        if (!row.accountingRecords) {
+            continue
+        }
         if (row.getAlias() in chRows) {
             def income101Records = getIncome101Data(row)
             if (!income101Records || income101Records.isEmpty()) {
