@@ -38,7 +38,7 @@ comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 
-create sequence seq_form_type start with 100;
+create sequence seq_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
