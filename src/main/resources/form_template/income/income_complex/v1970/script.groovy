@@ -291,9 +291,13 @@ void calc35to40(def dataRows) {
             return
         }
         // графа 14
-        row.opuSumByTableD = getOpuSumByTableDFor35to40(row, income101Data)
+        row.opuSumByTableD = income101Data.sum { income101Row ->
+            (income101Row.INCOME_DEBET_REMAINS.numberValue ?: 0)
+        }
         // графа 15
-        row.opuSumTotal = getOpuSumTotalFor35to40(row, income101Data)
+        row.opuSumTotal = income101Data.sum { income101Row ->
+            (income101Row.OUTCOME_DEBET_REMAINS.numberValue?:0)
+        }
         // графа 16
         row.difference = getDifferenceFor35to40(row)
     }
@@ -303,34 +307,6 @@ void calc35to40(def dataRows) {
 def getDifferenceFor35to40(def row) {
     // «графа 16» = «графа 9» - ( «графа 15» – «графа 14»)
     return row.incomeTaxSumS - (row.opuSumTotal - row.opuSumByTableD)
-}
-
-// Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
-def getOpuSumTotalFor35to40(def row, def income101Data) {
-    if (income101Data) {
-        return income101Data.sum { income101Row ->
-            if (income101Data.account == row.accountingRecords) {
-                return income101Row.outcomeDebetRemains
-            } else {
-                return 0
-            }
-        }
-    }
-    return 0
-}
-
-// Графа 14. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
-def getOpuSumByTableDFor35to40(def row, def income101Data){
-    if (income101Data) {
-        return income101Data.sum { income101Row ->
-            if (income101Data.account == row.accountingRecords) {
-                return (income101Row.incomeDebetRemains ?: 0)
-            } else {
-                return 0
-            }
-        }
-    }
-    return 0
 }
 
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма
