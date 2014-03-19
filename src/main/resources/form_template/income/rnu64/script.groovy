@@ -209,7 +209,7 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
     try {
         quarterRow = getDataRow(dataRows, 'totalQuarter')
     } catch (Exception e) {
-        throw new Exception("Отсутствует строка подитогов. " + e.message)
+        loggerError("Отсутствует строка подитогов.")
     }
     def prevQuarterTotalRow
     if (dataRowsPrev != null) {
