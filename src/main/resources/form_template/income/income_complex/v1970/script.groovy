@@ -187,7 +187,7 @@ void logicCheck() {
         def row = getDataRow(dataRows, rowAlias)
         final income102Data = getIncome102Data(row)
         if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
         }
     }
 
@@ -195,7 +195,7 @@ void logicCheck() {
         def row = getDataRow(dataRows, rowAlias)
         final income101Data = getIncome101Data(row)
         if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.error("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
         }
     }
 
