@@ -507,7 +507,7 @@ def consolidation() {
                         departments.add(sDepartment)
                     }
                 }
-            } else {
+            } else if (source.formType.id == 201){
                 def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
                 def taxPeriod = reportPeriod.taxPeriod
                 // дата начала отчетного периода
@@ -543,6 +543,12 @@ def consolidation() {
                     newRow.ownMonths = calc12(sRow, reportPeriodStartDate, reportPeriodEndDate)
 
                     dataRows.add(newRow)
+                }
+            } else if (source.getFormType().getId() == formData.getFormType().getId()) {
+                formDataService.getDataRowHelper(source).getAll().each { row ->
+                    if (row.getAlias() == null) {
+                        dataRows.add(row)
+                    }
                 }
             }
         }
