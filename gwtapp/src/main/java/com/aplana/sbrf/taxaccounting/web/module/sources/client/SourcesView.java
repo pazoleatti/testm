@@ -228,9 +228,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		formReceiversTable.addColumn(receiverKindColumn, "Тип налоговой формы");
+		formReceiversTable.addResizableColumn(receiverKindColumn, "Тип налоговой формы");
 		formReceiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
-		formReceiversTable.addColumn(receiverTypeColumn, "Вид налоговой формы");
+		formReceiversTable.addResizableColumn(receiverTypeColumn, "Вид налоговой формы");
 		formReceiversTable.setSelectionModel(formReceiversSelectionModel);
 		formReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -253,7 +253,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		declarationReceiversTable.addColumn(declarationReceiverTypeColumn, "Вид декларации");
+		declarationReceiversTable.addResizableColumn(declarationReceiverTypeColumn, "Вид декларации");
 		declarationReceiversTable.setSelectionModel(declarationReceiversSelectionModel);
 		declarationReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -290,9 +290,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		sourcesTable.addColumn(sourceKindColumn, "Тип налоговой формы");
+		sourcesTable.addResizableColumn(sourceKindColumn, "Тип налоговой формы");
 		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
-		sourcesTable.addColumn(sourceTypeColumn, "Вид налоговой формы");
+		sourcesTable.addResizableColumn(sourceTypeColumn, "Вид налоговой формы");
 		sourcesTable.setSelectionModel(sourcesSelectionModel);
 		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -359,11 +359,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		currentSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
 		currentSourcesTable.addColumn(indexColumn, "№ пп");
 		currentSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
-		currentSourcesTable.addColumn(departmentColumn, "Подразделение");
+		currentSourcesTable.addResizableColumn(departmentColumn, "Подразделение");
 		currentSourcesTable.setColumnWidth(departmentColumn, 250, Style.Unit.PX);
-		currentSourcesTable.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+		currentSourcesTable.addResizableColumn(receiverSourcesKindColumn, "Тип налоговой формы");
 		currentSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-		currentSourcesTable.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+		currentSourcesTable.addResizableColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 	}
 
 	@UiHandler("assignButton")

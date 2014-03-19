@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.client;
 
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -55,7 +56,7 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
     Button deleteButton;
 
     @UiField
-    DataGrid<TaskSearchResultItem> taskDataTable;
+    GenericDataGrid<TaskSearchResultItem> taskDataTable;
 
     @Inject
     @UiConstructor
@@ -137,12 +138,12 @@ public class TaskListView extends ViewWithUiHandlers<TaskListUiHandlers>
 
         taskDataTable.addColumn(checkColumn);
         taskDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
-        taskDataTable.addColumn(nameColumn, NAME_TITLE);
-        taskDataTable.addColumn(stateColumn, STATE_TITLE);
-        taskDataTable.addColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
-        taskDataTable.addColumn(numberOfRepeatsColumn, NUMBER_OF_REPEATS_TITLE);
-        taskDataTable.addColumn(timeCreatedColumn, TIME_CREATED_TITLE);
-        taskDataTable.addColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
+        taskDataTable.addResizableColumn(nameColumn, NAME_TITLE);
+        taskDataTable.addResizableColumn(stateColumn, STATE_TITLE);
+        taskDataTable.addResizableColumn(repeatsLeftColumn, REPEATS_LEFT_TITLE);
+        taskDataTable.addResizableColumn(numberOfRepeatsColumn, NUMBER_OF_REPEATS_TITLE);
+        taskDataTable.addResizableColumn(timeCreatedColumn, TIME_CREATED_TITLE);
+        taskDataTable.addResizableColumn(nextFireTimeColumn, NEXT_FIRE_TIME_TITLE);
 
         taskDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
                 .<TaskSearchResultItem>createCheckboxManager());

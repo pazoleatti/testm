@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,7 +35,7 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
 
     @UiField
-    CellTable<FormTemplateVersion> ftVersionCellTable;
+    GenericCellTable<FormTemplateVersion> ftVersionCellTable;
 
     @UiField
     Anchor returnAnchor;
@@ -80,23 +81,23 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             }
         };
 
-        ftVersionCellTable.addColumn(linkColumn, "Наименование");
+        ftVersionCellTable.addResizableColumn(linkColumn, "Наименование");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return String.valueOf(object.getVersionNumber());
             }
         }, "Версия");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualBeginVersionDate();
             }
         }, "Начало актуального периода");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualEndVersionDate();

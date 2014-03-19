@@ -84,7 +84,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
                 return object.getValues().get(RefBook.RECORD_VERSION_FROM_ALIAS);
             }
         };
-        refbookDataTable.addColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
+        refbookDataTable.addResizableColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
         refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.EM);
 
         TextColumn<RefBookDataRow> versionToColumn = new TextColumn<RefBookDataRow>() {
@@ -93,7 +93,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
                 return object.getValues().get(RefBook.RECORD_VERSION_TO_ALIAS);
             }
         };
-        refbookDataTable.addColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
+        refbookDataTable.addResizableColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
         refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.EM);
 
 		for (final RefBookColumn header : columns) {
@@ -104,7 +104,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 				}
 			};
 			column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
-			refbookDataTable.addColumn(column, header.getName());
+			refbookDataTable.addResizableColumn(column, header.getName());
 			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}

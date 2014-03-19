@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -28,7 +29,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	Button cancelButton;
 
     @UiField
-    CellTable<NotificationTableRow> notificationTable;
+    GenericCellTable<NotificationTableRow> notificationTable;
 
 	@UiField
 	FlexiblePager pager;
