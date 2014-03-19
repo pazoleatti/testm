@@ -1266,9 +1266,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
-            "\tversionTo IS NOT NULL and (versionFrom <= ? and versionTo >= ?)\n" +
+            "\tversionTo IS NOT NULL and (\n" +
+            "\t\t(:versionTo IS NULL and versionTo >= :versionFrom) or\n" +
+            "\t\t(versionFrom <= :versionFrom and versionTo >= :versionFrom) or \n" +
+            "\t\t(versionFrom >= :versionFrom and versionFrom <= :versionTo)\n" +
+            "\t)\n" +
             ") or (\n" +
-            "\t\t(versionFrom >= ? and (? IS NULL or versionFrom <= ?))\n" +
+            "\tversionTo IS NULL and (\n" +
+            "\t\tversionFrom <= :versionFrom or\n" +
+            "\t\t(versionFrom >= :versionFrom and (:versionTo IS NULL or versionFrom <= :versionTo))\n" +
+            "\t)\n" +
             ")";
 
     @Override
@@ -1280,7 +1287,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 SqlUtils.transformToSqlInStatement(recordIds));
-        return getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
+        Map<String, Date> params = new HashMap<String, Date>();
+        params.put("versionFrom", versionFrom);
+        params.put("versionTo", versionTo);
+        return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
     }
 
     public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
