@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -74,14 +73,15 @@ public class FormTemplateController {
             throw new ServiceException("Сначала сохраните шаблон.");
         Logger logger = new Logger();
         Date endDate = formTemplateService.getFTEndDate(formTemplateId);
-        mainOperatingService.edit(formTemplateService.get(formTemplateId), endDate, logger, securityService.currentUserInfo().getUser());
-        if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException("Найдены пересечения.", logEntryService.save(logger.getEntries()));
-
         FileItemFactory factory = new DiskFileItemFactory();
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		List<FileItem> items = upload.parseRequest(req);
-		formTemplateImpexService.importFormTemplate(formTemplateId, items.get(0).getInputStream());
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(req);
+        FormTemplate formTemplate = formTemplateImpexService.importFormTemplate(formTemplateId, items.get(0).getInputStream());
+        mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo().getUser());
+        /*if (logger.containsLevel(LogLevel.ERROR))
+            throw new ServiceLoggerException("Найдены пересечения.", logEntryService.save(logger.getEntries()));*/
+
+
 		IOUtils.closeQuietly(items.get(0).getInputStream());
         if (!logger.getEntries().isEmpty())
             resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(logger.getEntries()));

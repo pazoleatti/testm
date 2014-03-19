@@ -404,8 +404,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
         try {
             formTemplate.setId(formTemplateId);
-            formStyleDao.saveFormStyles(formTemplate);
-            columnDao.saveFormColumns(formTemplate);
             getJdbcTemplate().
                     update("insert into form_template (id, data_rows, data_headers, edition, version, fixed_rows, name, fullname, code, script, status, type_id) " +
                     "values (?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -423,6 +421,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.getType().getId()
                             );
 
+            formStyleDao.saveFormStyles(formTemplate);
+            columnDao.saveFormColumns(formTemplate);
             return formTemplateId;
         }catch (DataAccessException e){
             logger.error("Ошибка при сохранении новой версии макета.",e);

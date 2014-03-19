@@ -125,7 +125,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             formTemplateService.save(formTemplate);
                         }
                         //Варианты 16,19,20,18a
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10){
                             formTemplateService.delete(formTemplateService.get(intersection.getTemplateId()));
                         }
                         break;
