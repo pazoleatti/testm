@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -55,9 +56,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @UiField
     Anchor cancelAnchor;
     @UiField
-    CellTable<TableModel> formGrid;
+    GenericCellTable<TableModel> formGrid;
     @UiField
-    CellTable<TableModel> declarationGrid;
+    GenericCellTable<TableModel> declarationGrid;
     @UiField
     LinkButton editAnchor;
     @UiField
@@ -180,13 +181,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         formGrid.addColumn(indexColumn, "№ пп");
         formGrid.setColumnWidth(indexColumn, 40, Style.Unit.PX);
 
-        formGrid.addColumn(departmentColumn, "Подразделение");
+        formGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        formGrid.addColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+        formGrid.addResizableColumn(receiverSourcesKindColumn, "Тип налоговой формы");
 
-        formGrid.addColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+        formGrid.addResizableColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
 
-        formGrid.addColumn(performerColumn, "Исполнитель");
+        formGrid.addResizableColumn(performerColumn, "Исполнитель");
     }
 
     /**
@@ -254,9 +255,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         declarationGrid.addColumn(indexColumn, "№ пп");
         declarationGrid.setColumnWidth(indexColumn, 40, Style.Unit.PX);
 
-        declarationGrid.addColumn(departmentColumn, "Подразделение");
+        declarationGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        declarationGrid.addColumn(declarationType, "Вид декларации");
+        declarationGrid.addResizableColumn(declarationType, "Вид декларации");
     }
 
     // Перезаполнение таблицы

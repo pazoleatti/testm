@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminUIHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -36,7 +37,7 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
     Panel filterContentPanel;
 
 	@UiField
-	CellTable<FormTypeTemplate> formTemplateTable;
+    GenericCellTable<FormTypeTemplate> formTemplateTable;
 
     private NoSelectionModel<FormTypeTemplate> selectionModel;
 
@@ -69,16 +70,16 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
 			}
 		};
         formTemplateTable.setSelectionModel(selectionModel);
-		formTemplateTable.addColumn(linkColumn, "Наименование");
+		formTemplateTable.addResizableColumn(linkColumn, "Наименование");
 
-        formTemplateTable.addColumn(new TextColumn<FormTypeTemplate>() {
+        formTemplateTable.addResizableColumn(new TextColumn<FormTypeTemplate>() {
             @Override
             public String getValue(FormTypeTemplate formTypeTemplate) {
                 return formTypeTemplate.getTaxType().getName();
             }
         }, "Вид налога");
 
-		formTemplateTable.addColumn(new TextColumn<FormTypeTemplate>() {
+		formTemplateTable.addResizableColumn(new TextColumn<FormTypeTemplate>() {
 			@Override
 			public String getValue(FormTypeTemplate formTypeTemplate) {
 				return String.valueOf(formTypeTemplate.getVersionCount());

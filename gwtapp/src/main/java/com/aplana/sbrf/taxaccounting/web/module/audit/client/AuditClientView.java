@@ -177,17 +177,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
         dataProvider.addDataDisplay(auditTable);
 
-        auditTable.addColumn(dateColumn, dateColumnHeader);
-        auditTable.addColumn(eventColumn, eventColumnHeader);
-        auditTable.addColumn(noteColumn, noteColumnHeader);
-        auditTable.addColumn(reportPeriodColumn, reportPeriodColumnHeader);
-        auditTable.addColumn(departmentColumn, departmentColumnHeader);
-        auditTable.addColumn(typeColumn, typeColumnHeader);
-        auditTable.addColumn(formDataKindColumn, formDataKindColumnHeader);
-        auditTable.addColumn(formDeclTypeColumn, formTypeColumnHeader);
-        auditTable.addColumn(userLoginColumn, userLoginColumnHeader);
-        auditTable.addColumn(userRolesColumn, userRolesColumnHeader);
-        auditTable.addColumn(userIpColumn, userIpColumnHeader);
+        auditTable.addResizableColumn(dateColumn, dateColumnHeader);
+        auditTable.addResizableColumn(eventColumn, eventColumnHeader);
+        auditTable.addResizableColumn(noteColumn, noteColumnHeader);
+        auditTable.addResizableColumn(reportPeriodColumn, reportPeriodColumnHeader);
+        auditTable.addResizableColumn(departmentColumn, departmentColumnHeader);
+        auditTable.addResizableColumn(typeColumn, typeColumnHeader);
+        auditTable.addResizableColumn(formDataKindColumn, formDataKindColumnHeader);
+        auditTable.addResizableColumn(formDeclTypeColumn, formTypeColumnHeader);
+        auditTable.addResizableColumn(userLoginColumn, userLoginColumnHeader);
+        auditTable.addResizableColumn(userRolesColumn, userRolesColumnHeader);
+        auditTable.addResizableColumn(userIpColumn, userIpColumnHeader);
 	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
 		    @Override
 		    public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {

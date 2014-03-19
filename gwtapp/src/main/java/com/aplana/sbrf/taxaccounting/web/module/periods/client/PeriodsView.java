@@ -126,11 +126,11 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
             }
         };
         correctDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		periodsTable.addColumn(periodNameColumn, COLUMN_NAMES[0]);
-		periodsTable.addColumn(periodConditionColumn, COLUMN_NAMES[1]);
-        periodsTable.addColumn(deadlineColumn, COLUMN_NAMES[2]);
-        periodsTable.addColumn(periodBalanceColumn, COLUMN_NAMES[3]);
-        periodsTable.addColumn(correctDateColumn, COLUMN_NAMES[4]);
+		periodsTable.addResizableColumn(periodNameColumn, COLUMN_NAMES[0]);
+		periodsTable.addResizableColumn(periodConditionColumn, COLUMN_NAMES[1]);
+        periodsTable.addResizableColumn(deadlineColumn, COLUMN_NAMES[2]);
+        periodsTable.addResizableColumn(periodBalanceColumn, COLUMN_NAMES[3]);
+        periodsTable.addResizableColumn(correctDateColumn, COLUMN_NAMES[4]);
 
 		periodsTable.setSelectionModel(selectionModel);
 
