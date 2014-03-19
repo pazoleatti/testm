@@ -1043,18 +1043,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         List<Long> ids = new ArrayList<Long>();
         for (RefBookRecord record : records) {
-            ids.add(record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue());
-        }
-        String sql = String.format(CHECK_PARENT_CONFLICT, SqlUtils.transformToSqlInStatement(ids));
-        final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
-        getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
-            @Override
-            public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
-                return null;
+            Long id = record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            if (id != null) {
+                ids.add(id);
             }
-        }, versionTo, versionTo, versionFrom);
-        return new ArrayList<Pair<Long, Integer>>(result);
+        }
+        if (!ids.isEmpty()) {
+            String sql = String.format(CHECK_PARENT_CONFLICT, SqlUtils.transformToSqlInStatement(ids));
+            final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
+            getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
+                @Override
+                public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
+                    return null;
+                }
+            }, versionTo, versionTo, versionFrom);
+            return new ArrayList<Pair<Long, Integer>>(result);
+        }  else {
+            return new ArrayList<Pair<Long, Integer>>();
+        }
     }
 
     @Override
@@ -1143,8 +1150,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ") where cnt = ?";
 
     @Override
-    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull List<RefBookAttribute> attributes,
-			@NotNull List<RefBookRecord> records) {
+    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, Long uniqueRecordId, @NotNull List<RefBookAttribute> attributes,
+                                                                       @NotNull List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -1186,6 +1193,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     }
                     if (records.size() > 1) {
                         ps.appendQuery(")");
+                    }
+                    if (uniqueRecordId != null) {
+                        ps.appendQuery(" and v.record_id != ?");
+                        ps.addParam(uniqueRecordId);
                     }
                 }
 
@@ -1240,6 +1251,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 attrQuery.append(")");
                 if (i < records.size() - 1) {
                     attrQuery.append(" or \n");
+                } else {
+                    if (uniqueRecordId != null) {
+                        attrQuery.append(" and v.record_id != ?");
+                        ps.addParam(uniqueRecordId);
+                    }
                 }
             }
             ps.addParam(uniqueAttributes.size());
