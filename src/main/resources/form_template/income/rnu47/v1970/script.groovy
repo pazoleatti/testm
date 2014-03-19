@@ -23,9 +23,38 @@ import java.text.SimpleDateFormat
  * 6    amortTaxPeriod           -   С начала налогового периода
  */
 
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
+def isMonthBalance() {
+    if (isBalancePeriod == null) {
+        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
+            isBalancePeriod = false
+        } else {
+            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
+        }
+    }
+    return isBalancePeriod
+}
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.AFTER_CREATE:
+        if (isMonthBalance()) {
+            def dataRowHelper = formDataService.getDataRowHelper(formData)
+            def dataRows = dataRowHelper.getAllCached()
+            dataRows.each(){
+                row -> arithmeticCheckAlias.each() {
+                    row.getCell(it).editable = true
+                    row.getCell(it).styleAlias = 'Редактируемая'
+                }
+            }
+            dataRowHelper.save(dataRows)
+        }
         break
     case FormDataEvent.CALCULATE:
         if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
@@ -86,10 +115,6 @@ def arithmeticCheckAlias = ["sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amort
 
 @Field
 def dateFormat = new SimpleDateFormat("dd.MM.yyyy")
-
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
 
 // Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
@@ -398,18 +423,6 @@ def String getDateString(Date date) {
 
 BigDecimal round(BigDecimal value, int newScale = 2) {
     return value?.setScale(newScale, RoundingMode.HALF_UP)
-}
-
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
-def isMonthBalance() {
-    if (isBalancePeriod == null) {
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalancePeriod = false
-        } else {
-            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
-        }
-    }
-    return isBalancePeriod
 }
 
 def loggerError(def msg) {
