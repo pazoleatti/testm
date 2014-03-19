@@ -52,7 +52,7 @@
                     <fm:Left>
                         <style:LeftBar childValign="middle" height="100%">
                             <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку версий макета налоговой формы"
-                                              text="Версии макета налоговой формы" addStyleNames="{style.titleText}" disableImage="true"/>
+                                              text="Версии макета" addStyleNames="{style.titleText}" disableImage="true"/>
                             <g:Label text="—" addStyleNames="{style.header}"/>
                         </style:LeftBar>
                     </fm:Left>
