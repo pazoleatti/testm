@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.DeleteFormsSourceResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.DeleteFormsSourseAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -37,6 +34,9 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
 
     @Autowired
     FormTypeService formTypeService;
+
+    @Autowired
+    DeclarationTypeService declarationTypeService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -84,7 +84,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 for (DepartmentDeclarationType form: declarationDestinitions){
                     stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
                     stringBuffer.append(" - ");
-                    stringBuffer.append(formTypeService.get(form.getDeclarationTypeId()).getName());
+                    stringBuffer.append(declarationTypeService.get(form.getDeclarationTypeId()).getName());
                     stringBuffer.append(", ");
                 }
                 // удаляем последний символ ", "
