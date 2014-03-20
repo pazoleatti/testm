@@ -518,6 +518,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-PopupPanelGlass {
+    position: fixed !important; /*http://code.google.com/p/google-web-toolkit/issues/detail?id=5818*/
     background-color: #000;
     opacity: 0.3;
     filter: alpha(opacity=30);
