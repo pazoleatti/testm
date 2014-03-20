@@ -135,7 +135,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 		action.setFieldId(reportIds.get(0));
 		action.setTaxType(taxType);
 		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
-		action.setReportPeriodId(getView().getFilterData().getReportPeriodIds());
+		action.setReportPeriodId(reportIds);
         List<FormDataKind> kinds = new ArrayList<FormDataKind>();
         for (Long kindId : getView().getFilterData().getFormDataKind()) {
             kinds.add(FormDataKind.fromId(kindId.intValue()));
