@@ -205,7 +205,10 @@ public class FormTemplateDaoTest {
         calendar.set(2013, Calendar.JANUARY, 1);
         Date actualStartVersion = new Date(calendar.getTime().getTime());
 
-        Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdRight(2, actualStartVersion));
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+        Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdRight(2, list, actualStartVersion));
     }
 
     @Test

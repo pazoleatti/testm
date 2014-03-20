@@ -191,7 +191,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
-        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), formTemplate.getVersion());
+        @SuppressWarnings("unchecked")
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), createStatusList(status), formTemplate.getVersion());
         if (id == 0)
             return null;
         return formTemplateDao.get(id);
