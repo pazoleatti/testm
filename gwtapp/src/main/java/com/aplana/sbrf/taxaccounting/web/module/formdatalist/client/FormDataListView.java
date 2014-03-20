@@ -168,7 +168,8 @@ public class FormDataListView extends
 		formDataTable.setColumnWidth(linkColumn, 40, Style.Unit.EM);
 		
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
-		
+        formDataTable.setColumnWidth(departmentColumn, 50, Style.Unit.EM);
+
         formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE));
         formDataTable.setColumnWidth(periodYearColumn, 5, Style.Unit.EM);
         periodYearColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
