@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -417,6 +418,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
