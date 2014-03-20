@@ -1199,17 +1199,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         ps.addParam(uniqueRecordId);
                     }
                 }
+            }
 
-                if (hasUniqueAttributes) {
-                    return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-                        @Override
-                        public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
-                        }
-                    });
-                } else {
-                    return null;
-                }
+            if (hasUniqueAttributes) {
+                return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                    @Override
+                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                    }
+                });
+            } else {
+                return null;
             }
         } else {
             List<Long> uniqueAttributes = UniqueAttributeCombination.getByRefBookId(refBookId).getAttributeIds();
@@ -1274,7 +1274,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             return result;
         }
-        return null;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
