@@ -140,7 +140,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_UKS)) {
 
                 //Проверка корректности
-                checkCorrectness(logger, refBook, versionFrom, versionTo, attributes, records);
+                checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
                 if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
                     throw new ServiceException("Версия с указанной датой актуальности уже существует");
@@ -173,7 +173,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     /**
      * Проверка корректности
      */
-    private void checkCorrectness(Logger logger, RefBook refBook, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (errors.size() > 0){
@@ -193,7 +193,8 @@ public class RefBookUniversal implements RefBookDataProvider {
         if (refBook.isHierarchic()) {
             checkParentConflict(logger, versionFrom, versionTo, records);
         }
-        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
+        //Получаем записи у которых совпали значения уникальных атрибутов
+        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
         if (matchedRecords == null || matchedRecords.size() == 0) {
             //Проверка ссылочных значений
             boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
@@ -364,7 +365,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             refBookRecord.setValues(records);
 
             //Проверка корректности
-            checkCorrectness(logger, refBook, versionFrom, versionTo, attributes, Arrays.asList(refBookRecord));
+            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, versionTo, attributes, Arrays.asList(refBookRecord));
 
             RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
 

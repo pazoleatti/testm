@@ -106,9 +106,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
-        formTypeId.setEnabled(formDataKind.getValue().size() != 0);
+        formTypeId.setEnabled(formDataKind.getValue() != null && !formDataKind.getValue().isEmpty());
         // Кнопка "Создать" недоступна пока все не заполнено
-        continueButton.setEnabled(formTypeId.getValue().size() != 0);
+        continueButton.setEnabled(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty());
     }
 
 
@@ -122,8 +122,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
         formDataKind.setValue(new ArrayList<Long>(), true);
         formDataKind.setDereferenceValue(null);
-        formTypeId.setValue(new ArrayList<Long>(), true);
-        formTypeId.setDereferenceValue(null);
 	    getUiHandlers().onDepartmentChanged();
         updateEnabled();
     }
@@ -132,7 +130,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onDataKindChange(ValueChangeEvent<List<Long>> event) {
         formTypeId.setValue(new ArrayList<Long>(), true);
         formTypeId.setDereferenceValue(null);
-	    getUiHandlers().onDataKindChanged();
+        if ((formDataKind.getValue() != null) && !formDataKind.getValue().isEmpty()) {
+            getUiHandlers().onDataKindChanged();
+        }
         updateEnabled();
     }
 

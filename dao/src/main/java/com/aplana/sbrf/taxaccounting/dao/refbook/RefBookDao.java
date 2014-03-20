@@ -212,11 +212,14 @@ public interface RefBookDao {
      *
      * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми
      * Обеспечение соблюдения уникальности атрибутов в пределах справочника
+     *
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordId уникальный идентификатор записи справочника. Может быть null (при создании нового элемента). Используется для исключения из проверки указанного элемента справочника
      * @param attributes атрибуты справочника
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(Long refBookId, Long uniqueRecordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 
     /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
