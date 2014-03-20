@@ -76,13 +76,13 @@ switch (formDataEvent) {
             calc()
         }
         break
-// подготовить/утвердить
+    // подготовить/утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
         logicCheck()
         break
-// принятия
+    // принятия
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // принять из утверждена
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
@@ -182,13 +182,9 @@ void calc() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-
-    rowsAliasesFor4to5.each { rowAlias ->
-        def row = getDataRow(dataRows, rowAlias)
-        final income102Data = getIncome102Data(row)
-        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
-        }
+    for (def row : dataRows) {
+        // проверка заполнения обязательных полей
+        checkRequiredColumns(row, editableColumns)
     }
 
     rowsAliasesFor35to40.each { rowAlias ->
@@ -198,10 +194,12 @@ void logicCheck() {
             logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
         }
     }
-
-    for (def row : dataRows) {
-        // проверка заполнения обязательных полей
-        checkRequiredColumns(row, editableColumns)
+    rowsAliasesFor4to5.each { rowAlias ->
+        def row = getDataRow(dataRows, rowAlias)
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
+            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
     }
 
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
@@ -291,13 +289,9 @@ void calc35to40(def dataRows) {
             return
         }
         // графа 14
-        row.opuSumByTableD = income101Data.sum { income101Row ->
-            (income101Row.INCOME_DEBET_REMAINS.numberValue ?: 0)
-        }
+        row.opuSumByTableD = getOpuSumByTableDFor35to40(row, income101Data)
         // графа 15
-        row.opuSumTotal = income101Data.sum { income101Row ->
-            (income101Row.OUTCOME_DEBET_REMAINS.numberValue?:0)
-        }
+        row.opuSumTotal = getOpuSumTotalFor35to40(row, income101Data)
         // графа 16
         row.difference = getDifferenceFor35to40(row)
     }
@@ -307,6 +301,34 @@ void calc35to40(def dataRows) {
 def getDifferenceFor35to40(def row) {
     // «графа 16» = «графа 9» - ( «графа 15» – «графа 14»)
     return row.incomeTaxSumS - (row.opuSumTotal - row.opuSumByTableD)
+}
+
+// Графа 15. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
+def getOpuSumTotalFor35to40(def row, def income101Data) {
+    if (income101Data) {
+        return income101Data.sum { income101Row ->
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.OUTCOME_DEBET_REMAINS.numberValue?:0)
+            } else {
+                return 0
+            }
+        }
+    }
+    return 0
+}
+
+// Графа 14. Расчет контрольных граф Сводной формы начисленных доходов (№ строки 35-40)
+def getOpuSumByTableDFor35to40(def row, def income101Data){
+    if (income101Data) {
+        return income101Data.sum { income101Row ->
+            if (income101Row.ACCOUNT.stringValue == row.accountingRecords) {
+                return (income101Row.INCOME_DEBET_REMAINS.numberValue ?: 0)
+            } else {
+                return 0
+            }
+        }
+    }
+    return 0
 }
 
 // Возвращает данные из Оборотной Ведомости за период, для которого сформирована текущая форма

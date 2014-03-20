@@ -385,7 +385,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5.2
         newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        indexCell++
+        xmlIndexCol++
 
         // графа 6
         newRow.contractNum = row.cell[xmlIndexCol].text()
