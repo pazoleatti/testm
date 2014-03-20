@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 
@@ -23,8 +24,9 @@ public abstract class Column implements Ordered, Serializable {
 		String format(String valueToFormat);
 	}
 	private static final long serialVersionUID = 1L;
-	
+
 	private Integer id;
+
 	private String name;
 	private String alias;
 	private int width;
@@ -36,6 +38,7 @@ public abstract class Column implements Ordered, Serializable {
 	 * Если значение == null, то считается, что столбец новый и при его сохранении будет сгенерирован новый идентификатор
 	 * @return идентификатор столбца
 	 */
+    @XmlTransient
 	public Integer getId() {
 		return id;
 	}

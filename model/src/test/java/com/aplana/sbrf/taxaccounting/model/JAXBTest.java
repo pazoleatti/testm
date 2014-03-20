@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +52,60 @@ public class JAXBTest {
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty("jaxb.formatted.output",Boolean.TRUE);
         marshaller.marshal(currencyRates, System.out);
+    }
+
+    @Test
+    public void testFormTemplateContent() throws JAXBException {
+        Column column1 = new DateColumn();
+        Column column2 = new NumericColumn();
+        Column column3 = new StringColumn();
+        column1.setId(1);
+        column2.setId(2);
+        column3.setId(3);
+        column1.setAlias("contract");
+        column2.setAlias("contractDate");
+        column3.setAlias("amountOfTheGuarantee");
+        List<Column> columns = new ArrayList<Column>();
+        columns.add(column1);
+        columns.add(column2);
+        columns.add(column3);
+
+        List<FormStyle> formStyles = new ArrayList<FormStyle>();
+        FormStyle formStyle1 = new FormStyle();
+        formStyle1.setId(1);
+        formStyle1.setAlias("Редактируемая");
+        formStyle1.setBackColor(Color.LIGHT_BLUE);
+        formStyle1.setFontColor(Color.LIGHT_BROWN);
+        formStyles.add(formStyle1);
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Fkfd");
+        formType.setTaxType(TaxType.TRANSPORT);
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.setFixedRows(false);
+        formTemplate.setVersion(new Date());
+        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
+        formTemplate.setName("name_3");
+        formTemplate.setFullName("fullname_3");
+        formTemplate.setCode("code_3");
+        formTemplate.setScript("test_script");
+        formTemplate.getColumns().addAll(columns);
+        DataRow<Cell> rows = new DataRow<Cell>(FormDataUtils.createCells(formTemplate.getColumns(), formTemplate.getStyles()));
+        formTemplate.getRows().add(rows);
+        DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
+        formTemplate.getHeaders().add(headers1);
+        formTemplate.getStyles().addAll(formStyles);
+        formTemplate.setType(formType);
+
+        FormTemplateContent ftc = new FormTemplateContent();
+        ftc.fillFormTemplateContent(formTemplate);
+
+        JAXBContext context = JAXBContext.newInstance(FormTemplateContent.class);
+        Marshaller marshaller = context.createMarshaller();
+        marshaller.marshal(ftc, System.out);
     }
 
 }

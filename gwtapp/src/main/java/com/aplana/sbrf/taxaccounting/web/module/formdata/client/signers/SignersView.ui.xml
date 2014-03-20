@@ -38,8 +38,7 @@
                 <g:VerticalPanel addStyleNames="{style.content}">
                     <g:HorizontalPanel height="30px" verticalAlignment="middle">
                         <g:Label width="100px" text="Подразделение:"/>
-                        <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                                                            multiselection="false" labelWordWrap="false" width="300px" modal="true"/>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" labelWordWrap="false" width="300px"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="30px" verticalAlignment="middle">
                         <g:Label width="100px" text="Исполнитель:"/>

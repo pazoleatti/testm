@@ -262,5 +262,6 @@ public class DeclarationTemplateDaoTest {
 
         Assert.assertEquals(1, declarationTemplateDao.findFTVersionIntersections(1, 0, dateFormat.parse("2015.01.01"), dateFormat.parse("2014.12.31")).size());
         Assert.assertEquals(2, declarationTemplateDao.findFTVersionIntersections(1, 0, dateFormat.parse("2013.01.01"), dateFormat.parse("2015.12.31")).size());
+        Assert.assertEquals(1, declarationTemplateDao.findFTVersionIntersections(1, 1, dateFormat.parse("2013.01.01"), null).size());
     }
 }

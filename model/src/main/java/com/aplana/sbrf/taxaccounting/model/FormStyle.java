@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 /**
@@ -8,7 +9,7 @@ import java.io.Serializable;
  */
 public class FormStyle implements Serializable {
 	private static final long serialVersionUID = 7152539133796468066L;
-	
+
 	private Integer id;
 	private String alias;
 	private Color fontColor;
@@ -20,6 +21,7 @@ public class FormStyle implements Serializable {
 	 * Идентификатор записи в БД, если null, то стиль еще не был сохранён в БД
 	 * @return идентификатор записи в БД или null, если стиль еще не сохранялся в БД
 	 */
+    @XmlTransient
 	public Integer getId() {
 		return id;
 	}

@@ -13,8 +13,8 @@ import groovy.transform.Field
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  *
  * графа 1  - число  number                 № пп
- * графа 2  - строка issuer                 эмитент
- * графа 3  - строка regNumber              гос номер
+ * графа 2  - строка issuer                 Эмитент
+ * графа 3  - строка regNumber              Государственный регистрационный номер
  * графа 4  - строка tradeNumber            Номер сделки
  * графа 5  - строка currency               Валюта выпуска облигации (справочник)
  * графа 6  - число  prev                   Размер лота на отчётную дату по депозитарному учёту (шт.). Предыдущую
@@ -34,11 +34,12 @@ import groovy.transform.Field
  * @author lhaziev
  */
 
-/** Признак периода ввода остатков. */
+// Признак периода ввода остатков
 @Field
 def isBalancePeriod
 isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
+// Признак консолидированной формы
 @Field
 def isConsolidated
 isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
@@ -57,7 +58,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        if (isBalancePeriod) {
+            columns = allColumns - ['number', 'regNumber', 'currency']
+        } else {
+            columns = editableColumns
+        }
+        formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -84,10 +90,8 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         prevPeriodCheck()
         importData()
-        if (!hasError()) {
-            calcAfterImport()
-            addAllStatic(null)
-        }
+        calc()
+        logicCheck()
         break
     case FormDataEvent.MIGRATION:
         importData()
@@ -102,7 +106,9 @@ switch (formDataEvent) {
         break
 }
 
-//// Кэши и константы
+/**
+ * Кэши и константы
+ */
 @Field
 def providerCache = [:]
 @Field
@@ -118,7 +124,8 @@ def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = allColumns - ['number', 'fix', 'marketQuotationInRub']
+def editableColumns = allColumns - ['number', 'fix', 'regNumber', 'currency', 'reserveCalcValuePrev',
+        'marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Автозаполняемые атрибуты
 @Field
@@ -130,7 +137,7 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+def nonEmptyColumns = ['number', 'issuer', 'tradeNumber', 'reserveCalcValuePrev',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы
@@ -140,15 +147,16 @@ def totalColumns = ['prev', 'current', 'reserveCalcValuePrev', 'cost',
 
 // алиасы графов для арифметической проверки
 @Field
-def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub', 'costOnMarketQuotation',
-        'reserveCalcValue', 'reserveCreation', 'recovery']
+def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
+        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
 
-//// Обертки методов
-
+/**
+ * Обертки методов
+ */
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
@@ -168,12 +176,9 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
-}
-
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+/**
+ * Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
+ */
 void prevPeriodCheck() {
     if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated
             && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
@@ -181,14 +186,96 @@ void prevPeriodCheck() {
     }
 }
 
-def getMessageLP1(def list, def lable){
-    StringBuilder sb = new StringBuilder(lable)
+/**
+ * @param list
+ * @param label
+ * @return
+ */
+def getMessageLP1(def list, def label) {
+    StringBuilder sb = new StringBuilder(label)
     for (tradeNumber in list) {
         sb.append(" " + tradeNumber.toString() + ",")
     }
-    return  sb.substring(0, sb.length() - 1).toString()
+    return sb.substring(0, sb.length() - 1).toString()
 }
 
+/**
+ * Расчеты всех автоматически заполняемых граф
+ */
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+
+    deleteAllAliased(dataRows)
+
+    // отсортировать/группировать
+    sortRows(dataRows, groupColumns)
+
+    // данные предыдущего отчетного периода
+    def dataPrevRows = null
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def formPrev = getFormPrev()
+        def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
+        dataPrevRows = dataPrev?.getAllCached()
+    }
+
+    // номер последний строки предыдущей формы
+    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
+
+    for (row in dataRows) {
+        row.number = ++number
+        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
+            row.reserveCalcValuePrev = calc8(row, dataPrevRows)
+            row.marketQuotation = calc11(row)
+            row.rubCourse = calc12(row)
+            row.marketQuotationInRub = calc13(row)
+            row.costOnMarketQuotation = calc14(row)
+            row.reserveCalcValue = calc15(row)
+            row.reserveCreation = calc16(row)
+            row.recovery = calc17(row)
+        }
+    }
+
+    // добавить промежуточные итоги (по графе 2 - эмитент, а внутри этой группы по графе 3 - грн)
+    addAllStatic(dataRows)
+
+    // добавить строку "итого"
+    dataRows.add(getCalcTotalRow(dataRows))
+
+    // используется save() т.к. есть сортировка
+    dataRowHelper.save(dataRows)
+}
+
+/**
+ * Расчеты. Алгоритмы заполнения полей формы после импорта.
+ */
+void calcAfterImport() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
+    for (row in dataRows) {
+        // Проверим чтобы человек рукамми ввёл всё что необходимо
+        def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
+        checkNonEmptyColumns(row, row.getIndex(), requiredColumns, logger, true)
+    }
+    if (!hasError()) {
+        def formPrev = getFormPrev()
+        def dataPrevRows = formPrev != null ? formDataService.getDataRowHelper(formPrev)?.getAllCached() : null
+
+        for (DataRow row in dataRows) {
+            row.reserveCalcValuePrev = calc8(row, dataPrevRows)
+            row.costOnMarketQuotation = calc14(row)
+            row.reserveCalcValue = calc15(row)
+            row.reserveCreation = calc16(row)
+            row.recovery = calc17(row)
+        }
+        dataRowHelper.save(dataRows)
+    }
+}
+
+/**
+ * Логические проверки
+ * @return
+ */
 def logicCheck() {
     def data = formDataService.getDataRowHelper(formData)
     def dataRows = data.getAllCached()
@@ -196,9 +283,9 @@ def logicCheck() {
     def dataPrev = null
     def dataPrevRows = null
     if (formData.kind == FormDataKind.PRIMARY) {
-         formPrev = getFormPrev()
-         dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-         dataPrevRows = dataPrev?.getAllCached()
+        formPrev = getFormPrev()
+        dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
+        dataPrevRows = dataPrev?.getAllCached()
     }
 
     /** 1. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
@@ -374,6 +461,59 @@ def logicCheck() {
 }
 
 /**
+ * Импорт данных
+ */
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Эмитент',
+            (xml.row[0].cell[3]): 'Государственный регистрационный номер',
+            (xml.row[0].cell[4]): 'Номер сделки',
+            (xml.row[0].cell[5]): 'Валюта выпуска облигации',
+            (xml.row[0].cell[6]): 'Размер лота на отчётную дату по депозитарному учёту (шт.).',
+            (xml.row[0].cell[8]): 'Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)',
+            (xml.row[0].cell[9]): 'Стоимость по цене приобретения (руб.коп.)',
+            (xml.row[0].cell[10]): 'Признак ценной бумаги на текущую отчётную дату',
+            (xml.row[0].cell[11]): 'Рыночная котировка одной облигации в иностранной валюте',
+            (xml.row[0].cell[12]): 'Курс рубля к валюте рыночной котировки',
+            (xml.row[0].cell[13]): 'Рыночная котировка одной облигации в рублях',
+            (xml.row[0].cell[14]): 'Стоимость по рыночной котировке (руб.коп.)',
+            (xml.row[0].cell[15]): 'Расчетная величина резерва на текущую отчётную дату (руб.коп.)',
+            (xml.row[0].cell[16]): 'Создание резерва (руб.коп.)',
+            (xml.row[0].cell[17]): 'Восстановление резерва (руб.коп.)',
+
+            (xml.row[1].cell[6]): 'Предыдущую',
+            (xml.row[1].cell[7]): 'Текущую',
+
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[2]): '2',
+            (xml.row[2].cell[3]): '3',
+            (xml.row[2].cell[4]): '4',
+            (xml.row[2].cell[5]): '5',
+            (xml.row[2].cell[6]): '6',
+            (xml.row[2].cell[7]): '7',
+            (xml.row[2].cell[8]): '8',
+            (xml.row[2].cell[9]): '9',
+            (xml.row[2].cell[10]): '10',
+            (xml.row[2].cell[11]): '11',
+            (xml.row[2].cell[12]): '12',
+            (xml.row[2].cell[13]): '13',
+            (xml.row[2].cell[14]): '14',
+            (xml.row[2].cell[15]): '15',
+            (xml.row[2].cell[16]): '16',
+            (xml.row[2].cell[17]): '17',
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+/**
  * @author ivildanov
  * Ищем вверх по форме первую строку без альяса
  */
@@ -388,52 +528,97 @@ DataRow getPrevRowWithoutAlias(def dataRows, DataRow row) {
 }
 
 /**
- * Получение импортируемых данных.
+ * Заполнить форму данными
+ * @param xml - xml с данными
+ * @param headRowCount - количество строк шапки, указывается как n-1
  */
-void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        logger.error('Имя файла не должно быть пустым')
-        return
-    }
+void addData(def xml, int headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    def is = ImportInputStream
-    if (is == null) {
-        logger.error('Поток данных пуст')
-        return
-    }
+    def xmlIndexRow = -1
+    def int rowOffset = 10
+    def int colOffset = 1
 
-    if (!fileName.contains('.r')) {
-        logger.error('Формат файла должен быть *.rnu')
-        return
-    }
+    def rows = []
+    def int rowIndex = 1
 
-    def xmlString = importService.getData(is, fileName, 'cp866')
-    if (xmlString == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        logger.error('Отсутствие значении после обработки потока данных')
-        return
-    }
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(xml)
-
-        // расчетать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
+        /* Пропуск строк шапок */
+        if (xmlIndexRow <= headRowCount) {
+            continue
         }
-    } catch (Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        /* Пропуск итоговых строк */
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        /* Графа 1 */
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+
+        /* Графа 2 */
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[2].text(), xlsIndexRow, 2 + colOffset, false)
+
+        /* Графа 3 */
+//        newRow.regNumber = row.cell[3].text()
+
+        /* Графа 4 */
+        newRow.tradeNumber = row.cell[4].text()
+
+        /* Графа 5 */
+//        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset, false)
+
+        /* Графа 6 */
+        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
+
+        /* Графа 7 */
+        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
+
+        /* Графа 8 */
+        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
+
+        /* Графа 9 */
+        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
+
+        /* Графа 10 */
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset, false)
+
+        /* Графа 11 */
+        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
+
+        /* Графа 12 */
+        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
+
+        /* Графа 14 */
+        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
+
+        /* Графа 15 */
+        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, true)
+
+        /* Графа 16 */
+        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, true)
+
+        /* Графа 17 */
+        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, true)
+
+        rows.add(newRow)
     }
+    dataRowHelper.save(rows)
 }
 
 /**
@@ -467,7 +652,7 @@ void addAllStatic(def dataRows) {
 }
 
 /**
- * Расчет итога Эмитета
+ * Расчет итога Эмитента
  * @author ivildanov
  */
 def calcItogIssuer(int i) {
@@ -478,7 +663,7 @@ def calcItogIssuer(int i) {
     String tIssuer = 'Эмитент'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
-            tIssuer = getRow(j).issuer
+            tIssuer = getRefBookValue(84, getRow(j).issuer)?.ISSUER
             break
         }
     }
@@ -490,7 +675,7 @@ def calcItogIssuer(int i) {
     }
 
     for (int j = i; j >= 0; j--) {
-        srow = getRow(j)
+        def srow = getRow(j)
 
         if (srow.getAlias() == null) {
             if (((getRow(j).issuer != tIssuer))) {
@@ -522,7 +707,7 @@ def calcItogRegNumber(int i) {
     String tRegNumber = 'ГРН'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
-            tRegNumber = getRow(j).regNumber
+            tRegNumber = getRefBookValue(84, getRow(j).issuer)?.REG_NUM
             break
         }
     }
@@ -535,7 +720,7 @@ def calcItogRegNumber(int i) {
 
     // идем от текущей позиции вверх и ищем нужные строки
     for (int j = i; j >= 0; j--) {
-        srow = getRow(j)
+        def srow = getRow(j)
 
         if (srow.getAlias() == null) {
             if (getRow(j).regNumber != tRegNumber) {
@@ -566,76 +751,6 @@ DataRow<Cell> getRow(int i) {
     }
 }
 
-void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    deleteAllAliased(dataRows)
-
-    // отсортировать/группировать
-    sortRows(dataRows, groupColumns)
-
-    // данные предыдущего отчетного периода
-    def dataPrevRows = null
-    if (formData.kind == FormDataKind.PRIMARY) {
-        def formPrev = getFormPrev()
-        def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-        dataPrevRows = dataPrev?.getAllCached()
-    }
-
-    // номер последний строки предыдущей формы
-    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-
-    for (row in dataRows) {
-        row.number = ++number
-        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
-            row.reserveCalcValuePrev = calc8(row, dataPrevRows)
-            row.marketQuotation = calc11(row)
-            row.rubCourse = calc12(row)
-            row.marketQuotationInRub = calc13(row)
-            row.costOnMarketQuotation = calc14(row)
-            row.reserveCalcValue = calc15(row)
-            row.reserveCreation = calc16(row)
-            row.recovery = calc17(row)
-        }
-    }
-
-    // добавить промежуточные итоги (по графе 2 - эмитент, а внутри этой группы по графе 3 - грн)
-    addAllStatic(dataRows)
-
-    // добавить строку "итого"
-    dataRows.add(getCalcTotalRow(dataRows))
-
-    // используется save() т.к. есть сортировка
-    dataRowHelper.save(dataRows)
-}
-
-/**
- * Расчеты. Алгоритмы заполнения полей формы после импорта.
- */
-void calcAfterImport() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    for (row in dataRows) {
-        // Проверим чтобы человек рукамми ввёл всё что необходимо
-        def requiredColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency']
-        checkNonEmptyColumns(row, row.getIndex(), requiredColumns, logger, true)
-    }
-    if (!hasError()) {
-        def formPrev = getFormPrev()
-        def dataPrevRows = formPrev != null ? formDataService.getDataRowHelper(formPrev)?.getAllCached() : null
-
-        for (DataRow row in dataRows) {
-            row.reserveCalcValuePrev = calc8(row, dataPrevRows)
-            row.costOnMarketQuotation = calc14(row)
-            row.reserveCalcValue = calc15(row)
-            row.reserveCreation = calc16(row)
-            row.recovery = calc17(row)
-        }
-        dataRowHelper.save(dataRows)
-    }
-}
-
 /**
  * Расчет графы 8
  */
@@ -644,7 +759,7 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
         return row.reserveCalcValuePrev
     }
     // Расчет графы 8 в соответсвие коментарию Аванесова http://jira.aplana.com/browse/SBRFACCTAX-2562
-    temp = new BigDecimal(0)
+    def temp = new BigDecimal(0)
     tempCount = 0
 
     if (dataPrevRows != null) {
@@ -804,131 +919,7 @@ void setTotalStyle(def row) {
 }
 
 /**
- * Заполнить форму данными.
- *
- * @param xml данные
- */
-def addData(def xml) {
-    Date date = getReportPeriodEndDate()
-
-    def cache = [:]
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-
-        def indexCell = 1
-
-        newRow.number = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 2
-        newRow.issuer = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 3
-        newRow.regNumber = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 4
-        newRow.tradeNumber = row.cell[indexCell].text()
-        indexCell++
-
-        // графа 5
-        newRow.currency = getRecords(15, 'CODE_2', row.cell[indexCell].text(), date, cache)
-        indexCell++
-
-        // графа 6
-        newRow.prev = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 7
-        newRow.current = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 8
-        newRow.reserveCalcValuePrev = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 9
-        newRow.cost = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 10
-        newRow.signSecurity = getRecords(62, 'CODE', row.cell[indexCell].text(), date, cache)
-        indexCell++
-
-        // графа 11
-        newRow.marketQuotation = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 12
-        newRow.rubCourse = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 13
-        newRow.marketQuotationInRub = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 14
-        newRow.costOnMarketQuotation = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 15
-        newRow.reserveCalcValue = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 16
-        newRow.reserveCreation = getNumber(row.cell[indexCell].text())
-        indexCell++
-
-        // графа 17
-        newRow.recovery = getNumber(row.cell[indexCell].text())
-
-        rows.add(newRow)
-    }
-    dataRowHelper.save(rows)
-
-    if (xml.rowTotal.size() == 1) {
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-
-        // графа 6
-        total.prev = getNumber(row.cell[6].text())
-
-        // графа 7
-        total.current = getNumber(row.cell[7].text())
-
-        // графа 8
-        total.reserveCalcValuePrev = getNumber(row.cell[8].text())
-
-        // графа 9
-        total.cost = getNumber(row.cell[9].text())
-
-        // графа 14
-        total.costOnMarketQuotation = getNumber(row.cell[14].text())
-
-        // графа 15
-        total.reserveCalcValue = getNumber(row.cell[15].text())
-
-        // графа 16
-        total.reserveCreation = getNumber(row.cell[16].text())
-
-        // графа 17
-        total.recovery = getNumber(row.cell[17].text())
-
-        return total
-    } else {
-        return null
-    }
-}
-
-/**
  * Получить числовое значение.
- *
  * @param value строка
  */
 def getNumber(def value) {
@@ -1041,16 +1032,16 @@ void checkTotalRow(def totalRow) {
     def totalColumns = [6: 'prev', 7: 'current', 8: 'reserveCalcValuePrev', 9: 'cost', 14: 'costOnMarketQuotation',
             15: 'reserveCalcValue', 16: 'reserveCreation', 17: 'recovery']
     def totalCalc = getCalcTotalRow(dataRows)
-    def errorColums = []
+    def errorColumns = []
     if (totalCalc != null) {
         totalColumns.each { index, columnAlias ->
             if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
-                errorColums.add(index)
+                errorColumns.add(index)
             }
         }
     }
-    if (!errorColums.isEmpty()) {
-        def columns = errorColums.join(', ')
+    if (!errorColumns.isEmpty()) {
+        def columns = errorColumns.join(', ')
         logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }

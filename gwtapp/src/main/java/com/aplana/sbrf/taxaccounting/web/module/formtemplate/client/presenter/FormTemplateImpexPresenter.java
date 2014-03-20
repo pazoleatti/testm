@@ -52,7 +52,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	@Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null)
+        if (uuid != null && !uuid.equals("<pre></pre>"))
             LogAddEvent.fire(this, uuid);
 		MessageEvent.fire(this, "Форма импортирована");
 		FormTemplateSaveEvent.fire(this);

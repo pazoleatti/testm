@@ -612,46 +612,80 @@ void addData(def xml, int headRowCount) {
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
-        newRow.code = getRecordIdImport(61, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset, true)
+        def xmlIndexCol = 1
+        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
         // графа 3 - атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
-        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[2].text(), xlsIndexRow, 1 + colOffset, true)
+        xmlIndexCol = 2
+        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
         // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги»
-        newRow.issue = getRecordIdImport(84, 'ISSUE', row.cell[3].text(), xlsIndexRow, 1 + colOffset, true)
+        xmlIndexCol = 3
+        newRow.issue = getRecordIdImport(84, 'ISSUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
         // графа 5
-        newRow.purchaseDate = getDate(row.cell[4].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol =4
+        newRow.purchaseDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 6
-        newRow.implementationDate = getDate(row.cell[5].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 5
+        newRow.implementationDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 7
-        newRow.bondsCount = getNumber(row.cell[6].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 6
+        newRow.bondsCount = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 8
-        newRow.purchaseCost = getNumber(row.cell[7].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 7
+        newRow.purchaseCost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 9
-        newRow.costs = getNumber(row.cell[8].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 8
+        newRow.costs = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 10
-        newRow.marketPriceOnDateAcquisitionInPerc = getNumber(row.cell[9].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 9
+        newRow.marketPriceOnDateAcquisitionInPerc = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 11
-        newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[10].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 10
+        newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 13
-        newRow.redemptionVal = getNumber(row.cell[12].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 12
+        newRow.redemptionVal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 14
-        newRow.exercisePrice = getNumber(row.cell[13].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 13
+        newRow.exercisePrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 15
-        newRow.exerciseRuble = getNumber(row.cell[14].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 14
+        newRow.exerciseRuble = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 16
-        newRow.marketPricePercent = getNumber(row.cell[15].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 15
+        newRow.marketPricePercent = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 17
-        newRow.marketPriceRuble = getNumber(row.cell[16].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 16
+        newRow.marketPriceRuble = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 19
-        newRow.costsRetirement = getNumber(row.cell[18].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 18
+        newRow.costsRetirement = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 21
-        newRow.parPaper = getNumber(row.cell[20].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 20
+        newRow.parPaper = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 22
-        newRow.averageWeightedPricePaper = getNumber(row.cell[21].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 21
+        newRow.averageWeightedPricePaper = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
         // графа 23
-        newRow.issueDays = getNumber(row.cell[22].text(), xlsIndexRow, 0 + colOffset)
+        xmlIndexCol = 22
+        newRow.issueDays = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }

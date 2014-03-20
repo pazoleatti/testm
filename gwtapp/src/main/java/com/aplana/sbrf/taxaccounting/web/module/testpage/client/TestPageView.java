@@ -67,7 +67,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             boxTextLb,
             boxDatePickerLb;
     @UiField
-    CheckBox checkBoxNull;
+    CheckBox checkBoxNull,
+            checkBoxEnabled;
 
     @UiField
     LinkButton
@@ -375,6 +376,17 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                     boxText.setValue(null, true);
                     boxDatePicker.setValue(null, true);
                 }
+            }
+        });
+
+        checkBoxEnabled.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boxDate.setEnabled(event.getValue());
+                boxMy.setEnabled(event.getValue());
+                boxY.setEnabled(event.getValue());
+                boxText.setEnabled(event.getValue());
+                boxDatePicker.setEnabled(event.getValue());
             }
         });
 

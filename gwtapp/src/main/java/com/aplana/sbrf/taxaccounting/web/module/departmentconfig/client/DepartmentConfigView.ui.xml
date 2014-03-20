@@ -124,8 +124,7 @@
                         <g:Label width="100px" text="Подразделение:"/>
                     </g:cell>
                     <g:cell width="50%">
-                        <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" modal="false"
-                                                       header="Выберите подразделение" width="100%"
+                        <d:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="100%"
                                                        addStyleNames="{style.filterWidgets}"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right">

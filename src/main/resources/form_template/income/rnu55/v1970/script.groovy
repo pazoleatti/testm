@@ -393,7 +393,9 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
 // Получить курс банка России на указанную дату.
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : new Date(), null, 'CODE_NUMBER=' + value, null);
-    return res.getRecords().get(0).RATE.numberValue
+    if (res.getRecords() != null && res.getRecords().size() > 0)
+        return res.getRecords().get(0).RATE.numberValue
+    return 0
 }
 
 /**

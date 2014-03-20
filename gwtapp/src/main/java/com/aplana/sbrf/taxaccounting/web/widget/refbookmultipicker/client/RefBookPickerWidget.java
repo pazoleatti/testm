@@ -10,6 +10,7 @@ import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -39,7 +40,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiField
     TextBox textBox;
     @UiField
-    Image pickImageButton;
+    Image pickImageButton,
+            clearIconButton;
 
     @UiField
     HorizontalPanel widgetPanel;
@@ -49,13 +51,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     HTMLPanel widgetWrapper;
 
     @UiField
-    Button searchButton;
-    @UiField
-    Button clearButton;
-    @UiField
-    Button pickButton;
-    @UiField
-    Button cancelButton;
+    Button searchButton,
+            clearButton,
+            pickButton,
+            cancelButton;
+
     @UiField
     DateMaskBoxPicker versionDateBox;
     @UiField
@@ -86,7 +86,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         state.setMultiSelect(multiSelect);
 
         initWidget(binder.createAndBindUi(this));
-
+        WidgetUtils.setMouseBehavior(clearIconButton, textBox, pickImageButton);
         refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
 
         widgetWrapper.add(refBookView);
@@ -159,6 +159,19 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiHandler("searchButton")
     void onSearchButtonClicked(ClickEvent event) {
         refBookView.find(searchTextBox.getText());
+    }
+
+    @UiHandler("clearIconButton")
+    void onClearIconButtonClicked(ClickEvent event) {
+        if (state.getSetIds() != null) {
+            state.getSetIds().clear();
+        }
+        clearSearchPattern();
+        updateUIState();
+        prevState.setValues(state);
+
+        isEnabledFireChangeEvent = true;
+        refBookView.load(state);
     }
 
     @UiHandler("clearButton")

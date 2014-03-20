@@ -109,7 +109,7 @@ public interface DeclarationTemplateService {
      */
     List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
-    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.

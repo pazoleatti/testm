@@ -1,6 +1,7 @@
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -95,6 +96,9 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logger.info('Формирование сводной формы прошло успешно.')
+        }
 }
 
 // Кэш провайдеров
@@ -111,9 +115,20 @@ def refBookCache = [:]
 @Field
 def endDate = null
 
-/**
- * Проверка при создании формы.
- */
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), -1, null, logger, true)
+}
+
+// Проверка при создании формы
 void checkCreation() {
     def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
     if (findForm != null) {
@@ -123,14 +138,13 @@ void checkCreation() {
 
 // Логические проверки
 void logicCheck() {
-    // TODO
+    // TODO В ТЗ нет
 }
 
 // Расчеты. Алгоритмы заполнения полей формы.
 void calc() {
-    // TODO
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
     def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -148,24 +162,300 @@ void calc() {
 // Консолидация
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def rows = []
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    def sourceRows = []
+    // счетчик по группам для табл. 86
+    def int i = 1
+    // мапа идентификаторов для группировки
+    def groupStr = [:]
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
-            formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
+        if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
+            formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() == null) {
-                    def row = buildRow(srcRow, source.getFormType())
-                    rows.add(row)
+                    def row = buildRow(srcRow, source.formType)
+
+                    // идентификатор для группировки
+                    String group = getGroupId(row, srcRow)
+                    if (!groupStr.containsKey(group)) {
+                        groupStr.put(group, i++)
+                    }
+                    row.dealNum3 = groupStr.get(group)
+
+                    sourceRows.add(row)
                 }
             }
         }
     }
+
+    // "1" для графы 8 отчета 3
+    //def Long serviceType1 = getRecordId(11, 'CODE', '1')
+
+    // итоговые строки (всё то, что в итоге попадет в сводный отчет)
+    def rows = []
+
+    // Сортировка по row.dealNum3
+    sortRows(sourceRows, ['dealNum3'])
+
+    def Long currentGroup
+    def list = []
+
+    sourceRows.each { row ->
+        logger.info("" + row)
+        if (currentGroup == null) { // первая строка
+            currentGroup = row.dealNum3
+            list.add(row)
+        } else if (row.dealNum3.equals(currentGroup)) { // строка из той же группы что предыдущая
+            list.add(row)
+        } else { // строка из новой группы
+
+            // получаем итоговую строку для предыдущей группы
+            rows.add(getRow(list))
+
+            currentGroup = row.dealNum3
+            list.clear()
+            list.add(row)
+        }
+    }
+
     dataRowHelper.save(rows)
 }
 
 // Подготовка строки сводного отчета из первичных и консолидированных отчетов модуля МУКС
 def buildRow(def srcRow, def fomType) {
     def row = formData.createDataRow()
-    //  TODO
+    // Временный алиас строки
+    row.setAlias("group_$fomType.id")
+
+    // тип отчета
+    row.dealNum1 = fomType.id
+    // класс отчет
+    row.dealNum2 = getReportClass(fomType.id)
+
+    // TODO Формирование строк (1в1 из матрицы)
+
     return row
+}
+
+def Long getReportClass(def formTypeId) {
+    switch (formTypeId) {
+        case 376:
+        case 377:
+        case 380:
+        case 381:
+        case 382:
+        case 397:
+        case 399:
+            return 1
+        case 375:
+            return 3
+        case 379:
+        case 385:
+        case 387:
+        case 398:
+            return 4
+        default:
+            return 2
+    }
+}
+
+def String getGroupId(def row, def srcRow) {
+    def StringBuilder group = new StringBuilder()
+    group.append(row.dealNum1).append("#")
+            .append(row.organName).append("#")
+            .append(row.contractDate).append("#")
+            .append(row.contractNum).append("#")
+    switch (row.dealNum1) {
+        case 390:
+            group.append(srcRow.currencyCode)
+            break
+        case 391:
+            group.append(srcRow.currencyCode).append("#")
+            group.append(srcRow.dealType)
+            break
+        case 392:
+            group.append(srcRow.transactionType).append("#")
+            break
+        case 393:
+            group.append(srcRow.innerCode).append("#")
+            group.append(srcRow.dealType)
+            break
+        case 394:
+            group.append(srcRow.metalName).append("#")
+            group.append(srcRow.dealFocus)
+            break
+    }
+    return group.toString()
+}
+
+def getRow(def list) {
+    def row = formData.createDataRow()
+    // Временный алиас строки
+    row.setAlias(list.get(0).getAlias())
+    // TODO что копировать?
+    ['dealNum1','dealNum2','dealNum3'].each { alias ->
+        row.getCell(alias).setValue(list.get(0).getCell(alias).value, null)
+    }
+    list.each { srcRow ->
+        // TODO заполнить row по табл. 87
+        switch (srcRow.dealNum1) {
+            case 376:
+                // 1
+                if (srcRow.income != null) {
+                    row.income = (row.income ?: 0) + srcRow.income
+                    row.taxpayerSideCode = getRecordId(65, 'CODE', "022")
+                    row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
+                } else if (srcRow.outcome != null) {
+                    row.outcome = (row.outcome ?: 0) + srcRow.income
+                    row.taxpayerSideCode = getRecordId(65, 'CODE', "020")
+                    row.dealSubjectName = 'Получение помещений в аренду (субаренду)'
+                }
+                row.dealNameCode = getRecordId(67, 'CODE', "012")
+                if (srcRow.dealDoneDate != null && (row.dealDoneDate == null || srcRow.dealDoneDate > row.dealDoneDate)) {
+                    row.dealDoneDate = srcRow.dealDoneDate
+                }
+                row.similarDealGroup = getRecYesId()
+                break
+            case 377:
+                // 2
+                row.outcome = (row.outcome ?: 0) + (srcRow.outcome ?: 0)
+                row.dealNameCode = getRecordId(67, 'CODE', "019")
+                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
+                row.dealSubjectName = 'Услуги, связанные с обслуживанием недвижимости'
+                if (srcRow.dealDoneDate != null && (row.dealDoneDate == null || srcRow.dealDoneDate > row.dealDoneDate)) {
+                    row.dealDoneDate = srcRow.dealDoneDate
+                }
+                row.similarDealGroup = getRecYesId()
+                break
+            case 375:
+                // 3
+                row.outcome = (row.outcome ?: 0) + (srcRow.outcome ?: 0)
+                row.dealNameCode = getRecordId(67, 'CODE', "019")
+                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
+                row.dealSubjectName = 'Услуги по разработке, внедрению и модификации программного обеспечения'
+                if (srcRow.dealDoneDate != null && (row.dealDoneDate == null || srcRow.dealDoneDate > row.dealDoneDate)) {
+                    row.dealDoneDate = srcRow.dealDoneDate
+                }
+                row.similarDealGroup = getRecYesId()
+                break
+            case 379:
+                // 4
+                row.income = (row.income ?: 0) + (srcRow.income ?: 0)
+                row.dealNameCode = getRecordId(67, 'CODE', "016")
+                row.taxpayerSideCode = getRecordId(65, 'CODE', "028")
+                row.dealSubjectName = 'Услуги по предоставлению права пользования товарным знаком'
+                if (srcRow.dealDoneDate != null && (row.dealDoneDate == null || srcRow.dealDoneDate > row.dealDoneDate)) {
+                    row.dealDoneDate = srcRow.dealDoneDate
+                }
+                row.similarDealGroup = getRecYesId()
+                break
+            case 380:
+                // 5
+                row.outcome = (row.outcome ?: 0) + (srcRow.outcome ?: 0)
+                row.dealNameCode = getRecordId(67, 'CODE', "019")
+                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
+                row.dealSubjectName = 'Приобретение услуг, связанных с организацией и проведением торгов по реализации имущества'
+                if (srcRow.dealDoneDate != null && (row.dealDoneDate == null || srcRow.dealDoneDate > row.dealDoneDate)) {
+                    row.dealDoneDate = srcRow.dealDoneDate
+                }
+                row.similarDealGroup = getRecYesId()
+                break
+            case 381:
+                // 6
+               /* if(getRecRPCId().equals()){
+
+                }   else if(){
+
+                }*/
+                break
+            case 382:
+                // 7
+            case 383:
+                // 8
+                break
+            case 384:
+                // 9
+                break
+            case 385:
+                // 10
+                break
+            case 386:
+                // 11
+                break
+            case 387:
+                // 12
+                break
+            case 388:
+                // 13
+                break
+            case 389:
+                // 14
+                break
+            case 390:
+                // 15
+                break
+            case 391:
+                // 16
+                break
+            case 392:
+                // 17
+                break
+            case 393:
+                // 18
+                break
+            case 394:
+                // 19
+                break
+            case 397:
+                // 20
+                break
+            case 398:
+                // 21
+                break
+            case 399:
+                // 22
+                break
+            case 402:
+                // 23
+                break
+            case 401:
+                // 24
+                break
+            case 403:
+                // 25
+                break
+        }
+    }
+    return row
+}
+
+// Общие значения
+
+// "Да"
+@Field
+def Long recYesId
+
+def Long getRecYesId(){
+    if (recYesId == null)
+        recYesId = getRecordId(38, 'CODE', '1')
+    return recYesId
+}
+
+// "Нет"
+@Field
+def Long recNoId
+
+def Long getRecNoId(){
+    if (recNoId == null)
+        recNoId = getRecordId(38, 'CODE', '0')
+    return recNoId
+}
+
+// "Признак сделки, совершенной в РПС" = 1
+@Field
+def Long recRPCId
+
+def Long getRecRPCId(){
+    if (recRPCId == null)
+        recRPCId = getRecordId(36, 'SIGN', 'Да')
+    return recRPCId
 }

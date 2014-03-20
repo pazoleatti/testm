@@ -163,17 +163,15 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		getView().setUiHandlers(this);
 	}
 
-	@Override
-	protected void revealInParent() {
-		// TODO: [sgoryachkin] 
-		// 1) В перегрузке этого метода нет необходимости
-		// 2) В этом методе не должно быть такого количество логики  (для этого есть события - onReveal)
-		// 3) Нудно нормально реализовать manualReveal
-		setFormTemplate();
-	}
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        setFormTemplate();
+    }
 
-	@Override
+    @Override
 	public void reset() {
+        super.onReset();
 		setFormTemplate();
 	}
 
@@ -293,7 +291,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             return;
         }
         if (formTemplateExt.getActualEndVersionDate() != null &&
-                formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) >=0 ){
+                formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) > 0 ){
             MessageEvent.fire(FormTemplateMainPresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }

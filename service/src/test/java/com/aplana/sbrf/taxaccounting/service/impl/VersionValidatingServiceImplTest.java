@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -92,25 +92,25 @@ public class VersionValidatingServiceImplTest {
         formTemplate3.setEdition(1);
 
         //Настройка пересечений
-        IntersectionSegment segmentIntersection1 = new IntersectionSegment();
+        VersionSegment segmentIntersection1 = new VersionSegment();
         segmentIntersection1.setTemplateId(formTemplate1.getId());
         segmentIntersection1.setBeginDate(formTemplate1.getVersion());
         segmentIntersection1.setStatus(formTemplate1.getStatus());
         segmentIntersection1.setEndDate(formTemplate4.getVersion());
 
-        IntersectionSegment segmentIntersection2 = new IntersectionSegment();
+        VersionSegment segmentIntersection2 = new VersionSegment();
 
         segmentIntersection2.setTemplateId(formTemplate2.getId());
         segmentIntersection2.setBeginDate(formTemplate2.getVersion());
         segmentIntersection2.setStatus(formTemplate2.getStatus());
         segmentIntersection2.setEndDate(formTemplate3.getVersion());
 
-        IntersectionSegment segmentIntersection3 = new IntersectionSegment();
+        VersionSegment segmentIntersection3 = new VersionSegment();
         segmentIntersection3.setTemplateId(formTemplate3.getId());
         segmentIntersection3.setBeginDate(formTemplate3.getVersion());
         segmentIntersection3.setStatus(formTemplate3.getStatus());
 
-        IntersectionSegment segmentIntersection4 = new IntersectionSegment();
+        VersionSegment segmentIntersection4 = new VersionSegment();
         segmentIntersection4.setTemplateId(formTemplate4.getId());
         segmentIntersection4.setBeginDate(formTemplate4.getVersion());
         segmentIntersection4.setStatus(formTemplate4.getStatus());

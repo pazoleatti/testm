@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client;
 
+import com.aplana.gwt.client.DoubleStateComposite;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.adapters.TakesValueEditor;
@@ -19,65 +21,62 @@ import com.google.gwt.user.client.ui.*;
 
 import java.util.*;
 
-public class PeriodPickerPopupWidget extends Composite implements
-		PeriodPickerPopup, IsEditor<TakesValueEditor<List<Integer>>>  {
-	
-	interface Binder extends UiBinder<Widget, PeriodPickerPopupWidget> {
-	}
-	private static Binder binder = GWT.create(Binder.class);
+/**
+ * Компонент для выбора периода из списка в всплывающем окне
+ * @author sgorychkin
+ */
+public class PeriodPickerPopupWidget extends DoubleStateComposite implements
+        PeriodPickerPopup, IsEditor<TakesValueEditor<List<Integer>>> {
+
+    interface Binder extends UiBinder<Widget, PeriodPickerPopupWidget> {
+    }
+
+    private static Binder binder = GWT.create(Binder.class);
 
     @UiField
-    FlowPanel wrappingPanel;
+    HTMLPanel wrappingPanel;
 
-	@UiField(provided = true)
-	PeriodPickerWidget periodPicker;
-	
-	@UiField
-	Button selectButton;
-	
-	@UiField
-	Button clearButton;
-	
-	@UiField
+    @UiField(provided = true)
+    PeriodPickerWidget periodPicker;
+
+    @UiField
+    Image selectButton,
+            clearButton;
+
+    @UiField
     ModalWindow popupPanel;
-	
-	@UiField
-	Panel panel;
-	
-	@UiField
-    TextBox text;
-	 
-	
-	private List<Integer> value =  new LinkedList<Integer>();
-	
-	private TakesValueEditor<List<Integer>> editor;
-	
-	private Map<Integer, String> dereferenceValue;
-	private Map<Integer, Pair<Date, Date>> reportPeriodDates;
-	private Map<Integer, Integer> reportPeriodYears;
 
-	public PeriodPickerPopupWidget(){
-		periodPicker = new PeriodPickerWidget();
-		initWidget(binder.createAndBindUi(this));
+    @UiField
+    Panel panel;
+
+    @UiField
+    TextBox text;
+
+    private List<Integer> value = new LinkedList<Integer>();
+
+    private TakesValueEditor<List<Integer>> editor;
+
+    private Map<Integer, String> dereferenceValue;
+    private Map<Integer, Pair<Date, Date>> reportPeriodDates;
+    private Map<Integer, Integer> reportPeriodYears;
+
+    @UiConstructor
+    public PeriodPickerPopupWidget(boolean multiselect) {
+        periodPicker = new PeriodPickerWidget(multiselect);
+        initWidget(binder.createAndBindUi(this));
         periodPicker.setHeaderVisible(false);
-	}
-	
-	@UiConstructor
-	public PeriodPickerPopupWidget(boolean multiselect){
-		periodPicker = new PeriodPickerWidget(multiselect);
-		initWidget(binder.createAndBindUi(this));
-        periodPicker.setHeaderVisible(false);
-	}
+        WidgetUtils.setMouseBehavior(clearButton, text, selectButton);
+    }
 
     @Override
     public void setPeriods(List<ReportPeriod> periods) {
         dereferenceValue = new HashMap<Integer, String>();
         reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
-	    reportPeriodYears = new HashMap<Integer, Integer>();
+        reportPeriodYears = new HashMap<Integer, Integer>();
         for (ReportPeriod reportPeriod : periods) {
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
             reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
-	        reportPeriodYears.put(reportPeriod.getId(), reportPeriod.getTaxPeriod().getYear());
+            reportPeriodYears.put(reportPeriod.getId(), reportPeriod.getTaxPeriod().getYear());
         }
         periodPicker.setPeriods(periods);
     }
@@ -101,51 +100,49 @@ public class PeriodPickerPopupWidget extends Composite implements
     @Override
     public void setValue(List<Integer> value, boolean fireEvents) {
         this.value.clear();
-        if(value != null){
+        if (value != null) {
             this.value.addAll(value);
         }
         dereference(this.value);
-        if (fireEvents){
+        if (fireEvents) {
             ValueChangeEvent.fire(this, this.value);
         }
     }
 
     @Override
-    public HandlerRegistration addValueChangeHandler(
-            ValueChangeHandler<List<Integer>> handler) {
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Integer>> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
     @Override
     public boolean isEnabled() {
-        return selectButton.isEnabled();
+        return super.isEnabled();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectButton.setEnabled(enabled);
-        clearButton.setEnabled(enabled);
+        super.setEnabled(enabled);
     }
 
     @Override
-    public Pair<Date, Date> getPeriodDates(Integer reportPeriodId){
+    public Pair<Date, Date> getPeriodDates(Integer reportPeriodId) {
         return reportPeriodDates.get(reportPeriodId);
     }
 
     @UiHandler("okButton")
-    public void onOkButtonClick(ClickEvent event){
+    public void onOkButtonClick(ClickEvent event) {
         this.setValue(periodPicker.getValue(), true);
         popupPanel.hide();
     }
 
     @UiHandler("selectButton")
-    public void onSelectClick(ClickEvent event){
+    public void onSelectClick(ClickEvent event) {
         periodPicker.setValue(this.value);
         popupPanel.center();
     }
 
     @UiHandler("clearButton")
-    public void onClearClick(ClickEvent event){
+    public void onClearClick(ClickEvent event) {
         this.setValue(null, true);
     }
 
@@ -155,12 +152,12 @@ public class PeriodPickerPopupWidget extends Composite implements
         throw new UnsupportedOperationException();
     }
 
-    private void dereference(List<Integer> value){
+    private void dereference(List<Integer> value) {
         Collection<String> strings = new ArrayList<String>();
-        if (value != null && dereferenceValue != null){
+        if (value != null && dereferenceValue != null) {
             for (Integer val : value) {
                 String name = dereferenceValue.get(val);
-                if (name != null){
+                if (name != null) {
                     strings.add(reportPeriodYears.get(val) + ":" + name);
                 }
             }
@@ -170,15 +167,15 @@ public class PeriodPickerPopupWidget extends Composite implements
         this.text.setTitle(TextUtils.generateTextBoxTitle(txt));
     }
 
-	@Override
-	public TakesValueEditor<List<Integer>> asEditor() {
-	    if (editor == null) {
-	        editor = TakesValueEditor.of(this);
-	    }
-	    return editor;
-	}
+    @Override
+    public TakesValueEditor<List<Integer>> asEditor() {
+        if (editor == null) {
+            editor = TakesValueEditor.of(this);
+        }
+        return editor;
+    }
 
-    public void setWidth(String width){
+    public void setWidth(String width) {
         wrappingPanel.setWidth(width);
     }
 }

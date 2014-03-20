@@ -33,7 +33,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
-    private Calendar calendar = Calendar.getInstance();
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -144,7 +143,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return declarationTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 
@@ -161,7 +160,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
     public DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
         int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
@@ -174,7 +172,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public Date getDTEndDate(int declarationTemplateId) {
         if (declarationTemplateId == 0)
             return null;
-        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
         return declarationTemplateDao.getDTVersionEndDate(declarationTemplateId, declarationTemplate.getType().getId(), declarationTemplate.getVersion());
@@ -220,13 +217,5 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
 
         return statusList;
-    }
-
-    private Date addCalendar(int fieldNumber, int numberDays, long actualDate){
-        calendar.setTime(new Date(actualDate));
-        calendar.add(fieldNumber, numberDays);
-        Date time = calendar.getTime();
-        calendar.clear();
-        return time;
     }
 }

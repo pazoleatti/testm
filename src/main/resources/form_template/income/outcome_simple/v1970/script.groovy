@@ -80,6 +80,9 @@ def resetColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTax
         'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
+def totalColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+
+@Field
 def formatY = new SimpleDateFormat('yyyy')
 
 @Field
@@ -87,7 +90,11 @@ def format = new SimpleDateFormat('dd.MM.yyyy')
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
+
+// справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+@Field
+def rbIncome102 = null
 
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
@@ -145,9 +152,28 @@ void calc() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper?.allCached
-    dataRows.each {row ->
-         checkRequiredColumns(row, nonEmptyColumns)
+
+    dataRows.each { row ->
+        final income102Data = getIncome102Data(row)
+        if (!income102Data || income102Data.isEmpty()) {
+            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+        }
     }
+
+    dataRows.each {row ->
+        checkRequiredColumns(row, nonEmptyColumns)
+    }
+
+    def row50001 = getDataRow(dataRows, 'R107')
+    def row50002 = getDataRow(dataRows, 'R212')
+    def need50001 = [:]
+    def need50002 = [:]
+    totalColumns.each{ alias ->
+        need50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
+        need50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
+    }
+    checkTotalSum(row50001, need50001)
+    checkTotalSum(row50002, need50002)
 }
 
 void calculationBasicSum(def dataRows) {
@@ -155,7 +181,7 @@ void calculationBasicSum(def dataRows) {
     def row50002 = getDataRow(dataRows, 'R212')
 
     // суммы для графы 5..8
-    ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
+    totalColumns.each { alias ->
         row50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
         row50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
     }
@@ -191,7 +217,6 @@ void calculationControlGraphs(def dataRows) {
     def value
     def formDataComplex = getFormDataComplex()
     def dataRowsComplex = formDataComplex != null ? formDataService.getDataRowHelper(formDataComplex)?.allCached : null
-    def income102NotFound = []
     for (def row : dataRows) {
         // исключить итоговые строки и пять конечных
         if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
@@ -220,22 +245,15 @@ void calculationControlGraphs(def dataRows) {
         row.opuSumByTableP = tmp
 
         // графа 13
-        def income102 = income102Dao.getIncome102(formData.reportPeriodId, row.accountingRecords)
-        if (income102 == null || income102.isEmpty()) {
-            income102NotFound += row.getIndex() + 2
-            tmp = 0
-        } else {
-            tmp = (income102[0] != null ? income102[0].getTotalSum() : 0)
+        // получить отчет о прибылях и убытках
+        def income102Records = getIncome102Data(row)
+        row.opuSumTotal = 0
+        for (income102 in income102Records) {
+            row.opuSumTotal += income102.TOTAL_SUM.numberValue
         }
-        row.opuSumTotal = tmp
 
         // графа 14
         row.difference = (row.opuSumByEnclosure2?:0) + (row.opuSumByTableP?:0) - (row.opuSumTotal?:0)
-    }
-
-    if (!income102NotFound.isEmpty()) {
-        def rows = income102NotFound.join(', ')
-        logger.warn("Не найдены соответствующие данные в отчете о прибылях и убытках для строк: $rows")
     }
 }
 
@@ -327,8 +345,6 @@ void consolidationSummary(def dataRows) {
         }
     }
 
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
@@ -344,7 +360,7 @@ void consolidationSummary(def dataRows) {
                         def row = getDataRow(dataRows, alias)
 
                         // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -373,7 +389,7 @@ void consolidationSummary(def dataRows) {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
                         // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, reportPeriodEndDate)
+                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 5 рну-5
                         def sum5 = 0
@@ -408,7 +424,7 @@ def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAl
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
+    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
 /**
@@ -662,5 +678,33 @@ void checkRnu14Accepted() {
     def formData14 = getFormDataRNU14()
     if (formData14 == null || formData14.state != WorkflowState.ACCEPTED) {
         logger.error("Принятие сводной налоговой формы невозможно, т.к. форма РНУ-14 не сформирована или имеет статус, отличный от «Принята»")
+    }
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+// Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
+def getIncome102Data(def row) {
+    // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+    if (rbIncome102 == null) {
+        rbIncome102 = refBookFactory.getDataProvider(52L)
+    }
+    return rbIncome102?.getRecords(getReportPeriodEndDate(), null, "OPU_CODE = '${row.accountingRecords}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+}
+
+void checkTotalSum(totalRow, needRow){
+    def errorColumns = []
+    totalColumns.each { totalColumn ->
+        if (totalRow[totalColumn] != needRow[totalColumn]) {
+            errorColumns += "\"" + getColumnName(totalRow, totalColumn) + "\""
+        }
+    }
+    if (!errorColumns.isEmpty()){
+        logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
     }
 }

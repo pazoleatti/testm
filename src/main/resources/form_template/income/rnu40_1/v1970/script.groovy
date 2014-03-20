@@ -58,7 +58,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -109,6 +111,26 @@ def currentDate = new Date()
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 /** Добавить новую строку. */
@@ -198,16 +220,7 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // удалить нефиксированные строки
-    def deleteRows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            deleteRows.add(row)
-        }
-    }
-    dataRows.removeAll(deleteRows)
-    // поправить индексы, потому что они после изменения не пересчитываются
-    updateIndexes(dataRows)
+    deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -360,4 +373,133 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
     }
     return endDate
+}
+
+
+// Получение импортируемых данных
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    def xml = getXML(ImportInputStream, importService, fileName, 'Номер территориального банка', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 11, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : 'Номер территориального банка ',
+            (xml.row[0].cell[2]) : 'Наименование территориального банка / подразделения Центрального аппарата',
+            (xml.row[0].cell[3]) : 'Эмитент',
+            (xml.row[0].cell[4]) : 'Номер государственной регистрации',
+            (xml.row[0].cell[5]) : 'Дата приобретения',
+            (xml.row[0].cell[6]) : 'Номинальная стоимость, ед. вал.',
+            (xml.row[0].cell[7]) : 'Количество облигаций, шт.',
+            (xml.row[0].cell[8]) : 'Средневзвешенная цена одной бумаги на дату размещения, ед.вал.',
+            (xml.row[0].cell[9]) : 'Срок обращения условиям выпуска, дни',
+            (xml.row[0].cell[10]): 'Процентный доход, руб.коп.',
+            (xml.row[0].cell[11]): 'Код валюты номинала'
+    ]
+
+    (1..11).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 0 // Смещение для индекса колонок в ошибках импорта
+
+    def sectionIndex = null
+    def mapRows = [:]
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        def firstValue = row.cell[0].text()
+        if (firstValue != null && firstValue != '' && firstValue != 'Всего') {
+            sectionIndex = firstValue[0]
+            mapRows.put(sectionIndex, [])
+            continue
+        } else if (firstValue == 'Всего') {
+            continue
+        }
+
+        def newRow = getNewRow()
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
+        def xmlIndexCol = 2
+        newRow.name = getRecordIdImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
+        // графа 3 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
+        xmlIndexCol = 3
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+
+        // графа 5
+        xmlIndexCol = 5
+        newRow.buyDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 6
+        newRow.cost = getNumber(row.cell[6].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 7
+        xmlIndexCol = 7
+        newRow.bondsCount = getNumber(row.cell[7].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 8
+        newRow.upCost = getNumber(row.cell[8].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 9
+        newRow.circulationTerm = getNumber(row.cell[9].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        mapRows[sectionIndex].add(newRow)
+    }
+
+    deleteNotFixedRows(dataRows)
+
+    // копирование данных по разделам
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
+    }
+
+    dataRowHelper.save(dataRows)
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
+    }
 }

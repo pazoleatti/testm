@@ -38,8 +38,7 @@
                     <g:Label width="140px" wordWrap="false" text="Подразделение:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" width="100%" multiselection="false"
-                                                     header="Выбор подразделения" modal="true"/>
+                    <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" width="100%" multiselection="false"/>
                 </g:cell>
             </g:HorizontalPanel>
 

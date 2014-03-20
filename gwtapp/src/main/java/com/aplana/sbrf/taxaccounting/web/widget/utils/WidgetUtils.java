@@ -1,6 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.widget.utils;
 
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.TextBox;
 
 import java.util.Date;
 
@@ -12,6 +17,8 @@ import java.util.Date;
 public class WidgetUtils {
 
     public static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd.MM.yyyy");
+    public static String iconUrl = "resources/img/picker-icons/clear-icon.png";
+    public static String dummyUrl = "resources/img/picker-icons/clear-icon-dummy.png";
 
     /**
      * Проверка невхождения даты в ограничивающий период
@@ -97,6 +104,66 @@ public class WidgetUtils {
      */
     public static String getDateString(Date date) {
         return date != null ? dateTimeFormat.format(date) : null;
+    }
+
+    /**
+     * Добавляет поведения для скрытия/появления clearButton при отведении/наведении курсора мыши на виджеты input и pickButton
+     * Все виджеты должны реализовывать интерфейс HasMouseOutHandlers и HasMouseOverHandlers
+     *
+     * @param clearButton виджет который будет показываться при наведении мыши на anotherWidget
+     */
+    public static void setMouseBehavior(final Image clearButton, final TextBox input, final Image pickButton) {
+        if (clearButton != null && input != null && pickButton != null) {
+
+            final Element elementToHide = clearButton.getElement();
+            MouseOverHandler mouseOverHandler = new MouseOverHandler() {
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    if (input.getText() != null && !input.getText().isEmpty()) {
+                        clearButton.setUrl(iconUrl);
+                        clearButton.setTitle("Очистить выбор");
+                        setPointerCursor(elementToHide, true);
+                    }
+                }
+            };
+            MouseOutHandler mouseOutHandler = new MouseOutHandler() {
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    if (event.getRelatedTarget()!= null && !event.getRelatedTarget().equals(elementToHide)) {
+                        clearButton.setUrl(dummyUrl);
+                        clearButton.setTitle("");
+                        setPointerCursor(elementToHide, false);
+                    }
+                }
+            };
+
+            input.addMouseOutHandler(mouseOutHandler);
+            input.addMouseOverHandler(mouseOverHandler);
+            pickButton.addMouseOutHandler(mouseOutHandler);
+            pickButton.addMouseOverHandler(mouseOverHandler);
+
+            clearButton.addMouseOverHandler(mouseOverHandler);
+            clearButton.addMouseOutHandler(new MouseOutHandler() {
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    if (event.getRelatedTarget()!= null && !event.getRelatedTarget().equals(input.getElement()) &&
+                            !event.getRelatedTarget().equals(pickButton.getElement())) {
+                        clearButton.setUrl(dummyUrl);
+                        clearButton.setTitle("");
+                        setPointerCursor(elementToHide, false);
+                    }
+                }
+            });
+
+        }
+    }
+
+    public static void setPointerCursor(Element element, boolean pointer) {
+        if (pointer) {
+            element.getStyle().setCursor(Style.Cursor.POINTER);
+        } else {
+            element.getStyle().clearCursor();
+        }
     }
 
 

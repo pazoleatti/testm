@@ -31,11 +31,11 @@ import java.util.*;
 @Service
 @Transactional
 public class FormTemplateServiceImpl implements FormTemplateService {
-	private static final int FORM_VERSION_MAX_VALUE = 20;
+	//private static final int FORM_VERSION_MAX_VALUE = 20;
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
+	//private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
@@ -163,7 +163,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, statusList);
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
         for (Integer id : formTemplateIds)
             formTemplates.add(formTemplateDao.get(id));
@@ -171,7 +171,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return formTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 

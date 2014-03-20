@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.ConfigTuple;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,7 +24,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	private List<ConfigTuple> configData;
 	
 	@UiField
-	DataGrid<ConfigTuple> configTable;
+    GenericDataGrid<ConfigTuple> configTable;
 	
 	interface Binder extends UiBinder<Widget, ConfigurationView> {
 	}
@@ -55,8 +56,8 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 			}
 		});
 		
-		configTable.addColumn(captionColumn, "Наименование свойства");
-		configTable.addColumn(valueColumn, "Значение свойства");
+		configTable.addResizableColumn(captionColumn, "Наименование свойства");
+		configTable.addResizableColumn(valueColumn, "Значение свойства");
 		configTable.setSelectionModel(new NoSelectionModel<Object>());
 
 	}

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.module.members.shared.FilterValues;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -54,7 +55,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
     RefBookPickerWidget role;
 
     @UiField
-    CellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
+    GenericCellTable<TAUserFullWithDepartmentPath> taUserFullCellTable;
 
     @UiField
     Anchor printButton;
@@ -78,35 +79,35 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	    });
 
         widget = binder.createAndBindUi(this);
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
-		    @Override
-		    public String getValue(TAUserFullWithDepartmentPath object) {
-			    return object.getUser().getName();
-		    }
-	    },"Полное имя пользователя");
+	    taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
+            @Override
+            public String getValue(TAUserFullWithDepartmentPath object) {
+                return object.getUser().getName();
+            }
+        }, "Полное имя пользователя");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>(){
+        taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>(){
             @Override
             public String getValue(TAUserFullWithDepartmentPath object) {
                 return object.getUser().getLogin();
             }
         },"Логин");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
+	    taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
 		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().getEmail();
 		    }
 	    },"Электронная почта");
 
-	    taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
+	    taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
 		    @Override
 		    public String getValue(TAUserFullWithDepartmentPath object) {
 			    return object.getUser().isActive() ? "Да" : "Нет";
 		    }
 	    },"Признак активности");
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
+        taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
             public String getValue(TAUserFullWithDepartmentPath object) {
                 return object.getFullDepartmentPath();
@@ -114,7 +115,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
         },"Подразделение");
 
 
-        taUserFullCellTable.addColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
+        taUserFullCellTable.addResizableColumn(new TextColumn<TAUserFullWithDepartmentPath>() {
             @Override
             public String getValue(TAUserFullWithDepartmentPath object) {
                 StringBuilder sb = new StringBuilder();

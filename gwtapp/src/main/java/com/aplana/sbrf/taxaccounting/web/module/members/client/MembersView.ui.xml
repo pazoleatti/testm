@@ -96,8 +96,7 @@
                     </g:cell>
 
                     <g:cell width="25%">
-                        <picker:DepartmentPickerPopupWidget header="Подразделение" ui:field="departmentPicker"
-                                                            multiselection="true" width="100%" modal="true"/>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
                     </g:cell>
                     <g:cell horizontalAlignment="right">
                         <g:Label width="40px" text="Роль:"/>

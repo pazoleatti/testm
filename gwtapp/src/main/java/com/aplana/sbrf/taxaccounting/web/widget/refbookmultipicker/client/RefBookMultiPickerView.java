@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.*;
@@ -35,7 +36,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private static Binder binder = GWT.create(Binder.class);
 
     @UiField
-    DataGrid<RefBookItem> cellTable;
+    GenericDataGrid<RefBookItem> cellTable;
 
     @UiField
     FlexiblePager pager;
@@ -273,7 +274,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         for (Map.Entry<String, Integer> entry : headers.entrySet()) {
             RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true);
             sortColumns.put(refBookItemTextColumn, i);
-            cellTable.addColumn(refBookItemTextColumn, entry.getKey());
+            cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
             cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
             i++;
         }
