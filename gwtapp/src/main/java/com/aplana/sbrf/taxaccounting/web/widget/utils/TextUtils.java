@@ -92,4 +92,18 @@ public class TextUtils {
         return title;
     }
 
+    /**
+     * Генерация для высплывающей подписи для текстБокса для HTML представления
+     * @param text строка из joinListToString
+     * @return красивая подпись
+     */
+    public static String generateTextBoxHTMLTitle(String text) {
+        String title = text;
+        if (text != null && text.contains("; ")) {
+            text = text.replace("; ", ";<br/>");
+            title = "Выбрано: " + text.split(";").length + "<br/>" + text;
+        }
+        return title;
+    }
+
 }

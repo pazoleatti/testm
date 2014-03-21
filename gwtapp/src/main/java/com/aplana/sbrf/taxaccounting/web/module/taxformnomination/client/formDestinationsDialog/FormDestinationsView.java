@@ -82,7 +82,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
             );
         } else {
             getUiHandlers().onConfirm();
@@ -94,7 +94,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
             );
         } else {
             getUiHandlers().onEdit(selectedDFT);

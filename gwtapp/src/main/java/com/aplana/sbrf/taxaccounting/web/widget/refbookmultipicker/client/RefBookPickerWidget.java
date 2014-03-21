@@ -9,13 +9,11 @@ import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.style.Tooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -64,6 +62,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     Label selectionCountLabel;
     @UiField
     HorizontalPanel filterPanel;
+
+    private Tooltip tooltip;
 
     /* Вьюха которая принимает параметры, загружает и отображает записи из справочника */
     private RefBookView refBookView;
@@ -128,6 +128,13 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 refBookView.load(state);
             }
         });
+
+        tooltip = new Tooltip();
+        //установка обработчиков для тестовой строк
+        tooltip.addHandlersFor(textBox);
+        //установка обработчиков для лейбла который отображается если в режиме прсомотра
+        tooltip.addHandlersFor(label);
+
         // оставлю для примера
 //        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
 //            @Override
@@ -339,7 +346,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         }
         selectionCountLabel.setText(countValue);
         textBox.setText(defValue);
-        textBox.setTitle(TextUtils.generateTextBoxTitle(defValue));
+        tooltip.setTextHtml(TextUtils.generateTextBoxHTMLTitle(defValue));
         updateLabelValue();
     }
 
@@ -461,6 +468,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             }
         }
         label.setText(stringValue);
-        label.setTitle(stringValue.equals(EMPTY_STRING_VALUE) ? EMPTY_STRING_TITLE : TextUtils.generateTextBoxTitle(stringValue));
+        tooltip.setTextHtml(stringValue.equals(EMPTY_STRING_VALUE) ? EMPTY_STRING_TITLE : TextUtils.generateTextBoxHTMLTitle(stringValue));
     }
 }

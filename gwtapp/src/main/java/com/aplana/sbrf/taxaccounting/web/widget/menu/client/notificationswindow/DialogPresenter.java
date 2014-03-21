@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client;
+package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;

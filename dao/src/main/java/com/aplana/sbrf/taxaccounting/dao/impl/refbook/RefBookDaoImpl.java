@@ -1028,6 +1028,42 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, ref_book_id, record_id, version from ref_book_record where id in %s),\n" +
+            "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id),\n" +
+            "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
+            "select distinct id,\n" +
+            "case\n" +
+            "\twhen (versionEnd is not null and ? > versionEnd) then 1\n" +
+            "\twhen ((versionEnd is null or ? <= versionEnd) and ? < versionStart) then -1\n" +
+            "\telse 0\n" +
+            "end as result\n" +
+            "from allRecords";
+
+    @Override
+    public List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        List<Long> ids = new ArrayList<Long>();
+        for (RefBookRecord record : records) {
+            Long id = record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            if (id != null) {
+                ids.add(id);
+            }
+        }
+        if (!ids.isEmpty()) {
+            String sql = String.format(CHECK_PARENT_CONFLICT, SqlUtils.transformToSqlInStatement(ids));
+            final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
+            getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
+                @Override
+                public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
+                    return null;
+                }
+            }, versionTo, versionTo, versionFrom);
+            return new ArrayList<Pair<Long, Integer>>(result);
+        }  else {
+            return new ArrayList<Pair<Long, Integer>>();
+        }
+    }
+
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
@@ -1055,25 +1091,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return values;
     }
 
-    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where ref_book_id=? and record_id=? and (? is null or id=?)),\n" +
+    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id=:excludedRecordId)),\n" +
             "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id),\n" +
             "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
             "select num, id, version, status, nextversion, nextstatus, \n" +
             "case\n" +
             "  when (status=0 and (\n" +
-            "  \t(? is null and (\n" +
-            "  \t\t(nextversion is not null and nextversion > ?) or \n" +
-            "\t\t(nextversion is null and version > ?)\n" +
-            "  \t)) or (? is not null and (\n" +
-            "  \t\t(version < ? and nextversion > ?) or \n" +
-            "  \t\t(version > ? and version < ?)\n" +
+            "  \t(:versionTo is null and (\n" +
+            "  \t\t(nextversion is not null and nextversion > :versionFrom) or \n" +
+            "\t\t(nextversion is null and version > :versionFrom)\n" +
+            "  \t)) or (:versionTo is not null and (\n" +
+            "  \t\t(version < :versionFrom and nextversion > :versionFrom) or \n" +
+            "  \t\t(version > :versionFrom and version < :versionTo)\n" +
             "  \t))\n" +
             "  )) then 1\n" +
-            "  when (status=0 and nextversion is null and version < ?) then 2\n" +
-            "  when (status=2 and (? is not null and version > ? and version < ? and nextversion > ?)) then 3\n" +
+            "  when (status=0 and nextversion is null and version < :versionFrom) then 2\n" +
+            "  when (status=2 and (:versionTo is not null and version >= :versionFrom and version < :versionTo and nextversion > :versionTo)) then 3\n" +
             "  when (status=2 and (\n" +
-            "  \t(nextversion is not null and ? is null and version > ?) or \n" +
-            "  \t(nextversion is null and version > ?)\n" +
+            "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or \n" +
+            "  \t(nextversion is null and version >= :versionFrom)\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -1083,7 +1119,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<CheckCrossVersionsResult> checkCrossVersions(@NotNull Long refBookId, @NotNull Long recordId,
 			@NotNull Date versionFrom, @NotNull Date versionTo, Long excludedRecordId) {
 
-        return getJdbcTemplate().query(CHECK_CROSS_VERSIONS, new RowMapper<CheckCrossVersionsResult>() {
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("refBookId", refBookId);
+        params.put("recordId", recordId);
+        params.put("excludedRecordId", excludedRecordId);
+        params.put("versionFrom", versionFrom);
+        params.put("versionTo", versionTo);
+
+        return getNamedParameterJdbcTemplate().query(CHECK_CROSS_VERSIONS, params, new RowMapper<CheckCrossVersionsResult>() {
             @Override
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 CheckCrossVersionsResult result = new CheckCrossVersionsResult();
@@ -1096,9 +1140,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 result.setResult(CrossResult.getResultById(rs.getInt("RESULT")));
                 return result;
             }
-        }, refBookId, recordId, excludedRecordId, excludedRecordId,
-                versionTo, versionFrom, versionFrom, versionTo, versionFrom, versionFrom, versionFrom, versionTo,
-                versionFrom, versionTo, versionFrom, versionTo, versionTo, versionTo, versionFrom, versionFrom);
+        });
     }
 
     private final static String CHECK_UNIQUE_MATCHES = "select v.RECORD_ID as ID, a.NAME as NAME from REF_BOOK_VALUE v, REF_BOOK_RECORD r, REF_BOOK_ATTRIBUTE a \n" +
@@ -1114,8 +1156,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ") where cnt = ?";
 
     @Override
-    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull List<RefBookAttribute> attributes,
-			@NotNull List<RefBookRecord> records) {
+    public List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, Long uniqueRecordId, @NotNull List<RefBookAttribute> attributes,
+                                                                       @NotNull List<RefBookRecord> records) {
         boolean hasUniqueAttributes = false;
         PreparedStatementData ps = new PreparedStatementData();
 
@@ -1158,18 +1200,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     if (records.size() > 1) {
                         ps.appendQuery(")");
                     }
+                    if (uniqueRecordId != null) {
+                        ps.appendQuery(" and v.record_id != ?");
+                        ps.addParam(uniqueRecordId);
+                    }
                 }
+            }
 
-                if (hasUniqueAttributes) {
-                    return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
-                        @Override
-                        public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
-                        }
-                    });
-                } else {
-                    return null;
-                }
+            if (hasUniqueAttributes) {
+                return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                    @Override
+                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                    }
+                });
+            } else {
+                return null;
             }
         } else {
             List<Long> uniqueAttributes = UniqueAttributeCombination.getByRefBookId(refBookId).getAttributeIds();
@@ -1211,6 +1257,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 attrQuery.append(")");
                 if (i < records.size() - 1) {
                     attrQuery.append(" or \n");
+                } else {
+                    if (uniqueRecordId != null) {
+                        attrQuery.append(" and v.record_id != ?");
+                        ps.addParam(uniqueRecordId);
+                    }
                 }
             }
             ps.addParam(uniqueAttributes.size());
@@ -1229,7 +1280,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             return result;
         }
-        return null;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
@@ -1237,9 +1287,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
-            "\tversionTo IS NOT NULL and (versionFrom <= ? and versionTo >= ?)\n" +
+            "\tversionTo IS NOT NULL and (\n" +
+            "\t\t(:versionTo IS NULL and versionTo >= :versionFrom) or\n" +
+            "\t\t(versionFrom <= :versionFrom and versionTo >= :versionFrom) or \n" +
+            "\t\t(versionFrom >= :versionFrom and versionFrom <= :versionTo)\n" +
+            "\t)\n" +
             ") or (\n" +
-            "\t\t(versionFrom >= ? and (? IS NULL or versionFrom <= ?))\n" +
+            "\tversionTo IS NULL and (\n" +
+            "\t\tversionFrom <= :versionFrom or\n" +
+            "\t\t(versionFrom >= :versionFrom and (:versionTo IS NULL or versionFrom <= :versionTo))\n" +
+            "\t)\n" +
             ")";
 
     @Override
@@ -1251,7 +1308,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 SqlUtils.transformToSqlInStatement(recordIds));
-        return getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
+        Map<String, Date> params = new HashMap<String, Date>();
+        params.put("versionFrom", versionFrom);
+        params.put("versionTo", versionTo);
+        return getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
     }
 
     public void updateVersionRelevancePeriod(@NotNull Long uniqueRecordId, @NotNull Date version){
@@ -1291,12 +1351,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "\t(select id from form_column where attribute_id in\n" +
             "\t(select id from ref_book_attribute where ref_book_id = ?)) and value in %s))\n" +
             ")\n" +
-            "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, rp.name as reportPeriodName, tp.year as year from forms f \n" +
-            "join (select department_id, path from (SELECT f.department_id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
-            "\t\tFROM department d, forms f where d.type != 1 START \n" +
-            "\t\tWITH d.id = f.department_id \n" +
-            "\t\tCONNECT BY PRIOR d.parent_id = d.id order by lvl desc) \n" +
-            "\twhere ROWNUM = 1 ) d on d.department_id=f.department_id\n" +
+            "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year from forms f \n" +
+            "join (select d.id, d.type, substr(sys_connect_by_path(name,'/'), 2) as path \n" +
+            "\t\tfrom department d\n" +
+            "\t\twhere d.id in (select department_id from forms)\n" +
+            "\t\tstart with d.id = 0\n" +
+            "\t\tconnect by prior d.id = d.parent_id) d on d.id=f.department_id\n" +
             "join form_type t on t.id in (select t.type_id from form_template t, forms f where t.id = f.form_template_id)\n" +
             "join report_period rp on rp.id = f.report_period_id\n" +
             "join tax_period tp on tp.id = rp.tax_period_id";
@@ -1346,7 +1406,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     result.append("Существует экземпляр налоговой формы \"");
                     result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
                     result.append(rs.getString("formType")).append("\" в подразделении \"");
-                    result.append(reverseDepartmentPath(rs.getString("departmentPath"))).append("\" периоде \"");
+                    if (rs.getInt("departmentType") != 1) {
+                        result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" периоде \"");
+                    } else {
+                        result.append(rs.getString("departmentPath")).append("\" периоде \"");
+                    }
                     result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
                     return result.toString();
                 }
@@ -1388,19 +1452,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return new ArrayList<String>(results);
     }
 
-    private String reverseDepartmentPath(String departmentPath) {
-        String[] pathParts = departmentPath.substring(1).split("/");
-        StringBuilder result = new StringBuilder();
-        for (int i = pathParts.length - 1; i > -1; i--) {
-            result.append(pathParts[i]);
-            if (i != 0) {
-                result.append("/");
-            }
-        }
-        return result.toString();
-    }
-
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version > ?),\n" +
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version  = " +
+            "   (select min(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and version > ?)),\n" +
             "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day as versionEnd from nextVersion nv, nextVersionEnd nve";
 

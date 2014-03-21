@@ -87,7 +87,12 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 		notificationMenuItem.setCount(count);
 	}
 
-	private void addSubMenu(MenuItem menuItem, MenuBar menu) {
+    @Override
+    public void selectNotificationMenuItem() {
+        menu.selectItem(notificationMenuItem);
+    }
+
+    private void addSubMenu(MenuItem menuItem, MenuBar menu) {
 		for (MenuItem item : menuItem.getSubMenu()) {
 			if (!item.getSubMenu().isEmpty()) {
 				MenuBar subMenuBar = new MenuBar(true);
