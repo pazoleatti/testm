@@ -94,7 +94,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
         formTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        formTemplate.setEdition(formTemplateService.versionTemplateCount(formTemplate.getType().getId()) + 1);
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);

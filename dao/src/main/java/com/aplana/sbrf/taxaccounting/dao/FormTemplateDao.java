@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO-Интерфейс для работы с макетами налоговых форм
@@ -110,7 +111,7 @@ public interface FormTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestFTVersionIdRight(int formTypeId, Date actualBeginVersion);
+    int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
@@ -142,6 +143,20 @@ public interface FormTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, List<Integer> statusList);
+
+    /**
+     * Количество активных весий для вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество
+     */
+    List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeId);
+
+    /**
+     * Получает номер последней версии макета.
+     * @param formTypeId  вид шаблона
+     * @return номер следующей версии шаблона
+     */
+    int getLastVersionEdition(int formTypeId);
 
     int updateVersionStatus(int versionStatus, int formTemplateId);
 }

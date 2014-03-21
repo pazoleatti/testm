@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -191,7 +192,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
-        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), formTemplate.getVersion());
+        @SuppressWarnings("unchecked")
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), createStatusList(status), formTemplate.getVersion());
         if (id == 0)
             return null;
         return formTemplateDao.get(id);
@@ -209,6 +211,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override

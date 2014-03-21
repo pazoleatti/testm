@@ -328,20 +328,21 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public int getNearestFTVersionIdRight(int formTypeId, Date actualBeginVersion) {
+    public int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
             Map<String, Object> valueMap =  new HashMap<String, Object>();
             valueMap.put("typeId", formTypeId);
+            valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from form_template where type_id = :typeId");
             builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
             builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) order by version, edition) where rownum = 1");
+            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
@@ -410,7 +411,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
-                            formTemplate.getEdition(),
+                            getLastVersionEdition(formTemplate.getType().getId()) + 1,
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -446,6 +447,37 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
         }
+    }
+
+    @Override
+    public List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeIds) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeIds);
+        String sql = "SELECT type_id, COUNT(id) as version_count FROM form_template where type_id in(:typeId) and status in (0,1) GROUP BY type_id";
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении числа версий.", e);
+            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
+    }
+
+    @Override
+    public int getLastVersionEdition(int formTypeId) {
+        String sql = "SELECT edition FROM (SELECT edition" +
+                " from form_template WHERE type_id = ? and status in (0,1) order by edition DESC, version DESC) WHERE rownum = 1";
+        try {
+            return getJdbcTemplate().queryForObject(sql,
+                    new Object[]{formTypeId},
+                    Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении номера редакции макета", e);
+            throw new DaoException("Ошибка при получении номера редакции макета", e);
+        }
+
     }
 
     @Override

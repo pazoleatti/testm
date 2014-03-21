@@ -375,6 +375,28 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    public Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
+                                         Map<Long, Map<String, Long>> recordCache,
+                                         Map<Long, RefBookDataProvider> providerCache,
+                                         Map<Long, Map<String, RefBookValue>> refBookCache,
+                                         String alias, String value, Date date,
+                                         int rowIndex, int colIndex, Logger logger, boolean required) {
+        Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date);
+
+        if (record != null) {
+            return record;
+        }
+        RefBook rb = refBookFactory.get(refBookId);
+        String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        if (required) {
+            throw new ServiceException(msg);
+        } else {
+            logger.warn(msg);
+        }
+        return null;
+    }
+
+    @Override
     public Long getRefBookRecordId(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                    Map<Long, RefBookDataProvider> providerCache, String alias, String value, Date date,
                                    int rowIndex, String columnName, Logger logger, boolean required) {
@@ -540,5 +562,32 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return !CollectionUtils.isEmpty(prevDataRows);
         }
         return false;
+    }
+
+    /**
+     * Сравнить зависимое поле с ожидаемым.
+     *
+     * @param referenceValue значение зависомого поля
+     * @param expectedValue ожидаемое значение
+     * @param rowIndex номер строки в транспортном файле
+     * @param colIndex номер колонки в транспортном файле
+     * @param logger для вывода сообщений
+     * @param required фатальность/обязательность
+     */
+    void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
+                             Logger logger, boolean required) {
+        if (referenceValue == null && expectedValue == null) {
+            return;
+        }
+        if (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue)) {
+            return;
+        }
+        RefBook rb = refBookFactory.get(refBookId);
+        String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
+        if (required) {
+            throw new ServiceException(msg);
+        } else {
+            logger.warn(msg);
+        }
     }
 }

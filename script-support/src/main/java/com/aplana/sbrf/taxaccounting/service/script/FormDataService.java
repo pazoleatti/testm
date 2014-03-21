@@ -120,6 +120,28 @@ public interface FormDataService {
                             int rowIndex, int colIndex, Logger logger, boolean required);
 
     /**
+     * Получение Id записи справочника при импорте
+     * @param refBookId Id справочника
+     * @param recordCache Кэш записей
+     * @param providerCache Кэш провайдеров справочников
+     * @param refBookCache Кэш записей справочников
+     * @param alias Искомый атрибут справочника
+     * @param value Искомое значение справочника
+     * @param date Дата
+     * @param rowIndex Строка из файла для сообщения об ошибке
+     * @param colIndex Колонка из файла для сообщения об ошибке
+     * @param logger Логгер
+     * @param required Фатальность
+     * @return
+     */
+    Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
+                                  Map<Long, Map<String, Long>> recordCache,
+                                  Map<Long, RefBookDataProvider> providerCache,
+                                  Map<Long, Map<String, RefBookValue>> refBookCache,
+                                  String alias, String value, Date date,
+                                  int rowIndex, int colIndex, Logger logger, boolean required);
+
+    /**
      * Получение Id записи справочника
      * @param refBookId Id справочника
      * @param recordCache Кэш записей
