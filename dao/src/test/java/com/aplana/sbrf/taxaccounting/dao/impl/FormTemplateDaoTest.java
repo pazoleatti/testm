@@ -266,7 +266,7 @@ public class FormTemplateDaoTest {
 
     @Test
     public void testLastVersionEdition(){
-        Assert.assertEquals(1, formTemplateDao.getLastVersionEdition(2));
+        Assert.assertEquals(2, formTemplateDao.getLastVersionEdition(2));
     }
 
     @Test

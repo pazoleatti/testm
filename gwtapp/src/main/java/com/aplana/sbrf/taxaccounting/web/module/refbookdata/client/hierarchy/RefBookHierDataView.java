@@ -96,6 +96,12 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public void loadAndSelect(){
+        refbookDataTree.selectFirstItenOnLoad();
+        load();
+    }
+
+    @Override
     public void reload() {
         refbookDataTree.reload();
     }

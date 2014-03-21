@@ -10,6 +10,11 @@
         .header {
             font-size: 14px;
             color:  #636460;
+            white-space: nowrap;
+        }
+
+        .header div {
+            font-size: 14px !important;
         }
 
         .btnPanel {
@@ -57,7 +62,8 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar childValign="middle" height="100%">
-                            <g:Label text="Макеты деклараций" addStyleNames="{style.header}"/>
+                            <style:LinkAnchor ui:field="returnAnchor" title="Перейти к списку версий макета налоговой формы"
+                                              text="Версии макета" addStyleNames="{style.header}" disableImage="true"/>
                             <g:Label text="—" addStyleNames="{style.header}"/>
                         </style:LeftBar>
                     </fm:Left>

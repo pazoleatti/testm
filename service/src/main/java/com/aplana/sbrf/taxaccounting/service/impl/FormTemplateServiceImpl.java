@@ -36,7 +36,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	//private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;

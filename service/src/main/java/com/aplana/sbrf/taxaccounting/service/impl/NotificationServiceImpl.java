@@ -68,8 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
 			notifications.add(notificationDao.get(id));
 		}
 		int totalCount = notificationDao.getCountByFilter(filter);
-		PagingResult<Notification> result = new PagingResult<Notification>(notifications, totalCount);
-		return result;
+		return new PagingResult<Notification>(notifications, totalCount);
 	}
 
 	@Override

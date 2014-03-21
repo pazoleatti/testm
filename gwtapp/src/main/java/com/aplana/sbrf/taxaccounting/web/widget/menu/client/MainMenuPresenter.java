@@ -4,8 +4,9 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -19,7 +20,8 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 		void setMenuItems(List<MenuItem> links);
 		void setNotificationMenuItem(NotificationMenuItem item);
 		void updateNotificationCount(int count);
-	}
+        void selectNotificationMenuItem();
+    }
 	
 	private final DispatchAsync dispatchAsync;
 
@@ -44,7 +46,15 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 					public void onSuccess(GetMainMenuResult result) {
 						getView().setMenuItems(result.getMenuItems());
 						if (result.getNotificationMenuItemName() != null) {
-							getView().setNotificationMenuItem(new NotificationMenuItem(result.getNotificationMenuItemName(), MainMenuPresenter.this));
+                            NotificationMenuItem notificationMenuItem = new NotificationMenuItem(result.getNotificationMenuItemName());
+                            notificationMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
+                                @Override
+                                public void execute() {
+                                    showNotificationDialog();
+                                }
+                            });
+							getView().setNotificationMenuItem(notificationMenuItem);
+
 							refreshTimer = new Timer() {
 								@Override
 								public void run() {
@@ -62,6 +72,7 @@ public class MainMenuPresenter extends PresenterWidget<MainMenu>{
 	}
 
 	public void showNotificationDialog() {
+        getView().selectNotificationMenuItem();
 		addToPopupSlot(dialogPresenter);
 	}
 

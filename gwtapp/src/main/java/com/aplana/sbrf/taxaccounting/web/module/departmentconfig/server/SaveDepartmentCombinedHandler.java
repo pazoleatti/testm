@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -19,13 +20,10 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepa
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -37,8 +35,6 @@ import static java.util.Arrays.asList;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
-
-    private static final Log log = LogFactory.getLog(SaveDepartmentCombinedHandler.class);
 
     @Autowired
     private PeriodService reportService;

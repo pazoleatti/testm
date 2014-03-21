@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.scheduler.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaskSearchResultItem;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListAction;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.shared.GetTaskListResult;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +21,6 @@ import java.util.List;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 public class GetTaskListHandler extends AbstractActionHandler<GetTaskListAction, GetTaskListResult> {
-
-    private static final String DATE_FORMAT = "dd-MM-yyyy, HH:mm";
 
     @Autowired
     TaskManager taskManager;

@@ -74,14 +74,12 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
                 if (multiSelect != null) {
 
                     if (!multiSelect) {
-                        if (!getSelectedSet().isEmpty()) {
-                            if (getSelectedSet().iterator().next().equals(lazyTreeItem)) {
-                                return;
-                            }
-                            // для предыдушего радио-значения удаляем выделение
-                            getSelectedSet().iterator().next().setItemState(null);
-                        }
-                        getSelectedSet().clear();
+//                        if (getSelectedSet().iterator().next().equals(lazyTreeItem)) {
+//                            return;
+//                        }
+                        // для предыдушего радио-значения удаляем выделение
+                        //getSelectedSet().iterator().next().setItemState(null);
+                        //getSelectedSet().clear();
                         //lazyTreeItem.setItemState(true);
                         selectionModel.setSelected((H) lazyTreeItem, true);
                     } else {

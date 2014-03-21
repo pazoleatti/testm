@@ -55,7 +55,6 @@ public class MappingServiceImpl implements MappingService {
     private static final String RNU_EXT = ".rnu";
     private static final String XML_EXT = ".xml";
     private static final String DATE_APPENDER_XML = "20";
-    private static final String DATE_APPENDER_RNU = "01.01.";
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {

@@ -46,7 +46,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         }
 
         if (err.size() != 0) {
-		    Dialog.errorMessage("Ошибка", "Не заполнены обязательные атрибуты, необходимые для создания назначения: "+ StringUtils.join(err.toArray(), ','));
+		    Dialog.errorMessage("Ошибка", "Не заполнены обязательные атрибуты, необходимые для создания назначения: "+ StringUtils.join(err.toArray(), ", ", "\""));
 		    return;
 	    }
 
