@@ -1,7 +1,9 @@
 package form_template.income.rnu39_2.v1970
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -64,7 +66,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -111,13 +115,12 @@ def startDate = null
 @Field
 def endDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
-//// Обертки методов
-
-// Поиск записи в справочнике по значению (для расчетов)
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
@@ -357,7 +360,11 @@ def calc14(def row, def dateStart, def dateEnd, def isA) {
         } else {
             def t = row.maturityDateCurrent - row.maturityDatePrev
             // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-            def record22 = getRefBookRecord(22, 'CODE_NUMBER', currencyCode, row.maturityDateCurrent, row.getIndex(), getColumnName(row, 'currencyCode'), true)
+            def recordId = formDataService.getRefBookRecordId(15, recordCache, providerCache, 'CODE', currencyCode,
+                    getReportPeriodEndDate(), row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
+            def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER',
+                    "${recordId}", row.maturityDateCurrent, row.getIndex(), getColumnName(row, 'currencyCode'),
+                    logger, true)
             if (record22 == null) {
                 return null
             } else {
@@ -389,7 +396,7 @@ def roundValue(def value, int precision) {
     }
 }
 
-/** Отсорировать данные (по графе 1, 2). */
+/** Отсортировать данные (по графе 1, 2). */
 void sort(def dataRows) {
     // список со списками строк каждого раздела для сортировки
     def sortRows = []
@@ -441,4 +448,200 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
     }
     return endDate
+}
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Код валюты номинала', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'Код валюты номинала',
+            (xml.row[0].cell[2]): 'Эмитент',
+            (xml.row[0].cell[3]): 'Номер государственной регистрации',
+            (xml.row[0].cell[4]): 'Количество облигаций (шт.)',
+            (xml.row[0].cell[5]): 'Номинальная стоимость лота (руб.коп.)',
+            (xml.row[0].cell[6]): 'Дата открытия короткой позиции',
+            (xml.row[0].cell[7]): 'Дата закрытия короткой позиции',
+            (xml.row[0].cell[8]): 'Сумма ПКД полученного при открытии короткой позиции',
+            (xml.row[0].cell[9]): 'Сумма ПКД уплаченного при закрытии короткой позиции',
+            (xml.row[0].cell[10]): 'Дата погашения предыдущего купона',
+            (xml.row[0].cell[11]): 'Дата погашения текущего купона',
+            (xml.row[0].cell[12]): 'Ставка текущего купона (% годовых)',
+            (xml.row[0].cell[13]): 'Объявленный доход по текущему купону (руб.коп.)',
+            (xml.row[0].cell[14]): 'Выплачиваемый купонный доход (руб.коп.)',
+            (xml.row[0].cell[15]): 'Всего процентный доход (руб.коп.)',
+            (xml.row[1].cell[1]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7',
+            (xml.row[1].cell[8]): '8',
+            (xml.row[1].cell[9]): '9',
+            (xml.row[1].cell[10]): '10',
+            (xml.row[1].cell[11]): '11',
+            (xml.row[1].cell[12]): '12',
+            (xml.row[1].cell[13]): '13',
+            (xml.row[1].cell[14]): '14',
+            (xml.row[1].cell[15]): '15',
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными.
+def addData(def xml, int headRowCount) {
+    endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def groupsMap = [
+            'А. Открытые короткие позиции':'A',
+            'Б. Закрытые короткие позиции':'B'
+    ]
+    def subGroupsMap = [
+            '1. Ипотечные облигации, выпущенные до 1 января 2007 года':'1',
+            '2. Ипотечные облигации, выпущенные после 1 января 2007 года':'2',
+            '3. Корпоративные облигации':'3',
+            '4. ОВГВЗ':'4',
+            '5. Прочие еврооблигации':'5'
+    ]
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = dataRowHelper.allCached
+    //удаляем все нефиксированные строки
+    def deleteList = []
+    rows.each {
+        if (it.getAlias() == null){
+            deleteList.add(it)
+        }
+    }
+    rows.removeAll(deleteList)
+
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    def group
+    def subGroup
+    def sectionRowsMap = [:]
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if (groupsMap.get(row.cell[0].text()) != null) {
+            group = groupsMap.get(row.cell[0].text())
+            continue
+        }
+
+        if (subGroupsMap.get(row.cell[0].text()) != null) {
+            subGroup = subGroupsMap.get(row.cell[0].text())
+            continue
+        }
+
+        //Пропуск пустых и итоговых строк
+        if (row.cell[0].text() || !(row.cell[1].text())) {
+            continue
+        }
+
+        def xmlIndexCol = 0
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        newRow.keySet().each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        xmlIndexCol++
+        // графа 1 зависима от 2-й
+        getRecordIdImport(84, 'CODE_CUR', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 2
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 3 зависима от 2-й
+        getRecordIdImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 4
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 5
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 6
+        newRow.shortPositionOpen = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.shortPositionClose = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 8
+        newRow.pkdSumOpen = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 9
+        newRow.pkdSumClose = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 10
+        newRow.maturityDatePrev = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 11
+        newRow.maturityDateCurrent = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.currentCouponRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 13
+        newRow.incomeCurrentCoupon = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 14
+        newRow.couponIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 15
+        newRow.totalPercIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        if (group && subGroup) {
+            def section = group + subGroup
+            if (sectionRowsMap.get(section) != null) {
+                sectionRowsMap.get(section).add(newRow)
+            } else {
+                ArrayList<DataRow> newList = new ArrayList<DataRow>()
+                newList.add(newRow)
+                sectionRowsMap.put(section, newList)
+            }
+        }
+    }
+    sectionRowsMap.keySet().each { sectionKey ->
+        rows.addAll(getDataRow(rows, sectionKey).getIndex(), sectionRowsMap.get(sectionKey))
+        rows.eachWithIndex { row, i ->
+            row.setIndex(i + 1)
+        }
+    }
+    dataRowHelper.save(rows)
 }

@@ -67,7 +67,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -107,6 +109,13 @@ def startDate = null
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -301,14 +310,14 @@ BigDecimal calc14(def dataRows, def row, def period) {
             return null
         }
         def String cellName = getColumnName(row, 'currencyCode')
-        // TODO (Ramil Timerbaev) проверить
-        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', currencyCode,
+        def recordId = formDataService.getRefBookRecordId(15, recordCache, providerCache, 'CODE', currencyCode,
                 row.maturityDateCurrent, row.getIndex(), cellName, logger, true)
+        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', 
+                "${recordId}", row.maturityDateCurrent, row.getIndex(), cellName, logger, true)
         def rate = record?.RATE?.numberValue
         if (rate == null) {
             return null
         }
-        System.out.println('====== record = ' + record) // TODO (Ramil Timerbaev)
         return round(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 * rate)
     }
 }
@@ -381,4 +390,199 @@ void sort(def dataRows) {
             }
         }
     }
+}
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Код валюты номинала', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): 'Код валюты номинала',
+            (xml.row[0].cell[2]): 'Эмитент',
+            (xml.row[0].cell[3]): 'Номер государственной регистрации',
+            (xml.row[0].cell[4]): 'Количество облигаций (шт.)',
+            (xml.row[0].cell[5]): 'Номинальная стоимость лота (руб.коп.)',
+            (xml.row[0].cell[6]): 'Дата открытия короткой позиции',
+            (xml.row[0].cell[7]): 'Дата закрытия короткой позиции',
+            (xml.row[0].cell[8]): 'Сумма ПКД полученного при открытии короткой позиции',
+            (xml.row[0].cell[9]): 'Сумма ПКД уплаченного при закрытии короткой позиции',
+            (xml.row[0].cell[10]): 'Дата погашения предыдущего купона',
+            (xml.row[0].cell[11]): 'Дата погашения текущего купона',
+            (xml.row[0].cell[12]): 'Ставка текущего купона (% годовых)',
+            (xml.row[0].cell[13]): 'Объявленный доход по текущему купону (руб.коп.)',
+            (xml.row[0].cell[14]): 'Выплачиваемый купонный доход (руб.коп.)',
+            (xml.row[0].cell[15]): 'Всего процентный доход (руб.коп.)',
+            (xml.row[1].cell[1]): '1',
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4',
+            (xml.row[1].cell[5]): '5',
+            (xml.row[1].cell[6]): '6',
+            (xml.row[1].cell[7]): '7',
+            (xml.row[1].cell[8]): '8',
+            (xml.row[1].cell[9]): '9',
+            (xml.row[1].cell[10]): '10',
+            (xml.row[1].cell[11]): '11',
+            (xml.row[1].cell[12]): '12',
+            (xml.row[1].cell[13]): '13',
+            (xml.row[1].cell[14]): '14',
+            (xml.row[1].cell[15]): '15'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 1)
+}
+
+// Заполнить форму данными.
+def addData(def xml, int headRowCount) {
+    endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def groupsMap = [
+            'А. Открытые короткие позиции':'A',
+            'Б. Закрытые короткие позиции':'B'
+    ]
+    def subGroupsMap = [
+            '1. ОФЗ':'1',
+            '2. Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет':'2',
+            '3. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет':'3',
+            '4. Государственные облигации Республики Беларусь':'4'
+    ]
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+
+    def rows = dataRowHelper.allCached
+    //удаляем все нефиксированные строки
+    def deleteList = []
+    rows.each {
+        if (it.getAlias() == null){
+            deleteList.add(it)
+        }
+    }
+    rows.removeAll(deleteList)
+
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    def group
+    def subGroup
+    def sectionRowsMap = [:]
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if (groupsMap.get(row.cell[0].text()) != null) {
+            group = groupsMap.get(row.cell[0].text())
+            continue
+        }
+
+        if (subGroupsMap.get(row.cell[0].text()) != null) {
+            subGroup = subGroupsMap.get(row.cell[0].text())
+            continue
+        }
+
+        //Пропуск пустых и итоговых строк
+        if (row.cell[0].text() || !(row.cell[1].text())) {
+            continue
+        }
+
+        def xmlIndexCol = 0
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        newRow.keySet().each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+
+        xmlIndexCol++
+        // графа 1 зависима от 2-й
+        getRecordIdImport(84, 'CODE_CUR', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 2
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 3 зависима от 2-й
+        getRecordIdImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 4
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 5
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 6
+        newRow.shortPositionOpen = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.shortPositionClose = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 8
+        newRow.pkdSumOpen = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 9
+        newRow.pkdSumClose = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 10
+        newRow.maturityDatePrev = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 11
+        newRow.maturityDateCurrent = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.currentCouponRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 13
+        newRow.incomeCurrentCoupon = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 14
+        newRow.couponIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 15
+        newRow.totalPercIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        if (group && subGroup) {
+            def section = group + subGroup
+            if (sectionRowsMap.get(section) != null) {
+                sectionRowsMap.get(section).add(newRow)
+            } else {
+                ArrayList<DataRow> newList = new ArrayList<DataRow>()
+                newList.add(newRow)
+                sectionRowsMap.put(section, newList)
+            }
+        }
+    }
+    sectionRowsMap.keySet().each { sectionKey ->
+        rows.addAll(getDataRow(rows, sectionKey).getIndex(), sectionRowsMap.get(sectionKey))
+        rows.eachWithIndex { row, i ->
+            row.setIndex(i + 1)
+        }
+    }
+    dataRowHelper.save(rows)
 }
