@@ -349,19 +349,20 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion) {
+    public int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
             Map<String, Object> valueMap =  new HashMap<String, Object>();
             valueMap.put("typeId", typeId);
+            valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
             StringBuilder builder = new StringBuilder("select * from (select id");
             builder.append(" from declaration_template where declaration_type_id = :typeId");
             builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) order by version) where rownum = 1");
+            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
             return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;

@@ -107,7 +107,7 @@ public interface DeclarationTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion);
+    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии

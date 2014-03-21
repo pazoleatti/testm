@@ -110,7 +110,7 @@ public interface FormTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestFTVersionIdRight(int formTypeId, Date actualBeginVersion);
+    int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии

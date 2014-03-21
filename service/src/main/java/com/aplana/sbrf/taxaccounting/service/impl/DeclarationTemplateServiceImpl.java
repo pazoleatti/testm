@@ -162,7 +162,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status) {
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
+        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), createStatusList(status),
+                declarationTemplate.getVersion());
         if (id == 0)
             return null;
         return declarationTemplateDao.get(id);

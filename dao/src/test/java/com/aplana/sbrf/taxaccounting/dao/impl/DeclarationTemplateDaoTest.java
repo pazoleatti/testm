@@ -218,7 +218,10 @@ public class DeclarationTemplateDaoTest {
         Date actualBeginVersion = new Date(calendar.getTime().getTime());
         calendar.clear();
 
-        Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, actualBeginVersion));
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(VersionedObjectStatus.NORMAL.getId());
+        list.add(VersionedObjectStatus.DRAFT.getId());
+        Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, list, actualBeginVersion));
 
     }
 
