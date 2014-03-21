@@ -117,7 +117,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 					"insert into declaration_template (id, edition, name, version, is_active, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
-							declarationTemplate.getEdition(),
+							getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
                             declarationTemplate.getName(),
 							declarationTemplate.getVersion(),
 							declarationTemplate.isActive(),
@@ -303,7 +303,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
             builder.append(" OR ID = (select id from (select id, row_number() ").
-                    append(isSupportOver() ? " over(partition by TYPE_ID order by version)" : " over()").
+                    append(isSupportOver() ? " over(partition by DECLARATION_TYPE_ID order by version)" : " over()").
                     append(" rn FROM DECLARATION_TEMPLATE where TRUNC(version, 'DD') > :actualStartVersion AND STATUS in (0,1,2) AND DECLARATION_TYPE_ID = :typeId AND id <> :templateId) WHERE rn = 1)");
         builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null)");
         if (templateId != 0)
@@ -331,16 +331,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("templateId", templateId);
-            valueMap.put("typeId", typeId);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select  version - INTERVAL '1' day");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) and id <> :templateId order by version) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Date.class);
+            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
+                    " from declaration_template where declaration_type_id = ?" +
+                    " and version > ? and status in (0,1,2) and id <> ? order by version) where rownum = 1",
+                    new Object[]{typeId, actualBeginVersion, templateId},
+                    Date.class).getTime());
         } catch(EmptyResultDataAccessException e){
             return null;
         } catch (DataAccessException e){
@@ -424,6 +419,37 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> versionTemplateCountByType(List<Integer> typeIds) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeIds", typeIds);
+        String sql = "SELECT declaration_type_id as type_id, COUNT(id) as version_count FROM declaration_template " +
+                "where declaration_type_id in(:typeIds) and status in (0,1) GROUP BY declaration_type_id";
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении числа версий.", e);
+            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
+    }
+
+    @Override
+    public int getLastVersionEdition(int typeId) {
+        String sql = "SELECT edition FROM (SELECT edition" +
+                " FROM declaration_template WHERE declaration_type_id = ? AND status in (0,1)  order by edition DESC, version DESC) WHERE  rownum = 1 ";
+        try {
+            return getJdbcTemplate().queryForObject(sql,
+                    new Object[]{typeId},
+                    Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении номера редакции макета", e);
+            throw new DaoException("Ошибка при получении номера редакции макета", e);
         }
     }
 }

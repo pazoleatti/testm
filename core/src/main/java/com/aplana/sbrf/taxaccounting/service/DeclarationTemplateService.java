@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с шаблонами деклараций 
@@ -142,5 +143,12 @@ public interface DeclarationTemplateService {
      * @return количество
      */
     int versionTemplateCount(int typeId, VersionedObjectStatus... status);
+
+    /**
+     * Возвращает количество активных версий для каждого переданного вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество активных версий для id макета
+     */
+    Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds);
 
 }

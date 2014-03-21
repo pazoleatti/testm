@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
@@ -132,4 +133,18 @@ public interface DeclarationTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int decTypeId, List<Integer> statusList);
+
+    /**
+     * Количество активных весий для вида шаблона
+     * @param typeIds вид шаблона
+     * @return количество
+     */
+    List<Map<String,Object>> versionTemplateCountByType(List<Integer> typeIds);
+
+    /**
+     * Получает номер последней версии макета.
+     * @param typeId  вид шаблона
+     * @return номер следующей версии шаблона
+     */
+    int getLastVersionEdition(int typeId);
 }

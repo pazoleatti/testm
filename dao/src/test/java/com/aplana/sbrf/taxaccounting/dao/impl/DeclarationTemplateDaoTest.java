@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -79,9 +80,6 @@ public class DeclarationTemplateDaoTest {
 
 	@Test
 	public void testSaveNew() {
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
 
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
 		declarationTemplate.setActive(true);
@@ -91,7 +89,6 @@ public class DeclarationTemplateDaoTest {
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setType(declarationType);
         declarationTemplate.setJrxmlBlobId("1");
-        declarationTemplate.setEdition(declarationTemplateDao.versionTemplateCount(1, list) + 1);
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 
 		int id = declarationTemplateDao.save(declarationTemplate);
@@ -102,7 +99,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
-        assertEquals(3, savedDeclarationTemplate.getEdition().intValue());
+        assertEquals(2, savedDeclarationTemplate.getEdition().intValue());
 	}
 
 	@Test
@@ -274,6 +271,19 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals(2, declarationTemplateDao.versionTemplateCount(1, list));
 
     }
+
+    @Test
+    public void testVersionTemplateCountByType(){
+        List<Map<String, Object>> list = declarationTemplateDao.versionTemplateCountByType(Arrays.asList(1,2));
+        Assert.assertEquals(new BigDecimal(1), list.get(0).get("type_id"));
+        Assert.assertEquals((long) 2, list.get(0).get("version_count"));
+    }
+
+    @Test
+    public void testGetLastVersionEdition(){
+        Assert.assertEquals(1, declarationTemplateDao.getLastVersionEdition(2));
+    }
+
 
     @Test
     public void getBadDeclarationTemplateScriptTest(){

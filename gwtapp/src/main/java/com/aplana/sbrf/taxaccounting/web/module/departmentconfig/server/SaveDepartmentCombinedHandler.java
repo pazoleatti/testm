@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -10,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 /**
  * @author Dmitriy Levykin
  */
@@ -37,6 +41,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
     @Autowired
     private RefBookFactory rbFactory;
+
+    @Autowired
+    private DeclarationDataSearchService declarationDataSearchService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -163,6 +170,20 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             } else {
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);
             }
+
+            DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
+            declarationDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
+            declarationDataFilter.setDepartmentIds(asList(action.getDepartment()));
+            declarationDataFilter.setSearchOrdering(DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME);
+            declarationDataFilter.setStartIndex(0);
+            declarationDataFilter.setCountOfRecords(10);
+            PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
+            String text = "";
+            for(DeclarationDataSearchResultItem item: page) {
+                if (text != "") text += ", ";
+                text += item.getDeclarationType();
+            }
+            result.setDeclarationTypes(text);
 
             // Запись ошибок в лог при наличии
             if (!logger.getEntries().isEmpty()) {
