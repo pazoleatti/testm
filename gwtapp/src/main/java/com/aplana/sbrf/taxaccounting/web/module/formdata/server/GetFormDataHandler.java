@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormData;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -46,6 +50,12 @@ public class GetFormDataHandler extends
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private RefBookFactory refBookFactory;
+
+    private static final long REF_BOOK_ID = 8L;
+    private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	public GetFormDataHandler() {
 		super(GetFormData.class);
@@ -109,7 +119,14 @@ public class GetFormDataHandler extends
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
 		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-		result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
+        // http://jira.aplana.com/browse/SBRFACCTAX-6399
+        if (formData.getKind() == FormDataKind.PRIMARY && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+            RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
+            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+            Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
+            reportPeriod.setName(ReportPeriodSpecificNave.fromId(code).getName());
+        }
+        result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
 		result.setReportPeriod(reportPeriod);
 		result.setDepartmenName(departmentService.getDepartment(
 				formData.getDepartmentId()).getName());
