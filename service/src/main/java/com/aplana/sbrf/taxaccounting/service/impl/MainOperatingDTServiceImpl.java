@@ -90,7 +90,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         checkError(logger);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        declarationTemplate.setEdition(declarationTemplateService.versionTemplateCount(declarationTemplate.getType().getId()) + 1);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
                 declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);

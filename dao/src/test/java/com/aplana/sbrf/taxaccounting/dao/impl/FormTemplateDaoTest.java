@@ -13,12 +13,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -257,6 +255,18 @@ public class FormTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(1, formTemplateDao.versionTemplateCount(1, list));
+    }
+
+    @Test
+    public void testVersionTemplateCountByType(){
+        List<Map<String, Object>> list = formTemplateDao.versionTemplateCountByType(Arrays.asList(1,2));
+        Assert.assertEquals(new BigDecimal(1), list.get(0).get("type_id"));
+        Assert.assertEquals((long) 1, list.get(0).get("version_count"));
+    }
+
+    @Test
+    public void testLastVersionEdition(){
+        Assert.assertEquals(1, formTemplateDao.getLastVersionEdition(2));
     }
 
     @Test

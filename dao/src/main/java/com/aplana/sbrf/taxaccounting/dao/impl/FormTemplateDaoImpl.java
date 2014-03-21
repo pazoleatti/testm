@@ -411,7 +411,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
-                            formTemplate.getEdition(),
+                            getLastVersionEdition(formTemplate.getType().getId()) + 1,
                             formTemplate.getVersion(),
                             formTemplate.isFixedRows(),
                             formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -447,6 +447,37 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
         }
+    }
+
+    @Override
+    public List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeIds) {
+        Map<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeIds);
+        String sql = "SELECT type_id, COUNT(id) as version_count FROM form_template where type_id in(:typeId) and status in (0,1) GROUP BY type_id";
+
+        try {
+            return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении числа версий.", e);
+            throw new DaoException("Ошибка при получении числа версий.", e.getMessage());
+        }
+    }
+
+    @Override
+    public int getLastVersionEdition(int formTypeId) {
+        String sql = "SELECT edition FROM (SELECT edition" +
+                " from form_template WHERE type_id = ? and status in (0,1) order by edition DESC, version DESC) WHERE rownum = 1";
+        try {
+            return getJdbcTemplate().queryForObject(sql,
+                    new Object[]{formTypeId},
+                    Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при получении номера редакции макета", e);
+            throw new DaoException("Ошибка при получении номера редакции макета", e);
+        }
+
     }
 
     @Override

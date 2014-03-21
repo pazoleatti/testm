@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
@@ -182,6 +183,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public int versionTemplateCount(int typeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return declarationTemplateDao.versionTemplateCount(typeId, statusList);
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override
