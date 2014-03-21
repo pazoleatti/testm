@@ -99,15 +99,6 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         intersection.getTemplateId());
                         }
-                        //2 Шаг. Система проверяет наличие даты окончания актуальности.
-                        //Пересечений нет
-                        else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
-                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
-                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
-                            DeclarationTemplate formTemplate =  createFakeTemplate(date, newIntersection.getTypeId());
-                            declarationTemplateService.save(formTemplate);
-                        }
                         break;
                     case FAKE:
                         compareResult = newIntersection.compareTo(intersection);
@@ -124,9 +115,13 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                         break;
                 }
             }
-        } else if (versionActualDateEnd != null){
+        }
+        //2 Шаг. Система проверяет наличие даты окончания актуальности.
+        //Пересечений нет
+        if (versionActualDateEnd != null){
+            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
             cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
-            DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, typeId);
+            DeclarationTemplate declarationTemplate =  createFakeTemplate(date, typeId);
             declarationTemplateService.save(declarationTemplate);
         }
     }
