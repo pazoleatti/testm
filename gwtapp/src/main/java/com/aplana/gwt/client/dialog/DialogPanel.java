@@ -85,7 +85,7 @@ public class DialogPanel extends Composite {
                 closeAfterCkick();
             }
         });
-
+        setWidth("450px");
     }
 
     private void closeAfterCkick(){

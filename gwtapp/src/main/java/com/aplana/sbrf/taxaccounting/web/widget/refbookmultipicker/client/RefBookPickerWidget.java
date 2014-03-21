@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.Picker
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -48,7 +49,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @UiField
     ModalWindow modalPanel;
     @UiField
-    HTMLPanel widgetWrapper;
+    ResizeLayoutPanel widgetWrapper;
 
     @UiField
     Button searchButton,
@@ -394,6 +395,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setSearchEnabled(boolean isSearchEnabled) {
         filterPanel.setVisible(isSearchEnabled);
+        widgetWrapper.getElement().getStyle().setTop(isSearchEnabled ? 55 : 30, Style.Unit.PX);
     }
 
     @Override
