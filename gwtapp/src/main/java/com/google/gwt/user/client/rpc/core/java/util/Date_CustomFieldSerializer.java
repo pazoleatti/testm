@@ -29,9 +29,7 @@ public final class Date_CustomFieldSerializer extends
 		for (int i = 0; i < arr.length; i++) {
 			intArr[i] = Integer.valueOf(arr[i]);
 		}
-		@SuppressWarnings("deprecation")
-		Date d = new Date(intArr[0], intArr[1], intArr[2], intArr[3], intArr[4], intArr[5]);
-		return d;
+		return new Date(intArr[0], intArr[1], intArr[2], intArr[3], intArr[4], intArr[5]);
 	}
 
 	@SuppressWarnings("deprecation")

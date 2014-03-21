@@ -43,8 +43,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     private Set<Long> longList = new LinkedHashSet<Long>();
 
-    // так как развыделение асинхронное используем флаг для создания события измнеения
-    private Boolean isClearEvent = false;
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
 

@@ -30,7 +30,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -51,8 +50,6 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(String tableName, Long refBookId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {

@@ -37,13 +37,6 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	@Autowired
 	private FormTypeDao formTypeDao;
 
-	private static final String dbDateFormat = "YYYYMMDD HH24:MI:SS";
-	private static final String dateFormat = "yyyyMMdd HH:mm:ss";
-	private static final SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-    //Т.к. в базе при построении запросы часы/минуты/секунды присваиваются значения 00:00:00
-    //соответственно поиск только за прошлый день поучается и надо прибавить один день, чтобы получить поиск за текущий
-    private static final int oneDayTime = 24 * 60 * 60 * 1000;
-
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select ");

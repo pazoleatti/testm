@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,8 +29,6 @@ import java.util.zip.ZipInputStream;
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RefBookExternalServiceImpl implements RefBookExternalService {
-
-    private Log log = LogFactory.getLog(getClass());
 
     @Autowired
     private ConfigurationService configurationService;

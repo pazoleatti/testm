@@ -84,7 +84,6 @@ public interface DeclarationTemplateDao {
      * Метод для поиска пересечений версий макетов в указанных датах
      * @param formTypeId вид шаблона
      * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
-     * @param statusList статус формы
      * @param actualStartVersion дата начала
      * @param actualEndVersion дата окончания
      * @return список пеересечений

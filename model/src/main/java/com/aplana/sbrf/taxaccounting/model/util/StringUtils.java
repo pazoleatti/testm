@@ -42,7 +42,9 @@ public final class StringUtils {
 			}
 			if (array[i] != null) {
 				if (decorator != null) {
-					buf.append(decorator + array[i] + decorator);
+					buf.append(decorator);
+					buf.append(array[i]);
+					buf.append(decorator);
 				} else {
 					buf.append(array[i]);
 				}
