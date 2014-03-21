@@ -331,16 +331,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("templateId", templateId);
-            valueMap.put("typeId", typeId);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select  version - INTERVAL '1' day");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (0,1,2) and id <> :templateId order by version) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Date.class);
+            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
+                    " from declaration_template where declaration_type_id = ?" +
+                    " and version > ? and status in (0,1,2) and id <> ? order by version) where rownum = 1",
+                    new Object[]{typeId, actualBeginVersion, templateId},
+                    Date.class).getTime());
         } catch(EmptyResultDataAccessException e){
             return null;
         } catch (DataAccessException e){
