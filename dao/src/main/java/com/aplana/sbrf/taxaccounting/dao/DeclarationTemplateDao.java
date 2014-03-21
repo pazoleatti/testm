@@ -135,16 +135,16 @@ public interface DeclarationTemplateDao {
     int versionTemplateCount(int decTypeId, List<Integer> statusList);
 
     /**
-     * Количество активных весий для вида шаблона
+     * Количество активных версий для вида шаблона
      * @param typeIds вид шаблона
      * @return количество
      */
     List<Map<String,Object>> versionTemplateCountByType(List<Integer> typeIds);
 
     /**
-     * Получает номер последней версии макета.
+     * Получает номер последней редакции макета.
      * @param typeId  вид шаблона
-     * @return номер следующей версии шаблона
+     * @return номер последней редакции шаблона
      */
     int getLastVersionEdition(int typeId);
 }

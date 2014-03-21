@@ -465,8 +465,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     public int getLastVersionEdition(int formTypeId) {
-        String sql = "SELECT edition FROM (SELECT edition" +
-                " from form_template WHERE type_id = ? and status in (0,1) order by edition DESC, version DESC) WHERE rownum = 1";
+        String sql = "SELECT MAX(edition) FROM form_template WHERE type_id = ? AND status IN (0, 1)";
         try {
             return getJdbcTemplate().queryForObject(sql,
                     new Object[]{formTypeId},

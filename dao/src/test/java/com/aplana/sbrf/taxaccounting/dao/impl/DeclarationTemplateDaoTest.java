@@ -99,7 +99,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
 		assertTrue(savedDeclarationTemplate.isActive());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
-        assertEquals(2, savedDeclarationTemplate.getEdition().intValue());
+        assertEquals(3, savedDeclarationTemplate.getEdition().intValue());
 	}
 
 	@Test
@@ -281,7 +281,7 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testGetLastVersionEdition(){
-        Assert.assertEquals(1, declarationTemplateDao.getLastVersionEdition(2));
+        Assert.assertEquals(3, declarationTemplateDao.getLastVersionEdition(2));
     }
 
 

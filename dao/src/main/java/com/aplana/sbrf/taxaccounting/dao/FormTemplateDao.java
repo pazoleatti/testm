@@ -152,9 +152,9 @@ public interface FormTemplateDao {
     List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeId);
 
     /**
-     * Получает номер последней версии макета.
+     * Получает номер последней редакции макета.
      * @param formTypeId  вид шаблона
-     * @return номер следующей версии шаблона
+     * @return номер последней редакции шаблона
      */
     int getLastVersionEdition(int formTypeId);
 
