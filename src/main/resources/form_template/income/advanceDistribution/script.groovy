@@ -299,14 +299,14 @@ def calc10(def row, def propertyPriceSumm, def workersCountSumm) {
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
         return roundValue((row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2, 8)
     }
-    return null
+    return 0
 }
 
 def calc11(def row, def taxBase) {
     if (row.baseTaxOf != null && taxBase != null) {
         return roundValue(taxBase * row.baseTaxOf / 100, 0)
     }
-    return null
+    return 0
 }
 
 /**
@@ -806,29 +806,52 @@ void calcColumnFrom13To21(def row, def sumNal, def reportPeriod) {
     def tmp
 
     // графа 13
-    row.taxSum = (row.baseTaxOfRub > 0 ? roundValue(row.baseTaxOfRub * getTaxRateAttribute(row.subjectTaxStavka) / 100, 0) : 0)
+    if (row.baseTaxOfRub == null || row.subjectTaxStavka == null) {
+        row.taxSum = 0
+    } else {
+        row.taxSum = (row.baseTaxOfRub > 0 ? roundValue(row.baseTaxOfRub * getTaxRateAttribute(row.subjectTaxStavka) / 100, 0) : 0)
+    }
 
     // графа 14
-    row.taxSumOutside = roundValue(sumNal * row.baseTaxOf / 100, 0)
+    if (sumNal == null || row.baseTaxOf == null) {
+        row.taxSumOutside = 0
+    } else {
+        row.taxSumOutside = roundValue(sumNal * row.baseTaxOf / 100, 0)
+    }
 
     // графа 15
-    row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
-        row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+    if (row.taxSum == null || row.subjectTaxCredit == null || row.taxSumOutside == null) {
+        row.taxSumToPay = 0
+    } else {
+        row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
+                row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+    }
 
     // графа 16
-    row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
-        (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+    if (row.taxSum == null || row.subjectTaxCredit == null || row.taxSumOutside == null) {
+        row.taxSumToReduction = 0
+    } else {
+        row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
+                (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+    }
 
     // графа 19
     row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : 0)
 
     // графа 20
-    row.everyMonthForThirdKvartalNextPeriod =
-        (reportPeriod.order == 2 ? row.taxSum - row.everyMonthForSecondKvartalNextPeriod : 0)
+    if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null) {
+        row.everyMonthForThirdKvartalNextPeriod = 0
+    } else {
+        row.everyMonthForThirdKvartalNextPeriod = row.taxSum - row.everyMonthForSecondKvartalNextPeriod
+    }
 
     // графа 21
-    row.everyMonthForFourthKvartalNextPeriod =
-        (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+    if (reportPeriod.order != 3 || row.taxSum == null || row.everyMonthForThirdKvartalNextPeriod == null) {
+        row.everyMonthForFourthKvartalNextPeriod = 0
+    } else {
+        row.everyMonthForFourthKvartalNextPeriod =
+                (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+    }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
     // графа 17

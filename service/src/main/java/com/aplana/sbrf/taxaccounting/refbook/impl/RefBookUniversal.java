@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -293,7 +294,11 @@ public class RefBookUniversal implements RefBookDataProvider {
      * Обработка пересечений версий
      */
     private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
-        boolean isFatalErrorExists = false;
+        for (CheckCrossVersionsResult result : results) {
+            if (result.getResult() == CrossResult.FATAL_ERROR) {
+                throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
+            }
+        }
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
@@ -308,22 +313,12 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
                 refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                updateResults(results, result);
+                //updateResults(results, result);
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
                 refBookUtils.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
-                updateResults(results, result);
+                //updateResults(results, result);
             }
-        }
-
-        for (CheckCrossVersionsResult result : results) {
-            if (result.getResult() == CrossResult.FATAL_ERROR) {
-                isFatalErrorExists = true;
-            }
-        }
-
-        if (isFatalErrorExists) {
-            throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
         }
     }
 
@@ -423,6 +418,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
@@ -463,6 +459,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
+            //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {
@@ -489,6 +486,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         try {
+            //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {
