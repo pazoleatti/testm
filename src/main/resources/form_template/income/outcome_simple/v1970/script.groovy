@@ -115,6 +115,22 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
     return null
 }
 
+// Метод заполняющий в кэш все записи для разыменывавания
+void fillRecordsMap(def ref_id, String alias, List<String> values, Date date) {
+    def filterList = values.collect {
+        "LOWER($alias) = LOWER('$it')"
+    }
+    def filter = filterList.join(" OR ")
+    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
+    records.each { record ->
+        filter = "LOWER($alias) = LOWER('${record[alias]}')"
+        if (recordCache[ref_id] == null) {
+            recordCache[ref_id] = [:]
+        }
+        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
+}
+
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -262,7 +278,6 @@ void calculationControlGraphs(def dataRows) {
 
 /** Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка. */
 def consolidationBank(def dataRows) {
-    println("consolidationBank")
 
     // очистить форму
     dataRows.each { row ->
@@ -299,7 +314,6 @@ def consolidationBank(def dataRows) {
 
 /** Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП. */
 void consolidationSummary(def dataRows) {
-    println("consolidationSummary")
 
     // очистить форму
     dataRows.each { row ->
@@ -348,11 +362,17 @@ void consolidationSummary(def dataRows) {
         }
     }
 
+    // Прошел по строкам и получил список кну
+    def knuList = ((2..106) + (109..211)).collect{
+        def row = getDataRow(dataRows, 'R' + it)
+        return row.consumptionTypeId
+    }
+    fillRecordsMap(27, 'CODE', knuList, getReportPeriodEndDate())
+
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     departmentFormTypeService.getSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
-            // println("child source =" + child)
             def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
             switch (child.formType.id) {
             // рну 7
@@ -484,7 +504,6 @@ def getFormDataRNU14() {
 def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def resultAlias) {
     def sum = 0
     for (row in dataRowsChild) {
-        //println("value1 = ${value1} row[alias1] = ${row[alias1]}")
         if (value1 == row[alias1]) {
             sum += (row[resultAlias] ?: 0)
         }
