@@ -112,7 +112,6 @@ public class MappingServiceImpl implements MappingService {
             } else {
                 formData = formDataDao.find(formTemplateId, FormDataKind.PRIMARY, departmentId, reportPeriod.getId());
             }
-            System.out.println("formData " + formData);
             if (formData == null) {
                 long formDataId = formDataService.createFormData(logger,
                         userInfo,

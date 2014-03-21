@@ -199,7 +199,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
-                                        System.out.println(newId);
                                         recordChanges.setId(newId);
 
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
