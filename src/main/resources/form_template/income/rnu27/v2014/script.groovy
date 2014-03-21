@@ -118,7 +118,8 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
+// fix не убирать, стиль на итоги не вешается иначе
+def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
@@ -856,7 +857,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
+            return roundValue((row.marketQuotation?:0) - row.prev, 2)
         } else {
             return (BigDecimal) 0
         }
