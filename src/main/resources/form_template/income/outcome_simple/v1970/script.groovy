@@ -55,7 +55,7 @@ switch (formDataEvent) {
         def dataRows = dataRowHelper?.allCached
         isBank() ? consolidationBank(dataRows) : consolidationSummary(dataRows)
         calculationBasicSum(dataRows)
-        dataRowHelper.save(dataRows)
+        dataRowHelper.update(dataRows)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -65,6 +65,8 @@ switch (formDataEvent) {
 // Кэш id записей справочника
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 @Field
 def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
@@ -162,7 +164,7 @@ void calc() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         calculationControlGraphs(dataRows)
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.update(dataRows)
 }
 
 void logicCheck() {
@@ -391,9 +393,9 @@ void consolidationSummary(def dataRows) {
                         // сумма графы 10 рну-7 для графы 7
                         def sum = 0
                         if (recordId != null) {
-                            sum10 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'taxAccountingRuble')
-                            sum12 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', 'ruble')
-                            sum = getSumForColumn7(child, dataRowsChild, recordId)
+                            sum10 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', row.consumptionAccountNumber, 'taxAccountingRuble')
+                            sum12 = getSumForColumn5or6or8(dataRowsChild, recordId, 'code', row.consumptionAccountNumber, 'ruble')
+                            sum = getSumForColumn7(child, dataRowsChild, recordId, row.consumptionAccountNumber)
                         }
 
                         // графа 5
@@ -415,7 +417,7 @@ void consolidationSummary(def dataRows) {
                         // сумма графы 5 рну-5
                         def sum5 = 0
                         if (recordId != null) {
-                            sum5 = getSumForColumn5or6or8(dataRowsChild, recordId, 'number', 'sum')
+                            sum5 = getSumForColumn5or6or8(dataRowsChild, recordId, 'number', row.consumptionAccountNumber, 'sum')
                         }
                         // графа 8
                         row.rnu5Field5Accepted = (row.rnu5Field5Accepted ?: 0) + sum5
@@ -497,12 +499,13 @@ def getFormDataRNU14() {
  * @param dataRowsChild строки нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
  * @param alias1 алиас графы для первого условия
+ * @param value2 значение балансового счета для второго условия
  * @param resultAlias алиас графы суммирования
  */
-def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def resultAlias) {
+def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def value2, def resultAlias) {
     def sum = 0
     for (row in dataRowsChild) {
-        if (value1 == row[alias1]) {
+        if (value1 == row[alias1] && isEqualNum(value2, row[alias1])) {
             sum += (row[resultAlias] ?: 0)
         }
     }
@@ -513,12 +516,13 @@ def getSumForColumn5or6or8(def dataRowsChild, def value1, def alias1, def result
  * Получить сумму строк графы нф соответствующих двум условиям.
  * @param form нф источника (рну-7 или рну-5)
  * @param value1 значение приемника для первого условия (id справочника)
+ * @param value2 значение балансового счета для второго условия
  */
-def getSumForColumn7(def form, def dataRows, def value1) {
+def getSumForColumn7(def form, def dataRows, def value1, def value2) {
     def sum = 0
     dataRows.each { row ->
         if (row.getAlias() == null) {
-            if (value1 == row.code && row.ruble != null && row.ruble != 0) {
+            if (value1 == row.code && isEqualNum(value2, row.code) && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
                 def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
                 // получить отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
@@ -545,6 +549,14 @@ def getSumForColumn7(def form, def dataRows, def value1) {
         }
     }
     return sum
+}
+
+def getBalanceValue(def value) {
+    formDataService.getRefBookValue(27, value, refBookCache)?.NUMBER?.stringValue
+}
+
+boolean isEqualNum(String accNum, def balance) {
+    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
 }
 
 /** Проверить заполненость обязательных полей. */
