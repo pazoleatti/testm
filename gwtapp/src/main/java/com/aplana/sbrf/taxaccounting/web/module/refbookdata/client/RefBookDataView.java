@@ -48,9 +48,17 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     LinkButton addRow;
     @UiField
     LinkButton deleteRow;
+    @UiField
+    Button search;
+    @UiField
+    LinkButton edit;
+    @UiField
+    Button cancelEdit;
+    @UiField
+    HTML separator;
 
 
-	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
+    SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
 	@Inject
 	public RefBookDataView(final Binder uiBinder) {
@@ -200,6 +208,21 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
+    @UiHandler("cancelEdit")
+    void cancelEditButtonClicked(ClickEvent event) {
+        Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onSetDefaultMode();
+            }
+        });
+    }
+
+    @UiHandler("edit")
+    void editButtonClicked(ClickEvent event) {
+        getUiHandlers().onSetEditMode();
+    }
+
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
 		if (selectionModel.getSelectedObject() == null) {
@@ -238,4 +261,34 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 				return HasHorizontalAlignment.ALIGN_LEFT;
 		}
 	}
+
+    @Override
+    public void setEditMode() {
+        updateView(true);
+    }
+
+    @Override
+    public void setDefaultMode(){
+        updateView(false);
+    }
+
+    /**
+     * Обновляет видимость элементов
+     * в зависимости от режима
+     *
+     * @param isEditMode - режим редактирования true, false в противном случае
+     */
+    private void updateView(boolean isEditMode) {
+        setVisibleEditLink(!isEditMode);
+        addRow.setVisible(isEditMode);
+        deleteRow.setVisible(isEditMode);
+        cancelEdit.setVisible(isEditMode);
+    }
+
+    @Override
+    public void setVisibleEditLink(boolean visible){
+        edit.setVisible(visible);
+        // для красовы на форме
+        separator.setVisible(visible);
+    }
 }
