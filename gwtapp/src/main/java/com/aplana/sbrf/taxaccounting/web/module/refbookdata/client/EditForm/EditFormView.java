@@ -302,7 +302,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (widgets != null){
             for (HasValue entry : widgets.values()) {
                 if (entry instanceof HasEnabled) {
-
                     ((HasEnabled) entry).setEnabled(enabled);
                 }
             }
@@ -312,7 +311,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.setEnabled(!readOnly);
 		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
-        setReadOnlyMode(readOnly);
+        setReadOnlyMode(enabled);
 	}
 
     @Override
