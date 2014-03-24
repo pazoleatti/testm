@@ -31,6 +31,9 @@ import static com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils.*;
  */
 public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisibility, HasValue<Date>, LeafValueEditor<Date> {
 
+    public static String calendarIconUrl = "resources/img/picker-icons/calendar-icon.png";
+    public static String calendarIconDisableUrl = "resources/img/picker-icons/calendar-icon-disable.png";
+
     interface DateBoxUiBinder extends UiBinder<Widget, DateMaskBoxPicker> {
     }
 
@@ -293,7 +296,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     public void setEnabled(boolean enabled) {
         this.widgetEnabled = enabled;
         dateBox.setEnabled(enabled);
-        calendarImage.setUrl(enabled ? "resources/img/picker/calendar-icon.png" : "resources/img/picker/calendar-icon-disable.png");
+        calendarImage.setUrl(enabled ? calendarIconUrl : calendarIconDisableUrl);
         calendarImage.getElement().getStyle().setCursor(enabled ? Style.Cursor.POINTER : Style.Cursor.DEFAULT);
         clearImage.setVisible(false);
     }

@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+
+import java.util.List;
 
 /**
  * Интерфейс, позволяющий пользователю получать данные из базы по запросу
@@ -52,13 +52,7 @@ public interface FormDataSearchService {
 	 */
 	FormDataFilterAvailableValues getAvailableFilterValues(TAUserInfo userInfo, TaxType taxType);
 
-    /**
-     * Получает активные виды НФ в данном отчетном периоде. Активным считается тот, у которого есть хотя бы один
-     * шаблон НФ в этом отчетном периоде
-     * @param reportPeriodId идентификатор периода
-     * @return активные виды НФ
-     */
-    List<FormType> getActiveFormTypeInReportPeriod(int reportPeriodId, TaxType taxType);
-
 	List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo);
+
+    List<FormType> getActiveFormTypeInReportPeriod(int departmentId, int reportPeriodId, TaxType taxType, TAUserInfo userInfo, List<FormDataKind> kinds);
 }

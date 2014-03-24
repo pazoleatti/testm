@@ -41,18 +41,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             REFBOOK_TYPE, REFERENCE_TYPE);
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
 	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
-    private static final Map<String, String> stringDictionaryCodeMap = new HashMap<String, String>() {{
-        put("transportTypeCode", "ТН - Коды видов ТС");
-        put("transportOkato", "ТН - Коды ОКАТО");
-        put("transportTaxBenefitCode", "ТН - Коды налоговых льгот");
-        put("departmentNameList", "Подразделения");
-        put("dictionaryRegionCode", "Коды субъектов Российской Федерации");
-    }};
-    private static final Map<String, String> numericDictionaryCodeMap = new HashMap<String, String>() {{
-        put("transportTaxBaseUnitCode", "ТН - Коды единиц измерения");
-        put("transportEcoClass", "ТН - Коды классов экологических стандартов");
-        put("transportTaxRate", "ТН - Ставки транспортного налога");
-    }};
 
 	static {
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {

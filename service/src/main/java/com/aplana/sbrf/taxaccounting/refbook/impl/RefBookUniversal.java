@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
@@ -135,52 +136,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
 
-            List<String> errors;
-
-            //Проверка обязательности заполнения записей справочника
-            errors = refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-            }
-
-            //Проверка корректности значений атрибутов
-            errors = refBookUtils.checkRefBookAtributeValues(attributes, records);
-            if (errors.size() > 0){
-                for (String error : errors) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Обнаружено некорректное значение атрибута");
-            }
-
             if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROFIT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_UKS)) {
 
                 //Проверка корректности
-                List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, attributes, records);
-                if (matchedRecords == null || matchedRecords.size() == 0) {
-                    //Проверка ссылочных значений
-                    boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
-                    if (!isReferencesOk) {
-                        logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
-                    }
-                } else {
-                    //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                    List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
-
-                    if (conflictedIds.size() > 0) {
-                        StringBuilder attrNames = new StringBuilder();
-                        for (Long id : conflictedIds) {
-                            for (Pair<Long,String> pair : matchedRecords) {
-                                if (pair.getFirst().equals(id)) {
-                                    attrNames.append("\"").append(pair.getSecond()).append("\", ");
-                                }
-                            }
-                        }
-                        attrNames.delete(attrNames.length() - 2, attrNames.length());
-                        throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
-                    }
-                }
+                checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
 
                 if (recordIds.size() > 0 && refBookDao.isVersionsExist(refBookId, recordIds, versionFrom)) {
                     throw new ServiceException("Версия с указанной датой актуальности уже существует");
@@ -208,6 +169,92 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
         }
 
+    }
+
+    /**
+     * Проверка корректности
+     */
+    private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        //Проверка обязательности заполнения записей справочника
+        List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
+        if (errors.size() > 0){
+            throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
+        }
+
+        //Проверка корректности значений атрибутов
+        errors = refBookUtils.checkRefBookAtributeValues(attributes, records);
+        if (!errors.isEmpty()){
+            for (String error : errors) {
+                logger.error(error);
+            }
+            throw new ServiceException("Обнаружено некорректное значение атрибута");
+        }
+
+        //Проверка отсутствия конфликта с датой актуальности родительского элемента
+        if (refBook.isHierarchic()) {
+            checkParentConflict(logger, versionFrom, versionTo, records);
+        }
+        //Получаем записи у которых совпали значения уникальных атрибутов
+        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
+        if (matchedRecords == null || matchedRecords.size() == 0) {
+            //Проверка ссылочных значений
+            boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
+            if (!isReferencesOk) {
+                logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
+            }
+        } else {
+            //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+            List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+
+            if (conflictedIds.size() > 0) {
+                StringBuilder attrNames = new StringBuilder();
+                for (Long id : conflictedIds) {
+                    for (Pair<Long,String> pair : matchedRecords) {
+                        if (pair.getFirst().equals(id)) {
+                            attrNames.append("\"").append(pair.getSecond()).append("\", ");
+                        }
+                    }
+                }
+                attrNames.delete(attrNames.length() - 2, attrNames.length());
+                throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
+            }
+        }
+    }
+
+    /**
+     * Проверка отсутствия конфликта с датой актуальности родительского элемента
+     */
+    private void checkParentConflict(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        List<Pair<Long, Integer>> checkResult = refBookDao.checkParentConflict(versionFrom, versionTo, records);
+        if (!checkResult.isEmpty()) {
+            boolean error = false;
+            for (Pair<Long, Integer> conflict : checkResult) {
+                //Дата окончания периода актуальности проверяемой версии больше даты окончания периода актуальности родительской записи для проверяемой версии
+                if (conflict.getSecond() == 1) {
+                    logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
+                            ": Дата окончания периода актуальности версии должна быть не больше даты окончания периода актуальности записи, которая является родительской в иерархии!");
+                    error = true;
+                }
+                //Дата начала периода актуальности проверяемой версии меньше даты начала периода актуальности родительской записи для проверяемой версии
+                if (conflict.getSecond() == -1) {
+                    logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
+                            ": Дата начала периода актуальности версии должна быть не меньше даты начала периода актуальности записи, которая является родительской в иерархии!");
+                    error = true;
+                }
+            }
+            if (error) {
+                throw new ServiceException("Обнаружен конфликт с датой актуальности родительского элемента");
+            }
+        }
+    }
+
+    private String findNameByParent(List<RefBookRecord> records, Long parentId) {
+        for (RefBookRecord record : records) {
+            if (record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue().equals(parentId)) {
+                return record.getValues().get("NAME").getStringValue();
+            }
+        }
+        throw new ServiceException("Не найдена запись с заданным родительским элементом");
     }
 
     private List<Long> createVersions(Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, Logger logger) {
@@ -247,7 +294,11 @@ public class RefBookUniversal implements RefBookDataProvider {
      * Обработка пересечений версий
      */
     private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
-        boolean isFatalErrorExists = false;
+        for (CheckCrossVersionsResult result : results) {
+            if (result.getResult() == CrossResult.FATAL_ERROR) {
+                throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
+            }
+        }
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
@@ -262,22 +313,12 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
                 refBookUtils.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId(), SimpleDateUtils.addDayToDate(versionTo, 1));
-                updateResults(results, result);
+                //updateResults(results, result);
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
                 refBookUtils.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
-                updateResults(results, result);
+                //updateResults(results, result);
             }
-        }
-
-        for (CheckCrossVersionsResult result : results) {
-            if (result.getResult() == CrossResult.FATAL_ERROR) {
-                isFatalErrorExists = true;
-            }
-        }
-
-        if (isFatalErrorExists) {
-            throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
         }
     }
 
@@ -309,28 +350,17 @@ public class RefBookUniversal implements RefBookDataProvider {
         try {
             boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
 
-            List<RefBookAttribute> attributes = refBookDao.getAttributes(refBookId);
+            RefBook refBook = refBookDao.get(refBookId);
+            List<RefBookAttribute> attributes = refBook.getAttributes();
             //Получаем идентификатор записи справочника без учета версий
             Long recordId = refBookDao.getRecordId(uniqueRecordId);
-
-            //Проверка обязательности заполнения записей справочника
-            List<String> errors= refBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-            if (errors.size() > 0){
-                throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-            }
 
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setRecordId(uniqueRecordId);
             refBookRecord.setValues(records);
 
-            //Проверка корректности значений атрибутов
-            errors = refBookUtils.checkRefBookAtributeValues(attributes, Arrays.asList(refBookRecord));
-            if (errors.size() > 0){
-                for (String error : errors) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Обнаружено некорректное значение атрибута");
-            }
+            //Проверка корректности
+            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, versionTo, attributes, Arrays.asList(refBookRecord));
 
             RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
 
@@ -388,6 +418,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
@@ -428,6 +459,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
+            //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {
@@ -454,6 +486,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         try {
+            //Проверка использования
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {

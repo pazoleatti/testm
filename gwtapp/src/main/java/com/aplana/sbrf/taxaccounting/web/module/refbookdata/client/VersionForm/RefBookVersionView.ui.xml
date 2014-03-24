@@ -96,7 +96,9 @@
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>
                         <g:HTMLPanel>
-                            <style:GenericDataGrid ui:field="refbookDataTable" addStyleNames="{style.table}"/>
+                            <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                                <style:GenericDataGrid ui:field="refbookDataTable" height="100%" width="100%"/>
+                            </g:ResizeLayoutPanel>
                             <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
                                                  showFastForwardButton="false" fastForwardRows="0"
                                                  showLastPageButton="true" type="refBookVersion"/>

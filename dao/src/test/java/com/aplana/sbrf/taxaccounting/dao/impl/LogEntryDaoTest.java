@@ -62,4 +62,29 @@ public class LogEntryDaoTest {
     public void testGetEmpty2() {
         logEntryDao.get(UUID.randomUUID().toString().toLowerCase());
     }
+
+    @Test
+    public void testUpdate() {
+        Logger logger = new Logger();
+        logger.error("E1");
+        logger.error("E2");
+        logger.warn("W1");
+        logger.warn("W2");
+        String uuid = UUID.randomUUID().toString().toLowerCase();
+        logEntryDao.save(logger.getEntries(), uuid);
+
+        List<LogEntry> logEntries = logEntryDao.get(uuid);
+
+        Logger newLogger = new Logger();
+        newLogger.error("E3");
+        newLogger.warn("W3");
+        logEntries.addAll(newLogger.getEntries());
+
+        logEntryDao.update(logEntries, uuid);
+        List<LogEntry> list = logEntryDao.get(uuid);
+
+        Assert.assertEquals(list.size(), 6);
+        Assert.assertEquals(list.get(4).getMessage(), "E3");
+        Assert.assertEquals(list.get(5).getLevel(), LogLevel.WARNING);
+    }
 }

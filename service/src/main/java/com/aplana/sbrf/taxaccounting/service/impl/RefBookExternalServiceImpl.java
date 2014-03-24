@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,8 +29,6 @@ import java.util.zip.ZipInputStream;
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RefBookExternalServiceImpl implements RefBookExternalService {
-
-    private Log log = LogFactory.getLog(getClass());
 
     @Autowired
     private ConfigurationService configurationService;
@@ -65,13 +61,12 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         // String refBookDirectory = "file://c:/region/";
 
         BufferedReader reader = null;
-        if (log.isDebugEnabled()) {
-            log.debug("RefBook dir: " + refBookDirectory);
-        }
+        logger.info("Импорт данных справочников из директории \"" + refBookDirectory + "\".");
 
         if (refBookDirectory == null || refBookDirectory.trim().isEmpty()) {
-            throw new ServiceException("Не указан путь к директории для импорта справочников");
+            throw new ServiceException("Не указан путь к директории для импорта справочников.");
         }
+
         refBookDirectory = refBookDirectory.trim();
 
         // Признак наличия ошибок при импорте
@@ -101,18 +96,30 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                                     break;
                                 }
                             }
-                            log.debug("Import RefBook file = " + refBookDirectory + fileName);
+                            logger.info("Импорт данных справочника из файла «" + fileName + "».");
+
                             // Обращение к скрипту
                             Map<String, Object> additionalParameters = new HashMap<String, Object>();
                             additionalParameters.put("inputStream", is);
                             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
                         } catch (Exception e) {
+                            //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             withError = true;
+                            String errorMsg;
+                            if (e != null && e.getLocalizedMessage() != null) {
+                                errorMsg = e.getLocalizedMessage()+".";
+                            } else {
+                                errorMsg = "";
+                            }
+
+                            errorMsg = "Не удалось выполнить импорт данных справочника (id = " + refBookId + ") из файла «"
+                                    + fileName + "». " + errorMsg;
+
                             // Журнал аудита
                             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
-                                    null, null, null, null,
-                                    "Не удалось выполнить импорт справочника (id = " + refBookId + ") из файла "
-                                            + fileName);
+                                    null, null, null, null, errorMsg);
+
+                            logger.error(errorMsg);
                         } finally {
                             IOUtils.closeQuietly(is);
                         }
@@ -120,15 +127,26 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     }
                 }
             }
+            String msg = "Произведен импорт данных справочников из «" + refBookDirectory + "»" +
+                    (withError ? " с ошибками." : " без ошибок.");
             // Журнал аудита
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                    null, "Произведен импорт справочников из " + refBookDirectory +
-                    (withError ? " с ошибками" : " без ошибок"));
+                    null, msg);
+            logger.info(msg);
         } catch (Exception e) {
+            //// Глобальная ошибка импорта — все изменения откатываются
             // Журнал аудита
+            String errorMsg;
+            if (e != null && e.getLocalizedMessage() != null) {
+                errorMsg = e.getLocalizedMessage() + ".";
+            } else {
+                errorMsg = "";
+            }
+            errorMsg = "Не удалось выполнить импорт данных справочников из «" + refBookDirectory + "». " + errorMsg;
+
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
-                    null, "Не удалось выполнить импорт справочников из " + refBookDirectory);
-            throw new ServiceException("Не удалось выполнить импорт справочников", e);
+                    null, errorMsg);
+            throw new ServiceException(errorMsg, e);
         } finally {
             IOUtils.closeQuietly(reader);
         }

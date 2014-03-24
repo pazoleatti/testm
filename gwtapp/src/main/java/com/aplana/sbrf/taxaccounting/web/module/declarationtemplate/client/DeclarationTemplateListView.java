@@ -1,13 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -32,7 +32,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 	 * Список шаблонов деклараций
 	 */
 	@UiField
-	CellTable<DeclarationTypeTemplate> declarationTemplateTable;
+    GenericCellTable<DeclarationTypeTemplate> declarationTemplateTable;
     @UiField
     Panel filterContentPanel;
 
@@ -66,9 +66,9 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 				return object;
 			}
 		};
-		declarationTemplateTable.addColumn(linkColumn, "Наименование");
+		declarationTemplateTable.addResizableColumn(linkColumn, "Наименование");
 
-		declarationTemplateTable.addColumn(new TextColumn<DeclarationTypeTemplate>() {
+		declarationTemplateTable.addResizableColumn(new TextColumn<DeclarationTypeTemplate>() {
 			@Override
 			public String getValue(DeclarationTypeTemplate declarationTypeTemplate) {
 				return String.valueOf(declarationTypeTemplate.getVersionCount());

@@ -6,7 +6,7 @@ import java.util.Date;
  * User: avanteev
  * Класс, представляющий собой описание пересечения для версий макетов
  */
-public class IntersectionSegment implements Comparable {
+public class VersionSegment implements Comparable {
     private Date beginDate;
     private Date endDate;
     private int templateId;
@@ -55,7 +55,7 @@ public class IntersectionSegment implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        IntersectionSegment intersection = (IntersectionSegment)o;
+        VersionSegment intersection = (VersionSegment)o;
         int summand = 0;
         int equalSummand = 10;
         int result;

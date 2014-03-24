@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -31,11 +32,10 @@ import java.util.*;
 @Service
 @Transactional
 public class FormTemplateServiceImpl implements FormTemplateService {
-	private static final int FORM_VERSION_MAX_VALUE = 20;
+	//private static final int FORM_VERSION_MAX_VALUE = 20;
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
@@ -163,7 +163,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, statusList);
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
         for (Integer id : formTemplateIds)
             formTemplates.add(formTemplateDao.get(id));
@@ -171,7 +171,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return formTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 
@@ -191,7 +191,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
-        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), formTemplate.getVersion());
+        @SuppressWarnings("unchecked")
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), createStatusList(status), formTemplate.getVersion());
         if (id == 0)
             return null;
         return formTemplateDao.get(id);
@@ -209,6 +210,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override

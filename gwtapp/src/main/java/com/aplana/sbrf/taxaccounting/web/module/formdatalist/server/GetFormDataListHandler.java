@@ -43,7 +43,7 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
                 .findDataByUserIdAndFilter(securityService.currentUserInfo(), action.getFormDataFilter());
         Map<Integer, String> departmentFullNames = new HashMap<Integer, String>();
         for(FormDataSearchResultItem item: resultPage) {
-            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchy(item.getDepartmentId()));
+            if (departmentFullNames.get(item.getDepartmentId()) == null) departmentFullNames.put(item.getDepartmentId(), departmentService.getParentsHierarchyShortNames(item.getDepartmentId()));
         }
         res.setTotalCountOfRecords(resultPage.getTotalCount());
         res.setRecords(resultPage);

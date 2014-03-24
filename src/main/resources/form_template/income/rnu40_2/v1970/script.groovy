@@ -31,13 +31,6 @@ switch (formDataEvent) {
         }
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
-        if (!checkSourceAccepted()) {
-            return
-        }
-        calc()
-        logicCheck()
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
@@ -96,28 +89,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def sourceDataRows = getRowsRNU40_1()
-
-    // удалить нефиксированные строки
-    deleteRows(dataRows)
-
-    // Получение данных из первичной рну-40.1 в первичную рну-40.2.
-    sections.each { section ->
-        def rows40_1 = getRowsBySection(sourceDataRows, section)
-        def rows40_2 = getRowsBySection(dataRows, section)
-        def newRows = []
-        for (def row : rows40_1) {
-            if (hasCalcRow(row.name, row.currencyCode, rows40_2)) {
-                continue
-            }
-            def newRow = getCalcRowFromRNU_40_1(row.name, row.currencyCode, rows40_1)
-            newRows.add(newRow)
-        }
-        if (!newRows.isEmpty()) {
-            dataRows.addAll(getDataRow(dataRows, 'total' + section).getIndex() - 1, newRows)
-            updateIndexes(dataRows)
-        }
-    }
 
     // отсортировать/группировать
     sort(dataRows)

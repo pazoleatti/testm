@@ -93,7 +93,7 @@ public class FormTemplateImpexServiceImpl implements
 	}
 
 	@Override
-	public void importFormTemplate(Integer id, InputStream is) {
+	public FormTemplate importFormTemplate(Integer id, InputStream is) {
 		try {
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
@@ -128,18 +128,18 @@ public class FormTemplateImpexServiceImpl implements
 					ft.getRows().clear();
 					ft.getRows().addAll(xmlSerializationUtils.deserialize
 							(new String(files.get(ROWS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), Cell.class));
-				}
+                }
 				if (files.get(HEADERS_FILE).length != 0) {
 					ft.getHeaders().clear();
 					ft.getHeaders().addAll(xmlSerializationUtils.deserialize
 							(new String(files.get(HEADERS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), HeaderCell.class));
 				}
-            	formTemplateDao.save(ft);
+            	return ft;
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }
 		} catch (Exception e) {
-			throw new ServiceException("Не удалось импортировать шаблон", e);
+            throw new ServiceException("Не удалось импортировать шаблон", e);
 		}
 	}
 }

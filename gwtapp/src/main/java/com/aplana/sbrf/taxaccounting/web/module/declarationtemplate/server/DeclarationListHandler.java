@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
@@ -16,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+//import com.google.gwt.thirdparty.guava.common.base.Function;
+//import com.google.gwt.thirdparty.guava.common.collect.Lists;
 
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
@@ -35,15 +37,20 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 		DeclarationListResult result = new DeclarationListResult();
 		/*result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));*/
         List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
+        //List<Integer> ids = Lists.transform(declarationTypes, new Function<DeclarationType, Integer>() {
+        //    @Override
+        //    public Integer apply(@Nullable DeclarationType formType) {
+        //        return formType != null ? formType.getId() : 0;
+        //    }
+        //});
+        //Map<Long, Integer> idsVsCount = declarationTemplateService.versionTemplateCountByFormType(ids);
 
         List<DeclarationTypeTemplate> typeTemplateList = new ArrayList<DeclarationTypeTemplate>();
         for (DeclarationType type : declarationTypes){
             DeclarationTypeTemplate typeTemplate = new DeclarationTypeTemplate();
             typeTemplate.setTypeId(type.getId());
             typeTemplate.setTypeName(type.getName());
-
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            typeTemplate.setVersionCount(declarationTemplateService.versionTemplateCount(type.getId(), VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT));
+            //typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
 
             typeTemplateList.add(typeTemplate);
         }

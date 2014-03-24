@@ -85,7 +85,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     public int save(FormType formType) {
         try {
 
-            int formTypeId = generateId("seq_form_template", Integer.class);
+            int formTypeId = generateId("seq_form_type", Integer.class);
             getJdbcTemplate().update("insert into form_type (id, name, tax_type, status) values (?,?,?,?)",
                     new Object[]{formTypeId,
                     formType.getName(),

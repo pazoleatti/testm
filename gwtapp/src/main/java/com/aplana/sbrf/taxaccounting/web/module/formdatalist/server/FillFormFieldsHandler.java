@@ -80,7 +80,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 result.setDataKinds(kinds);
                 break;
             case FORTH:
-                result.setFormTypes(formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo()));
+                result.setFormTypes(formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo(), action.getKinds()));
                 break;
         }
 

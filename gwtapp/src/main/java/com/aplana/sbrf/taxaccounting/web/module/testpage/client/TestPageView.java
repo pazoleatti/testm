@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
@@ -12,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -47,8 +51,6 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     @UiField
     Button showDialog;
-
-    Label lbl1;
 
     @UiField
     DateMaskBox boxDate;
@@ -109,6 +111,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     TextBox fpValueTb;
     @UiField
     Button fpSetValueBtn;
+    @UiField
+    Button showDialog2;
 
 
     @Inject
@@ -181,26 +185,32 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         });
     }
 
+
     private void modalWind() {
+        final ModalWindow mw = new ModalWindow("тест", "http://127.0.0.1:8888/resources/img/question_mark.png");
+        HTMLPanel lbl1 = new HTMLPanel("Тут будет содержаться любой объект. А пока закрой меня.");
+        lbl1.setHeight("100%");
+//        lbl1.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                mw.setSize("200px", "200px");
+//                System.out.println(mw.getOffsetWidth() + " " + mw.getOffsetHeight());
+//            }
+//        });
+        //lbl1.setSize("200px","200px");
+        mw.add(lbl1);
         showDialog.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                ModalWindow mw = new ModalWindow("тест", "http://127.0.0.1:8888/resources/img/question_mark.png");
-                lbl1 = new Label("Тут будет содержаться любой объект. А пока закрой меня.");
-                //lbl1.setSize("200px","200px");
-                mw.add(lbl1);
-                // mw.addAdditionalButton(new ImageButtonLink("http://127.0.0.1:8888/resources/img/email.png", "Отправить письмо"));
-            /*    mw.addSaveButtonClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        lbl1.setText("Нажали кнопку сохранить.");
-                    }
-                });*/
-                mw.setWidth("300px");
                 mw.center();
-                mw.show();
             }
 
+        });
+        showDialog2.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Dialog.errorMessage("Тескт");
+            }
         });
     }
 

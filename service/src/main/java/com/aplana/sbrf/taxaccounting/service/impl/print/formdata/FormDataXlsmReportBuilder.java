@@ -152,10 +152,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     protected void fillHeader(){
 
+        int nullColumnCount = 0;
         //Необходимо чтобы определять нулевые столбцы для Excel, по идее в конце должно делаться
         for (int i = 0; i < formTemplate.getColumns().size(); i++ ){
             if (formTemplate.getColumns().get(i).getWidth() == 0){
                 sheet.setColumnWidth(i, 0);
+                nullColumnCount++;
             }
         }
 
@@ -197,8 +199,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         //Fill code
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
         int j = 0;
-        Row row = sheet.getRow(0);
-        int shiftCode = formTemplate.getColumns().size() - row.getLastCellNum();
+
+        int shiftCode = formTemplate.getColumns().size() - nullColumnCount - 2;
         while(sToK.hasMoreTokens()){
             createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, shiftCode);
             j++;
@@ -230,11 +232,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             for (int i=0; i<formTemplate.getColumns().size(); i++){
                 Column column = formTemplate.getColumns().get(i);
                 if ((column.isChecking() && !isShowChecked)){
-                    continue;
-                }
-                if (column.getWidth() == 0){
-                    mergedDataCells(headerCellDataRow.getCell(column.getAlias()), row, i, true);//иначе следующая колонка тоже скрывается, т.к. нет lastCell
-                    /*sheet.setColumnHidden(i, true);*/
                     continue;
                 }
                 HeaderCell headerCell = headerCellDataRow.getCell(column.getAlias());

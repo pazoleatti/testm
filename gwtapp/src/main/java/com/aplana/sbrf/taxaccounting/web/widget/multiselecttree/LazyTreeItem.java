@@ -79,12 +79,12 @@ public class LazyTreeItem extends TreeItem {
 
     /**
      * Сброс значения виджета итема
-     * @param aBoolean может быть нулл
+     * @param select может быть нулл
      */
-    public void setItemState(Boolean aBoolean){
+    public void setItemState(Boolean select){
         if (getWidget() instanceof CheckBox) {
-            ((CheckBox) getWidget()).setValue(aBoolean, false);
-            setColorOnSelect(aBoolean);
+            ((CheckBox) getWidget()).setValue(select, false);
+            setColorOnSelect(select);
         }
     }
 

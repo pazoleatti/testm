@@ -112,7 +112,7 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
+def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
@@ -176,7 +176,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        loggerError("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
 }
 
@@ -253,15 +253,15 @@ def logicCheck() {
             }
             if (getSign(row.signSecurity) == "+") {
                 // 6. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) > 0) && row.recovery != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
                 // 7. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) < 0) && row.reserveCreation != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
                 // 8. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
-                if (row.reserveCalcValue - row.reserveCalcValuePrev == 0 && (row.reserveCreation != 0 || row.recovery != 0)) {
+                if ((row.reserveCalcValue - (row.reserveCalcValuePrev ?: 0) == 0) && (row.reserveCreation != 0 || row.recovery != 0)) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
             }
@@ -292,11 +292,11 @@ def logicCheck() {
             }
 
             // 15. LC Проверка на заполнение поля «<Наименование поля>»
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, false)//TODO Вернуть фатальность
 
             // 16. Проверка на уникальность поля «№ пп»
             if (number != row.number) {
-                logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+                loggerError(errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
             if (getCurrency(row.currency) == 'RUR') {
@@ -322,7 +322,7 @@ def logicCheck() {
                         reserveCreation: calc16(row),
                         recovery: calc17(row)
                 ]
-                checkCalc(row, arithmeticCheckAlias, calcValues, logger, true)
+                checkCalc(row, arithmeticCheckAlias, calcValues, logger, false)//TODO Вернуть фатальность
             }
         }
 
@@ -364,7 +364,7 @@ def logicCheck() {
     }
 
     // 22. Проверка итоговых значений по всей форме
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, false)//TODO Вернуть фатальность
 }
 
 /**
@@ -672,7 +672,6 @@ BigDecimal calc12(DataRow row) {
         return null
     }
     return row.rubCourse
-    //return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -732,7 +731,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
+            return roundValue((row.marketQuotation ?: 0) - row.prev, 2)
         } else {
             return (BigDecimal) 0
         }
@@ -982,19 +981,6 @@ def isRubleCurrency(def currencyCode) {
     return getRefBookValue(15, currencyCode)?.CODE?.stringValue == '810'
 }
 
-/**
- * Получить курс валюты
- */
-def getCourse(def currency, def date) {
-    if (currency != null && date != null)
-        if (isRubleCurrency(currency)) {
-            return 1
-        } else {
-            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE.getNumberValue()
-        }
-    return null
-}
-
 def getNewRow() {
     def newRow = formData.createDataRow()
     editableColumns.each {
@@ -1070,11 +1056,13 @@ def getCalcTotalRow(def dataRows) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg) {
-    if (isBalancePeriod) {
-        logger.warn(msg)
-    } else {
-        logger.error(msg)
-    }
+    //TODO вернуть
+    //    if (isBalancePeriod) {
+    //        logger.warn(msg)
+    //    } else {
+    //        logger.error(msg)
+    //    }
+    logger.warn(msg)
 }
 
 /**

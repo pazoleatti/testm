@@ -5,6 +5,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
@@ -13,105 +14,115 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-import static com.google.gwt.dom.client.BrowserEvents.CLICK;
-import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
+import static com.google.gwt.dom.client.BrowserEvents.*;
 
+/**
+ * Ячейка заголовка с возможность сортировки
+ *
+ * @author
+ */
 public class SortingHeaderCell extends AbstractSafeHtmlCell<String> {
 
-	private static final int ESCAPE = 27;
-	private static final String ARROW_ASC_IMAGE_SOURCE = "resources/img/sortAscending.png";
-	private static final String ARROW_DES_IMAGE_SOURCE = "resources/img/sortDescending.png";
-	private static final String ARROW_IMAGE_WIDTH = "10px";
-	private static final String ARROW_IMAGE_HEIGHT = "10px";
-	private static final String HEADER_BACKGROUND_COLOR = "#949494";
-	private static final Image arrowAscImage;
-	private static final Image arrowDesImage;
-	private static boolean isAscSort = true;
-	private PopupPanel popupWithArrow;
-	private Element lastParent;
+    private static final String ARROW_ASC_IMAGE_SOURCE = "resources/img/sortAscending.png";
+    private static final String ARROW_DES_IMAGE_SOURCE = "resources/img/sortDescending.png";
+    private static final Image arrowAscImage;
+    private static final Image arrowDesImage;
 
-	static {
-		arrowAscImage = new Image();
-		arrowAscImage.setUrl(ARROW_ASC_IMAGE_SOURCE);
-		arrowAscImage.setWidth(ARROW_IMAGE_WIDTH);
-		arrowAscImage.setHeight(ARROW_IMAGE_HEIGHT);
+    static {
+        arrowAscImage = new Image(ARROW_ASC_IMAGE_SOURCE, 0, 0, 10, 10);
+        arrowAscImage.setTitle("По возврастанию");
+        arrowDesImage = new Image(ARROW_DES_IMAGE_SOURCE, 0, 0, 10, 10);
+        arrowDesImage.setTitle("По убыванию");
+    }
 
+    private boolean isAscSort = true;
+    private PopupPanel popupWithArrow;
+    private Element lastParent;
+    private int lastPositionX = 0;
+    private int lastPositionY = 0;
 
-		arrowDesImage = new Image();
-		arrowDesImage.setUrl(ARROW_DES_IMAGE_SOURCE);
-		arrowDesImage.setWidth(ARROW_IMAGE_WIDTH);
-		arrowDesImage.setHeight(ARROW_IMAGE_HEIGHT);
-		//arrowDesImage.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-	}
+    private int exceedOffsetY = 7;
+    private int exceedOffsetX = 15;
 
-	public SortingHeaderCell() {
-		this(SimpleSafeHtmlRenderer.getInstance());
-	}
+    public SortingHeaderCell() {
+        this(SimpleSafeHtmlRenderer.getInstance());
+    }
 
-	public SortingHeaderCell(SafeHtmlRenderer<String> renderer) {
-		super(renderer, CLICK, KEYDOWN);
+    public SortingHeaderCell(SafeHtmlRenderer<String> renderer) {
+        super(renderer, CLICK, KEYDOWN, MOUSEMOVE, MOUSEDOWN);
 
-		this.popupWithArrow = new PopupPanel(true, false) {
-			@Override
-			protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-				if (Event.ONKEYUP == event.getTypeInt()) {
-					if (event.getNativeEvent().getKeyCode() == ESCAPE) {
-						// Dismiss when escape is pressed
-						popupWithArrow.hide();
-					}
-				}
-			}
-		};
+        this.popupWithArrow = new PopupPanel(true, false) {
+            @Override
+            protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+                if (Event.ONKEYUP == event.getTypeInt()) {
+                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        // Dismiss when escape is pressed
+                        popupWithArrow.hide();
+                    }
+                }
+            }
+        };
 
-		popupWithArrow.getElement().getStyle().setBorderStyle(Style.BorderStyle.HIDDEN);
-		popupWithArrow.getElement().getStyle().setBackgroundColor(HEADER_BACKGROUND_COLOR);
-		popupWithArrow.getElement().getStyle().setPadding(0, Style.Unit.PX);
-	}
+        popupWithArrow.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
+        popupWithArrow.getElement().getStyle().setBackgroundColor("transparent");
+        popupWithArrow.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    }
 
-	@Override
-	public void onBrowserEvent(Context context, Element parent, String value,
-							   NativeEvent event, ValueUpdater<String> valueUpdater) {
-		super.onBrowserEvent(context, parent, value, event, valueUpdater);
-		if (CLICK.equals(event.getType())) {
-			onEnterKeyDown(context, parent, value, event, valueUpdater);
-		}
-	}
+    @Override
+    public void onBrowserEvent(Context context, Element parent, String value,
+                               NativeEvent event, ValueUpdater<String> valueUpdater) {
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+        if (CLICK.equals(event.getType())) {
+            onEnterKeyDown(context, parent, value, event, valueUpdater);
+        }
+    }
 
-	@Override
-	protected void onEnterKeyDown(Context context, Element parent, String value,
-								  NativeEvent event, ValueUpdater<String> valueUpdater) {
-		if (valueUpdater != null) {
-			valueUpdater.update(value);
+    @Override
+    protected void onEnterKeyDown(Context context, Element parent, String value,
+                                  NativeEvent event, ValueUpdater<String> valueUpdater) {
+        if (valueUpdater != null) {
+            valueUpdater.update(value);
 
-			this.lastParent = parent;
-			this.popupWithArrow.clear();
+            lastParent = parent;
+            popupWithArrow.clear();
 
-			if(isAscSort){
-				popupWithArrow.add(arrowAscImage);
-				isAscSort = false;
-			} else {
-				popupWithArrow.add(arrowDesImage);
-				isAscSort = true;
-			}
+            popupWithArrow.add(isAscSort ? arrowAscImage : arrowDesImage);
+            isAscSort = !isAscSort;
 
-			popupWithArrow.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
-				public void setPosition(int offsetWidth, int offsetHeight) {
-					int exceedOffsetY = 5;
-					int exceedOffsetX = 5;
+            popupWithArrow.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                public void setPosition(int offsetWidth, int offsetHeight) {
+                    lastPositionX = lastParent.getAbsoluteLeft() + lastParent.getClientWidth()  - exceedOffsetX;
+                    lastPositionY = lastParent.getAbsoluteTop() + (lastParent.getOffsetHeight() / 2) - exceedOffsetY;
+                    popupWithArrow.setPopupPosition(lastPositionX, lastPositionY);
+                }
+            });
+        }
+    }
 
-					popupWithArrow.setPopupPosition(
-							lastParent.getAbsoluteLeft() + lastParent.getClientWidth() - popupWithArrow.getOffsetWidth() - exceedOffsetX,
-							lastParent.getAbsoluteTop() + exceedOffsetY
-					);
-				}
-			});
-		}
-	}
+    @Override
+    protected void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
+        if (value != null) {
+            sb.append(value);
+        }
+    }
 
-	@Override
-	protected void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
-		if (value != null) {
-			sb.append(value);
-		}
-	}
+    public boolean isAscSort(){
+        return isAscSort;
+    }
+
+    public void refreshPosition(Element cell) {
+        int cellPositionX = cell.getAbsoluteLeft() + cell.getClientWidth() - exceedOffsetX;
+        int cellPositionY = cell.getAbsoluteTop() + (cell.getOffsetHeight() / 2) - exceedOffsetY;
+        if (cellPositionX != lastPositionX || cellPositionY != lastPositionY) {
+            popupWithArrow.setPopupPosition(cellPositionX, cellPositionY);
+        }
+    }
+
+    public void setNotHideElement(Element notHideElement){
+        popupWithArrow.addAutoHidePartner(notHideElement);
+    }
+
+    public void removeNotHideElement(Element notHideElement){
+        popupWithArrow.removeAutoHidePartner(notHideElement);
+    }
 }

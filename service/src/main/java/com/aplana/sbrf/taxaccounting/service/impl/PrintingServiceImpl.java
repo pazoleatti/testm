@@ -7,10 +7,10 @@ import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -72,9 +73,15 @@ public class PrintingServiceImpl implements PrintingService {
         Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
-
+        // http://jira.aplana.com/browse/SBRFACCTAX-6399
+        if (formData.getKind() == FormDataKind.PRIMARY && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+            RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
+            Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
+            Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
+            reportPeriod.setName(ReportPeriodSpecificNave.fromId(code).getName());
+        }
         data.setData(formData);
-        data.setDepartmentName(departmentDao.getParentsHierarchy(department.getId()));
+        data.setDepartmentName(department.getId() != 0 ? departmentDao.getParentsHierarchy(department.getId()) : department.getName());
         data.setFormTemplate(formTemplate);
         data.setReportPeriod(reportPeriod);
         data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));

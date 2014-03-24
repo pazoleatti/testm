@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с шаблонами налоговых форм. В первую очередь предназначен для использования в админке
@@ -112,7 +113,7 @@ public interface FormTemplateService {
      * @param actualEndVersion дата окончания версии макета
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.
@@ -139,6 +140,13 @@ public interface FormTemplateService {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, VersionedObjectStatus... status);
+
+    /**
+     * Возвращает количество активных версий для каждого переданного вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество активных версий для id макета
+     */
+    Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds);
 
     /**
      * Является ли форма ежемесячной.

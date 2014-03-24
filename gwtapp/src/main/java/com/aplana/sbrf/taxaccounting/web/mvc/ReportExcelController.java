@@ -58,11 +58,6 @@ public class ReportExcelController {
 	private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final String filePath) throws IOException{
         File file = new File(filePath);
 		String fileName = file.getName();
-		ServletContext context  = req.getSession().getServletContext();
-		String mimeType = context.getMimeType(filePath);
-
-		/*response.setContentType(mimeType == null ?
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset="+ENCODING : mimeType);*/
 		response.setContentLength((int)file.length());
         setCorrectFileName(req, response, fileName);
 

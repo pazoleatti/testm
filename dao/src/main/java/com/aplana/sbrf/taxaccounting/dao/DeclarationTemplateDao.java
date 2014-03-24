@@ -2,11 +2,12 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
@@ -84,12 +85,11 @@ public interface DeclarationTemplateDao {
      * Метод для поиска пересечений версий макетов в указанных датах
      * @param formTypeId вид шаблона
      * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
-     * @param statusList статус формы
      * @param actualStartVersion дата начала
      * @param actualEndVersion дата окончания
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
 
     /**
      * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
@@ -107,7 +107,7 @@ public interface DeclarationTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion);
+    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
@@ -133,4 +133,18 @@ public interface DeclarationTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int decTypeId, List<Integer> statusList);
+
+    /**
+     * Количество активных версий для вида шаблона
+     * @param typeIds вид шаблона
+     * @return количество
+     */
+    List<Map<String,Object>> versionTemplateCountByType(List<Integer> typeIds);
+
+    /**
+     * Получает номер последней редакции макета.
+     * @param typeId  вид шаблона
+     * @return номер последней редакции шаблона
+     */
+    int getLastVersionEdition(int typeId);
 }

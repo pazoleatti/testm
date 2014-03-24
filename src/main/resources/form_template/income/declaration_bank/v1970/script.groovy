@@ -627,10 +627,18 @@ void generateXML() {
                                 КБК : kbk,
                                 НалПУ : nalPu)
 
-                        // получение строки текущего подразделения, затем значение столбца «Сумма налога к доплате [100]»
-                        def rowForNalPu = getRowAdvanceForCurrentDepartment(dataRowsAdvance, kpp)
-                        tmpValue = (rowForNalPu != null ? rowForNalPu.taxSumToPay : 0)
-                        nalPu = (tmpValue != 0 ? tmpValue : -tmpValue)
+                        nalPu = 0
+                        if (dataRowsAdvance != null) {
+                            // получение строки подразделения "ЦА", затем значение столбца «Сумма налога к доплате [100]»
+                            def rowForNalPu = getDataRow(dataRowsAdvance, 'ca')
+                            // налПу = строка 070, если строка 070 == 0, то строка 080, если строка 080 == 0, то 0
+                            nalPu = (rowForNalPu != null ?
+                                (rowForNalPu.taxSumToPay ?: rowForNalPu.taxSumToReduction) : 0)
+                            if (nalPu == null) {
+                                nalPu = 0
+                            }
+                        }
+
                         // 0..1
                         СубБдж(
                                 КБК : kbk2,
@@ -673,13 +681,10 @@ void generateXML() {
                             avPlat1 = empty
                             avPlat2 = empty
                             avPlat3 = empty
-                            if (!isTaxPeriod) {
-                                // при формировании декларации банка надо брать appl5List02Row120 относящегося к ЦА
-                                // (как определять пока не ясно, толи по id, толи по id сбербанка,
-                                // толи по КПП = 775001001), при формировании декларации подразделения
-                                // надо брать строку appl5List02Row120 относящегося к этому подразделению
-                                def rowForAvPlat = getRowAdvanceForCurrentDepartment(dataRowsAdvance, kpp)
-                                def appl5List02Row120 = (rowForAvPlat ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                            if (!isTaxPeriod && dataRowsAdvance != null) {
+                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                                 avPlat1 = (long) appl5List02Row120 / 3
                                 avPlat2 = avPlat1
                                 avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
@@ -1685,24 +1690,6 @@ def getRashShtraf(def dataRows) {
     result -= getSumRowsByCol(dataRows, 'consumptionTypeId', 'rnu7Field12Accepted', codes)
 
     return getLong(result)
-}
-
-/**
- * Получить из нф авансовые платежи подраздереления по КПП.
- *
- * @param dataRows строки выходной нф Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации».
- * @param kpp КПП
- */
-def getRowAdvanceForCurrentDepartment(def dataRows, def kpp) {
-    if (dataRows == null) {
-        return null
-    }
-    for (row in dataRows) {
-        if (kpp == getRefBookValue(33, row.kpp)?.KPP?.value) {
-            return row
-        }
-    }
-    return null
 }
 
 /**

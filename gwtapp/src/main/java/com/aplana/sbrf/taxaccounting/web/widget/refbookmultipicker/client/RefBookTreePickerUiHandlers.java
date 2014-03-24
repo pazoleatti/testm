@@ -55,4 +55,6 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
      * @param version дата версии на которую загружить итемы
      */
     void reloadForDate(Date version);
+
+    void selectFirstItenOnLoad();
 }

@@ -32,6 +32,12 @@ public class TemplateFilter implements Serializable {
         TemplateFilter filter = (TemplateFilter) o;
 
         return active == filter.active && taxType == filter.taxType;
-
     }
+
+	@Override
+	public int hashCode() {
+		int result = taxType != null ? taxType.hashCode() : 0;
+		result = 31 * result + (active ? 1 : 0);
+		return result;
+	}
 }

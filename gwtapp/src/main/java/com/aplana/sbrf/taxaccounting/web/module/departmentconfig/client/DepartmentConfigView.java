@@ -12,7 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
+import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
+import java.util.Arrays;
 
 /**
  * View для формы настроек подразделений
@@ -114,7 +115,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	// Контейнер для справочника периодов
 	@UiField
 	@Editor.Ignore
-	PeriodPickerPopup periodPickerPopup;
+    PeriodPickerPopupWidget periodPickerPopup;
 
 	@UiField
 	@Ignore
@@ -128,7 +129,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@UiField
 	@Ignore
 	Button saveButton,
-			cancelButton;
+			cancelButton,
+            findButton;
 
 	@UiField
 	@Ignore
@@ -150,6 +152,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Ignore
     Label taxTypeLabel;
 
+    @UiField
+    @Ignore
+    HorizontalPanel findButtonPanel;
+
     @Inject
 	@UiConstructor
 	public DepartmentConfigView(final Binder uiBinder) {
@@ -169,7 +175,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     onReportPeriodsSelected(null);
                     isReportPeriodActive = false;
                 }
-                editButton.setEnabled(isReportPeriodActive);
             }
         });
 		// Подразделение
@@ -183,50 +188,16 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 					selDepartmentId = event.getValue().iterator().next();
 				}
 
-				final Integer selDepid = selDepartmentId;
-
-				if (isEditMode && driver.isDirty()) {
-                    Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
-                        @Override
-                        public void yes() {
-                            setEditMode(false);
-                            // Проверка совпадения выбранного подразделения с текущим
-                            if (DepartmentConfigView.this.currentDepartmentId != null
-                                    && DepartmentConfigView.this.currentDepartmentId.equals(selDepid)) {
-                                return;
-                            }
-                            DepartmentConfigView.this.currentDepartmentId = selDepid;
-                            // Очистка формы
-                            clear();
-                            updateVisibility();
-                            reloadDepartmentParams();
-                            Dialog.hideMessage();
-                        }
-
-                        @Override
-                        public void no() {
-                            // Вернуть старое подразделение
-                            departmentPicker.setValue(Arrays.asList(DepartmentConfigView.this.currentDepartmentId));
-                        }
-
-                        @Override
-                        public void close() {
-                            no();
-                        }
-                    });
-                } else {
-                    setEditMode(false);
-					// Проверка совпадения выбранного подразделения с текущим
-					if (DepartmentConfigView.this.currentDepartmentId != null
-							&& DepartmentConfigView.this.currentDepartmentId.equals(selDepartmentId)) {
-						return;
-					}
-					DepartmentConfigView.this.currentDepartmentId = selDepartmentId;
-					// Очистка формы
-					clear();
-					updateVisibility();
-					reloadDepartmentParams();
-				}
+                // Проверка совпадения выбранного подразделения с текущим
+                if (DepartmentConfigView.this.currentDepartmentId != null
+                        && DepartmentConfigView.this.currentDepartmentId.equals(selDepartmentId)) {
+                    return;
+                }
+                DepartmentConfigView.this.currentDepartmentId = selDepartmentId;
+                // Очистка формы
+                editButton.setEnabled(false);
+                clear();
+                updateVisibility();
 			}
 		});
 	}
@@ -300,27 +271,27 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("findButton")
 	public void onFind(ClickEvent event) {
-		Dialog.infoMessage("Доработать", "Поиск должен идти по нажатию кнопкуи на не выбору одно из элементов слева!");
+        reloadDepartmentParams();
 	}
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
-		getUiHandlers().save(driver.flush(), currentReportPeriodId);
-		driver.edit(data);
+		getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
+        driver.edit(data);
 
-		if (dereferenceValues != null) {
-			// Обновление разыменованных значений
-			dereferenceValues.clear();
-			dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-			dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-			dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-			dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-			dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-			dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-			dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-			dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-		}
-	}
+        if (dereferenceValues != null) {
+            // Обновление разыменованных значений
+            dereferenceValues.clear();
+            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+            dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
+            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
+        }
+    }
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event) {
@@ -349,8 +320,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("editButton")
 	public void onEdit(ClickEvent event) {
-		if (currentReportPeriodId != null && isReportPeriodActive) {
-			setEditMode(true);
+		if (currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive) {
+            getUiHandlers().edit(currentReportPeriodId, currentDepartmentId);
 		}
 	}
 
@@ -359,13 +330,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	 *
 	 * @param isEditMode Флаг
 	 */
-	private void setEditMode(boolean isEditMode) {
+    @Override
+	public void setEditMode(boolean isEditMode) {
 		this.isEditMode = isEditMode;
 		editModeLabel.setVisible(isEditMode);
 		editButton.setVisible(!isEditMode);
+        periodPickerPopup.setEnabled(!isEditMode);
+        departmentPicker.setEnabled(!isEditMode);
         editButton.setEnabled(currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive);
         saveButton.setVisible(isEditMode);
 		cancelButton.setVisible(isEditMode);
+        findButtonPanel.setVisible(!isEditMode);
 		enableAllChildren(isEditMode, formPanel);
 	}
 
@@ -391,31 +366,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		if (this.currentReportPeriodId != null && reportPeriodId != null && this.currentReportPeriodId.equals(reportPeriodId)) {
 			return;
 		}
-		final Integer repPeriodId = reportPeriodId;
-		if (isEditMode && driver.isDirty()) {
-			Dialog.confirmMessage(CONFIRM_TITLE, CONFIRM_MSG, new DialogHandler() {
-				@Override
-				public void yes() {
-					setEditMode(false);
-					afterCheckUnsaved(repPeriodId);
-					Dialog.hideMessage();
-				}
-
-				@Override
-				public void no() {
-					Dialog.hideMessage();
-				}
-
-				@Override
-				public void close() {
-					no();
-				}
-			});
-
-		} else {
-			setEditMode(false);
-			afterCheckUnsaved(reportPeriodId);
-		}
+        this.currentReportPeriodId = reportPeriodId;
+        editButton.setEnabled(false);
+        resetRefBookWidgetsDatePeriod(currentReportPeriodId);
+        clear();
 	}
 
 	private void afterCheckUnsaved(Integer repPeriodId) {
@@ -425,7 +379,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		editButton.setEnabled(repPeriodId != null && isReportPeriodActive);
 
 		updateVisibility();
-		reloadDepartmentParams();
+		//reloadDepartmentParams();
 		resetRefBookWidgetsDatePeriod(currentReportPeriodId);
 	}
 
@@ -439,7 +393,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		if (department != null) {
 			departmentPicker.setValue(Arrays.asList(department.getId()), true);
 			updateVisibility();
-			reloadDepartmentParams();
 		}
 
 		this.currentDepartmentId = department != null ? department.getId() : null;
@@ -523,5 +476,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
 		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
+    }
+
+    @Override
+    public void updateVisibleEditButton() {
+        editButton.setVisible(!isEditMode);
     }
 }

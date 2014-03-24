@@ -40,8 +40,6 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
     public UpdateDeclarationResult execute(UpdateDeclarationAction action, ExecutionContext context) {
 		UpdateDeclarationResult result = new UpdateDeclarationResult();
 
-        TemplateChanges changes = new TemplateChanges();
-
         Logger logger = new Logger();
         makeDates(action);
         if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null
