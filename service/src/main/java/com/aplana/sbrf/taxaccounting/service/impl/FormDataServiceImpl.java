@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -223,14 +220,29 @@ public class FormDataServiceImpl implements FormDataService {
                                            FormDataKind kind, int reportPeriodId, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
 		FormData formData = new FormData(formTemplate);
-		
+
 		formData.setState(WorkflowState.CREATED);
 		formData.setDepartmentId(departmentId);
 		formData.setKind(kind);
 		formData.setReportPeriodId(reportPeriodId);
         formData.setPeriodOrder(periodOrder);
-		
-		// Execute scripts for the form event CREATE
+
+        Integer prevReportPeriodId = reportPeriodService.getPrevReportPeriod(reportPeriodId).getId();
+        FormData formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriodId);
+        if (formDataOld != null) {
+            List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
+            List<FormDataSigner> signerOld = formDataOld.getSigners();
+            for(FormDataSigner formDataSignerOld: signerOld) {
+                FormDataSigner formDataSigner = new FormDataSigner();
+                formDataSigner.setName(formDataSignerOld.getName());
+                formDataSigner.setPosition(formDataSignerOld.getPosition());
+                signer.add(formDataSigner);
+            }
+            formData.setSigners(signer);
+            formData.setPerformer(formDataOld.getPerformer());
+        }
+
+        // Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
 				importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
 		if (logger.containsLevel(LogLevel.ERROR)) {

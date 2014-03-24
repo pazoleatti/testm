@@ -146,12 +146,12 @@ public class PeriodServiceImplTest {
         reportPeriodListBy1Period.add(reportPeriod14);
 
         List<ReportPeriod> reportPeriodListBy2Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy1Period.add(reportPeriod21);
-        reportPeriodListBy1Period.add(reportPeriod22);
+        reportPeriodListBy2Period.add(reportPeriod21);
+        reportPeriodListBy2Period.add(reportPeriod22);
 
         List<ReportPeriod> reportPeriodListBy3Period= new ArrayList<ReportPeriod>();
-        reportPeriodListBy1Period.add(reportPeriod31);
-        reportPeriodListBy1Period.add(reportPeriod32);
+        reportPeriodListBy3Period.add(reportPeriod31);
+        reportPeriodListBy3Period.add(reportPeriod32);
 
 
         // Mock для reportPeriodDao
@@ -233,5 +233,23 @@ public class PeriodServiceImplTest {
     @Test
     public void getMonthReportDate() {
 		checkDates(2012, Calendar.JUNE, 1, service.getMonthReportDate(8, 5).getTime());
+    }
+
+    /*
+     * Тест получения из текущего налогового периода
+     */
+    @Test
+    public void getPrevReportPeriodInSide(){
+        assertNotNull(service.getPrevReportPeriod(2));
+        assertTrue(service.getPrevReportPeriod(2).getId() == 1);
+    }
+
+    /*
+     * Тест получения из предыдущего налогового периода
+     */
+    @Test
+    public void getPrevReportPeriodOutSide(){
+        service.getPrevReportPeriod(5);
+        assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 4);
     }
 }

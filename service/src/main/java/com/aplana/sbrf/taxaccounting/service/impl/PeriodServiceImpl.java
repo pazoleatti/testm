@@ -655,4 +655,41 @@ public class PeriodServiceImpl implements PeriodService{
 	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
 		return departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId);
 	}
+
+    @Override
+    public ReportPeriod getPrevReportPeriod(int reportPeriodId) {
+        // текущий отчетный период
+        ReportPeriod thisReportPeriod = reportPeriodDao.get(reportPeriodId);
+        // текущий налоговый период
+        TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
+        // список отчетных периодов в текущем налоговом периоде
+        List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
+
+        /**
+         *  если это первый отчетный период в данном налоговом периоде
+         *  то возвращать последний отчетный период с предыдущего налогово периода
+         */
+        if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
+            List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
+            for (int i = 0; i < taxPeriodlist.size(); i++){
+                if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
+                    if (i == 0) {
+                        return null;
+                    }
+                    // получим список отчетных периодов для данного налогового периода
+                    reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
+                    // вернем последний отчетный период
+                    return reportPeriodlist.size() > 0 ? reportPeriodlist.get(reportPeriodlist.size() - 1) : null;
+                }
+            }
+        } else {
+            // не первый отчетный период в данном налоговом
+            for (int i = 0; i < reportPeriodlist.size(); i++){
+                if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
+                    return reportPeriodlist.get(i - 1);
+                }
+            }
+        }
+        return null;
+    }
 }
