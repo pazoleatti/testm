@@ -87,4 +87,15 @@ public class LogEntryServiceImpl implements LogEntryService {
 
         return retMap;
     }
+
+    @Override
+    public String update(List<LogEntry> logEntries, String uuid) {
+        if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
+            return null;
+        }
+        List<LogEntry> list = getAll(uuid);
+        list.addAll(logEntries);
+        logEntryDao.update(logEntries, uuid);
+        return uuid;
+    }
 }

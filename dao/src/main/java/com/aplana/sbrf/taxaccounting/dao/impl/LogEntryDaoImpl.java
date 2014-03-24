@@ -90,4 +90,42 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             throw new DaoException(String.format("Не удалось получить запись с id = %s", uuid), e);
         }
     }
+
+    @Override
+    public void update(List<LogEntry> logEntries, String uuid) {
+        if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
+            return;
+        }
+        try {
+            final BlobData blobData = new BlobData();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream output = new ObjectOutputStream(baos);
+            output.writeObject(logEntries);
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+            blobData.setInputStream(is);
+            blobData.setUuid(uuid);
+            blobData.setDataSize(baos.size());
+
+            PreparedStatementCreator psc = new PreparedStatementCreator() {
+
+                @Override
+                public PreparedStatement createPreparedStatement(Connection con)
+                        throws SQLException {
+
+                    PreparedStatement ps = con
+                            .prepareStatement(
+                                    "update blob_data set data = ?, data_size = ? where id = ?");
+                    ps.setBlob(1, blobData.getInputStream());
+                    ps.setInt(2, blobData.getDataSize());
+                    ps.setString(3, blobData.getUuid());
+                    return ps;
+                }
+            };
+            getJdbcTemplate().update(psc);
+        } catch (Exception e) {
+            throw new DaoException("Не удалось обновить запись. " + e.getMessage());
+        }
+    }
 }
