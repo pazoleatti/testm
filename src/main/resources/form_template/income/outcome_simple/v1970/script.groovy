@@ -382,7 +382,6 @@ void consolidationSummary(def dataRows) {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
 
-                        // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
                         def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 10 рну-7
@@ -411,7 +410,6 @@ void consolidationSummary(def dataRows) {
                     ((2..106) + (109..211)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
-                        // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
                         def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
 
                         // сумма графы 5 рну-5
