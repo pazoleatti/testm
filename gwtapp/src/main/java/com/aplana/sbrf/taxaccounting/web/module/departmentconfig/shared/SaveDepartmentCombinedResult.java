@@ -10,6 +10,7 @@ public class SaveDepartmentCombinedResult implements Result {
 
     private String uuid;
     private boolean hasError = false;
+    private String declarationTypes;
 
     public String getUuid() {
         return uuid;
@@ -25,5 +26,13 @@ public class SaveDepartmentCombinedResult implements Result {
 
     public void setHasError(boolean hasError) {
         this.hasError = hasError;
+    }
+
+    public String getDeclarationTypes() {
+        return declarationTypes;
+    }
+
+    public void setDeclarationTypes(String declarationTypes) {
+        this.declarationTypes = declarationTypes;
     }
 }

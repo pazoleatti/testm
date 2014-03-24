@@ -174,10 +174,10 @@ public class ImportServiceImpl implements ImportService {
      * Получить текстовый xml из XLS файла.
      *
      * @param inputStream  данные из файла
-     * @param startStr     начало таблицы (шапка первой колонки)
-     * @param endStr       конец табцицы (надпись "итого" или значения после таблицы)
-     * @param columnsCount количество колонок в таблице
-     * @param headerRowCount количество строк в шапке
+     * @param startStr     начало таблицы (шапка первой колонки) (может быть null)
+     * @param endStr       конец табцицы (надпись "итого" или значения после таблицы) (может быть null)
+     * @param columnsCount количество колонок в таблице (может быть null)
+     * @param headerRowCount количество строк в шапке (может быть null)
      * @param isCompressed true для xlsx и xlsm, false для xls
      */
     private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount,
@@ -333,7 +333,7 @@ public class ImportServiceImpl implements ImportService {
      */
     private String getRowString(Row row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
-            return "<row/>";
+            return TAB + "<row/>" + ENTER;
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);

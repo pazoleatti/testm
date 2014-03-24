@@ -114,13 +114,18 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 // Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required) {
     if (value == null || value == '') {
         return null
     }
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению
+def getRecord(def refBookId, def String alias, def String value) {
+    return getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, getReportPeriodEndDate())
 }
 
 // Получение числа из строки при импорте
@@ -189,11 +194,9 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        def index = row.getIndex()
-        def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // 2. Арифметическая проверка графы 10
         def needValue = [:]
@@ -403,7 +406,7 @@ void importData() {
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 2)
 }
 
 // Заполнить форму данными
@@ -422,7 +425,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexRow++
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -445,11 +448,23 @@ void addData(def xml, int headRowCount) {
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
         def xmlIndexCol = 2
-        newRow.name = getRecordIdImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.name = record30?.record_id?.value
+
+        // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
+        if (record30 != null) {
+            formDataService.checkReferenceValue(30, row.cell[1].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         // графа 3 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
         xmlIndexCol = 3
-        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.issuer = record84?.record_id?.value
+
+        // графа 4 - зависит от графы 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
+        if (record84 != null) {
+            formDataService.checkReferenceValue(84, row.cell[4].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         // графа 5
         xmlIndexCol = 5

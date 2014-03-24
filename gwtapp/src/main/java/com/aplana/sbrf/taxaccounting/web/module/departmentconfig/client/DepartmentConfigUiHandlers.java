@@ -15,8 +15,18 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      *
      * @param combinedDepartmentParam
      * @param period
+     * @param department
+    */
+
+    void save(DepartmentCombined combinedDepartmentParam, Integer period, Integer department);
+
+    /**
+     * Проверка перед редакритованием
+     *
+     * @param period
+     * @param department
      */
-    void save(DepartmentCombined combinedDepartmentParam, Integer period);
+    void edit(Integer period, Integer department);
 
     /**
      * Очистка формы

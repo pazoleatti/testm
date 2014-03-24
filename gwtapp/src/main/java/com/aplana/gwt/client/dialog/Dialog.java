@@ -18,6 +18,11 @@ public final class Dialog extends ModalWindow {
         YES, NO, OK, CANCEL, CLOSE
     }
 
+    public static String WARNING_MESSAGE = "Внимание!";
+    public static String ERROR_MESSAGE = "Ошибка";
+    public static String INFO_MESSAGE = "Информация";
+    public static String CONFIRM_MESSAGE = "Подтверждение";
+
     private static final Dialog INSTANCE = new Dialog();
 
     private static DialogPanel dialogPanel = new DialogPanel();
@@ -49,6 +54,7 @@ public final class Dialog extends ModalWindow {
     private boolean initDialog = false;
 
     private Dialog() {
+        isResizable = false;
     }
 
     /**
@@ -83,7 +89,7 @@ public final class Dialog extends ModalWindow {
      * @param text - Текст сообщения
      */
     public static void warningMessage(String text) {
-        warningMessage("Внимание!", text);
+        warningMessage(WARNING_MESSAGE, text);
     }
 
     /**
@@ -108,7 +114,7 @@ public final class Dialog extends ModalWindow {
      * @param handler - обарботчик
      */
     public static void warningMessage(String text, DialogHandler handler) {
-        warningMessage("Внимание!", text, handler);
+        warningMessage(WARNING_MESSAGE, text, handler);
     }
 
     /**
@@ -132,7 +138,7 @@ public final class Dialog extends ModalWindow {
      * @param text - Текст сообщения
      */
     public static void errorMessage(String text) {
-        errorMessage("Ошибка", text);
+        errorMessage(ERROR_MESSAGE, text);
     }
 
     /**
@@ -157,7 +163,7 @@ public final class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void errorMessage(String text, DialogHandler handler) {
-        errorMessage("Ошибка", text, handler);
+        errorMessage(ERROR_MESSAGE, text, handler);
     }
 
     /**
@@ -181,7 +187,7 @@ public final class Dialog extends ModalWindow {
      * @param text - Текст сообщения
      */
     public static void infoMessage(String text) {
-        infoMessage("Информация", text);
+        infoMessage(INFO_MESSAGE, text);
     }
 
     /**
@@ -206,7 +212,7 @@ public final class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void infoMessage(String text, DialogHandler handler) {
-        infoMessage("Информация", text, handler);
+        infoMessage(INFO_MESSAGE, text, handler);
     }
 
     /**
@@ -230,7 +236,7 @@ public final class Dialog extends ModalWindow {
      * @param text - Текст сообщения
      */
     public static void confirmMessage(String text) {
-        confirmMessage("Подтверждение", text);
+        confirmMessage(CONFIRM_MESSAGE, text);
     }
 
     /**
@@ -267,7 +273,7 @@ public final class Dialog extends ModalWindow {
      * @param handler - обработчик
      */
     public static void confirmMessage(String text, DialogHandler handler) {
-        confirmMessage("Подтверждение", text, handler);
+        confirmMessage(CONFIRM_MESSAGE, text, handler);
     }
 
     /**

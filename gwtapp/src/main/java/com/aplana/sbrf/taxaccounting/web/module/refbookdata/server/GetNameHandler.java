@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,17 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
         result.setRefBookType(refBook.getType());
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
+        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
+        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
+        Map<String, String> refAliases = new HashMap<String, String>();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
+                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
+                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
+                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
+            }
+        }
 
         if (action.getUniqueRecordId() != null) {
             //Получение значений уникальных параметров
@@ -66,9 +79,8 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
                         break;
                     case REFERENCE:
                         if (value.getReferenceValue() != null) {
-                            RefBookDataProvider referenceDataProvider = refBookFactory.getDataProvider(attribute.getRefBookId());
-                            Map<String, RefBookValue> refValue = referenceDataProvider.getRecordData(value.getReferenceValue());
-                            uniqueValues.append(refValue.get(attribute.getAlias()).toString());
+                            Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                            uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
                         }
                         break;
                     default:

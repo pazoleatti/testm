@@ -14,7 +14,6 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int reportPeriodId;
 	private int departmentId;
 	private boolean accepted;
-    private String jasperPrintId;
 
     /**
      * Идентификаторы бинарных данных в таблице BLOB_DATA

@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,6 +35,24 @@ public class DeclarationTemplateDaoTest {
 
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
+
+	@Autowired
+	private BlobDataDao blobDataDao;
+
+	private static final String SAMPLE_BLOB_ID = UUID.randomUUID().toString();
+
+	@Before
+	public void init() throws UnsupportedEncodingException {
+		// генерим тестовый блоб
+		String sampleBlobData = "sample text";
+		BlobData blob = new BlobData();
+		blob.setCreationDate(new Date());
+		blob.setDataSize(sampleBlobData.length());
+		blob.setUuid(SAMPLE_BLOB_ID);
+		blob.setType(0);
+		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
+		blobDataDao.create(blob);
+	}
 
 	@Test
 	public void testListAll() {
@@ -56,9 +80,6 @@ public class DeclarationTemplateDaoTest {
 
 	@Test
 	public void testSaveNew() {
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
 
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
 		declarationTemplate.setActive(true);
@@ -68,7 +89,6 @@ public class DeclarationTemplateDaoTest {
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setType(declarationType);
         declarationTemplate.setJrxmlBlobId("1");
-        declarationTemplate.setEdition(declarationTemplateDao.versionTemplateCount(1, list) + 1);
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 
 		int id = declarationTemplateDao.save(declarationTemplate);
@@ -117,8 +137,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
-        String uuid1 = UUID.randomUUID().toString();
-        declarationTemplate.setJrxmlBlobId(uuid1);
+        declarationTemplate.setJrxmlBlobId(SAMPLE_BLOB_ID);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 
@@ -127,9 +146,8 @@ public class DeclarationTemplateDaoTest {
         DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
         assertEquals(1, savedDeclarationTemplate.getId().intValue());
 
-        String uuid2 = UUID.randomUUID().toString();
-        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), uuid2);
-        assertEquals(uuid2, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
+        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), SAMPLE_BLOB_ID);
+        assertEquals(SAMPLE_BLOB_ID, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
     }
 
 	/*@Test(expected = DaoException.class)
@@ -253,6 +271,19 @@ public class DeclarationTemplateDaoTest {
         Assert.assertEquals(2, declarationTemplateDao.versionTemplateCount(1, list));
 
     }
+
+    @Test
+    public void testVersionTemplateCountByType(){
+        List<Map<String, Object>> list = declarationTemplateDao.versionTemplateCountByType(Arrays.asList(1,2));
+        Assert.assertEquals(new BigDecimal(1), list.get(0).get("type_id"));
+        Assert.assertEquals((long) 2, list.get(0).get("version_count"));
+    }
+
+    @Test
+    public void testGetLastVersionEdition(){
+        Assert.assertEquals(3, declarationTemplateDao.getLastVersionEdition(2));
+    }
+
 
     @Test
     public void getBadDeclarationTemplateScriptTest(){

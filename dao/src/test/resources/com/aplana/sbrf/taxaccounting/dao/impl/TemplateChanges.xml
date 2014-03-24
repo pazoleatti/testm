@@ -7,7 +7,6 @@
     <import resource="classpath:testDaoContext.xml"/>
 
     <jdbc:initialize-database>
-        <jdbc:script location="classpath:data/DeclarationType.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/DeclarationTemplate.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
         <jdbc:script location="classpath:data/TAUser.sql" encoding="UTF-8"/>

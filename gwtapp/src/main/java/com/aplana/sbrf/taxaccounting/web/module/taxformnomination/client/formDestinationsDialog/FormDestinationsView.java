@@ -55,8 +55,6 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     @UiField
     DepartmentPickerPopupWidget performersPickerWidget;
 
-    private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-
     /**
      * Список id назначений (department_form_type) выделенные на форме
      * при открытии формы редактирования данных, теряется четкое сопостовление
@@ -82,7 +80,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
             );
         } else {
             getUiHandlers().onConfirm();
@@ -94,7 +92,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         if (!checkRequiredFields()){
             Dialog.errorMessage(
                     "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ',')
+                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
             );
         } else {
             getUiHandlers().onEdit(selectedDFT);

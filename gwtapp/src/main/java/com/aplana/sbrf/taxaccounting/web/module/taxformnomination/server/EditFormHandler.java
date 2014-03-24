@@ -23,13 +23,6 @@ public class EditFormHandler extends AbstractActionHandler<EditFormsAction, Edit
     @Autowired
     private SourceService departmentFormTypeService;
 
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private FormTypeService formTypeService;
-
-
     public EditFormHandler() {
         super(EditFormsAction.class);
     }

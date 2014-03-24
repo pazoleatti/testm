@@ -150,22 +150,23 @@ void checkBeforeCalc(DataRowHelper form) {
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    DataRowHelper data = getData(formData)
+    def dataRowHelper = getData(formData)
+    def dataRows = dataRowHelper.allCached
 
     // удалить строку "итого"
     def delRow = []
-    getRows(data).each { row ->
+    dataRows.each { row ->
         if (isTotal(row)) {
             delRow += row
         }
     }
     delRow.each { row ->
-        data.delete(row)
+        dataRowHelper.delete(row)
     }
 
     // отсортировать/группировать
     if (formDataEvent != FormDataEvent.IMPORT) {
-        sort(data)
+        sort(dataRowHelper)
     }
 
     /** Отчетная дата. */
@@ -173,7 +174,7 @@ void calc() {
     /** Последний день отчетного периода */
     def lastDayReportPeriod = getReportPeriodEndDate()
 
-    checkBeforeCalc(data)
+    checkBeforeCalc(dataRowHelper)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return  // Расчитывать не можем
     }
@@ -191,7 +192,7 @@ void calc() {
     def tmp = 0
     def a, b, c
 
-    for (def row : getRows(data)) {
+    for (def row : dataRows) {
 
         // графа 9, 10 - при импорте не рассчитывать эти графы
         if (formDataEvent != FormDataEvent.IMPORT) {
@@ -209,31 +210,11 @@ void calc() {
             row.outcome = b
         }
 
-        def currency = getCurrency(row.currencyCode)
         // графа 11
         row.rateBR = roundTo2(calc11(row, lastDayReportPeriod))
 
         // графа 12
-        if (row.outcome == 0) {
-            tmp = 0
-        } else if (row.outcome > 0 && currency == '810') {
-            if (inPeriod(lastDayReportPeriod, '01.09.2008', '31.12.2009')) {
-                tmp = calc12Value(row, 1.5, reportDate, daysInYear)
-            } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
-                tmp = calc12Value(row, 2, reportDate, daysInYear)
-            } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '31.12.2012')) {
-                tmp = calc12Value(row, 1.8, reportDate, daysInYear)
-            } else {
-                tmp = calc12Value(row, 1.1, reportDate, daysInYear)
-            }
-        } else if (row.outcome > 0 && currency != '810') {
-            if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
-                tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
-            } else {
-                tmp = calc12Value(row, 1, reportDate, daysInYear) * course
-            }
-        }
-        row.outcome269st = roundTo2(tmp)
+        row.outcome269st = roundTo2(calc12(row, daysInYear, course, someDate, reportDate))
 
         // графа 13
         if (row.outcome == 0) {
@@ -245,12 +226,12 @@ void calc() {
         }
         row.outcomeTax = roundTo2(tmp)
     }
-    data.save(getRows(data))
+    dataRowHelper.save(dataRows)
 
     // строка итого
-    if (getRows(data).size() > 0) {
+    if (dataRows.size() > 0) {
         def totalRow = getCalcTotalRow()
-        insert(data, totalRow)
+        insert(dataRowHelper, totalRow)
     }
 }
 
@@ -352,6 +333,7 @@ def logicalCheck() {
             } else if (a != null && a < 0) {
                 b = roundTo2(-a)
             }
+
             // графа 9
             if (row.income != c) {
                 name = getColumnName(row, 'income')
@@ -371,27 +353,7 @@ def logicalCheck() {
             }
 
             // графа 12
-            def currency = getCurrency(row.currencyCode)
-            if (row.outcome == 0) {
-                tmp = 0
-            } else if (row.outcome > 0 && currency == '810') {
-                if (inPeriod(lastDayReportPeriod, '01.09.2008', '31.12.2009')) {
-                    tmp = calc12Value(row, 1.5, reportDate, daysInYear)
-                } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
-                    tmp = calc12Value(row, 2, reportDate, daysInYear)
-                } else if (inPeriod(lastDayReportPeriod, '01.01.2010', '31.12.2012')) {
-                    tmp = calc12Value(row, 1.8, reportDate, daysInYear)
-                } else {
-                    tmp = calc12Value(row, 1.1, reportDate, daysInYear)
-                }
-            } else if (row.outcome > 0 && currency != '810') {
-                if (inPeriod(lastDayReportPeriod, '01.01.20011', '31.12.2012')) {
-                    tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
-                } else {
-                    tmp = calc12Value(row, 1, reportDate, daysInYear) * course
-                }
-            }
-            if (row.outcome269st != tmp) {
+            if (row.outcome269st != roundTo2(calc12(row, daysInYear, course, someDate, reportDate))) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -404,7 +366,7 @@ def logicalCheck() {
             } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
                 tmp = row.outcome269st
             }
-            if (row.outcomeTax != tmp) {
+            if (row.outcomeTax !=  roundTo2(tmp)) {
                 name = getColumnName(row, 'outcomeTax')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -432,6 +394,33 @@ def logicalCheck() {
     }
 
     return true
+}
+
+def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def reportDate) {
+    if (row.outcome == null || row.currencyCode == null || row.part1REPODate == null
+            || daysInYear == null || course == null || someDate == null) {
+        return 0
+    }
+    def currency = getCurrency(row.currencyCode)
+    def tmp = 0
+    if (row.outcome > 0 && currency == '810') {
+        if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
+            tmp = calc12Value(row, 1.5, reportDate, daysInYear)
+        } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
+            tmp = calc12Value(row, 2, reportDate, daysInYear)
+        } else if (inPeriod(reportDate, '01.01.2010', '31.12.2012')) {
+            tmp = calc12Value(row, 1.8, reportDate, daysInYear)
+        } else {
+            tmp = calc12Value(row, 1.1, reportDate, daysInYear)
+        }
+    } else if (row.outcome > 0 && currency != '810') {
+        if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
+            tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
+        } else {
+            tmp = calc12Value(row, 1, reportDate, daysInYear) * course
+        }
+    }
+    return roundTo2(tmp)
 }
 
 /**
@@ -592,8 +581,7 @@ def getDate(def value, def format) {
  * @paam days количество дней в году
  */
 def calc12Value(def row, def coef, def reportDate, def days) {
-    def tmp = (row.acquisitionPrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return roundTo2(tmp)
+    return (row.acquisitionPrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
 }
 
 /**

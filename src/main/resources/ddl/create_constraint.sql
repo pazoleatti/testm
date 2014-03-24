@@ -20,7 +20,7 @@ alter table form_template add constraint form_template_chk_fixed_rows check(fixe
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table form_style add constraint form_style_pk primary key (id);
-alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template (id) on delete cascade;
+alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
@@ -45,9 +45,9 @@ alter table ref_book_attribute add constraint ref_book_attr_chk_ref check ((type
 alter table ref_book_attribute add constraint ref_book_attr_chk_ref_attr check ((type <> 4 and attribute_id is null) or (type = 4 and not (attribute_id is null)));
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_ord unique (ref_book_id, ord);
 alter table ref_book_attribute add constraint ref_book_attribute_uniq_alias unique (ref_book_id, alias);
-alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
-alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book (id);
-alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_reference_id foreign key (reference_id) references ref_book(id);
+alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5));
 
@@ -56,12 +56,12 @@ alter table ref_book_attribute add constraint ref_book_attribute_chk_format chec
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
-alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book (id);
+alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
 create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
-alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record (id) on delete cascade;
-alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
+alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record(id) on delete cascade;
+alter table ref_book_value add constraint ref_book_value_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
 
 alter table form_column add constraint form_column_pk primary key (id);
 alter table form_column add constraint form_column_fk_form_templ_id foreign key (form_template_id) references form_template(id) on delete cascade;
@@ -72,9 +72,9 @@ alter table form_column add constraint form_column_chk_max_length check ((type =
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null and precision >=0 and precision < 9) or (type <> 'R' and attribute_id is null));
 alter table form_column add constraint form_column_chk_width check (not width is null);
-alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute (id);
-alter table form_column add constraint form_column_fk_attribute_id2 foreign key (attribute_id2) references ref_book_attribute (id);
-alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column (id);
+alter table form_column add constraint form_column_fk_attribute_id foreign key (attribute_id) references ref_book_attribute(id);
+alter table form_column add constraint form_column_fk_attribute_id2 foreign key (attribute_id2) references ref_book_attribute(id);
+alter table form_column add constraint form_column_fk_parent_id foreign key (parent_column_id) references form_column(id);
 alter table form_column add constraint form_column_chk_filt_parent check ((type='R' and ((parent_column_id is null) and (filter is not null)) or ((parent_column_id is not null) and (filter is null)) or ((parent_column_id is null) and (filter is null))) or (type<>'R'));
 
 alter table department add constraint department_pk primary key (id);
@@ -82,7 +82,7 @@ alter table department add constraint dept_fk_parent_id foreign key (parent_id) 
 alter table department add constraint dept_chk_type check(type in (1, 2, 3, 4, 5));
 
 alter table report_period add constraint report_period_pk primary key(id);
-alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period (id);
+alter table report_period add constraint report_period_fk_taxperiod foreign key (tax_period_id) references tax_period(id);
 alter table report_period add constraint report_period_fk_dtp_id foreign key (dict_tax_period_id) references ref_book_record(id);
 alter table report_period add constraint report_period_uniq_tax_dict unique (tax_period_id, dict_tax_period_id);
 alter table report_period add constraint report_period_chk_date check (end_date >= start_date);
@@ -100,24 +100,25 @@ alter table declaration_type add constraint declaration_type_chk_tax_type check 
 alter table declaration_type add constraint declaration_type_chk_status check (status in (-1, 0, 1, 2));
 
 alter table department_declaration_type add constraint dept_decl_type_pk primary key (id);
-alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department (id);
-alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type (id);
+alter table department_declaration_type add constraint dept_decl_type_fk_dept foreign key (department_id) references department(id);
+alter table department_declaration_type add constraint dept_decl_type_fk_decl_type foreign key (declaration_type_id) references declaration_type(id);
 alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
-alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
-alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
+alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type(id);
+alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (xsd) references blob_data(id);
+alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 
 alter table declaration_data add constraint declaration_data_pk primary key (id);
-alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template (id);
+alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_data add constraint declaration_data_fk_rep_per_id foreign key (report_period_id) references report_period (id);
-alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department (id);
-alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data (id);
-alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data (id);
-alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data (id);
-alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data (id);
+alter table declaration_data add constraint declaration_data_fk_dep_id foreign key (department_id) references department(id);
+alter table declaration_data add constraint declaration_data_fk_j_print foreign key (jasper_print) references blob_data(id);
+alter table declaration_data add constraint declaration_data_fk_data foreign key (data) references blob_data(id);
+alter table declaration_data add constraint declaration_data_fk_data_pdf foreign key (data_pdf) references blob_data(id);
+alter table declaration_data add constraint declaration_data_fk_data_xlsx foreign key (data_xlsx) references blob_data(id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
 
@@ -132,11 +133,11 @@ alter table form_data add constraint form_data_chk_return_sign check(return_sign
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));
 
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
-alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
+alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
-alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data (id) on delete cascade;
-alter table form_data_performer add constraint formdata_performer_fk_print_dep_id foreign key (print_department_id) references department(id);
+alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
+alter table form_data_performer add constraint formdata_performer_fk_dept foreign key (print_department_id) references department(id);
 
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
@@ -145,13 +146,13 @@ alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1))
 alter table data_row add constraint data_row_chk_manual check (manual in (0, 1));
 
 alter table cell_style add constraint cell_style_pk primary key (row_id, column_id);
-alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column (id);
-alter table cell_style add constraint cell_style_fk_data_row foreign key (row_id) references data_row (id) on delete cascade;
-alter table cell_style add constraint cell_style_fk_style_id foreign key (style_id) references form_style (id);
+alter table cell_style add constraint cell_style_fk_column_id foreign key (column_id) references form_column(id);
+alter table cell_style add constraint cell_style_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
+alter table cell_style add constraint cell_style_fk_style_id foreign key (style_id) references form_style(id);
 
 alter table cell_editable add constraint cell_editable_pk primary key (row_id, column_id);
-alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row (id) on delete cascade;
-alter table cell_editable add constraint cell_editable_fk_form_column foreign key (column_id) references form_column (id);
+alter table cell_editable add constraint cell_editable_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
+alter table cell_editable add constraint cell_editable_fk_form_column foreign key (column_id) references form_column(id);
 
 alter table numeric_value add constraint numeric_value_pk primary key (row_id, column_id);
 alter table numeric_value add constraint numeric_value_fk_column_id foreign key (column_id) references form_column(id);
@@ -173,7 +174,7 @@ alter table department_form_type add constraint dept_form_type_uniq_form unique 
 alter table department_form_type add constraint dept_form_type_chk_kind check (kind in (1,2,3,4,5));
 
 alter table declaration_source add constraint declaration_source_pk primary key (department_declaration_type_id,src_department_form_type_id );
-alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type (id);
+alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type(id);
 alter table declaration_source add constraint decl_source_fk_dept_formtype foreign key (src_department_form_type_id) references department_form_type (id);
 
 alter table form_data_source add constraint form_data_source_pk primary key (department_form_type_id, src_department_form_type_id);
@@ -185,7 +186,7 @@ alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_i
 alter table sec_user add constraint sec_user_uniq_login_active unique (login);
 
 alter table object_lock add constraint object_lock_pk primary key (object_id, class);
-alter table object_lock add constraint object_lock_fk_user_id foreign key (user_id) references sec_user (id) on delete cascade;
+alter table object_lock add constraint object_lock_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
 
 alter table sec_role add constraint sec_role_pk primary key (id);
 alter table sec_role add constraint sec_role_uniq_alias unique (alias);
@@ -195,27 +196,27 @@ alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (u
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
 
 alter table cell_span_info add constraint cell_span_pk primary key (row_id, column_id);
-alter table cell_span_info add constraint cell_span_info_fk_row_id foreign key (row_id) references data_row (id) on delete cascade;
-alter table cell_span_info add constraint cell_span_info_fk_column_id foreign key (column_id) references form_column (id);
+alter table cell_span_info add constraint cell_span_info_fk_row_id foreign key (row_id) references data_row(id) on delete cascade;
+alter table cell_span_info add constraint cell_span_info_fk_column_id foreign key (column_id) references form_column(id);
 alter table cell_span_info add constraint cell_span_info_chk_span check (colspan is not null or rowspan is not null);
 
-alter table log_business add constraint log_business_fk_user_id foreign key (user_id) references sec_user (id);
+alter table log_business add constraint log_business_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
-alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data (id) on delete cascade;
+alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
-alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department (id);
+alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
 alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 503, 601));
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 501, 502, 503, 601) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_id is not null);
-alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user (id);
+alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
 alter table log_system add constraint log_system_fk_report_period_id foreign key (report_period_id) references report_period(id);
-alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type (id);
+alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
-alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department (id);
+alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department(id);
 
 alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
@@ -228,14 +229,14 @@ alter table task_context add constraint task_context_uniq_task_id unique (task_i
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
 
 alter table notification add constraint notification_fk_report_period foreign key (report_period_id) references report_period (id) on delete cascade;
-alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id);
-alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id);
-alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user (id);
+alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department(id);
+alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department(id);
+alter table notification add constraint notification_fk_sec_user foreign key (first_reader_id) references sec_user(id);
 
 alter table template_changes add constraint template_changes_pk primary key (id);
 alter table template_changes add constraint template_changes_fk_user_id foreign key (author) references sec_user(id);
 alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
-alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id);
+alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
 alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
 
 ------------------------------------------------------------------------------------------------------

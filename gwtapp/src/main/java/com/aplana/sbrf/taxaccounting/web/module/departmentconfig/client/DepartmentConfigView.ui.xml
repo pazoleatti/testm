@@ -135,12 +135,13 @@
                                                      addStyleNames="{style.filterWidgets}"/>
                     </g:cell>
 
-                    <!--Пока скрыл кнопку поиска(и сепаратор), может в будущем понадобится-->
                     <g:cell>
-                        <g:HTML addStyleNames="{style.separator}" visible="false"/>
+                        <g:HorizontalPanel ui:field="findButtonPanel">
+                            <g:HTML addStyleNames="{style.separator}"/>
+                            <g:Button title="Найти" width="70px" text="Поиск" ui:field="findButton"/>
+                        </g:HorizontalPanel>
                     </g:cell>
 
-                    <g:Button title="Найти" width="70px" text="Поиск" ui:field="findButton" visible="false"/>
                 </g:HorizontalPanel>
 
                 <g:ScrollPanel addStyleNames="{style.scrolPanelStyle}">

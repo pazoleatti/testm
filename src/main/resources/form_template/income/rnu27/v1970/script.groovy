@@ -112,7 +112,7 @@ def refBookCache = [:]
 
 // все атрибуты
 @Field
-def allColumns = ['number', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
+def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current',
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
@@ -176,7 +176,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     if (!isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+        loggerError("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
     }
 }
 
@@ -731,7 +731,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue(row.marketQuotation?:0 - row.reserveCalcValuePrev, 2)
+            return roundValue((row.marketQuotation ?: 0) - row.prev, 2)
         } else {
             return (BigDecimal) 0
         }

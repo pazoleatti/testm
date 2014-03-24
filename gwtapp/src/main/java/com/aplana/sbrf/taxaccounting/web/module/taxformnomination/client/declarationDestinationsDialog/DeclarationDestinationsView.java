@@ -28,9 +28,6 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 	public interface Binder extends UiBinder<PopupPanel, DeclarationDestinationsView> {
     }
 
-    // значения выпадающего списка типы деклараций, для виджета ValueListBox
-    private Map<Integer, String> formTypesMap = new LinkedHashMap<Integer, String>();
-
     @UiField(provided = true)
     ValueListBox<DeclarationType> declarationTypeId;
 

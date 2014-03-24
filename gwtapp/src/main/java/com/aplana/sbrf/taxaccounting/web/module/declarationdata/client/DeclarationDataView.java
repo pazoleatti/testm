@@ -104,6 +104,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setDepartment(String department) {
 		this.department.setText(department);
+		this.department.setTitle(department);
 	}
 
 	@Override

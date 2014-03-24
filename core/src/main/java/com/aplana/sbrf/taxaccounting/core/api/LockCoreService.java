@@ -55,8 +55,13 @@ public interface LockCoreService {
 	 * @param userInfo
 	 */
 	<T extends Number> void unlock(Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo);
-	
-	
+
+	/**
+	 * Снимает все блокировки пользователя. Например, это требуется после выхода пользователя из системы
+	 *
+	 * @param userInfo
+	 */
+	<T extends Number> void unlockAll(TAUserInfo userInfo);
 	
 	<T extends Number> ObjectLock<T> getLock(Class<? extends IdentityObject<T>> clazz, T id, TAUserInfo userInfo);
 	

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -35,7 +36,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	//private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
@@ -210,6 +210,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override
