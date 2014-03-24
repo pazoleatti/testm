@@ -111,11 +111,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
                             logEntryService.save(logger.getEntries()));
                 formTemplate.setStatus(VersionedObjectStatus.DELETED);
-                formTemplateService.save(formTemplate);
             }
+            formTemplateService.update(formTemplates);
         }
         formTypeService.delete(typeId);
-
         /*logging(typeId, TemplateChangesEvent.DELETED, user);*/
     }
 
@@ -128,7 +127,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на удаляемую версию макета",
                     logEntryService.save(logger.getEntries()));
         versionOperatingService.cleanVersions(templateId, template.getType().getId(), template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        formTemplateService.delete(template);
+        template.setStatus(VersionedObjectStatus.DELETED);
+        formTemplateService.save(template);
         if (formTemplateService.getFormTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
             formTypeService.delete(template.getType().getId());

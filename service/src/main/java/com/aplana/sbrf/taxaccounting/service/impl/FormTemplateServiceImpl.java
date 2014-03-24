@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             return formTemplateDao.saveNew(formTemplate);
 	}
 
-	@Override
+
+
+    @Override
 	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
 		return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
 	}
@@ -177,13 +180,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public int delete(FormTemplate formTemplate) {
-        switch (formTemplate.getStatus()){
-            case FAKE:
-                return formTemplateDao.delete(formTemplate.getId());
-            default:
-                formTemplate.setStatus(VersionedObjectStatus.DELETED);
-                return formTemplateDao.save(formTemplate);
-        }
+        return formTemplateDao.delete(formTemplate.getId());
     }
 
     @Override
@@ -213,7 +210,17 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+    public void update(List<FormTemplate> formTemplates) {
+        try {
+            if (ArrayUtils.contains(formTemplateDao.update(formTemplates), 0))
+                throw new ServiceException("Не все записи макета обновились.");
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка обновления версий.", e);
+        }
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
         Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
         List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
         for (Map<String, Object> map : mapList){

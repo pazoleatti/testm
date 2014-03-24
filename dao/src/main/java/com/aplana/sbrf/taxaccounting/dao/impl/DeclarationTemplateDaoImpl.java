@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,15 +14,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Реализация Dao для работы с шаблонами деклараций
@@ -179,6 +178,29 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		}
 		return declarationTemplateId;
 	}
+
+    @Override
+    public int[] update(final List<DeclarationTemplate> declarationTemplates) {
+        try {
+            return getJdbcTemplate().batchUpdate("UPDATE declaration_template SET status = ? WHERE id = ?",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            DeclarationTemplate declarationTemplate = declarationTemplates.get(i);
+                            ps.setInt(1, declarationTemplate.getStatus().getId());
+                            ps.setLong(2, declarationTemplate.getId());
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return declarationTemplates.size();
+                        }
+                    });
+        } catch (DataAccessException e){
+            logger.error("Ошибка обновления деклараций.", e);
+            throw new DaoException("Ошибка обновления деклараций.", e);
+        }
+    }
 
     @Override
     @Transactional(readOnly = false)
@@ -423,7 +445,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public List<Map<String, Object>> versionTemplateCountByType(List<Integer> typeIds) {
+    public List<Map<String, Object>> versionTemplateCountByType(Collection<Integer> typeIds) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeIds", typeIds);
         String sql = "SELECT declaration_type_id as type_id, COUNT(id) as version_count FROM declaration_template " +

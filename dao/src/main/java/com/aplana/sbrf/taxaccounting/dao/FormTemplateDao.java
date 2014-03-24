@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,14 @@ public interface FormTemplateDao {
 	 * @return идентификатор сохранённой записи
 	 */
 	int save(FormTemplate formTemplate);
+
+    /**
+     * Обновление данных версий макетов
+     * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * @param formTemplates объект шаблона декларации
+     * @return массив успешных апдейтов обновленных версий (0 - неуспешный, 1 - успешный)
+     */
+    int[] update(List<FormTemplate> formTemplates);
 	
 	/**
 	 * Возвращает идентификатор действующего {@link FormTemplate описания налоговой формы} по виду налоговой формы
@@ -149,7 +158,7 @@ public interface FormTemplateDao {
      * @param formTypeId вид шаблона
      * @return количество
      */
-    List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeId);
+    List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeId);
 
     /**
      * Получает номер последней редакции макета.

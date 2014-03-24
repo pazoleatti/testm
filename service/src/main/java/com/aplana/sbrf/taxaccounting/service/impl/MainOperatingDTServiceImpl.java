@@ -111,9 +111,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
                             logEntryService.save(logger.getEntries()));
                 declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
-                //TODO dloshkarev: можно переделать на batch
-                declarationTemplateService.save(declarationTemplate);
             }
+            declarationTemplateService.update(templates);
         }
         declarationTypeService.delete(typeId);
 
@@ -131,7 +130,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     logEntryService.save(logger.getEntries()));
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        declarationTemplateService.delete(template);
+        template.setStatus(VersionedObjectStatus.DELETED);
+        declarationTemplateService.save(template);
         if (declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
             declarationTypeService.delete(template.getType().getId());

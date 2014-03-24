@@ -19,14 +19,14 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -161,6 +161,29 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		columnDao.saveFormColumns(formTemplate);
 		return formTemplateId;
 	}
+
+    @Override
+    public int[] update(final List<FormTemplate> formTemplates) {
+        try {
+            return getJdbcTemplate().batchUpdate("UPDATE form_template SET status=? WHERE id = ?",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            FormTemplate formTemplate = formTemplates.get(i);
+                            ps.setInt(1, formTemplate.getStatus().getId());
+                            ps.setInt(2, formTemplate.getId());
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return formTemplates.size();
+                        }
+                    });
+        } catch (DataAccessException e){
+            logger.error("Ошибка обновления деклараций.", e);
+            throw new DaoException("Ошибка обновления деклараций.", e);
+        }
+    }
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -450,7 +473,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public List<Map<String,Object>> versionTemplateCountByType(List<Integer> formTypeIds) {
+    public List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeIds) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", formTypeIds);
         String sql = "SELECT type_id, COUNT(id) as version_count FROM form_template where type_id in(:typeId) and status in (0,1) GROUP BY type_id";
