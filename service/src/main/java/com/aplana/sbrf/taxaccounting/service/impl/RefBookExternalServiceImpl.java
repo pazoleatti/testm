@@ -155,7 +155,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
             } else {
                 errorMsg = "";
             }
-            errorMsg = "Не удалось выполнить импорт данных справочников из «" + refBookDirectory + "». " + errorMsg;
+            errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + errorMsg;
 
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                     null, errorMsg);
