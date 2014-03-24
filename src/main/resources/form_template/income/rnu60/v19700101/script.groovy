@@ -369,57 +369,50 @@ BigDecimal calc12(DataRow row) {
     if (row.currencyCode == null) {
         return null
     }
+    if (row.outcome != null && row.outcome == 0) {
+        return roundTo2(0)
+    }
+
     SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     Date date01_11_2009 = format.parse('01.11.2009')
     BigDecimal result = null
-    def countDaysInYear = getCountDaysInYear()
-    def currency = getCurrency(row.currencyCode)
+
     if (row.outcome != null && row.outcome > 0) {
         long difference = 0
         if (row.part2REPODate != null && row.part1REPODate != null) {
             difference = row.part2REPODate - row.part1REPODate
         }
         // необходимо получить кол-во в днях
-        difference = difference == 0 ? 1 : difference   // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
+        difference = difference == 0 ? 1 : difference // Эти вычисления для того чтобы получить разницу в днях, если она нулевая считаем равной 1 так написано в чтз
+
+        def coefficient
+        def currency = getCurrency(row.currencyCode)
         if (currency == '810') {
             if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.09.2008', '31.12.2009')) {
-                /*
-                a.  Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то:
-                    «графа 12» = («графа 7» ? «графа 11» ? 1,5) ? ((«графа6» - «графа5») / 365 (366)) / 100;
-
-                 */
-                result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * 1.5) * (difference / countDaysInYear) / 100
-            } else if (row.part2REPODate != null && row.part1REPODate!= null &&
-                    inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate.compareTo(date01_11_2009) < 0) {
-                /*
-                b.  Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010 и одновременно сделка открыта до 01.11.2009 («графа 5» < 01.11.2009 г.), то
-                    «графа 12» = («графа 7» ? «графа 11» ? 2) ? ((«графа 6» - «графа 5») / 365 (366)) / 100;
-                 */
-                result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * 2) * (difference / countDaysInYear) / 100
+                // a. Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009, то: 1.5
+                coefficient = 1.5
+            } else if (row.part2REPODate != null && row.part1REPODate != null &&
+                    inPeriod(row.part2REPODate, '01.01.2010', '30.06.2010') && row.part1REPODate < date01_11_2009) {
+                // b. Если «графа 6» принадлежит периоду с 01.01.2010 по 30.06.2010
+                // и одновременно сделка открыта до 01.11.2009 («графа 5» < 01.11.2009 г.), то: 2
+                coefficient = 2
             } else if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.01.2010', '31.12.2012')) {
-                /*
-                c.  Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то:
-                    «графа 12» = («графа 7» ? «графа 11» ? 1,8) ? ((«графа6» - «графа5») / 365(366)) / 100.
-                 */
-                result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * 1.8) * (difference / countDaysInYear) / 100
+                // c. Если «графа 6» принадлежит периоду с 01.01.2010 по 31.12.2012, то: 1.8
+                coefficient = 1.8
             } else {
-                /*
-                d.  Иначе
-                    «графа 12» = («графа 7» ? «графа 11» ? 1,1) ? ((«графа 6» -« графа 5») / 365 (366)) / 100;.
-                 */
-                result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * 1.1) * (difference / countDaysInYear) / 100
+                // d. Иначе: 1.1
+                coefficient = 1.1
             }
         } else {
-            result = ((row.salePrice ?: 0) * (row.rateBR ?: 0)) * (difference / countDaysInYear) / 100
             if (row.part2REPODate != null && inPeriod(row.part2REPODate, '01.01.2011', '31.12.2012')) {
-                result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * 0.8) * (difference / countDaysInYear) / 100
+                coefficient = 0.8
+            } else {
+                coefficient = 1
             }
         }
+        def countDaysInYear = getCountDaysInYear()
+        result = ((row.salePrice ?: 0) * (row.rateBR ?: 0) * coefficient) * (difference / countDaysInYear) / 100
     }
-    if (row.outcome != null && row.outcome == 0) {
-        result = 0
-    }
-
     return roundTo2(result)
 }
 
@@ -477,7 +470,7 @@ void calcAfterImport() {
  */
 int getCountDaysInYear() {
     Calendar periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
-    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 365 : 366
+    return countDaysOfYear = (new GregorianCalendar()).isLeapYear(periodStartDate.get(Calendar.YEAR)) ? 366 : 365
 }
 
 /**
@@ -1007,25 +1000,7 @@ def hasError() {
 void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
-    if (
-            formDataEvent != FormDataEvent.COMPOSE &&
-                    formDataEvent != FormDataEvent.MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_PREPARED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED
-    ) {
-        logger.error(msg)
-    } else {
-        logger.warn(msg)
-    }
+    logger.warn(msg)
 }
 
 def getReportPeriodEndDate() {

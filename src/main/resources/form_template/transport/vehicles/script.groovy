@@ -3,6 +3,7 @@ package form_template.transport.vehicles
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 /**
@@ -18,7 +19,9 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.AFTER_CREATE:
-        copyData()
+        if (formData.kind == FormDataKind.PRIMARY) {
+            copyData()
+        }
         break
     case FormDataEvent.CALCULATE:
         calc()

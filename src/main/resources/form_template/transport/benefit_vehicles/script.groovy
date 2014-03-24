@@ -3,6 +3,7 @@ package form_template.transport.benefit_vehicles
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
@@ -20,7 +21,9 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.AFTER_CREATE:
-        copyData()
+        if (formData.kind == FormDataKind.PRIMARY) {
+            copyData()
+        }
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -142,6 +145,8 @@ def logicCheck() {
     def dTo = getReportPeriodEndDate()
     def String dFormat = "dd.MM.yyyy"
 
+    def taxBenefitPropDataProvider = refBookFactory.getDataProvider(7)  // Параметры налоговых льгот
+
     // Проверенные строки (3-я провека)
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
     for (def row in dataRows) {
@@ -189,20 +194,39 @@ def logicCheck() {
         }
         checkedRows.add(row)
 
-        /**
-         * Проверка льготы
-         * Проверка осуществляется только для кодов 20210, 20220, 20230
-         */
-        if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
-            def region = getRegionByOKTMO(row.codeOKATO, errorMsg)
-            query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, reportDate) == null) {
-                logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+        // 6. Проверка льготы
+        if (row.taxBenefitCode != null && row.codeOKATO != null) {
+            def value = getRefBookValue(6, row.taxBenefitCode)
+            if (value?.CODE?.stringValue in ['20210', '20220', '20230']) {
+                def region = row.codeOKATO == null ? null : getRegionByOKTMO(row.codeOKATO, errorMsg)
+                def filter = "DICT_REGION_ID = " + region.record_id
+                def taxBenefitCode1 = getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue
+                def records = taxBenefitPropDataProvider.getRecords(reportDate, null, filter, null)
+                def found = true
+                if (records != null) {
+                    found = false
+                    for (def record : records) {
+                        def taxBenefitId = record?.TAX_BENEFIT_ID?.referenceValue
+                        def taxBenefitCode2 = taxBenefitId == null ? null : getRefBookValue(6, taxBenefitId)?.CODE?.stringValue
+                        if (taxBenefitCode1 == taxBenefitCode2) {
+                            found = true
+                            break
+                        }
+                    }
+                }
+                if (records == null || !found) {
+                    logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+                }
             }
+        }
+
+        // 7. Проверка выбранного кода (актуально только для 0.3.5, в 0.3.7 будет не нужна)
+        if (row.taxBenefitCode != null && !(getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['30200','20210', '20220', '20230'])) {
+            logger.error(errorMsg + "Выбранная льгота не предусмотрена для использования!")
         }
     }
 
-    // 6. Проверка наличия формы предыдущего периода
+    // 5. Проверка наличия формы предыдущего периода
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def str = ''

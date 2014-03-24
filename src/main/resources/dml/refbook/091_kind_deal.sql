@@ -1,18 +1,22 @@
--- Справочник "Виды сделок"
-/*DF FX  Поставочный форвард на валюту
-NDF FX  Беспоставочный (расчетный) форвард на валюту
-FRA  Беспоставочный (расчетный) форвард на процентные ставки
-DF PM  Поставочный форвард на драгоценные металлы
-NDF PM  Беспоставочный (расчетный) форвард на драгоценные металлы
-CCIRS  Валютно-процентный своп
-IRS  Процентный своп
-CCS  Валютный своп
-DOP FX	Поставочный опцион на валюту
-NDOP FX	Беспоставочный (расчетный) опцион на валюту
-DOP PM	Поставочный опцион на драгоценные металлы
-NDOP PM	Беспоставочный (расчетный) опцион на драгоценные металлы
+/*
+Справочник:
+	Виды сделок
+Список изменений:
+	Первоначальное заполнение данными
+Данные:
+	DF FX;Поставочный форвард на валюту
+	NDF FX;Беспоставочный (расчетный) форвард на валюту
+	FRA;Беспоставочный (расчетный) форвард на процентные ставки
+	DF PM;Поставочный форвард на драгоценные металлы
+	NDF PM;Беспоставочный (расчетный) форвард на драгоценные металлы
+	CCIRS;Валютно-процентный своп
+	IRS;Процентный своп
+	CCS;Валютный своп
+	DOP FX;оставочный опцион на валюту
+	NDOP FX;Беспоставочный (расчетный) опцион на валюту
+	DOP PM;Поставочный опцион на драгоценные металлы
+	NDOP PM;Беспоставочный (расчетный) опцион на драгоценные металлы
 */
--- Виды сделок
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,1,91,to_date('01.01.2012','dd.mm.yyyy'),0);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'DF FX',null,null,null);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Поставочный форвард на валюту',null,null,null);
@@ -49,27 +53,6 @@ insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, 
 insert into REF_BOOK_RECORD(ID, RECORD_ID, REF_BOOK_ID, VERSION, STATUS) values (seq_ref_book_record.nextval,12,91,to_date('01.01.2012','dd.mm.yyyy'),0);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,831,'NDOP PM',null,null,null);
 insert into REF_BOOK_VALUE(RECORD_ID, ATTRIBUTE_ID, STRING_VALUE, NUMBER_VALUE, DATE_VALUE, REFERENCE_VALUE) values(seq_ref_book_record.currval,832,'Беспоставочный (расчетный) опцион на драгоценные металлы',null,null,null);
+
 commit;
---запрос
-/*with t as (select
-  max(version) version, record_id
-from
-  ref_book_record
-where
-  ref_book_id = 91 and version <= to_date('10.01.2013', 'dd.mm.yy')
-group by
-  record_id)
-   
-select
-  r.id as id,
-  a1.string_value as code,
-  a2.string_value as code_2
-  
-from
-  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)
-  left join ref_book_value a1 on a1.record_id = r.id and a1.attribute_id = 831
-  left join ref_book_value a2 on a2.record_id = r.id and a2.attribute_id = 832
-  
-where
-  r.ref_book_id = 91 and
-  r.status <> -1*/
+exit;

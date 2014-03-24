@@ -82,9 +82,9 @@
 
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>
-                        <g:HTMLPanel width="100%" height="100%">
+                        <g:ResizeLayoutPanel width="100%" height="100%">
                             <rb:RefBookTreePickerView ui:field="refbookDataTree"/>
-                        </g:HTMLPanel>
+                        </g:ResizeLayoutPanel>
                     </g:center>
                     <g:east size="500">
                         <g:SimplePanel ui:field="contentPanel"/>

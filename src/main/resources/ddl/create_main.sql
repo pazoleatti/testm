@@ -37,8 +37,9 @@ comment on table form_type is 'Типы налоговых форм (назва�
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
 comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+comment on column form_type.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 
-create sequence seq_form_type start with 100;
+create sequence seq_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table tax_period (
   id number(9) not null,
@@ -336,8 +337,9 @@ comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
 comment on column declaration_type.name is 'Наименование';
+comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
 
-create sequence seq_declaration_type start with 100;
+create sequence seq_declaration_type start with 10000;
 -----------------------------------------------------------------------------------------------------------------------------------
 create table department_declaration_type (
   id         number(9) not null,
@@ -729,8 +731,7 @@ create table template_changes (
  declaration_template_id number(9),
  event number(1),
  author number(9) not null,
- date_event date,
- edition_number number(9)
+ date_event date
 );
 
 comment on table template_changes is 'Изменение версий налоговых шаблонов';
@@ -739,7 +740,6 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
-comment on column template_changes.edition_number is 'Номер версии';
 
  create sequence seq_template_changes start with 10000;
 --------------------------------------------------------------------------------------------------------

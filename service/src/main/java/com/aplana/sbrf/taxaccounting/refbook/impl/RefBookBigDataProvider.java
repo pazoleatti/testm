@@ -127,7 +127,9 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
 
     @Override
     public List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        try {
+        //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
+        throw new UnsupportedOperationException();
+        /*try {
             RefBook refBook = rbDao.get(refBookId);
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> recordIds = new ArrayList<Long>();
@@ -193,7 +195,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             } else {
                 throw new ServiceException("Версия не создана, обнаружены фатальные ошибки!");
             }
-        }
+        }*/
     }
 
     /**
@@ -299,7 +301,9 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
 
     @Override
     public void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> values) {
-        try {
+        //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
+        throw new UnsupportedOperationException();
+        /*try {
             boolean isJustNeedValuesUpdate = (versionFrom == null && versionTo == null);
 
             List<RefBookAttribute> attributes = rbDao.getAttributes(refBookId);
@@ -369,7 +373,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             } else {
                 throw new ServiceException("Версия не сохранена, обнаружены фатальные ошибки!");
             }
-        }
+        }*/
     }
 
     @Override
@@ -409,7 +413,9 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
 
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
-        try {
+        //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
+        throw new UnsupportedOperationException();
+        /*try {
             boolean isReferenceToVersionExists = dao.isVersionUsed(getTableName(), refBookId, uniqueRecordIds);
             if (isReferenceToVersionExists) {
                 throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
@@ -429,7 +435,7 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
             } else {
                 throw new ServiceException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!");
             }
-        }
+        }*/
     }
 
     @Override

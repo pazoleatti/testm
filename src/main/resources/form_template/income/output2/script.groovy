@@ -93,7 +93,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 void checkCreation() {
     if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error('Нельзя создавать форму с типом ${formData.kind?.name}')
+        logger.error("Нельзя создавать форму с типом «${formData.kind?.name}»!")
     }
     formDataService.checkUnique(formData, logger)
 }
@@ -108,7 +108,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         String zipCode = (String) row.zipCode;
-        if (zipCode == null || zipCode.length() != 6 || !zipCode.matches('[0-9]*')) {
+        if (zipCode != null && (zipCode.length() != 6 || !zipCode.matches('[0-9]*'))) {
             logger.error("Строка $rowNum: Неправильно указан почтовый индекс!")
         }
 

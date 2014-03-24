@@ -30,7 +30,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     @Autowired
 	BDUtils dbUtils;
 
-	public static final String ERROR_MSG_NO_ROWID = "Строка id=%s отсутствует во временном срезе формы formDataId=%s";
+	public static final String ERROR_MSG_NO_ROWID = "Невозможно сохранить изменения, так как данные устарели. " +
+                                                    "Изменения будут отменены. Переоткройте форму заново.";
+
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
 	@Override
@@ -67,6 +69,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
 		List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
 		List<Long> forCreateOrder = new ArrayList<Long>();
+        //TODO Заменить цикл на вызов ДАО
 		for (DataRow<Cell> dataRow : rows) {
 			Long id = dataRow.getId();
 			Pair<Integer, Long> typeAndOrd = getTypeAndOrdById(fd.getId(), id);

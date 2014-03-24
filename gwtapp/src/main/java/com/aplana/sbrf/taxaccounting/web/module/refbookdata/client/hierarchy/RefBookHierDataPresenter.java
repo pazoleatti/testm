@@ -61,6 +61,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         void load();
 
+        void loadAndSelect();
+
         void reload();
 
         void setRefBookNameDesc(String desc);
@@ -130,6 +132,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
                 }
             }
+
         }
     }
 
@@ -172,7 +175,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void onSelectionChanged() {
         if (getView().getSelectedId() != null) {
-
             recordId = getView().getSelectedId();
             editFormPresenter.show(recordId);
         }
@@ -210,7 +212,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         }
                         getView().setAttributeId(attrId);
                         editFormPresenter.init(refBookDataId, result.isReadOnly());
-                        getView().load();
+                        getView().loadAndSelect();
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
                     }
                 }, this));

@@ -1,10 +1,7 @@
 package form_template.income.rnu5
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -123,14 +120,14 @@ void calc() {
         // если код расходы поменялся то создать новую строку "итого по коду"
         if (tmp != row.number) {
             def code = getKnu(tmp)
-            totalRows.put(i, getNewRow(code, sum))
+            totalRows.put(i, getNewRow(code, sum, tmp))
             sum = 0
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == dataRows.size() - 1) {
             sum += (row.sum ?: 0)
             def code = getKnu(row.number)
-            def totalRowCode = getNewRow(code, sum)
+            def totalRowCode = getNewRow(code, sum, row.number)
             totalRows.put(i + 1, totalRowCode)
             sum = 0
         }
@@ -195,12 +192,10 @@ void logicCheck() {
         }
 
         // 4. Арифметическая проверка итоговых значений по каждому <Коду классификации расходов>
-        def code = getKnu(row.number)
-
-        if (sumRowsByCode[code] != null) {
-            sumRowsByCode[code] += row.sum ?: 0
+        if (sumRowsByCode[""+row.number] != null) {
+            sumRowsByCode[""+row.number] += row.sum ?: 0
         } else {
-            sumRowsByCode[code] = row.sum ?: 0
+            sumRowsByCode[""+row.number] = row.sum ?: 0
         }
     }
 
@@ -208,7 +203,8 @@ void logicCheck() {
     totalRows.each { key, val ->
         if (totalRows.get(key) != sumRowsByCode.get(key)) {
             def msg =  formData.createDataRow().getCell('sum').column.name
-            logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
+            def code = getKnu(Long.valueOf(key))
+            logger.error("Неверное итоговое значение по коду '$code' графы «$msg»!")
         }
     }
 
@@ -217,9 +213,9 @@ void logicCheck() {
 }
 
 // Получить новую строку подитога
-def getNewRow(def alias, def sum) {
+def getNewRow(def alias, def sum, def alias_id) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias)
+    newRow.setAlias('total' + alias_id)
     newRow.sum = sum
     newRow.fix = 'Итого по КНУ ' + alias
     newRow.getCell('fix').colSpan = 4

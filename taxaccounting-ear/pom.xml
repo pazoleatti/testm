@@ -30,7 +30,8 @@
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
-        <dependency>
+        <!-- TODO: вернуть когда будет внедрен планировщик -->
+        <!--<dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-core</artifactId>
             <version>0.3.5</version>
@@ -41,7 +42,7 @@
                     <artifactId>ws-runtime</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.aplana.taxaccounting</groupId>
             <artifactId>scheduler-task</artifactId>
@@ -59,6 +60,8 @@
 					<version>5</version>
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
                     <skinnyWars>true</skinnyWars>
+                    <displayName>${parent.artifactId}</displayName>
+                    <applicationName>${parent.description}</applicationName>
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
@@ -76,11 +79,12 @@
                             <artifactId>mdb</artifactId>
                             <bundleFileName>mdb.jar</bundleFileName>
                         </ejbModule>
-                        <ejbModule>
+                        <!-- TODO: вернуть когда будет внедрен планировщик -->
+                        <!--<ejbModule>
                             <groupId>com.aplana.taxaccounting</groupId>
                             <artifactId>scheduler-core</artifactId>
                             <bundleFileName>scheduler-core.jar</bundleFileName>
-                        </ejbModule>
+                        </ejbModule>-->
                         <ejbModule>
                             <groupId>com.aplana.taxaccounting</groupId>
                             <artifactId>scheduler-task</artifactId>
@@ -111,3 +115,4 @@
 		</plugins>
 	</build>
 </project>
+

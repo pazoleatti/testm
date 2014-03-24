@@ -183,8 +183,10 @@ void calc() {
             } else if (a > 0) {
                 b = a
             }
-            row.income = b
-            row.outcome = c
+            // графа 10
+            row.outcome = b
+            // графа 9
+            row.income = c
         }
 
         // графа 11
@@ -206,8 +208,9 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
             || daysInYear == null || course == null || someDate == null) {
         return 0
     }
+    def currency = getCurrency(row.currencyCode)
     def tmp = 0
-    if (row.outcome > 0 && row.currencyCode == '810') {
+    if (row.outcome > 0 && currency == '810') {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -217,14 +220,14 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && row.currencyCode != '810') {
-        if (inPeriod(reportDate, '01.01.20011', '31.12.2012')) {
+    } else if (row.outcome > 0 && currency != '810') {
+        if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
             tmp = calc12Value(row, 1, reportDate, daysInYear) * course
         }
     }
-    return tmp
+    return roundTo2(tmp)
 }
 
 def BigDecimal calc13(def row) {
@@ -235,7 +238,6 @@ def BigDecimal calc13(def row) {
         } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
             tmp = row.outcome269st
         }
-
     }
     return tmp
 }
@@ -295,12 +297,12 @@ def logicalCheck() {
             course = getCourse(row.currencyCode, reportDate)
 
             // 2. Проверка даты первой части РЕПО (графа 7)
-            if (row.part1REPODate > reportDate) {
+            if (row.part1REPODate >= reportDate) {
                 loggerError(errorMsg + 'неверно указана дата первой части сделки!')//TODO вернуть error
                 return false
             }
             // 3. Проверка даты второй части РЕПО (графа 8)
-            if (row.part2REPODate <= reportDate) {
+            if (row.part2REPODate < reportDate) {
                 loggerError(errorMsg + 'неверно указана дата второй части сделки!')//TODO вернуть error
                 return false
             }
@@ -342,31 +344,31 @@ def logicalCheck() {
                 b = a
             }
             // графа 9
-            if (row.income != b) {
+            if (row.income != c) {
                 name = getColumnName(row, 'income')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
             // графа 10
-            if (row.outcome != c) {
+            if (row.outcome != b) {
                 name = getColumnName(row, 'outcome')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 11
-            def col11 = roundTo2(calc11Value(row, row.part2REPODate))
+            def col11 = roundTo2(calc11Value(row, reportDate))
             if (col11 != null && col11 != row.rateBR) {
                 name = getColumnName(row, 'rateBR')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 12
-            if (row.outcome269st != calc12(row, daysInYear, course, someDate, reportDate)) {
+            if (row.outcome269st != roundTo2(calc12(row, daysInYear, course, someDate, reportDate))) {
                 name = getColumnName(row, 'outcome269st')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
 
             // графа 13
-            if (row.outcomeTax != calc13(row)) {
+            if (row.outcomeTax != roundTo2(calc13(row))) {
                 name = getColumnName(row, 'outcomeTax')
                 logger.warn(errorMsg + "неверно рассчитана графа «$name»!")
             }
@@ -419,7 +421,7 @@ def checkNSI() {
             }
 
             // 2. Проверка соответствия ставки рефинансирования ЦБ (графа 11) коду валюты (графа 3)
-            def col11 = roundTo2(calc11Value(row, row.part2REPODate))
+            def col11 = roundTo2(calc11Value(row, reportDate))
             if (col11 != null && col11 != row.rateBR) {
                 loggerError(errorMsg + 'неверно указана ставка Банка России!')//TODO вернуть error
                 return false
@@ -622,8 +624,7 @@ def calc12Value(def row, def coef, def reportDate, def days) {
     if (row.salePrice == null || row.rateBR == null || coef == null || reportDate == null || row.part1REPODate == null || days == null) {
         return 0
     }
-    def tmp = (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
-    return roundTo2(tmp)
+    return (row.salePrice * row.rateBR * coef) * ((reportDate - row.part1REPODate) / days) / 100
 }
 
 /**
@@ -751,9 +752,21 @@ def getColumnName(def row, def alias) {
 def calcAForColumn9or10(def row, def reportDate, def course) {
     if (row.acquisitionPrice != null && row.salePrice != null && reportDate != null && course != null
             && row.part1REPODate != null && row.part2REPODate != null && row.part2REPODate != row.part1REPODate) {
+
+        // DEBUG
+        // logger.info("((" + row.acquisitionPrice + " - " + row.salePrice + ") " +
+                //"* (" + reportDate.format("dd.MM.yyyy") + " - " + row.part1REPODate.format("dd.MM.yyyy") + ")" +
+               //" / (" + row.part2REPODate.format("dd.MM.yyyy") + " - " + row.part1REPODate.format("dd.MM.yyyy") + ")) * " + course)
+
         // ((«графа 6» - «графа 5») х (отчетная дата – «графа 7») / («графа 8» - «графа 7»)) х курс ЦБ РФ
         def tmp = ((row.acquisitionPrice - row.salePrice) *
                 (reportDate - row.part1REPODate) / (row.part2REPODate - row.part1REPODate)) * course
+
+        // DEBUG
+        //logger.info(" дата1 = " + 1*(reportDate - row.part1REPODate))
+        //logger.info(" дата2 = " + 1*(row.part2REPODate - row.part1REPODate))
+        //logger.info(" tmp = " + tmp)
+
         return roundTo2(tmp)
     } else {
         return null
@@ -1160,25 +1173,7 @@ void sort(def data) {
 void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
-    if (
-            formDataEvent != FormDataEvent.COMPOSE &&
-                    formDataEvent != FormDataEvent.MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_PREPARED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_APPROVED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_CREATED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_ACCEPTED_TO_PREPARED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED &&
-                    formDataEvent != FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED
-    ) {
-        logger.error(msg)
-    } else {
-        logger.warn(msg)
-    }
+    logger.warn(msg)
 }
 
 def getReportPeriodEndDate() {

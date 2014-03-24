@@ -198,8 +198,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
-                                        getView().fillInputFields(null);
-                                        setEnabled(false);
+                                        Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
+                                        recordChanges.setId(newId);
+
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                     }
                                 }, this));
@@ -222,8 +223,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogCleanEvent.fire(EditFormPresenter.this);
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
-                                        getView().fillInputFields(null);
-                                        setEnabled(false);
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!", new DialogHandler() {
@@ -252,6 +251,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }
                             }, this));
         }
+    }
+
+    public void clearAndDisableForm(){
+        getView().fillInputFields(null);
+        setEnabled(false);
     }
 
     private RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {

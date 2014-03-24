@@ -66,7 +66,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkAnchor title="Перейти к списку справочников" text="Справочники" href="#!refbooklist" disableImage="true"
+                            <style:LinkAnchor ui:field="backAnchor" title="Перейти к списку справочников" text="Справочники" disableImage="true"
                                               addStyleNames="{style.titleText}, {style.marginRight5}"/>
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
@@ -96,7 +96,9 @@
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>
                         <g:HTMLPanel>
-                            <style:GenericDataGrid ui:field="refbookDataTable" addStyleNames="{style.table}"/>
+                            <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                                <style:GenericDataGrid ui:field="refbookDataTable" width="100%" height="100%"/>
+                            </g:ResizeLayoutPanel>
                             <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
                                                  showFastForwardButton="false" fastForwardRows="0"
                                                  showLastPageButton="true" type="refBookData"/>

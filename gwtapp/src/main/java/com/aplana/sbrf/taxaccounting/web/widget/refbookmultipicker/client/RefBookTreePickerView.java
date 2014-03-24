@@ -121,17 +121,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
      */
     private void trySelectValues(List<RefBookTreeItem> preudoItems) {
         for (RefBookTreeItem pseudoItem : preudoItems) {
-            String itemName = RefBookPickerUtils.getDereferenceValue(pseudoItem.getRefBookRecordDereferenceValues(), "NAME");
             if (pseudoItem.getId() != null) {
-                RefBookUiTreeItem uiTreeItem = getUiTreeItem(pseudoItem.getId());
-                if (uiTreeItem != null) {
-                    tree.setSelected(uiTreeItem, true);
-                }
-            } else if (itemName != null) {
-                RefBookUiTreeItem uiTreeItem = getUiTreeItem(itemName);
-                if (uiTreeItem != null) {
-                    tree.setSelected(uiTreeItem, true);
-                }
+                RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(pseudoItem);
+                tree.setSelected(uiTreeItem, true);
             }
         }
     }
@@ -219,6 +211,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 if (scroll == 0 && maxScroll == 0) {
                     return false;
                 }
+                //System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
+
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 
                 boolean isScrolled = (absTop != 0) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
@@ -235,6 +229,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void reload() {
         getUiHandlers().reload();
+    }
+
+    @Override
+    public void reload(List<Long> needToSelectIds)  {
+        getUiHandlers().reload(needToSelectIds);
     }
 
     @Override
@@ -286,18 +285,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         return null;
     }
 
-    private RefBookUiTreeItem getUiTreeItem(String defererenceName) {
-        if (defererenceName != null) {
-            List<RefBookUiTreeItem> fi = new LinkedList<RefBookUiTreeItem>();
-            tree.findAllChild(fi, null);
-
-            for (RefBookUiTreeItem item : fi) {
-                if (RefBookPickerUtils.getDereferenceValue(item.getRefBookTreeItem().getRefBookRecordDereferenceValues(), "NAME").equals(defererenceName)) {
-                    return item;
-                }
-            }
-        }
-        return null;
+    public void selectFirstItenOnLoad(){
+        getUiHandlers().selectFirstItenOnLoad();
     }
 
     /**
@@ -325,83 +314,80 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
      * @param name        имя, может быть нулл если не меняется
      */
     public void updateRecord(Long id, Long newParentId, String name) {
-        if (id != null) {                                           // редактирование записи
-            RefBookUiTreeItem uiTreeItem = getUiTreeItem(id);       // поиск итема которй обновили
-            RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem() != null ? uiTreeItem.getRefBookTreeItem().getParent() : null;
+        if (id != null) {
+            RefBookUiTreeItem uiTreeItem = getUiTreeItem(id);       // поиск итема который обновили или создали
+            if (uiTreeItem != null) {                               // редактирование записи
+                RefBookTreeItem parent = uiTreeItem.getRefBookTreeItem() != null ? uiTreeItem.getRefBookTreeItem().getParent() : null;
 
-            if (RefBookPickerUtils.itWasChange(name, uiTreeItem.getName())) {
-                // Если изменилось наименование
-                uiTreeItem.getRefBookTreeItem().setDereferenceValue(name);
-                uiTreeItem.setName(name);
-            }
+                if (RefBookPickerUtils.itWasChange(name, uiTreeItem.getName())) {
+                    // Если изменилось наименование
+                    uiTreeItem.getRefBookTreeItem().setDereferenceValue(name);
+                    uiTreeItem.setName(name);
+                }
 
-            if ((newParentId == null && parent == null) ||
-                    (newParentId != null && parent != null && newParentId.equals(parent.getId()))) {
-                // Если парент не изменился
-            } else {
-                // иначе
-                tree.removeItem(uiTreeItem);        // удаляем выделеный итем
-                if (newParentId == null) {
-                    // если добавляется в корень
-                    uiTreeItem.getRefBookTreeItem().setParent(null);
-                    tree.addTreeItem(uiTreeItem);
-                    ensureVisible(uiTreeItem);
+                if ((newParentId == null && parent == null) ||
+                        (newParentId != null && parent != null && newParentId.equals(parent.getId()))) {
+                    // Если парент не изменился
                 } else {
-                    // если добавляется в другой итем
-                    RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);     // поиск итема нового родителя в загруженых итемах
+                    // иначе
+                    tree.removeItem(uiTreeItem);        // удаляем выделеный итем
+                    if (newParentId == null) {
+                        // если добавляется в корень
+                        uiTreeItem.getRefBookTreeItem().setParent(null);
+                        tree.addTreeItem(uiTreeItem);
+                        ensureVisible(uiTreeItem);
+                    } else {
+                        // если добавляется в другой итем
+                        RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);     // поиск итема нового родителя в загруженых итемах
+                        if (newParentUiTreeItem != null) {
+                            // новый итем был уже загружен
+                            uiTreeItem.getRefBookTreeItem().setParent(newParentUiTreeItem.getRefBookTreeItem());    // обновляем ссылку на родителя
+
+                            if (newParentUiTreeItem.isChildLoaded()) {
+                                // итем уже открывался и загружал своих чилдов
+                                tree.addTreeItem(newParentUiTreeItem, uiTreeItem);
+                                tree.openAllParent(uiTreeItem);     // открываем всех родителей итемак
+                                ensureVisible(uiTreeItem);
+                            } else {
+                                // иначе открывает, редактируемый итем уже появится при загрузке
+                                isOpeningOperation = true;
+                                newParentUiTreeItem.setState(true);
+                            }
+                        } else {
+                            // если не загружен то узнаем его путь до иерархии вверх
+                            // получаем лист ид - путь от рута до родителя чилда
+                            // 1, 2, 3
+                            // и последовательно открываем
+                            getUiHandlers().openFor(newParentId, false);
+                        }
+                    }
+                }
+            } else {
+                // добавление новой записи
+                RefBookTreeItem pseudoTreeItem = new RefBookTreeItem(id, name);     // создаем псевдо итем
+                pseudoTreeItem.addRecordValues(name, "NAME", null);
+
+                if (newParentId == null) {
+                    // добавление в главный корень
+                    reload(Arrays.asList(id));
+                } else {
+                    RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);
                     if (newParentUiTreeItem != null) {
-                        // новый итем был уже загружен
-                        uiTreeItem.getRefBookTreeItem().setParent(newParentUiTreeItem.getRefBookTreeItem());    // обновляем ссылку на родителя
+                        // если родитель уже загружен
+                        tree.openAllParent(newParentUiTreeItem);
 
                         if (newParentUiTreeItem.isChildLoaded()) {
-                            // итем уже открывался и загружал своих чилдов
-                            tree.addTreeItem(newParentUiTreeItem, uiTreeItem);
-                            tree.openAllParent(uiTreeItem);     // открываем всех родителей итемак
-                            ensureVisible(uiTreeItem);
-                        } else {
-                            // иначе открывает, редактируемый итем уже появится при загрузке
-                            isOpeningOperation = true;
-                            newParentUiTreeItem.setState(true);
+                            // Чилды были уже загружены, значит нужно перезагрузить, удаляем старые
+                            tree.removeChildItems(newParentUiTreeItem);
                         }
+                        trySelectValues(Arrays.asList(pseudoTreeItem));
+                        newParentUiTreeItem.setState(true, true);       // и снова открываем, чилды загужаются
                     } else {
-                        // если не загружен то узнаем его путь до иерархии вверх
-                        // получаем лист ид - путь от рута до родителя чилда
-                        // 1, 2, 3
-                        // и последовательно открываем
+                        trySelectValues(Arrays.asList(pseudoTreeItem));
                         getUiHandlers().openFor(newParentId, false);
                     }
                 }
             }
-        } else {
-            //  добавление записи
-            // TODO нужно подумать как выделять новый итем, ведь идентификатор не известен.
-            if (newParentId == null) {
-                // добавление в главный корень
-                reload();
-//                RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
-//                treeItem.addRecordValues(name, "NAME", null);
-//                trySelectValues(Arrays.asList(treeItem));
-            } else {
-                RefBookUiTreeItem newParentUiTreeItem = getUiTreeItem(newParentId);
-                if (newParentUiTreeItem != null) {
-                    tree.openAllParent(newParentUiTreeItem);
-
-                    if (newParentUiTreeItem.isChildLoaded()) {
-                        // Чилды были уже загружены, значит нужно перезагрузить, удаляем старые
-                        tree.removeChildItems(newParentUiTreeItem);
-                    }
-                    newParentUiTreeItem.setState(true, true);       // и снова открываем, чилды загужаются
-//                    RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
-//                    treeItem.addRecordValues(name, "NAME", null);
-//                    trySelectValues(Arrays.asList(treeItem));
-                } else {
-                    getUiHandlers().openFor(newParentId, false);
-//                    RefBookTreeItem treeItem = new RefBookTreeItem(null, null);
-//                    treeItem.addRecordValues(name, "NAME", null);
-//                    trySelectValues(Arrays.asList(treeItem));
-                }
-            }
-
         }
     }
 

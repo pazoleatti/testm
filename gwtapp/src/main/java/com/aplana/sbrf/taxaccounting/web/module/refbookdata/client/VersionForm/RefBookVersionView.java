@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -60,6 +61,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 			}
 		});
         refbookDataTable.setPageSize(pager.getPageSize());
+        refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 		pager.setDisplay(refbookDataTable);
 	}
 

@@ -22,6 +22,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     private final DispatchAsync dispatcher;
 
     private PickerState ps;
+    private boolean isNeedSelectFirstItem = false;
 
     interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
 
@@ -57,7 +58,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
             ps.setValues(newState);
-            load();
+            load(null);
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
@@ -67,11 +68,20 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void reload() {
-        load();
+        load(null);
+    }
+
+    @Override
+    public void reload(List<Long> needToSelectIds) {
+        load(needToSelectIds);
     }
 
     /* Загрузка верхушки дерева */
-    private void load() {
+    private void load(List<Long> needToSelectIds) {
+        if (needToSelectIds != null) {
+            ps.getSetIds().clear();
+            ps.getSetIds().addAll(needToSelectIds);
+        }
         if (ps.getRefBookAttrId() == null) {
             return;
         }
@@ -83,6 +93,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
                 getView().loadRoot(result.getPage());
+                if(isNeedSelectFirstItem && !result.getPage().isEmpty()){
+                    isNeedSelectFirstItem = false;
+                    ps.getSetIds().clear();
+                    ps.getSetIds().add(result.getPage().get(0).getId());
+                }
                 trySelect(ps);
             }
         }, this));
@@ -96,6 +111,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     private void trySelect(PickerState stateWithIds) {
         if (stateWithIds.getSetIds() != null && stateWithIds.getSetIds().size() > 0) {
             if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())) {
+                // TODO сделать проверку что эти итемы уже загружены в дерево.
                 // загрузим объекты которые должны быть подсвечены как выделенные
                 loadingForSelection(stateWithIds.getSetIds());
             } else {
@@ -149,6 +165,11 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     @Override
     public void reloadForDate(Date relevanceDate) {
         init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
+    }
+
+    @Override
+    public void selectFirstItenOnLoad() {
+        isNeedSelectFirstItem = true;
     }
 
     @Override

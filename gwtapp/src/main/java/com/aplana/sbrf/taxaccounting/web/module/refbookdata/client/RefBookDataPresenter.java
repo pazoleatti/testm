@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.Edit
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -99,6 +100,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onUpdateForm(UpdateForm event) {
 		getView().updateTable();
+        editFormPresenter.clearAndDisableForm();
 	}
 
 	@Override
@@ -162,6 +164,13 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		editFormPresenter.show(null);
 		editFormPresenter.setEnabled(false);
 	}
+
+    @Override
+    public void onBackClicked() {
+        refBookDataId = null;
+        recordId = null;
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
+    }
 
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {

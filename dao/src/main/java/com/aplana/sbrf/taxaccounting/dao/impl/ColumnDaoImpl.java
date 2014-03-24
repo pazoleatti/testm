@@ -285,7 +285,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(9, Types.INTEGER);
                                 ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
                                 ps.setNull(11, Types.CHAR);
-                                System.out.println("parent_id = "+((ReferenceColumn) col).getParentId());
                                 ps.setLong(12, ((ReferenceColumn) col).getParentId());
                             } else {
 								ps.setNull(7, Types.INTEGER);

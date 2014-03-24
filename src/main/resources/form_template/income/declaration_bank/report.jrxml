@@ -3372,33 +3372,33 @@ Arrays.asList(1)]]></variableExpression>
 		</variable>
 		<variable name="Fam" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Фамилия} == null || $F{Фамилия}.equals( "0" )?
-"нет данных----------"
+"нет-данных----------"
 :
-($F{Фамилия}.toUpperCase()+"--------------------").substring(0,20)]]></variableExpression>
+($F{Фамилия}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Фамилия} == null || $F{Фамилия}.equals( "0" )?
-"нет данных----------"
+"нет-данных----------"
 :
-($F{Фамилия}.toUpperCase()+"--------------------").substring(0,20)]]></initialValueExpression>
+($F{Фамилия}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></initialValueExpression>
 		</variable>
 		<variable name="Imya" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Имя} == null || $F{Имя}.equals( "0" )?
 "--------------------"
 :
-($F{Имя}.toUpperCase()+"--------------------").substring(0,20)]]></variableExpression>
+($F{Имя}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Имя} == null || $F{Имя}.equals( "0" )?
 "--------------------"
 :
-($F{Имя}.toUpperCase()+"--------------------").substring(0,20)]]></initialValueExpression>
+($F{Имя}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></initialValueExpression>
 		</variable>
 		<variable name="Otchestvo" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Отчество} == null || $F{Отчество}.equals( "0" )?
 "--------------------"
 :
-($F{Отчество}.toUpperCase()+"--------------------").substring(0,20)]]></variableExpression>
+($F{Отчество}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{Отчество} == null || $F{Отчество}.equals( "0" )?
 "--------------------"
 :
-($F{Отчество}.toUpperCase()+"--------------------").substring(0,20)]]></initialValueExpression>
+($F{Отчество}.toUpperCase().replace(" ","-")+"--------------------").substring(0,20)]]></initialValueExpression>
 		</variable>
 		<variable name="tel" class="java.lang.String">
 			<variableExpression><![CDATA[$F{Тлф} == null || $F{Тлф}.equals( "0" )?
@@ -3521,7 +3521,7 @@ Arrays.asList(1)]]></variableExpression>
 		<variableExpression><![CDATA[$F{КПП} == null ?
 "------------"
 :
-($F{КПП}+"------------").substring(0,9) ]]></variableExpression>
+($F{КПП}+"------------").substring(0,9)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{КПП} == null ?
 "------------"
 :
@@ -3651,31 +3651,31 @@ Arrays.asList(1)]]></variableExpression>
 		<variableExpression><![CDATA[$F{Фамилия} == null ?
 "-------------------------"
 :
-($F{Фамилия}.toUpperCase()+"-------------------------").substring(0,25)]]></variableExpression>
+($F{Фамилия}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{Фамилия} == null ?
 "-------------------------"
 :
-($F{Фамилия}.toUpperCase()+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Фамилия}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></initialValueExpression>
 	</variable>
 	<variable name="Имя" class="java.lang.String">
 		<variableExpression><![CDATA[$F{Имя} == null ?
 "-------------------------"
 :
-($F{Имя}.toUpperCase()+"-------------------------").substring(0,25)]]></variableExpression>
+($F{Имя}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{Имя} == null ?
 "-------------------------"
 :
-($F{Имя}.toUpperCase()+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Имя}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></initialValueExpression>
 	</variable>
 	<variable name="Отчество" class="java.lang.String">
 		<variableExpression><![CDATA[$F{Отчество} == null ?
 "-------------------------"
 :
-($F{Отчество}.toUpperCase()+"-------------------------").substring(0,25)]]></variableExpression>
+($F{Отчество}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></variableExpression>
 		<initialValueExpression><![CDATA[$F{Отчество} == null ?
 "-------------------------"
 :
-($F{Отчество}.toUpperCase()+"-------------------------").substring(0,25)]]></initialValueExpression>
+($F{Отчество}.toUpperCase().replace(" ","-")+"-------------------------").substring(0,25)]]></initialValueExpression>
 	</variable>
 	<variable name="ДатаДок" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ДатаДок} == null ?
