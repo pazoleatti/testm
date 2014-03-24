@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
-import com.google.gwt.thirdparty.guava.common.base.Function;
-import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -15,10 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+//import com.google.gwt.thirdparty.guava.common.base.Function;
+//import com.google.gwt.thirdparty.guava.common.collect.Lists;
 
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
@@ -38,20 +37,20 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 		DeclarationListResult result = new DeclarationListResult();
 		/*result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));*/
         List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
-        List<Integer> ids = Lists.transform(declarationTypes, new Function<DeclarationType, Integer>() {
-            @Override
-            public Integer apply(@Nullable DeclarationType formType) {
-                return formType != null ? formType.getId() : 0;
-            }
-        });
-        Map<Long, Integer> idsVsCount = declarationTemplateService.versionTemplateCountByFormType(ids);
+        //List<Integer> ids = Lists.transform(declarationTypes, new Function<DeclarationType, Integer>() {
+        //    @Override
+        //    public Integer apply(@Nullable DeclarationType formType) {
+        //        return formType != null ? formType.getId() : 0;
+        //    }
+        //});
+        //Map<Long, Integer> idsVsCount = declarationTemplateService.versionTemplateCountByFormType(ids);
 
         List<DeclarationTypeTemplate> typeTemplateList = new ArrayList<DeclarationTypeTemplate>();
         for (DeclarationType type : declarationTypes){
             DeclarationTypeTemplate typeTemplate = new DeclarationTypeTemplate();
             typeTemplate.setTypeId(type.getId());
             typeTemplate.setTypeName(type.getName());
-            typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
+            //typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
 
             typeTemplateList.add(typeTemplate);
         }

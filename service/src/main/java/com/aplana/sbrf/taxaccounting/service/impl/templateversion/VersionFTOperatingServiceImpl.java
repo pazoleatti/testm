@@ -104,17 +104,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         intersection.getTemplateId());
                         }
-                        //2 Шаг. Система проверяет наличие даты окончания актуальности.
-                        /*  Пересечений нет
-                            По идее такого варианта быть не должно, об этом заботится метод FormTemplateService.findFTVersionIntersections
-                        */
-                        else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
-                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                                    newIntersection.getBeginDate(), intersection.getEndDate(), logger);
-                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime());
-                            FormTemplate formTemplate =  createFakeTemplate(date, typeId);
-                            formTemplateService.save(formTemplate);
-                        }
                         break;
                     case FAKE:
                         compareResult = newIntersection.compareTo(intersection);
@@ -131,7 +120,10 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                         break;
                 }
             }
-        } else if(versionActualDateEnd != null){
+        }
+        //2 Шаг. Система проверяет наличие даты окончания актуальности.
+        //  Пересечений нет
+        if(versionActualDateEnd != null){
             cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
             FormTemplate formTemplate =  createFakeTemplate(date, typeId);
