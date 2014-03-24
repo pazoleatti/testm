@@ -448,24 +448,13 @@ void importData() {
             (xml.row[1].cell[13]): 'Текущую',
             (xml.row[1].cell[14]): 'Доначисление резерва с отнесением на расходы код 22670',
             (xml.row[1].cell[15]): 'Восстановление резерва на доходах код 13091',
-            (xml.row[1].cell[16]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16'
+            (xml.row[1].cell[16]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде'
     ]
+
+    // проверки нумерации колонок
+    (1..16).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
