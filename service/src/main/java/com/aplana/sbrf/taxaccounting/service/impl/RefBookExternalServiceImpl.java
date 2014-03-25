@@ -135,7 +135,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                     (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + refBookImportCount + ".";
 
             if (refBookImportCount == 0) {
-                msg = "Импорт не выполнен, файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
+                msg = "Импорт не выполнен, корректных файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
             }
 
             // Журнал аудита

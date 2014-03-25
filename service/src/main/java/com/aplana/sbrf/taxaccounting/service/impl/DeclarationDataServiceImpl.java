@@ -394,7 +394,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 					.parse(inputSource);
 		} catch (Exception e) {
 			throw new ServiceException(
-					"Неудалось получить структуру документа", e);
+					"Не удалось получить структуру документа", e);
 		}
 	}
 
