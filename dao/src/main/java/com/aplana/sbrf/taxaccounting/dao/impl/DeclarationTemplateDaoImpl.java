@@ -43,7 +43,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		public DeclarationTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationTemplate d = new DeclarationTemplate();
 			d.setId(rs.getInt("id"));
-			d.setActive(rs.getBoolean("is_active"));
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
 			d.setEdition(rs.getInt("edition"));
@@ -72,10 +71,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public DeclarationTemplate get(int declarationTemplateId) {
 		try {
 			return getJdbcTemplate().queryForObject(
-                    "select id, is_active, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
-                    new Object[]{declarationTemplateId},
-                    new DeclarationTemplateRowMapper()
-            );
+					"select id, name, version, edition, declaration_type_id, xsd, jrxml, status from declaration_template where id = ?",
+					new Object[] { declarationTemplateId },
+					new DeclarationTemplateRowMapper()
+			);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Шаблон декларации с id = %d не найдена в БД", declarationTemplateId);
 		}
@@ -113,13 +112,12 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		if (declarationTemplate.getId() == null) {
 			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
 			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, name, version, is_active, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					"insert into declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
 					new Object[] {
 							declarationTemplateId,
 							getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
                             declarationTemplate.getName(),
 							declarationTemplate.getVersion(),
-							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
 							declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
@@ -130,7 +128,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
                             Types.VARCHAR,
 							Types.DATE,
-							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
                             Types.VARCHAR,
@@ -147,12 +144,11 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 						" было изменено после того, как данные по ней были считаны");
 			}*/
 			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, name = ?, version = ?, is_active = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
+					"update declaration_template set edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
 					new Object[] {
                             declarationTemplate.getEdition(),
                             declarationTemplate.getName(),
 							declarationTemplate.getVersion(),
-							declarationTemplate.isActive(),
 							declarationTemplate.getCreateScript(),
 							declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
@@ -163,7 +159,6 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 							Types.NUMERIC,
                             Types.VARCHAR,
 							Types.DATE,
-							Types.NUMERIC,
 							Types.VARCHAR,
 							Types.NUMERIC,
                             Types.VARCHAR,

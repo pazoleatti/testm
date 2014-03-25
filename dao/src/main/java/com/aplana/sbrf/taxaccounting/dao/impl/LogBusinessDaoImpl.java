@@ -130,7 +130,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("departmentId", filter.getDepartmentId());
         names.put("userId", filter.getUserIds());
         names.put("fromDate", filter.getFromSearchDate());
-        names.put("toDate", new Date(filter.getToSearchDate().getTime()));
+        names.put("toDate", filter.getToSearchDate());
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 

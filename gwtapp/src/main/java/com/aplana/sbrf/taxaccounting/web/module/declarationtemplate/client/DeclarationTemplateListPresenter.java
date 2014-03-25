@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.filter.DeclarationTemplateApplyEvent;
@@ -135,6 +136,10 @@ public class DeclarationTemplateListPresenter
 
     @Override
     public void onCreateClicked() {
+        if (filterPresenter.getFilterData().getTaxType() == null){
+            MessageEvent.fire(this, "Выберите вид налога");
+            return;
+        }
         DTCreateNewTypeEvent.fire(this, filterPresenter.getFilterData().getTaxType());
     }
 

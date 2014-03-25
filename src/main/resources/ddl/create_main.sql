@@ -58,7 +58,6 @@ create table form_template (
   type_id number(9) not null,
   data_rows clob,
   version date not null,
-  is_active number(1) default 1 not null,
   edition number(9) not null,
   fixed_rows number(1) not null,
   name varchar2(600) not null,
@@ -72,7 +71,6 @@ create table form_template (
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
 comment on column form_template.id is 'Первичный ключ';
-comment on column form_template.is_active is 'Признак активности';
 comment on column form_template.type_id is 'Идентификатор вида налоговой формы';
 comment on column form_template.version is 'Версия формы (уникально в рамках типа)';
 comment on column form_template.edition is 'Номер редакции записи';
@@ -363,7 +361,6 @@ create table declaration_template (
   status number(1) default 0 not null,
   version date not null,
   name varchar2(600) not null,
-  is_active   number(1) not null,
   create_script       clob,
   jrxml               varchar2(36),
   declaration_type_id number(9) not null,
@@ -374,7 +371,6 @@ comment on column declaration_template.id is 'Идентификатор (пер
 comment on column declaration_template.edition is 'Номер редакции';
 comment on column declaration_template.version is 'Версия';
 comment on column declaration_template.name is 'Наименование версии макета';
-comment on column declaration_template.is_active is 'Признак активности';
 comment on column declaration_template.create_script is 'Скрипт формирования декларации';
 comment on column declaration_template.jrxml is 'Макет JasperReports для формирования печатного представления формы';
 comment on column declaration_template.declaration_type_id is 'Вид деклараций';

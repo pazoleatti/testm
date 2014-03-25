@@ -114,10 +114,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	@Override
 	public List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind) {
 		return getJdbcTemplate().query(
-			"with templatesByVersion as (select id, type_id, status, is_active, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE)," +
+			"with templatesByVersion as (select id, type_id, status, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE)," +
 					"      allTemplates as (select tv.id," +
 					"                         tv.type_id," +
-					"                         tv.is_active," +
 					"                         tv.VERSION versionFrom," +
 					"                         case" +
 					"                         when tv2.status=2 then tv2.version" +
@@ -128,7 +127,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 					"    join department_form_type dft on t.id=dft.form_type_id" +
 					"    join allTemplates ft on dft.form_type_id=ft.type_id" +
 					"  where dft.kind in " + SqlUtils.transformFormKindsToSqlInStatement(kind) +
-					"  and dft.department_id=? and t.tax_type=? and ft.is_active=1 and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
+					"  and dft.department_id=? and t.tax_type=? and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
 			new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
 			new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
 			new FormTypeMapper()

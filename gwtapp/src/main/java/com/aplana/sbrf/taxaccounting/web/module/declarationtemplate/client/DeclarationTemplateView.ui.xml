@@ -128,10 +128,6 @@
                             <g:TextBox width="300px" ui:field="version"/>
                         </g:HorizontalPanel>
 
-                        <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Активный"/>
-                            <g:CheckBox ui:field="active"/>
-                        </g:HorizontalPanel>
                     </g:VerticalPanel>
 
                     <g:cell verticalAlignment="middle">

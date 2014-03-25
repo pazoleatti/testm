@@ -64,13 +64,13 @@ public class DeclarationTemplateDaoTest {
 		DeclarationTemplate d1 = declarationTemplateDao.get(1);
 		assertEquals(1, d1.getId().longValue());
 		assertEquals('T', d1.getType().getTaxType().getCode());
-		assertFalse(d1.isActive());
+		/*assertFalse(d1.isActive());*/
         assertEquals("Декларация 1", d1.getName());
 
 		DeclarationTemplate d2 = declarationTemplateDao.get(2);
 		assertEquals(2, d2.getId().longValue());
 		assertEquals('T', d2.getType().getTaxType().getCode());
-		assertTrue(d2.isActive());
+		/*assertTrue(d2.isActive());*/
 	}
 	
 	@Test(expected=DaoException.class)
@@ -82,7 +82,7 @@ public class DeclarationTemplateDaoTest {
 	public void testSaveNew() {
 
 		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-		declarationTemplate.setActive(true);
+		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setName("Декларация");
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
@@ -97,7 +97,7 @@ public class DeclarationTemplateDaoTest {
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
 		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
-		assertTrue(savedDeclarationTemplate.isActive());
+		/*assertTrue(savedDeclarationTemplate.isActive());*/
         assertEquals(null, savedDeclarationTemplate.getXsdId());
         assertEquals(3, savedDeclarationTemplate.getEdition().intValue());
 	}
@@ -110,7 +110,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setName("Декларация");
 		declarationTemplate.setEdition(1);
-		declarationTemplate.setActive(true);
+		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setJrxmlBlobId("1");
@@ -124,7 +124,7 @@ public class DeclarationTemplateDaoTest {
 		assertNull(savedDeclarationTemplate.getCreateScript());
 		assertEquals(declarationType.getId(), savedDeclarationTemplate.getType().getId());
         assertEquals(null, savedDeclarationTemplate.getXsdId());
-        assertEquals(VersionedObjectStatus.FAKE, savedDeclarationTemplate.getStatus());
+        assertEquals(VersionedObjectStatus.NORMAL, savedDeclarationTemplate.getStatus());
 	}
 
     @Test
@@ -133,7 +133,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setId(1);
         declarationTemplate.setEdition(1);
         declarationTemplate.setName("Декларация");
-        declarationTemplate.setActive(true);
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
@@ -156,7 +156,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate1.setId(1);
 		declarationTemplate1.setEdition(1000);
         declarationTemplate1.setName("");
-		declarationTemplate1.setActive(true);
         declarationTemplate1.setStatus(VersionedObjectStatus.FAKE);
 		declarationTemplate1.setVersion(new Date());
 		declarationTemplate1.setCreateScript("MyScript");
@@ -165,7 +164,6 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate2.setId(2);
         declarationTemplate2.setEdition(1001);
         declarationTemplate2.setName("sfcxvxc");
-        declarationTemplate2.setActive(true);
         declarationTemplate2.setStatus(VersionedObjectStatus.FAKE);
         declarationTemplate2.setVersion(new Date());
         declarationTemplate2.setCreateScript("MyScript");
@@ -197,7 +195,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setEdition(1);
         declarationTemplate.setName("Декларация");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-        declarationTemplate.setActive(true);
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setJrxmlBlobId("1");

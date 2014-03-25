@@ -70,10 +70,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	Label title;
 
 	@UiField
-    @Path("declarationTemplate.active")
-	CheckBox active;
-
-	@UiField
     @Path("declarationTemplate.createScript")
 	CodeMirror createScript;
 

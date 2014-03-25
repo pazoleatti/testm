@@ -15,7 +15,6 @@ alter table tax_period add constraint tax_period_chk_taxtype check (tax_type in 
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
 alter table form_template add constraint form_template_uniq_version unique(type_id, version);
-alter table form_template add constraint form_template_check_active check (is_active in (0, 1));
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 
@@ -105,9 +104,8 @@ alter table department_declaration_type add constraint dept_decl_type_fk_decl_ty
 alter table department_declaration_type add constraint dept_decl_type_uniq_decl unique (department_id, declaration_type_id);
 
 alter table declaration_template add constraint declaration_template_pk primary key (id);
-alter table declaration_template add constraint declaration_t_chk_is_active check (is_active in (0,1));
-alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type(id);
-alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (xsd) references blob_data(id);
+alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
+alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
 alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 

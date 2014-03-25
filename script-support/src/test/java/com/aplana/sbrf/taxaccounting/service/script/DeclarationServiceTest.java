@@ -45,7 +45,7 @@ public class DeclarationServiceTest {
         declarationType.setTaxType(TaxType.INCOME);
 
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-        declarationTemplate.setActive(true);
+        declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setCreateScript("script");
         declarationTemplate.setType(new DeclarationType());
         declarationTemplate.setEdition(1);

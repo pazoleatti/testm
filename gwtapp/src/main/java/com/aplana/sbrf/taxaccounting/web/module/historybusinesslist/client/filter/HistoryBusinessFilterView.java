@@ -87,7 +87,10 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
 
     @Override
     public void init() {
-        driver.edit(new LogSystemAuditFilter());
+        LogSystemAuditFilter filter = new LogSystemAuditFilter();
+        filter.setFromSearchDate(new Date());
+        filter.setToSearchDate(new Date());
+        driver.edit(filter);
     }
 
     @Override
