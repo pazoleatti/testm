@@ -19,6 +19,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -81,10 +82,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			Widget widget;
 			switch (col.getAttributeType()) {
 				case NUMBER:
-					widget = new com.aplana.gwt.client.TextBox();
+					widget = new TextBox();
 					break;
 				case STRING:
-					widget = new com.aplana.gwt.client.TextBox();
+					widget = new TextBox();
 					break;
 				case DATE:
 					widget = new DateMaskBoxPicker();
