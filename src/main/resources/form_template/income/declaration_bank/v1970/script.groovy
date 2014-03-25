@@ -578,7 +578,7 @@ void generateXML() {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
+                НомКорр : reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(

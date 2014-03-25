@@ -163,7 +163,7 @@ void generateXML() {
         }
     }
     if (!findCurrentDepo) {
-        logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")//TODO
+        logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")
         return
     }
 
@@ -229,7 +229,7 @@ void generateXML() {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : '0', // TODO (от Айдара) учесть что потом будут корректирующие периоды
+                НомКорр : reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, declarationData.departmentId),
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(

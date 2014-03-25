@@ -201,4 +201,8 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertFalse(departmentReportPeriodDao.isPeriodOpen(2, 2));
 	}
 
+    @Test
+    public void getCorrectionPerionNumber() {
+        assertEquals(1, departmentReportPeriodDao.getCorrectionPeriodNumber(2, 2));
+    }
 }

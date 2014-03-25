@@ -107,8 +107,7 @@ void generateXML() {
                 // Код налогового органа
                 КодНО: departmentParam.TAX_ORGAN_CODE.stringValue,
                 // Номер корректировки
-                // TODO сделать на следующей версии
-                НомКорр: '0',
+                НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.reportPeriodId, departmentId),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {

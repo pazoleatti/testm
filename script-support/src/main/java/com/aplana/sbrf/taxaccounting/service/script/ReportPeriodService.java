@@ -121,4 +121,11 @@ public interface ReportPeriodService {
      * @return Список отчетных периодов
      */
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
+
+    /**
+     * Получить номер корректирующего периода.
+     * @param reportPeriodId идентификатор отчетного период
+     * @param departmentId идентификатор подразделения
+     */
+    int getCorrectionPeriodNumber(int reportPeriodId, long departmentId);
 }

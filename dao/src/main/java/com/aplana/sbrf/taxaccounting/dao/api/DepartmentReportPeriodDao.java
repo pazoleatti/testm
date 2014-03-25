@@ -78,5 +78,11 @@ public interface DepartmentReportPeriodDao {
 	 * @return  признак активности периода для подразделения
 	 */
 	boolean isPeriodOpen(int departmentId, long reportPeriodId);
-	
+
+    /**
+     * Получить номер корректирующего периода.
+     * @param reportPeriodId идентификатор отчетного период
+     * @param departmentId идентификатор подразделения
+     */
+    int getCorrectionPeriodNumber(int reportPeriodId, long departmentId);
 }

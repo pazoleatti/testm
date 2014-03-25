@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
@@ -28,6 +29,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
+
+    @Autowired
+    DepartmentReportPeriodDao depertmentReportPeriodDao;
 
     @Autowired(required = false)
     com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
@@ -124,5 +128,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     @Override
     public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
         return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
+    }
+
+    @Override
+    public int getCorrectionPeriodNumber(int reportPeriodId, long departmentId) {
+        return depertmentReportPeriodDao.getCorrectionPeriodNumber(reportPeriodId, departmentId);
     }
 }
