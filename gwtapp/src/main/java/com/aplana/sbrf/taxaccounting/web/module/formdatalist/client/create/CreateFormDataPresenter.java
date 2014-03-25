@@ -17,6 +17,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +32,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
         void setAcceptableMonthList(List<Months> monthList);
+        void setAcceptableKinds(List<FormDataKind> dataKinds);
+        void setAcceptableTypes(List<FormType> types);
         FormDataFilter getFilterData();
         void setFilterData(FormDataFilter filter);
         public void setFilter(String filter);
@@ -95,6 +98,57 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     }
                 }, this));
     }
+
+	@Override
+	public void onDepartmentChanged() {
+		if ((getView().getFilterData().getDepartmentIds() == null) || getView().getFilterData().getDepartmentIds().isEmpty()) {
+			return;
+		}
+		FillFormFieldsAction action = new FillFormFieldsAction();
+		action.setFieldsNum(FillFormFieldsAction.FieldsNum.THIRD);
+		action.setTaxType(taxType);
+		List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
+		if (reportIds == null || reportIds.isEmpty())
+			return;
+		action.setFieldId(reportIds.get(0));
+		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
+		action.setReportPeriodId(getView().getFilterData().getReportPeriodIds());
+		dispatchAsync.execute(action, CallbackUtils
+				.wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+					@Override
+					public void onSuccess(FillFormFieldsResult result) {
+						getView().setAcceptableKinds(result.getDataKinds());
+					}
+				}, this));
+	}
+
+	@Override
+	public void onDataKindChanged() {
+		if ((getView().getFilterData().getDepartmentIds() == null) || getView().getFilterData().getDepartmentIds().isEmpty()) {
+			return;
+		}
+		FillFormFieldsAction action = new FillFormFieldsAction();
+		action.setFieldsNum(FillFormFieldsAction.FieldsNum.FORTH);
+		List<Integer> reportIds = getView().getFilterData().getReportPeriodIds();
+		if (reportIds == null || reportIds.isEmpty())
+			return;
+		action.setFieldId(reportIds.get(0));
+		action.setTaxType(taxType);
+		action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0).longValue());
+		action.setReportPeriodId(reportIds);
+        List<FormDataKind> kinds = new ArrayList<FormDataKind>();
+        for (Long kindId : getView().getFilterData().getFormDataKind()) {
+            kinds.add(FormDataKind.fromId(kindId.intValue()));
+        }
+        action.setKinds(kinds);
+		dispatchAsync.execute(action, CallbackUtils
+				.wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
+					@Override
+					public void onSuccess(FillFormFieldsResult result) {
+						getView().setAcceptableTypes(result.getFormTypes());
+					}
+				}, this));
+	}
 
     public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
         taxType = filter.getTaxType();

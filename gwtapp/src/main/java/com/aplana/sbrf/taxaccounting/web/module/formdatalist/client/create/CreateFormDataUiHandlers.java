@@ -5,6 +5,8 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface CreateFormDataUiHandlers extends UiHandlers {
 	void onConfirm();
     void onReportPeriodChange();
+    void onDepartmentChanged();
+    void onDataKindChanged();
 
     /**
      * Проверяет является ли форма ежемесячной.
