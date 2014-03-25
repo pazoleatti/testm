@@ -122,10 +122,10 @@ public interface DeclarationTemplateService {
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param declarationTemplate версия декларации
+     * @param declarationTemplateId идентификатор версия декларации
      * @return удаленный идентфикатор
      */
-    int delete(DeclarationTemplate declarationTemplate);
+    int delete(int declarationTemplateId);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.

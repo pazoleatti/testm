@@ -161,8 +161,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public int delete(DeclarationTemplate declarationTemplate) {
-        return declarationTemplateDao.delete(declarationTemplate.getId());
+    public int delete(int declarationTemplateId) {
+        return declarationTemplateDao.delete(declarationTemplateId);
     }
 
     @Override
