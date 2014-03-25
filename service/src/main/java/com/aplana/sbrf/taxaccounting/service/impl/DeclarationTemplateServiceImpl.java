@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,6 +13,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,17 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		return declarationTemplateDao.save(declarationTemplate);
 	}
 
-	@Override
+    @Override
+    public void update(List<DeclarationTemplate> declarationTemplates) {
+        try {
+            if (ArrayUtils.contains(declarationTemplateDao.update(declarationTemplates), 0))
+                throw new ServiceException("Не все записи макета обновились.");
+        } catch (DaoException e){
+            throw new ServiceException("Ошибки при обновлении списка версий макета.",e);
+        }
+    }
+
+    @Override
 	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
 		return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
 	}
@@ -149,14 +161,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public int delete(DeclarationTemplate declarationTemplate) {
-        switch (declarationTemplate.getStatus()){
-            case FAKE:
-                return declarationTemplateDao.delete(declarationTemplate.getId());
-            default:
-                declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
-                return declarationTemplateDao.save(declarationTemplate);
-        }
+    public int delete(int declarationTemplateId) {
+        return declarationTemplateDao.delete(declarationTemplateId);
     }
 
     @Override
@@ -186,7 +192,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public Map<Long, Integer> versionTemplateCountByFormType(List<Integer> formTypeIds) {
+    public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
         Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
         List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
         for (Map<String, Object> map : mapList){

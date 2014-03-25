@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,15 @@ public interface DeclarationTemplateDao {
 	 * @return идентификатор сохранённой записи в БД
 	 */
 	int save(DeclarationTemplate declarationTemplate);
+
+    /**
+     * Обновление данных версий макетов
+     * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * @param declarationTemplates объект шаблона декларации
+     * @return массив успешных апдейтов обновленных версий (0 - неуспешный, 1 - успешный)
+     */
+    int[] update(List<DeclarationTemplate> declarationTemplates);
+
 	/**
 	 * Задать Jrxml-файла
 	 * @param declarationTemplateId идентификатор шаблона декларации
@@ -139,7 +149,7 @@ public interface DeclarationTemplateDao {
      * @param typeIds вид шаблона
      * @return количество
      */
-    List<Map<String,Object>> versionTemplateCountByType(List<Integer> typeIds);
+    List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> typeIds);
 
     /**
      * Получает номер последней редакции макета.

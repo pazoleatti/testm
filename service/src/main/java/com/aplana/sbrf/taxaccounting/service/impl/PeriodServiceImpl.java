@@ -22,14 +22,14 @@ import java.util.*;
 
 /**
  * Сервис работы с периодами
- * 
+ *
  * Только этот сервис должен использоваться для работы с отчетными и налоговыми периодами
  *
  */
 @Service
 @Transactional
 public class PeriodServiceImpl implements PeriodService{
-	
+
 	private static final Long PERIOD_CODE_REFBOOK = 8L;
 	private static final long REF_BOOK_101 = 50L;
 	private static final long REF_BOOK_102 = 52L;
@@ -80,7 +80,7 @@ public class PeriodServiceImpl implements PeriodService{
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
 		return drp != null && drp.isActive();
 	}
-	
+
 	@Override
 	public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
@@ -132,6 +132,7 @@ public class PeriodServiceImpl implements PeriodService{
 					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
 			Calendar start = Calendar.getInstance();
 			start.setTime(record.get("START_DATE").getDateValue());
 			start.set(Calendar.YEAR, year);
@@ -143,6 +144,18 @@ public class PeriodServiceImpl implements PeriodService{
 			Calendar calendarDate = Calendar.getInstance();
 			calendarDate.setTime(record.get("CALENDAR_START_DATE").getDateValue());
 			calendarDate.set(Calendar.YEAR, year);
+
+            if (gregorianCalendar.isLeapYear(year)) {
+                if (start.get(Calendar.MONTH) == Calendar.FEBRUARY && start.get(Calendar.DATE) == 28) {
+                    start.set(Calendar.DATE, 29);
+                }
+                if (end.get(Calendar.MONTH) == Calendar.FEBRUARY && end.get(Calendar.DATE) == 28) {
+                    end.set(Calendar.DATE, 29);
+                }
+                if (calendarDate.get(Calendar.MONTH) == Calendar.FEBRUARY && calendarDate.get(Calendar.DATE) == 28) {
+                    calendarDate.set(Calendar.DATE, 29);
+                }
+            }
 
 			newReportPeriod.setName(name);
 			newReportPeriod.setOrder(ord.intValue());

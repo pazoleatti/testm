@@ -9,17 +9,13 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormTempl
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-//import com.google.gwt.thirdparty.guava.common.base.Function;
-//import com.google.gwt.thirdparty.guava.common.collect.Lists;
+import java.util.*;
 
 /**
  * Get all form types.
@@ -45,20 +41,22 @@ public class GetFormTemplateListHandler extends AbstractActionHandler<GetFormTem
 
         List<FormType> formTypes = formTypeService.getByFilter(formListAction.getFilter());
         List<FormTypeTemplate> formTypeTemplates = new ArrayList<FormTypeTemplate>();
-        //List<Integer> ids = Lists.transform(formTypes, new Function<FormType, Integer>() {
-         //   @Override
-        //    public Integer apply(@Nullable FormType formType) {
-        //        return formType != null ? formType.getId() : 0;
-        //    }
-        //});
-        //Map<Long, Integer> idsVsCount = formTemplateService.versionTemplateCountByFormType(ids);
+
+        @SuppressWarnings("unchecked")
+        Collection<Integer> ids = CollectionUtils.collect(formTypes, new Transformer() {
+            @Override
+            public Object transform(Object o) {
+                return ((FormType)o).getId();
+            }
+        });
+        Map<Long, Integer> idsVsCount = formTemplateService.versionTemplateCountByFormType(ids);
 
         for (FormType type : formTypes){
             FormTypeTemplate typeTemplate = new FormTypeTemplate();
             typeTemplate.setTaxType(type.getTaxType());
             typeTemplate.setFormTypeId(type.getId());
             typeTemplate.setFormTypeName(type.getName());
-            //typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
+            typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
 
             formTypeTemplates.add(typeTemplate);
         }

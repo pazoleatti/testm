@@ -150,21 +150,30 @@ public class DeclarationTemplateDaoTest {
         assertEquals(SAMPLE_BLOB_ID, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
     }
 
-	/*@Test(expected = DaoException.class)
-	public void testSaveExistWithBadEdition() {
-		DeclarationTemplate declarationTemplate = new DeclarationTemplate();
-		declarationTemplate.setId(1);
-		declarationTemplate.setEdition(1000);
-		declarationTemplate.setActive(true);
-        declarationTemplate.setStatus(VersionedObjectStatus.FAKE);
-		declarationTemplate.setVersion(new Date());
-		declarationTemplate.setCreateScript("MyScript");
-		DeclarationType declarationType = declarationTypeDao.get(1);
-		declarationTemplate.setType(declarationType);
+    @Test
+	public void testUpdate() {
+		DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
+		declarationTemplate1.setId(1);
+		declarationTemplate1.setEdition(1000);
+        declarationTemplate1.setName("");
+		declarationTemplate1.setActive(true);
+        declarationTemplate1.setStatus(VersionedObjectStatus.FAKE);
+		declarationTemplate1.setVersion(new Date());
+		declarationTemplate1.setCreateScript("MyScript");
+		declarationTemplate1.setType(declarationTypeDao.get(1));
+        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
+        declarationTemplate2.setId(2);
+        declarationTemplate2.setEdition(1001);
+        declarationTemplate2.setName("sfcxvxc");
+        declarationTemplate2.setActive(true);
+        declarationTemplate2.setStatus(VersionedObjectStatus.FAKE);
+        declarationTemplate2.setVersion(new Date());
+        declarationTemplate2.setCreateScript("MyScript");
+        declarationTemplate2.setType(declarationTypeDao.get(2));
 
-		declarationTemplateDao.save(declarationTemplate);
-
-	}*/
+		int[] updateIds = declarationTemplateDao.update(Arrays.asList(declarationTemplate1, declarationTemplate2));
+        Assert.assertArrayEquals(new int[]{1,1}, updateIds);
+	}
 
 	@Test
 	public void getActiveDeclarationTemplateIdTest() {
