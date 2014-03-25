@@ -58,7 +58,7 @@ public class AuthRemoteServiceProxy extends RemoteServiceProxy {
                     throw new IllegalArgumentException("Response can't be null.");
                 }
 
-                // Получаем стутус и тип ответа.
+                // Получаем статус и тип ответа.
                 int status = response.getStatusCode();
                 String contentType = response.getHeader("Content-Type");
 
@@ -73,12 +73,11 @@ public class AuthRemoteServiceProxy extends RemoteServiceProxy {
                 /*
                  * Если ответ 403, заменяем текст сообщения, т.к. по умолчанию берет с /WEB-INF/jsp/forbidden.jsp
                  * и отображается вместе с HTML тегами.
-                 * Закоментировал, т.к. на стенде не работает этот вариант.
                  */
-//                } else if (status == Response.SC_FORBIDDEN) {
-//                    String encoded = "Доступ запрещен!";
-//                    Throwable caught = new StatusCodeException(status, encoded);
-//                    callback.onFailure(caught);
+                } else if (status == Response.SC_FORBIDDEN) {
+                    String encoded = "Доступ запрещен!";
+                    Throwable caught = new StatusCodeException(status, encoded);
+                    callback.onFailure(caught);
                 } else {
                     // Во всех остальных случаях, пусть разбирается стандартный обраблотчик.
                     delegate.onResponseReceived(request, response);
