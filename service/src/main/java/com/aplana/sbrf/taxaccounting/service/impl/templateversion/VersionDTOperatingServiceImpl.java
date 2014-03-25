@@ -93,11 +93,11 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
                             } else
-                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии с датой начала %td.%tm.%tY",
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
-                                        intersection.getTemplateId());
+                                        intersection.getBeginDate(), intersection.getBeginDate(), intersection.getBeginDate());
                         }
                         break;
                     case FAKE:

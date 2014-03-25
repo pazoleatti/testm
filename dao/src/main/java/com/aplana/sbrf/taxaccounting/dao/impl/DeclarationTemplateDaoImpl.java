@@ -463,9 +463,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     public int getLastVersionEdition(int typeId) {
         String sql = "SELECT MAX(edition) FROM declaration_template WHERE declaration_type_id = ? AND status IN (0, 1)";
         try {
-            return getJdbcTemplate().queryForObject(sql,
+            Integer edition = getJdbcTemplate().queryForObject(sql,
                     new Object[]{typeId},
                     Integer.class);
+            return edition != null ? edition : 0;
         } catch (EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
