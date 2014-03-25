@@ -212,7 +212,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 if (scroll == 0 && maxScroll == 0) {
                     return false;
                 }
-                System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
+                //System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
 
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 
@@ -224,7 +224,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     @Override
     public void load(PickerState pickerState) {
-        System.out.println("init");
         getUiHandlers().init(pickerState);
     }
 

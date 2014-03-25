@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -50,6 +51,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     LinkButton addRow;
     @UiField
     LinkButton deleteRow;
+    @UiField
+    LinkAnchor backAnchor;
     @UiField
     Button search;
     @UiField
@@ -251,6 +254,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             }
         });
 	}
+
+    @UiHandler("backAnchor")
+    void onPrintButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onBackClicked();
+        }
+    }
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
 		switch (alignment) {

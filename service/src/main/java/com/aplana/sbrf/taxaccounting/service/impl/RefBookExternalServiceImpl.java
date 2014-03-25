@@ -69,6 +69,9 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
 
         refBookDirectory = refBookDirectory.trim();
 
+        // Число успешно импортированных файлов
+        int refBookImportCount = 0;
+
         // Признак наличия ошибок при импорте
         boolean withError = false;
         try {
@@ -102,6 +105,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                             Map<String, Object> additionalParameters = new HashMap<String, Object>();
                             additionalParameters.put("inputStream", is);
                             refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+                            refBookImportCount++;
                         } catch (Exception e) {
                             //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             withError = true;
@@ -128,7 +132,12 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
                 }
             }
             String msg = "Произведен импорт данных справочников из «" + refBookDirectory + "»" +
-                    (withError ? " с ошибками." : " без ошибок.");
+                    (withError ? " с ошибками." : " без ошибок.") + " Импортировано файлов: " + refBookImportCount + ".";
+
+            if (refBookImportCount == 0) {
+                msg = "Импорт не выполнен, файлов с данными справочников в папке «" + refBookDirectory + "» не найдено.";
+            }
+
             // Журнал аудита
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                     null, msg);
@@ -142,7 +151,7 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
             } else {
                 errorMsg = "";
             }
-            errorMsg = "Не удалось выполнить импорт данных справочников из «" + refBookDirectory + "». " + errorMsg;
+            errorMsg = "Импорт не выполнен, ошибка доступа к папке «" + refBookDirectory + "». " + errorMsg;
 
             auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(), null, null, null,
                     null, errorMsg);
