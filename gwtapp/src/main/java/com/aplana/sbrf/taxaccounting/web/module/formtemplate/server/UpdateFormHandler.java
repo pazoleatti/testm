@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.UpdateFormAction;
@@ -33,6 +34,8 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
     @Autowired
     private SecurityService securityService;
+    @Autowired
+    LogEntryService logEntryService;
 
     public UpdateFormHandler() {
         super(UpdateFormAction.class);
@@ -57,7 +60,8 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 
         }
 
-		result.setLogEntries(logger.getEntries());
+        if (!logger.getEntries().isEmpty())
+            result.setUuid(logEntryService.save(logger.getEntries()));
         result.setFormTemplateId(formTemplateId);
 		return result;
     }
