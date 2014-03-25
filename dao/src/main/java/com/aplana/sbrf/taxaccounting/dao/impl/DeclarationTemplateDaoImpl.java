@@ -322,7 +322,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
         builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion)");
         if (actualEndVersion != null)
-            builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
+            builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion + interval '1' day OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
             builder.append(" OR ID = (select id from (select id, row_number() ").
                     append(isSupportOver() ? " over(partition by DECLARATION_TYPE_ID order by version)" : " over()").
@@ -463,9 +463,10 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     public int getLastVersionEdition(int typeId) {
         String sql = "SELECT MAX(edition) FROM declaration_template WHERE declaration_type_id = ? AND status IN (0, 1)";
         try {
-            return getJdbcTemplate().queryForObject(sql,
+            Integer edition = getJdbcTemplate().queryForObject(sql,
                     new Object[]{typeId},
                     Integer.class);
+            return edition != null ? edition : 0;
         } catch (EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){

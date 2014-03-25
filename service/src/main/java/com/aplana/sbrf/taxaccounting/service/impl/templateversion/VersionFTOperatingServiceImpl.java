@@ -98,11 +98,11 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
                             } else
-                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии с датой начала %td.%tm.%tY",
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
-                                        intersection.getTemplateId());
+                                        intersection.getBeginDate(), intersection.getBeginDate(), intersection.getBeginDate());
                         }
                         break;
                     case FAKE:
@@ -114,8 +114,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             formTemplateService.save(formTemplate);
                         }
                         //Варианты 16,19,20,18a
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10){
-                            formTemplateService.delete(formTemplateService.get(intersection.getTemplateId()));
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10
+                                || compareResult == 16){
+                            formTemplateService.delete(intersection.getTemplateId());
                         }
                         break;
                 }
@@ -123,7 +124,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         }
         //2 Шаг. Система проверяет наличие даты окончания актуальности.
         //  Пересечений нет
-        if(versionActualDateEnd != null){
+        else if(versionActualDateEnd != null){
             cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
             FormTemplate formTemplate =  createFakeTemplate(date, typeId);
@@ -143,7 +144,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             return;
         FormTemplate formTemplateFake = formTemplateService.getNearestFTRight(templateId, VersionedObjectStatus.FAKE);
         if (formTemplateFake != null)
-            formTemplateService.delete(formTemplateFake);
+            formTemplateService.delete(templateId);
     }
 
     private FormTemplate createFakeTemplate(Date date, int formTypeId){

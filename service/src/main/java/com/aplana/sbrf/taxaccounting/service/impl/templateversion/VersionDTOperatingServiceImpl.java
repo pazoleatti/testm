@@ -93,11 +93,11 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
                             } else
-                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии с датой начала %td.%tm.%tY",
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
-                                        intersection.getTemplateId());
+                                        intersection.getBeginDate(), intersection.getBeginDate(), intersection.getBeginDate());
                         }
                         break;
                     case FAKE:
@@ -109,8 +109,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,18a,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10){
-                            declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10
+                                || compareResult == 16){
+                            declarationTemplateService.delete(intersection.getTemplateId());
                         }
                         break;
                 }
@@ -118,7 +119,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
         }
         //2 Шаг. Система проверяет наличие даты окончания актуальности.
         //Пересечений нет
-        if (versionActualDateEnd != null){
+        else if (versionActualDateEnd != null){
             Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
             cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
             DeclarationTemplate declarationTemplate =  createFakeTemplate(date, typeId);
@@ -139,7 +140,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             return;
         DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId, VersionedObjectStatus.FAKE);
         if (declarationTemplateFake != null)
-            declarationTemplateService.delete(declarationTemplateFake);
+            declarationTemplateService.delete(declarationTemplateFake.getId());
     }
 
     private DeclarationTemplate createFakeTemplate(Date date, int typeId){

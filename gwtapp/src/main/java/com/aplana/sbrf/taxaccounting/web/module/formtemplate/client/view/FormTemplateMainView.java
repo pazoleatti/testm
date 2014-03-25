@@ -1,24 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.SimpleTabPanel;
-import com.aplana.sbrf.taxaccounting.web.widget.log.cell.LogEntryMessageCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.Tab;
 import com.gwtplatform.mvp.client.TabData;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,12 +23,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public interface Binder extends UiBinder<Widget, FormTemplateMainView> { }
 
 	private int formId;
-
-	@UiField
-	DockLayoutPanel dockPanel;
-
-	@UiField
-	Widget logPanel;
 
 	@UiField
 	Label title;
@@ -54,9 +44,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
     @UiField
     Anchor returnAnchor;
-
-	@UiField(provided = true)
-	CellList<LogEntry> loggerList = new CellList<LogEntry>(new LogEntryMessageCell());
 
 	@Inject
 	public FormTemplateMainView(Binder binder) {
@@ -142,21 +129,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 		}
 
 		this.formId = formId;
-	}
-
-	@Override
-	public void setLogMessages(List<LogEntry> entries) {
-		dockPanel.setWidgetHidden(logPanel, (entries == null || entries.isEmpty()));
-		if (entries != null && !entries.isEmpty()) {
-			logPanel.setVisible(true);
-			loggerList.setVisible(true);
-			loggerList.setRowData(entries);
-		}
-		else {
-			loggerList.setRowCount(0);
-			loggerList.setRowData(new ArrayList<LogEntry>(0));
-		}
-		loggerList.redraw();
 	}
 
 	@Override

@@ -2,7 +2,6 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
              xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:c="urn:import:com.google.gwt.user.cellview.client"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
         >
@@ -81,11 +80,6 @@
                 <g:Label addStyleNames="{style.horSep}"/>
 
                 <g:DockLayoutPanel ui:field="dockPanel" addStyleNames="{style.table}">
-                    <g:north size="80">
-                        <g:ScrollPanel width="100%" ui:field="logPanel">
-                            <c:CellList ui:field="loggerList"/>
-                        </g:ScrollPanel>
-                    </g:north>
                     <g:center>
                         <npui:SimpleTabPanel ui:field="tabPanel"/>
                     </g:center>

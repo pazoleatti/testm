@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -27,7 +29,6 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
@@ -65,7 +66,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        getView().setLogMessages(null);
                         getView().setFormId(formTemplate.getId());
                         getView().setTitle(formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -98,7 +98,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         type.setTaxType(event.getTaxType());
                         formTemplate.setType(type);
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
-                        getView().setLogMessages(null);
                         getView().setTitle(formTemplate.getType().getName());
                         TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -123,7 +122,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplate.setVersion(new Date());
                         formTemplate.setType(result.getFormType());
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
-                        getView().setLogMessages(null);
                         getView().setTitle(formTemplate.getType().getName());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
@@ -141,7 +139,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	public interface MyView extends TabView, HasUiHandlers<FormTemplateMainUiHandlers> {
 		void setFormId(int formId);
-		void setLogMessages(List<LogEntry> entries);
 		void setTitle(String title);
         void activateVersionName(String s);
 	}
@@ -263,7 +260,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 						public void onSuccess(GetFormResult result) {
                             formTemplateExt = result.getForm();
 							formTemplate = formTemplateExt.getFormTemplate();
-							getView().setLogMessages(null);
 							getView().setFormId(formTemplate.getId());
 							getView().setTitle(formTemplate.getType().getName());
                             getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
@@ -302,8 +298,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                     @Override
                     public void onSuccess(UpdateFormResult result) {
-                        if (!result.getLogEntries().isEmpty()) {
-                            getView().setLogMessages(result.getLogEntries());
+                        if (result.getUuid() != null) {
+                            LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                         }
                         MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).

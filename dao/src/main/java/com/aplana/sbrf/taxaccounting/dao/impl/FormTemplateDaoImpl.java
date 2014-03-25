@@ -119,13 +119,13 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
 		}*/
 
-		JdbcTemplate jt = getJdbcTemplate();
+		/*JdbcTemplate jt = getJdbcTemplate();
 		int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
 
 		if (storedEdition != formTemplate.getEdition()) {
 			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +
 				" было изменено после того, как данные по ней были считаны");
-		}
+		}*/
 
 		String dataRowsXml = null;
 		List<DataRow<Cell>> rows = formTemplate.getRows();
@@ -146,7 +146,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			" monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
 			dataRowsXml,
 			dataHeadersXml,
-			storedEdition,
+			formTemplate.getEdition(),
 			formTemplate.getVersion(),
 			formTemplate.isFixedRows(),
             formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -292,7 +292,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     public List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion) {
-        String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number()" + (isSupportOver()? " over(partition by TYPE_ID order by version)" : " over()") +
+        String INTERSECTION_VERSION_SQL = "with segmentIntersection as (Select ID, TYPE_ID, STATUS, VERSION, row_number()" +
+                (isSupportOver()? " over(partition by TYPE_ID order by version)" : " over()") +
                 " rn from FORM_TEMPLATE where TYPE_ID = :typeId AND STATUS in (0,1,2)) " +
                 " select * from (select rv.ID ID, rv.STATUS, rv.TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo" +
                 " FROM segmentIntersection rv " +
@@ -307,7 +308,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
         builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
         if (actualEndVersion != null)
-            builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
+            builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion + interval '1' day OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
             builder.append(" OR ID = (select id from (select id, row_number() ").
                     append(isSupportOver() ? " over(partition by TYPE_ID order by version)" : " over()").
@@ -490,9 +491,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     public int getLastVersionEdition(int formTypeId) {
         String sql = "SELECT MAX(edition) FROM form_template WHERE type_id = ? AND status IN (0, 1)";
         try {
-            return getJdbcTemplate().queryForObject(sql,
+            Integer edition = getJdbcTemplate().queryForObject(sql,
                     new Object[]{formTypeId},
                     Integer.class);
+            return edition != null ? edition : 0;
         } catch (EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
