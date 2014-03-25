@@ -1,7 +1,3 @@
-/*
-    blob_data.id = '99462c1e-1376-4fbe-8e31-eceb4ca470af'
-    Коды ОКАТО
- */
 package refbook.okato
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -16,7 +12,9 @@ import javax.xml.stream.XMLInputFactory
 import java.text.SimpleDateFormat
 
 /**
- * скрипт справочника ОКАТО
+ * Коды ОКАТО
+ * blob_data.id = '99462c1e-1376-4fbe-8e31-eceb4ca470af'
+ * ref_book_id = 4
  *
  * @author Stanislav Yasinskiy
  * @author Levykin
@@ -152,6 +150,8 @@ void importFromXML() {
     versions.addAll(delByVersionMap.keySet())
     Collections.sort(versions)
 
+    def hasChanges = false
+
     // По версиям
     versions.each { version ->
         // Добавляемые/обновляемые записи
@@ -164,13 +164,19 @@ void importFromXML() {
         println("Import OKATO: Add/Upd candidate record count = ${addMap == null ? 0 : addMap.size()}, " +
                 "Del candidate record count = ${delMap == null ? 0 : delMap.size()}")
 
-        // Список записей для сохранения в текущей версии
+        // Список записей для сохранения в текущей версии (updateRecords)
         def addList = []
 
-        // Список id записей для удаления в текущей версии
+        // Список записей для сохранения в текущей версии (insertRecords)
+        def addNewList = []
+
+        // Список записей для удаления в текущей версии (удаление записи updateRecordsVersionEnd)
         def delList = []
 
-        // Список id записей для изменения в текущей версии
+        // Список id записей для удаления в текущей версии (удаление версии deleteRecordVersions)
+        def delRecList = []
+
+        // Список id записей для изменения в текущей версии (refBookOkatoDao#updateValueNames)
         def updList = []
 
         // Коды окато, записи по которым будут изменены в текущей версии
@@ -182,7 +188,7 @@ void importFromXML() {
             okatoSet.addAll(delMap.keySet())
         }
 
-        // Получение частями актуальных записей
+        // Получение частями актуальных записей для сравнения с записями из ТФ
         def tempList = []
         def actualRecordList = []
         okatoSet.each { okato ->
@@ -211,28 +217,49 @@ void importFromXML() {
             def actualValue = actualRecordMap.get(okato)
             def actualName = actualValue?.NAME?.stringValue
             if (actualName == null || !actualName.equals(value.NAME.stringValue)) {
-                // Если запись новая или отличная от имеющейся, то добавляем новую версию
-                addList.add(value)
-                if (actualName != null) {
-                    // Если запись уже была то запоминаем record_id
-                    delList.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                if (actualName == null) {
+                    // Запись новая
+                    addNewList.add(value)
+                } else {
+                    // Запись уже была
+                    value.put(RefBook.RECORD_ID_ALIAS, actualValue.get(RefBook.RECORD_ID_ALIAS))
+                    addList.add(value)
                 }
             }
         }
 
+        // Поиск удаляемых
+        delMap?.keySet()?.each { okato ->
+            def actualValue = actualRecordMap.get(okato)
+            if (actualValue != null) {
+                // Запись нашлась
+                delList.add(actualValue)
+            }
+        }
+
         // Проверка добавляемых на совпадение версий
-        def checkIds = []
+        def checkIdsAdd = [] as Set
+        def checkIdsDel = [] as Set
+
         addList.each { map ->
             def okato = map.OKATO.stringValue
             def actualValue = actualRecordMap.get(okato)
             if (actualValue != null) {
-                checkIds.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                checkIdsAdd.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
             }
         }
 
-        if (!checkIds.isEmpty()) {
+        delList.each { map ->
+            def okato = map.OKATO.stringValue
+            def actualValue = actualRecordMap.get(okato)
+            if (actualValue != null) {
+                checkIdsDel.add(actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue)
+            }
+        }
+
+        if (!checkIdsAdd.isEmpty()) {
             // Получение версий для проверяемых записей
-            def versionMap = dataProvider.getRecordsVersionStart(checkIds)
+            def versionMap = dataProvider.getRecordsVersionStart(new ArrayList(checkIdsAdd))
             addList.each { map ->
                 def okato = map.OKATO.stringValue
                 def actualValue = actualRecordMap.get(okato)
@@ -241,6 +268,7 @@ void importFromXML() {
                     def recVersion = versionMap.get(recordId)
                     if (recVersion.equals(version)) {
                         println("Import OKATO: Found update okato = " + okato)
+                        // Не добавление новой версии, а обновление имеющеся
                         updList.add(map)
                     }
                 }
@@ -249,25 +277,47 @@ void importFromXML() {
             addList.removeAll(updList)
         }
 
-        // Поиск удаляемых
-        delMap?.keySet()?.each { okato ->
-            def actualValue = actualRecordMap.get(okato)
-
-            if (actualValue != null) {
-                // Запись нашлась
-                delList.add(value.get(RefBook.RECORD_ID_ALIAS).numberValue)
+        if (!checkIdsDel.isEmpty()) {
+            // Получение версий для проверяемых записей
+            def versionMap = dataProvider.getRecordsVersionStart(new ArrayList(checkIdsDel))
+            def delFromList = []
+            delList.each { map ->
+                def okato = map.OKATO.stringValue
+                def actualValue = actualRecordMap.get(okato)
+                if (actualValue != null) {
+                    def recordId = actualValue.get(RefBook.RECORD_ID_ALIAS).numberValue
+                    def recVersion = versionMap.get(recordId)
+                    if (recVersion.equals(version)) {
+                        println("Import OKATO: Found delete record okato = " + okato)
+                        // Не удаление записи, а удаление версии
+                        delRecList.add(recordId)
+                        delFromList.add(map)
+                    }
+                }
             }
+
+            // Удаляемые версии не должны удаляться как удаление элементов
+            delList.removeAll(delFromList)
         }
 
-        println("Import OKATO: Delete in version count = ${delList.size()}, Add in version count = ${addList.size()}, " +
-                "Upd in version count = ${updList.size()}")
+        println("Import OKATO: Delete element count = ${delList.size()}, Delete version count = ${delRecList.size()},  Add element count = ${addList.size()}, Add version count = ${addNewList.size()}, " +
+                "Upd element count = ${updList.size()}")
 
-        if (!delList.isEmpty() || !addList.isEmpty() || !updList.isEmpty()) {
+        if (!delList.isEmpty() || !delRecList.isEmpty() || !addList.isEmpty() || !addNewList.isEmpty() || !updList.isEmpty()) {
             println("Import OKATO: DB update/create begin " + System.currentTimeMillis())
 
             // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые
             if (!delList.isEmpty()) {
-                dataProvider.updateRecordsVersionEnd(logger, version, delList)
+                def delIds = []
+                for (def map : delList) {
+                    delIds.add(map.get(RefBook.RECORD_ID_ALIAS).numberValue)
+                }
+                dataProvider.updateRecordsVersionEnd(logger, version, delIds)
+            }
+
+            // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые при этом версия совпадает с датой удаления
+            if (!delRecList.isEmpty()) {
+                dataProvider.deleteRecordVersions(logger, delRecList)
             }
 
             // Обновление записей, которые изменились, но дата совпадает с датой создания
@@ -275,14 +325,11 @@ void importFromXML() {
                 refBookOkatoDao.updateValueNames(version, updList)
             }
 
-            // Добавление новых или обновленных записей в текущей версии
-            if (!addList.isEmpty()) {
-                if (addList.size() < 10) {
-                    println("addList = " + addList)
-                }
+            // Добавление новых версии
+            if (!addNewList.isEmpty()) {
                 // Добавление порциями
                 tempList = []
-                addList.each { record ->
+                addNewList.each { record ->
                     if (tempList.size() < 500) {
                         tempList.add(record)
                     } else {
@@ -295,15 +342,26 @@ void importFromXML() {
                     tempList.clear()
                 }
             }
+
+            // Добавление элементов
+            if (!addList.isEmpty()) {
+                dataProvider.updateRecords(version, addList)
+            }
+
             println("Import OKATO: DB update/create end " + System.currentTimeMillis())
+            hasChanges = true
         }
         if (logger.containsLevel(LogLevel.ERROR)) {
             return
         }
     }
-
     println("Import OKATO: End " + System.currentTimeMillis())
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("Импорт успешно выполнен.")
+
+    if (!hasChanges) {
+        logger.info("Файл не содержит новые записи или изменения к существующим записям!")
+    } else {
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logger.info("Импорт успешно выполнен.")
+        }
     }
 }
