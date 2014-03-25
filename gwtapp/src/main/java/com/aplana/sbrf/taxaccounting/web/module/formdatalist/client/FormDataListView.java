@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style;
@@ -59,7 +60,7 @@ public class FormDataListView extends
 	Panel filterContentPanel;
 
 	@UiField
-	DataGrid<FormDataSearchResultItem> formDataTable;
+	GenericDataGrid<FormDataSearchResultItem> formDataTable;
 	
 	@UiField
 	FlexiblePager pager;
@@ -161,24 +162,24 @@ public class FormDataListView extends
 			}
 		};
 
-		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE));
+		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE, formKindColumn));
         formDataTable.setColumnWidth(formKindColumn, 8.5, Style.Unit.EM);
-		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
+		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE, linkColumn));
 
-		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
+		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE, departmentColumn));
 
-        formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE));
+        formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE, periodYearColumn));
         formDataTable.setColumnWidth(periodYearColumn, 3.5, Style.Unit.EM);
         periodYearColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         
         
-		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
+		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE, reportPeriodColumn));
         formDataTable.setColumnWidth(reportPeriodColumn, 7, Style.Unit.EM);
-		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE));
+		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE, periodMonthColumn));
         formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
-		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
+		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE, stateColumn));
         formDataTable.setColumnWidth(stateColumn, 6, Style.Unit.EM);
-		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE));
+		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE, returnColumn));
         formDataTable.setColumnWidth(returnColumn, 8, Style.Unit.EM);
 
 		pager.setDisplay(formDataTable);
@@ -229,18 +230,18 @@ public class FormDataListView extends
 		formHeader.setText(title);
 	}
 
-    /**
-     * Добавление заголовка для столбца, который может резайзиться
-     * @param columnName название
-     * @param returnColumn объект колонки
-     * @return заголовок с сортировкой и резайзом
-     */
+	/**
+	 * Добавление заголовка для столбца, который может резайзиться
+	 * @param columnName название
+	 * @param returnColumn объект колонки
+	 * @return заголовок с сортировкой и резайзом
+	 */
 	private Header<String> getHeader(final String columnName, Column<FormDataSearchResultItem, ?> returnColumn){
-        GenericDataGrid.DataGridResizableHeader resizableHeader;
-        final SortingHeaderCell headerCell = new SortingHeaderCell();
-        resizableHeader = formDataTable.createResizableHeader(columnName, returnColumn, headerCell);
+		GenericDataGrid.DataGridResizableHeader resizableHeader;
+		final SortingHeaderCell headerCell = new SortingHeaderCell();
+		resizableHeader = formDataTable.createResizableHeader(columnName, returnColumn, headerCell);
 
-        resizableHeader.setUpdater(new ValueUpdater<String>() {
+		resizableHeader.setUpdater(new ValueUpdater<String>() {
 			@Override
 			public void update(String value) {
 				setAscSorting(headerCell.isAscSort());
