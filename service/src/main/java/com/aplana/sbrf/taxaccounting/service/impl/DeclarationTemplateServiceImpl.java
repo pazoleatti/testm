@@ -73,7 +73,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
 	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
-		return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
+        try {
+            return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении активного шаблона декларации.", e);
+        }
+
 	}
 
 	@Override
