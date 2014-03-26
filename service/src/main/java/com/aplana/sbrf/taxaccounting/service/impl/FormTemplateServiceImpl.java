@@ -84,7 +84,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
 	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
-		return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
+        try {
+            return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении активного шаблона НФ.", e);
+        }
+
 	}
 
 	@Override

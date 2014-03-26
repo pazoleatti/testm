@@ -92,7 +92,7 @@ def autoFillColumns = ['rowNumber', 'rateBRBill', 'rateBROperation', 'sumLimit',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNumber', 'billNumber', 'creationDate', 'nominal', 'currencyCode', 'rateBRBill',
-        'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate', 'sum70606', 'sumLimit',
+        'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate',
         'percAdjustment']
 
 @Field
@@ -175,8 +175,6 @@ def calc() {
             row.rateBRBill = calc6and7(row.currencyCode, row.creationDate)
             // графа 7
             row.rateBROperation = calc6and7(row.currencyCode, row.operationDate)
-            // графа 12
-            row.sum70606 = calc12(row)
             // графа 13
             row.sumLimit = calc13(row, daysOfYear)
             // графа 14
@@ -188,7 +186,6 @@ def calc() {
 
     dataRowHelper.save(dataRows)
 }
-
 
 // Расчет итоговой строки
 def getTotalRow(def dataRows) {
@@ -215,26 +212,12 @@ def BigDecimal calc6and7(def currencyCode, def date) {
     }
 }
 
-// Ресчет графы 12
-def BigDecimal calc12(def row) {
-    // TODO вопрос к заказчику
-    def val = row.sum70606
-    if (row.currencyCode != null && isRubleCurrency(row.currencyCode)) {
-    } else {
-    }
-    return val
-}
-
 // Ресчет графы 13
 def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
-//    row.getCell('sumLimit').setEditable(false);
-//    row.getCell('sumLimit').setStyleAlias(null);
     if (row.paymentEnd == null || row.creationDate == null) {
         return null
     }
     if (getCountDays(row.creationDate) != getCountDays(row.paymentEnd)) {
-        row.getCell('sumLimit').setStyleAlias("Редактируемая");
-        row.getCell('sumLimit').setEditable(true);
         return row.sumLimit
     }
     if (row.sum70606 == null && isRubleCurrency(row.currencyCode)) {
@@ -258,7 +241,6 @@ def BigDecimal calc14(def row) {
         }
     } else if (row.nominal != null && row.rateBRBill != null && row.rateBROperation != null) {
         return row.nominal * (row.rateBRBill - row.rateBROperation)
-        // TODO вопрос к заказчику "второй строкой записать..."
     }
     return null
 }
@@ -272,7 +254,7 @@ void logicCheck() {
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // алиасы графов для арифметической проверки (графа 8, 9, 12-15)
-    def arithmeticCheckAlias = ['rateBRBill', 'rateBROperation', 'sum70606', 'sumLimit', 'percAdjustment']
+    def arithmeticCheckAlias = ['rateBRBill', 'rateBROperation', 'sumLimit', 'percAdjustment']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
     // Инвентарные номера
@@ -318,7 +300,6 @@ void logicCheck() {
         // 5. Арифметические проверки
         needValue['rateBRBill'] = calc6and7(row.currencyCode, row.creationDate)
         needValue['rateBROperation'] = calc6and7(row.currencyCode, row.operationDate)
-        needValue['sum70606'] = calc12(row)
         needValue['sumLimit'] = calc13(row, daysOfYear)
         needValue['percAdjustment'] = calc14(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
@@ -446,10 +427,6 @@ void addData(def xml, int headRowCount) {
         // графа 5
         newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
 
-        // графа 6
-
-        // графа 7
-
         // графа 8
         newRow.paymentStart = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
 
@@ -464,8 +441,6 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         newRow.sum70606 = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
-
-
 
         rows.add(newRow)
     }
