@@ -8,7 +8,7 @@ INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (6, 'Коды �
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (7, 'Параметры налоговых льгот', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (8, 'Коды, определяющие налоговый (отчётный) период', 0, 1, 0);
 
-INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (9, 'Организации-участники контролируемых сделок', 1, 0, 0);
+INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (9, 'Организации-участники контролируемых сделок', 1, 0, 1);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (10, 'ОК 025-2001 (Общероссийский классификатор стран мира)', 1, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (11, 'Услуги в части программного обеспечения', 0, 1, 0);
 INSERT INTO REF_BOOK (ID, NAME, TYPE, VISIBLE, READ_ONLY) VALUES (12, 'Коды единиц измерения на основании ОКЕИ', 0, 1, 0);
@@ -239,6 +239,7 @@ INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFEREN
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (164, 30, 'Тип подразделения', 'TYPE', 2, 4, null, null, 1, 0, 5, 1, 0);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (165, 30, 'Индекс территориального банка', 'TB_INDEX', 1, 5, null, null, 1, null, 10, 0, 0);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (166, 30, 'Код подразделения в нотации Сбербанка', 'SBRF_CODE', 1, 6, null, null, 1, null, 10, 0, 0);
+INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (845, 30, 'Регион', 'REGION_ID', 4, 7, 4, 10, 1, null, 20, 0, 0);
 
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (210, 34, 'Код ОКВЭД', 'CODE', 1, 0, null, null, 1, null, 6, 1, 1);
 INSERT INTO REF_BOOK_ATTRIBUTE (ID, REF_BOOK_ID, NAME, ALIAS, TYPE, ORD, REFERENCE_ID, ATTRIBUTE_ID, VISIBLE, PRECISION, WIDTH, REQUIRED, IS_UNIQUE) VALUES (211, 34, 'Наименование', 'NAME', 1, 1, null, null, 1, null, 250, 1, 0);
