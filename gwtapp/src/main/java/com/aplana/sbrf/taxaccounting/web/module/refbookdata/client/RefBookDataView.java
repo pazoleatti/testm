@@ -152,6 +152,10 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			refbookDataTable.setRowCount(0);
 			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
 		} else {
+            if (totalCount == 0) {
+                start = 0;
+                pager.setPage(0);
+            }
 			refbookDataTable.setRowCount(totalCount);
 			refbookDataTable.setRowData(start, dataRows);
 		}

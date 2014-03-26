@@ -202,25 +202,30 @@ void consolidation() {
     def mapForSummary = [:]
 
     matrixRows.each { matrixRow ->
+        def sourceRow = rowsMap.get(matrixRow)
+        def reportClass = matrixRow.dealNum3
 
-        if (matrixRow.dealNum3.equals(4)) { // "класс 4" копируем построчно
-            mapForSummary.put(matrixRow, rowsMap.get(matrixRow))
+        if ((reportClass.equals(2) && isGroupClass2())
+                || (reportClass.equals(3) && !getRecSWId().equals(sourceRow.serviceType))
+                || reportClass.equals(4)) { // копируем построчно
+            mapForSummary.put(matrixRow, sourceRow)
             summaryRows.add(getRow(mapForSummary))
             mapForSummary.clear()
 
-        } else { // 1, 2, 3 класс
+        } else { // группируем перед копированием
             if (currentGroup == null) { // первая строка
                 currentGroup = matrixRow.dealNum3
-                mapForSummary.put(matrixRow, rowsMap.get(matrixRow))
+                mapForSummary.put(matrixRow, sourceRow)
             } else if (currentGroup.equals(matrixRow.dealNum3.longValue())) { // строка из той же группы что предыдущая
-                mapForSummary.put(matrixRow, rowsMap.get(matrixRow))
+                mapForSummary.put(matrixRow, sourceRow)
             } else { // строка из новой группы
+
                 // получаем итоговую строку для предыдущей группы
                 summaryRows.add(getRow(mapForSummary))
 
                 currentGroup = matrixRow.dealNum3
                 mapForSummary.clear()
-                mapForSummary.put(matrixRow, rowsMap.get(matrixRow))
+                mapForSummary.put(matrixRow, sourceRow)
             }
         }
     }
@@ -233,7 +238,7 @@ void consolidation() {
 }
 
 // Подготовка строки сводного отчета
-// из первичных и консолидированных отчетов модуля МУКС
+// из первичных и консолидированных отчетов модуля МУКС (табл. 85)
 def buildRow(def srcRow, def type) {
     // Общие значения
     // "Да"
@@ -281,7 +286,39 @@ def buildRow(def srcRow, def type) {
     row.f135 = recNoId
 
     // Графа 12
-    row.similarDealGroup = recNoId
+    switch (type.id) {
+        case 376: // 1
+        case 377: // 2
+        case 380: // 5
+        case 382: // 7
+        case 399: // 22
+            row.similarDealGroup = getRecYesId()
+            break
+        case 375: // 3
+            // Заполняется уже для сгруппировонной строки
+            break
+        case 379: // 4
+        case 381: // 6
+        case 383: // 8
+        case 384: // 9
+        case 385: // 10
+        case 386: // 11
+        case 387: // 12
+        case 388: // 13
+        case 389: // 14
+        case 390: // 15
+        case 391: // 16
+        case 392: // 17
+        case 393: // 18
+        case 394: // 19
+        case 397: // 20
+        case 398: // 21
+        case 402: // 23
+        case 401: // 24
+        case 403: // 25
+            row.similarDealGroup = getRecNoId()
+            break
+    }
 
     // Графа 13
     def String val13 = null
@@ -290,9 +327,10 @@ def buildRow(def srcRow, def type) {
             val13 = '002'
             break
         case 377:
+        case 375:
         case 380:
         case 382:
-        case 375:
+        case 399:
             val13 = '019'
             break
         case 379:
@@ -316,12 +354,12 @@ def buildRow(def srcRow, def type) {
         case 386:
         case 388:
         case 401:
+        case 402:
         case 403:
             val13 = '003'
             break
         case 387:
         case 389:
-        case 402:
             val13 = '012'
             break
         case 390:
@@ -329,9 +367,6 @@ def buildRow(def srcRow, def type) {
             break
         case 397:
             val13 = '004'
-            break
-        case 399:
-            // TODO [13/03/14 12:57:03] Евгений Ломоносов: тут ждем ответа от заказчика
             break
     }
     if (val13 != null) {
@@ -341,82 +376,73 @@ def buildRow(def srcRow, def type) {
     // Графа 14
     def String val14 = null
     switch (type.id) {
-        case 376:
-            val14 = '004'
+        case 376: // 1
+            if (srcRow.incomeBankSum != null) {
+                val14 = '004'
+            } else if (srcRow.outcomeBankSum != null) {
+                val14 = '003'
+            }
             break
-        case 377:
-        case 375:
-        case 380:
+        case 377: // 2
+        case 375: // 3
+        case 380: // 5
+        case 399: // 22
             val14 = '012'
-            break
-        case 379:
-            val14 = '029'
-            break
-        case 381:
-            if (srcRow.outcomeSum == null) {
-                val14 = '027'
-            }
-            if (srcRow.incomeSum == null) {
-                val14 = '026'
-            }
-            break
-        case 382:
-            val14 = '011'
-            break
-        case 383:
-        case 391:
-        case 392:
-        case 393:
-            val14 = '052'
-            break
-        case 384:
-            if (srcRow.transactionType != null) {
-                def val14Rec = getRefBookValue(16, srcRow.transactionType)
-                if (val14Rec != null && val14Rec.CODE != null) {
-                    if (val14Rec.CODE.stringValue.equals('S')) {
-                        val14 = '027'
-                    } else if (val14Rec.CODE.stringValue.equals('B')) {
-                        val14 = '026'
-                    }
-                }
-            }
-            break
-        case 385:
-        case 387:
-        case 389:
-            val14 = '022'
-            break
-        case 386:
-        case 388:
-            val14 = '005'
-            break
-        case 390:
-            val14 = '030'
-            break
-        case 394:
-            if (srcRow.outcomeSum == null) {
-                val14 = '027'
-            }
-            if (srcRow.incomeSum == null) {
-                val14 = '026'
-            }
-            break
-        case 397:
-            val14 = '007'
-            break
-        case 398:
-        case 399:
+        case 379: // 4
+        case 398: // 21
             val14 = '028'
             break
-        case 402:
+            break
+        case 381: // 6
+            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
+                val14 = '026'
+            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
+                val14 = '027'
+            }
+            break
+        case 382: // 7
+            val14 = '011'
+            break
+        case 383: // 8
+        case 391: // 16
+        case 392: // 17
+        case 393: // 18
+            val14 = '052'
+            break
+        case 384: // 9
+            if (getRecBuyId().equals(srcRow.transactionType)) {
+                val14 = '026'
+            } else if (getRecSellId().equals(srcRow.transactionType)) {
+                val14 = '027'
+            }
+            break
+        case 385: // 10
+        case 387: // 12
+        case 389: // 14
+            val14 = '022'
+            break
+        case 386: // 11
+        case 388: // 13
+            val14 = '005'
+            break
+        case 390: // 15
+            val14 = '030'
+            break
+        case 394: // 19
+            def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
+            val14 = (dealBuy ? '026' : '027')
+            break
+        case 397: // 20
+            val14 = '007'
+            break
+        case 402: // 23
             val14 = '020'
             break
-        case 401:
-        case 403:
+        case 401: // 24
+        case 403: // 25
             val14 = '002'
             break
     }
-
     if (val14 != null) {
         row.taxpayerSideCode = getRecordId(65, 'CODE', "$val14")
     }
@@ -448,40 +474,46 @@ def buildRow(def srcRow, def type) {
 
     // Графа 18
     switch (type.id) {
-        case 376:
+        case 376: // 1
             row.income = srcRow.incomeBankSum
             break
-        case 379:
-        case 387:
+        case 379: // 4
+        case 386: // 11
+        case 388: // 13
+        case 389: // 14
             row.income = srcRow.sum
             break
-        case 382:
-        case 398:
-            row.income = srcRow.bankIncomeSum
-            break
-        case 381:
+        case 381: // 6
+        case 387: // 12
             row.income = srcRow.cost
             break
-        case 383:
+        case 382: // 7
+        case 398: // 21
+            row.income = srcRow.bankIncomeSum
+            break
+        case 383: // 8
             row.income = srcRow.percentIncomeSum
             break
-        case 384:
+        case 384: // 9
             row.income = srcRow.transactionSumRub
             break
-        case 385:
+        case 385: // 10
             row.income = srcRow.totalCost
             break
-        case 386:
-        case 388:
-        case 389:
-            row.income = srcRow.total
-            break
-        case 390:
-        case 391:
-        case 392:
-        case 393:
-        case 394:
+        case 390: // 15
             row.income = srcRow.incomeSum
+            break
+        case 391: // 16
+            row.income = srcRow.price
+            break
+        case 392: // 17
+            row.income = srcRow.price
+            break
+        case 393: // 18
+            row.income = srcRow.priceOne
+            break
+        case 394: // 19
+            row.income = srcRow.outcomeSum
             break
     }
 
@@ -491,32 +523,45 @@ def buildRow(def srcRow, def type) {
 
     // Графа 20
     switch (type.id) {
-        case 376:
+        case 376: // 1
             row.outcome = srcRow.outcomeBankSum
             break
-        case 377:
+        case 377: // 2
             row.outcome = srcRow.bankSum
             break
-        case 375:
+        case 375: // 3
             row.outcome = srcRow.expensesSum
             break
-        case 380:
-        case 397:
-        case 402:
-        case 401:
+        case 380: // 5
+        case 397: // 20
+        case 402: // 23
+        case 401: // 24
             row.outcome = srcRow.sum
             break
-        case 390:
-        case 391:
-        case 394:
-        case 403:
+        case 381: // 6
+        case 390: // 15
+        case 403: // 25
             row.outcome = srcRow.outcomeSum
             break
-        case 392:
-        case 393:
-            row.outcome = srcRow.consumptionSum
+        case 383: // 8
+            row.outcome = srcRow.percentConsumptionSum
             break
-        case 399:
+        case 384: // 9
+            row.outcome = srcRow.transactionSumRub
+            break
+        case 391: // 16
+            row.outcome = srcRow.price
+            break
+        case 392: // 17
+            row.outcome = srcRow.price
+            break
+        case 393: // 18
+            row.outcome = srcRow.priceOne
+            break
+        case 394: // 19
+            row.outcome = srcRow.incomeSum
+            break
+        case 399: // 22
             row.outcome = srcRow.bankIncomeSum
             break
     }
@@ -542,68 +587,97 @@ def buildRow(def srcRow, def type) {
 
     // Графа 24
     switch (type.id) {
-        case 376:
-            row.dealSubjectName = 'Предоставление в аренду нежилых помещений'
+        case 376: // 1
+            if (srcRow.incomeBankSum != null) {
+                row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
+            } else if (srcRow.outcomeBankSum != null) {
+                row.dealSubjectName = 'Получение помещений в аренду (субаренду)'
+            }
             break
-        case 377:
-            row.dealSubjectName = 'Оказание услуг по техническому обслуживанию'
+        case 377: // 2
+            row.dealSubjectName = 'Услуги, связанные с обслуживанием недвижимости'
             break
-        case 375:
-            row.dealSubjectName = 'Информационно-технологические услуги'
+        case 375: // 3
+            row.dealSubjectName = 'Услуги по разработке, внедрению и модификации программного обеспечения'
             break
-        case 379:
-            row.dealSubjectName = 'Предоставление прав пользования торговым знаком'
+        case 379: // 4
+            row.dealSubjectName = 'Услуги по предоставлению права пользования товарным знаком'
             break
-        case 380:
-            row.dealSubjectName = 'Приобретение услуг по организации и проведению торгов по реализации имущества'
+        case 380: // 5
+            row.dealSubjectName = 'Приобретение услуг, связанных с организацией и проведением торгов по реализации имущества'
             break
-        case 381:
-            row.dealSubjectName = 'Купля-продажа ценных бумаг'
+        case 381: // 6
+            def String out = (getRecRPCId().equals(srcRow.dealSign) ? "" : "вне")
+            if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
+                row.dealSubjectName = "Покупка акций и долей - " + out + "биржевые сделки"
+            } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
+                row.dealSubjectName = "Продажа акций и долей - " + out + "биржевые сделки"
+            }
             break
-        case 382:
-        case 384:
+        case 382: // 7
             row.dealSubjectName = 'Оказание банковских услуг'
             break
-        case 383:
-            row.dealSubjectName = 'РЕПО'
+        case 383: // 8
+            def String out = (getRecDealsModeId().equals(srcRow.dealsMode) ? "" : "вне")
+            if (srcRow.percentIncomeSum != null) {
+                row.dealSubjectName = "Операции РЕПО - " + out + "биржевые (процентный доход)"
+            } else if (srcRow.percentConsumptionSum != null) {
+                row.dealSubjectName = "Операции РЕПО - " + out + "биржевые (процентный расход)"
+            }
             break
-        case 385:
-            row.dealSubjectName = 'Уступка прав требования по кредитным договорам'
+        case 384: // 9
+            def String out = (getRecDealsModeId().equals(srcRow.transactionMode) ? "" : "вне")
+            if (getRecBuyId().equals(srcRow.transactionType)) {
+                row.dealSubjectName = "Покупка ЦБ - " + out + "биржевые сделки"
+            } else if (getRecSellId().equals(srcRow.transactionType)) {
+                row.dealSubjectName = "Продажа ЦБ - " + out + "биржевые сделки"
+            }
             break
-        case 386:
-        case 388:
-            row.dealSubjectName = 'Предоставление банковских гарантий и иных аналогичных инструментов'
+        case 385: // 10
+            row.dealSubjectName = 'Уступка прав требования - с обязательной оценкой'
             break
-        case 387:
-        case 389:
-            row.dealSubjectName = 'Предоставление денежных средств на условиях возвратности, платности, срочности'
+        case 386: // 11
+            row.dealSubjectName = 'открытие аккредитивов и инструментов торгового финансирования'
             break
-        case 390:
-            row.dealSubjectName = 'Операции с иностранной валютой'
+        case 387: // 12
+            row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
             break
-        case 391:
-        case 392:
-            row.dealSubjectName = 'Операции с производными финансовыми инструментами'
+        case 388: // 13
+            row.dealSubjectName = 'Выдача гарантий (открытие аккредитивов и инструментов торгового финансирования)'
             break
-        case 393:
-        case 394:
-            row.dealSubjectName = 'Купля-продажа драгоценного металла'
+        case 389: // 14
+            row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
             break
-        case 397:
+        case 390: // 15
+            if (srcRow.incomeSum != null) {
+                row.dealSubjectName = 'Кассовые конверсионные сделки - доходные'
+            } else if (srcRow.outcomeSum != null) {
+                row.dealSubjectName = 'Кассовые конверсионные сделки - расходные'
+            }
+            break
+        case 391: // 16
+        case 392: // 17
+        case 393: // 18
+        case 394: // 19
+            // расчитывается дальше для группы
+            break
+        case 397: // 20
             row.dealSubjectName = 'Привлечение денежных средств'
             break
-        case 398:
+        case 398: // 21
             row.dealSubjectName = 'Предоставление лицензий на программное обеспечение'
             break
-        case 402:
+        case 399: // 22
+            row.dealSubjectName = getRefBookValue(13, srcRow.serviceName)?.NAME?.stringValue
+            break
+        case 402: // 23
             row.dealSubjectName = 'Привлечение денежных средств в межбанковские кредиты'
             break
-        case 401:
-        case 403:
-            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и другиг инструментов торгового финансирования)'
+        case 401: // 24
+            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
             break
-        case 399:
-            // TODO [13/03/14 12:57:03] Евгений Ломоносов: тут ждем ответа от заказчика
+        case 403: // 25
+            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
             break
     }
 
@@ -1112,6 +1186,7 @@ def buildRow(def srcRow, def type) {
     return row
 }
 
+// определение класса строки по типу формы
 def Long getReportClass(def formTypeId) {
     switch (formTypeId) {
         case 376:
@@ -1124,100 +1199,81 @@ def Long getReportClass(def formTypeId) {
         case 399:
             return 1
         case 375:
-            // TODO ?
             return 3
         case 379:
         case 387:
         case 398:
             return 4
         default:
-            // TODO чем отличается от 1?
             return 2
     }
 }
 
-def String getGroupId(def row, def srcRow) {
+// значение для группировки строки (табл. 86)
+def String getGroupId(def matrixRow, def srcRow) {
     def StringBuilder group = new StringBuilder()
-    group.append(row.dealNum1).append("#")
-            .append(row.organName).append("#")
-            .append(row.contractDate).append("#")
-            .append(row.contractNum).append("#")
-    switch (row.dealNum1) {
-        case 376:
-            // 1
+    group.append(matrixRow.dealNum1).append("#")
+            .append(matrixRow.organName).append("#")
+            .append(matrixRow.contractDate).append("#")
+            .append(matrixRow.contractNum).append("#")
+    switch (matrixRow.dealNum1) {
+        case 376: // 1
             group.append(srcRow.incomeBankSum != null).append("#")
             group.append(srcRow.outcomeBankSum != null)
             break
-        case 381:
-            // 6
+        case 381: // 6
             group.append(getRecRPCId().equals(srcRow.dealSign)).append("#")
             group.append((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0).append("#")
             group.append((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0)
             break
-        case 383:
-            // 8
+        case 383: // 8
             group.append(getRecDealsModeId().equals(srcRow.dealsMode)).append("#")
             group.append(srcRow.percentIncomeSum != null).append("#")
             group.append(srcRow.percentConsumptionSum != null)
             break
-        case 384:
-            // 9
+        case 384: // 9
             group.append(getRecDealsModeId().equals(srcRow.transactionMode)).append("#")
             group.append(getRecBuyId().equals(srcRow.transactionType)).append("#")
             group.append(getRecSellId().equals(srcRow.transactionType))
             break
-        case 390:
-            // 15
+        case 390: // 15
             group.append(srcRow.currencyCode).append("#")
             group.append(srcRow.incomeSum).append("#")
             group.append(srcRow.outcomeSum)
             break
-        case 391:
-            // 16
+        case 391: // 16
             group.append(srcRow.currencyCode).append("#")
             group.append(srcRow.dealType).append("#")
             group.append((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) > 0)
             break
-        case 392:
-            // 17
+        case 392: // 17
             group.append(srcRow.transactionType).append("#")
             group.append((srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0) > 0)
             break
-        case 393:
-            // 18
+        case 393: // 18
             group.append(srcRow.innerCode).append("#")
             group.append(srcRow.dealType).append("#")
             group.append((srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0) > 0)
             break
-        case 394:
-            // 19
+        case 394: // 19
             group.append(srcRow.metalName).append("#")
             group.append(srcRow.dealFocus).append("#")
             group.append((srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0) > 0)
-        case 399:
-            // 22
-            group.append(srcRow.serviceName).append("#")
-            group.append(srcRow.dealFocus)
+            break
+        case 399: // 22
+            group.append(srcRow.serviceName)
             break
     }
     return group.toString()
 }
 
+// получение строки итогового отчета на основании группы строк (или одной строки) из "матрицы" и источника (табл. 87)
 def getRow(def map) {
     // для отчетов 16..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        switch (matrixRow.dealNum1) {
-            case 391:
-            case 394:
-                // 16 и 19
-                totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
-                break
-            case 392:
-            case 393:
-                // 17 и 18
-                totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
-                break
+        if(matrixRow.dealNum1 in [391,394,392,393]){
+            totalSum = matrixRow.income - matrixRow.outcome
         }
     }
 
@@ -1228,16 +1284,22 @@ def getRow(def map) {
         if (first) {
             first = false
             // Копируем значения из матрицы по всем графам
+            // TODO или алгоритм заполнения из матрицы вызывать сдесь?
             row.setAlias(matrixRow.getAlias())
             row.each { alias, value ->
                 row.getCell(alias).setValue(matrixRow.getCell(alias).value, null)
             }
             // обнуление сумм, которые расчитываем далее
-            row.income = null
-            row.outcome = null
+            row.income = 0
+            row.outcome = 0
 
-            // TODO перенести общие для группы графы сюда под свой свитч?
-            // (row.dealNameCode, row.taxpayerSideCode, row.dealSubjectName, row.similarDealGroup)
+            if (matrixRow.dealNum1.equals(375)) {
+                if (map.size > 1) {
+                    row.similarDealGroup = getRecYesId()
+                } else {
+                    row.similarDealGroup = getRecNoId()
+                }
+            }
         }
 
         // Атрибут «п. 150 "Дата совершения сделки (цифрами день, месяц, год)"» всегда расчитывавется одинакого
@@ -1245,166 +1307,51 @@ def getRow(def map) {
             row.dealDoneDate = matrixRow.dealDoneDate
         }
 
-        // TODO подумать о суммах (income, outcome) и дате (dealDoneDate) для "класс 4" - зачем расчеты, если по одной строке всегда?
         switch (matrixRow.dealNum1) {
-            case 376:
-                // 1
-                if (srcRow.incomeBankSum != null) {
-                    row.income = (row.income ?: 0) + srcRow.incomeBankSum
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "004")
-                    row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
-                } else if (srcRow.outcomeBankSum != null) {
-                    row.outcome = (row.outcome ?: 0) + srcRow.outcomeBankSum
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "003")
-                    row.dealSubjectName = 'Получение помещений в аренду (субаренду)'
-                }
-                row.dealNameCode = getRecordId(67, 'CODE', "002")
-
-                row.similarDealGroup = getRecYesId()
-                break
-            case 377:
-                // 2
-                row.outcome = (row.outcome ?: 0) + (srcRow.bankSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "019")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
-                row.dealSubjectName = 'Услуги, связанные с обслуживанием недвижимости'
-                row.similarDealGroup = getRecYesId()
-                break
-            case 375:
-                // 3
-                row.outcome = (row.outcome ?: 0) + (srcRow.expensesSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "019")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
-                row.dealSubjectName = 'Услуги по разработке, внедрению и модификации программного обеспечения'
-                if (map.size > 1) {
-                    row.similarDealGroup = getRecYesId()
-                } else {
-                    row.similarDealGroup = getRecNoId()
+            case 376: // 1
+            case 383: // 8
+            case 390: // 15
+                if (matrixRow.income != null) {
+                    row.income = row.income + matrixRow.income
+                } else if (matrixRow.outcome != null) {
+                    row.outcome = row.outcome + matrixRow.outcome
                 }
                 break
-            case 379:
-                // 4
-                row.income = (row.income ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "016")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "028")
-                row.dealSubjectName = 'Услуги по предоставлению права пользования товарным знаком'
-                row.similarDealGroup = getRecNoId()
+            case 377: // 2
+            case 375: // 3
+            case 380: // 5
+            case 397: // 20
+            case 398: // 21
+            case 399: // 22
+            case 402: // 23
+            case 401: // 24
+            case 403: // 25
+                row.outcome = row.outcome + matrixRow.outcome
                 break
-            case 380:
-                // 5
-                row.outcome = (row.outcome ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "019")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
-                row.dealSubjectName = 'Приобретение услуг, связанных с организацией и проведением торгов по реализации имущества'
-                row.similarDealGroup = getRecYesId()
+            case 379: // 4
+            case 382: // 7
+            case 385: // 10
+            case 386: // 11
+            case 387: // 12
+            case 388: // 13
+            case 389: // 14
+                row.income = row.income + matrixRow.income
                 break
-            case 381:
-                // 6
-                def String out = (getRecRPCId().equals(srcRow.dealSign) ? "" : "вне")
+            case 381: // 6
                 if ((srcRow.incomeSum ?: 0) == 0 && (srcRow.outcomeSum ?: 0) > 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "026")
-                    row.dealSubjectName = "Покупка акций и долей - " + out + "биржевые сделки"
+                    row.outcome = row.outcome + srcRow.outcomeSum
                 } else if ((srcRow.incomeSum ?: 0) > 0 && (srcRow.outcomeSum ?: 0) == 0) {
-                    row.income = (row.income ?: 0) + (srcRow.cost ?: 0)
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "027")
-                    row.dealSubjectName = "Продажа акций и долей - " + out + "биржевые сделки"
+                    row.income = row.income + srcRow.cost
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "015")
-                row.similarDealGroup = getRecNoId()
                 break
-            case 382:
-                // 7
-                row.income = (row.income ?: 0) + (srcRow.bankIncomeSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "019")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "011")
-                row.dealSubjectName = 'Оказание банковских услуг'
-                row.similarDealGroup = getRecYesId()
-                break
-            case 383:
-                // 8
-                def String out = (getRecDealsModeId().equals(srcRow.dealsMode) ? "" : "вне")
-                if (srcRow.percentIncomeSum != null) {
-                    row.income = (row.income ?: 0) + (srcRow.percentIncomeSum ?: 0)
-                    row.dealSubjectName = "Операции РЕПО - " + out + "биржевые (процентный доход)"
-                } else if (srcRow.percentConsumptionSum != null) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.percentConsumptionSum ?: 0)
-                    row.dealSubjectName = "Операции РЕПО - " + out + "биржевые (процентный расход)"
-                }
-                row.dealNameCode = getRecordId(67, 'CODE', "032")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "052")
-                row.similarDealGroup = getRecNoId()
-                break
-            case 384:
-                // 9
-                def String out = (getRecDealsModeId().equals(srcRow.transactionMode) ? "" : "вне")
+            case 384: // 9
                 if (getRecBuyId().equals(srcRow.transactionType)) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.transactionSumRub ?: 0)
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "026")
-                    row.dealSubjectName = "Покупка ЦБ - " + out + "биржевые сделки"
+                    row.outcome = row.outcome + srcRow.transactionSumRub
                 } else if (getRecSellId().equals(srcRow.transactionType)) {
-                    row.income = (row.income ?: 0) + (srcRow.transactionSumRub ?: 0)
-                    row.taxpayerSideCode = getRecordId(65, 'CODE', "027")
-                    row.dealSubjectName = "Продажа ЦБ - " + out + "биржевые сделки"
+                    row.income = row.income + srcRow.transactionSumRub
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "015")
-                row.similarDealGroup = getRecNoId()
                 break
-            case 385:
-                // 10
-                row.income = (row.income ?: 0) + (srcRow.totalCost ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "029")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "022")
-                row.dealSubjectName = 'Уступка прав требования - с обязательной оценкой'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 386:
-                // 11
-                row.income = (row.income ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "003")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "005")
-                row.dealSubjectName = 'открытие аккредитивов и инструментов торгового финансирования'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 387:
-                // 12
-                row.income = (row.income ?: 0) + (srcRow.cost ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "012")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "022")
-                row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 388:
-                // 13
-                row.income = (row.income ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "003")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "005")
-                row.dealSubjectName = 'Выдача гарантий (открытие аккредитивов и инструментов торгового финансирования)'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 389:
-                // 14
-                row.income = (row.income ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "012")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "022")
-                row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 390:
-                // 15
-                if (srcRow.incomeSum != null) {
-                    row.income = (row.income ?: 0) + (srcRow.incomeSum ?: 0)
-                    row.dealSubjectName = 'Кассовые конверсионные сделки - доходные'
-                } else if (srcRow.outcomeSum != null) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
-                    row.dealSubjectName = 'Кассовые конверсионные сделки - расходные'
-                }
-                row.dealNameCode = getRecordId(67, 'CODE', "017")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "030")
-                row.similarDealGroup = getRecNoId()
-                break
-            case 391:
-                // 16
+            case 391: // 16
                 def String dealName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - '
                 if (totalSum >= 0) {
                     row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
@@ -1412,14 +1359,9 @@ def getRow(def map) {
                 } else {
                     row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расход'
-
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "032")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "052")
-                row.similarDealGroup = getRecNoId()
                 break
-            case 392:
-                // 17
+            case 392: // 17
                 def String dealName = 'Беспоставочные (расчетные) срочные сделки - '
                 if (totalSum >= 0) {
                     row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
@@ -1427,14 +1369,9 @@ def getRow(def map) {
                 } else {
                     row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
-
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "032")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "052")
-                row.similarDealGroup = getRecNoId()
                 break
-            case 393:
-                // 18
+            case 393: // 18
                 def String dealName = 'Срочные поставочные сделки купли-продажи драгоценных металлов (сделки с ' +
                         'отсрочкой исполнения), ' + (getRecRUSId().equals(srcRow.unitCountryCode) ? "покупка, " : "продажа, ")
                 if (totalSum >= 0) {
@@ -1444,12 +1381,8 @@ def getRow(def map) {
                     row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
                     row.dealSubjectName = dealName + 'расход'
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "015")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "052")
-                row.similarDealGroup = getRecNoId()
                 break
-            case 394:
-                // 19
+            case 394: // 19
                 def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
                 def String dealName = 'Кассовые сделки ' + (dealBuy ? "покупки " : "продажи ") + ' драгоценных металлов - '
                 if (totalSum >= 0) {
@@ -1459,57 +1392,6 @@ def getRow(def map) {
                     row.income = (row.income ?: 0) + (srcRow.outcomeSum ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
-                row.dealNameCode = getRecordId(67, 'CODE', "015")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', (dealBuy ? "026" : "027"))
-                row.similarDealGroup = getRecNoId()
-                break
-            case 397:
-                // 20
-                row.outcome = (row.outcome ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "004")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "007")
-                row.dealSubjectName = 'Привлечение денежных средств'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 398:
-                // 21
-                row.income = (row.income ?: 0) + (srcRow.bankIncomeSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "016")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "028")
-                row.dealSubjectName = 'Предоставление лицензий на программное обеспечение'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 399:
-                // 22
-                row.outcome = (row.outcome ?: 0) + (srcRow.bankIncomeSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "019")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "012")
-                row.dealSubjectName = getRefBookValue(13, srcRow.serviceName)?.NAME?.stringValue
-                row.similarDealGroup = getRecNoId()
-                break
-            case 402:
-                // 23
-                row.outcome = (row.outcome ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "012")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "020")
-                row.dealSubjectName = 'Привлечение денежных средств в межбанковские кредиты'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 401:
-                // 24
-                row.outcome = (row.outcome ?: 0) + (srcRow.sum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "003")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "002")
-                row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
-                row.similarDealGroup = getRecNoId()
-                break
-            case 403:
-                // 25
-                row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
-                row.dealNameCode = getRecordId(67, 'CODE', "003")
-                row.taxpayerSideCode = getRecordId(65, 'CODE', "002")
-                row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
-                row.similarDealGroup = getRecNoId()
                 break
         }
     }
@@ -1606,4 +1488,45 @@ def Long getRecDealSellId() {
     if (recDealSellId == null)
         recDealSellId = getRecordId(20, 'DIRECTION', 'продажа')
     return recDealSellId
+}
+
+// "Услуги в части программного обеспечения" = 1 (Услуги по разработке, внедрению, поддержке и модификации программного обеспечения)
+@Field
+def Long recSWId
+
+def Long getRecSWId() {
+    if (recSWId == null)
+        recSWId = getRecordId(11, 'CODE', '1')
+    return recSWId
+}
+
+// дополнительное условие для отчетов "класс 2" на попадание в группу
+boolean isGroupClass2(def matrixRow, def sourceRow) {
+    def boolean class2ext = false
+    class2ext = matrixRow.contractDate != null && matrixRow.contractNum != null
+    switch (row.dealNum1) {
+        case 383: // 8
+        case 392: // 17
+        case 393: // 18
+            class2ext = sourceRow.transactionNum == null && sourceRow.transactionDeliveryDate == null
+            break
+        case 384: // 9
+            // TODO номер сделки в этом отчете это какая графа?
+            // class2ext = sourceRow. == null && sourceRow.transactionDeliveryDate == null
+            break
+        case 386: // 11
+        case 389: // 14
+        case 390: // 15
+        case 391: // 16
+        case 394: // 19
+        case 402: // 23
+        case 401: // 24
+        case 403: // 25
+            class2ext = sourceRow.dealNumber == null && sourceRow.dealDate == null
+            break
+        case 388: // 13
+            class2ext = sourceRow.dealNumber == null && sourceRow.transactionDeliveryDate == null
+            break
+    }
+    return class2ext
 }
