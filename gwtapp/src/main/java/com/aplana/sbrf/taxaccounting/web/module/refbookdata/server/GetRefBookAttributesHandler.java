@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookAttributesAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookAttributesResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
@@ -23,6 +26,12 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
 
 	@Autowired
 	RefBookFactory refBookFactory;
+
+    @Autowired
+    SecurityService securityService;
+
+    @Autowired
+    DepartmentService departmentService;
 
 	public GetRefBookAttributesHandler() {
 		super(GetRefBookAttributesAction.class);
@@ -49,7 +58,23 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
             col.setFormat(attribute.getFormat());
 			columns.add(col);
 		}
-        result.setReadOnly(refBook.isReadOnly());
+
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+        if (currentUser.hasRole("ROLE_CONTROL_UNP")){ // Контроллер УНП
+            // Контроллер УНП может редактировать все справочники
+            result.setReadOnly(refBook.isReadOnly());
+        } else { // Оператор, Контролёр, Контролёр НС
+            if (currentUser.hasRole("ROLE_CONTROL_NS") && refBook.getRegionAttribute() != null){
+                /*
+                 * контролер НС может редактировать данные справочника, сделано без фильтра
+                 * так как при показе строки уже фильтруются
+                 */
+                result.setReadOnly(refBook.isReadOnly());
+            } else{  // Оператор, Контролёр не имеют прав редактирования региональных справочников
+                result.setReadOnly(true);
+            }
+        }
+
 		result.setColumns(columns);
 		return result;
 	}
