@@ -22,7 +22,10 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
@@ -34,6 +37,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     private final MyDriver driver;
+
+    private boolean isMonthly = false;
 
     @UiField
     @Path("departmentIds")
@@ -100,7 +105,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // "Вид налоговой формы" недоступен если не выбран тип НФ
         formTypeId.setEnabled(formDataKind.getValue() != null && !formDataKind.getValue().isEmpty());
         // "Месяц" недоступен если не выбран "Вид налоговой формы"
-        formMonth.setEnabled(formTypeId.getValue() != null);
+        formMonth.setEnabled(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && isMonthly);
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formMonth.getValue() != null);
     }
@@ -223,6 +228,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void setFormMonthEnabled(boolean isMonthly) {
         // Если ежемесячный, то устанавливается formMonth = true
+        this.isMonthly = isMonthly;
         formMonth.setEnabled(isMonthly);
         // Кнопка "Создать" пока неактивна
         if (isMonthly) {

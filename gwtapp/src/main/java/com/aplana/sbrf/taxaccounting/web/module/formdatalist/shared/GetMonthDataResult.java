@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 
-import com.aplana.gwt.client.Month;
 import com.aplana.sbrf.taxaccounting.model.Months;
 import com.gwtplatform.dispatch.shared.Result;
 
