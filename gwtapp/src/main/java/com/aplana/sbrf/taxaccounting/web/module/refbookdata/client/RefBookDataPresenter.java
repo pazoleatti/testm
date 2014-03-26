@@ -51,7 +51,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     private Long recordId;
     private Integer page;
-    private boolean editMode;
+    private FormMode mode;
 
 	EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
@@ -76,16 +76,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void setReadOnlyMode(boolean readOnly);
         public int getPage();
         public void setPage(int page);
-        /** Показ формы в режиме редактирования */
-        public void setEditMode();
-        /** Показ формы в режиме просмотра */
-        public void setDefaultMode();
-        /** установить видимость кнопки редактирования */
-        public void setVisibleEditLink(boolean visible);
         /** Метод для получения строки с поля фильтрации*/
         String getSearchPattern();
         /** Сброс значения поля поиска */
         void resetSearchInputBox();
+        /** Обновление вьюшки для определенного состояния */
+        void updateMode(FormMode mode);
     }
 
 	@Inject
@@ -153,7 +149,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     });
                                 }
 								editFormPresenter.show(null);
-								editFormPresenter.setEnabled(false);
+								editFormPresenter.setMode(mode);
 								getView().updateTable();
 							}
 						}, this));
@@ -178,7 +174,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		getView().updateTable();
 		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
 		editFormPresenter.show(null);
-		editFormPresenter.setEnabled(false);
+		editFormPresenter.setMode(mode);
 	}
 
     @Override
@@ -201,8 +197,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         } else {
             recordId = null;
             page = null;
-            onSetDefaultMode();
             getView().resetSearchInputBox();
+            setMode(FormMode.VIEW);
         }
 		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
@@ -213,9 +209,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                getView().setVisibleEditLink(!result.isReadOnly() && !editMode);
-                                getView().setReadOnlyMode(!(editMode && !result.isReadOnly()));
-								editFormPresenter.init(refBookDataId, result.isReadOnly());
+                                if (result.isReadOnly()){
+                                    setMode(FormMode.READ);
+                                }
+                                editFormPresenter.init(refBookDataId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}
 						}, this));
@@ -275,20 +272,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         return true;
     }
 
-
     @Override
-    public void onSetEditMode(){
-        editMode = true;
-        getView().setEditMode();
-        editFormPresenter.onSetEditMode();
-        versionPresenter.onSetEditMode();
-    }
-
-    @Override
-    public void onSetDefaultMode(){
-        editMode = false;
-        getView().setDefaultMode();
-        editFormPresenter.onSetDefaultMode();
-        versionPresenter.onSetDefaultMode();
+    public void setMode(FormMode mode) {
+        this.mode = mode;
+        editFormPresenter.setMode(mode);
+        versionPresenter.setMode(mode);
+        getView().updateMode(mode);
     }
 }
