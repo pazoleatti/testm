@@ -277,6 +277,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
     @Override
+    public int getDeclarationId() {
+        return declarationTemplate.getId() != null ? declarationTemplate.getId() : 0;
+    }
+
+    @Override
     protected void onBind() {
         super.onBind();
         ValueChangeHandler<String> declarationValueChangeHandler = new ValueChangeHandler<String>() {
