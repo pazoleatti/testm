@@ -173,7 +173,7 @@ void consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() == null) {
-                    def matrixRow = buildRow(srcRow, source.formType)
+                    def matrixRow = getPreRow(srcRow, source.formType.id)
 
                     // идентификатор для группировки
                     String group = getGroupId(matrixRow, srcRow)
@@ -188,9 +188,6 @@ void consolidation() {
             }
         }
     }
-
-    // "1" для графы 8 отчета 3
-    //def Long serviceType1 = getRecordId(11, 'CODE', '1')
 
     // итоговые строки (всё то, что в итоге попадет в сводный отчет)
     def summaryRows = []
@@ -237,23 +234,15 @@ void consolidation() {
     dataRowHelper.save(summaryRows)
 }
 
-// Подготовка строки сводного отчета
-// из первичных и консолидированных отчетов модуля МУКС (табл. 85)
-def buildRow(def srcRow, def type) {
+// Строка сводного отчета из первичных и консолидированных отчетов модуля МУКС (табл. 85)
+def buildRow(def srcRow, def BigDecimal formTypeId) {
+    def row = formData.createDataRow()
+
     // Общие значения
     // "Да"
     def Long recYesId = getRecYesId()
     // "Нет"
     def Long recNoId = getRecNoId()
-
-    def row = formData.createDataRow()
-    // Временный алиас строки
-    row.setAlias("group_$type.id")
-
-    // тип отчета
-    row.dealNum1 = type.id
-    // класс отчет
-    row.dealNum2 = getReportClass(type.id)
 
     // Графа 2
     row.interdependenceSing = getRecordId(69, 'CODE', '1')
@@ -286,7 +275,7 @@ def buildRow(def srcRow, def type) {
     row.f135 = recNoId
 
     // Графа 12
-    switch (type.id) {
+    switch (formTypeId) {
         case 376: // 1
         case 377: // 2
         case 380: // 5
@@ -322,7 +311,7 @@ def buildRow(def srcRow, def type) {
 
     // Графа 13
     def String val13 = null
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
             val13 = '002'
             break
@@ -375,7 +364,7 @@ def buildRow(def srcRow, def type) {
 
     // Графа 14
     def String val14 = null
-    switch (type.id) {
+    switch (formTypeId) {
         case 376: // 1
             if (srcRow.incomeBankSum != null) {
                 val14 = '004'
@@ -453,7 +442,7 @@ def buildRow(def srcRow, def type) {
 
     // Графа 16
     def int val16 = 0
-    switch (type.id) {
+    switch (formTypeId) {
         case 385:
             val16 = 3
             break
@@ -473,106 +462,16 @@ def buildRow(def srcRow, def type) {
     row.dealMemberCount = 2
 
     // Графа 18
-    switch (type.id) {
-        case 376: // 1
-            row.income = srcRow.incomeBankSum
-            break
-        case 379: // 4
-        case 386: // 11
-        case 388: // 13
-        case 389: // 14
-            row.income = srcRow.sum
-            break
-        case 381: // 6
-        case 387: // 12
-            row.income = srcRow.cost
-            break
-        case 382: // 7
-        case 398: // 21
-            row.income = srcRow.bankIncomeSum
-            break
-        case 383: // 8
-            row.income = srcRow.percentIncomeSum
-            break
-        case 384: // 9
-            row.income = srcRow.transactionSumRub
-            break
-        case 385: // 10
-            row.income = srcRow.totalCost
-            break
-        case 390: // 15
-            row.income = srcRow.incomeSum
-            break
-        case 391: // 16
-            row.income = srcRow.price
-            break
-        case 392: // 17
-            row.income = srcRow.price
-            break
-        case 393: // 18
-            row.income = srcRow.priceOne
-            break
-        case 394: // 19
-            row.income = srcRow.outcomeSum
-            break
-    }
-
-    if (row.income == null) {
-        row.income = 0
-    }
+    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    row.income = 0
 
     // Графа 20
-    switch (type.id) {
-        case 376: // 1
-            row.outcome = srcRow.outcomeBankSum
-            break
-        case 377: // 2
-            row.outcome = srcRow.bankSum
-            break
-        case 375: // 3
-            row.outcome = srcRow.expensesSum
-            break
-        case 380: // 5
-        case 397: // 20
-        case 402: // 23
-        case 401: // 24
-            row.outcome = srcRow.sum
-            break
-        case 381: // 6
-        case 390: // 15
-        case 403: // 25
-            row.outcome = srcRow.outcomeSum
-            break
-        case 383: // 8
-            row.outcome = srcRow.percentConsumptionSum
-            break
-        case 384: // 9
-            row.outcome = srcRow.transactionSumRub
-            break
-        case 391: // 16
-            row.outcome = srcRow.price
-            break
-        case 392: // 17
-            row.outcome = srcRow.price
-            break
-        case 393: // 18
-            row.outcome = srcRow.priceOne
-            break
-        case 394: // 19
-            row.outcome = srcRow.incomeSum
-            break
-        case 399: // 22
-            row.outcome = srcRow.bankIncomeSum
-            break
-    }
-
-    if (row.outcome == null) {
-        row.outcome = 0
-    }
+    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    row.outcome = 0
 
     // Графа 23
     def int val23 = 2
-    switch (type.id) {
+    switch (formTypeId) {
         case 379:
         case 385:
             val23 = 3
@@ -586,7 +485,7 @@ def buildRow(def srcRow, def type) {
     row.dealType = getRecordId(64, 'CODE', "$val23")
 
     // Графа 24
-    switch (type.id) {
+    switch (formTypeId) {
         case 376: // 1
             if (srcRow.incomeBankSum != null) {
                 row.dealSubjectName = 'Предоставление помещений в аренду (субаренду)'
@@ -683,7 +582,7 @@ def buildRow(def srcRow, def type) {
 
     // Графа 26
     def val26 = null
-    switch (type.id) {
+    switch (formTypeId) {
         case 393:
             val26 = srcRow.innerCode
             break
@@ -709,7 +608,7 @@ def buildRow(def srcRow, def type) {
 
     // Графа 27
     def String val27 = null
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
             val27 = '70.20.2'
             break
@@ -721,7 +620,8 @@ def buildRow(def srcRow, def type) {
             break
         case 379:
         case 380:
-            val27 = '74.8'
+            // TODO SBRFACCTAX-6488 (val27 = '74.8')
+            val27 = '72.20'
             break
         case 381:
         case 384:
@@ -753,7 +653,7 @@ def buildRow(def srcRow, def type) {
     row.otherNum = 1
 
     // Графа 29
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
         case 382:
@@ -782,7 +682,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 30
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
         case 382:
@@ -816,7 +716,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 31
-    switch (type.id) {
+    switch (formTypeId) {
         case 393:
             row.countryCode = srcRow.unitCountryCode
             break
@@ -826,19 +726,19 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 32, Графа 33, Графа 34, Графа 35
-    if (type.id == 393 || type.id == 394) {
-        sign32 = type.id == 393 ? srcRow.signPhis : srcRow.deliverySign
+    if (formTypeId == 393 || formTypeId == 394) {
+        sign32 = formTypeId == 393 ? srcRow.signPhis : srcRow.deliverySign
         if (sign32 != null) {
             def values32 = getRefBookValue(18, sign32)
             if (values32 != null && values32.SIGN.stringValue.equals("Физическая поставка")) {
-                if (type.id == 393) {
+                if (formTypeId == 393) {
                     row.countryCode1 = srcRow.countryCode2
                     row.region1 = srcRow.region1
                     row.city1 = srcRow.city1
                     row.locality1 = srcRow.settlement1
                 }
 
-                if (type.id == 394) {
+                if (formTypeId == 394) {
                     row.countryCode1 = srcRow.countryCodeNumeric
                     row.region1 = srcRow.regionCode
                     row.city1 = srcRow.city
@@ -849,7 +749,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 36, Графа 37, Графа 38, Графа 39
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
             row.countryCode2 = srcRow.country
@@ -878,19 +778,19 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 40
-    if (type.id == 393) {
+    if (formTypeId == 393) {
         row.deliveryCode = srcRow.conditionCode
     }
-    if (type.id == 394) {
+    if (formTypeId == 394) {
         row.deliveryCode = srcRow.deliveryCode
     }
 
     // Графа 41
-    if (type.id == 381 || type.id == 385) {
+    if (formTypeId == 381 || formTypeId == 385) {
         row.okeiCode = srcRow.okeiCode
     } else {
         def String val41 = null
-        switch (type.id) {
+        switch (formTypeId) {
             case 376:
             case 377:
                 val41 = '055'
@@ -925,7 +825,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 42
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
         case 381:
@@ -945,7 +845,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 43
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
         case 375:
@@ -980,7 +880,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 44
-    switch (type.id) {
+    switch (formTypeId) {
         case 375:
         case 376:
         case 377:
@@ -1024,49 +924,13 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 45
-    switch (type.id) {
-        case 376:
-        case 377:
-        case 382:
-        case 383:
-        case 385:
-        case 392:
-        case 393:
-        case 398:
-        case 399:
-            row.dealDoneDate = srcRow.transactionDate
-            break
-        case 375:
-        case 379:
-        case 381:
-        case 387:
-        case 397:
-            row.dealDoneDate = srcRow.dealDate
-            break
-        case 380:
-            row.dealDoneDate = srcRow.date
-            break
-        case 386:
-        case 388:
-        case 389:
-        case 390:
-        case 391:
-        case 394:
-        case 402:
-        case 401:
-        case 403:
-            row.dealDoneDate = srcRow.dealDoneDate
-            break
-        case 384:
-            row.dealDoneDate = srcRow.transactionDeliveryDate
-            break
-    }
+    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
 
     // Графа 47
     row.dealMemberNum = row.otherNum
 
     // Графа 49
-    switch (type.id) {
+    switch (formTypeId) {
         case 382:
         case 383:
         case 385:
@@ -1103,7 +967,7 @@ def buildRow(def srcRow, def type) {
     }
 
     // Графа 50
-    switch (type.id) {
+    switch (formTypeId) {
         case 376:
         case 377:
         case 382:
@@ -1187,7 +1051,7 @@ def buildRow(def srcRow, def type) {
 }
 
 // определение класса строки по типу формы
-def Long getReportClass(def formTypeId) {
+def Long getReportClass(def BigDecimal formTypeId) {
     switch (formTypeId) {
         case 376:
         case 377:
@@ -1283,15 +1147,7 @@ def getRow(def map) {
 
         if (first) {
             first = false
-            // Копируем значения из матрицы по всем графам
-            // TODO или алгоритм заполнения из матрицы вызывать сдесь?
-            row.setAlias(matrixRow.getAlias())
-            row.each { alias, value ->
-                row.getCell(alias).setValue(matrixRow.getCell(alias).value, null)
-            }
-            // обнуление сумм, которые расчитываем далее
-            row.income = 0
-            row.outcome = 0
+            row = buildRow(srcRow, matrixRow.dealNum1)
 
             if (matrixRow.dealNum1.equals(375)) {
                 if (map.size > 1) {
@@ -1529,4 +1385,153 @@ boolean isGroupClass2(def matrixRow, def sourceRow) {
             break
     }
     return class2ext
+}
+
+// Заполняем каждую строку полученную из источника необходимыми предварительными значениями
+def getPreRow(def srcRow, def BigDecimal formTypeId) {
+    def row = formData.createDataRow()
+    // Временный алиас строки
+    row.setAlias("group_$formTypeId")
+    // тип отчета
+    row.dealNum1 = formTypeId
+    // класс отчет
+    row.dealNum2 = getReportClass(formTypeId)
+
+    // Графа 18
+    switch (formTypeId) {
+        case 376: // 1
+            row.income = srcRow.incomeBankSum
+            break
+        case 379: // 4
+        case 386: // 11
+        case 388: // 13
+        case 389: // 14
+            row.income = srcRow.sum
+            break
+        case 381: // 6
+        case 387: // 12
+            row.income = srcRow.cost
+            break
+        case 382: // 7
+        case 398: // 21
+            row.income = srcRow.bankIncomeSum
+            break
+        case 383: // 8
+            row.income = srcRow.percentIncomeSum
+            break
+        case 384: // 9
+            row.income = srcRow.transactionSumRub
+            break
+        case 385: // 10
+            row.income = srcRow.totalCost
+            break
+        case 390: // 15
+            row.income = srcRow.incomeSum
+            break
+        case 391: // 16
+            row.income = srcRow.price
+            break
+        case 392: // 17
+            row.income = srcRow.price
+            break
+        case 393: // 18
+            row.income = srcRow.priceOne
+            break
+        case 394: // 19
+            row.income = srcRow.outcomeSum
+            break
+    }
+    if (row.income == null) {
+        row.income = 0
+    }
+
+    // Графа 20
+    switch (formTypeId) {
+        case 376: // 1
+            row.outcome = srcRow.outcomeBankSum
+            break
+        case 377: // 2
+            row.outcome = srcRow.bankSum
+            break
+        case 375: // 3
+            row.outcome = srcRow.expensesSum
+            break
+        case 380: // 5
+        case 397: // 20
+        case 402: // 23
+        case 401: // 24
+            row.outcome = srcRow.sum
+            break
+        case 381: // 6
+        case 390: // 15
+        case 403: // 25
+            row.outcome = srcRow.outcomeSum
+            break
+        case 383: // 8
+            row.outcome = srcRow.percentConsumptionSum
+            break
+        case 384: // 9
+            row.outcome = srcRow.transactionSumRub
+            break
+        case 391: // 16
+            row.outcome = srcRow.price
+            break
+        case 392: // 17
+            row.outcome = srcRow.price
+            break
+        case 393: // 18
+            row.outcome = srcRow.priceOne
+            break
+        case 394: // 19
+            row.outcome = srcRow.incomeSum
+            break
+        case 399: // 22
+            row.outcome = srcRow.bankIncomeSum
+            break
+    }
+    if (row.outcome == null) {
+        row.outcome = 0
+    }
+
+    // Графа 45
+    // заполняется предварительно для каждой строки
+    switch (formTypeId) {
+        case 376:
+        case 377:
+        case 382:
+        case 383:
+        case 385:
+        case 392:
+        case 393:
+        case 398:
+        case 399:
+            row.dealDoneDate = srcRow.transactionDate
+            break
+        case 375:
+        case 379:
+        case 381:
+        case 387:
+        case 397:
+            row.dealDoneDate = srcRow.dealDate
+            break
+        case 380:
+            row.dealDoneDate = srcRow.date
+            break
+        case 386:
+        case 388:
+        case 389:
+        case 390:
+        case 391:
+        case 394:
+        case 402:
+        case 401:
+        case 403:
+            row.dealDoneDate = srcRow.dealDoneDate
+            break
+        case 384:
+            row.dealDoneDate = srcRow.transactionDeliveryDate
+            break
+    }
+
+    return row
 }
