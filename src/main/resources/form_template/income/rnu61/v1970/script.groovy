@@ -229,42 +229,20 @@ def BigDecimal calc13(def DataRow<Cell> row) {
             if (row.paymentEnd > row.creationDate) {
                 c3.set(Calendar.DAY_OF_MONTH, 31)
                 c3.set(Calendar.MONTH, 12)
-                t1 = TimeCategory.minus(c3.getTime(), row.creationDate)
+                t1 = TimeCategory.minus(c3.getTime(), row.creationDate).getDays()
                 c9.set(Calendar.DAY_OF_MONTH, 1)
                 c9.set(Calendar.MONTH, 1)
-                t2 = TimeCategory.minus(row.paymentEnd, c3.getTime())
+                t2 = TimeCategory.minus(row.paymentEnd, c3.getTime()).getDays()
             } else {
                 c9.set(Calendar.DAY_OF_MONTH, 31)
                 c9.set(Calendar.MONTH, 12)
-                t1 = TimeCategory.minus(row.creationDate, c9.getTime())
+                t1 = TimeCategory.minus(row.creationDate, c9.getTime()).getDays()
                 c3.set(Calendar.DAY_OF_MONTH, 1)
                 c3.set(Calendar.MONTH, 1)
-                t2 = TimeCategory.minus(c9.getTime(), row.paymentEnd)
+                t2 = TimeCategory.minus(c9.getTime(), row.paymentEnd).getDays()
             }
         }
     }
-
-    println("daysOfYear3 = " + daysOfYear3)
-    println("daysOfYear9 = " + daysOfYear9)
-    println("diffYear = " + diffYear)
-    println("t1 = " + t1)
-    println("t2 = " + t2)
-
-//    * графа 1  - rowNumber
-//    * графа 2  - billNumber
-//    * графа 3  - creationDate
-//    * графа 4  - nominal
-//    * графа 5  - currencyCode
-//    * графа 6  - rateBRBill
-//    * графа 7  - rateBROperation
-//    * графа 8  - paymentStart
-//    * графа 9  - paymentEnd
-//    * графа 10 - interestRate
-//    * графа 11 - operationDate
-//    * графа 12 - sum70606
-//    * графа 13 - sumLimit
-//    * графа 14 - percAdjustment
-
     // Если «Графа 3» и «Графа 9» принадлежат разным годам
     // и продолжительность каждого года разная (в одном 365 дней, в другом 366)
     if (daysOfYear3 != null && daysOfYear9 != null && diffYear && daysOfYear3 != daysOfYear9) {
@@ -274,11 +252,11 @@ def BigDecimal calc13(def DataRow<Cell> row) {
         if (daysOfYear3 == 365) {
             // Если первый год содержит 365 дней
             // «Графа 13» = («Графа 4» * «Графа 10» * ( T1 - 1)) / 365*100 +(«Графа 4» * «Графа 10» * T2) / 366*100
-            return (row.nominal * row.interestRate * (t1 - 1)) / 36500 + (row.nominal * row.interestRate * t2 / 36600)
+            return ((row.nominal * row.interestRate * (t1 - 1)) / 36500 + (row.nominal * row.interestRate * t2 / 36600)).setScale(2, RoundingMode.HALF_UP)
         } else {
             // Если первый год содержит 366 дней
             // «Графа 13» = («Графа 4» * «Графы 10» * ( T2 - 1)) / 365*100 +(«Графа 4» * «Графы 10» * T1) / 365*100
-            return (row.nominal * row.interestRate * (t2 - 1)) / 36500 + (row.nominal * row.interestRate * t1 / 36500)
+            return ((row.nominal * row.interestRate * (t2 - 1)) / 36500 + (row.nominal * row.interestRate * t1 / 36500)).setScale(2, RoundingMode.HALF_UP)
         }
     } else {
         if (row.sum70606 == null && isRubleCurrency(row.currencyCode)) {
@@ -296,8 +274,8 @@ def BigDecimal calc13(def DataRow<Cell> row) {
                 // TODO Уточнить выражение http://jira.aplana.com/browse/SBRFACCTAX-2358
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 11» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
-                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.operationDate, row.creationDate) / 365)
-                        .setScale(2, RoundingMode.HALF_UP) * row.rateBROperation
+                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.operationDate, row.creationDate).getDays() / 365 * row.rateBROperation)
+                        .setScale(2, RoundingMode.HALF_UP)
 
             } else if (row.paymentEnd < row.operationDate) {
                 // Если «Графа 11» > «графы 9»
@@ -309,8 +287,8 @@ def BigDecimal calc13(def DataRow<Cell> row) {
                 // TODO Уточнить выражение http://jira.aplana.com/browse/SBRFACCTAX-2358
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 9» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
-                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.paymentEnd, row.creationDate) / 365)
-                        .setScale(2, RoundingMode.HALF_UP) * row.rateBROperation
+                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.paymentEnd, row.creationDate).getDays() / 365 * row.rateBROperation)
+                        .setScale(2, RoundingMode.HALF_UP)
             }
         }
     }
