@@ -227,19 +227,21 @@ public class FormDataServiceImpl implements FormDataService {
 		formData.setReportPeriodId(reportPeriodId);
         formData.setPeriodOrder(periodOrder);
 
-        Integer prevReportPeriodId = reportPeriodService.getPrevReportPeriod(reportPeriodId).getId();
-        FormData formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriodId);
-        if (formDataOld != null) {
-            List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
-            List<FormDataSigner> signerOld = formDataOld.getSigners();
-            for(FormDataSigner formDataSignerOld: signerOld) {
-                FormDataSigner formDataSigner = new FormDataSigner();
-                formDataSigner.setName(formDataSignerOld.getName());
-                formDataSigner.setPosition(formDataSignerOld.getPosition());
-                signer.add(formDataSigner);
+        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
+        if (prevReportPeriod != null) {
+            FormData formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
+            if (formDataOld != null) {
+                List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
+                List<FormDataSigner> signerOld = formDataOld.getSigners();
+                for(FormDataSigner formDataSignerOld: signerOld) {
+                    FormDataSigner formDataSigner = new FormDataSigner();
+                    formDataSigner.setName(formDataSignerOld.getName());
+                    formDataSigner.setPosition(formDataSignerOld.getPosition());
+                    signer.add(formDataSigner);
+                }
+                formData.setSigners(signer);
+                formData.setPerformer(formDataOld.getPerformer());
             }
-            formData.setSigners(signer);
-            formData.setPerformer(formDataOld.getPerformer());
         }
 
         // Execute scripts for the form event CREATE
