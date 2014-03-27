@@ -10,7 +10,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Anchor;
@@ -42,6 +41,9 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @UiField
     Label versionLabel;
+
+    @UiField
+    Label versionKind;
 
     @UiField
     LinkButton deleteVersion;
@@ -124,6 +126,11 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
     @Override
     public void resetSelectedLine() {
         selectionModel.clear();
+    }
+
+    @Override
+    public void setKindLabel(String kindLabel) {
+        versionKind.setText(kindLabel);
     }
 
     @UiHandler("createVersion")

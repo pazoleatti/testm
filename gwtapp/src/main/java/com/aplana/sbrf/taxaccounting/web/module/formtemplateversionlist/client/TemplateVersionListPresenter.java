@@ -100,6 +100,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         FormTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
         void resetSelectedLine();
+        void setKindLabel(String kindLabel);
     }
 
     @Override
@@ -113,6 +114,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     public void onSuccess(GetFTVersionListResult result) {
                         getView().setFTVersionTable(result.getFormTemplateVersions());
                         getView().setLabelName(result.getFormTypeName());
+                        getView().setKindLabel(result.getTaxType().getName());
                     }
                 }, this)
         );
