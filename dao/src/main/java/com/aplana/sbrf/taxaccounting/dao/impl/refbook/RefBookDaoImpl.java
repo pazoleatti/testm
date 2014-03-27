@@ -351,7 +351,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			}
 		});
 		if (result.get(RefBook.RECORD_ID_ALIAS).getNumberValue() == null) { // если элемент не найден
-			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
+			throw new DaoException(String.format("В справочнике \"%s\" (id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
 		}
 		return result;
     }
