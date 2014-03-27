@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
@@ -141,8 +143,13 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @UiHandler("deleteVersion")
     void onDeleteVersion(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteVersion();
+        Dialog.confirmMessage("Удаление версии макета", "Вы подтверждаете удаление версии макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null)
+                    getUiHandlers().onDeleteVersion();
+            }
+        });
     }
 
     @UiHandler("historyVersion")
