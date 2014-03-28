@@ -196,7 +196,7 @@ public class FormTemplateDaoTest {
         //Сверка
         calendar.set(2014, Calendar.DECEMBER, 31, 0, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        Assert.assertEquals(calendar.getTime(), formTemplateDao.getFTVersionEndDate(2, 2, actualStartVersion));
+        Assert.assertEquals(calendar.getTime(), formTemplateDao.getFTVersionEndDate(2, actualStartVersion));
     }
 
     @Test
@@ -209,18 +209,6 @@ public class FormTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(2, formTemplateDao.getNearestFTVersionIdRight(2, list, actualStartVersion));
-    }
-
-    @Test
-    public void testGetNearestFTVersionIdLeft(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 1);
-        Date actualStartVersion = calendar.getTime();
-
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
-        Assert.assertEquals(0, formTemplateDao.getNearestFTVersionIdLeft(2, list, actualStartVersion));
     }
 
     @Test

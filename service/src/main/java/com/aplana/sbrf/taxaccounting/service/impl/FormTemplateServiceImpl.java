@@ -204,7 +204,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (formTemplateId == 0)
             return null;
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        return formTemplateDao.getFTVersionEndDate(formTemplateId, formTemplate.getType().getId(), formTemplate.getVersion());
+        return formTemplateDao.getFTVersionEndDate(formTemplate.getType().getId(), formTemplate.getVersion());
     }
 
     @Override
