@@ -73,7 +73,7 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
                             return;
                         }
                         sb.appendHtmlConstant("<a href=\"#"
-                                + AdminConstants.NameTokens.formTemplateInfoPage + ";"
+                                + AdminConstants.NameTokens.formTemplateMainPage + ";"
                                 + AdminConstants.NameTokens.formTemplateId + "="
                                 + formTemplateVersion.getFormTemplateId() + "\">"
                                 + formTemplateVersion.getTypeName() + "</a>");
