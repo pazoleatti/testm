@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
@@ -10,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Anchor;
@@ -42,6 +43,9 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @UiField
     Label versionLabel;
+
+    @UiField
+    Label versionKind;
 
     @UiField
     LinkButton deleteVersion;
@@ -126,6 +130,11 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
         selectionModel.clear();
     }
 
+    @Override
+    public void setKindLabel(String kindLabel) {
+        versionKind.setText(kindLabel);
+    }
+
     @UiHandler("createVersion")
     void onCreateVersionClick(ClickEvent event){
         if (getUiHandlers() != null)
@@ -134,8 +143,13 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @UiHandler("deleteVersion")
     void onDeleteVersion(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteVersion();
+        Dialog.confirmMessage("Удаление версии макета", "Вы подтверждаете удаление версии макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null)
+                    getUiHandlers().onDeleteVersion();
+            }
+        });
     }
 
     @UiHandler("historyVersion")

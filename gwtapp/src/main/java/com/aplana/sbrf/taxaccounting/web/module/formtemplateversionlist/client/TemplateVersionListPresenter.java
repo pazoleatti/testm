@@ -61,7 +61,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteVersionResult>() {
             @Override
             public void onSuccess(DeleteVersionResult result) {
-                if (result.getUuid() == null)
+                if (result.getUuid() != null)
                     LogAddEvent.fire(TemplateVersionListPresenter.this, result.getUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList)
                         .with(AdminConstants.NameTokens.formTypeId, placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTypeId, "")).build());
@@ -100,6 +100,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
         FormTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
         void resetSelectedLine();
+        void setKindLabel(String kindLabel);
     }
 
     @Override
@@ -113,6 +114,7 @@ public class TemplateVersionListPresenter extends Presenter<TemplateVersionListP
                     public void onSuccess(GetFTVersionListResult result) {
                         getView().setFTVersionTable(result.getFormTemplateVersions());
                         getView().setLabelName(result.getFormTypeName());
+                        getView().setKindLabel(result.getTaxType().getName());
                     }
                 }, this)
         );

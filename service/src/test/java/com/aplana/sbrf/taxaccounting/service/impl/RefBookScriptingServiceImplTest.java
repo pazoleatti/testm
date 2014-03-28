@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 
 import org.junit.Before;
@@ -28,11 +29,11 @@ public class RefBookScriptingServiceImplTest {
     public void init() {
         rbScriptingService = new RefBookScriptingServiceImpl();
         // BlobDataDao
-        BlobDataDao blobDao = mock(BlobDataDao.class);
+		BlobDataService blobDataService = mock(BlobDataService.class);
         BlobData bd = new BlobData();
         bd.setInputStream(new ByteArrayInputStream(SCRIPT_TEST_DATA.getBytes()));
-        when(blobDao.get("test-test")).thenReturn(bd);
-        ReflectionTestUtils.setField(rbScriptingService, "blobDao", blobDao);
+        when(blobDataService.get("test-test")).thenReturn(bd);
+        ReflectionTestUtils.setField(rbScriptingService, "blobDataService", blobDataService);
         // RefBookFactory
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         ReflectionTestUtils.setField(rbScriptingService, "refBookFactory", refBookFactory);

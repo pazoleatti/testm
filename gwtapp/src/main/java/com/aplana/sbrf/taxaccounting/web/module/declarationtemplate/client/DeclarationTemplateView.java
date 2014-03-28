@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
@@ -180,7 +182,20 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().close();
+        if (getUiHandlers() == null)
+            return;
+        Dialog.confirmMessage(getUiHandlers().getDeclarationId() != 0 ? "Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
+                new DialogHandler() {
+                    @Override
+                    public void no() {
+                        getUiHandlers().close();
+                    }
+
+                    @Override
+                    public void yes() {
+                        getUiHandlers().save();
+                    }
+                });
 	}
 
 	@UiHandler("downloadJrxmlButton")

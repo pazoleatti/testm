@@ -285,9 +285,6 @@ void calc35to40(def dataRows) {
     rowsAliasesFor35to40.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income101Data = getIncome101Data(row)
-        if (!income101Data) { // Нет данных об оборотной ведомости
-            return
-        }
         // графа 14
         row.opuSumByTableD = getOpuSumByTableDFor35to40(row, income101Data)
         // графа 15

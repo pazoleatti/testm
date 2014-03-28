@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -11,6 +12,15 @@ import java.util.List;
 public class GetFTVersionListResult implements Result {
     private List<FormTemplateVersion> formTemplateVersions;
     private String formTypeName;
+    private TaxType taxType;
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
 
     public String getFormTypeName() {
         return formTypeName;

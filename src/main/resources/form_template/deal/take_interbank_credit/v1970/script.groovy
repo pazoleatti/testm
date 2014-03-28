@@ -177,16 +177,17 @@ void logicCheck() {
             def msg = totalCell.column.name
             logger.warn("Строка $rowNum: «$msg» не может отличаться от «$msgSum»!")
         }
-        // Корректность даты сделки относительно даты договора
-        def docDateCell = row.getCell('docDate')
-        def dealDoneDateCell = row.getCell('dealDoneDate')
-        if (docDateCell.value > dealDoneDateCell.value) {
-            def msg1 = dealDoneDateCell.column.name
+
+        def docDateCell = row.getCell('docDate')            // графа 7
+        def dealDateCell = row.getCell('dealDate')          // графа 9
+        def dealDoneDateCell = row.getCell('dealDoneDate')  // графа 14
+        // Корректность даты заключения сделки относительно даты договора
+        if (docDateCell.value > dealDateCell.value) {
+            def msg1 = dealDateCell.column.name
             def msg2 = docDateCell.column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
-        // Корректность даты сделки относительно даты заключения
-        def dealDateCell = row.getCell('dealDate')
+        // Корректность даты совершения сделки относительно даты заключения сделки
         if (dealDateCell.value > dealDoneDateCell.value) {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
