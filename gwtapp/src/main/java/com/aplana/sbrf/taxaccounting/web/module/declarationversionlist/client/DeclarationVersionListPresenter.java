@@ -65,8 +65,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
             @Override
             public void onSuccess(DeleteDTVersionResult result) {
                 String typeId = placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationType, "");
-                if (result.getLogEntryUuid() != null)
-                    LogAddEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
+                LogAddEvent.fire(DeclarationVersionListPresenter.this, result.getLogEntryUuid());
                 placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationVersionList)
                         .with(DeclarationTemplateTokens.declarationType, typeId).build());
                 getView().resetSelectedLine();

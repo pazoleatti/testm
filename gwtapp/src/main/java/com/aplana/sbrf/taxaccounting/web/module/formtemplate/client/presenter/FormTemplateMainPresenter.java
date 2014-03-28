@@ -216,8 +216,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetStatusFormResult>() {
             @Override
             public void onSuccess(SetStatusFormResult result) {
-                if (result.getUuid() != null)
-                    LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
+                LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
                             "Найдены экземпляры налоговых форм, использующие версию макета",
@@ -295,9 +294,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                     @Override
                     public void onSuccess(UpdateFormResult result) {
-                        if (result.getUuid() != null) {
-                            LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
-                        }
+                        LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
                         MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
