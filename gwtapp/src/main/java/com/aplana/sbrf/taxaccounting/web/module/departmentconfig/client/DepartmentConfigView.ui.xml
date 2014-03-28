@@ -138,7 +138,7 @@
                     <g:cell>
                         <g:HorizontalPanel ui:field="findButtonPanel">
                             <g:HTML addStyleNames="{style.separator}"/>
-                            <g:Button title="Найти" width="70px" text="Поиск" ui:field="findButton"/>
+                            <g:Button title="Найти" width="70px" text="Найти" ui:field="findButton"/>
                         </g:HorizontalPanel>
                     </g:cell>
 
