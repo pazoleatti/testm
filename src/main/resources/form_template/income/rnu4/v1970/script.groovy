@@ -117,7 +117,6 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
 
@@ -141,22 +140,23 @@ void calc() {
         if (tmp == null) {
             tmp = row.balance
         }
-        // если код расходы поменялся то создать новую строку "итого по коду"
-        if (tmp != row.balance) {
-            def code = getKnu(tmp)
-            totalRows.put(i, getNewRow(code, sum))
-            sum = 0
-        }
-        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-        if (i == dataRows.size() - 1) {
+        def code = getKnu(tmp)
+        if (code != null) { // Строки без кода не образуют группы
+            // Если код поменялся, то создать новую строку итого
+            if (tmp != row.balance) {
+                totalRows.put(i, getNewRow(code, sum))
+                sum = 0
+            }
+            // Если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
+            if (i == dataRows.size() - 1) {
+                sum += (row.sum ?: 0)
+                def totalRowCode = getNewRow(code, sum)
+                totalRows.put(i + 1, totalRowCode)
+                sum = 0
+            }
             sum += (row.sum ?: 0)
-            def code = getKnu(row.balance)
-            def totalRowCode = getNewRow(code, sum)
-            totalRows.put(i + 1, totalRowCode)
-            sum = 0
+            tmp = row.balance
         }
-        sum += (row.sum ?: 0)
-        tmp = row.balance
     }
 
     // добавить "итого по коду" в таблицу
@@ -228,7 +228,9 @@ void logicCheck() {
     //4. Арифметическая проверка итоговых значений по каждому <Коду классификации доходов>
     totalRows.each { key, val ->
         if (totalRows.get(key) != sumRowsByCode.get(key)) {
-            def msg =  formData.createDataRow().getCell('sum').column.name
+            println("totalRows.get(key) = " + totalRows.get(key))
+            println("sumRowsByCode.get(key)) = " + sumRowsByCode.get(key))
+            def msg = formData.createDataRow().getCell('sum').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
@@ -251,6 +253,9 @@ def getNewRow(def alias, def sum) {
 }
 
 def String getKnu(def code) {
+    if (code == null) {
+        return null
+    }
     return getRefBookValue(28, code)?.CODE?.stringValue
 }
 
@@ -347,8 +352,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -389,8 +394,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[2].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 2 " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
@@ -398,8 +402,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[4].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 4 " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
