@@ -7,7 +7,7 @@ import groovy.transform.Field
 
 /**
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
- * formTemplateId=328
+ * formTemplateId=1328
  *
  * @author rtimerbaev
  */
@@ -114,23 +114,30 @@ void logicCheck() {
     if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
-
         if (rowOld != null) {
             for (def column : editableColumns) {
-                if (row.getCell(column).value < rowOld.getCell(column).value) {
-                    def securitiesType = row.securitiesType
-                    logger.error("Процентный (купонный) доход по «$securitiesType» уменьшился!")
+                if (row.getCell(column).value == null
+                        && rowOld.getCell(column).value != null
+                        && row.getCell(column).value < rowOld.getCell(column).value) {
+                    logger.warn("Процентный (купонный) доход по «${row.securitiesType}» уменьшился!")
                 }
             }
         }
     }
 
     // 14-22. Проверка на неотрицательные значения
-    for (def column : editableColumns) {
+    for (def column : ['ofz', 'municipalBonds', 'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore', 'corporateBonds']) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
-            logger.error("Значения графы «$columnName» по строке 1 отрицательное!")
+            logger.error("Значение графы «$columnName» по строке 1 отрицательное!")
+        }
+    }
+    for (def column : ['governmentBonds','ovgvz','eurobondsRF','itherEurobonds']) {
+        def value = row.getCell(column).value
+        if (value != null && value < 0) {
+            def columnName = getColumnName(row, column)
+            logger.warn("Значение графы «$columnName» по строке 1 отрицательное!")
         }
     }
 }
