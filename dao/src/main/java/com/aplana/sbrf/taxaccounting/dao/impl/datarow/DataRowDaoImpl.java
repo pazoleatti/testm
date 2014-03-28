@@ -178,12 +178,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// Если строка помечена как SAME, то помечаем как DELETE
 
 		getJdbcTemplate().update(
-				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=?",
-				new Object[] { formData.getId(), TypeFlag.ADD.getKey() });
+				"delete from DATA_ROW where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
+				new Object[] { formData.getId(), TypeFlag.ADD.getKey(), formData.isManual() ? 1 : 0 });
 		getJdbcTemplate().update(
-                "update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=?",
+                "update DATA_ROW set TYPE=? where FORM_DATA_ID=? and TYPE=? and MANUAL = ?",
                 new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
-                        TypeFlag.SAME.getKey()});
+                        TypeFlag.SAME.getKey(), formData.isManual() ? 1 : 0});
 	}
 
 	@Override
@@ -326,9 +326,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
 		params.put("types", TypeFlag.rtsToKeys(types));
+        params.put("manual", formData.isManual() ? 1 : 0);
 		return getNamedParameterJdbcTemplate()
 				.queryForInt(
-						"select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types)",
+						"select count(ID) from DATA_ROW where FORM_DATA_ID = :formDataId and TYPE in (:types) and manual = :manual",
 						params);
 	}
 
@@ -345,7 +346,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         // получение id'шников для вставки строк батчем
         final List<Long> ids = dbUtils.getNextDataRowIds(Integer.valueOf(dataRows.size()).longValue());
         getJdbcTemplate().batchUpdate(
-                "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE) values (?, ?, ?, ?, ?)",
+                "insert into DATA_ROW (ID, FORM_DATA_ID, ALIAS, ORD, TYPE, MANUAL) values (?, ?, ?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
@@ -367,6 +368,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                         ps.setLong(4, order);
 
                         ps.setInt(5, TypeFlag.ADD.getKey());
+                        ps.setBoolean(6, formData.isManual());
                     }
 
                     @Override

@@ -12,11 +12,20 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 
 	DataRowRange range;
 	boolean readOnly;
+    boolean manual;
 	long formDataId;
 	int formDataTemplateId;
 	List<DataRow<Cell>> modifiedRows;
 
-	public DataRowRange getRange() {
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
+
+    public DataRowRange getRange() {
 		return range;
 	}
 

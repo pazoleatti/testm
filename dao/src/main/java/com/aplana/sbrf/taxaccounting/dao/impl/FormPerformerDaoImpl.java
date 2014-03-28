@@ -36,8 +36,8 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 	}
 
 	@Override
-	public void save(long formDataId, FormDataPerformer performer) {
-		if (formDataDao.get(formDataId) != null) {
+	public void save(long formDataId, boolean manual, FormDataPerformer performer) {
+		if (formDataDao.get(formDataId, manual) != null) {
 			if (this.get(formDataId) != null) {
 				getJdbcTemplate().update(
 					"update form_data_performer set name = ?, phone = ?, print_department_id = ? where form_data_id = ?",

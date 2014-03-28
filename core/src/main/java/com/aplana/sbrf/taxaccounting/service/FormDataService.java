@@ -36,6 +36,14 @@ public interface FormDataService {
                         ReportPeriod reportPeriod, Integer periodOrder);
 
     /**
+     * Создает версию ручного ввода
+     * @param logger логгер-объект для фиксации диагностических сообщений
+     * @param userInfo данные пользователя
+     * @param formDataId идентификатор формы, для которой создается версия ручного ввода
+     */
+    void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId);
+
+    /**
      * Метод для импорта данных из xls-файлов
      * 
      * @param logger
@@ -89,30 +97,34 @@ public interface FormDataService {
 	
 	/**
 	 * Получить данные по налоговой форме
-	 * @param userInfo информация о пользователе, выполняющего операцию
-	 * @param formDataId идентификатор записи, которую необходимо считать
-	 * @return объект с данными по налоговой форме
+	 *
+     * @param userInfo информация о пользователе, выполняющего операцию
+     * @param formDataId идентификатор записи, которую необходимо считать
+     * @param manual нужна версия ручного ввода?
+     * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав просматривать налоговую форму с такими параметрами
 	 */
-	FormData getFormData(TAUserInfo userInfo, long formDataId, Logger logger);
+	FormData getFormData(TAUserInfo userInfo, long formDataId, Boolean manual, Logger logger);
 
 	/**
 	 * Удалить данные по налоговой форме
 	 * @param userInfo информация о пользователе, выполняющего операцию
 	 * @param formDataId идентификатор записи, котрую нужно удалить
+     * @param manual признак версии ручного ввода
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя недостаточно прав для удаления записи
 	 */
-	void deleteFormData(TAUserInfo userInfo, long formDataId);
+	void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual);
 
 	/**
 	 * Выполнить изменение статуса карточки
 	 * @param formDataId идентификатор объекта {@link FormData}
+     * @param manual признак версии ручного ввода
 	 * @param userInfo информация о пользователе, от имени которого выполняется действие
 	 * @param move @{link WorkflowMove переход жизненного цикла}, который нужно выполнить
 	 * @param note Причина возврата (перехода) по ЖЦ в Системе
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger);
+	void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger);
 
     /**
      * Создаёт налоговую форму без проверок прав доступа
@@ -192,9 +204,23 @@ public interface FormDataService {
     /**
      * Ищет налоговые формы, которые использует данную версию макета, у которых период от #startDate
      * http://conf.aplana.com/pages/viewpage.action?pageId=11377482
-     * @param formTemplateId идентификатор версии
+     * @param templateId идентификатор версии
      * @param startDate дата начала актуализации
      * @return список идентификаторов НФ
      */
     List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
+
+    /**
+     * Проверяет существование версии ручного ввода для указанной нф
+     * @param formDataId идентификатор налоговой формы
+     * @return версия ручного ввода существует?
+     */
+    boolean existManual(Long formDataId);
+
+    /**
+     * Проверяет, является ли указанная нф сводной формой банка - последней формой перед декларацией
+     * @param formDataId идентификатор нф
+     * @return форма - сводная банка?
+     */
+    boolean isBankSummaryForm(long formDataId);
 }

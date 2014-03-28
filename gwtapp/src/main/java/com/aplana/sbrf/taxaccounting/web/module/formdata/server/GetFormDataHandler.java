@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,6 +48,9 @@ public class GetFormDataHandler extends
 
     @Autowired 
     private TAUserService taUserService;
+
+    @Autowired
+    private SourceService sourceService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -114,8 +118,8 @@ public class GetFormDataHandler extends
 	private void fillFormAndTemplateData(GetFormData action, TAUserInfo userInfo,
 			Logger logger, GetFormDataResult result) {
 
-		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), logger);
-		
+		FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
 
 		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
@@ -142,6 +146,18 @@ public class GetFormDataHandler extends
 		result.setFormInClosedPeriod(!reportPeriodService.isActivePeriod(result.getReportPeriod().getId(), formData.getDepartmentId()));
 
         result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
+        boolean isBankSummaryForm = formDataService.isBankSummaryForm(action.getFormDataId());
+        result.setBankSummaryForm(isBankSummaryForm);
+        if (isBankSummaryForm) {
+            result.setExistManual(formDataService.existManual(action.getFormDataId()));
+        } else {
+            //Если это не сводная банка, то нет смысла проверять наличие версии ручного ввода
+            result.setExistManual(false);
+        }
+
+        //Является ли форма последней перед декларацией
+        List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
+        result.setCanCreatedManual((formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY)) && !declarationDestinations.isEmpty());
 	}
 
 	/**
@@ -163,7 +179,8 @@ public class GetFormDataHandler extends
 					0));
 		} else {
 			accessParams = accessService.getFormDataAccessParams(userInfo, result
-					.getFormData().getId());
+					.getFormData().getId(),
+                    result.getFormData().isManual());
         }
 		result.setFormDataAccessParams(accessParams);
 	}

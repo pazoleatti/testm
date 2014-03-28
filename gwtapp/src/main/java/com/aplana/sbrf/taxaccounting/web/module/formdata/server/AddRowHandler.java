@@ -53,7 +53,7 @@ public class AddRowHandler extends
 		Logger logger = new Logger();
 		if (!action.getModifiedRows().isEmpty()) {
 			TAUserInfo userInfo = securityService.currentUserInfo();
-			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.addRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		DataRowResult result = new DataRowResult();

@@ -39,5 +39,5 @@ public class GoMoveAction extends UnsecuredActionImpl<GoMoveResult> implements A
 		return "Запроса для перехода между этапами";
 	}
 
-	
+
 }

@@ -49,7 +49,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 		FormData formData = action.getFormData();
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
 		DataRowResult result = new DataRowResult();

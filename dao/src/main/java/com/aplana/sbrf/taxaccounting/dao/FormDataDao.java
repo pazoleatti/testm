@@ -12,15 +12,29 @@ import java.util.List;
  * DAO для работы с данными по налоговым формам
  */
 public interface FormDataDao {
+    /**
+     * Получить данные по налоговой формы
+     *
+     *
+     * @param formDataId идентификатор заполненной налоговой формы
+     * @return данные по налоговой форме
+     * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException,
+     *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
+     */
+    @Deprecated
+    FormData get(long formDataId);
+
 	/**
 	 * Получить данные по налоговой формы
 	 *
-	 * @param formDataId идентификатор заполненной налоговой формы
-	 * @return данные по налоговой форме
+	 *
+     * @param formDataId идентификатор заполненной налоговой формы
+     * @param manual признак версии ручного ввода
+     * @return данные по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException,
 	 *          если данных с таким id нет (также может возникнуть из-за других ошибок в слое Dao)
 	 */
-	FormData get(long formDataId);
+	FormData get(long formDataId, Boolean manual);
 
 	/**
 	 * Данная функция нужна для получения информации по налоговой форме.
@@ -108,4 +122,17 @@ public interface FormDataDao {
     void updatePeriodOrder(long id, int periodOrder);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
+
+    /**
+     * Проверяет существование версии ручного ввода для указанной нф
+     * @param formDataId идентификатор налоговой формы
+     * @return версия ручного ввода существует?
+     */
+    boolean existManual(Long formDataId);
+
+    /**
+     * Удаляет версию ручного ввода
+     * @param formDataId идентификатор нф
+     */
+    void deleteManual(long formDataId);
 }
