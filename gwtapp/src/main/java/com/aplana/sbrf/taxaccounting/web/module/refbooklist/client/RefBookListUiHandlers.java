@@ -9,5 +9,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 public interface RefBookListUiHandlers extends UiHandlers {
     void onFindClicked();
+
     void onLoadClicked();
 }
