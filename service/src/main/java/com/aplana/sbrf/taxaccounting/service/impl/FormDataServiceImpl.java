@@ -444,12 +444,6 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo,
 				formData, FormDataEvent.AFTER_LOAD, logger, null);
 
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте, который выполняется после загрузки формы",
-                    logEntryService.save(logger.getEntries()));
-		}
-
 		return formData;
 	}
 
