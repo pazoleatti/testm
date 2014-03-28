@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PrintingService {
 	
-	String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked);
+	String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserFullWithDepartmentPath> taUserFullList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);

@@ -41,7 +41,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 			throws ActionException {
 
 			Logger logger = new Logger();
-			formDataService.doMove(action.getFormDataId(), securityService.currentUserInfo(),
+			formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
 					action.getMove(), action.getReasonToWorkflowMove(), logger);
 			GoMoveResult result = new GoMoveResult();
             result.setUuid(logEntryService.save(logger.getEntries()));

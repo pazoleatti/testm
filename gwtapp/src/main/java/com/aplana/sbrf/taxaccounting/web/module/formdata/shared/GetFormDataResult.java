@@ -18,7 +18,7 @@ import java.util.List;
 public class GetFormDataResult implements Result {
 	private static final long serialVersionUID = 5032224706310298119L;
 
-	public static enum FormMode {
+    public static enum FormMode {
 		READ_UNLOCKED, // Открыта для чтения
 		READ_LOCKED, // Открыта для чтения и заблокирована другим пользователем
 		EDIT // Открыта для редактирования
@@ -43,6 +43,9 @@ public class GetFormDataResult implements Result {
 	private boolean balancePeriod;
 
 	private boolean isFormInClosedPeriod;
+    private boolean existManual;
+    private boolean isBankSummaryForm;
+    private boolean canCreatedManual;
 
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
@@ -59,6 +62,14 @@ public class GetFormDataResult implements Result {
 	private Date reportPeriodEndDate;
 
     private Integer reportPeriodYear;
+
+    public boolean canCreatedManual() {
+        return canCreatedManual;
+    }
+
+    public void setCanCreatedManual(boolean canCreatedManual) {
+        this.canCreatedManual = canCreatedManual;
+    }
 
 	public FormData getFormData() {
 		return formData;
@@ -195,6 +206,22 @@ public class GetFormDataResult implements Result {
 	public void setFormInClosedPeriod(boolean formInClosedPeriod) {
 		isFormInClosedPeriod = formInClosedPeriod;
 	}
+
+    public boolean existManual() {
+        return existManual;
+    }
+
+    public void setExistManual(boolean existManual) {
+        this.existManual = existManual;
+    }
+
+    public boolean isBankSummaryForm() {
+        return isBankSummaryForm;
+    }
+
+    public void setBankSummaryForm(boolean bankSummaryForm) {
+        isBankSummaryForm = bankSummaryForm;
+    }
 
 	@Override
     public String toString() {

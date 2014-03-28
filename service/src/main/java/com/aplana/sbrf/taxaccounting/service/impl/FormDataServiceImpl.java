@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -77,6 +78,8 @@ public class FormDataServiceImpl implements FormDataService {
 	private ApplicationContext applicationContext;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    SourceService sourceService;
 
 	/**
 	 * Создать налоговую форму заданного типа При создании формы выполняются
@@ -123,6 +126,17 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
     @Override
+    public void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId) {
+        FormData formData = formDataDao.get(formDataId, false);
+        formDataAccessService.canCreateManual(logger, userInfo, formDataId);
+
+        List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null, null);
+        formData.setManual(true);
+        dataRowDao.saveRows(formData, rows);
+        dataRowDao.commit(formData.getId());
+    }
+
+    @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, inputStream, fileName, FormDataEvent.IMPORT);
     }
@@ -139,7 +153,7 @@ public class FormDataServiceImpl implements FormDataService {
     	// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 
-        formDataAccessService.canEdit(userInfo, formDataId);
+        formDataAccessService.canEdit(userInfo, formDataId, false);
 
         File dataFile = null;
         File pKeyFile = null;
@@ -177,7 +191,7 @@ public class FormDataServiceImpl implements FormDataService {
                 }
             }
 
-            FormData fd = formDataDao.get(formDataId);
+            FormData fd = formDataDao.get(formDataId, false);
 
             dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
             Map<String, Object> additionalParameters = new HashMap<String, Object>();
@@ -226,7 +240,9 @@ public class FormDataServiceImpl implements FormDataService {
 		formData.setKind(kind);
 		formData.setReportPeriodId(reportPeriodId);
         formData.setPeriodOrder(periodOrder);
-
+        formData.setManual(false);
+		
+		// Execute scripts for the form event CREATE
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
         if (prevReportPeriod != null) {
             FormData formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
@@ -296,7 +312,7 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Нельзя добавить строку в НФ с фиксированным количеством строк");
 		}
 
-		formDataAccessService.canEdit(userInfo, formData.getId());
+		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -320,7 +336,7 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Нельзя удалить строку в НФ с фиксированным количеством строк");
 		}
 
-		formDataAccessService.canEdit(userInfo, formData.getId());
+		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 		
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
@@ -348,7 +364,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
 
-		formDataAccessService.canEdit(userInfo, formData.getId());
+		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.CALCULATE, logger, null);
@@ -404,7 +420,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
 		lockCoreService.checkLockedMe(FormData.class, formData.getId(), userInfo);
 
-		formDataAccessService.canEdit(userInfo, formData.getId());
+		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		formDataScriptingService.executeScript(userInfo, formData,
 				FormDataEvent.SAVE, logger, null);
@@ -423,23 +439,24 @@ public class FormDataServiceImpl implements FormDataService {
 	/**
 	 * Получить данные по налоговой форме
 	 *
-	 * @param userInfo
-	 *            информация о пользователе, выполняющего операцию
-	 * @param formDataId
-	 *            идентификатор записи, которую необходимо считать
-	 * @param logger
-	 *            логгер-объект для фиксации диагностических сообщений
-	 * @return объект с данными по налоговой форме
+	 *
+     * @param userInfo
+     *            информация о пользователе, выполняющего операцию
+     * @param formDataId
+     *            идентификатор записи, которую необходимо считать
+     * @param manual
+     *@param logger
+     *            логгер-объект для фиксации диагностических сообщений  @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав просматривать налоговую форму с
 	 *             такими параметрами
 	 */
 	@Override
 	@Transactional
-	public FormData getFormData(TAUserInfo userInfo, long formDataId, Logger logger) {
+	public FormData getFormData(TAUserInfo userInfo, long formDataId, Boolean manual, Logger logger) {
 		formDataAccessService.canRead(userInfo, formDataId);
 
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.get(formDataId, manual);
 
 		formDataScriptingService.executeScript(userInfo,
 				formData, FormDataEvent.AFTER_LOAD, logger, null);
@@ -459,16 +476,21 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public void deleteFormData(TAUserInfo userInfo, long formDataId) {
+	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formDataId, userInfo);
 
-		formDataAccessService.canDelete(userInfo, formDataId);
+        if (manual) {
+            formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
+            formDataDao.deleteManual(formDataId);
+        } else {
+            formDataAccessService.canDelete(userInfo, formDataId);
 
-		FormData formData = formDataDao.get(formDataId);
-		auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getId(), formData.getKind().getId(), null);
-		formDataDao.delete(formDataId);
+            FormData formData = formDataDao.get(formDataId, manual);
+            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                    null, formData.getFormType().getId(), formData.getKind().getId(), null);
+            formDataDao.delete(formDataId);
+        }
 	}
 
 	/**
@@ -482,7 +504,7 @@ public class FormDataServiceImpl implements FormDataService {
 	 *            переход
 	 */
 	@Override
-	public void doMove(long formDataId, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+	public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
 		// Форма не должна быть заблокирована даже текущим пользователем;
 		lockCoreService.checkUnlocked(FormData.class, formDataId, userInfo);
    		// Временный срез формы должен быть в актуальном состоянии
@@ -497,7 +519,7 @@ public class FormDataServiceImpl implements FormDataService {
                             "не хватает полномочий для его осуществления");
 		}
 
-		FormData formData = formDataDao.get(formDataId);
+		FormData formData = formDataDao.get(formDataId, manual);
 
 		formDataScriptingService.executeScript(userInfo,formData, workflowMove.getEvent(), logger, null);
 		
@@ -587,7 +609,7 @@ public class FormDataServiceImpl implements FormDataService {
                             formDataCompositionService.compose(formData, i.getDepartmentId(),
                                     i.getFormTypeId(), i.getKind());
                         } else if (destinationForm != null){
-                            deleteFormData(userInfo, destinationForm.getId());
+                            deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
                         }
                     }
                 }
@@ -635,7 +657,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     @Transactional(readOnly = true)
     public void checkDestinations(long formDataId) {
-        FormData formData = formDataDao.get(formDataId);
+        FormData formData = formDataDao.get(formDataId, null);
         // Проверка вышестоящих налоговых форм
         List<DepartmentFormType> departmentFormTypes =
                 departmentFormTypeDao.getFormDestinations(formData.getDepartmentId(),
@@ -676,5 +698,16 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
         return formDataDao.getFormDataListInActualPeriodByTemplate(templateId, startDate);
+    }
+
+    @Override
+    public boolean existManual(Long formDataId) {
+        return formDataDao.existManual(formDataId);
+    }
+
+    @Override
+    public boolean isBankSummaryForm(long formDataId) {
+        //TODO
+        return true;
     }
 }

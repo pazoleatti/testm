@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -34,7 +33,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.Date;
 import java.util.List;
@@ -122,12 +120,23 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel centerBlock;
     @UiField
-    LinkButton manualInputAnchor;
+    LinkButton editAnchor;
+
+    @UiField
+    LinkButton manualAnchor;
+
+    @UiField
+    LinkButton deleteManualAnchor;
 
     @UiField
     Label editModeLabel;
     @UiField
     ResizeLayoutPanel tableWrapper;
+
+    @UiField
+    LinkButton modeAnchor;
+    @UiField
+    Label modeLabel;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -316,12 +325,26 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		selectionModel.setSelected(item, selected);
 	}
 
-	@UiHandler("manualInputAnchor")
-	void onManualInputButtonClicked(ClickEvent event) {
+	@UiHandler("modeAnchor")
+	void onModeClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onManualInputClicked(false);
+			getUiHandlers().onModeChangeClicked();
 		}
 	}
+
+    @UiHandler("editAnchor")
+    void onEditButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onEditClicked(false);
+        }
+    }
+
+    @UiHandler("manualAnchor")
+    void onCreateManualClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateManualClicked(false);
+        }
+    }
 
 	@UiHandler("infoAnchor")
 	void onInfoButtonClicked(ClickEvent event) {
@@ -380,6 +403,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onDeleteFormClicked();
 		}
 	}
+
+    @UiHandler("deleteManualAnchor")
+    void onDeleteManualButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDeleteManualClicked();
+        }
+    }
 
 	@UiHandler("showCheckedColumns")
 	void onShowCheckedColumnsClicked(ClickEvent event) {
@@ -478,11 +508,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     public void showEditModeLabel(boolean show) {
         editModeLabel.setVisible(show);
     }
-
-	@Override
-	public void showManualInputAnchor(boolean show) {
-        manualInputAnchor.setVisible(show);
-	}
 
 	@Override
 	public void showDeleteFormButton(boolean show) {
@@ -596,6 +621,33 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             this.taxType = taxType;
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
+        }
+    }
+
+    @Override
+    public void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual) {
+        System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual);
+        editAnchor.setVisible(readOnlyMode);
+        if (bankSummaryForm) {
+            boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
+            modeLabel.setVisible(needShowMode);
+            modeAnchor.setVisible(needShowMode);
+            manualAnchor.setVisible(readOnlyMode && canCreatedManual && !existManual);
+            deleteManualAnchor.setVisible(manual && !readOnlyMode);
+            if (manual) {
+                modeAnchor.setText("К автоматической версии");
+                modeAnchor.setImg("resources/img/cogwheel-16.png");
+                modeLabel.setText("Версия ручного ввода");
+            } else {
+                modeAnchor.setText("К версии ручного ввода");
+                modeAnchor.setImg("resources/img/pencil-16.png");
+                modeLabel.setText("Автоматическая версия");
+            }
+        } else {
+            modeAnchor.setVisible(false);
+            modeAnchor.setVisible(false);
+            modeLabel.setVisible(false);
+            deleteManualAnchor.setVisible(false);
         }
     }
 }

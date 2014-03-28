@@ -82,6 +82,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("formDataId", fd.getId());
+        params.put("manual", fd.isManual() ? 1 : 0);
         params.put("types", TypeFlag.rtsToKeys(types));
 
         // генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
@@ -108,7 +109,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
         }
 
         select.append(" FROM data_row d left join c on d.id = c.row_id \n"+
-                "where d.FORM_DATA_ID = :formDataId and d.TYPE IN (:types)) sub \n"+
+                "where d.FORM_DATA_ID = :formDataId and manual = :manual and d.TYPE IN (:types)) sub \n"+
                 "group by sub.id, sub.ord, sub.a \n " +
                 "order by sub.ord");
 
