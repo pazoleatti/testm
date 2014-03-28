@@ -632,7 +632,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
             modeLabel.setVisible(needShowMode);
             modeAnchor.setVisible(needShowMode);
-            manualAnchor.setVisible(canCreatedManual && !existManual);
+            manualAnchor.setVisible(readOnlyMode && canCreatedManual && !existManual);
             deleteManualAnchor.setVisible(manual && !readOnlyMode);
             if (manual) {
                 modeAnchor.setText("К автоматической версии");
