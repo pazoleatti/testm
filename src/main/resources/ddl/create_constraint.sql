@@ -22,7 +22,7 @@ alter table form_template add constraint form_template_chk_monthly check (monthl
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
-alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12));
+alter table form_style add constraint form_style_chk_back_color check (back_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
 alter table form_style add constraint form_style_chk_italic check (italic in (0,1));
 alter table form_style add constraint form_style_chk_bold check (bold in (0,1));
 alter table form_style add constraint form_style_uniq_alias unique (form_template_id, alias);
@@ -51,8 +51,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 alter table ref_book_attribute add constraint ref_book_attr_chk_is_unique check (is_unique in (0, 1));
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5));
 
---TODO (Marat Fayzullin 07.03.2014) добавить ограничение, при этом, чтобы корректно работал скрипт drop_main.sql
---alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
+alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));

@@ -35,7 +35,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 		TARole role;
 		try {
 			role = getJdbcTemplate().queryForObject(
-					"select * from sec_role where id = ?",
+					"select id, alias, name from sec_role where id = ?",
 					new Object[] { id },
 					new int[] { Types.NUMERIC },
 					TA_ROLE_MAPPER

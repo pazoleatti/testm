@@ -193,9 +193,9 @@ public class PeriodServiceImplTest {
         Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
         record.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
         record.put("ORD", new RefBookValue(RefBookAttributeType.NUMBER, 1));
-        record.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, 1, 1)));
-        record.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, 1, 28)));
-        record.put("CALENDAR_START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, 1, 1)));
+        record.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
+        record.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 28)));
+        record.put("CALENDAR_START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
         when(provider.getRecordData(1L)).thenReturn(record);
         ReflectionTestUtils.setField(service, "rbFactory", rbFactory);
     }

@@ -29,7 +29,7 @@ comment on column configuration.value is 'Значение параметра';
 -------------------------------------------------------------------------------------------------------------------------------------------
 create table form_type (
   id       number(9) not null,
-  name     varchar2(600) not null,
+  name     varchar2(1000) not null,
   tax_type char(1) not null,
   status number(1) default 0 not null
 );
@@ -60,8 +60,8 @@ create table form_template (
   version date not null,
   edition number(9) not null,
   fixed_rows number(1) not null,
-  name varchar2(600) not null,
-  fullname varchar2(600) not null,
+  name varchar2(1000) not null,
+  fullname varchar2(1000) not null,
   code varchar2(600) not null,
   script clob,
   data_headers clob,
