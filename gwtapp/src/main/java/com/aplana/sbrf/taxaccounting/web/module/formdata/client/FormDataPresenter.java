@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -13,11 +10,13 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -63,17 +62,19 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
+        action.setManual(request.getParameter(MANUAL, null) != null ? Boolean.parseBoolean(request.getParameter(MANUAL, null)) : null);
         executeAction(action);
 	}
 
 	@Override
 	public void onRangeChange(final int start, int length) {
-		if (formData != null) {
+        if (formData != null) {
 			GetRowsDataAction action = new GetRowsDataAction();
 			action.setFormDataId(formData.getId());
 			action.setRange(new DataRowRange(start+1, length));
 			action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 			action.setReadOnly(readOnlyMode);
+            action.setManual(formData.isManual());
 			action.setFormDataTemplateId(formData.getFormTemplateId());
 			dispatcher.execute(action, CallbackUtils
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
@@ -99,7 +100,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
-		modifiedRows.add(dataRow);
+        modifiedRows.add(dataRow);
 	}
 
     @Override
@@ -110,6 +111,41 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     public void onEndLoad() {
         LockInteractionEvent.fire(this, false);
+    }
+
+    @Override
+    public void onCreateManualClicked(boolean b) {
+        //Сводная форма банка
+        if (!existManual) {
+            Dialog.confirmMessage("Подтверждение", "Создать для налоговой формы версию ручного ввода?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    LogCleanEvent.fire(FormDataPresenter.this);
+                    LogShowEvent.fire(FormDataPresenter.this, false);
+                    CreateManualFormData action = new CreateManualFormData();
+                    action.setFormDataId(formData.getId());
+                    dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
+                                @Override
+                                public void onSuccess(CreateManualFormDataResult result) {
+                                    revealFormData(readOnlyMode, true);
+                                }
+                            }, FormDataPresenter.this)
+                    );
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void close() {
+                    Dialog.hideMessage();
+                }
+            });
+        }
     }
 
     @Override
@@ -135,13 +171,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			getView().showSignersAnchor(false);
 			getView().showRecalculateButton(false);
 			getView().showOriginalVersionButton(false);
-			getView().showManualInputAnchor(false);
+            getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, false, canCreatedManual);
 		}
 	}
 
+    @Override
+    public void onModeChangeClicked() {
+        revealFormData(readOnlyMode, !formData.isManual());
+    }
+
 	@Override
-	public void onManualInputClicked(boolean readOnlyMode) {
-		revealFormData(readOnlyMode);
+	public void onEditClicked(final boolean readOnlyMode) {
+        revealFormData(readOnlyMode, formData.isManual());
 	}
 
 	@Override
@@ -160,7 +201,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		Window.open(
                 GWT.getHostPageBaseURL() + "download/downloadController/"
                         + formData.getId() + "/"
-                        + getView().getCheckedColumnsClicked(), "", "");
+                        + getView().getCheckedColumnsClicked() + "/"
+                        + formData.isManual(), "", "");
 	}
 
 	@Override
@@ -177,7 +219,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCancelClicked() {
-		revealFormData(true);
+		revealFormData(true, formData.isManual());
 	}
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
@@ -216,7 +258,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	 */
 	@Override
 	public void onSaveClicked() {
-		SaveFormDataAction action = new SaveFormDataAction();
+        System.out.println("modifiedRows: "+modifiedRows.size());
+        SaveFormDataAction action = new SaveFormDataAction();
         action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
@@ -263,12 +306,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onDeleteFormClicked() {
-        final FormDataPresenter t = this;
         Dialog.confirmMessage("Подтверждение", "Вы уверены, что хотите удалить налоговую форму?",new DialogHandler() {
             @Override
             public void yes() {
                 DeleteFormDataAction action = new DeleteFormDataAction();
                 action.setFormDataId(formData.getId());
+                action.setManual(false);
                 dispatcher
                         .execute(
                                 action,
@@ -280,7 +323,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 revealFormDataList();
                                             }
 
-                                        }, t));
+                                        }, FormDataPresenter.this));
                 Dialog.hideMessage();
             }
 
@@ -296,9 +339,83 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         });
 	}
 
+    @Override
+    public void onDeleteManualClicked() {
+        Dialog.confirmMessage("Удалить версию ручного ввода и перейти к автоматически сформированной версии?",new DialogHandler() {
+            @Override
+            public void yes() {
+                LogCleanEvent.fire(FormDataPresenter.this);
+                LogShowEvent.fire(FormDataPresenter.this, false);
+                DeleteFormDataAction action = new DeleteFormDataAction();
+                action.setFormDataId(formData.getId());
+                action.setManual(true);
+                dispatcher
+                        .execute(
+                                action,
+                                CallbackUtils
+                                        .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
+                                            @Override
+                                            public void onSuccess(
+                                                    DeleteFormDataResult result) {
+                                                revealFormData(true, false);
+                                            }
+
+                                        }, FormDataPresenter.this));
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void no() {
+                Dialog.hideMessage();
+            }
+
+            @Override
+            public void close() {
+                Dialog.hideMessage();
+            }
+        });
+    }
+
 	@Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
-		if (wfMove.isReasonToMoveShouldBeSpecified()){
+        if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
+            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \"Создана\"?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    LogCleanEvent.fire(FormDataPresenter.this);
+                    LogShowEvent.fire(FormDataPresenter.this, false);
+                    DeleteFormDataAction action = new DeleteFormDataAction();
+                    action.setFormDataId(formData.getId());
+                    action.setManual(true);
+                    dispatcher.execute(action, CallbackUtils
+                            .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
+                                @Override
+                                public void onSuccess(
+                                        DeleteFormDataResult result) {
+                                    formData.setManual(false);
+                                    commonMoveLogic(wfMove);
+                                }
+                            }, FormDataPresenter.this));
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void no() {
+                    Dialog.hideMessage();
+                }
+
+                @Override
+                public void close() {
+                    Dialog.hideMessage();
+                }
+            });
+        } else {
+            commonMoveLogic(wfMove);
+        }
+	}
+
+    private void commonMoveLogic(final WorkflowMove wfMove) {
+        if (wfMove.isReasonToMoveShouldBeSpecified()){
             DestinationCheckAction action = new DestinationCheckAction();
             action.setFormDataId(formData.getId());
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DestinationCheckResult>() {
@@ -309,10 +426,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     addToPopupSlot(dialogPresenter);
                 }
             }, this));
-		} else {
-			goMove(wfMove);
-		}
-	}
+        } else {
+            goMove(wfMove);
+        }
+    }
 
 	private void goMove(final WorkflowMove wfMove){
 		LogCleanEvent.fire(this);
@@ -324,7 +441,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					@Override
 					public void onSuccess(GoMoveResult result) {
 						LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-						revealFormData(true);
+						revealFormData(true, formData.isManual());
 					}
 				}, this));
 	}
@@ -344,8 +461,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
-                    			
+
                     			formData = result.getFormData();
+                                existManual = result.existManual();
+                                canCreatedManual = result.canCreatedManual();
+                                isBankSummaryForm = result.isBankSummaryForm();
+                                getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, readOnlyMode, canCreatedManual);
                     			
                     			// Регистрируем хендлер на закрытие
                     			if (closeFormDataHandlerRegistration !=null ){

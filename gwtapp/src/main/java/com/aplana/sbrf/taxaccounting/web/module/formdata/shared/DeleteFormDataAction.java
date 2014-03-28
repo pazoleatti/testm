@@ -10,6 +10,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class DeleteFormDataAction extends UnsecuredActionImpl<DeleteFormDataResult> implements ActionName {
 	private long formDataId;
+    private boolean manual;
 	
 	public long getFormDataId() {
 		return formDataId;
@@ -22,5 +23,12 @@ public class DeleteFormDataAction extends UnsecuredActionImpl<DeleteFormDataResu
 		return "Обработка запроса на удаление формы";
 	}
 
-	
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
 }

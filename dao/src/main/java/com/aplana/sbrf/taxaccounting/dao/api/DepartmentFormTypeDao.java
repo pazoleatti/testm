@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.List;
 
@@ -154,4 +155,14 @@ public interface DepartmentFormTypeDao {
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
+
+    /**
+     * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param reportPeriodId     идентификатор отчетного периода
+     * @return приемники существуют?
+     */
+    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
 }

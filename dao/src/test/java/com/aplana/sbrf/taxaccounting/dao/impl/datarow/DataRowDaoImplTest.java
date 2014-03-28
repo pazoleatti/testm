@@ -44,7 +44,7 @@ public class DataRowDaoImplTest {
 	public void cleanDataRow() {
         ReflectionTestUtils.setField(dataRowDao, "dbUtils", BDUtilsMock.getBDUtils());
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -137,7 +137,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void getSizeSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		Assert.assertEquals(5, dataRowDao.getSize(fd, null));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(4, dataRowDao.getSize(fd, null));
@@ -151,7 +151,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void getSavedSizeSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd, null));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd, null));
@@ -166,7 +166,7 @@ public class DataRowDaoImplTest {
 	@Test
 	public void saveRowsSuccess() {
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -221,7 +221,7 @@ public class DataRowDaoImplTest {
 	@Test(expected=DaoException.class)
 	public void updateRowsErrorDataRowId() {
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
 		List<DataRow<Cell>> dataRowsForUpdate = new ArrayList<DataRow<Cell>>();
 
@@ -376,7 +376,7 @@ public class DataRowDaoImplTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void maodifyAndSaveErrorDublicat() {
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, null);
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -453,7 +453,7 @@ public class DataRowDaoImplTest {
 	@Test
 	public void insertRowsByIndexFirstSuccess() {
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -480,7 +480,7 @@ public class DataRowDaoImplTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void insertRowsByIndexError() {
 
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -491,7 +491,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void insertRowsAfterFirstSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -519,7 +519,7 @@ public class DataRowDaoImplTest {
 	
 	@Test(expected=DaoException.class)
 	public void insertRowsAfterErrorRowId() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = fd.createDataRow();
@@ -583,7 +583,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void removeRowsByIndexes1Success() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 2, 4);
 		Assert.assertArrayEquals(
 				new int[] { 1, 5 },
@@ -592,19 +592,19 @@ public class DataRowDaoImplTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexesError1() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 0, 4);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexes1Error2() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 1, 6);
 	}
 
 	@Test
 	public void removeRowsByIndexes2Success() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 2, 5);
 		Assert.assertArrayEquals(
 				new int[] { 1 },
@@ -613,7 +613,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void removeRowsByIndexes3Success() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 1, 5);
 		Assert.assertArrayEquals(
 				new int[] {},
@@ -622,7 +622,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void removeRowsAll() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd);
 		Assert.assertArrayEquals(
 				new int[] {},
@@ -642,7 +642,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void getRowsSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
@@ -684,7 +684,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void getSavedRowsSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
 		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null,
 						null)));
@@ -851,7 +851,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void repackORDSuccessFirst() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		for (int i = 0; i < DataRowDaoImplUtils.DEFAULT_ORDER_STEP; i++) {
@@ -872,7 +872,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void repackORDSuccessCenter() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
         //int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
@@ -891,7 +891,7 @@ public class DataRowDaoImplTest {
 
 	@Test
 	public void repackORDSuccessLast() {
-		FormData fd = formDataDao.get(1);
+		FormData fd = formDataDao.get(1, false);
         int sizeBefore = dataRowDao.getSize(fd,null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
@@ -913,7 +913,7 @@ public class DataRowDaoImplTest {
     @Test
     public void repackORDWithRemoveRows(){
         //Prepare
-        FormData fd = formDataDao.get(1);
+        FormData fd = formDataDao.get(1, false);
         List<DataRow<Cell>> rowsBefore = dataRowDao.getRows(fd,null,null);
         List<Long> rowIdsBefore = new ArrayList<Long>();
         for (DataRow<Cell> row : rowsBefore){

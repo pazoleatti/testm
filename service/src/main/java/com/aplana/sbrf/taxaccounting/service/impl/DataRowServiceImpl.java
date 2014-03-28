@@ -32,27 +32,27 @@ public class DataRowServiceImpl implements DataRowService {
 
 	@Override
 	public PagingResult<DataRow<Cell>> getDataRows(
-			TAUserInfo userInfo, long formDataId, DataRowRange range,
-			boolean saved) {
+            TAUserInfo userInfo, long formDataId, DataRowRange range,
+            boolean saved, boolean manual) {
 		PagingResult<DataRow<Cell>> result = new PagingResult<DataRow<Cell>>();
-		FormData fd = formDataDao.get(formDataId);
+		FormData fd = formDataDao.get(formDataId, manual);
 		result.addAll(saved ? dataRowDao.getSavedRows(fd, null, range) : dataRowDao.getRows(fd, null, range));
 		result.setTotalCount(saved ? dataRowDao.getSavedSize(fd, null) : dataRowDao.getSize(fd, null));
 		return result;
 	}
 
 	@Override
-	public int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved) {
-		FormData fd = formDataDao.get(formDataId);
+	public int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved, boolean manual) {
+		FormData fd = formDataDao.get(formDataId, manual);
 		return saved ? dataRowDao.getSavedSize(fd, null) : dataRowDao.getSize(fd, null);
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows) {
+	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual) {
 		lockCoreService.checkLockedMe(FormData.class, formDataId, userInfo);
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
-			FormData fd = formDataDao.get(formDataId);
+			FormData fd = formDataDao.get(formDataId, manual);
 			dataRowDao.updateRows(fd, dataRows);
 		}
 	}

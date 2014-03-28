@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -64,10 +63,10 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormDataReport data = new FormDataReport();
-        FormData formData = formDataDao.get(formDataId);
+        FormData formData = formDataDao.get(formDataId, manual);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());

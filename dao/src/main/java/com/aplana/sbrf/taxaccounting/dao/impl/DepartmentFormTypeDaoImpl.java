@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -336,6 +337,22 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     },
                     Integer.class
                 ).size() > 0;
+    }
+
+    @Override
+    public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
+        return getJdbcTemplate().query("select fd.kind, d.name from form_data fd\n" +
+                "join department_form_type dft on (dft.department_id = fd.department_id and dft.kind = fd.kind)\n" +
+                "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
+                "join form_data_source fds on fds.department_form_type_id = dft.id\n" +
+                "join department d on d.id = fd.department_id\n" +
+                "where fds.src_department_form_type_id = (select id from department_form_type where department_id = ? and kind = ? and form_type_id = ?)\n" +
+                "and fd.report_period_id = ? and fd.state = 4", new RowMapper<Pair<String, String>>() {
+            @Override
+            public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new Pair<String, String>(FormDataKind.fromId(rs.getInt("KIND")).getName(), rs.getString("NAME"));
+            }
+        }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
     }
 
     @Override

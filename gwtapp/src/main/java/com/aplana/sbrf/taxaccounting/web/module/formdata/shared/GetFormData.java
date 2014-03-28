@@ -13,6 +13,7 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	private Long formDataId;
 
 	private boolean readOnly;
+    private Boolean manual;
 
 	public Long getFormDataId() {
 		return formDataId;
@@ -45,4 +46,11 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	}
 
 
+    public Boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(Boolean manual) {
+        this.manual = manual;
+    }
 }

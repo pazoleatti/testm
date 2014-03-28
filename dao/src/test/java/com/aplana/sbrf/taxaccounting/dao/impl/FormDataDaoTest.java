@@ -31,13 +31,13 @@ public class FormDataDaoTest {
 	@Test
 	public void testGet() {
 		@SuppressWarnings("unused")
-		FormData formData = formDataDao.get(1);
+		FormData formData = formDataDao.get(1, false);
 
 	}
 
 	@Test
 	public void testGetWithoutRows(){
-		FormData formData = formDataDao.get(1);
+		FormData formData = formDataDao.get(1, false);
 		FormData formDataWithoutRows = formDataDao.getWithoutRows(1);
 
 		Assert.assertEquals(Long.valueOf(1), formDataWithoutRows.getId());
@@ -66,7 +66,7 @@ public class FormDataDaoTest {
 		formData.setReportPeriodId(1);
 
 		long formDataId = formDataDao.save(formData);
-		formData = formDataDao.get(formDataId);
+		formData = formDataDao.get(formDataId, false);
 
 	}
 
@@ -90,7 +90,7 @@ public class FormDataDaoTest {
 		fd.setReportPeriodId(Constants.REPORT_PERIOD_ID);
 		long savedFormDataId = formDataDao.save(fd);
 
-		fd = formDataDao.get(savedFormDataId);
+		fd = formDataDao.get(savedFormDataId, false);
 		Assert.assertEquals("Изменился тип налоговой формы",
 				FormDataKind.SUMMARY, fd.getKind());
 		Assert.assertEquals("Изменилось подразделение", new Integer(
@@ -106,7 +106,7 @@ public class FormDataDaoTest {
 		long id = formDataDao.save(fd);
 		Assert.assertEquals("Изменился id", savedFormDataId, id);
 
-		fd = formDataDao.get(id);
+		fd = formDataDao.get(id, false);
 
 		Assert.assertEquals("Изменился тип налоговой формы",
 				FormDataKind.SUMMARY, fd.getKind());
@@ -120,7 +120,7 @@ public class FormDataDaoTest {
 
 		// Убеждаемся, что данные удалены
 		try {
-			fd = formDataDao.get(savedFormDataId);
+			fd = formDataDao.get(savedFormDataId, false);
 			Assert.fail("Данные не удалены!");
 		} catch (DaoException e) {
 			// Это нормально - записи нет в БД
@@ -148,7 +148,7 @@ public class FormDataDaoTest {
 
 	
 		long formDataId = formDataDao.save(formData);
-		formData = formDataDao.get(formDataId);
+		formData = formDataDao.get(formDataId, false);
 
 	}
 	
@@ -157,7 +157,7 @@ public class FormDataDaoTest {
 	public void editsSaveGetSuccess() {
 		FormData formData = fillFormData();
 		long formDataId = formDataDao.save(formData);
-		formData = formDataDao.get(formDataId);
+		formData = formDataDao.get(formDataId, false);
 
 	}
 	
@@ -201,7 +201,7 @@ public class FormDataDaoTest {
 	@Test
 	public void updateStateSuccess() {
 		formDataDao.updateState(1, WorkflowState.APPROVED);
-		Assert.assertEquals(WorkflowState.APPROVED, formDataDao.get(1).getState());
+		Assert.assertEquals(WorkflowState.APPROVED, formDataDao.get(1, false).getState());
 	}
 	
 	@Test(expected=DaoException.class)
@@ -212,9 +212,9 @@ public class FormDataDaoTest {
 	@Test
 	public void updateReturnSignSuccess() {
 		formDataDao.updateReturnSign(1, true);
-		Assert.assertTrue(formDataDao.get(1).isReturnSign());
+		Assert.assertTrue(formDataDao.get(1, false).isReturnSign());
 		formDataDao.updateReturnSign(1, false);
-		Assert.assertFalse(formDataDao.get(1).isReturnSign());
+		Assert.assertFalse(formDataDao.get(1, false).isReturnSign());
 	}
 	
 	@Test(expected=DaoException.class)
