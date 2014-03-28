@@ -19,6 +19,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -298,15 +299,20 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
 	@Override
 	public void setEnabled(boolean enabled) {
-		for (HasValue entry : widgets.values()) {
-			if (entry instanceof HasEnabled) {
-				((HasEnabled) entry).setEnabled(enabled);
-			}
-		}
+
+        if (widgets != null){
+            for (HasValue entry : widgets.values()) {
+                if (entry instanceof HasEnabled) {
+                    ((HasEnabled) entry).setEnabled(enabled);
+                }
+            }
+        }
+
         versionStart.setEnabled(!readOnly);
         versionEnd.setEnabled(!readOnly);
 		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
+        setReadOnlyMode(enabled);
 	}
 
     @Override
@@ -354,8 +360,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setReadOnlyMode(boolean readOnly) {
         this.readOnly = readOnly;
-        save.setVisible(!readOnly);
-        cancel.setVisible(!readOnly);
+        save.setVisible(readOnly);
+        cancel.setVisible(readOnly);
     }
 
     @Override

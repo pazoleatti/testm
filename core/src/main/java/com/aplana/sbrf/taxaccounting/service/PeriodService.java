@@ -254,4 +254,15 @@ public interface PeriodService {
 	 * @return  признак активности периода для подразделения
 	 */
 	boolean isPeriodOpen(int departmentId, long reportPeriodId);
+
+    /**
+     * Возвращает предыдущий отчетный период, не привязываясь к налоговому периоду,
+     * т.е. если запрашивают предыдущий отчетный период первого отчетного периода в налоговом,
+     * то функция возвращает последний отчетный период предыдущего налогового периода,
+     * если такой период не найден то null
+     *
+     * @param reportPeriodId
+     * @return предыдущий отчетный период
+     */
+    ReportPeriod getPrevReportPeriod(int reportPeriodId);
 }

@@ -6,4 +6,6 @@ public interface RefBookVersionUiHandlers extends UiHandlers {
 	void onAddRowClicked();
 	void onDeleteRowClicked();
 	void onSelectionChanged();
+    void onSetEditMode();
+    void onSetDefaultMode();
 }

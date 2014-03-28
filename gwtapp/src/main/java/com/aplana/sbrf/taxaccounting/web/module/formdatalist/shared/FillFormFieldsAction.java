@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -25,6 +26,7 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
     private FieldsNum fieldsNum;
 	private Long DepartmentId;
 	private List<Integer> reportPeriodId;
+    private List<FormDataKind> kinds;
 
     public FieldsNum getFieldsNum() {
         return fieldsNum;
@@ -65,4 +67,12 @@ public class FillFormFieldsAction extends UnsecuredActionImpl<FillFormFieldsResu
 	public void setReportPeriodId(List<Integer> reportPeriodId) {
 		this.reportPeriodId = reportPeriodId;
 	}
+
+    public List<FormDataKind> getKinds() {
+        return kinds;
+    }
+
+    public void setKinds(List<FormDataKind> kinds) {
+        this.kinds = kinds;
+    }
 }

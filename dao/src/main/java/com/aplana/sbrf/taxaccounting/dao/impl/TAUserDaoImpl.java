@@ -62,7 +62,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		TAUser user;
 		try {
 			user = getJdbcTemplate().queryForObject(
-				"select * from sec_user where id = ?",
+				"select id, login, name, department_id, is_active, email from sec_user where id = ?",
 				new Object[] { userId },
 				new int[] { Types.NUMERIC },
 				TA_USER_MAPPER
@@ -91,7 +91,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 				logger.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
 			List<TARole> userRoles = getJdbcTemplate().query(
-				"select * from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
+				"select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
 				new Object[] { user.getId() },
 				new int[] { Types.NUMERIC },
 				TA_ROLE_MAPPER

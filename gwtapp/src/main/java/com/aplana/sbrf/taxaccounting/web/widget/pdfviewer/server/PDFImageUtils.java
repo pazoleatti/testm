@@ -44,12 +44,12 @@ public final class PDFImageUtils {
 					BufferedImage.TYPE_BYTE_GRAY, imageResolution);
 			if (!ImageIOUtil.writeImage(bufferedImage, imageFormat, image)) {
 				throw new RuntimeException(
-						"Неудалось сформировать изображение для страницы "
+						"Не удалось сформировать изображение для страницы "
 								+ pageIndex);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(
-					"Неудалось сформировать изображение для страницы "
+					"Не удалось сформировать изображение для страницы "
 							+ pageIndex, e);
 		} finally {
 			if (pdDocument != null) {
@@ -74,7 +74,7 @@ public final class PDFImageUtils {
 			pdDocument = PDDocument.load(pdf);
 			return pdDocument.getDocumentCatalog().getAllPages().size();
 		} catch (Exception e) {
-			throw new RuntimeException("Неудалось получить количество страниц",
+			throw new RuntimeException("Не удалось получить количество страниц",
 					e);
 		} finally {
 			if (pdDocument != null) {

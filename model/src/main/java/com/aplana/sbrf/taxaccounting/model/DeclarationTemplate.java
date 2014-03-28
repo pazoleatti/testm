@@ -11,7 +11,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 
 	private DeclarationType type;
 	private Date version;
-	private boolean active;
 	private Integer edition;
     private String xsdId;
     private String jrxmlBlobId;
@@ -67,22 +66,6 @@ public class DeclarationTemplate extends IdentityObject<Integer> {
 	 */
 	public void setVersion(Date version) {
 		this.version = version;
-	}
-	
-	/**
-	 * Признак активности шаблона декларации
-	 * @return true - шаблон активен, false - шаблон неактивен
-	 */
-	public boolean isActive() {
-		return active;
-	}
-
-	/**
-	 * Задать признак активности декларации
-	 * @param active true - шаблон активен, false - шаблон неактивен
-	 */
-	public void setActive(boolean active) {
-		this.active = active;
 	}
 
 	/**

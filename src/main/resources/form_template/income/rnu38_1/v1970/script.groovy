@@ -53,7 +53,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -84,6 +86,16 @@ def totalColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercInc
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
+}
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
@@ -226,4 +238,79 @@ def getMonthEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
     }
     return endDate
+}
+
+// Получение импортируемых данных
+void importData() {
+    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
+    def xml = getXML(ImportInputStream, importService, fileName, 'Серия', 'Итого')
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : 'Серия',
+            (xml.row[0].cell[1]) : 'Количество, шт.',
+            (xml.row[0].cell[2]) : 'Дата открытия короткой позиции',
+            (xml.row[0].cell[3]) : 'Дата погашения предыдущего купона',
+            (xml.row[0].cell[4]) : 'Объявленный доход по текущему купону, руб.коп.',
+            (xml.row[0].cell[5]) : 'Текущий купонный период, дней',
+            (xml.row[0].cell[6]) : 'Доход с даты погашения предыдущего купона, руб.коп.',
+            (xml.row[0].cell[7]) : 'Доход с даты открытия короткой позиции, руб.коп.',
+            (xml.row[0].cell[8]) : 'Всего процентный доход, руб.коп.'
+    ]
+
+    (1..9).each { index ->
+        headerMapping.put((xml.row[1].cell[index - 1]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int colOffset = 0 // Смещение для индекса колонок в ошибках импорта
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount - 1) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = formDataService.addRow(formData, null, editableColumns, null)
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // графа 1
+        newRow.series = row.cell[0].text()
+        // графа 2
+        def xmlIndexCol = 1
+        newRow.amount = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 3
+        xmlIndexCol = 2
+        newRow.shortPositionDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 4
+        xmlIndexCol = 3
+        newRow.maturityDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 5
+        xmlIndexCol = 4
+        newRow.incomeCurrentCoupon = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 6
+        xmlIndexCol = 5
+        newRow.currentPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        dataRows.add(newRow)
+    }
+    dataRowHelper.save(dataRows)
 }

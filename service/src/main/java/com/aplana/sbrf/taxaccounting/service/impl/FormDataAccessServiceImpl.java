@@ -41,8 +41,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
     private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид налоговой формы не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
-    private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный вид налоговой формы не назначен подразделению!";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип налоговой формы не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид налоговой формы не назначен подразделению";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create manual version of form!";
@@ -157,23 +158,23 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // Если у пользователя нет доступа к выбранному виду формы, то система выводит сообщение в панель уведомления:
         // "Нет прав доступа к созданию формы с заданными параметрами".
         boolean foundTypeAndKind = false;
-        boolean foundType = false;
+        boolean foundKind = false;
         for (DepartmentFormType dft : sourceService.getDFTByDepartment(departmentId, formType.getTaxType())) {
-            if (dft.getFormTypeId() == formTypeId) {
-                foundType = true;
-                if (dft.getKind() == kind) {
+            if (dft.getKind() == kind) {
+                foundKind = true;
+                if (dft.getFormTypeId() == formTypeId) {
                     foundTypeAndKind = true;
                     break;
                 }
             }
         }
-        if (!foundType) {
-            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
-            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE1);
-        }
         if (!foundTypeAndKind) {
             logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
-            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE2);
+            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE3);
+        }
+        if (!foundKind) {
+            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(), departmentId));
+            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE1);
         }
 
         // Доступные типы форм

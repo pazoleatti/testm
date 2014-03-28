@@ -219,7 +219,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                 continue;
             }
             child.setMultiSelection(multiSelection);
-            CheckBox widget = (CheckBox) child.getWidget();
             treeItemsHash.put(child.getWidget(), child);
             child.getPanel().getElement().addClassName(style.msiTreeItem());
         }

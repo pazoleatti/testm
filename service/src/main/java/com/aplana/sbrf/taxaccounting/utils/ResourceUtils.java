@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Утилитный класс для получения удаленных ресурсов
@@ -19,12 +21,14 @@ public class ResourceUtils {
     public static FileWrapper getSharedResource(String uri) {
         try {
             if (uri.startsWith("smb:")) {
-                return new FileWrapper(new SmbFile(uri));
+                String checkedUri = Pattern.compile("smb:/*").matcher(uri).replaceFirst("smb://");
+                return new FileWrapper(new SmbFile(checkedUri));
             } else {
                 if (!uri.startsWith("file:")) {
-                    uri = "file:" + uri ;
+                    uri = "file:///" + uri ;
                 }
-                URL url = new URL(uri);
+                String checkedUri = Pattern.compile("file:/*").matcher(uri).replaceFirst("file:///");
+                URL url = new URL(checkedUri);
                 File file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
                 if (file.exists()) {
                     return new FileWrapper(file);
@@ -42,13 +46,15 @@ public class ResourceUtils {
     public static InputStream getSharedResourceAsStream(String uri) {
         try {
             if (uri.startsWith("smb:")) {
-                SmbFile file = new SmbFile(uri);
+                String checkedUri = Pattern.compile("smb:/*").matcher(uri).replaceFirst("smb://");
+                SmbFile file = new SmbFile(checkedUri);
                 return file.getInputStream();
             } else {
                 if (!uri.startsWith("file:")) {
-                    uri = "file:" + uri ;
+                    uri = "file:///" + uri ;
                 }
-                URL url = new URL(uri);
+                String checkedUri = Pattern.compile("file:/*").matcher(uri).replaceFirst("file:///");
+                URL url = new URL(checkedUri);
                 return url.openStream();
             }
         } catch (MalformedURLException e) {

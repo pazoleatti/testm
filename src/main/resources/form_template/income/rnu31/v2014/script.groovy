@@ -33,6 +33,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
+        calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
@@ -56,8 +57,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT :
-    case FormDataEvent.MIGRATION :
         importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -76,6 +78,20 @@ def getNumber(def value, def indexRow, def indexCol) {
 }
 
 void calc() {
+    // Проверка наличия формы за предыдущий период начиная с отчета за 2-й отчетный период,
+    // т.е. проверка отчёта за январь не осуществляется
+    if (formData.periodOrder != 1) {
+        def prevFormData = formDataService.getFormDataPrev(formData, formData.departmentId)
+        if (prevFormData == null || prevFormData.state != WorkflowState.ACCEPTED) {
+            logger.error("Отсутствует предыдущий экземпляр отчета!")
+            return
+        }
+    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def row = getDataRow(dataRows, 'total')
+    row.number = formData.periodOrder
+    dataRowHelper.update(dataRows)
 }
 
 void logicCheck() {
@@ -86,48 +102,35 @@ void logicCheck() {
     // строка из текущего отчета
     def row = getDataRow(dataRows, 'total')
 
-    // 22. Обязательность заполнения полей графы 3..12
+    // 1. Обязательность заполнения полей графы 3..12
     checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-    // графы для которых тип ошибки нефатальный (графа 5, 9, 10, 11)
-    def warnColumns = ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']
+    // 2. Проверка на уникальность поля «№ п.п»
+    if (formData.periodOrder != row.number) {
+        logger.error("Нарушена уникальность номера по порядку!")
+    }
 
-    if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY) {
+    // 3-12. Проверка процентного (купонного) дохода по виду ценной бумаги
+    if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
 
-        // 1. Проверка наличия предыдущего экземпляра отчета
-        if (rowOld == null && formDataEvent != FormDataEvent.COMPOSE) {
-            logger.error("Не найдены экземпляры «${formTypeService.get(328).name}» за прошлый отчетный период!")
-        }
-
-        // 2..11 Проверка процентного (купонного) дохода по видам валютных ценных бумаг (графы 3..12)
         if (rowOld != null) {
             for (def column : editableColumns) {
                 if (row.getCell(column).value < rowOld.getCell(column).value) {
                     def securitiesType = row.securitiesType
-                    def message = "Процентный (купонный) доход по $securitiesType уменьшился!"
-                    if (column in warnColumns) {
-                        logger.warn(message)
-                    } else {
-                        logger.error(message)
-                    }
+                    logger.error("Процентный (купонный) доход по «$securitiesType» уменьшился!")
                 }
             }
         }
     }
 
-    // 12..21. Проверка на неотрицательные значения (графы 3..12)
+    // 14-22. Проверка на неотрицательные значения
     for (def column : editableColumns) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
-            def message = "Значения графы \"$columnName\" по строке 1 отрицательное!"
-            if (column in warnColumns) {
-                logger.warn(message)
-            } else {
-                logger.error(message)
-            }
+            logger.error("Значения графы «$columnName» по строке 1 отрицательное!")
         }
     }
 }
@@ -160,120 +163,87 @@ void consolidation() {
 }
 
 void importData() {
-    try {
-        // добавить данные в форму
-        def totalLoad = addData(getXML())
-        // рассчитать, проверить и сравнить итоги
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (totalLoad != null) {
-                checkTotalRow(totalLoad)
-            } else {
-                logger.error("Нет итоговой строки.")
-            }
-        }
-    } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
-    }
+
+    def xml = getXML('№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[1]): 'Ставка налога на прибыль',
+            (xml.row[0].cell[2]): '15%',
+            (xml.row[0].cell[6]): '9%',
+            (xml.row[0].cell[8]): '0%',
+            (xml.row[0].cell[9]): '20%',
+
+            (xml.row[1].cell[1]): 'Вид ценных бумаг',
+            (xml.row[1].cell[2]): 'ОФЗ',
+            (xml.row[1].cell[3]): 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет',
+            (xml.row[1].cell[4]): 'Государственные облигации Республики Беларусь',
+            (xml.row[1].cell[5]): 'Ипотечные облигации, выпущенные после 1 января 2007 года',
+            (xml.row[1].cell[6]): 'Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет',
+            (xml.row[1].cell[7]): 'Ипотечные облигации, выпущенные до 1 января 2007 года',
+            (xml.row[1].cell[8]): 'ОВГВЗ',
+            (xml.row[1].cell[9]): 'Еврооблигации РФ',
+            (xml.row[1].cell[10]): 'Прочие еврооблигации',
+            (xml.row[1].cell[11]): 'Корпоративные облигации',
+
+            (xml.row[2].cell[0]): '1',
+            (xml.row[2].cell[1]): '2',
+            (xml.row[2].cell[2]): '3',
+            (xml.row[2].cell[3]): '4',
+            (xml.row[2].cell[4]): '5',
+            (xml.row[2].cell[5]): '6',
+            (xml.row[2].cell[6]): '7',
+            (xml.row[2].cell[7]): '8',
+            (xml.row[2].cell[8]): '9',
+            (xml.row[2].cell[9]): '10',
+            (xml.row[2].cell[10]): '11',
+            (xml.row[2].cell[11]): '12'
+    ]
+
+    checkHeaderEquals(headerMapping)
+    addData(xml,3)
 }
 
 // Заполнить форму данными
-def addData(def xml) {
+def addData(def xml, int headRowCount) {
+
     if (xml.row.size() > 0) {
-        def row = xml.row[0]
-        def indexCell = 3
+        def xmlRow = xml.row[3]
+        def indexCell = 2
         def indexRow = 1
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
-        def newRow = dataRows.get(0)
+        def row = getDataRow(dataRows, 'total')
 
-        // графа 1
-        newRow.number = 1
-        // графа 2
-        newRow.securitiesType = 'Процентный (купонный) доход по облигациям'
         // графа 3
-        newRow.ofz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.ofz = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 4
-        newRow.municipalBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.municipalBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 5
-        newRow.governmentBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.governmentBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 6
-        newRow.mortgageBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.mortgageBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 7
-        newRow.municipalBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.municipalBondsBefore = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 8
-        newRow.rtgageBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.rtgageBondsBefore = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 9
-        newRow.ovgvz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.ovgvz = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 10
-        newRow.eurobondsRF = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.eurobondsRF = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 11
-        newRow.itherEurobonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.itherEurobonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
         // графа 12
-        newRow.corporateBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
+        row.corporateBonds = getNumber(xmlRow.cell[indexCell++].text(), indexRow, indexCell + 1)
+
         dataRowHelper.save(dataRows)
-    }
-
-    // итоговая строка
-    if (xml.rowTotal.size() > 0) {
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-        def indexCell = 3
-        def indexRow = 1
-
-        // графа 3
-        total.ofz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 4
-        total.municipalBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 5
-        total.governmentBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 6
-        total.mortgageBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 7
-        total.municipalBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 8
-        total.rtgageBondsBefore = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 9
-        total.ovgvz = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 10
-        total.eurobondsRF = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 11
-        total.itherEurobonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        // графа 12
-        total.corporateBonds = getNumber(row.cell[indexCell++].text(), indexRow, indexCell + 1)
-        return total
-    } else {
-        return null
-    }
-
-}
-
-/**
- * Расчетать, проверить и сравнить итоги.
- *
- * @param totalRow итоговая строка из транспортного файла
- */
-void checkTotalRow(def totalRow) {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    def totalColumns = [3 : 'ofz', 4 : 'municipalBonds', 5 : 'governmentBonds',
-            6 : 'mortgageBonds', 7 : 'municipalBondsBefore', 8 : 'rtgageBondsBefore',
-            9 : 'ovgvz', 10 : 'eurobondsRF', 11 : 'itherEurobonds', 12 :'corporateBonds']
-    def totalCalc = dataRows.get(0)
-    def errorColums = []
-    if (totalCalc != null) {
-        totalColumns.each { index, columnAlias ->
-            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
-                errorColums.add(index)
-            }
-        }
-    }
-    if (!errorColums.isEmpty()) {
-        def columns = errorColums.join(', ')
-        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
 // Получение xml с общими проверками
-def getXML() {
+def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
     if (fileName == null || fileName == '') {
         throw new ServiceException('Имя файла не должно быть пустым')
@@ -282,16 +252,16 @@ def getXML() {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.contains('.r')) {
-        throw new ServiceException('Формат файла должен быть *.rnu')
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
     }
-    def xmlString = importService.getData(is, fileName, 'cp866')
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }

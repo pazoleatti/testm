@@ -12,7 +12,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -30,7 +32,9 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
@@ -47,8 +51,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     private Long recordId;
     private Integer page;
+    private boolean editMode;
 
 	EditFormPresenter editFormPresenter;
+    RefBookVersionPresenter versionPresenter;
 
 	private final DispatchAsync dispatcher;
 	private final TaPlaceManager placeManager;
@@ -70,15 +76,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void setReadOnlyMode(boolean readOnly);
         public int getPage();
         public void setPage(int page);
+        /** Показ формы в режиме редактирования */
+        public void setEditMode();
+        /** Показ формы в режиме просмотра */
+        public void setDefaultMode();
+        /** установить видимость кнопки редактирования */
+        public void setVisibleEditLink(boolean visible);
     }
 
 	@Inject
-	public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager, final MyProxy proxy,
+	public RefBookDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, RefBookVersionPresenter versionPresenter, PlaceManager placeManager, final MyProxy proxy,
 	                            DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.editFormPresenter = editFormPresenter;
+        this.versionPresenter = versionPresenter;
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize(), dataProvider);
 	}
@@ -164,6 +177,13 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		editFormPresenter.setEnabled(false);
 	}
 
+    @Override
+    public void onBackClicked() {
+        refBookDataId = null;
+        recordId = null;
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
+    }
+
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
@@ -177,6 +197,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         } else {
             recordId = null;
             page = null;
+            onSetDefaultMode();
         }
 		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
@@ -187,7 +208,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                getView().setReadOnlyMode(result.isReadOnly());
+                                getView().setVisibleEditLink(!result.isReadOnly() && !editMode);
+                                getView().setReadOnlyMode(!(editMode && !result.isReadOnly()));
 								editFormPresenter.init(refBookDataId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}
@@ -245,5 +267,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public boolean useManualReveal() {
         return true;
+    }
+
+
+    @Override
+    public void onSetEditMode(){
+        editMode = true;
+        getView().setEditMode();
+        editFormPresenter.onSetEditMode();
+        versionPresenter.onSetEditMode();
+    }
+
+    @Override
+    public void onSetDefaultMode(){
+        editMode = false;
+        getView().setDefaultMode();
+        editFormPresenter.onSetDefaultMode();
+        versionPresenter.onSetDefaultMode();
     }
 }

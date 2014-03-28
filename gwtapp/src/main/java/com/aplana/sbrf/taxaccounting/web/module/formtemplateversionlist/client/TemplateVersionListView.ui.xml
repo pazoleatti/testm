@@ -11,6 +11,12 @@
             white-space: nowrap;
         }
 
+        .labelKind {
+            font-size: 14px !important;
+            color:  #636460;
+            margin-left: 10px;
+        }
+
         .titleText div {
             font-size: 14px !important;
         }
@@ -33,7 +39,7 @@
             bottom: 30px;
             right: 0;
             left: 0;
-            top: 39px;
+            top: 50px;
         }
     </ui:style>
 
@@ -58,6 +64,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
+                <g:Label ui:field="versionKind" addStyleNames="{style.labelKind}"/>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <style:LinkButton text="Создать версию" ui:field="createVersion"/>
                     <style:LinkButton text="Удалить версию" ui:field="deleteVersion" enabled="false"/>

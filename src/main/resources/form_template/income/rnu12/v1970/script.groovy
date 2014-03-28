@@ -289,6 +289,11 @@ void logicCheck() {
             logger.error(errorMsg + 'Неправильно указан номер первой записи (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
         }
 
+        // 7. Проверка на уникальность поля «№ пп» (графа 1)
+        if (++i != row.rowNumber) {
+            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
+        }
+
         needValue['outcomeInNalog'] = calc11(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
     }

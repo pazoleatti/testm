@@ -73,8 +73,8 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
             }
         };
 
-        formDataTable.addColumn(nameColumn, COLUMN_NAMES[0]);
-        formDataTable.addColumn(typeColumn, COLUMN_NAMES[1]);
+        formDataTable.addResizableColumn(nameColumn, COLUMN_NAMES[0]);
+        formDataTable.addResizableColumn(typeColumn, COLUMN_NAMES[1]);
         formDataTable.setColumnWidth(typeColumn, 400, Style.Unit.PX);
     }
 

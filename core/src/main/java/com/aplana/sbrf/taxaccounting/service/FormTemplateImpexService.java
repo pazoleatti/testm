@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -8,18 +10,17 @@ public interface FormTemplateImpexService {
 	/**
 	 * Экспорт
 	 * 
-	 * @param id
-	 * @return
+	 * @param id идентификатори макета
 	 */
 	void exportFormTemplate(Integer id, OutputStream os);
 	
 	/**
 	 * Импорт
 	 * 
-	 * @param id
-	 * @param is
+	 * @param id идентификатори макета
+	 * @param is импортирующийся архив
 	 */
-	void importFormTemplate(Integer id, InputStream is);
+	FormTemplate importFormTemplate(Integer id, InputStream is);
 
 
 }

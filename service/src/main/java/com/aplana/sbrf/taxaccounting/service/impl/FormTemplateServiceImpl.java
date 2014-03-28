@@ -12,12 +12,14 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -31,11 +33,10 @@ import java.util.*;
 @Service
 @Transactional
 public class FormTemplateServiceImpl implements FormTemplateService {
-	private static final int FORM_VERSION_MAX_VALUE = 20;
+	//private static final int FORM_VERSION_MAX_VALUE = 20;
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
-	private static final int FORM_COLUMN_GROUP_NAME_MAX_VALUE = 1000;
 	//TODO: надо подумать как хендлить длину строковой ячейки и нужно ли это тут
 	//private static final int FORM_COLUMN_CHK_MAX_VALUE = 500;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
@@ -79,9 +80,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             return formTemplateDao.saveNew(formTemplate);
 	}
 
-	@Override
+
+
+    @Override
 	public int getActiveFormTemplateId(int formTypeId, int reportPeriodId) {
-		return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
+        try {
+            return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении активного шаблона НФ.", e);
+        }
+
 	}
 
 	@Override
@@ -163,7 +171,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public List<FormTemplate> getFormTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
 
-        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, 0, statusList, null, null);
+        List<Integer> formTemplateIds =  formTemplateDao.getFormTemplateVersions(formTypeId, statusList);
         List<FormTemplate> formTemplates = new ArrayList<FormTemplate>();
         for (Integer id : formTemplateIds)
             formTemplates.add(formTemplateDao.get(id));
@@ -171,19 +179,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return formTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 
     @Override
-    public int delete(FormTemplate formTemplate) {
-        switch (formTemplate.getStatus()){
-            case FAKE:
-                return formTemplateDao.delete(formTemplate.getId());
-            default:
-                formTemplate.setStatus(VersionedObjectStatus.DELETED);
-                return formTemplateDao.save(formTemplate);
-        }
+    public int delete(int formTemplateId) {
+        return formTemplateDao.delete(formTemplateId);
     }
 
     @Override
@@ -191,7 +193,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         //formTemplate.setVersion(addCalendar(Calendar.DAY_OF_YEAR, 1, formTemplate.getVersion()));
-        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), formTemplate.getVersion());
+        int id = formTemplateDao.getNearestFTVersionIdRight(formTemplate.getType().getId(), createStatusList(status), formTemplate.getVersion());
         if (id == 0)
             return null;
         return formTemplateDao.get(id);
@@ -209,6 +211,28 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public int versionTemplateCount(int formTypeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return formTemplateDao.versionTemplateCount(formTypeId, statusList);
+    }
+
+    @Override
+    public void update(List<FormTemplate> formTemplates) {
+        try {
+            if (ArrayUtils.contains(formTemplateDao.update(formTemplates), 0))
+                throw new ServiceException("Не все записи макета обновились.");
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка обновления версий.", e);
+        }
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        if (formTypeIds.isEmpty())
+            return integerMap;
+        List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override

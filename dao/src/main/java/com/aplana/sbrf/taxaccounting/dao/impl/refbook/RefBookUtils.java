@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -127,6 +128,7 @@ public class RefBookUtils extends AbstractDao {
      * @param isSortAscending
      * @return
      */
+	//TODO вместо PARENT_ID использовать com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS (Marat Fayzullin 26.03.2014)
     private PreparedStatementData getChildRecordsQuery(RefBook refBook, String tableName, Long parentId, RefBookAttribute sortAttribute,
                                                 String filter, PagingParams pagingParams, boolean isSortAscending) {
         String orderBy = "";
@@ -161,16 +163,22 @@ public class RefBookUtils extends AbstractDao {
         simpleFilterTreeListener.setRefBook(refBook);
         simpleFilterTreeListener.setPs(filterPS);
 
+        ps.appendQuery(")");
+
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
+            if (parentId == null) {
+                ps.appendQuery("PARENT_ID is null or (");
+            }
             ps.appendQuery(filterPS.getQuery().toString());
             if (filterPS.getParams().size() > 0) {
                 ps.addParam(filterPS.getParams());
             }
+            if (parentId == null) {
+                ps.appendQuery(")");
+            }
         }
-
-        ps.appendQuery(")");
 
         if (pagingParams != null) {
 			ps.appendQuery(" WHERE ");

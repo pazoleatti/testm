@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.Editor;
@@ -69,10 +72,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	Label title;
 
 	@UiField
-    @Path("declarationTemplate.active")
-	CheckBox active;
-
-	@UiField
     @Path("declarationTemplate.createScript")
 	CodeMirror createScript;
 
@@ -95,8 +94,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Editor.Ignore
     Anchor downloadJrxmlButton;
+    @UiField
+    LinkAnchor returnAnchor;
 
-	@Inject
+    @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -181,7 +182,20 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().close();
+        if (getUiHandlers() == null)
+            return;
+        Dialog.confirmMessage(getUiHandlers().getDeclarationId() != 0 ? "Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
+                new DialogHandler() {
+                    @Override
+                    public void no() {
+                        getUiHandlers().close();
+                    }
+
+                    @Override
+                    public void yes() {
+                        getUiHandlers().save();
+                    }
+                });
 	}
 
 	@UiHandler("downloadJrxmlButton")
@@ -198,6 +212,15 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     public void onActivatetButton(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().activate(false);
+    }
+
+    @UiHandler("returnAnchor")
+    void onReturnAnchor(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().close();
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
 }

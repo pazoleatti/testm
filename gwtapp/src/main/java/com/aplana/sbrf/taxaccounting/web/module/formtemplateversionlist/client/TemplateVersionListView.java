@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Anchor;
@@ -34,13 +36,16 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
 
     @UiField
-    CellTable<FormTemplateVersion> ftVersionCellTable;
+    GenericCellTable<FormTemplateVersion> ftVersionCellTable;
 
     @UiField
     Anchor returnAnchor;
 
     @UiField
     Label versionLabel;
+
+    @UiField
+    Label versionKind;
 
     @UiField
     LinkButton deleteVersion;
@@ -68,7 +73,7 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
                             return;
                         }
                         sb.appendHtmlConstant("<a href=\"#"
-                                + AdminConstants.NameTokens.formTemplateInfoPage + ";"
+                                + AdminConstants.NameTokens.formTemplateMainPage + ";"
                                 + AdminConstants.NameTokens.formTemplateId + "="
                                 + formTemplateVersion.getFormTemplateId() + "\">"
                                 + formTemplateVersion.getTypeName() + "</a>");
@@ -80,23 +85,23 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             }
         };
 
-        ftVersionCellTable.addColumn(linkColumn, "Наименование");
+        ftVersionCellTable.addResizableColumn(linkColumn, "Наименование");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return String.valueOf(object.getVersionNumber());
             }
         }, "Версия");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualBeginVersionDate();
             }
         }, "Начало актуального периода");
 
-        ftVersionCellTable.addColumn(new TextColumn<FormTemplateVersion>() {
+        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualEndVersionDate();
@@ -125,6 +130,11 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
         selectionModel.clear();
     }
 
+    @Override
+    public void setKindLabel(String kindLabel) {
+        versionKind.setText(kindLabel);
+    }
+
     @UiHandler("createVersion")
     void onCreateVersionClick(ClickEvent event){
         if (getUiHandlers() != null)
@@ -133,8 +143,13 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     @UiHandler("deleteVersion")
     void onDeleteVersion(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteVersion();
+        Dialog.confirmMessage("Удаление версии макета", "Вы подтверждаете удаление версии макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null)
+                    getUiHandlers().onDeleteVersion();
+            }
+        });
     }
 
     @UiHandler("historyVersion")

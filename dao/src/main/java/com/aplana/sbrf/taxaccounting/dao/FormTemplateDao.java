@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO-Интерфейс для работы с макетами налоговых форм
@@ -31,6 +33,14 @@ public interface FormTemplateDao {
 	 * @return идентификатор сохранённой записи
 	 */
 	int save(FormTemplate formTemplate);
+
+    /**
+     * Обновление данных версий макетов
+     * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * @param formTemplates объект шаблона декларации
+     * @return массив успешных апдейтов обновленных версий (0 - неуспешный, 1 - успешный)
+     */
+    int[] update(List<FormTemplate> formTemplates);
 	
 	/**
 	 * Возвращает идентификатор действующего {@link FormTemplate описания налоговой формы} по виду налоговой формы
@@ -78,11 +88,10 @@ public interface FormTemplateDao {
     /**
      * Получает список id версий макета по типу шаблона и статусу версии.
      * @param formTypeId вид шаблона
-     * @param formTemplateId идентификатор шаблона, котрый исключить из поиска, если нет такого то 0
      * @param statusList статус формы
      * @return список версий
      */
-    List<Integer> getFormTemplateVersions(int formTypeId, int formTemplateId, List<Integer> statusList, Date actualStartVersion, Date actualEndVersion);
+    List<Integer> getFormTemplateVersions(int formTypeId, List<Integer> statusList);
 
     /**
      * Метод для поиска пересечений версий макетов в указанных датах
@@ -93,7 +102,7 @@ public interface FormTemplateDao {
      * @param actualEndVersion дата окончания
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
 
     /**
      * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
@@ -111,7 +120,7 @@ public interface FormTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestFTVersionIdRight(int formTypeId, Date actualBeginVersion);
+    int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
@@ -143,6 +152,20 @@ public interface FormTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, List<Integer> statusList);
+
+    /**
+     * Количество активных весий для вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество
+     */
+    List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeId);
+
+    /**
+     * Получает номер последней редакции макета.
+     * @param formTypeId  вид шаблона
+     * @return номер последней редакции шаблона
+     */
+    int getLastVersionEdition(int formTypeId);
 
     int updateVersionStatus(int versionStatus, int formTemplateId);
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -12,6 +13,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
@@ -33,7 +36,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
-    private Calendar calendar = Calendar.getInstance();
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -59,9 +61,24 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 		return declarationTemplateDao.save(declarationTemplate);
 	}
 
-	@Override
+    @Override
+    public void update(List<DeclarationTemplate> declarationTemplates) {
+        try {
+            if (ArrayUtils.contains(declarationTemplateDao.update(declarationTemplates), 0))
+                throw new ServiceException("Не все записи макета обновились.");
+        } catch (DaoException e){
+            throw new ServiceException("Ошибки при обновлении списка версий макета.",e);
+        }
+    }
+
+    @Override
 	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
-		return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
+        try {
+            return declarationTemplateDao.getActiveDeclarationTemplateId(declarationTypeId, reportPeriodId);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при получении активного шаблона декларации.", e);
+        }
+
 	}
 
 	@Override
@@ -144,27 +161,21 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
-    public List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
+    public List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion) {
         return declarationTemplateDao.findFTVersionIntersections(typeId, templateId, actualBeginVersion, actualEndVersion);
     }
 
     @Override
-    public int delete(DeclarationTemplate declarationTemplate) {
-        switch (declarationTemplate.getStatus()){
-            case FAKE:
-                return declarationTemplateDao.delete(declarationTemplate.getId());
-            default:
-                declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
-                return declarationTemplateDao.save(declarationTemplate);
-        }
+    public int delete(int declarationTemplateId) {
+        return declarationTemplateDao.delete(declarationTemplateId);
     }
 
     @Override
     public DeclarationTemplate getNearestDTRight(int declarationTemplateId, VersionedObjectStatus... status) {
-        List<Integer> statusList = createStatusList(status);
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
+        int id = declarationTemplateDao.getNearestDTVersionIdRight(declarationTemplate.getType().getId(), createStatusList(status),
+                declarationTemplate.getVersion());
         if (id == 0)
             return null;
         return declarationTemplateDao.get(id);
@@ -174,7 +185,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public Date getDTEndDate(int declarationTemplateId) {
         if (declarationTemplateId == 0)
             return null;
-        List<Integer> statusList = createStatusList(new VersionedObjectStatus[]{});
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
         return declarationTemplateDao.getDTVersionEndDate(declarationTemplateId, declarationTemplate.getType().getId(), declarationTemplate.getVersion());
@@ -184,6 +194,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     public int versionTemplateCount(int typeId, VersionedObjectStatus... status) {
         List<Integer> statusList = createStatusList(status);
         return declarationTemplateDao.versionTemplateCount(typeId, statusList);
+    }
+
+    @Override
+    public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
+        Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
+        for (Map<String, Object> map : mapList){
+            integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
+        }
+        return integerMap;
     }
 
     @Override
@@ -220,13 +240,5 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
 
         return statusList;
-    }
-
-    private Date addCalendar(int fieldNumber, int numberDays, long actualDate){
-        calendar.setTime(new Date(actualDate));
-        calendar.add(fieldNumber, numberDays);
-        Date time = calendar.getTime();
-        calendar.clear();
-        return time;
     }
 }

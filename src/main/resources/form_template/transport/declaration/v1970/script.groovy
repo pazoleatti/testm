@@ -105,12 +105,11 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     Период: 34,
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
-                    // TODO учесть что потом будут корректирующие периоды
-                    НомКорр: "0",
-                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE.CODE
+                    НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.getReportPeriodId(), departmentId),
+                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE?.CODE
             ) {
-                Integer formReorg = departmentParamTransport.REORG_FORM_CODE.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue) : 0;
-                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE.CODE]
+                Integer formReorg = departmentParamTransport.REORG_FORM_CODE?.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue) : 0;
+                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE?.CODE]
                 if (departmentParamTransport.OKVED_CODE) {
                     svnp.Тлф = departmentParamTransport.PHONE
                 }
@@ -122,7 +121,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                         if (!departmentParamTransport.REORG_FORM_CODE.toString().equals("")) {
                             СвРеоргЮЛ(
-                                    ФормРеорг: departmentParamTransport.REORG_FORM_CODE.CODE,
+                                    ФормРеорг: departmentParamTransport.REORG_FORM_CODE?.CODE,
                                     ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN : 0),
                                     КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_KPP : 0)
                             )
@@ -130,14 +129,14 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     }
                 }
 
-                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID.CODE) {
+                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID?.CODE) {
                     ФИО(
                             "Фамилия": departmentParamTransport.SIGNATORY_SURNAME,
                             "Имя": departmentParamTransport.SIGNATORY_FIRSTNAME,
                             "Отчество": departmentParamTransport.SIGNATORY_LASTNAME
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParamTransport.SIGNATORY_ID.CODE.getNumberValue() == 2) {
+                    if (departmentParamTransport.SIGNATORY_ID?.CODE?.getNumberValue() == 2) {
                         def svPred = ["НаимДок": departmentParamTransport.APPROVE_DOC_NAME]
                         if (departmentParamTransport.APPROVE_ORG_NAME)
                             svPred.НаимОрг = departmentParamTransport.APPROVE_ORG_NAME
@@ -448,6 +447,8 @@ def getModRefBookValue(refBookId, filter, date = getReportPeriodEndDate()) {
         if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
             def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
             record[attr.alias] = attrProvider.getRecordData(ref);
+        } else if (attr.attributeType == RefBookAttributeType.REFERENCE && ref == null) {
+            record[attr.alias] = null
         }
     }
     record

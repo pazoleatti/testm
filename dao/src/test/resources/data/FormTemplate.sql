@@ -1,9 +1,9 @@
-insert into form_template (id, type_id, data_rows, version, is_active, edition, monthly, fixed_rows, name, fullname, code, status)
-  values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 0);
-insert into form_template (id, type_id, data_rows, version, is_active, edition, monthly, fixed_rows, name, fullname, code, status)
-  values (2, 2, null, to_date('01.01.2014 12.01.01', 'DD.MM.YY HH.MI.SS'), 0, 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
-insert into form_template (id, type_id, data_rows, version, is_active, edition, monthly, fixed_rows, name, fullname, code, status)
-  values (3, 2, null, date '2015-01-01', 0, 1, 0, 0, 'name_3', 'fullname_3', 'code_2', 1);
+insert into form_template (id, type_id, data_rows, version, edition, monthly, fixed_rows, name, fullname, code, status)
+  values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 0, 1, 'name_1', 'fullname_1', 'code_1', 0);
+insert into form_template (id, type_id, data_rows, version, edition, monthly, fixed_rows, name, fullname, code, status)
+  values (2, 2, null, to_date('01.01.2014 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
+insert into form_template (id, type_id, data_rows, version, edition, monthly, fixed_rows, name, fullname, code, status)
+  values (3, 2, null, date '2015-01-01', 2, 0, 0, 'name_3', 'fullname_3', 'code_2', 1);
 
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, null, 500, 1);

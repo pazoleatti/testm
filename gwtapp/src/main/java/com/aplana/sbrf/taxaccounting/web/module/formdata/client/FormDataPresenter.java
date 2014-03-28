@@ -236,11 +236,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onFailure(Throwable caught) {
 					modifiedRows.clear();
-					getView().updateData();
 				}
 
 			};
-			return showMsg ? CallbackUtils.defaultCallback(callback, this) : 
+			return showMsg ? CallbackUtils.defaultCallback(callback, this) :
 				CallbackUtils.defaultCallbackNoModalError(callback, this);
 	}
 	

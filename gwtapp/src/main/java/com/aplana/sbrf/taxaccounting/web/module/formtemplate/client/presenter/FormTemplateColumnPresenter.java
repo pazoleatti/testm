@@ -70,7 +70,7 @@ public class FormTemplateColumnPresenter
 	public void onSet(FormTemplateSetEvent event) {
 		boolean isFormChanged = true;
         if (formTemplate != null) {
-            isFormChanged = !formTemplate.getId().equals(event.getFormTemplateExt().getFormTemplate().getId());
+            isFormChanged = formTemplate.getId() != null && !formTemplate.getId().equals(event.getFormTemplateExt().getFormTemplate().getId());
         }
         formTemplate = event.getFormTemplateExt().getFormTemplate();
 
@@ -109,7 +109,7 @@ public class FormTemplateColumnPresenter
 	/**
 	 * Исправляем значение alias чтобы небыло дубликатов
 	 * 
-	 * @param column
+	 * @param column столбец
 	 */
 	private void fixAlias(Column column) {
 		int i = 0;

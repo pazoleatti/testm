@@ -112,22 +112,5 @@ public class ReportPeriodServiceTest {
         reportPeriod.setOrder(order);
 		return reportPeriod;
 	}
-	
-	/*
-	 * Тест получения из текущего налогового периода 
-	 */
-	@Test
-	public void getPrevReportPeriodInSide(){
-		assertNotNull(service.getPrevReportPeriod(2));
-		assertTrue(service.getPrevReportPeriod(2).getId() == 1);
-	}
-	
-	/*
-	 * Тест получения из предыдущего налогового периода 
-	 */
-	@Test
-	public void getPrevReportPeriodOutSide(){
-		assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 4);
-	}
 
 }

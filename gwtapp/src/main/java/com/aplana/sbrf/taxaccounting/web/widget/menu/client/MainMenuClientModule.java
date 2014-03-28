@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
-import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.client.DialogView;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogView;
 import com.google.inject.Singleton;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 

@@ -43,39 +43,54 @@
             height: 100% !important;
         }
 
-        .mainVertical {
-            background-color: #E8E1CF;
-            width: 100%;
-            height: 100%;
-        }
-
-        .forScroll {
-            border: 1px solid;
-            margin: 0 10px;
-            background-color: #ffffff;
-            width: 600px !important;
-            height: 350px !important;
-        }
-
-        .forMargin0 {
-            margin: 0;
-        }
-
-        .forFind2 {
-            margin-top: 8px;
-        }
-
-        .forVersion {
-            margin-right: 5px;
-        }
-
         .forCountSelected {
             font-weight: bold;
             margin: 0 20px 0 5px;
         }
 
-        .forCancel {
-            margin: 0 0 0 10px;
+        .mainPanel {
+            background-color: #E8E1CF;
+            position: absolute !important;
+            top: 35px;
+            left: 10px;
+            right: 10px;
+            bottom: 0;
+        }
+
+        .widgetWrapper {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            position: absolute !important;
+            top: 55px;
+            left: 0;
+            right: 0;
+            bottom: 42px;
+        }
+
+        .buttons {
+            position: absolute !important;
+            left: 0;
+            right: 0;
+            width: 25px;
+            bottom: 10px;
+        }
+
+        .textAlign {
+            text-align: right;
+        }
+
+        .marginRight10 {
+            margin-right: 10px;
+        }
+
+        .marginBottom5 {
+            margin-bottom: 5px;
+        }
+
+        .datePanel {
+            position: absolute !important;
+            top: 26px;
+            height: 24px;
         }
 
     </ui:style>
@@ -92,33 +107,37 @@
         </g:HorizontalPanel>
 
         <g:HTMLPanel visible="false">
-            <m:ModalWindow ui:field="popupPanel">
-                <g:VerticalPanel addStyleNames="{modal.mainVertical}">
+            <m:ModalWindow ui:field="popupPanel" resizable="true" width="600px" height="350px" minWidth="500px">
 
-                    <g:HorizontalPanel spacing="10" width="100%">
-                        <g:VerticalPanel width="100%">
-                            <g:TextBox ui:field="filter" width="100%" addStyleNames="{modal.forMargin0}"/>
-                            <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{modal.forFind2}">
-                                <g:cell horizontalAlignment="left" >
-                                    <g:CheckBox ui:field="selectChild" text="Включая подчиненные"/>
-                                </g:cell>
-                                <g:cell horizontalAlignment="right">
-                                    <g:Label text="Дата актуальности:" wordWrap="false" addStyleNames="{modal.forVersion}"/>
-                                </g:cell>
-                                <g:cell horizontalAlignment="right">
-                                    <g:ValueListBox ui:field="version" width="100%"/>
-                                </g:cell>
-                            </g:HorizontalPanel>
-                        </g:VerticalPanel>
-                        <g:Button ui:field="find" text="Найти" width="100%"/>
+                <g:FlowPanel addStyleNames="{modal.mainPanel}">
+
+                    <g:HorizontalPanel ui:field="filterPanel" spacing="0" width="100%"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="99%">
+                            <g:TextBox ui:field="filter" width="99%"/>
+                        </g:cell>
+                        <g:Button ui:field="find" text="Найти" width="70px"/>
                     </g:HorizontalPanel>
 
-                    <g:ScrollPanel addStyleNames="{modal.forScroll}">
+                    <g:HorizontalPanel spacing="0" width="100%" addStyleNames="{modal.datePanel}"
+                                       verticalAlignment="middle" horizontalAlignment="right">
+                        <g:cell horizontalAlignment="left" width="50%">
+                            <g:CheckBox ui:field="selectChild" wordWrap="false" text="Включая подчиненные"/>
+                        </g:cell>
+                        <g:cell horizontalAlignment="left" width="50%">
+                            <g:Label text="Дата актуальности:" wordWrap="false"
+                                     addStyleNames="{modal.marginRight10}, {modal.textAlign}"/>
+                        </g:cell>
+                        <g:ValueListBox ui:field="version" width="148px"/>
+                    </g:HorizontalPanel>
+
+                    <g:ScrollPanel ui:field="widgetWrapper" addStyleNames="{modal.widgetWrapper}">
                         <t:DepartmentTreeWidget ui:field="tree" headerVisible="false" addStyleNames="{modal.forTree}"/>
                     </g:ScrollPanel>
 
-                    <g:HorizontalPanel spacing="10" width="100%">
-                        <g:cell horizontalAlignment="left" verticalAlignment="middle">
+                    <g:HorizontalPanel spacing="0" horizontalAlignment="right" verticalAlignment="middle"
+                                       width="100%" addStyleNames="{modal.buttons}">
+                        <g:cell horizontalAlignment="left" width="99%">
                             <g:HorizontalPanel ui:field="itemsInfoPanel">
                                 <g:Label ui:field="countItemsLabel" text="Выбрано:"/>
                                 <g:Label ui:field="countItems" addStyleNames="{modal.forCountSelected}"/>
@@ -126,15 +145,12 @@
                                           visible="false"/>
                             </g:HorizontalPanel>
                         </g:cell>
-                        <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                            <g:HorizontalPanel>
-                                <g:Button ui:field="ok" text="Выбрать"/>
-                                <g:Button ui:field="cancel" text="Закрыть" addStyleNames="{modal.forCancel}"/>
-                            </g:HorizontalPanel>
-                        </g:cell>
+                        <g:Button ui:field="ok" text="Выбрать" width="70px"
+                                  addStyleNames="{modal.marginRight10}"/>
+                        <g:Button ui:field="cancel" text="Закрыть" width="70px"/>
                     </g:HorizontalPanel>
+                </g:FlowPanel>
 
-                </g:VerticalPanel>
             </m:ModalWindow>
         </g:HTMLPanel>
     </g:HTMLPanel>

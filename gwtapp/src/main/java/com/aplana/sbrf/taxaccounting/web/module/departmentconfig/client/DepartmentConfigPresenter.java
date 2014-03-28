@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -115,6 +117,16 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setReportPeriodActive(boolean reportPeriodActive);
 
         TaxType getTaxType();
+
+        /**
+         * Изменение режима редактирования формы
+         */
+        void setEditMode(boolean isEditMode);
+
+        /**
+         * Обновление видимости дял кнопки "Редактировать"
+         */
+        void updateVisibleEditButton();
     }
 
     @Inject
@@ -126,8 +138,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void save(DepartmentCombined combinedDepartmentParam, Integer period) {
-        if (combinedDepartmentParam == null || period == null) {
+    public void save(DepartmentCombined combinedDepartmentParam, Integer period, Integer department) {
+        if (combinedDepartmentParam == null || department == null || period == null) {
             return;
         }
 
@@ -137,6 +149,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         action.setDepartmentCombined(combinedDepartmentParam);
         action.setReportPeriodId(period);
         action.setTaxType(getView().getTaxType());
+        action.setDepartment(department);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                     @Override
@@ -146,9 +159,43 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         }
                         if(!result.isHasError()){
                             MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                            if (!result.getDeclarationTypes().equals("")) {
+                                Dialog.infoMessage("В декларациях " + result.getDeclarationTypes() + " используется старая версия настроек. Для вступления изменений в силу каждую декларацию нужно обновить.");
+                            }
+                            getView().reloadDepartmentParams();
                         }
                     }
                 }, this));
+    }
+
+    @Override
+    public void edit(Integer period, Integer department) {
+        if (department == null || period == null) {
+            return;
+        }
+
+        GetCheckDeclarationAction action = new GetCheckDeclarationAction();
+        action.setReportPeriodId(period);
+        action.setDepartment(department);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetCheckDeclarationResult>() {
+                            @Override
+                            public void onSuccess(GetCheckDeclarationResult result) {
+                                if (!result.getDeclarationTypes().equals("")) {
+                                    Dialog.confirmMessage("Настройки используются для деклараций " + result.getDeclarationTypes() + ". Желаете внести изменения в Настройки?",
+                                            new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    super.yes();
+                                                    getView().setEditMode(true);
+                                                }
+                                            });
+                                } else {
+                                    getView().setEditMode(true);
+                                }
+                            }
+                        }, this));
     }
 
     @Override
@@ -176,6 +223,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         getView().setDepartmentCombined(result.getDepartmentCombined());
                         getView().setDereferenceValue(result.getRbTextValues());
                         getView().setReportPeriodActive(result.isReportPeriodActive());
+                        getView().updateVisibleEditButton();
                         result.getRbTextValues();
                         if (result.getUuid() != null) {
                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());

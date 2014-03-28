@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с шаблонами налоговых форм. В первую очередь предназначен для использования в админке
@@ -30,7 +32,8 @@ public interface FormTemplateService {
 	 * @param logger объект, для ведения логов
 	 */
 	void validateFormTemplate(FormTemplate formTemplate, Logger logger);
-	/**
+
+    /**
 	 * Сохранить описание налоговой формы
 	 * @param formTemplate объект, содержащий описание налоговой формы
 	 * @return идентификатор сохранённой записи
@@ -112,15 +115,15 @@ public interface FormTemplateService {
      * @param actualEndVersion дата окончания версии макета
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param formTemplate макет для удаления
-     * @return идентификатор удаленного объекта
+     * @param formTemplateId макет для удаления
+     * @return обновленные записи
      */
-    int delete(FormTemplate formTemplate);
+    int delete(int formTemplateId);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.
@@ -139,6 +142,19 @@ public interface FormTemplateService {
      * @return количество
      */
     int versionTemplateCount(int formTypeId, VersionedObjectStatus... status);
+
+    /**
+     * Изменение информации о версиях шаблонов
+     * @param formTemplates шаблоны
+     */
+    void update(List<FormTemplate> formTemplates);
+
+    /**
+     * Возвращает количество активных версий для каждого переданного вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество активных версий для id макета
+     */
+    Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds);
 
     /**
      * Является ли форма ежемесячной.

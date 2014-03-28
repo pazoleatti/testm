@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -33,7 +34,7 @@ public class HistoryView extends PopupViewImpl implements
 	private static final String DECLARATION_SAVE_EVENT = "Обновление";
 
 	@UiField
-	DataGrid<LogBusiness> logsTable;
+    GenericDataGrid<LogBusiness> logsTable;
 
 	@UiField
 	Button hideButton;
@@ -105,12 +106,12 @@ public class HistoryView extends PopupViewImpl implements
 			}
 		};
 
-		logsTable.addColumn(eventColumn, "Событие");
-		logsTable.addColumn(dateColumn, "Дата-время");
-		logsTable.addColumn(nameColumn, "Пользователь");
-		logsTable.addColumn(rolesColumn, "Роли пользователя");
-		logsTable.addColumn(departmentColumn, "Подразделение пользователя");
-		logsTable.addColumn(noteColumn, "Текст события");
+		logsTable.addResizableColumn(eventColumn, "Событие");
+		logsTable.addResizableColumn(dateColumn, "Дата-время");
+		logsTable.addResizableColumn(nameColumn, "Пользователь");
+		logsTable.addResizableColumn(rolesColumn, "Роли пользователя");
+		logsTable.addResizableColumn(departmentColumn, "Подразделение пользователя");
+		logsTable.addResizableColumn(noteColumn, "Текст события");
 		logsTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogBusiness>() {
 			@Override
 			public void onCellPreview(CellPreviewEvent<LogBusiness> event) {

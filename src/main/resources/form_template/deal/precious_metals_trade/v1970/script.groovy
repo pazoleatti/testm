@@ -3,6 +3,7 @@ package form_template.deal.precious_metals_trade.v1970
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -302,7 +303,9 @@ void logicCheck() {
         }
     }
 
-    checkItog(dataRows)
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        checkItog(dataRows)
+    }
 }
 
 // Проверки подитоговых сумм
@@ -394,12 +397,14 @@ void calc() {
     }
 
     // Добавление подитов
-    addAllAliased(dataRows, new CalcAliasRow() {
-        @Override
-        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, dataRows)
-        }
-    }, groupColumns)
+    if (formData.kind == FormDataKind.CONSOLIDATED) {
+        addAllAliased(dataRows, new CalcAliasRow() {
+            @Override
+            DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+                return calcItog(i, dataRows)
+            }
+        }, groupColumns)
+    }
 
     // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows)
     dataRowHelper.save(dataRows)

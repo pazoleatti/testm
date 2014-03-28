@@ -21,7 +21,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 @Service("importService")
@@ -61,7 +60,7 @@ public class ImportServiceImpl implements ImportService {
         String format = getFileExtension(fileName.trim());
 
         if (XLS.equals(format) || XLSX.equals(format) || XLSM.equals(format)) {
-            return getXMLStringFromXLS(inputStream, null, null, null, !XLS.equals(format));
+            return getXMLStringFromXLS(inputStream, null, null, null, null, !XLS.equals(format));
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -83,6 +82,12 @@ public class ImportServiceImpl implements ImportService {
     @Override
     public String getData(InputStream inputStream, String fileName, String charset, String startStr,
                           String endStr, Integer columnsCount) throws IOException {
+        return getData(inputStream, fileName, charset, startStr, endStr, columnsCount, null);
+    }
+
+    @Override
+    public String getData(InputStream inputStream, String fileName, String charset, String startStr,
+                          String endStr, Integer columnsCount, Integer headerRowCount) throws IOException {
         if (inputStream == null) {
             throw new ServiceException("Поток данных не должен быть пустым");
         }
@@ -101,7 +106,7 @@ public class ImportServiceImpl implements ImportService {
         String format = getFileExtension(fileName.trim());
 
         if (XLS.equals(format) || XLSX.equals(format) || XLSM.equals(format)) {
-            return getXMLStringFromXLS(inputStream, startStr, endStr, columnsCount, !XLS.equals(format));
+            return getXMLStringFromXLS(inputStream, startStr, endStr, columnsCount, headerRowCount, !XLS.equals(format));
         } else if (XML.equals(format)) {
             return getXMLStringFromXML(inputStream, charset);
         } else if (RNU.equals(format) || (format != null && format.matches("r[\\d]{2}"))) {
@@ -169,12 +174,14 @@ public class ImportServiceImpl implements ImportService {
      * Получить текстовый xml из XLS файла.
      *
      * @param inputStream  данные из файла
-     * @param startStr     начало таблицы (шапка первой колонки)
-     * @param endStr       конец табцицы (надпись "итого" или значения после таблицы)
-     * @param columnsCount количество колонок в таблице
+     * @param startStr     начало таблицы (шапка первой колонки) (может быть null)
+     * @param endStr       конец табцицы (надпись "итого" или значения после таблицы) (может быть null)
+     * @param columnsCount количество колонок в таблице (может быть null)
+     * @param headerRowCount количество строк в шапке (может быть null)
      * @param isCompressed true для xlsx и xlsm, false для xls
      */
     private String getXMLStringFromXLS(InputStream inputStream, String startStr, String endStr, Integer columnsCount,
+                                       Integer headerRowCount,
                                        boolean isCompressed) throws IOException {
         Workbook workbook = isCompressed ? new XSSFWorkbook(inputStream) : new HSSFWorkbook(inputStream);
 
@@ -200,7 +207,7 @@ public class ImportServiceImpl implements ImportService {
         addRow(sb, tmp, "colOffset");
         sb.append("</infoXLS>").append(ENTER);
 
-        Set<Integer> skipSet = getSkipCol(sheet, firstP);
+        Set<Integer> skipSet = getSkipCol(sheet, firstP, headerRowCount);
 
         String rowStr;
         int indexRow = -1;
@@ -232,14 +239,18 @@ public class ImportServiceImpl implements ImportService {
      *
      * @param sheet  лист XLS
      * @param firstP начало таблицы
+     * @param headerRowCount количество строк в шапке
      */
-    Set<Integer> getSkipCol(Sheet sheet, Point firstP) {
+    Set<Integer> getSkipCol(Sheet sheet, Point firstP, Integer headerRowCount) {
         Set<Integer> value = new HashSet<Integer>();
         // Список объединенных столбцов
         Set<Integer> mergeRegion = new HashSet<Integer>();
+        if (headerRowCount == null) {
+            headerRowCount = 2;
+        }
         for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
             CellRangeAddress adr = sheet.getMergedRegion(i);
-            if (adr.getFirstRow() != firstP.getY() + 2) {
+            if (adr.getFirstRow() != firstP.getY() + headerRowCount - 1) {
                 continue;
             }
             for (int j = adr.getFirstRow(); j <= adr.getLastRow(); j++) {
@@ -262,9 +273,9 @@ public class ImportServiceImpl implements ImportService {
             }
 
             // брать строки с позиции начала таблицы
-            if (indexRow < (firstP.getY() + 2)) {
+            if (indexRow < (firstP.getY() + headerRowCount - 1)) {
                 continue;
-            } else if (indexRow > (firstP.getY() + 2)) {
+            } else if (indexRow > (firstP.getY() + headerRowCount - 1)) {
                 break;
             }
 
@@ -322,7 +333,7 @@ public class ImportServiceImpl implements ImportService {
      */
     private String getRowString(Row row, Integer colP, Integer columnsCount, Set<Integer> skipSet) {
         if (row == null) {
-            return "<row/>";
+            return TAB + "<row/>" + ENTER;
         }
         StringBuilder sb = new StringBuilder();
         sb.append(TAB).append("<row>").append(ENTER);

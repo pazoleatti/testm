@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -45,7 +46,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     TextBox phone;
 
     @UiField
-    DataGrid<FormDataSigner> signersTable;
+    GenericDataGrid<FormDataSigner> signersTable;
 
     @UiField
     Button upSigner;
@@ -223,17 +224,17 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         }
 
         if (name.getText().isEmpty()) {
-            Dialog.warningMessage("Внимание!", "Необходимо ввести ФИО исполнителя");
+            Dialog.warningMessage("Необходимо ввести ФИО исполнителя");
             return;
         }
 
         if (phone.getText().isEmpty()) {
-            Dialog.warningMessage("Внимание!", "Необходимо ввести телефон исполнителя");
+            Dialog.warningMessage("Необходимо ввести телефон исполнителя");
             return;
         }
 
         if (departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty()) {
-            Dialog.warningMessage("Внимание!", "Не указано подразделение-исполнитель!");
+            Dialog.warningMessage("Не указано подразделение-исполнитель!");
             return;
         }
 
@@ -258,7 +259,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     private boolean validateSigners() {
         for (FormDataSigner signer : clonedSigners) {
             if (signer.getName().isEmpty() || signer.getPosition().isEmpty()) {
-                Dialog.warningMessage("Внимание!", "Необходимо ввести ФИО подписанта и должность");
+                Dialog.warningMessage("Необходимо ввести ФИО подписанта и должность");
                 return false;
             }
         }
@@ -270,7 +271,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     public void onCancel(ClickEvent event) {
         final SignersView t = this;
         if (!readOnlyMode && !isEqualClonedAndCurrentSignersAndReporter()) {
-            Dialog.confirmMessage("Подтверждение", "Первоначальные данные изменились, хотите применить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Первоначальные данные изменились, хотите применить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     t.onSave();
@@ -335,11 +336,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                     signer.setName(value);
                 } else {
                     signer.setName(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Внимание!", "Количество символов для ФИО подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Количество символов для ФИО подписанта превысило допустимое значение 100");
                 }
             }
         });
-        signersTable.addColumn(nameColumn, "ФИО подписанта");
+        signersTable.addResizableColumn(nameColumn, "ФИО подписанта");
 
         Column<FormDataSigner, String> positionColumn = new Column<FormDataSigner, String>(positionCell) {
             @Override
@@ -354,11 +355,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                     signer.setPosition(value);
                 } else {
                     signer.setPosition(value.substring(0, NAME_AND_POSITION_MAX_LENGTH));
-                    Dialog.warningMessage("Внимание!", "Количество символов для должности подписанта превысило допустимое значение 100");
+                    Dialog.warningMessage("Количество символов для должности подписанта превысило допустимое значение 100");
                 }
             }
         });
-        signersTable.addColumn(positionColumn, "Должность");
+        signersTable.addResizableColumn(positionColumn, "Должность");
     }
 
     private boolean isEqualClonedAndCurrentSignersAndReporter() {

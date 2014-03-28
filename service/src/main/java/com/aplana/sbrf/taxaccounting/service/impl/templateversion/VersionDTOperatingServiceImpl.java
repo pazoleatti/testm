@@ -63,15 +63,16 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     @Override
     public void isIntersectionVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         //1 Шаг. Система проверяет пересечение с периодом актуальности хотя бы одной версии этого же макета, STATUS которой не равен -1.
-        IntersectionSegment newIntersection = new IntersectionSegment();
-        newIntersection.setBeginDate(versionActualDateStart);
-        newIntersection.setEndDate(versionActualDateEnd);
-        newIntersection.setTemplateId(templateId);
-        newIntersection.setStatus(status);
-        List<IntersectionSegment> segmentIntersections =
+
+        List<VersionSegment> segmentIntersections =
                 declarationTemplateService.findFTVersionIntersections(templateId, typeId, versionActualDateStart, versionActualDateEnd);
         if (!segmentIntersections.isEmpty()){
-            for (IntersectionSegment intersection : segmentIntersections){
+            VersionSegment newIntersection = new VersionSegment();
+            newIntersection.setBeginDate(versionActualDateStart);
+            newIntersection.setEndDate(versionActualDateEnd);
+            newIntersection.setTemplateId(templateId);
+            newIntersection.setStatus(status);
+            for (VersionSegment intersection : segmentIntersections){
                 int compareResult;
                 switch (intersection.getStatus()){
                     case NORMAL:
@@ -92,20 +93,11 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
                             } else
-                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии %d",
+                                logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии с датой начала %td.%tm.%tY",
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
-                                        intersection.getTemplateId());
-                        }
-                        //2 Шаг. Система проверяет наличие даты окончания актуальности.
-                        //Пересечений нет
-                        else if (compareResult == -9 || compareResult == 4 || compareResult == -4){
-                            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
-                            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
-                            DeclarationTemplate formTemplate =  createFakeTemplate(date, newIntersection.getTypeId());
-                            declarationTemplateService.save(formTemplate);
+                                        intersection.getBeginDate(), intersection.getBeginDate(), intersection.getBeginDate());
                         }
                         break;
                     case FAKE:
@@ -117,16 +109,20 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,18a,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16){
-                            declarationTemplateService.delete(declarationTemplateService.get(intersection.getTemplateId()));
+                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10
+                                || compareResult == 16){
+                            declarationTemplateService.delete(intersection.getTemplateId());
                         }
                         break;
                 }
             }
-        } else if (newIntersection.getEndDate() != null){
-            cleanVersions(newIntersection.getTemplateId(), newIntersection.getTypeId(), newIntersection.getStatus(),
-                    newIntersection.getBeginDate(), newIntersection.getEndDate(), logger);
-            DeclarationTemplate declarationTemplate =  createFakeTemplate(versionActualDateEnd, typeId);
+        }
+        //2 Шаг. Система проверяет наличие даты окончания актуальности.
+        //Пересечений нет
+        else if (versionActualDateEnd != null){
+            Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
+            cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
+            DeclarationTemplate declarationTemplate =  createFakeTemplate(date, typeId);
             declarationTemplateService.save(declarationTemplate);
         }
     }
@@ -144,7 +140,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             return;
         DeclarationTemplate declarationTemplateFake = declarationTemplateService.getNearestDTRight(templateId, VersionedObjectStatus.FAKE);
         if (declarationTemplateFake != null)
-            declarationTemplateService.delete(declarationTemplateFake);
+            declarationTemplateService.delete(declarationTemplateFake.getId());
     }
 
     private DeclarationTemplate createFakeTemplate(Date date, int typeId){

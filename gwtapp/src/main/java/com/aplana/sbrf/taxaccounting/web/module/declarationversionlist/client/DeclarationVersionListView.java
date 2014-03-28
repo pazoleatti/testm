@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client;
 
-import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeclarationTemplateVersion;
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
+import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeclarationTemplateVersion;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
@@ -31,7 +33,7 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     private SingleSelectionModel<DeclarationTemplateVersion> selectionModel;
 
     @UiField
-    CellTable<DeclarationTemplateVersion> dtVersionCellTable;
+    GenericCellTable<DeclarationTemplateVersion> dtVersionCellTable;
 
     @UiField
     Label versionLabel;
@@ -74,23 +76,23 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
             }
         };
 
-        dtVersionCellTable.addColumn(linkColumn, "Наименование");
+        dtVersionCellTable.addResizableColumn(linkColumn, "Наименование");
 
-        dtVersionCellTable.addColumn(new TextColumn<DeclarationTemplateVersion>() {
+        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return String.valueOf(object.getVersionNumber());
             }
         }, "Версия");
 
-        dtVersionCellTable.addColumn(new TextColumn<DeclarationTemplateVersion>() {
+        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return object.getActualBeginVersionDate();
             }
         }, "Начало актуального периода");
 
-        dtVersionCellTable.addColumn(new TextColumn<DeclarationTemplateVersion>() {
+        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return object.getActualEndVersionDate();
@@ -137,8 +139,13 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
 
     @UiHandler("deleteVersion")
     void onDeleteClick(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteVersion();
+        Dialog.confirmMessage("Удаление версии макета", "Вы подтверждаете удаление версии макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                if (getUiHandlers() != null)
+                    getUiHandlers().onDeleteVersion();
+            }
+        });
     }
 
     @UiHandler("historyVersion")

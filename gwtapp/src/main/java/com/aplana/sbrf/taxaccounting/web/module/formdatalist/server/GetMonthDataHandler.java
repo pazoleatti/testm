@@ -29,9 +29,15 @@ public class GetMonthDataHandler extends AbstractActionHandler<GetMonthData, Get
 
     @Override
     public GetMonthDataResult execute(GetMonthData action, ExecutionContext executionContext) throws ActionException {
+
         GetMonthDataResult result = new GetMonthDataResult();
-        result.setMonthly(formTemplateService.isMonthly(action.getTypeId()));
-        result.setMonthsList(periodService.getAvailableMonthList(action.getReportPeriodId()));
+        Integer formId = formTemplateService.getActiveFormTemplateId(action.getTypeId(), action.getReportPeriodId());
+        boolean isMonthly = formTemplateService.isMonthly(formId);
+        result.setMonthly(isMonthly);
+
+        if (isMonthly) {
+            result.setMonthsList(periodService.getAvailableMonthList(action.getReportPeriodId()));
+        }
         return result;
     }
 

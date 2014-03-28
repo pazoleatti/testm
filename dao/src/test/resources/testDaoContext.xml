@@ -28,7 +28,7 @@
         <property name="connectionCachingEnabled" value="true"/> 
     </bean>-->
 
-    <!--Запуск и работа с лакальной базой запущенной в режиме сервера-->
+    <!--Запуск и работа с локальной базой запущенной в режиме сервера-->
 <!--
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
@@ -40,8 +40,8 @@
 -->
 
     <jdbc:initialize-database ignore-failures="DROPS">
-        <jdbc:script location="file:../src/main/resources/ddl/drop_main.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_main.sql" encoding="UTF-8"/>
         <jdbc:script location="file:../src/main/resources/ddl/create_constraint.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
+
 </beans>

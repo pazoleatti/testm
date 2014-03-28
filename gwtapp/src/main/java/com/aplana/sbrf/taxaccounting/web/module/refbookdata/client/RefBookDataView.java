@@ -5,9 +5,11 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,6 +18,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -48,9 +51,19 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     LinkButton addRow;
     @UiField
     LinkButton deleteRow;
+    @UiField
+    LinkAnchor backAnchor;
+    @UiField
+    Button search;
+    @UiField
+    LinkButton edit;
+    @UiField
+    Button cancelEdit;
+    @UiField
+    HTML separator;
 
 
-	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
+    SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
 	@Inject
 	public RefBookDataView(final Binder uiBinder) {
@@ -73,6 +86,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			}
 		});
         refbookDataTable.setPageSize(pager.getPageSize());
+        refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 		pager.setDisplay(refbookDataTable);
 	}
 
@@ -99,7 +113,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 				}
 			};
 			column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
-			refbookDataTable.addColumn(column, header.getName());
+			refbookDataTable.addResizableSortableColumn(column, header.getName());
 			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}
@@ -138,6 +152,10 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			refbookDataTable.setRowCount(0);
 			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
 		} else {
+            if (totalCount == 0) {
+                start = 0;
+                pager.setPage(0);
+            }
 			refbookDataTable.setRowCount(totalCount);
 			refbookDataTable.setRowData(start, dataRows);
 		}
@@ -200,6 +218,21 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
+    @UiHandler("cancelEdit")
+    void cancelEditButtonClicked(ClickEvent event) {
+        Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onSetDefaultMode();
+            }
+        });
+    }
+
+    @UiHandler("edit")
+    void editButtonClicked(ClickEvent event) {
+        getUiHandlers().onSetEditMode();
+    }
+
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
 		if (selectionModel.getSelectedObject() == null) {
@@ -226,6 +259,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         });
 	}
 
+    @UiHandler("backAnchor")
+    void onPrintButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onBackClicked();
+        }
+    }
+
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
 		switch (alignment) {
 			case ALIGN_LEFT:
@@ -238,4 +278,34 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 				return HasHorizontalAlignment.ALIGN_LEFT;
 		}
 	}
+
+    @Override
+    public void setEditMode() {
+        updateView(true);
+    }
+
+    @Override
+    public void setDefaultMode(){
+        updateView(false);
+    }
+
+    /**
+     * Обновляет видимость элементов
+     * в зависимости от режима
+     *
+     * @param isEditMode - режим редактирования true, false в противном случае
+     */
+    private void updateView(boolean isEditMode) {
+        setVisibleEditLink(!isEditMode);
+        addRow.setVisible(isEditMode);
+        deleteRow.setVisible(isEditMode);
+        cancelEdit.setVisible(isEditMode);
+    }
+
+    @Override
+    public void setVisibleEditLink(boolean visible){
+        edit.setVisible(visible);
+        // для красовы на форме
+        separator.setVisible(visible);
+    }
 }

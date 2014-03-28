@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationListAction;
@@ -10,12 +9,16 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Decla
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
@@ -35,15 +38,21 @@ public class DeclarationListHandler	extends AbstractActionHandler<DeclarationLis
 		DeclarationListResult result = new DeclarationListResult();
 		/*result.setDeclarations(declarationTemplateService.getByFilter(action.getFilter()));*/
         List<DeclarationType> declarationTypes = declarationTypeService.getByFilter(action.getFilter());
+        @SuppressWarnings("unchecked")
+        Collection<Integer> ids = CollectionUtils.collect(declarationTypes, new Transformer() {
+            @Override
+            public Object transform(Object o) {
+                return ((DeclarationType)o).getId();
+            }
+        });
+        Map<Long, Integer> idsVsCount = declarationTemplateService.versionTemplateCountByFormType(ids);
 
         List<DeclarationTypeTemplate> typeTemplateList = new ArrayList<DeclarationTypeTemplate>();
         for (DeclarationType type : declarationTypes){
             DeclarationTypeTemplate typeTemplate = new DeclarationTypeTemplate();
             typeTemplate.setTypeId(type.getId());
             typeTemplate.setTypeName(type.getName());
-
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            typeTemplate.setVersionCount(declarationTemplateService.versionTemplateCount(type.getId(), VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT));
+            typeTemplate.setVersionCount(idsVsCount.containsKey((long) type.getId()) ? idsVsCount.get((long)type.getId()) : 0);
 
             typeTemplateList.add(typeTemplate);
         }

@@ -14,6 +14,7 @@ public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepart
     private DepartmentCombined departmentCombined;
     private Integer period;
     private TaxType taxType;
+    private Integer department;
 
     public DepartmentCombined getDepartmentCombined() {
         return departmentCombined;
@@ -37,6 +38,14 @@ public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepart
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public Integer getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Integer department) {
+        this.department = department;
     }
 
     @Override

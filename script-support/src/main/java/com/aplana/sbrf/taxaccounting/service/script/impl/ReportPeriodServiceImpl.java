@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,9 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 	@Autowired
 	TaxPeriodDao taxPeriodDao;
 
+    @Autowired
+    DepartmentReportPeriodDao depertmentReportPeriodDao;
+
     @Autowired(required = false)
     com.aplana.sbrf.taxaccounting.service.PeriodService reportPeriodService;
 	
@@ -45,39 +48,7 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
 
 	@Override
 	public ReportPeriod getPrevReportPeriod(int reportPeriodId) {
-		// текущий отчетный период
-		ReportPeriod thisReportPeriod = reportPeriodDao.get(reportPeriodId);
-		// текущий налоговый период
-		TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
-		// список отчетных периодов в текущем налоговом периоде
-		List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
-
-		/**
-		 *  если это первый отчетный период в данном налоговом периоде
-		 *  то возвращать последний отчетный период с предыдущего налогово периода
-		 */
-		if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
-			List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
-			for (int i = 0; i < taxPeriodlist.size(); i++){
-				if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
-                    if (i == 0) {
-                        return null;
-                    }
-					// получим список отчетных периодов для данного налогового периода
-					reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
-					// вернем последний отчетный период
-					return reportPeriodlist.size() > 0 ? reportPeriodlist.get(reportPeriodlist.size() - 1) : null;
-				}
-			}
-		} else {
-            // не первый отчетный период в данном налоговом
-            for (int i = 0; i < reportPeriodlist.size(); i++){
-                if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
-                    return reportPeriodlist.get(i - 1);
-                }
-            }
-        }
-		return null;
+        return reportPeriodService.getPrevReportPeriod(reportPeriodId);
 	}
 
     /**
@@ -157,5 +128,10 @@ public class ReportPeriodServiceImpl extends AbstractDao implements ReportPeriod
     @Override
     public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
         return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
+    }
+
+    @Override
+    public int getCorrectionPeriodNumber(int reportPeriodId, long departmentId) {
+        return depertmentReportPeriodDao.getCorrectionPeriodNumber(reportPeriodId, departmentId);
     }
 }

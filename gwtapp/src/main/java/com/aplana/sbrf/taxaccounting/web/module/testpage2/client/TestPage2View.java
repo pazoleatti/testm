@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.MultiSelectTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.SimpleTree;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;

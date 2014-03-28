@@ -42,6 +42,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
     private boolean readOnly;
+    private boolean editMode;
 
     public void setNeedToReload() {
         getView().setNeedToReload(true);
@@ -88,7 +89,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookAttributesResult result) {
                                 EditFormPresenter.this.readOnly = readOnly;
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
-                                getView().setReadOnlyMode(readOnly);
+                                getView().setReadOnlyMode(!(editMode && !readOnly));
 								getView().createInputFields(result.getColumns());
                                 setIsFormModified(false);
                                 setEnabled(false);
@@ -199,7 +200,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
-                                        System.out.println(newId);
                                         recordChanges.setId(newId);
 
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
@@ -280,7 +280,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
-            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Редактирование версии", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
@@ -315,7 +315,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
     public void setEnabled(boolean enabled) {
-		getView().setEnabled(enabled);
+		getView().setEnabled(editMode && enabled);
 	}
 
     public boolean isVersionMode() {
@@ -333,5 +333,17 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    @Override
+    public void onSetEditMode() {
+        editMode = true;
+        setEnabled(editMode);
+    }
+
+    @Override
+    public void onSetDefaultMode() {
+        editMode = false;
+        setEnabled(editMode);
     }
 }

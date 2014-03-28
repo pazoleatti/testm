@@ -23,6 +23,15 @@
     <inherits name="com.google.gwt.user.TextBox"/>
     <source path="utils"/>
 
+    <replace-with class="com.aplana.sbrf.taxaccounting.web.widget.utils.TrickUtils">
+        <when-type-is class="com.aplana.sbrf.taxaccounting.web.widget.utils.TrickUtils"/>
+    </replace-with>
+
+    <replace-with class="com.aplana.sbrf.taxaccounting.web.widget.utils.TrickUtilsIe8">
+        <when-type-is class="com.aplana.sbrf.taxaccounting.web.widget.utils.TrickUtils" />
+        <when-property-is name="user.agent" value="ie8"/>
+    </replace-with>
+
     <source path="cell"/>
     <source path="datepicker"/>
     <source path="style"/>

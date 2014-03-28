@@ -4,6 +4,7 @@ import com.aplana.gwt.client.ValueListBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -21,7 +22,10 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
@@ -33,6 +37,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     private final MyDriver driver;
+
+    private boolean isMonthly = false;
 
     @UiField
     @Path("departmentIds")
@@ -97,9 +103,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // "Тип налоговой формы" недоступен если не выбрано подразделение
         formDataKind.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
         // "Вид налоговой формы" недоступен если не выбран тип НФ
-        formTypeId.setEnabled(formDataKind.getValue() != null);
+        formTypeId.setEnabled(formDataKind.getValue() != null && !formDataKind.getValue().isEmpty());
         // "Месяц" недоступен если не выбран "Вид налоговой формы"
-        formMonth.setEnabled(formTypeId.getValue() != null);
+        formMonth.setEnabled(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && isMonthly);
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(formMonth.getValue() != null);
     }
@@ -117,14 +123,19 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiHandler("departmentPicker")
     public void onDepartmentChange(ValueChangeEvent<List<Integer>> event) {
-        formDataKind.setValue(null, true);
+        formDataKind.setValue(new ArrayList<Long>(), true);
+        formDataKind.setDereferenceValue(null);
+	    getUiHandlers().onDepartmentChanged();
         updateEnabled();
     }
 
     @UiHandler("formDataKind")
     public void onDataKindChange(ValueChangeEvent<List<Long>> event) {
-        formTypeId.setValue(null, true);
-
+        formTypeId.setValue(new ArrayList<Long>(), true);
+        formTypeId.setDereferenceValue(null);
+        if ((formDataKind.getValue() != null) && !formDataKind.getValue().isEmpty()) {
+            getUiHandlers().onDataKindChanged();
+        }
         updateEnabled();
     }
 
@@ -167,6 +178,27 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
+	public void setAcceptableKinds(List<FormDataKind> dataKinds) {
+		StringBuilder filter = new StringBuilder();
+		for (FormDataKind k : dataKinds) {
+			filter.append(k.getId() + ",");
+		}
+		filter.deleteCharAt(filter.length()-1);
+		formDataKind.setFilter(filter.toString());
+	}
+
+	@Override
+	public void setAcceptableTypes(List<FormType> types) {
+		StringBuilder str = new StringBuilder();
+		for (FormType ft : types) {
+			str.append(RefBook.RECORD_ID_ALIAS + "=" + ft.getId() + " or ");
+		}
+		str.delete(str.length()-3, str.length()-1);
+		formTypeId.setFilter(str.toString());
+
+    }
+
+    @Override
     public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
         departmentPicker.setAvalibleValues(list, availableValues);
     }
@@ -196,6 +228,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void setFormMonthEnabled(boolean isMonthly) {
         // Если ежемесячный, то устанавливается formMonth = true
+        this.isMonthly = isMonthly;
         formMonth.setEnabled(isMonthly);
         // Кнопка "Создать" пока неактивна
         if (isMonthly) {

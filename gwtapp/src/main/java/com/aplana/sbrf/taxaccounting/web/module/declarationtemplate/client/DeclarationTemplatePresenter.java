@@ -160,8 +160,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
 					@Override
 					public void onSuccess(UpdateDeclarationResult result) {
-                        if (result.getLogUuid() != null)
-                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                        LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
 						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
                         declarationTemplate.setId(result.getDeclarationTemplateId());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
@@ -192,8 +191,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetActiveResult>() {
             @Override
             public void onSuccess(SetActiveResult result) {
-                if (result.getUuid() != null)
-                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
                 setDeclarationTemplate();
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
@@ -275,6 +273,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void uploadDectFail(String msg) {
 		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
+
+    @Override
+    public int getDeclarationId() {
+        return declarationTemplate.getId() != null ? declarationTemplate.getId() : 0;
+    }
 
     @Override
     protected void onBind() {

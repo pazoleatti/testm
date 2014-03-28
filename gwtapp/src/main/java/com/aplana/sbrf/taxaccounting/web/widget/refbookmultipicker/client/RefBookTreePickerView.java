@@ -212,7 +212,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 if (scroll == 0 && maxScroll == 0) {
                     return false;
                 }
-                System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
+                //System.out.println("scroll " + scroll + " maxScroll " + maxScroll + " absTop " + absTop + " offsetTop " + offsetTop);
 
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 
@@ -284,6 +284,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             }
         }
         return null;
+    }
+
+    public void selectFirstItenOnLoad(){
+        getUiHandlers().selectFirstItenOnLoad();
     }
 
     /**

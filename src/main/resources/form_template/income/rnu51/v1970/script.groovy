@@ -319,7 +319,7 @@ def BigDecimal calc16(def row) {
 }
 
 def BigDecimal calc17(def row) {
-    return row.redemptionValue > 0 ? row.redemptionValue : row.marketPriceInRub1
+    return row.redemptionValue
 }
 
 def BigDecimal calc18(def row) {
@@ -327,21 +327,29 @@ def BigDecimal calc18(def row) {
 // Debug:
 //    println("---------------------- "+row)
 //    println(" code = " + code)
+//    println(" 13 = " + row.redemptionValue)
 //    println(" 14 = " + row.priceInFactPerc)
 //    println(" 15 = " + row.priceInFactRub)
 //    println(" 16 = " + row.marketPriceInPerc1)
 //    println(" 17 = " + row.marketPriceInRub1)
-    if ((code == 1 || code == 2 || code == 5)
-            && (row.priceInFactPerc > row.marketPriceInPerc1 && row.priceInFactRub > row.marketPriceInRub1)) {
+    if (code == 1) {
         return row.priceInFactRub
     }
     if (code == 4) {
         return row.redemptionValue
     }
-    if ((code == 2 || code == 5)
-            && (row.priceInFactPerc < row.marketPriceInPerc1 && row.priceInFactRub < row.marketPriceInRub1)) {
-        return row.marketPriceInRub1
+    if (code == 2 || code == 5) {
+        if (row.marketPriceInPerc1 > row.priceInFactPerc && row.marketPriceInRub1 > row.priceInFactRub){
+            return row.marketPriceInRub1
+        }
+        if (row.marketPriceInPerc1 < row.priceInFactPerc && row.marketPriceInRub1 < row.priceInFactRub){
+            return row.priceInFactRub
+        }
+        if (row.marketPriceInRub1 == 0 && row.priceInFactRub == 0){
+            return row.priceInFactRub
+        }
     }
+
     // Для всех остальных случаев значение графы не изменяется
     return row.salePriceTax
 }

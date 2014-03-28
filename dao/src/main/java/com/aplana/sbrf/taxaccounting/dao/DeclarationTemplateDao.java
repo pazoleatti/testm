@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.IntersectionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dao для работы с {@link DeclarationTemplate шаблонами деклараций}
@@ -29,7 +31,7 @@ public interface DeclarationTemplateDao {
 	DeclarationTemplate get(int declarationTemplateId);
 	/**
 	 * Возвращает идентификатор действующего {@link com.aplana.sbrf.taxaccounting.model.DeclarationTemplate описания декларации} по виду декларации
-	 * Такое описание для каждого вида декларации в любой момент времени может быть только одно
+	 * Такое описание для каждого вида декларации в любой отчетном периоде может быть только одно
 	 * @param declarationTypeId идентификатор вида декларации
 	 * @return идентификатор описания декларации
 	 * @throws DaoException если не удалось найти активное описание декларации по заданному типу,
@@ -43,6 +45,15 @@ public interface DeclarationTemplateDao {
 	 * @return идентификатор сохранённой записи в БД
 	 */
 	int save(DeclarationTemplate declarationTemplate);
+
+    /**
+     * Обновление данных версий макетов
+     * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * @param declarationTemplates объект шаблона декларации
+     * @return массив успешных апдейтов обновленных версий (0 - неуспешный, 1 - успешный)
+     */
+    int[] update(List<DeclarationTemplate> declarationTemplates);
+
 	/**
 	 * Задать Jrxml-файла
 	 * @param declarationTemplateId идентификатор шаблона декларации
@@ -84,12 +95,11 @@ public interface DeclarationTemplateDao {
      * Метод для поиска пересечений версий макетов в указанных датах
      * @param formTypeId вид шаблона
      * @param formTemplateId дентификатор шаблона, который исключить из поиска, если нет такого то 0
-     * @param statusList статус формы
      * @param actualStartVersion дата начала
      * @param actualEndVersion дата окончания
      * @return список пеересечений
      */
-    List<IntersectionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int formTypeId, int formTemplateId, Date actualStartVersion, Date actualEndVersion);
 
     /**
      * Поиск даты окончания версии макета, которая находится следующей по дате(т.е. "справа") от данной версии
@@ -107,7 +117,7 @@ public interface DeclarationTemplateDao {
      * @param actualBeginVersion дата актуализации версии, для которой ведем поиск
      * @return идентификатор "правой" версии макета
      */
-    int getNearestDTVersionIdRight(int typeId, Date actualBeginVersion);
+    int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion);
 
     /**
      * Поиск версии макета, которая предшествует по дате(т.е. "слева") данной версии
@@ -133,4 +143,18 @@ public interface DeclarationTemplateDao {
      * @return количество
      */
     int versionTemplateCount(int decTypeId, List<Integer> statusList);
+
+    /**
+     * Количество активных версий для вида шаблона
+     * @param typeIds вид шаблона
+     * @return количество
+     */
+    List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> typeIds);
+
+    /**
+     * Получает номер последней редакции макета.
+     * @param typeId  вид шаблона
+     * @return номер последней редакции шаблона
+     */
+    int getLastVersionEdition(int typeId);
 }

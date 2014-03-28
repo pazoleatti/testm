@@ -1,6 +1,9 @@
-insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, name, fullname, code, status) values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 1, 'name_1', 'fullname_1', 'code_1', 0);
-insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, name, fullname, code, status) values (2, 2, null, date '2013-01-01', 1, 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
-insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, name, fullname, code, status) values (3, 2, null, date '2013-02-01', 1, 1, 0, 'name_3', 'fullname_3', 'code_2', 1);
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status)
+  values (1, 1, null, to_date('01.01.2013 12.01.01', 'DD.MM.YY HH.MI.SS'), 1, 1, 'name_1', 'fullname_1', 'code_1', 0);
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status) 
+  values (2, 2, null, date '2013-01-01', 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status) 
+  values (3, 2, null, date '2013-02-01', 1, 0, 'name_3', 'fullname_3', 'code_2', 1);
 
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into tax_period(id, tax_type, year) values (11, 'T', 2012);
@@ -10,7 +13,7 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values (23, 3, 8, to_date('01.01.2013', 'DD.MM.YY'), 0);
 insert into report_period (id, name, tax_period_id, ord, dict_tax_period_id, start_date, end_date, calendar_start_date) values (1, 'Transport report period 1',  1, 1, 21, date '2013-01-01', date '2013-03-31', date '2013-01-01');
 
-insert into declaration_template(id, edition, name, version, is_active, declaration_type_id) values (1, 1, 'Декларация 1', date '2014-01-01', 1, 1);
+insert into declaration_template(id, edition, name, version, declaration_type_id) values (1, 1, 'Декларация 1', date '2014-01-01', 1);
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
 insert into declaration_data(id, declaration_template_id, report_period_id, department_id, data, is_accepted) values (1, 1, 1, 2, null, 1);
 insert into log_business(id, log_date, event_id, user_id, roles, declaration_data_id, form_data_id, user_department_id, note) values (1, date '2013-01-01', 1, 1, 'operator', 1, null, 1, 'the best note');

@@ -68,8 +68,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
-        'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'contractNum', 'contractDate', 'country', 'count', 'price',
+        'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -385,7 +385,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5.2
         newRow.outcomeBankSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        indexCell++
+        xmlIndexCol++
 
         // графа 6
         newRow.contractNum = row.cell[xmlIndexCol].text()

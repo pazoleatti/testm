@@ -134,4 +134,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		return is_active != 0;
 	}
 
+    @Override
+    public int getCorrectionPeriodNumber(int reportPeriodId, long departmentId) {
+        return getJdbcTemplate().queryForInt(
+                "select count(CORRECTION_DATE) from DEPARTMENT_REPORT_PERIOD " +
+                        "where DEPARTMENT_ID = ? and REPORT_PERIOD_ID = ? and CORRECTION_DATE is not null",
+                new Object[] {departmentId, reportPeriodId},
+                new int[] {Types.NUMERIC, Types.NUMERIC}
+        );
+    }
+
 }

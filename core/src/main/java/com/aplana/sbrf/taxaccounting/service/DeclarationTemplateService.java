@@ -5,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с шаблонами деклараций 
@@ -32,6 +34,12 @@ public interface DeclarationTemplateService {
 	 * @throws AccessDeniedException если у пользователя нет прав на изменение шаблона декларации 
 	 */
 	int save(DeclarationTemplate declarationTemplate);
+
+    /**
+     * Изменение информации о версиях шаблонов
+     * @param declarationTemplates шаблоны
+     */
+    void update(List<DeclarationTemplate> declarationTemplates);
 	/**
 	 * Возвращает идентификатор действующего {@link DeclarationTemplate описания декларации} по виду декларации
 	 * Такое описание для каждого вида декларации в любой момент времени может быть только одно
@@ -109,15 +117,15 @@ public interface DeclarationTemplateService {
      */
     List<DeclarationTemplate> getDecTemplateVersionsByStatus(int formTypeId, VersionedObjectStatus... status);
 
-    List<IntersectionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
+    List<VersionSegment> findFTVersionIntersections(int templateId, int typeId, Date actualBeginVersion, Date actualEndVersion);
 
     /**
      * Удаление макета.
      * Макеты со статусом фиктивной версии удаляются, с остальными статусами помечаются как удаленные
-     * @param declarationTemplate версия декларации
+     * @param declarationTemplateId идентификатор версия декларации
      * @return удаленный идентфикатор
      */
-    int delete(DeclarationTemplate declarationTemplate);
+    int delete(int declarationTemplateId);
 
     /**
      * Возвращает версию макета ближайшую к данной спрвва.
@@ -142,5 +150,12 @@ public interface DeclarationTemplateService {
      * @return количество
      */
     int versionTemplateCount(int typeId, VersionedObjectStatus... status);
+
+    /**
+     * Возвращает количество активных версий для каждого переданного вида шаблона
+     * @param formTypeId вид шаблона
+     * @return количество активных версий для id макета
+     */
+    Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds);
 
 }

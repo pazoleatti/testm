@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTypeService;
@@ -44,7 +45,9 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
     @Override
     public GetFTVersionListResult execute(GetFTVersionListAction action, ExecutionContext context) throws ActionException {
         GetFTVersionListResult result = new GetFTVersionListResult();
-        result.setFormTypeName(formTypeService.get(action.getFormTypeId()).getName());
+        FormType formType = formTypeService.get(action.getFormTypeId());
+        result.setFormTypeName(formType.getName());
+        result.setTaxType(formType.getTaxType());
 
         List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(action.getFormTypeId());
         List<FormTemplateVersion> formTemplateVersions = new LinkedList<FormTemplateVersion>();
@@ -55,14 +58,10 @@ public class GetFTVersionListHandler extends AbstractActionHandler<GetFTVersionL
             formTemplateVersion.setTypeName(formTemplate.getType().getName());
             formTemplateVersion.setVersionNumber(String.valueOf(formTemplate.getEdition()));
             formTemplateVersion.setActualBeginVersionDate(SDF.format(formTemplate.getVersion()));
-
+            formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
+                    SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
             if (formTemplates.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
-                formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
-                        SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime())):"");
                 i++;
-            }else {
-                formTemplateVersion.setActualEndVersionDate(formTemplates.get(i + 1).getVersion() != null?
-                        SDF.format(new Date(formTemplates.get(i + 1).getVersion().getTime() - AdminConstants.oneDayMilliseconds)):"");
             }
 
             formTemplateVersions.add(formTemplateVersion);

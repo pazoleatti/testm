@@ -1,25 +1,31 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared;
 
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.gwtplatform.dispatch.shared.Result;
-
-import java.util.List;
 
 /**
  * @author Vitalii Samolovskikh
  */
 public class UpdateFormResult implements Result {
-	private List<LogEntry> logEntries;
-
     private int formTemplateId;
+    private String uuid;
+    private FormTemplate formTemplate;
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
+    public FormTemplate getFormTemplate() {
+        return formTemplate;
+    }
 
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
-	}
+    public void setFormTemplate(FormTemplate formTemplate) {
+        this.formTemplate = formTemplate;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public int getFormTemplateId() {
         return formTemplateId;

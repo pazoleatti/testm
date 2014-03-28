@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager;
 import com.aplana.sbrf.taxaccounting.cache.KeyWrapper;
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
@@ -18,15 +19,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +41,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"CacheTest.xml"})
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class CacheTest {
 
     @Autowired
@@ -56,6 +60,9 @@ public class CacheTest {
     @Autowired
     private DeclarationTypeDao declarationTypeDao;
 
+	@Autowired
+	private BlobDataDao blobDataDao;
+
     private static String FORM_TYPE_JNDI = "services/cache/aplana/taxaccounting/FormType";
     private static String FORM_TEMPLATE_JNDI = "services/cache/aplana/taxaccounting/FormTemplate";
     private static String DECLARATION_TYPE_JNDI = "services/cache/aplana/taxaccounting/DeclarationType";
@@ -65,9 +72,12 @@ public class CacheTest {
     private static String PERMANENT_DATA_JNDI = "services/cache/aplana/taxaccounting/PermanentData";
     private static String DATA_BLOBS_CACHE_JNDI = "services/cache/aplana/taxaccounting/DataBlobsCache";
 
+	private static final String SAMPLE_BLOB_ID = UUID.randomUUID().toString();
+    private static SimpleNamingContextBuilder builder = null;
+
     @BeforeClass
     public static void initContext() throws NamingException {
-        SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+        builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
         builder.bind(FORM_TYPE_JNDI, new HashMap<Object, Object>());
         builder.bind(FORM_TEMPLATE_JNDI, new HashMap<Object, Object>());
         builder.bind(DECLARATION_TYPE_JNDI, new HashMap<Object, Object>());
@@ -81,8 +91,17 @@ public class CacheTest {
     }
 
     @Before
-    public void init(){
+    public void init() throws UnsupportedEncodingException {
         cacheManager = applicationContext.getBean(ExtendedSimpleCacheManager.class);
+		// генерим тестовый блоб
+		String sampleBlobData = "sample text";
+		BlobData blob = new BlobData();
+		blob.setCreationDate(new Date());
+		blob.setDataSize(sampleBlobData.length());
+		blob.setUuid(SAMPLE_BLOB_ID);
+		blob.setType(0);
+		blob.setInputStream(new ByteArrayInputStream(sampleBlobData.getBytes("UTF-8")));
+		blobDataDao.create(blob);
     }
 
     @Test
@@ -113,7 +132,9 @@ public class CacheTest {
         formTemplate = formTemplateDao.get(1);
         Assert.assertNull(formTemplate.getScript());//проверил что убрали из маппера.
         formTemplate.setScript(formTemplateDao.getFormTemplateScript(1));
-        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_script", "test_script");
+        Assert.assertEquals(2, ((HashMap) ic.lookup(FORM_TEMPLATE_JNDI)).size());
+        Assert.assertEquals("test_script",
+                ((HashMap) ic.lookup(FORM_TEMPLATE_JNDI)).get(new KeyWrapper(CacheConstants.FORM_TEMPLATE, String.valueOf(formTemplate.getId()) + "_script")));
 
         //После получения скрипта(должен закэшироваться)
         Assert.assertEquals("test_script", formTemplate.getScript());
@@ -135,28 +156,27 @@ public class CacheTest {
         declarationTemplate.setId(1);
         declarationTemplate.setName("Декларация");
         declarationTemplate.setEdition(1);
-        declarationTemplate.setActive(true);
+        /*declarationTemplate.setActive(true);*/
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
-        String uuid1 = UUID.randomUUID().toString();
-        declarationTemplate.setJrxmlBlobId(uuid1);
+        declarationTemplate.setJrxmlBlobId(SAMPLE_BLOB_ID);
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-
         declarationTemplateDao.save(declarationTemplate);
 
         DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(1);
         assertEquals(1, savedDeclarationTemplate.getId().intValue());
 
         //Проверка заполнения uuid
-        String uuid2 = UUID.randomUUID().toString();
-        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), uuid2);
-        assertEquals(uuid2, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
+        declarationTemplateDao.setJrxml(savedDeclarationTemplate.getId(), SAMPLE_BLOB_ID);
+        assertEquals(SAMPLE_BLOB_ID, declarationTemplateDao.get(savedDeclarationTemplate.getId()).getJrxmlBlobId());
 
         //Проверка кэширования тела скрипта
         declarationTemplateDao.getDeclarationTemplateScript(1);
-        checkExistInCache(CacheConstants.DECLARATION_TEMPLATE, DECLARATION_TEMPLATE_JNDI, String.valueOf(declarationTemplate.getId()) + "_script", "MyScript");
+        Assert.assertEquals("MyScript",
+                ((HashMap) ic.lookup(DECLARATION_TEMPLATE_JNDI)).get(new KeyWrapper(CacheConstants.DECLARATION_TEMPLATE,
+                        String.valueOf(declarationTemplate.getId()) + "_script")));
         cacheManager.clearAll();
     }
 
@@ -165,12 +185,4 @@ public class CacheTest {
         MapUtils.debugPrint(System.out, name, map);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> void checkExistInCache(String cacheName, String jndiName, String cacheId, T assertString) throws NamingException {
-        HashMap map =((HashMap) ic.lookup(jndiName));
-        if (assertString instanceof DataRow)
-            Assert.assertEquals(((DataRow)assertString).size(), ((List<DataRow>)map.get(new KeyWrapper(cacheName, cacheId))).get(0).size());
-        else
-            Assert.assertEquals(assertString, map.get(new KeyWrapper(cacheName, cacheId)));
-    }
 }

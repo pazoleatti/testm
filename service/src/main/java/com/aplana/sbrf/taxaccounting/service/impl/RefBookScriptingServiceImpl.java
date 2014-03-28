@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -37,7 +36,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
 
     @Autowired
-    private BlobDataDao blobDao;
+    private BlobDataService blobDataService;
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -50,7 +49,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
 
-        BlobData bd = blobDao.get(refBook.getScriptId());
+        BlobData bd = blobDataService.get(refBook.getScriptId());
 
         if (bd == null) {
             return;
@@ -70,6 +69,9 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
 
+        // Локальный логгер для импорта конкретного справочника
+        Logger scriptLogger = new Logger();
+
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = scriptEngine.createBindings();
         // ScriptExposed
@@ -78,14 +80,14 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             if (component instanceof ScriptComponentContextHolder) {
                 ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                 scriptComponentContext.setUserInfo(userInfo);
-                scriptComponentContext.setLogger(logger);
+                scriptComponentContext.setLogger(scriptLogger);
                 ((ScriptComponentContextHolder) component).setScriptComponentContext(scriptComponentContext);
             }
         }
         bindings.putAll(scriptComponents);
 
         bindings.put("formDataEvent", event);
-        bindings.put("logger", logger);
+        bindings.put("logger", scriptLogger);
         bindings.put("refBookFactory", refBookFactory);
 
         if (userInfo != null && userInfo.getUser() != null) {
@@ -101,13 +103,17 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
         }
 
-        logger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «"+refBook.getName()+"»"));
-        executeScript(bindings, script, logger);
-        logger.setMessageDecorator(null);
+        // Выполнение импорта скрипта справочника
+        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «"+refBook.getName()+"»"));
+        executeScript(bindings, script, scriptLogger);
+        scriptLogger.setMessageDecorator(null);
+
+        // Перенос записей из локального лога в глобальный
+        logger.getEntries().addAll(scriptLogger.getEntries());
 
         // Откат при возникновении фатальных ошибок в скрипте
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Произошли ошибки в скрипте импорта справочника");
+        if (scriptLogger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Произошли ошибки в скрипте импорта справочника.");
         }
     }
 

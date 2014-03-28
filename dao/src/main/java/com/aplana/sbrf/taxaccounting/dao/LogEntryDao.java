@@ -26,4 +26,12 @@ public interface LogEntryDao {
      * @return
      */
     List<LogEntry> get(String uuid);
+
+    /**
+     * Обновление записи
+     *
+     * @param logEntries
+     * @param uuid
+     */
+    void update(List<LogEntry> logEntries, String uuid);
 }

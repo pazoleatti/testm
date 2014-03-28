@@ -22,14 +22,14 @@ import java.util.*;
 
 /**
  * Сервис работы с периодами
- * 
+ *
  * Только этот сервис должен использоваться для работы с отчетными и налоговыми периодами
  *
  */
 @Service
 @Transactional
 public class PeriodServiceImpl implements PeriodService{
-	
+
 	private static final Long PERIOD_CODE_REFBOOK = 8L;
 	private static final long REF_BOOK_101 = 50L;
 	private static final long REF_BOOK_102 = 52L;
@@ -80,7 +80,7 @@ public class PeriodServiceImpl implements PeriodService{
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
 		return drp != null && drp.isActive();
 	}
-	
+
 	@Override
 	public boolean isBalancePeriod(int reportPeriodId, long departmentId) {
 		DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, departmentId);
@@ -132,6 +132,7 @@ public class PeriodServiceImpl implements PeriodService{
 					|| record.get("CALENDAR_START_DATE").getDateValue() == null) {
 				throw new ServiceException("Не заполнен один из обязательных атрибутов справочника \"" + refBook.getName() + "\"");
 			}
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
 			Calendar start = Calendar.getInstance();
 			start.setTime(record.get("START_DATE").getDateValue());
 			start.set(Calendar.YEAR, year);
@@ -143,6 +144,18 @@ public class PeriodServiceImpl implements PeriodService{
 			Calendar calendarDate = Calendar.getInstance();
 			calendarDate.setTime(record.get("CALENDAR_START_DATE").getDateValue());
 			calendarDate.set(Calendar.YEAR, year);
+
+            if (gregorianCalendar.isLeapYear(year)) {
+                if (start.get(Calendar.MONTH) == Calendar.FEBRUARY && start.get(Calendar.DATE) == 28) {
+                    start.set(Calendar.DATE, 29);
+                }
+                if (end.get(Calendar.MONTH) == Calendar.FEBRUARY && end.get(Calendar.DATE) == 28) {
+                    end.set(Calendar.DATE, 29);
+                }
+                if (calendarDate.get(Calendar.MONTH) == Calendar.FEBRUARY && calendarDate.get(Calendar.DATE) == 28) {
+                    calendarDate.set(Calendar.DATE, 29);
+                }
+            }
 
 			newReportPeriod.setName(name);
 			newReportPeriod.setOrder(ord.intValue());
@@ -655,4 +668,41 @@ public class PeriodServiceImpl implements PeriodService{
 	public boolean isPeriodOpen(int departmentId, long reportPeriodId) {
 		return departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId);
 	}
+
+    @Override
+    public ReportPeriod getPrevReportPeriod(int reportPeriodId) {
+        // текущий отчетный период
+        ReportPeriod thisReportPeriod = reportPeriodDao.get(reportPeriodId);
+        // текущий налоговый период
+        TaxPeriod thisTaxPeriod = thisReportPeriod.getTaxPeriod();
+        // список отчетных периодов в текущем налоговом периоде
+        List<ReportPeriod> reportPeriodlist = reportPeriodDao.listByTaxPeriod(thisReportPeriod.getTaxPeriod().getId());
+
+        /**
+         *  если это первый отчетный период в данном налоговом периоде
+         *  то возвращать последний отчетный период с предыдущего налогово периода
+         */
+        if (reportPeriodlist.size() > 0 && reportPeriodlist.get(0).getId() == reportPeriodId){
+            List<TaxPeriod> taxPeriodlist = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
+            for (int i = 0; i < taxPeriodlist.size(); i++){
+                if (taxPeriodlist.get(i).getId().equals(thisTaxPeriod.getId())){
+                    if (i == 0) {
+                        return null;
+                    }
+                    // получим список отчетных периодов для данного налогового периода
+                    reportPeriodlist = reportPeriodDao.listByTaxPeriod(taxPeriodlist.get(i - 1).getId());
+                    // вернем последний отчетный период
+                    return reportPeriodlist.size() > 0 ? reportPeriodlist.get(reportPeriodlist.size() - 1) : null;
+                }
+            }
+        } else {
+            // не первый отчетный период в данном налоговом
+            for (int i = 0; i < reportPeriodlist.size(); i++){
+                if (reportPeriodlist.get(i).getId().equals(reportPeriodId)) {
+                    return reportPeriodlist.get(i - 1);
+                }
+            }
+        }
+        return null;
+    }
 }

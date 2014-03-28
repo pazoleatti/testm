@@ -6,10 +6,10 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({DateColumn.class, StringColumn.class, NumericColumn.class, RefBookColumn.class})
+@XmlSeeAlso({DateColumn.class, StringColumn.class, NumericColumn.class, RefBookColumn.class, ReferenceColumn.class})
 public class FormTemplateContent {
-	@XmlElement
-	private FormType type;
+	/*@XmlElement
+	private FormType type;*/
 	@XmlElement
 	private boolean fixedRows;
 	@XmlElement
@@ -24,7 +24,7 @@ public class FormTemplateContent {
 	private List<FormStyle> styles;
 
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
-		this.type = formTemplate.getType();
+		/*this.type = formTemplate.getType();*/
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();
 		this.fullName = formTemplate.getFullName();
@@ -34,7 +34,7 @@ public class FormTemplateContent {
 	}
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
-		formTemplate.setType(type);
+		/*formTemplate.setType(type);*/
 		formTemplate.setFixedRows(fixedRows);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);

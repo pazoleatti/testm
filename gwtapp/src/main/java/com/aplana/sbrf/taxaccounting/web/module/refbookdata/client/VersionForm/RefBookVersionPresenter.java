@@ -13,8 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -48,6 +46,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	private Long refBookId;
     private Long uniqueRecordId;
+    private boolean editMode;
 
 	EditFormPresenter editFormPresenter;
 
@@ -171,7 +170,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                getView().setReadOnlyMode(result.isReadOnly());
+                                getView().setReadOnlyMode(!(editMode && !result.isReadOnly()));
                                 editFormPresenter.init(refBookId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookVersionPresenter.this);
 							}
@@ -233,5 +232,17 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     @Override
     public boolean useManualReveal() {
         return true;
+    }
+
+    @Override
+    public void onSetEditMode() {
+        editMode = true;
+        getView().setReadOnlyMode(true);
+    }
+
+    @Override
+    public void onSetDefaultMode() {
+        editMode = false;
+        getView().setReadOnlyMode(false);
     }
 }

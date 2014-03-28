@@ -73,8 +73,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         type.setName(declarationTemplate.getName() != null && !declarationTemplate.getName().isEmpty()?declarationTemplate.getName():"");
         int formTypeId = declarationTypeService.save(type);
         declarationTemplate.getType().setId(formTypeId);
-        versionOperatingService.isIntersectionVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
-                VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger);
+        versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL, declarationTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
         declarationTemplate.setEdition(1);//т.к. первый
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
@@ -90,7 +89,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         /*versionOperatingService.isCorrectVersion(action.getForm(), action.getVersionEndDate(), logger);*/
         checkError(logger);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-        declarationTemplate.setEdition(declarationTemplateService.versionTemplateCount(declarationTemplate.getType().getId()) + 1);
         versionOperatingService.isIntersectionVersion(0, declarationTemplate.getType().getId(),
                 declarationTemplate.getStatus(), declarationTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
@@ -112,9 +110,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     throw new ServiceLoggerException("Удаление невозможно, обнаружено использование макета",
                             logEntryService.save(logger.getEntries()));
                 declarationTemplate.setStatus(VersionedObjectStatus.DELETED);
-                //TODO dloshkarev: можно переделать на batch
-                declarationTemplateService.save(declarationTemplate);
             }
+            declarationTemplateService.update(templates);
         }
         declarationTypeService.delete(typeId);
 
@@ -132,7 +129,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     logEntryService.save(logger.getEntries()));
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
-        declarationTemplateService.delete(template);
+        template.setStatus(VersionedObjectStatus.DELETED);
+        declarationTemplateService.save(template);
         if (declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL).isEmpty()){
             declarationTypeService.delete(template.getType().getId());

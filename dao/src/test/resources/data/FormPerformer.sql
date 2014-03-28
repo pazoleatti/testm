@@ -4,10 +4,10 @@ insert into department (id, name, parent_id, type) values (2, 'Б - департ
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
 insert into form_type (id, name, tax_type) values (2, 'Б - тип', 'I');
 
-insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, monthly, name, fullname, code)
-  values (1, 1, null, date '2013-01-01', 1, 1, 1, 0, 'name', 'fullname', 'code');
-insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, monthly, name, fullname, code)
-  values (2, 2, null, date '2013-01-01', 1, 1, 1, 1, 'name', 'fullname', 'code');
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code)
+  values (1, 1, null, date '2013-01-01', 1, 1,'name', 'fullname', 'code');
+insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code)
+  values (2, 2, null, date '2013-01-01', 1, 1,'name', 'fullname', 'code');
 
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
