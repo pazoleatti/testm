@@ -165,19 +165,20 @@ def boolean hasReport() {
 // Консолидация
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    def rows = new LinkedList<DataRow<Cell>>()
+    def dataRows = dataRowHelper.getAllCached()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
-                if (srcRow.getAlias() == null) {
-                   // TODO  суммирование граф 4 и 5
+                if (srcRow.getAlias()!= null && !srcRow.getAlias().equals('itog')) {
+                    def row= dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
+                    row.realizeCost = (row.realizeCost ?: 0) + (srcRow.realizeCost ?: 0)
+                    row.obtainCost = (row.obtainCost ?: 0) + (srcRow.obtainCost ?: 0)
                 }
             }
         }
     }
 
-    dataRowHelper.save(rows)
+    dataRowHelper.update(dataRows)
 }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг) или
+        возврата соответствующих сумм авансовых платежей
+    </name>
+    <fullName>Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
+        или возврата соответствующих сумм авансовых платежей
+    </fullName>
+    <code></code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>1000</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <name>Наименование балансового счета</name>
+        <order>2</order>
+        <width>5</width>
+        <maxLength>255</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <name>Номер балансового счета</name>
+        <order>3</order>
+        <width>5</width>
+        <maxLength>22</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <name>Сумма</name>
+        <order>4</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>number2</alias>
+        <checking>false</checking>
+        <name>Номер балансового счета</name>
+        <order>5</order>
+        <width>5</width>
+        <maxLength>22</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum2</alias>
+        <checking>false</checking>
+        <name>Сумма</name>
+        <order>6</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>псевдоним6</alias>
+        <checking>false</checking>
+        <name>Новый столбец</name>
+        <order>7</order>
+        <width>5</width>
+        <maxLength>1000</maxLength>
+    </columns>
+</formTemplateContent>
