@@ -9,19 +9,15 @@ import groovy.transform.Field
  * Форма "(РНУ-32.1) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 1".
  * formTemplateId=330
  *
- * TODO:
- *      - миграция еще не сделаны
- *      - невозможно проверить форму пока не будет заполнен справочник 84 "Ценные бумаги"
- *
  * @author rtimerbaev
  */
 
 // графа 0  - fix
-// графа 1  - number                - Номер территориального банка          - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
+// графа 1  - number                - Номер территориального банка          - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
 // графа 2  - name                  - Наименование территориального банка   - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - code                  - Код валюты номинала                   - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
+// графа 3  - code                  - Код валюты номинала                   - зависит от графы 4 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
 // графа 4  - issuer                - Эмитент                               - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
-// графа 5  - regNumber             - Номер государственной регистрации     - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
+// графа 5  - regNumber             - Номер государственной регистрации     - зависит от графы 4 - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
 // графа 6  - shortPositionData     - Дата открытия короткой позиции
 // графа 7  - faceValue             - Номинальная стоимость (ед. валюты)
 // графа 8  - countsBonds           - Количество облигаций (шт.)
@@ -115,20 +111,53 @@ sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
 
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
 def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
                      boolean required) {
+    if (value == null) {
+        return null
+    }
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
             day, rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
+    if (recordId == null) {
+        return null
+    }
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                def Date date, boolean required = true) {
+    if (value == null) {
+        return null
+    }
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
+            cellName, logger, required)
 }
 
 def addRow() {
@@ -154,7 +183,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def lastDay = getMonthEndDate()
+    def lastDay = getReportPeriodEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -184,20 +213,18 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // алиасы графов для арифметической проверки (графа 15..18)
     def arithmeticCheckAlias = ['incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
     // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
-    def lastDay = getMonthEndDate()
+    def lastDay = getReportPeriodEndDate()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def index = row.getIndex()
-        def errorMsg = "Строка $index: "
 
         // 2. Обязательность заполнения полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -230,16 +257,7 @@ void consolidation() {
     def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
-    def deleteRows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            deleteRows.add(row)
-        }
-    }
-    dataRows.removeAll(deleteRows)
-    // поправить индексы, потому что они после изменения не пересчитываются
-    updateIndexes(dataRows)
-
+    deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -284,10 +302,9 @@ void sort(def dataRows) {
             def numberA = (recordA != null ? recordA.SBRF_CODE.value : null)
             def numberB = (recordB != null ? recordB.SBRF_CODE.value : null)
 
-            def nameA = (recordA != null ? recordA.NAME.value : null)
-            def nameB = (recordB != null ? recordB.NAME.value : null)
-
             if (numberA == numberB) {
+                def nameA = (recordA != null ? recordA.NAME.value : null)
+                def nameB = (recordB != null ? recordB.NAME.value : null)
                 return nameA <=> nameB
             }
             return numberA <=> numberB
@@ -376,8 +393,6 @@ def calc16(def row, def lastDay, def dataRows) {
  * @param dataRows строки нф
  */
 def calc15or16(def row, def lastDay, def t, def dataRows) {
-    def code = getRefBookValue(84L, row.issuer)?.CODE_CUR
-    def recordId = getRecordId(15, 'CODE', code.toString(), 1, "1", lastDay)
     if (row.getIndex() < getDataRow(dataRows, '7').getIndex()) {
         if (row.currentPeriod == null || row.currentPeriod == 0 ||
                 row.countsBonds == null || row.incomeCurrentCoupon == null) {
@@ -386,14 +401,31 @@ def calc15or16(def row, def lastDay, def t, def dataRows) {
         // Для ценных бумаг, учтенных в подразделах 1, 2, 3, 4, 5, 6
         return row.countsBonds * roundValue(row.incomeCurrentCoupon * t / row.currentPeriod, 2)
     } else {
-        if (code == null || row.currentCouponRate == null || row.faceValue == null) {
+        // Для ценных бумаг, учтенных в подразделах 7 и 8
+        if (row.issuer == null || row.currentCouponRate == null || row.faceValue == null) {
             return null
         }
-        // Для ценных бумаг, учтенных в подразделах 7 и 8
-        // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-        def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId.toString(), lastDay, row.getIndex(), getColumnName(row, 'code'), true)
-        return roundValue(row.currentCouponRate * row.faceValue * t / 360, 2) * record22.RATE.value
+
+        def rate = getRate(row, lastDay)
+        if (rate == null) {
+            return null
+        }
+        return roundValue(row.currentCouponRate * row.faceValue * t / 360, 2) * rate
     }
+}
+
+// Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
+def getRate(def row, def lastDay) {
+    if (row.issuer == null) {
+        return null
+    }
+    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
+    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
+    // получить id записи из справочника валют (15) по цифровому коду валюты
+    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+    // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
+    def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId?.toString(), lastDay, row.getIndex(), null, true)
+    return record22?.RATE?.value
 }
 
 /**
@@ -403,10 +435,8 @@ def calc15or16(def row, def lastDay, def t, def dataRows) {
  * @param lastDay последний день отчетного месяца
  */
 def calc17(def row, def lastDay) {
-    def code = getRefBookValue(84L, row.issuer)?.CODE_CUR
-    def recordId = getRecordId(15, 'CODE', code.toString(), 1, "1", lastDay)
     if (row.countsBonds == null || row.termBondsIssued == null || row.faceValue == null ||
-            row.averageWeightedPrice == null || row.shortPositionData == null || code == null ||
+            row.averageWeightedPrice == null || row.shortPositionData == null || row.issuer == null ||
             row.termBondsIssued == 0 || row.countsBonds == 0) {
         return null
     }
@@ -414,9 +444,11 @@ def calc17(def row, def lastDay) {
             ((lastDay - row.shortPositionData) / row.termBondsIssued) * row.countsBonds)
     tmp = roundValue(tmp, 2)
 
-    // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-    def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId.toString(), lastDay, row.getIndex(), getColumnName(row, 'code'), true)
-    tmp = tmp * record22.RATE.value
+    def rate = getRate(row, lastDay)
+    if (rate == null) {
+        return null
+    }
+    tmp = tmp * rate
     return roundValue(tmp, 2)
 }
 
@@ -453,207 +485,179 @@ void updateIndexes(def dataRows) {
     }
 }
 
-def getMonthEndDate() {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     }
-    return reportPeriodEndDate
+    return endDate
 }
-
-/**
- * Импорт
- */
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Номер территориального банка', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): 'Номер территориального банка',
-            (xml.row[0].cell[1]): 'Наименование территориального банка',
-            (xml.row[0].cell[2]): 'Код валюты номинала',
-            (xml.row[0].cell[3]): 'Эмитент',
-            (xml.row[0].cell[4]): 'Номер государственной регистрации',
-            (xml.row[0].cell[5]): 'Дата открытия короткой позиции',
-            (xml.row[0].cell[6]): 'Номинальная стоимость (ед. валюты)',
-            (xml.row[0].cell[7]): 'Количество облигаций (шт.)',
-            (xml.row[0].cell[8]): 'Средневзвешенная цена одной облигации на дату, когда выпуск признан размещенным (ед. вал.)',
-            (xml.row[0].cell[9]): 'Срок обращения выпуска (дни)',
-            (xml.row[0].cell[10]): 'Дата погашения предыдущего купона',
-            (xml.row[0].cell[11]): 'Текущий купонный период (дни)',
-            (xml.row[0].cell[12]): 'Ставка текущего купона, (% год.)',
-            (xml.row[0].cell[13]): 'Объявленный доход по текущему купону (руб.коп.)',
-            (xml.row[0].cell[14]): 'Доход с даты погашения предыдущего купона (руб.коп.)',
-            (xml.row[0].cell[15]): 'Доход с даты открытия короткой позиции (руб.коп.)',
-            (xml.row[0].cell[16]): 'Процентный доход по дисконтным облигациям (руб.коп.)',
-            (xml.row[0].cell[17]): 'Всего процентный доход (руб.коп.)',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[1]): '2',
-            (xml.row[1].cell[2]): '3',
-            (xml.row[1].cell[3]): '4',
-            (xml.row[1].cell[4]): '5',
-            (xml.row[1].cell[5]): '6',
-            (xml.row[1].cell[6]): '7',
-            (xml.row[1].cell[7]): '8',
-            (xml.row[1].cell[8]): '9',
-            (xml.row[1].cell[9]): '10',
-            (xml.row[1].cell[10]): '11',
-            (xml.row[1].cell[11]): '12',
-            (xml.row[1].cell[12]): '13',
-            (xml.row[1].cell[13]): '14',
-            (xml.row[1].cell[14]): '15',
-            (xml.row[1].cell[15]): '16',
-            (xml.row[1].cell[16]): '17',
-            (xml.row[1].cell[17]): '18',
+            // название первого столбца хранится в нулевой скрытой графе
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'number'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'name'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'code'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'issuer'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'regNumber'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'shortPositionData'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'faceValue'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'countsBonds'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'averageWeightedPrice'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'termBondsIssued'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'maturityDate'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'currentPeriod'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'currentCouponRate'),
+            (xml.row[0].cell[14]): getColumnName(tmpRow, 'incomeCurrentCoupon'),
+            (xml.row[0].cell[15]): getColumnName(tmpRow, 'incomePrev'),
+            (xml.row[0].cell[16]): getColumnName(tmpRow, 'incomeShortPosition'),
+            (xml.row[0].cell[17]): getColumnName(tmpRow, 'percIncome'),
+            (xml.row[0].cell[18]): getColumnName(tmpRow, 'totalPercIncome')
     ]
+
+    (1..18).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 2)
 }
 
 /* Заполнить форму данными */
-
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
     def xmlIndexRow = -1
     def int rowOffset = 10
-    def int colOffset = 1
+    def int colOffset = 0
 
-    def int rowIndex = 1
-    def rows = []
-
-    // Индекс для вставки данных по соответствующим фиксированным строкам
-    def index = -1
-
-    // Очищаем форму от старых данных
-    for (def row : dataRows) {
-        if (row.fix != null) {
-            rows.add(row)
-        }
-    }
+    def sectionIndex = null
+    def mapRows = [:]
 
     for (def row : xml.row) {
-
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
 
         /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
-        index++
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        def firstValue = row.cell[0].text()
+        if (firstValue != null && firstValue != '' && firstValue != 'Итого:') {
+            sectionIndex = firstValue[0]
+            mapRows.put(sectionIndex, [])
+            continue
+        } else if (firstValue == 'Итого:') {
             continue
         }
 
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
+        def newRow = getNewRow()
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
+        xmlIndexCol = 2
+        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.name = record30?.record_id?.value
+
+        // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
+        if (record30 != null) {
+            xmlIndexCol = 1
+            formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        /* Графа 2 */
-        def nameId = getRecordIdImport(30, 'NAME', row.cell[1].text(), xlsIndexRow, 1 + colOffset)
-        newRow.name = nameId
+        // графа 4 - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
+        xmlIndexCol = 4
+        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.issuer = record84?.record_id?.value
 
-        /* Проверка зависимой графы 1 */
-        checkImportReferenceColumn(30, nameId, refBookCache, 'SBRF_CODE', row.cell[0].text(), xlsIndexRow, colOffset, true)
+        if (record84 != null) {
+            // графа 3 - зависит от графы 4 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
+            xmlIndexCol = 3
+            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.CODE_CUR?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        /* Графа 4 */
-        issuerId = getRecordIdImport(84, 'ISSUER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-        newRow.issuer = issuerId
-
-        /* Проверка зависимой графы 3 */
-        checkImportReferenceColumn(84, issuerId, refBookCache, 'CODE_CUR', row.cell[2].text(), xlsIndexRow, 2 + colOffset, true)
-
-        /* Проверка зависимой графы 5 */
-        checkImportReferenceColumn(84, issuerId, refBookCache, 'REG_NUM', row.cell[4].text(), xlsIndexRow, 4 + colOffset, true)
+            // графа 5 - зависит от графы 4 - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
+            xmlIndexCol = 5
+            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         /* Графа 6 */
-        newRow.shortPositionData = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        xmlIndexCol = 6
+        newRow.shortPositionData = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 7 */
-        newRow.faceValue = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        xmlIndexCol = 7
+        newRow.faceValue = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 8 */
-        newRow.countsBonds = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        xmlIndexCol = 8
+        newRow.countsBonds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 9*/
-        newRow.averageWeightedPrice = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        xmlIndexCol = 9
+        newRow.averageWeightedPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 10 */
-        newRow.termBondsIssued = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        xmlIndexCol = 10
+        newRow.termBondsIssued = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 11 */
-        newRow.maturityDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
+        xmlIndexCol = 11
+        newRow.maturityDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 12 */
-        newRow.currentPeriod = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        xmlIndexCol = 12
+        newRow.currentPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 13 */
-        newRow.currentCouponRate = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+        xmlIndexCol = 13
+        newRow.currentCouponRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         /* Графа 14 */
-        newRow.incomeCurrentCoupon = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, false)
+        xmlIndexCol = 14
+        newRow.incomeCurrentCoupon = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
-        rows.add(index, newRow)
+        mapRows[sectionIndex].add(newRow)
     }
 
-    dataRowHelper.save(rows)
-}
+    deleteNotFixedRows(dataRows)
 
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
-
-/**
- * Проверка зависимых граф
- *
- * @param refBookId идентификатор справочника
- * @param recordId идентификатор записи
- * @param refBookCache кэш
- * @param recordAttributeName (GString) название атрибута записи
- * @param value значение, полученное из excel
- * @param rowNumber номер строки для логгера
- * @param colNumber номер столбца для логгера
- * @param isFatal управление фатальностью
- * @return
- */
-def checkImportReferenceColumn(def refBookId, def recordId, def refBookCache, def recordAttributeName, def value, def rowNumber, def colNumber, def isFatal) {
-
-    def record = formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-    if (record != null) {
-        if ((value != null && !value.isEmpty() && !value.equals(record[recordAttributeName]?.stringValue))
-                || ((value == null || value.isEmpty()) && record[recordAttributeName]?.stringValue != null)) {
-            def message = "Проверка файла: Строка ${rowNumber}, столбец ${colNumber} " +
-                    "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(refBookId).getName() + "»!"
-
-            if (isFatal) {
-                logger.error(message)
-            } else {
-                logger.warn(message)
-            }
+    // копирование данных по разделам
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
         }
+    }
+
+    dataRowHelper.save(dataRows)
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
     }
 }
