@@ -64,7 +64,7 @@
                 </g:cell>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}" ui:field="monthPanel">
                 <g:cell horizontalAlignment="right">
                     <g:Label width="140px" wordWrap="false" text="Месяц:"/>
                 </g:cell>

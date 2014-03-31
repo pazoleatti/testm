@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -52,6 +53,9 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiField
     RefBookPickerWidget formTypeId;
+
+    @UiField
+    HorizontalPanel monthPanel;
 
     @UiField(provided = true)
     ValueListBox<Months> formMonth;
@@ -94,6 +98,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         formTypeId.setValue(null);
         formTypeId.setDereferenceValue(null);
         formMonth.setValue(null);
+        monthPanel.setVisible(false);
         updateEnabled();
     }
 
@@ -229,6 +234,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void setFormMonthEnabled(boolean isMonthly) {
         // Если ежемесячный, то устанавливается formMonth = true
         this.isMonthly = isMonthly;
+        monthPanel.setVisible(isMonthly);
         formMonth.setEnabled(isMonthly);
         // Кнопка "Создать" пока неактивна
         if (isMonthly) {
