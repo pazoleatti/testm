@@ -116,16 +116,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -329,42 +329,34 @@ String getValuesByGroupColumn(DataRow row) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог:')
+    def tmpRow = formData.createDataRow()
+    def xml = getXML('Общие сведения о контрагенте - юридическом лице', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 3)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Наименование страны регистрации',
-            (xml.row[0].cell[3]): 'Код страны регистрации по классификатору ОКСМ',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Номер сделки',
-            (xml.row[0].cell[7]): 'Дата заключения сделки',
-            (xml.row[0].cell[8]): 'Код валюты по сделке',
-            (xml.row[0].cell[9]): 'Код страны происхождения предмета сделки по классификатору ОКСМ',
-            (xml.row[0].cell[10]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',
-            (xml.row[0].cell[11]): 'Сумма расходов Банка по данным бухгалтерского учета, руб.',
-            (xml.row[0].cell[12]): 'Цена (тариф) за единицу измерения, руб.',
-            (xml.row[0].cell[13]): 'Итого стоимость, руб.',
-            (xml.row[0].cell[14]): 'Дата совершения сделки',
-            (xml.row[2].cell[0]): 'гр. 2',
-            (xml.row[2].cell[1]): 'гр. 3',
-            (xml.row[2].cell[2]): 'гр. 4.1',
-            (xml.row[2].cell[3]): 'гр. 4.2',
-            (xml.row[2].cell[4]): 'гр. 5',
-            (xml.row[2].cell[5]): 'гр. 6',
-            (xml.row[2].cell[6]): 'гр. 7',
-            (xml.row[2].cell[7]): 'гр. 8',
-            (xml.row[2].cell[8]): 'гр. 9',
-            (xml.row[2].cell[9]): 'гр. 10',
-            (xml.row[2].cell[10]): 'гр. 11',
-            (xml.row[2].cell[11]): 'гр. 12',
-            (xml.row[2].cell[12]): 'гр. 13',
-            (xml.row[2].cell[13]): 'гр. 14',
-            (xml.row[2].cell[14]): 'гр. 15'
+            (xml.row[1].cell[3]): getColumnName(tmpRow, 'inn'),
+            (xml.row[1].cell[4]): getColumnName(tmpRow, 'countryName'),
+            (xml.row[1].cell[5]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[1].cell[6]): getColumnName(tmpRow, 'docNum'),
+            (xml.row[1].cell[7]): getColumnName(tmpRow, 'docDate'),
+            (xml.row[1].cell[8]): getColumnName(tmpRow, 'dealNumber'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'dealDate'),
+            (xml.row[1].cell[10]): getColumnName(tmpRow, 'currencyCode'),
+            (xml.row[1].cell[11]): getColumnName(tmpRow, 'countryDealCode'),
+            (xml.row[1].cell[12]): getColumnName(tmpRow, 'incomeSum'),
+            (xml.row[1].cell[13]): getColumnName(tmpRow, 'outcomeSum'),
+            (xml.row[1].cell[14]): getColumnName(tmpRow, 'price'),
+            (xml.row[1].cell[15]): getColumnName(tmpRow, 'total'),
+            (xml.row[1].cell[17]): getColumnName(tmpRow, 'dealDoneDate'),
+            (xml.row[2].cell[3]): 'гр. 3',
+            (xml.row[2].cell[4]): 'гр. 4.1',
+            (xml.row[2].cell[5]): 'гр. 4.2',
+            (xml.row[2].cell[17]): 'гр. 15'
     ]
-
+    (6..15).each{
+        headerMapping.put(xml.row[2].cell[it], 'гр. ' + (it-1))
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -377,7 +369,7 @@ void addData(def xml, int headRowCount) {
 
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger() + 2
 
     def rows = []
     def int rowIndex = 1
@@ -395,6 +387,11 @@ void addData(def xml, int headRowCount) {
             break
         }
 
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
@@ -409,6 +406,10 @@ void addData(def xml, int headRowCount) {
 
         // графа 1
         newRow.rowNumber = xmlIndexRow - headRowCount
+        xmlIndexCol++
+
+        // графа fix
+        xmlIndexCol++
 
         // графа 2
         newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -481,6 +482,8 @@ void addData(def xml, int headRowCount) {
         // графа 13
         xmlIndexCol++
         // графа 14
+        xmlIndexCol++
+        // графа fix
         xmlIndexCol++
 
         // графа 15

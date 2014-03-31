@@ -116,7 +116,7 @@ def getXML(def String startStr, def String endStr) {
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -226,7 +226,7 @@ void importData() {
             (xml.row[1].cell[3]): 'гр. 4.2'
     ]
     (4..10).each{
-        headerMapping.put((xml.row[1].cell[it]), 'гр. ' + (it+1))
+        headerMapping.put(xml.row[1].cell[it], 'гр. ' + (it+1))
     }
     checkHeaderEquals(headerMapping)
 
