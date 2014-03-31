@@ -54,54 +54,23 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	private AuditService auditService;
 
     @Autowired
-    private ReportPeriodService reportPeriodService;
-
-    @Autowired
     private LogEntryService logEntryService;
 
-	/**
-	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
-	 * <ol>
-	 * <li>Поиск формы-потребителя по заданным параметрам. Отчетный период берется текущий.</li>
-	 * <li>Если форма-потребитель не найдена, она создается автоматически.</li>
-	 * <li>Форме-потребителю отправляется событие {@link com.aplana.sbrf.taxaccounting.model.FormDataEvent#COMPOSE}</li>
-	 * <li>На форме-потребителе выполняются скрипты, привязанные к событию {@link com.aplana.sbrf.taxaccounting.model.FormDataEvent#COMPOSE}</li>
-	 * </ol>
-	 * <p/>
-	 * Этот метод вызывается тогда, когда форма-источник переходит в состояние "Принята". Вызов должен происходить из
-	 * скрипта, прикрепленного к соответствующему событию.
-	 *
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 *                     формы-потребителя. В скрипте, вызывающем данный метод, необходимо определить подразделение
-	 *                     формы-потребителя. Как правило, это вышестоящее подразделение подразделения формы-источника
-	 *                     или подразделение формы-источника.
-	 * @param formTypeId   {@link com.aplana.sbrf.taxaccounting.model.FormType вид формы-потребителя}.
-	 * @param kind         тип формы-потребителя: консолидированная, сводная.
-	 */
 	@Override
-	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind) {
-        // Find form data.
-        FormData dformData;
-        if (sformData.getPeriodOrder() == null) {
-            dformData = formDataDao.find(formTypeId, kind, departmentId, sformData.getReportPeriodId());
-        } else {
-            Integer taxPeriodId = reportPeriodService.get(sformData.getReportPeriodId()).getTaxPeriod().getId();
-            dformData = formDataDao.findMonth(formTypeId, kind, departmentId, taxPeriodId, sformData.getPeriodOrder());
-        }
-
-        // Create form data if doesn't exist.
+	public void compose(FormData dformData, int reportPeriodId, Integer periodOrder,  int departmentId, int formTypeId, FormDataKind kind) {
+        // Если экземпляр не найден, то он создается
 		if (dformData == null) {
 			// TODO: Надо подумать, что делать с пользователем.
-			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, sformData.getReportPeriodId());
+			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
             // Создание формы в том же периоде
 			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(),
                     scriptComponentContext.getUserInfo(), formTemplateId, departmentId, kind,
-                    sformData.getReportPeriodId(), sformData.getPeriodOrder(), false);
+                    reportPeriodId, periodOrder, false);
 			dformData = formDataDao.get(dFormDataId);
         }
 
-		if(dformData.getState() != WorkflowState.ACCEPTED){
-			auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
+        if (dformData.getState() != WorkflowState.ACCEPTED) {
+            auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
 					dformData.getDepartmentId(), dformData.getReportPeriodId(),
 					null, dformData.getFormType().getId(), dformData.getKind().getId(), "Событие инициировано Системой");
 			

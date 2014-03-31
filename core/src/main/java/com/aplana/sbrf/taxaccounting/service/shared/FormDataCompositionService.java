@@ -28,23 +28,19 @@ import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 })
 public interface FormDataCompositionService {
 	/**
-	 * Интеграция формы (источника данных) в другую форму (потребителя) происходит в несколько этапов:
+	 * Консолидация формы-потребителя из форм-источников в несколько этапов:
 	 * <ol>
-	 * <li>Поиск формы-потребителя по заданным параметрам. Отчетный период берется текущий.</li>
-	 * <li>Если форма-потребитель не найдена, она создается автоматически.</li>
-	 * <li>Форме-потребителю отправляется событие {@link com.aplana.sbrf.taxaccounting.model.FormDataEvent#COMPOSE}</li>
-	 * <li>На форме-потребителе выполняются скрипты, привязанные к событию {@link com.aplana.sbrf.taxaccounting.model.FormDataEvent#COMPOSE}</li>
+	 * <li>Если экземпляр формы-потребителя не найден, то он создается автоматически.</li>
+	 * <li>Экземпляру формы-потребителю отправляется событие {@link com.aplana.sbrf.taxaccounting.model.FormDataEvent#COMPOSE}</li>
 	 * </ol>
 	 * <p/>
-	 * Этот метод вызывается тогда, когда форма-источник переходит в состояние "Принята". Вызов должен происходить из
-	 * скрипта, прикрепленного к соответствующему событию.
-	 *
-	 * @param departmentId идентификатор {@link com.aplana.sbrf.taxaccounting.model.Department подразделения}
-	 *                     формы-потребителя. В скрипте, вызывающем данный метод, необходимо определить подразделение
-	 *                     формы-потребителя. Как правило, это вышестоящее подразделение подразделения формы-источника
-	 *                     или подразделение формы-источника.
-	 * @param formTypeId   {@link com.aplana.sbrf.taxaccounting.model.FormType вид формы-потребителя}.
-	 * @param kind         тип формы-потребителя: консолидированная, сводная.
+	 * Этот метод вызывается тогда, когда форма-источник переходит в статус «Принята».
+     * @param dformData Экземпляр формы-приемника (может отсутствовать)
+     * @param reportPeriodId Отчетный период формы-приемника
+     * @param periodOrder Месяц для ежемесячных форм (для квартальных форм не задается)
+	 * @param departmentId Подразделение формы-приемника
+	 * @param formTypeId Вид формы-приемника
+	 * @param kind  Тип формы-приемника
 	 */
-	public void compose(FormData sformData, int departmentId, int formTypeId, FormDataKind kind);
+	public void compose(FormData dformData, int reportPeriodId, Integer periodOrder, int departmentId, int formTypeId, FormDataKind kind);
 }
