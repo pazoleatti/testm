@@ -63,6 +63,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
 		action.setReadOnly(Boolean.parseBoolean(request.getParameter(READ_ONLY, "true")));
         action.setManual(request.getParameter(MANUAL, null) != null ? Boolean.parseBoolean(request.getParameter(MANUAL, null)) : null);
+        action.setUuid(request.getParameter(UUID, null));
         executeAction(action);
 	}
 
@@ -128,7 +129,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    revealFormData(readOnlyMode, true);
+                                    revealFormData(readOnlyMode, true, null);
                                 }
                             }, FormDataPresenter.this)
                     );
@@ -177,12 +178,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onModeChangeClicked() {
-        revealFormData(readOnlyMode, !formData.isManual());
+        revealFormData(readOnlyMode, !formData.isManual(), null);
     }
 
 	@Override
 	public void onEditClicked(final boolean readOnlyMode) {
-        revealFormData(readOnlyMode, formData.isManual());
+        revealFormData(readOnlyMode, formData.isManual(), null);
 	}
 
 	@Override
@@ -219,7 +220,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCancelClicked() {
-		revealFormData(true, formData.isManual());
+		revealFormData(true, formData.isManual(), null);
 	}
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
@@ -356,7 +357,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             @Override
                                             public void onSuccess(
                                                     DeleteFormDataResult result) {
-                                                revealFormData(true, false);
+                                                revealFormData(true, false, null);
                                             }
 
                                         }, FormDataPresenter.this));
@@ -439,10 +440,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
-						LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-						revealFormData(true, formData.isManual());
-					}
-				}, this));
+                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                        revealFormData(true, formData.isManual(), result.getUuid());
+                    }
+                }, this));
 	}
 
     private void executeAction(GetFormData action){
@@ -453,10 +454,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(GetFormDataResult result) {
 
-                                // если нет сообщений для показа то не обращаться к логгеру, по причине того что при обращении логгер очищается
-                                if (result.getUuid() != null){
-                                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                                }
+                                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
