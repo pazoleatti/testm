@@ -136,8 +136,8 @@ void prevPeriodCheck() {
     }
     def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         def formName = formData.getFormType().getName()
+        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
         logger.error("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
 }

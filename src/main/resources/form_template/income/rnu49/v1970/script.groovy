@@ -247,11 +247,14 @@ void logicCheck() {
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def numbers = []
-    reportPeriodList.each { ReportPeriod period ->
+    for (ReportPeriod period in reportPeriodList) {
         if (period.order < reportPeriod.order) {
             def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
+            if (!findFormData) {
+                continue
+            }
             def findRows = formDataService.getDataRowHelper(findFormData)?.allCached
-            for (row in findRows){
+            for (row in findRows) {
                 numbers += row.invNumber
             }
         }
@@ -438,7 +441,7 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
     // Если «Графа 21» = 2, то
     // «Графа 8» =Значение «Графы 7» РНУ-45, где «Графа 2» = «Графа 6» РНУ-49
     // иначе ручной ввод
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
         if (row46 != null && saledPropertyCode == 1) {
@@ -453,11 +456,11 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
 }
 
 BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
         if (row46 != null && saledPropertyCode == 1) {
-            tmp = row46.cost10perExploitation + row46.amortExploitation
+            tmp = (row46.cost10perExploitation ?: 0) + (row46.amortExploitation ?: 0)
         } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.amortizationSinceUsed
         } else if (saledPropertyCode in [3,5,6,7]) {
@@ -470,7 +473,7 @@ BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
 }
 
 BigDecimal getGraph15(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.marketPrice != null) {
         if (row.sum - row.marketPrice * 0.8 > 0) {
             tmp = BigDecimal.ZERO
@@ -482,7 +485,7 @@ BigDecimal getGraph15(def row) {
 }
 
 BigDecimal getGraph16(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
@@ -490,7 +493,7 @@ BigDecimal getGraph16(def row) {
 }
 
 BigDecimal getGraph17(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
@@ -514,7 +517,7 @@ def getGraph19(def DataRow row49) {
 }
 
 BigDecimal getGraph20(def DataRow row49) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.monthsLoss != 0 && row49.monthsLoss != null) {
         if (row49.sum > 0 && row49.loss != null) {
             tmp = (row49.loss / row49.monthsLoss)

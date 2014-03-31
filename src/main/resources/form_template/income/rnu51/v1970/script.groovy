@@ -446,7 +446,7 @@ void logicCheck() {
         }
         // 8. Проверка суммы финансового результата
         if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
-            logger.error(errorMsg + "неверно определен финансовый результат реализации (выбытия)!")
+            logger.error(errorMsg + "Неверно определен финансовый результат реализации (выбытия)!")
         }
         // 9. Проверка превышения цены реализации для целей налогообложения над фактической ценой реализации
         if ((code != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))

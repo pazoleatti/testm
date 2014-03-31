@@ -265,9 +265,9 @@ BigDecimal calc8(def row) {
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
     if ([1, 2, 8..10].contains(group) && row.cost != null) {
-        return round(row.cost * 10)
+        return round(row.cost * 0.1)
     } else if ([3..7].contains(row.amortGroup) && row.cost != null) {
-        return round(row.cost * 30)
+        return round(row.cost * 0.3)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
         return 0
     }
@@ -408,7 +408,7 @@ void logicCheck() {
         if (formData.kind == FormDataKind.PRIMARY) {
 
             def prevRow = getPrevRow(getDataRowHelperPrev(), row)
-            def prevSum = getYearSum(['cost10perMonth', 'amortMonth'])
+            def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row)
 
             // 6. Проверка суммы расходов в виде капитальных вложений с начала года
             if (prevRow == null ||
@@ -473,7 +473,7 @@ def getPrevRow(def dataPrev, def row) {
 }
 
 // Получение суммы по графе всех предыдущих принятых форм и по графе текущей формы
-def getYearSum(def aliases) {
+def getYearSum(def aliases, def rowCurrent) {
     def retVal = [:]
 
     for (def alias : aliases) {
@@ -484,20 +484,17 @@ def getYearSum(def aliases) {
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     // Сумма в текущей форме
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
-    for (def row : dataRows) {
-        for (def alias : aliases) {
-            def val = row.get(alias)
-            retVal[alias] += val == null ? 0 : val
-        }
+    for (def alias : aliases) {
+        def val = rowCurrent.get(alias)
+        retVal[alias] += val == null ? 0 : val
     }
     // Сумма в предыдущих формах
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
         def prevFormData = formDataService.findMonth(formData.formType.id, formData.kind, formData.departmentId,
                 taxPeriod.id, month)
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-            def prevDataRows = formDataService.getDataRowHelper(prevFormData).getAll()
-            for (def row : prevDataRows) {
+            def row = getPrevRow(formDataService.getDataRowHelper(prevFormData), rowCurrent)
+            if (row) {
                 for (def alias : aliases) {
                     def val = row.get(alias)
                     retVal[alias] += val == null ? 0 : val
