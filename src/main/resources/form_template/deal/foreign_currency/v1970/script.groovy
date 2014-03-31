@@ -9,7 +9,6 @@ import groovy.transform.Field
 
 /**
  * 390 - Купля-продажа иностранной валюты (15)
- * (похож на nondeliverable " Беспоставочные срочные сделки")
  *
  * @author Stanislav Yasinskiy
  */

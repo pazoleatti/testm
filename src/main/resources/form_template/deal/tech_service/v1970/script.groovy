@@ -268,7 +268,7 @@ void importData() {
             (xml.row[1].cell[6]): getColumnName(tmpRow, 'country'),
             (xml.row[1].cell[7]): getColumnName(tmpRow, 'region'),
             (xml.row[1].cell[8]): getColumnName(tmpRow, 'city'),
-            (xml.row[1].cell[9]): getColumnName(tmpRow, 'settlement'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'settlement')
     ]
 
     (0..13).each{

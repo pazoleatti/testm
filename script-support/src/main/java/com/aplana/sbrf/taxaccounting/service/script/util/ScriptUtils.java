@@ -484,7 +484,7 @@ public final class ScriptUtils {
                     if (nextRow == null || nextRow.getAlias() == null && isDiffRow(row, nextRow, groupColums)) {
                         String groupCols = groupString.getString(row);
                         if (groupCols != null) {
-                            logger.error(String.format(GROUP_WRONG_ITOG, groupCols));
+                            logger.error(GROUP_WRONG_ITOG, groupCols);
                         }
                     }
                 }
@@ -494,7 +494,7 @@ public final class ScriptUtils {
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
                     if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
-                        logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                        logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
             }
@@ -504,7 +504,7 @@ public final class ScriptUtils {
                 DataRow<Cell> realItogRow = itogRows.get(i);
                 int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
                 if (dataRows.get(itg).getAlias() != null) {
-                    logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                    logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                 } else {
                     String groupCols = groupString.getString(dataRows.get(itg));
                     if (groupCols != null) {
@@ -565,10 +565,12 @@ public final class ScriptUtils {
             if (currentString == null || referenceString == null) {
                 continue;
             }
-            if (currentString.toString().trim().equalsIgnoreCase(referenceString.trim())) {
+            String s1 = currentString.toString().trim().replaceAll("%%", "%");
+            String s2 = referenceString.trim().replaceAll("%%", "%");
+            if (s1.equalsIgnoreCase(s2)) {
                 continue;
             }
-            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString.toString()));
+            throw new ServiceException(WRONG_HEADER_EQUALS, s2, s1);
         }
     }
 
