@@ -348,11 +348,12 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
+            Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from declaration_template where declaration_type_id = ?" +
                     " and TRUNC(version,'DD') > ? and status in (0,1,2)",
                     new Object[]{typeId, actualBeginVersion},
-                    Date.class).getTime());
+                    Date.class);
+            return date != null ? new Date(date.getTime()) : null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении ближайшей версии.", e);
         }

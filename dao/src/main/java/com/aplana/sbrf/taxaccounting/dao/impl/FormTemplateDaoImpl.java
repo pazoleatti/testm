@@ -339,11 +339,12 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
+            Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from form_template where type_id = ? and TRUNC(version, 'DD') > ? and status in (0,1,2)",
                     new Object[]{formTypeId, actualBeginVersion},
                     new int[]{Types.NUMERIC, Types.DATE},
-                    Date.class).getTime());
+                    Date.class);
+            return date != null ? new Date(date.getTime()) : null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении даты окончания версии.", e);
         }
