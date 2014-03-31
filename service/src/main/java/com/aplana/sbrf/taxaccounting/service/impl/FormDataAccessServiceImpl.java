@@ -233,7 +233,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
-                    "Произошли ошибки при создании версии ручного ввода",
+                    "Произошли ошибки при проверке необходимых условий для перевода формы в режим ручного ввода",
                     logEntryService.save(logger.getEntries()));
         }
     }
@@ -349,7 +349,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     case APPROVED:
                     case ACCEPTED:
                         if (!manual) {
-                            //TODO проверки для приемника?
                             // Нельзя редактировать НФ в состоянии "Принята"
                             throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
                                     formData.getFormType().getName(), formData.getState().getName()));

@@ -107,20 +107,18 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	@Override
 	public List<DeclarationType> getTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType) {
 		return getJdbcTemplate().query(
-				"with templatesByVersion as (select id, declaration_type_id, status, is_active, version, row_number() over(partition by declaration_type_id order by version) rn from declaration_template), " +
+				"with templatesByVersion as (select id, declaration_type_id, status, version, row_number() " +
+                        (isSupportOver() ? "over(partition by declaration_type_id order by version)" : "over()") +
+                        " rn from declaration_template), " +
 						"allTemplates as (select tv.id, " +
 						"tv.declaration_type_id, " +
-						"tv.is_active," +
-						"tv.VERSION versionFrom, " +
-						"case" +
-						" when tv2.status=2 then tv2.version" +
-						" when (tv2.status=0 or tv2.status=1) then tv2.version - interval '1' day" +
-						" end as versionTo" +
+						"tv.VERSION versionFrom,  " +
+						" tv2.version - interval '1' day as versionTo, tv.status" +
 						" from templatesByVersion tv left outer join templatesByVersion tv2 on tv.declaration_type_id = tv2.declaration_type_id and tv.rn+1 = tv2.rn)" +
 						" select distinct t.* from declaration_type t" +
 						" join department_declaration_type ddt on t.id = ddt.declaration_type_id" +
-						" join allTemplates at on ddt.declaration_type_id = at.declaration_type_id" +
-						" where ddt.department_id=? and t.tax_type=? and at.is_active=1 and ((at.versionFrom <= ? and at.versionTo >= ?) or (at.versionFrom <= ? and at.versionTo is null))",
+						" join allTemplates all_t on ddt.declaration_type_id = all_t.declaration_type_id" +
+						" where ddt.department_id=? and t.tax_type=? and all_t.status = 0 and ((all_t.versionFrom <= ? and all_t.versionTo >= ?) or (all_t.versionFrom <= ? and all_t.versionTo is null))",
 				new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
 				new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
 				new DeclarationTypeRowMapper()

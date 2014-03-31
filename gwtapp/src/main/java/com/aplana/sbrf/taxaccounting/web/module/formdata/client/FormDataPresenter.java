@@ -183,7 +183,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onEditClicked(final boolean readOnlyMode) {
-        revealFormData(readOnlyMode, formData.isManual(), null);
+        if (formData.isManual()) {
+            CheckManualAction action = new CheckManualAction();
+            action.setFormDataId(formData.getId());
+            dispatcher.execute(action, new AbstractCallback<CheckManualResult>() {
+                @Override
+                public void onSuccess(CheckManualResult result) {
+                    revealFormData(readOnlyMode, formData.isManual(), null);
+                }
+            });
+        } else {
+            revealFormData(readOnlyMode, formData.isManual(), null);
+        }
 	}
 
 	@Override
