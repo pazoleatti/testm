@@ -283,7 +283,7 @@ void logicCheck() {
 
         // проверки НСИ
         // 1. Проверка значения графы «Наименование балансового счёта» (графа 4)
-        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "NAME = '$row.nameBalanceAccount'", null)
+        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "BALANCE_ACCOUNT = '$row.nameBalanceAccount'", null)
         if (record == null || record.isEmpty()) {
             def name = getColumnName(row, 'nameBalanceAccount')
             def ref = refBookFactory.get(29).name
