@@ -95,8 +95,7 @@ public class GetFormDataHandler extends
 		fillLockData(action, userInfo, result);
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
-
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
 
 		return result;
 	}

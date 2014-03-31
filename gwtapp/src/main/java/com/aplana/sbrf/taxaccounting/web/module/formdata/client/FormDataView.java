@@ -626,13 +626,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @Override
     public void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual) {
-        System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual);
+        //System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual + "; "+manual + " ;"+ bankSummaryForm + "; " +canCreatedManual);
         editAnchor.setVisible(readOnlyMode);
         if (bankSummaryForm) {
             boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
-            modeLabel.setVisible(needShowMode);
+            modeLabel.setVisible(!readOnlyMode);
             modeAnchor.setVisible(needShowMode);
-            manualAnchor.setVisible(readOnlyMode && canCreatedManual && !existManual);
+            manualAnchor.setVisible(!readOnlyMode && canCreatedManual && !existManual);
             deleteManualAnchor.setVisible(manual && !readOnlyMode);
             if (manual) {
                 modeAnchor.setText("К автоматической версии");

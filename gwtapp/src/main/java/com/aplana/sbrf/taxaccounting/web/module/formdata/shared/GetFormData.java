@@ -15,6 +15,8 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 	private boolean readOnly;
     private Boolean manual;
 
+    private String uuid;
+
 	public Long getFormDataId() {
 		return formDataId;
 	}
@@ -52,5 +54,13 @@ public class GetFormData extends UnsecuredActionImpl<GetFormDataResult> implemen
 
     public void setManual(Boolean manual) {
         this.manual = manual;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
