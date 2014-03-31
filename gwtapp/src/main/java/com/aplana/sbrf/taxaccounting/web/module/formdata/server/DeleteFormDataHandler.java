@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	@Override
 	public DeleteFormDataResult execute(DeleteFormDataAction action,
 			ExecutionContext context) throws ActionException {
-		formDataService.deleteFormData(securityService.currentUserInfo(), action.getFormDataId());
+		formDataService.deleteFormData(new Logger(), securityService.currentUserInfo(), action.getFormDataId(), action.isManual());
 		return new DeleteFormDataResult();
 	}
 

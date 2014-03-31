@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +140,12 @@ public class SourceServiceImpl implements SourceService {
         return departmentFormTypeDao.existAssignedForm(departmentId, typeId, kind);
     }
 
-	@Override
+    @Override
+    public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
+        return departmentFormTypeDao.existAcceptedDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, reportPeriodId);
+    }
+
+    @Override
 	public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
 		return declarationTypeDao.listAllByTaxType(taxType);
 	}

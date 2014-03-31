@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormPerformerDaoTest.xml"})
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FormPerformerDaoTest {
 	@Autowired
 	private FormPerformerDao formPerformerDao;
@@ -41,7 +43,7 @@ public class FormPerformerDaoTest {
 		performer.setName("MyNameUpdate");
 		performer.setPhone("MyPhoneUpdate");
         performer.setPrintDepartmentId(1);
-		formPerformerDao.save(1,performer);
+		formPerformerDao.save(1,false, performer);
 		performer = formPerformerDao.get(1);
 		assertEquals("MyNameUpdate", performer.getName());
 		assertEquals("MyPhoneUpdate", performer.getPhone());
@@ -56,7 +58,7 @@ public class FormPerformerDaoTest {
 		performer.setPhone("MyPhoneInsert");
         performer.setPrintDepartmentId(1);
 		assertNull(formPerformerDao.get(2));
-		formPerformerDao.save(2,performer);
+		formPerformerDao.save(2, false, performer);
 		assertEquals("MyNameInsert", performer.getName());
 		assertEquals("MyPhoneInsert", performer.getPhone());
         assertEquals(Integer.valueOf(1), performer.getPrintDepartmentId());

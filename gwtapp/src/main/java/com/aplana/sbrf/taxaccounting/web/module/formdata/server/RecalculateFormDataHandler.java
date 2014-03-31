@@ -48,7 +48,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
 		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.doCalc(logger, userInfo, formData);
 		DataRowResult result = new DataRowResult();

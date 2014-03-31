@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationTemplateDaoTest.xml"})
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DeclarationTemplateDaoTest {
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
@@ -226,13 +228,13 @@ public class DeclarationTemplateDaoTest {
     @Test
     public void testGetDTVersionEndDate(){
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2012, Calendar.JANUARY, 1);
+        calendar.set(2013, Calendar.JANUARY, 1);
         Date actualBeginVersion = new Date(calendar.getTime().getTime());
         calendar.clear();
 
         calendar.set(2013, Calendar.DECEMBER, 31, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, 1, actualBeginVersion));
+        Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, actualBeginVersion));
 
     }
 
@@ -247,21 +249,6 @@ public class DeclarationTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, list, actualBeginVersion));
-
-    }
-
-    @Test
-    public void testGetNearestDTVersionIdLeft(){
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2012, Calendar.JANUARY, 1);
-        Date actualBeginVersion = calendar.getTime();
-        calendar.clear();
-
-        Assert.assertEquals(0, declarationTemplateDao.getNearestDTVersionIdLeft(1, list, actualBeginVersion));
 
     }
 

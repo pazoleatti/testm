@@ -40,7 +40,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 		}		
 		try {
 			return getJdbcTemplate().queryForObject(
-				"select * from form_type where id = ?",
+				"select id, name, tax_type, status from form_type where id = ?",
 				new Object[] { typeId },
 				new int[] { Types.NUMERIC },
 				new FormTypeMapper()
@@ -58,7 +58,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
 	public List<FormType> getByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
-			"select * from form_type ft where ft.tax_type = ?",
+			"select id, name, tax_type, status from form_type ft where ft.tax_type = ?",
 			new Object[]{String.valueOf(taxType.getCode())},
 			new int[]{Types.CHAR},
 			new FormTypeMapper()

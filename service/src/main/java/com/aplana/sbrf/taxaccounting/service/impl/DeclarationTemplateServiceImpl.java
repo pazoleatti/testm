@@ -187,7 +187,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return null;
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        return declarationTemplateDao.getDTVersionEndDate(declarationTemplateId, declarationTemplate.getType().getId(), declarationTemplate.getVersion());
+        return declarationTemplateDao.getDTVersionEndDate(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
     }
 
     @Override

@@ -343,18 +343,16 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public Date getDTVersionEndDate(int templateId, int typeId, Date actualBeginVersion) {
+    public Date getDTVersionEndDate(int typeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
+            return new Date(getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from declaration_template where declaration_type_id = ?" +
-                    " and version > ? and status in (0,1,2) and id <> ? order by version) where rownum = 1",
-                    new Object[]{typeId, actualBeginVersion, templateId},
+                    " and TRUNC(version,'DD') > ? and status in (0,1,2)",
+                    new Object[]{typeId, actualBeginVersion},
                     Date.class).getTime());
-        } catch(EmptyResultDataAccessException e){
-            return null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении ближайшей версии.", e);
         }
@@ -371,34 +369,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
-        } catch(EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибки при получении ближайшей версии.", e);
-        }
-    }
-
-    @Override
-    public int getNearestDTVersionIdLeft(int typeId, List<Integer> statusList, Date actualBeginVersion) {
-        try {
-            if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
-
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", typeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version < :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version desc, edition desc) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from declaration_template " +
+                    " where declaration_type_id = :typeId and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)",
+                    valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){

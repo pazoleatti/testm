@@ -39,6 +39,7 @@ public class FormDataServiceTest {
         formType.setId(1);
         formData.setFormType(formType);
         formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setIp("127.0.0.1");
@@ -73,7 +74,7 @@ public class FormDataServiceTest {
         FormData formData1 = new FormData();
         formData1.setId(2L);
         when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), formData.getReportPeriodId())).thenReturn(formData1);
-        when(formDataDao.get(formData1.getId())).thenReturn(formData);
+        when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
 
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {

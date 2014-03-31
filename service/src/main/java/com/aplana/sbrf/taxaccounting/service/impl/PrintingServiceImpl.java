@@ -65,10 +65,10 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormDataReport data = new FormDataReport();
-        FormData formData = formDataDao.get(formDataId);
+        FormData formData = formDataDao.get(formDataId, manual);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());

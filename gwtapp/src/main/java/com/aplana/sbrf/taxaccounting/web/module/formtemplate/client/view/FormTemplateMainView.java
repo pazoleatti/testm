@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateMainPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.BaseTab;
@@ -103,8 +105,19 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().close();
-	}
+        Dialog.confirmMessage(formId != 0 ?"Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
+                new DialogHandler() {
+                    @Override
+                    public void no() {
+                        getUiHandlers().close();
+                    }
+
+                    @Override
+                    public void yes() {
+                        getUiHandlers().save();
+                    }
+                });
+    }
 
     @UiHandler("activateVersion")
     void onActiveClick(ClickEvent event){

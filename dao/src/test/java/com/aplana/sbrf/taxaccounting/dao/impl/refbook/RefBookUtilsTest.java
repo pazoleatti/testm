@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -20,6 +21,7 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "RefBookUtilsTest.xml" })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RefBookUtilsTest {
 
     private RefBookUtils refBookUtils = new RefBookUtils();
