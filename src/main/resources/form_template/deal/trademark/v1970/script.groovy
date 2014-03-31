@@ -111,12 +111,12 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
@@ -203,33 +203,29 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(getColumnName(tmpRow, 'fullNamePerson'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
-            (xml.row[0].cell[3]): 'Сумма доходов Банка, руб.',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Цена',
-            (xml.row[0].cell[7]): 'Стоимость',
-            (xml.row[0].cell[8]): 'Дата совершения сделки',
-            (xml.row[2].cell[0]): 'гр. 2',
-            (xml.row[2].cell[1]): 'гр. 3',
-            (xml.row[2].cell[2]): 'гр. 4',
-            (xml.row[2].cell[3]): 'гр. 5',
-            (xml.row[2].cell[4]): 'гр. 6',
-            (xml.row[2].cell[5]): 'гр. 7',
-            (xml.row[2].cell[6]): 'гр. 8',
-            (xml.row[2].cell[7]): 'гр. 9',
-            (xml.row[2].cell[8]): 'гр. 10'
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'inn'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'sum'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'docNumber'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'docDate'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'price'),
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[8]): getColumnName(tmpRow, 'dealDate'),
     ]
+
+    (0..8).each{
+        headerMapping.put((xml.row[1].cell[it]), 'гр. ' + (it+2))
+    }
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 1)
 }
 
 // Заполнить форму данными
