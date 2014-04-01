@@ -59,6 +59,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     private String value;
     private static String actionUrl = "upload/uploadController/pattern/";
+    private static String actionTempUrl = "upload/uploadController/patterntemp/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
     private static String uploadPatternIE = "C:.+fakepath?."; //паттерн для IE
 
@@ -153,7 +154,10 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
      * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
      */
     public void setUploadAsTemporal(boolean asTemporal){
-        // ignore
+        if (asTemporal)
+            uploadFormDataXls.setAction(actionTempUrl);
+        else
+            uploadFormDataXls.setAction(actionUrl);
     }
 
     public void setText(String text) {

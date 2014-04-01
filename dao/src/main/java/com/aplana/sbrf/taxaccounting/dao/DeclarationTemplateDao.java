@@ -47,8 +47,15 @@ public interface DeclarationTemplateDao {
 	int save(DeclarationTemplate declarationTemplate);
 
     /**
-     * Обновление данных версий макетов
-     * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * Создание новой версии макета декларации
+     * @param declarationTemplate версия макета
+     * @return идентификатор
+     */
+    int create(DeclarationTemplate declarationTemplate);
+
+    /**
+     * Обновление данных версий макетов.
+     * Батч апдейт.
      * @param declarationTemplates объект шаблона декларации
      * @return массив успешных апдейтов обновленных версий (0 - неуспешный, 1 - успешный)
      */

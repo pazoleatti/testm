@@ -107,72 +107,82 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
             @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
-		int count;
-		int declarationTemplateId;
-		if (declarationTemplate.getId() == null) {
-			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
-			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
-					new Object[] {
-							declarationTemplateId,
-							getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
-                            declarationTemplate.getName(),
-							declarationTemplate.getVersion(),
-							declarationTemplate.getCreateScript(),
-							declarationTemplate.getType().getId(),
-                            declarationTemplate.getXsdId(),
-                            declarationTemplate.getStatus().getId()
-					},
-					new int[] {
-							Types.NUMERIC,
-							Types.NUMERIC,
-                            Types.VARCHAR,
-							Types.DATE,
-							Types.VARCHAR,
-							Types.NUMERIC,
-                            Types.VARCHAR,
-                            Types.NUMERIC
-					}
-			);
-
-		} else {
-			declarationTemplateId = declarationTemplate.getId();
 			/*int storedEdition = getJdbcTemplate()
 					.queryForInt("select edition from declaration_template where id = ? for update", declarationTemplateId);
             if (storedEdition != declarationTemplate.getEdition()) {
 				throw new DaoException("Сохранение описания декларации невозможно, так как её состояние в БД" +
 						" было изменено после того, как данные по ней были считаны");
 			}*/
-			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
-					new Object[] {
+        try {
+            int count = getJdbcTemplate().update(
+                    "UPDATE declaration_template SET edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
+                    new Object[]{
                             declarationTemplate.getEdition(),
                             declarationTemplate.getName(),
-							declarationTemplate.getVersion(),
-							declarationTemplate.getCreateScript(),
-							declarationTemplate.getType().getId(),
+                            declarationTemplate.getVersion(),
+                            declarationTemplate.getCreateScript(),
+                            declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
                             declarationTemplate.getStatus().getId(),
-							declarationTemplateId
-					},
-					new int[] {
-							Types.NUMERIC,
+                            declarationTemplate.getId()
+                    },
+                    new int[]{
+                            Types.NUMERIC,
                             Types.VARCHAR,
-							Types.DATE,
-							Types.VARCHAR,
-							Types.NUMERIC,
+                            Types.DATE,
+                            Types.VARCHAR,
+                            Types.NUMERIC,
                             Types.VARCHAR,
                             Types.NUMERIC,
                             Types.NUMERIC
-					}
-			);
-		}
+                    }
+            );
 
-		if (count == 0) {
-			throw new DaoException("Не удалось сохранить данные");
-		}
-		return declarationTemplateId;
-	}
+            if (count == 0) {
+                throw new DaoException("Не удалось сохранить данные");
+            }
+
+            return declarationTemplate.getId();
+        } catch (DataAccessException e) {
+            logger.error("Ошибка при создании шаблона.", e);
+            throw new DaoException("Ошибка при создании шаблона.", e);
+        }
+    }
+
+    @Override
+    public int create(DeclarationTemplate declarationTemplate) {
+        try {
+            int declarationTemplateId = generateId("seq_declaration_template", Integer.class);
+            getJdbcTemplate().update(
+                    "INSERT INTO declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    new Object[]{
+                            declarationTemplateId,
+                            getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
+                            declarationTemplate.getName(),
+                            declarationTemplate.getVersion(),
+                            declarationTemplate.getCreateScript(),
+                            declarationTemplate.getType().getId(),
+                            declarationTemplate.getXsdId(),
+                            declarationTemplate.getStatus().getId()
+                    },
+                    new int[]{
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.DATE,
+                            Types.VARCHAR,
+                            Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.NUMERIC
+                    }
+            );
+            return declarationTemplateId;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при создании шаблона.", e);
+            throw new DaoException("Ошибка при создании шаблона.", e);
+        }
+
+    }
 
     @Override
     public int[] update(final List<DeclarationTemplate> declarationTemplates) {

@@ -93,7 +93,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 
-		int id = declarationTemplateDao.save(declarationTemplate);
+		int id = declarationTemplateDao.create(declarationTemplate);
 
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
