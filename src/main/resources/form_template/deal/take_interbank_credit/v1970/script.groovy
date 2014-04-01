@@ -224,21 +224,6 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-//    № п/п	rowNumber
-//    Полное наименование юридического лица с указанием ОПФ	fullNamePerson
-//    ИНН/КИО	inn
-//    Наименование страны регистрации	countryName
-//    Код страны регистрации по классификатору ОКСМ	countryCode
-//    Номер договора	docNum
-//    Дата договора	docDate
-//    Номер сделки	dealNumber
-//    Дата заключения сделки	dealDate
-//    Количество	count
-//    Сумма расходов Банка по данным бухгалтерского учета, руб.	sum
-//    Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.	price
-//    Итого стоимость без учета НДС, акцизов и пошлины, руб.	total
-//    Дата совершения сделки	dealDoneDate
-
     def tmpRow = formData.createDataRow()
     def xml = getXML(getColumnName(tmpRow, 'fullNamePerson'), null)
 
