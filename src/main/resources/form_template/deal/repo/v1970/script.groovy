@@ -112,16 +112,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -220,28 +220,29 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование с указанием ОПФ', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(getColumnName(tmpRow, 'jurName'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 18, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Наименование страны регистрации',
-            (xml.row[0].cell[3]): 'Код страны регистрации по классификатору ОКСМ',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Номер сделки',
-            (xml.row[0].cell[7]): 'Дата (заключения) сделки',
-            (xml.row[0].cell[8]): 'Режим переговорных сделок',
-            (xml.row[0].cell[9]): 'Дата исполнения 1-ой части сделки',
-            (xml.row[0].cell[10]): 'Дата исполнения 2-ой части сделки',
-            (xml.row[0].cell[11]): 'Сумма процентного дохода (руб.)',
-            (xml.row[0].cell[12]): 'Сумма процентного расхода (руб.)',
-            (xml.row[0].cell[13]): 'Цена 1-ой части сделки, ед. валюты',
-            (xml.row[0].cell[14]): 'Код валюты расчетов по сделке',
-            (xml.row[0].cell[16]): 'Цена 1-ой части сделки, руб.',
-            (xml.row[0].cell[17]): 'Дата совершения сделки',
-            (xml.row[0].cell[15]): 'Курс ЦБ РФ',
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'country'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'transactionNum'),
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (xml.row[0].cell[8]): getColumnName(tmpRow, 'dealsMode'),
+            (xml.row[0].cell[9]): getColumnName(tmpRow, 'date1'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'date2'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'percentIncomeSum'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'percentConsumptionSum'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'priceFirstCurrency'),
+            (xml.row[0].cell[14]): getColumnName(tmpRow, 'currencyCode'),
+            (xml.row[0].cell[16]): getColumnName(tmpRow, 'priceFirstRub'),
+            (xml.row[0].cell[17]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[0].cell[15]): getColumnName(tmpRow, 'courseCB'),
             (xml.row[1].cell[0]): 'Гр. 2',
             (xml.row[1].cell[1]): 'Гр. 3',
             (xml.row[1].cell[2]): 'Гр. 4.1',
