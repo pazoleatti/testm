@@ -565,8 +565,9 @@ public final class ScriptUtils {
             if (currentString == null || referenceString == null) {
                 continue;
             }
-            String s1 = currentString.toString().trim().replaceAll("%%", "%");
-            String s2 = referenceString.trim().replaceAll("%%", "%");
+            String s1 = currentString.toString().trim().replaceAll("%%", "%").replaceAll("  ", " ");
+            String s2 = referenceString.trim().replaceAll("%%", "%").replaceAll("  ", " ");
+
             if (s1.equalsIgnoreCase(s2)) {
                 continue;
             }
