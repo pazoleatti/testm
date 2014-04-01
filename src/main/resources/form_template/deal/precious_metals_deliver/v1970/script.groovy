@@ -117,16 +117,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
+    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr, 33, 4)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -500,66 +500,76 @@ String getValuesByGroupColumn(DataRow row) {
 
 // Получение импортируемых данных.
 void importData() {
-    def xml = getXML('Полное наименование с указанием ОПФ', 'Подитог:')
+    def tmpRow = formData.createDataRow()
+    def xml = getXML('Общие сведения о контрагенте - юридическом лице', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 29, 2)
+    checkHeaderSize(xml.row[1].cell.size(), xml.row.size(), 26, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'Признак взаимозависимости',
-            (xml.row[0].cell[2]): 'ИНН/ КИО',
-            (xml.row[0].cell[3]): 'Наименование страны регистрации',
-            (xml.row[0].cell[4]): 'Код страны регистрации по классификатору ОКСМ',
-            (xml.row[0].cell[5]): 'Номер договора',
-            (xml.row[0].cell[6]): 'Дата договора',
-            (xml.row[0].cell[7]): 'Номер сделки',
-            (xml.row[0].cell[8]): 'Вид срочной сделки',
-            (xml.row[0].cell[9]): 'Дата заключения сделки',
-            (xml.row[0].cell[10]): 'Характеристика базисного актива',
-            (xml.row[0].cell[12]): 'Признак физической поставки драгоценного металла',
-            (xml.row[0].cell[13]): 'Признак внешнеторговой сделки',
-            (xml.row[0].cell[14]): 'Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами',
-            (xml.row[0].cell[18]): 'Место совершения сделки (адрес места доставки (разгрузки) драгоценного металла)',
-            (xml.row[0].cell[22]): 'Код условия поставки',
-            (xml.row[0].cell[23]): 'Количество',
-            (xml.row[0].cell[24]): 'Сумма доходов Банка по данным бухгалтерского учета, руб.',
-            (xml.row[0].cell[25]): 'Сумма расходов Банка по данным бухгалтерского учета, руб.',
-            (xml.row[0].cell[26]): 'Цена (тариф) за единицу измерения без учета НДС, руб.',
-            (xml.row[0].cell[27]): 'Итого стоимость без учета НДС, руб.',
-            (xml.row[0].cell[28]): 'Дата совершения сделки',
-            (xml.row[2].cell[0]): 'гр. 2.1',
-            (xml.row[2].cell[1]): 'гр. 2.2',
-            (xml.row[2].cell[2]): 'гр. 3',
-            (xml.row[2].cell[3]): 'гр. 4.1',
-            (xml.row[2].cell[4]): 'гр. 4.2',
-            (xml.row[2].cell[5]): 'гр. 5',
-            (xml.row[2].cell[6]): 'гр. 6',
-            (xml.row[2].cell[7]): 'гр. 7.1',
-            (xml.row[2].cell[8]): 'гр. 7.2',
-            (xml.row[2].cell[9]): 'гр. 8',
-            (xml.row[2].cell[10]): 'гр. 9.1',
-            (xml.row[2].cell[11]): 'гр. 9.2',
-            (xml.row[2].cell[12]): 'гр. 10',
-            (xml.row[2].cell[13]): 'гр. 11',
-            (xml.row[2].cell[14]): 'гр. 12.1',
-            (xml.row[2].cell[15]): 'гр. 12.2',
-            (xml.row[2].cell[16]): 'гр. 12.3',
-            (xml.row[2].cell[17]): 'гр. 12.4',
-            (xml.row[2].cell[18]): 'гр. 13.1',
-            (xml.row[2].cell[19]): 'гр. 13.2',
-            (xml.row[2].cell[20]): 'гр. 13.3',
-            (xml.row[2].cell[21]): 'гр. 13.4',
-            (xml.row[2].cell[22]): 'гр. 14',
-            (xml.row[2].cell[23]): 'гр. 15',
-            (xml.row[2].cell[24]): 'гр. 16',
-            (xml.row[2].cell[25]): 'гр. 17',
-            (xml.row[2].cell[26]): 'гр. 18',
-            (xml.row[2].cell[27]): 'гр. 19',
-            (xml.row[2].cell[28]): 'гр. 20'
+            (xml.row[1].cell[2]): getColumnName(tmpRow, 'name'),
+            (xml.row[1].cell[3]): getColumnName(tmpRow, 'dependence'),
+            (xml.row[1].cell[4]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[1].cell[5]): getColumnName(tmpRow, 'country'),
+            (xml.row[1].cell[6]): getColumnName(tmpRow, 'countryCode1'),
+            (xml.row[1].cell[7]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[1].cell[8]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'transactionNum'),
+            (xml.row[1].cell[10]): getColumnName(tmpRow, 'dealType'),
+            (xml.row[1].cell[11]): getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (xml.row[2].cell[12]): getColumnName(tmpRow, 'innerCode'),
+            (xml.row[2].cell[13]): getColumnName(tmpRow, 'unitCountryCode'),
+            (xml.row[1].cell[14]): getColumnName(tmpRow, 'signPhis'),
+            (xml.row[1].cell[15]): getColumnName(tmpRow, 'signTransaction'),
+            (xml.row[2].cell[16]): getColumnName(tmpRow, 'countryCode2'),
+            (xml.row[2].cell[17]): getColumnName(tmpRow, 'region1'),
+            (xml.row[2].cell[18]): getColumnName(tmpRow, 'city1'),
+            (xml.row[2].cell[19]): getColumnName(tmpRow, 'settlement1'),
+            (xml.row[2].cell[20]): getColumnName(tmpRow, 'countryCode3'),
+            (xml.row[2].cell[21]): getColumnName(tmpRow, 'region2'),
+            (xml.row[2].cell[22]): getColumnName(tmpRow, 'city2'),
+            (xml.row[2].cell[23]): getColumnName(tmpRow, 'settlement2'),
+            (xml.row[1].cell[24]): getColumnName(tmpRow, 'conditionCode'),
+            (xml.row[1].cell[25]): getColumnName(tmpRow, 'count'),
+            (xml.row[1].cell[26]): getColumnName(tmpRow, 'incomeSum'),
+            (xml.row[1].cell[27]): getColumnName(tmpRow, 'consumptionSum'),
+            (xml.row[1].cell[28]): getColumnName(tmpRow, 'priceOne'),
+            (xml.row[1].cell[29]): getColumnName(tmpRow, 'totalNds'),
+            (xml.row[1].cell[31]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[3].cell[2]): 'гр. 2.1',
+            (xml.row[3].cell[3]): 'гр. 2.2',
+            (xml.row[3].cell[4]): 'гр. 3',
+            (xml.row[3].cell[5]): 'гр. 4.1',
+            (xml.row[3].cell[6]): 'гр. 4.2',
+            (xml.row[3].cell[7]): 'гр. 5',
+            (xml.row[3].cell[8]): 'гр. 6',
+            (xml.row[3].cell[9]): 'гр. 7.1',
+            (xml.row[3].cell[10]): 'гр. 7.2',
+            (xml.row[3].cell[11]): 'гр. 8',
+            (xml.row[3].cell[12]): 'гр. 9.1',
+            (xml.row[3].cell[13]): 'гр. 9.2',
+            (xml.row[3].cell[14]): 'гр. 10',
+            (xml.row[3].cell[15]): 'гр. 11',
+            (xml.row[3].cell[16]): 'гр. 12.1',
+            (xml.row[3].cell[17]): 'гр. 12.2',
+            (xml.row[3].cell[18]): 'гр. 12.3',
+            (xml.row[3].cell[19]): 'гр. 12.4',
+            (xml.row[3].cell[20]): 'гр. 13.1',
+            (xml.row[3].cell[21]): 'гр. 13.2',
+            (xml.row[3].cell[22]): 'гр. 13.3',
+            (xml.row[3].cell[23]): 'гр. 13.4',
+            (xml.row[3].cell[24]): 'гр. 14',
+            (xml.row[3].cell[25]): 'гр. 15',
+            (xml.row[3].cell[26]): 'гр. 16',
+            (xml.row[3].cell[27]): 'гр. 17',
+            (xml.row[3].cell[28]): 'гр. 18',
+            (xml.row[3].cell[29]): 'гр. 19',
+            (xml.row[3].cell[30]): '',
+            (xml.row[3].cell[31]): 'гр. 20',
+            (xml.row[3].cell[32]): 'гр. 9.2',
     ]
-
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
@@ -586,6 +596,11 @@ void addData(def xml, int headRowCount) {
             break
         }
 
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+            continue
+        }
+
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
@@ -598,8 +613,12 @@ void addData(def xml, int headRowCount) {
 
         def xmlIndexCol = 0
 
-        // столбец 1
+        // графа 1
         newRow.rowNum = xmlIndexRow - headRowCount
+        xmlIndexCol++
+
+        // графа fix
+        xmlIndexCol++
 
         // столбец 2.1
         newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -650,8 +669,8 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 7.1
-        newRow.transactionNum = row.cell[indexCell].text()
-        indexCell++
+        newRow.transactionNum = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 7.2 Вид срочной сделки
         newRow.dealType = getRecordIdImport(85, 'CONTRACT_TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -739,6 +758,9 @@ void addData(def xml, int headRowCount) {
 
         // графа 19
         newRow.totalNds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа fix
         xmlIndexCol++
 
         // графа 20
