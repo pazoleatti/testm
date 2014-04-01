@@ -37,6 +37,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         FormDataFilter getFilterData();
         void setFilterData(FormDataFilter filter);
         public void setFilter(String filter);
+        void updateLabel();
 
         /**
          * Устанавливаем в enabled/disabled ежемесячность
@@ -155,6 +156,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         FillFormFieldsAction action = new FillFormFieldsAction();
         action.setFieldsNum(FillFormFieldsAction.FieldsNum.FIRST);
         action.setTaxType(taxType);
+        getView().updateLabel();
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
                     @Override
@@ -189,7 +191,11 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                 }, this));
     }
 
-//	private void setSelectedFilterValues(FormDataFilter formDataFilter){
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
+    //	private void setSelectedFilterValues(FormDataFilter formDataFilter){
 //		FormDataFilter filter = new FormDataFilter();
 //		if(formDataFilter.getFormTypeId() != null){
 //			 filter.setFormTypeId(formDataFilter.getFormTypeId());

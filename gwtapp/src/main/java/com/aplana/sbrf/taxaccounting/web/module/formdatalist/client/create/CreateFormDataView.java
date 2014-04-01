@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.ValueListBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
@@ -16,6 +17,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -31,6 +33,13 @@ import java.util.Set;
 public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUiHandlers> implements CreateFormDataPresenter.MyView,
         Editor<FormDataFilter> {
 
+    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы";
+    public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
+    public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы";
+    public static final String FORM_DATA_TITLE = "Создание налоговой формы";
+    public static final String FORM_DATA_TITLE_D = "Создание формы";
+
     public interface Binder extends UiBinder<PopupPanel, CreateFormDataView> {
     }
 
@@ -40,6 +49,18 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     private final MyDriver driver;
 
     private boolean isMonthly = false;
+
+    @UiField
+    @Ignore
+    ModalWindow title;
+
+    @UiField
+    @Ignore
+    Label formDataKindLabel;
+
+    @UiField
+    @Ignore
+    Label formTypeIdLabel;
 
     @UiField
     @Path("departmentIds")
@@ -242,6 +263,20 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
             // Иначе, кнопка активна
         } else {
             continueButton.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void updateLabel() {
+        boolean isTaxTypeDeal = getUiHandlers().getTaxType().equals(TaxType.DEAL);
+        if (!isTaxTypeDeal) {
+            formDataKindLabel.setText(FORM_DATA_KIND_TITLE);
+            formTypeIdLabel.setText(FORM_DATA_TYPE_TITLE);
+            title.setText(FORM_DATA_TITLE);
+        } else {
+            formDataKindLabel.setText(FORM_DATA_KIND_TITLE_D);
+            formTypeIdLabel.setText(FORM_DATA_TYPE_TITLE_D);
+            title.setText(FORM_DATA_TITLE_D);
         }
     }
 }

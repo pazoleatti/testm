@@ -87,9 +87,11 @@ public class FormDataListPresenter extends
 	public void prepareFromRequest(PlaceRequest request) {
 		LogCleanEvent.fire(this);
 		LogShowEvent.fire(this, false);
+        TaxType taxTypeOld = taxType;
 		taxType = TaxType.valueOf(request.getParameter("nType", ""));
 		filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
+        if (taxTypeOld == null || !taxType.equals(taxTypeOld)) getView().updateFormDataTable(taxType);
         // Передаем типы налоговых форм
         GetKindListAction kindListAction = new GetKindListAction();
         kindListAction.setTaxType(taxType);

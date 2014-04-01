@@ -199,7 +199,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onInfoClicked() {
-		historyPresenter.prepareFormHistory(formData.getId());
+		historyPresenter.prepareFormHistory(formData.getId(), getView().getTaxType());
 		addToPopupSlot(historyPresenter);
 	}
 
@@ -514,7 +514,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         result.getFormData().getState()
                                                 .getName(),
 		                                result.getReportPeriodStartDate(), result.getReportPeriodEndDate());
-                                
+
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="
                                         + result.getFormData().getFormType().getTaxType());
                                 getView().setColumnsData(

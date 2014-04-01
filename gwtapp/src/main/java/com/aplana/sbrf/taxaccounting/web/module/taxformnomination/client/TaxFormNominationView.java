@@ -39,8 +39,12 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
      * признак формы: true - налоговые формы, false - декларации
      */
     private Boolean isForm;
+    private TaxType taxType;
 
     // изменяемые колонки в таблице
+    private GenericCellTable.TableCellResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
+
+
     private TextColumn<TableModel> receiverSourcesKindColumn;
     private TextColumn<TableModel> receiverSourcesTypeColumn;
     private TextColumn<TableModel> departmentColumn;
@@ -108,7 +112,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         declarationDataProvider.addDataDisplay(declarationGrid);
         initFormGrid();
         initDeclarationGrid();
-        formViewInit();
+        //formViewInit();
     }
 
     /**
@@ -183,9 +187,11 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         formGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        formGrid.addResizableColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+        receiverSourcesKindTitle = formGrid.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
+        formGrid.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
 
-        formGrid.addResizableColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+        receiverSourcesTypeTitle = formGrid.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
+        formGrid.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
 
         formGrid.addResizableColumn(performerColumn, "Исполнитель");
     }
@@ -257,7 +263,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 
         declarationGrid.addResizableColumn(departmentColumn, "Подразделение");
 
-        declarationGrid.addResizableColumn(declarationType, "Вид декларации");
+        declarationTypeHeader = declarationGrid.createResizableHeader("Вид декларации", declarationType);
+        declarationGrid.addColumn(declarationType, declarationTypeHeader);
     }
 
     // Перезаполнение таблицы
@@ -352,6 +359,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void init(TaxType nType, boolean isForm) {
         this.isForm = isForm;
+        this.taxType = nType;
         // Вид налога: в зависимости от налога, выбранного в главном меню ("Вид налога": "Налог на прибыль")
         taxTypeLabel.setText(nType!= null ? nType.getName() : "Неизвестный вид налога");
         setupHeader();
@@ -378,10 +386,17 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     }
 
     private void setupHeader(){
+        boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+        receiverSourcesKindTitle.setTitle(!isTaxTypeDeal?"Тип налоговой формы":"Тип формы");
+        receiverSourcesTypeTitle.setTitle(!isTaxTypeDeal?"Вид налоговой формы":"Вид формы");
+        declarationTypeHeader.setTitle(!isTaxTypeDeal?"Вид декларации":"Вид уведомления");
+        formGrid.redrawHeaders();
+        declarationGrid.redrawHeaders();
+
         // леваяя ссылка
-        switchMode.setText(isForm ? "Назначение деклараций" : "Назначение налоговых форм");
+        switchMode.setText(getHeader(isForm, isTaxTypeDeal));
         // средний лейбл
-        formHeader.setText(!isForm ? "Назначение деклараций" : "Назначение налоговых форм");
+        formHeader.setText(getHeader(!isForm, isTaxTypeDeal));
     }
 
     private List<FormTypeKind> getSelectedItems(CellTable<TableModel> grid) {
@@ -603,5 +618,9 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public void setDepartments(List<Integer> department){
         departmentPicker.setValue(department);
+    }
+
+    private String getHeader(boolean isForm, boolean isTaxTypeDeal){
+        return isForm ? (!isTaxTypeDeal ? "Назначение деклараций" : "Назначение уведомлений") : (!isTaxTypeDeal ? "Назначение налоговых форм" : "Назначение форм");
     }
 }

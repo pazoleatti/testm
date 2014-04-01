@@ -21,7 +21,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание декларации">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание декларации" ui:field="modalWindowTitle">
         <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
@@ -44,7 +44,7 @@
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Вид декларации:"/>
+                    <g:Label ui:field="declarationTypeLabel" width="140px" wordWrap="false" text="Вид декларации:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
                     <dw:ListBoxWithTooltipWidget width="100%" ui:field="declarationTypeBox" showTooltip="true"/>

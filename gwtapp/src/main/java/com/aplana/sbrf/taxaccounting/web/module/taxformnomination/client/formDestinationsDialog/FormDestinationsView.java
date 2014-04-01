@@ -6,6 +6,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -16,6 +17,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -26,6 +28,13 @@ import java.util.*;
 public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinationsUiHandlers>
         implements FormDestinationsPresenter.MyView,Editor<FormDataFilter> {
 
+    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы";
+    public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
+    public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы";
+    public static final String MODAL_WINDOW_TITLE = "Создание назначения налоговой формы";
+    public static final String MODAL_WINDOW_TITLE_D = "Создание назначения формы";
+
     public interface Binder extends UiBinder<PopupPanel, FormDestinationsView> {
 	}
 
@@ -33,6 +42,14 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @UiField
     ModalWindow modalWindowTitle;
+
+    @UiField
+    @Ignore
+    Label formDataKindLabel;
+
+    @UiField
+    @Ignore
+    Label formTypeLabel;
 
     @UiField
     RefBookPickerWidget formDataKind;
@@ -284,5 +301,18 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         formDataKind.setValue(new ArrayList<Long>(kinds), true);
         formDataKind.setEnabled(false);
 
+    }
+
+    @Override
+    public void updateLabel(TaxType taxType) {
+        if (!taxType.equals(TaxType.DEAL)) {
+            formDataKindLabel.setText(FORM_DATA_KIND_TITLE);
+            formTypeLabel.setText(FORM_DATA_TYPE_TITLE);
+            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);
+        } else {
+            formDataKindLabel.setText(FORM_DATA_KIND_TITLE_D);
+            formTypeLabel.setText(FORM_DATA_TYPE_TITLE_D);
+            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE_D);
+        }
     }
 }

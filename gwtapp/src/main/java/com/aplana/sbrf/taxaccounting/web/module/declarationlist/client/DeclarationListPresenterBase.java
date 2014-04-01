@@ -31,7 +31,7 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		boolean isAscSorting();
 
-		void updateTitle(String title);
+		void updateTitle(TaxType taxType);
 
         void updatePageSize(TaxType taxType);
     }

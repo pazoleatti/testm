@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +26,9 @@ import java.util.Map;
 public class HistoryView extends PopupViewImpl implements
 		HistoryPresenter.MyView {
 
+    public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме/декларации";
+    public static final String MODAL_WINDOW_TITLE_D = "Информация по форме/уведомлению";
+
 	interface Binder extends UiBinder<PopupPanel, HistoryView> {
 	}
 
@@ -32,6 +37,9 @@ public class HistoryView extends PopupViewImpl implements
 	private Map<Integer, String> userDepartments;
 	private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
 	private static final String DECLARATION_SAVE_EVENT = "Обновление";
+
+    @UiField
+    ModalWindow modalWindowTitle;
 
 	@UiField
     GenericDataGrid<LogBusiness> logsTable;
@@ -59,7 +67,16 @@ public class HistoryView extends PopupViewImpl implements
 		return widget;
 	}
 
-	private void initTable() {
+    @Override
+    public void updateTitle(TaxType taxType) {
+        if (!taxType.equals(TaxType.DEAL)) {
+            modalWindowTitle.setText(MODAL_WINDOW_TITLE);
+        } else {
+            modalWindowTitle.setText(MODAL_WINDOW_TITLE_D);
+        }
+    }
+
+    private void initTable() {
 		TextColumn<LogBusiness> eventColumn = new TextColumn<LogBusiness>() {
 			@Override
 			public String getValue(LogBusiness object) {
