@@ -284,7 +284,7 @@ void consolidationBank(def dataRows) {
             }
         }
     }
-    logger.info("Формирование формы прошло успешно: «${formData.formType.name}».")
+    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
 }
 
 // Консолидация из первичек
@@ -487,6 +487,7 @@ void consolidationSummary(def dataRows) {
             }
         }
     }
+    logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
 
 void checkCreation() {

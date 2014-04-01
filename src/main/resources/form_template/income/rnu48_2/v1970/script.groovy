@@ -107,7 +107,7 @@ void consolidation() {
 }
 
 BigDecimal calcTotal(def dataRows) {
-    def sum = 0
+    BigDecimal sum = 0
     dataRows.each { row ->
         sum += (row.getAlias() != 'total' ? (row.summ ?: 0) : 0)
     }

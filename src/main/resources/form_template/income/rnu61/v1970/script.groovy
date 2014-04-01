@@ -301,16 +301,15 @@ def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
 
 // Ресчет графы 14
 def BigDecimal calc14(def row) {
+    BigDecimal temp = null
     if (row.sum70606 != null) {
         if (row.sumLimit != null && row.sum70606 > row.sumLimit) {
-            return row.sum70606 - row.sumLimit
-        } else {
-            return null
+            temp = row.sum70606 - row.sumLimit
         }
     } else if (row.nominal != null && row.rateBRBill != null && row.rateBROperation != null) {
-        return row.nominal * (row.rateBRBill - row.rateBROperation)
+        temp = row.nominal * (row.rateBRBill - row.rateBROperation)
     }
-    return null
+    return temp?.setScale(2, RoundingMode.HALF_UP)
 }
 // Логические проверки
 void logicCheck() {
