@@ -109,7 +109,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 		return getJdbcTemplate().query(
 				"with templatesByVersion as (select id, declaration_type_id, status, version, row_number() " +
                         (isSupportOver() ? "over(partition by declaration_type_id order by version)" : "over()") +
-                        " rn from declaration_template), " +
+                        " rn from declaration_template where status != -1), " +
 						"allTemplates as (select tv.id, " +
 						"tv.declaration_type_id, " +
 						"tv.VERSION versionFrom,  " +
