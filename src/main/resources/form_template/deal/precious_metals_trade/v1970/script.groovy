@@ -564,7 +564,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[1].text() != null) {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
