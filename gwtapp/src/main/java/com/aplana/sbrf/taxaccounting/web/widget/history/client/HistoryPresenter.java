@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.history.client;
 
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetDeclarationLogsBusinessAction;
@@ -21,6 +22,7 @@ public class HistoryPresenter extends
 
 	public static interface MyView extends PopupView{
 		void setHistory(List<LogBusiness> logs, Map<Integer, String> userNames, Map<Integer, String> userDepartments);
+        void updateTitle(TaxType taxType1);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -31,13 +33,15 @@ public class HistoryPresenter extends
 		this.dispatcher = dispatcher;
 	}
 
-	public void prepareDeclarationHistory(long declarationId) {
+	public void prepareDeclarationHistory(long declarationId, TaxType taxType) {
+        getView().updateTitle(taxType);
 		GetDeclarationLogsBusinessAction action = new GetDeclarationLogsBusinessAction();
 		action.setId(declarationId);
 		prepareHistory(action);
 	}
 
-	public void prepareFormHistory(long formId) {
+	public void prepareFormHistory(long formId, TaxType taxType) {
+        getView().updateTitle(taxType);
 		GetFormLogsBusinessAction action = new GetFormLogsBusinessAction();
 		action.setId(formId);
 		prepareHistory(action);
@@ -52,4 +56,5 @@ public class HistoryPresenter extends
 					}
 				}, this));
 	}
+
 }

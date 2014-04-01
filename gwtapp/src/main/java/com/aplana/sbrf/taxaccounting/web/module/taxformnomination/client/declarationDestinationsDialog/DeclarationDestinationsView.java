@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
@@ -11,6 +13,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
@@ -27,6 +30,18 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 
 	public interface Binder extends UiBinder<PopupPanel, DeclarationDestinationsView> {
     }
+
+    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DECLARATION_TYPE_TITLE_D = "Вид уведомления";
+    public static final String MODAL_WINDOW_TITLE = "Создание назначения декларации";
+    public static final String MODAL_WINDOW_TITLE_D = "Создание назначения уведомления";
+
+    @UiField
+    ModalWindow modalWindowTitle;
+
+    @UiField
+    @Ignore
+    Label declarationTypeTitle;
 
     @UiField(provided = true)
     ValueListBox<DeclarationType> declarationTypeId;
@@ -91,5 +106,14 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 		declarationTypeId.setAcceptableValues(declarationTypes);
 	}
 
-
+    @Override
+    public void updateLabel(TaxType taxType) {
+        if (!taxType.equals(TaxType.DEAL)) {
+            declarationTypeTitle.setText(DECLARATION_TYPE_TITLE);
+            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);
+        } else {
+            declarationTypeTitle.setText(DECLARATION_TYPE_TITLE_D);
+            modalWindowTitle.setTitle(MODAL_WINDOW_TITLE_D);
+        }
+    }
 }

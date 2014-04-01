@@ -88,7 +88,8 @@ public class DeclarationListPresenter extends
 			super.prepareFromRequest(request);
 			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
-			getView().updateTitle(taxType.getName());
+			getView().updateTitle(taxType);
+            filterPresenter.getView().updateFilter(taxType);
             getView().updatePageSize(taxType);
 		} catch (Exception e) {
 			ErrorEvent.fire(this, "Не удалось открыть список деклараций", e);
@@ -149,6 +150,7 @@ public class DeclarationListPresenter extends
     private void updateTitle(TaxType taxType){
         // TODO Зачем это? В постановке нет. Виды налога перечислены не все.
 		String description = "";
+        String title = "Список деклараций";
 		if(taxType.getName().equals(TaxType.VAT.getName())){
 			description = "Деклараци по НДС";
 		}  else if (taxType.getName().equals(TaxType.PROPERTY.getName())){
@@ -157,8 +159,10 @@ public class DeclarationListPresenter extends
 			description = "Деклараци по транспортному налогу";
 		}  else if (taxType.getName().equals(TaxType.INCOME.getName())){
 			description = "Деклараци по налогу на прибыль";
-		}
-		TitleUpdateEvent.fire(this, "Список деклараций", description);
+		} else if (taxType.getName().equals(TaxType.DEAL.getName())) {
+            title = "Список уведомлений";
+        }
+		TitleUpdateEvent.fire(this, title, description);
 	}
 
     private void saveFilterState(TaxType taxType, DeclarationDataFilter filter){

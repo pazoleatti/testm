@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.GetDeclarationDataAction;
@@ -72,10 +69,12 @@ public class GetDeclarationDataHandler
 		result.setCanAccept(permittedEvents.contains(FormDataEvent.MOVE_CREATED_TO_ACCEPTED));
 		result.setCanReject(permittedEvents.contains(FormDataEvent.MOVE_ACCEPTED_TO_CREATED));
 		result.setCanDelete(permittedEvents.contains(FormDataEvent.DELETE));
-		
-		result.setTaxType(declarationTemplateService
-				.get(declaration.getDeclarationTemplateId())
-				.getType().getTaxType());
+
+        TaxType taxType = declarationTemplateService
+                .get(declaration.getDeclarationTemplateId())
+                .getType().getTaxType();
+		result.setTaxType(taxType);
+
 		result.setDeclarationType(declarationTemplateService
 				.get(declaration.getDeclarationTemplateId())
 				.getType().getName());
@@ -87,7 +86,7 @@ public class GetDeclarationDataHandler
 
         result.setReportPeriodYear(reportPeriod.getTaxPeriod().getYear());
 
-		result.setPdf(generatePdfViewerModel(action, userInfo));
+		result.setPdf(generatePdfViewerModel(action, userInfo, taxType));
 
 		return result;
 	}
@@ -100,9 +99,9 @@ public class GetDeclarationDataHandler
 	 * @return
 	 */
 	private Pdf generatePdfViewerModel(GetDeclarationDataAction action,
-									   TAUserInfo userInfo) {
+									   TAUserInfo userInfo, TaxType taxType) {
 		Pdf pdf = new Pdf();
-		pdf.setTitle("Список листов декларации");
+		pdf.setTitle(!taxType.equals(TaxType.DEAL) ? "Список листов декларации" : "Список листов уведомления");
 		List<PdfPage> pdfPages = new ArrayList<PdfPage>();
 		InputStream pdfData = new ByteArrayInputStream(
 				declarationDataService.getPdfData(action.getId(), userInfo));

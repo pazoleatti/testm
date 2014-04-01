@@ -68,7 +68,7 @@ public abstract class ResizableHeader<T> extends Header<String> {
         style.setZIndex(4);
     }
 
-    private final String title;
+    private String title;
     private final Document document = Document.get();
     private final AbstractCellTable<T> table;
     private final Element tableElement;
@@ -101,6 +101,10 @@ public abstract class ResizableHeader<T> extends Header<String> {
     @Override
     public String getValue() {
         return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override

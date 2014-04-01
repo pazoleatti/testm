@@ -39,7 +39,7 @@
         }*/
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание назначения деклараций" ui:field="modalWindowTitle">
         <g:VerticalPanel height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:VerticalPanel addStyleNames="{style.content}" spacing="2">
                 <!-- эта штука понадобится в 0.3.7
@@ -57,7 +57,7 @@
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
-                    <g:Label text="Вид декларации" addStyleNames="{style.labels}"/>
+                    <g:Label ui:field="declarationTypeTitle" text="Вид декларации" addStyleNames="{style.labels}"/>
                     <g:ValueListBox width="250px" ui:field="declarationTypeId"/>
                 </g:HorizontalPanel>
 

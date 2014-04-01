@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.client.PdfViewerView;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
@@ -19,6 +20,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 		implements DeclarationDataPresenter.MyView{
 
 	interface Binder extends UiBinder<Widget, DeclarationDataView> { }
+
+    public static final String DATE_BOX_TITLE = "Дата формирования декларации";
+    public static final String DATE_BOX_TITLE_D = "Дата формирования уведомления";
 
 	@UiField
 	Button refreshButton;
@@ -53,6 +57,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	PdfViewerView pdfViewer;
 
+    @UiField
+    Label dateBoxLabel;
+
 	@UiField
     DateMaskBoxPicker dateBox;
 
@@ -65,7 +72,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void showAccept(boolean show) {
 		if (show) {
-			stateLabel.setText("Создана");
+			stateLabel.setText(!getUiHandlers().getTaxType().equals(TaxType.DEAL) ? "Создана" : "Создано");
 		}
 		acceptButton.setVisible(show);
 	}
@@ -73,7 +80,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void showReject(boolean show) {
 		if (show) {
-			stateLabel.setText("Принята");
+			stateLabel.setText(!getUiHandlers().getTaxType().equals(TaxType.DEAL) ? "Принята" : "Принято");
 		}
 		cancelButton.setVisible(show);
 	}
@@ -96,9 +103,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	}
 
 	@Override
-	public void setTitle(String title) {
+	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
+        if (!isTaxTypeDeal) {
+            dateBoxLabel.setText(DATE_BOX_TITLE + ":");
+            dateBoxLabel.setTitle(DATE_BOX_TITLE);
+        } else {
+            dateBoxLabel.setText(DATE_BOX_TITLE_D + ":");
+            dateBoxLabel.setTitle(DATE_BOX_TITLE_D);
+        }
 	}
 
 	@Override

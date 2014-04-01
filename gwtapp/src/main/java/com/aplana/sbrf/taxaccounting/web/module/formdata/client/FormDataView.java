@@ -45,7 +45,10 @@ import java.util.List;
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
-	private NoSelectionModel<DataRow<Cell>> selectionModel;
+    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы:";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы:";
+
+    private NoSelectionModel<DataRow<Cell>> selectionModel;
     private TaxType taxType;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
@@ -93,6 +96,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
     HorizontalPanel saveCancelPanel;
 
+    @UiField
+    Label formKindTitle;
 	@UiField
 	Label formKindLabel;
 	@UiField
@@ -433,6 +438,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
+        if (!taxType.equals(TaxType.DEAL)) {
+            formKindTitle.setText(FORM_DATA_KIND_TITLE);
+        } else {
+            formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
+        }
+
 	}
 
 	/**
@@ -649,5 +660,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             modeLabel.setVisible(false);
             deleteManualAnchor.setVisible(false);
         }
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
     }
 }

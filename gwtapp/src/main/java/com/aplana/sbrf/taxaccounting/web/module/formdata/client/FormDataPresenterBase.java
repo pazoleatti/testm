@@ -99,6 +99,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void updatePageSize(TaxType taxType);
 
         void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual);
+
+        TaxType getTaxType();
     }
 
 	public static final String NAME_TOKEN = "!formData";
