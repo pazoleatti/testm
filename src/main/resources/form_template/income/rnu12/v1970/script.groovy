@@ -129,12 +129,11 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.opy) })
+        dataRows.sort { getKnu(it.opy) }
 
         // номер последний строки предыдущей формы
         def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
@@ -186,15 +185,13 @@ void calc() {
         }
 
         // добавить "итого по коду" в таблицу
-        def i = 1
+        def i = 0
         totalRows.each { index, row ->
-            dataRowHelper.insert(row, index + i++)
+            dataRows.add(index + i++, row)
         }
     }
-
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRows.add(dataRows.size(), calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
-
 }
 
 def calcTotalRow(def dataRows) {
@@ -241,7 +238,7 @@ void logicCheck() {
         return
     }
 
-    def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     // календарная дата начала отчетного периода
     def startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -263,9 +260,8 @@ void logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-
         // 2. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++i != row.rowNumber) {
+        if (++number != row.rowNumber) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
 
@@ -289,11 +285,6 @@ void logicCheck() {
             logger.error(errorMsg + 'Неправильно указан номер первой записи (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!')
         }
 
-        // 7. Проверка на уникальность поля «№ пп» (графа 1)
-        if (++i != row.rowNumber) {
-            logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
-        }
-
         needValue['outcomeInNalog'] = calc11(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
     }
@@ -309,34 +300,9 @@ def String getKnu(def code) {
     return getRefBookValue(27, code)?.CODE?.stringValue
 }
 
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -379,8 +345,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -399,7 +365,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -414,10 +380,9 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
-        // Зависимая
+        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
 
         // графа 3
         newRow.numberFirstRecord = row.cell[3].text()
@@ -448,7 +413,6 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         newRow.outcomeInBuh = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
-
 
         rows.add(newRow)
     }
