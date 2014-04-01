@@ -1,4 +1,4 @@
-package form_template.deal.guarantees
+package form_template.deal.guarantees_involvement
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -366,7 +366,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null) {
             continue
         }
 
