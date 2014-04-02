@@ -16,7 +16,7 @@ import groovy.transform.Field
 // графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 4  - kpp                       атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
-// графа 5  - avepropertyPricerageCost
+// графа 5  - propertyPrice
 // графа 6  - workersCount
 // графа 7  - subjectTaxCredit
 
@@ -36,7 +36,7 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        if (currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -69,11 +69,11 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
 
 // Автозаполняемые атрибуты
 @Field
@@ -81,7 +81,7 @@ def autoFillColumns = ['regionBank', 'kpp']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
 
 // Группируемые атрибуты
 @Field
@@ -89,11 +89,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
-
-// Текущая дата
-@Field
-def currentDate = new Date()
+def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit']
 
 @Field
 def endDate = null
@@ -269,10 +265,7 @@ def calc4(def row) {
     if (row.regionBankDivision != null) {
         incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
     }
-    if (incomeParam == null || incomeParam.isEmpty()) {
-        return null
-    }
-    return incomeParam.get('record_id').getNumberValue()
+    return incomeParam?.KPP?.stringValue
 }
 
 // Расчет итоговой строки
@@ -363,7 +356,7 @@ void addData(def xml, int headRowCount) {
         newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
 
         // графа 5
-        newRow.avepropertyPricerageCost = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.propertyPrice = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 6
         newRow.workersCount = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
