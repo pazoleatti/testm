@@ -41,7 +41,8 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();
         for (RefBook refBook : list) {
             if (!isFiltered || refBook.getName().toLowerCase().contains(action.getFilter().toLowerCase())) {
-                returnList.add(new TableModel(refBook.getId(), refBook.getName(), RefBookType.get(refBook.getType()), refBook.isReadOnly()));
+                returnList.add(new TableModel(refBook.getId(), refBook.getName(), RefBookType.get(refBook.getType()),
+                        refBook.isReadOnly(), refBook.isVisible(), refBook.getRegionAttributeId()));
             }
         }
 

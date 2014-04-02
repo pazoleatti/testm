@@ -15,15 +15,19 @@ public class TableModel implements Serializable {
     private String name;
     private RefBookType refBookType;
 	private boolean readOnly;
+    private boolean visible;
+    private Long regionAttributeId;
 
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly) {
-        setId(id);
-        setName(name);
-        setType(refBookType);
-		setReadOnly(readOnly);
+    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly, boolean visible, Long regionAttributeId) {
+        this.id = id;
+        this.name = name;
+        this.refBookType = refBookType;
+        this.readOnly = readOnly;
+        this.visible = visible;
+        this.regionAttributeId = regionAttributeId;
     }
 
     public String getName() {
@@ -57,4 +61,28 @@ public class TableModel implements Serializable {
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
+
+    public RefBookType getRefBookType() {
+        return refBookType;
+    }
+
+    public void setRefBookType(RefBookType refBookType) {
+        this.refBookType = refBookType;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    public Long getRegionAttributeId() {
+        return regionAttributeId;
+    }
+
+    public void setRegionAttributeId(Long regionAttributeId) {
+        this.regionAttributeId = regionAttributeId;
+    }
 }

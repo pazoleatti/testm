@@ -57,6 +57,9 @@ public class RefBook implements Serializable {
 	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
 	private boolean readOnly;
 
+    /** Содержит информацию о региональности справочника */
+    private Long regionAttributeId;
+
 	public static RefBookAttribute getVersionFromAttribute() {
 		RefBookAttribute attr = new RefBookAttribute();
 		attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
@@ -234,6 +237,14 @@ public class RefBook implements Serializable {
 		this.readOnly = readOnly;
 	}
 
+    public Long getRegionAttributeId() {
+        return regionAttributeId;
+    }
+
+    public void setRegionAttributeId(Long regionAttributeId) {
+        this.regionAttributeId = regionAttributeId;
+    }
+
 	/** Возвращает упорядоченный список атрибутов для сортировки по умолчанию. В запросах пока используется только
 	 * первый в списке, то есть мультисортировка пока не поддерживается.
 	 * @return всегда определен, не может быть null
@@ -274,7 +285,8 @@ public class RefBook implements Serializable {
 		sb.append(", visible=").append(visible);
 		sb.append(", type=").append(type);
 		sb.append(", readOnly=").append(readOnly);
-		sb.append('}');
+        sb.append(", regionAttributeId=").append(regionAttributeId);
+        sb.append('}');
 		return sb.toString();
 	}
 }
