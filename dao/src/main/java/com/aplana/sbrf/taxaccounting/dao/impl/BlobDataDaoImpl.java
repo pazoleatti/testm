@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -71,6 +73,19 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     new int[]{Types.CHAR});
         } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить запись с id = %s", uuid), e);
+        }
+    }
+
+    @Override
+    public void delete(List<String> uuidStrings) {
+        try {
+            HashMap<String, Object> valuesMap = new HashMap<String, Object>();
+            valuesMap.put("uuids", uuidStrings);
+            getNamedParameterJdbcTemplate().update("DELETE FROM blob_data WHERE id in (:uuids)",
+                    valuesMap);
+        } catch (DataAccessException e){
+            logger.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
+            throw new DaoException(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
         }
     }
 

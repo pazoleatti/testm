@@ -7,6 +7,10 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +46,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид налоговой формы не назначен подразделению";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
+    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTOL can create manual version of form!";
+    private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер может создавать версию ручного ввода";
     // private static final String CREATE_FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав для создания налоговой формы с указанными параметрами";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
@@ -67,6 +73,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private FormTypeDao formTypeDao;
     @Autowired
     private FormTemplateService formTemplateService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
     public void canRead(TAUserInfo userInfo, long formDataId) {
@@ -191,7 +199,47 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     }
 
     @Override
-    public void canEdit(TAUserInfo userInfo, long formDataId) {
+    public void canCreateManual(Logger logger, TAUserInfo userInfo, long formDataId) {
+        FormData formData = formDataDao.get(formDataId, false);
+
+        //Проверка роли пользователя
+        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            logger.warn(String.format(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
+            throw new ServiceException(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL);
+        }
+
+        //Форма принята?
+        if (formData.getState() != WorkflowState.ACCEPTED) {
+            logger.error("Форма не принята!");
+        }
+
+        //Период формы - открыт?
+        if (!reportPeriodService.isPeriodOpen(formData.getDepartmentId(), formData.getReportPeriodId())) {
+            logger.error("Период формы закрыт!");
+        }
+
+        //Не существует приёмника формы, имеющего статус "Принят"?
+        List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
+                formData.getKind(), formData.getReportPeriodId());
+        if (!destinations.isEmpty()) {
+            ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+            for (Pair<String, String> destination : destinations) {
+                logger.error("Приёмник формы - " + destination.getFirst() + " для подразделения " + destination.getSecond() +
+                        " в периоде " + period.getTaxPeriod().getYear() + " " + period.getName() + " - находится в статусе \"Принят\"!");
+            }
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки при проверке необходимых условий для перевода формы в режим ручного ввода",
+                    logEntryService.save(logger.getEntries()));
+        }
+    }
+
+    @Override
+    public void canEdit(TAUserInfo userInfo, long formDataId, boolean manual) {
         FormData formData = formDataDao.getWithoutRows(formDataId);
         // Проверка закрытого периода
         if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
@@ -300,9 +348,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         return;
                     case APPROVED:
                     case ACCEPTED:
-                        // Нельзя редактировать НФ в состоянии "Принята"
-                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                        if (!manual) {
+                            // Нельзя редактировать НФ в состоянии "Принята"
+                            throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                    formData.getFormType().getName(), formData.getState().getName()));
+                        }
+                        return;
                 }
             }
         }
@@ -321,7 +372,42 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_DELETE_RU,
                     formData.getKind().getName(), formData.getState().getName()));
         }
-        canEdit(userInfo, formDataId);
+        canEdit(userInfo, formDataId, false);
+    }
+
+    @Override
+    public void canDeleteManual(Logger logger, TAUserInfo userInfo, long formDataId) {
+        FormData formData = formDataDao.getWithoutRows(formDataId);
+
+        //Проверка роли пользователя
+        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            logger.warn(String.format(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
+            throw new ServiceException(CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL);
+        }
+
+        //Период формы - открыт?
+        if (!reportPeriodService.isPeriodOpen(formData.getDepartmentId(), formData.getReportPeriodId())) {
+            logger.error("Период формы закрыт!");
+        }
+
+        //Не существует приёмника формы, имеющего статус "Принят"?
+        List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
+                formData.getKind(), formData.getReportPeriodId());
+        if (!destinations.isEmpty()) {
+            ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+            for (Pair<String, String> destination : destinations) {
+                logger.error("Приёмник формы - " + destination.getFirst() + " для подразделения " + destination.getSecond() +
+                        " в периоде " + period.getTaxPeriod().getYear() + " " + period.getName() + " - находится в статусе \"Принят\"!");
+            }
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки при удалении версии ручного ввода",
+                    logEntryService.save(logger.getEntries()));
+        }
     }
 
     @Override
@@ -530,7 +616,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     }
 
     @Override
-    public FormDataAccessParams getFormDataAccessParams(TAUserInfo userInfo, long formDataId) {
+    public FormDataAccessParams getFormDataAccessParams(TAUserInfo userInfo, long formDataId, boolean manual) {
         FormDataAccessParams result = new FormDataAccessParams();
         result.setCanRead(false);
         result.setCanEdit(false);
@@ -550,7 +636,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Редактирование
         try {
-            canEdit(userInfo, formDataId);
+            canEdit(userInfo, formDataId, manual);
             result.setCanEdit(true);
         } catch (AccessDeniedException e) {
             return result;

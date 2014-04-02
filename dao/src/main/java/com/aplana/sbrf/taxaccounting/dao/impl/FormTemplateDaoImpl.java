@@ -334,18 +334,17 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public Date getFTVersionEndDate(int templateId, int formTypeId, Date actualBeginVersion) {
+    public Date getFTVersionEndDate(int formTypeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
-                    " from form_template where type_id = :typeId and version > ? and status in (0,1,2) and id <> :templateId order by version) where rownum = 1",
-                    new Object[]{formTypeId, actualBeginVersion, templateId},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.NUMERIC},
-                    Date.class).getTime());
-        } catch(EmptyResultDataAccessException e){
-            return null;
+            Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
+                    " from form_template where type_id = ? and TRUNC(version, 'DD') > ? and status in (0,1,2)",
+                    new Object[]{formTypeId, actualBeginVersion},
+                    new int[]{Types.NUMERIC, Types.DATE},
+                    Date.class);
+            return date != null ? new Date(date.getTime()) : null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении даты окончания версии.", e);
         }
@@ -353,44 +352,16 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     public int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
+        HashMap<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeId);
+        valueMap.put("statusList", statusList);
+        valueMap.put("actualBeginVersion", actualBeginVersion);
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
-        } catch(EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибки при получении ближайшей версии.", e);
-        }
-    }
-
-    @Override
-    public int getNearestFTVersionIdLeft(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
-        try {
-            if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
-
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and version < :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version desc, edition desc) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from form_template where type_id = :typeId " +
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)", valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){

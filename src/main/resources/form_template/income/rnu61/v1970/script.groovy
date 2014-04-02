@@ -159,6 +159,12 @@ def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    // Отчетная дата
+    def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    // Начальная дата отчетного периода
+    def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def daysOfYear = getCountDays(reportDateStart)
+
     // Удаление итогов
     deleteAllAliased(dataRows)
 
@@ -174,7 +180,7 @@ def calc() {
             // графа 7
             row.rateBROperation = calc6and7(row.currencyCode, row.operationDate)
             // графа 13
-            row.sumLimit = calc13(row)
+            row.sumLimit = calc13(row, daysOfYear)
             // графа 14
             row.percAdjustment = calc14(row)
         }
@@ -211,7 +217,7 @@ def BigDecimal calc6and7(def currencyCode, def date) {
 }
 
 // Ресчет графы 13
-def BigDecimal calc13(def DataRow<Cell> row) {
+def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
     def daysOfYear3 = null as Integer
     def daysOfYear9 = null as Integer
     def diffYear = false // Признак разницы в годах между графами 3 и 9
@@ -271,10 +277,9 @@ def BigDecimal calc13(def DataRow<Cell> row) {
                         || row.rateBROperation == null) {
                     return null
                 }
-                // TODO Уточнить выражение http://jira.aplana.com/browse/SBRFACCTAX-2358
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 11» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
-                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.operationDate, row.creationDate).getDays() / 365 * row.rateBROperation)
+                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.operationDate, row.creationDate).getDays() / daysOfYear * row.rateBROperation)
                         .setScale(2, RoundingMode.HALF_UP)
 
             } else if (row.paymentEnd < row.operationDate) {
@@ -284,10 +289,9 @@ def BigDecimal calc13(def DataRow<Cell> row) {
                         || row.rateBROperation == null) {
                     return null
                 }
-                // TODO Уточнить выражение http://jira.aplana.com/browse/SBRFACCTAX-2358
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 9» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
-                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.paymentEnd, row.creationDate).getDays() / 365 * row.rateBROperation)
+                return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.paymentEnd, row.creationDate).getDays() / daysOfYear * row.rateBROperation)
                         .setScale(2, RoundingMode.HALF_UP)
             }
         }
@@ -297,16 +301,15 @@ def BigDecimal calc13(def DataRow<Cell> row) {
 
 // Ресчет графы 14
 def BigDecimal calc14(def row) {
+    BigDecimal temp = null
     if (row.sum70606 != null) {
         if (row.sumLimit != null && row.sum70606 > row.sumLimit) {
-            return row.sum70606 - row.sumLimit
-        } else {
-            return null
+            temp = row.sum70606 - row.sumLimit
         }
     } else if (row.nominal != null && row.rateBRBill != null && row.rateBROperation != null) {
-        return row.nominal * (row.rateBRBill - row.rateBROperation)
+        temp = row.nominal * (row.rateBRBill - row.rateBROperation)
     }
-    return null
+    return temp?.setScale(2, RoundingMode.HALF_UP)
 }
 // Логические проверки
 void logicCheck() {
@@ -325,8 +328,9 @@ void logicCheck() {
     def List<String> invList = new ArrayList<String>()
     // Отчетная дата
     def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    // Начальная дата отчетного периода
+    //Начальная дата отчетного периода
     def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def daysOfYear = getCountDays(reportDateStart)
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -363,7 +367,7 @@ void logicCheck() {
         // 5. Арифметические проверки
         needValue['rateBRBill'] = calc6and7(row.currencyCode, row.creationDate)
         needValue['rateBROperation'] = calc6and7(row.currencyCode, row.operationDate)
-        needValue['sumLimit'] = calc13(row)
+        needValue['sumLimit'] = calc13(row, daysOfYear)
         needValue['percAdjustment'] = calc14(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 

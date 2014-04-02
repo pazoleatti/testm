@@ -177,7 +177,6 @@ def String getKnu(def knu) {
 /* Получение импортируемых данных */
 
 void importData() {
-
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1 )
@@ -192,7 +191,6 @@ void importData() {
             (xml.row[1].cell[3]): '3',
             (xml.row[1].cell[4]): '4',
     ]
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
@@ -205,8 +203,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -224,8 +222,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -236,11 +234,8 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        /* Графа 1 */
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
-
         /* Графа 2 */
-        /* Автозаполняемое */
+        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
 
         /* Графа 3 */
         newRow.incomeType = getRecordIdImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset)

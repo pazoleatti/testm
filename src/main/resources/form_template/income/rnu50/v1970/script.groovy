@@ -236,7 +236,7 @@ def calc4(def row49, def startDate, def endDate) {
             result = row49.expensesSum
         }
     }
-    return round(result, 2)
+    return result?.setScale(2, RoundingMode.HALF_UP)
 }
 
 def calc5(def row49, def startDate, def endDate) {
@@ -245,14 +245,9 @@ def calc5(def row49, def startDate, def endDate) {
     if (date < startDate) {
         result = row49.expensesSum * 3
     } else if (date >= startDate && date <= endDate) {
-        result = row49.expensesSum * (endDate[Calendar.MONTH] - row49.usefullLifeEnd[Calendar.MONTH])
+        result = row49.expensesSum * (endDate[Calendar.MONTH] - date[Calendar.MONTH])
     }
-    return round(result, 2)
-}
-
-// Округление
-def BigDecimal round(BigDecimal value, def int precision = 2) {
-    return value?.setScale(precision, RoundingMode.HALF_UP)
+    return result?.setScale(2, RoundingMode.HALF_UP)
 }
 
 def getTotalRow(def dataRows) {
@@ -285,7 +280,6 @@ void importData() {
             (xml.row[2].cell[3]): '4',
             (xml.row[2].cell[4]): '5'
     ]
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -296,8 +290,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1

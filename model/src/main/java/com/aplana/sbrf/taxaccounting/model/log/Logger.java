@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model.log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,9 +114,10 @@ public class Logger {
      * Очистить содержимое журнала с определенным уровнем сообщений
      */
     public void clear(LogLevel logLevel) {
-        for (LogEntry entry : entries) {
-            if (entry.getLevel().equals(logLevel)) {
-                entries.remove(entry);
+        for (ListIterator<LogEntry> i = entries.listIterator(); i.hasNext(); ) {
+            LogEntry entry = i.next();
+            if(entry.getLevel().equals(logLevel)) {
+                i.remove();
             }
         }
     }

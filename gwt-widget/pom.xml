@@ -80,7 +80,6 @@
 					<modules>
 						<module>com.aplana.gwt.GwtWidget</module>
 					</modules>
-					<generateDirectory>${basedir}/src/main/java</generateDirectory>
 					<i18nMessagesBundles>
 						<i18nMessagesBundle>com.aplana.gwt.client.Messages</i18nMessagesBundle>
 					</i18nMessagesBundles>

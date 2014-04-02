@@ -449,8 +449,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -467,10 +467,6 @@ void addData(def xml, int headRowCount) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
-            continue
-        }
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
@@ -478,9 +474,6 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
         newRow.contractNumber = row.cell[1].text()
@@ -495,7 +488,7 @@ void addData(def xml, int headRowCount) {
         newRow.transactionDate = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 6
-        newRow.base = parseNumber(row.cell[5].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.course = parseNumber(row.cell[5].text(),xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 7
         newRow.interestRate = parseNumber(row.cell[6].text(),xlsIndexRow, 0 + colOffset, logger, false)
@@ -546,11 +539,9 @@ void addData(def xml, int headRowCount) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 20, 4)
     // проверка шапки таблицы
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 3)
-
-
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 4)
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
             (xml.row[0].cell[1]): 'Номер договора',

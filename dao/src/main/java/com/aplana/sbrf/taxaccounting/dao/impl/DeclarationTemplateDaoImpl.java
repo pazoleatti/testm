@@ -107,72 +107,82 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @Caching(evict = {@CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id", beforeInvocation = true),
             @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, key = "#declarationTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	public int save(DeclarationTemplate declarationTemplate) {
-		int count;
-		int declarationTemplateId;
-		if (declarationTemplate.getId() == null) {
-			declarationTemplateId = generateId("seq_declaration_template", Integer.class);
-			count = getJdbcTemplate().update(
-					"insert into declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) values (?, ?, ?, ?, ?, ?, ?, ?)",
-					new Object[] {
-							declarationTemplateId,
-							getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
-                            declarationTemplate.getName(),
-							declarationTemplate.getVersion(),
-							declarationTemplate.getCreateScript(),
-							declarationTemplate.getType().getId(),
-                            declarationTemplate.getXsdId(),
-                            declarationTemplate.getStatus().getId()
-					},
-					new int[] {
-							Types.NUMERIC,
-							Types.NUMERIC,
-                            Types.VARCHAR,
-							Types.DATE,
-							Types.VARCHAR,
-							Types.NUMERIC,
-                            Types.VARCHAR,
-                            Types.NUMERIC
-					}
-			);
-
-		} else {
-			declarationTemplateId = declarationTemplate.getId();
 			/*int storedEdition = getJdbcTemplate()
 					.queryForInt("select edition from declaration_template where id = ? for update", declarationTemplateId);
             if (storedEdition != declarationTemplate.getEdition()) {
 				throw new DaoException("Сохранение описания декларации невозможно, так как её состояние в БД" +
 						" было изменено после того, как данные по ней были считаны");
 			}*/
-			count = getJdbcTemplate().update(
-					"update declaration_template set edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? where id = ?",
-					new Object[] {
+        try {
+            int count = getJdbcTemplate().update(
+                    "UPDATE declaration_template SET edition = ?, name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
+                    new Object[]{
                             declarationTemplate.getEdition(),
                             declarationTemplate.getName(),
-							declarationTemplate.getVersion(),
-							declarationTemplate.getCreateScript(),
-							declarationTemplate.getType().getId(),
+                            declarationTemplate.getVersion(),
+                            declarationTemplate.getCreateScript(),
+                            declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
                             declarationTemplate.getStatus().getId(),
-							declarationTemplateId
-					},
-					new int[] {
-							Types.NUMERIC,
+                            declarationTemplate.getId()
+                    },
+                    new int[]{
+                            Types.NUMERIC,
                             Types.VARCHAR,
-							Types.DATE,
-							Types.VARCHAR,
-							Types.NUMERIC,
+                            Types.DATE,
+                            Types.VARCHAR,
+                            Types.NUMERIC,
                             Types.VARCHAR,
                             Types.NUMERIC,
                             Types.NUMERIC
-					}
-			);
-		}
+                    }
+            );
 
-		if (count == 0) {
-			throw new DaoException("Не удалось сохранить данные");
-		}
-		return declarationTemplateId;
-	}
+            if (count == 0) {
+                throw new DaoException("Не удалось сохранить данные");
+            }
+
+            return declarationTemplate.getId();
+        } catch (DataAccessException e) {
+            logger.error("Ошибка при создании шаблона.", e);
+            throw new DaoException("Ошибка при создании шаблона.", e);
+        }
+    }
+
+    @Override
+    public int create(DeclarationTemplate declarationTemplate) {
+        try {
+            int declarationTemplateId = generateId("seq_declaration_template", Integer.class);
+            getJdbcTemplate().update(
+                    "INSERT INTO declaration_template (id, edition, name, version, create_script, declaration_type_id, xsd, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    new Object[]{
+                            declarationTemplateId,
+                            getLastVersionEdition(declarationTemplate.getType().getId()) + 1,
+                            declarationTemplate.getName(),
+                            declarationTemplate.getVersion(),
+                            declarationTemplate.getCreateScript(),
+                            declarationTemplate.getType().getId(),
+                            declarationTemplate.getXsdId(),
+                            declarationTemplate.getStatus().getId()
+                    },
+                    new int[]{
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.DATE,
+                            Types.VARCHAR,
+                            Types.NUMERIC,
+                            Types.VARCHAR,
+                            Types.NUMERIC
+                    }
+            );
+            return declarationTemplateId;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при создании шаблона.", e);
+            throw new DaoException("Ошибка при создании шаблона.", e);
+        }
+
+    }
 
     @Override
     public int[] update(final List<DeclarationTemplate> declarationTemplates) {
@@ -343,18 +353,17 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     }
 
     @Override
-    public Date getDTVersionEndDate(int templateId, int typeId, Date actualBeginVersion) {
+    public Date getDTVersionEndDate(int typeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
+            Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from declaration_template where declaration_type_id = ?" +
-                    " and version > ? and status in (0,1,2) and id <> ? order by version) where rownum = 1",
-                    new Object[]{typeId, actualBeginVersion, templateId},
-                    Date.class).getTime());
-        } catch(EmptyResultDataAccessException e){
-            return null;
+                    " and TRUNC(version,'DD') > ? and status in (0,1,2)",
+                    new Object[]{typeId, actualBeginVersion},
+                    Date.class);
+            return date != null ? new Date(date.getTime()) : null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении ближайшей версии.", e);
         }
@@ -371,34 +380,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             valueMap.put("statusList", statusList);
             valueMap.put("actualBeginVersion", actualBeginVersion);
 
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
-        } catch(EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибки при получении ближайшей версии.", e);
-        }
-    }
-
-    @Override
-    public int getNearestDTVersionIdLeft(int typeId, List<Integer> statusList, Date actualBeginVersion) {
-        try {
-            if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
-
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", typeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from declaration_template where declaration_type_id = :typeId");
-            builder.append(" and version < :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version desc, edition desc) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from declaration_template " +
+                    " where declaration_type_id = :typeId and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)",
+                    valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){

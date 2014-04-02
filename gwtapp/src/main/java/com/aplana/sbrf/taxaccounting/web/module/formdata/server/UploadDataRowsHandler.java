@@ -54,7 +54,7 @@ public class UploadDataRowsHandler extends
 		FormData formData = action.getFormData();
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
-		dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+		dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		
         BlobData blobData = blobDataService.get(action.getUuid());
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");

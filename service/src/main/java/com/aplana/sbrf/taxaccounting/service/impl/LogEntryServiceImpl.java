@@ -90,7 +90,7 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Override
     public String update(List<LogEntry> logEntries, String uuid) {
-        if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
+        if (uuid == null || uuid.isEmpty()) {
             return null;
         }
         List<LogEntry> list = getAll(uuid);

@@ -70,8 +70,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showEditModeLabel(boolean show);
 
-        void showManualInputAnchor(boolean show);
-
 		void showDeleteFormButton(boolean show);
 
 		void showSignersAnchor(boolean show);
@@ -99,12 +97,18 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void isCanEditPage(boolean visible);
 
         void updatePageSize(TaxType taxType);
+
+        void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual);
+
+        TaxType getTaxType();
     }
 
 	public static final String NAME_TOKEN = "!formData";
 
 	public static final String FORM_DATA_ID = "formDataId";
 	public static final String READ_ONLY = "readOnly";
+    public static final String MANUAL = "manual";
+    public static final String UUID = "uuid";
 
 	protected HandlerRegistration closeFormDataHandlerRegistration;
 
@@ -117,7 +121,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected FormData formData;
 	
 	protected FormDataAccessParams formDataAccessParams;
-	
+
+    /** Признак сводной формы банка */
+    protected boolean isBankSummaryForm;
+
+    /** Признак существования версии ручного ввода */
+    protected boolean existManual;
+
+    protected boolean canCreatedManual;
 
 	protected boolean readOnlyMode;
 
@@ -167,13 +178,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
-		view.showManualInputAnchor(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(true, lockDate, lockedBy);
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(false);
         view.showEditModeLabel(false);
+        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, false, canCreatedManual);
 	}
 
 	protected void setReadUnlockedMode() {
@@ -186,12 +197,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
-		view.showManualInputAnchor(formDataAccessParams.isCanEdit());
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
 		view.setLockInformation(false, null, null);
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead());
+        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, formDataAccessParams.isCanEdit(), canCreatedManual);
 	}
 
 	protected void setEditMode() {
@@ -212,13 +223,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showAddRemoveRowsBlock(!fixedRows);
 
 		view.showPrintAnchor(false);
-		view.showManualInputAnchor(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(false, null, null);
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
 		view.setSelectedRow(null, true);
+        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, readOnlyMode, canCreatedManual);
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
@@ -238,10 +249,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				String.valueOf(formData.getFormType().getTaxType())).build());
 	}
 	
-	protected void revealFormData(Boolean readOnly) {
+	protected void revealFormData(Boolean readOnly, boolean isManual, String uuid) {
 		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
-				.with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
-				.with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build());
+                .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
+                .with(FormDataPresenterBase.MANUAL, String.valueOf(isManual))
+                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build()
+                .with(UUID, uuid)
+        );
 	}
 
 	@SuppressWarnings("unchecked")

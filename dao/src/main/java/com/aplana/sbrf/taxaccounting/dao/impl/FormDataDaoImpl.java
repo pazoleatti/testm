@@ -72,6 +72,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             fd.setPeriodOrder(rs.wasNull() ? null : periodOrder);
 			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
 			fd.setPerformer(formPerformerDao.get(fd.getId()));
+            fd.setManual(rs.getBoolean("manual"));
 
 			result.formData = fd;
 			return result;
@@ -97,13 +98,38 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 	}
 
-	public FormData get(final long formDataId) {
+    public FormData get(final long formDataId) {
+        JdbcTemplate jt = getJdbcTemplate();
+        final FormData formData;
+        try {
+            RowMapperResult res = jt.queryForObject(
+                    "select f.*, r.manual from form_data f \n" +
+                            "left join (select max(manual) as manual, form_data_id from data_row where manual = 0 group by form_data_id) r on r.form_data_id = f.id\n" +
+                            "where f.id = ?",
+                    new Object[] {
+                            formDataId}, new int[] { Types.NUMERIC },
+                    new FormDataRowMapper());
+            formData = res.formData;
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Записи в таблице FORM_DATA с id = "
+                    + formDataId + " не найдено");
+        }
+
+        return formData;
+    }
+
+	public FormData get(final long formDataId, Boolean manual) {
 		JdbcTemplate jt = getJdbcTemplate();
 		final FormData formData;
 		try {
 			RowMapperResult res = jt.queryForObject(
-					"select * from form_data where id = ?",
-					new Object[] { formDataId }, new int[] { Types.NUMERIC },
+					"select f.*, r.manual from form_data f \n" +
+                            "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on (r.form_data_id = f.id and (? is null or r.manual = ?))\n" +
+                            "where f.id = ?",
+					new Object[] {
+                            manual == null ? null : manual ? 1 : 0,
+                            manual == null ? null : manual ? 1 : 0,
+                            formDataId}, new int[] { Types.NUMERIC, Types.NUMERIC, Types.NUMERIC },
 					new FormDataRowMapper());
 			formData = res.formData;
 		} catch (EmptyResultDataAccessException e) {
@@ -154,7 +180,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 						|| StringUtils.hasLength(formData.getPerformer().getPhone())
                         || formData.getPerformer().getPrintDepartmentId() != null)
 			) {
-			formPerformerDao.save(formDataId, formData.getPerformer());
+			formPerformerDao.save(formDataId, formData.isManual(), formData.getPerformer());
 		} else {
 			formPerformerDao.clear(formDataId);
 		}
@@ -194,7 +220,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 					Types.NUMERIC
 				}
 			);
-			return get(formDataId);
+			return get(formDataId, null);
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (IncorrectResultSizeDataAccessException e) {
@@ -262,7 +288,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             Types.NUMERIC
                     }
             );
-            return get(formDataId);
+            return get(formDataId, null);
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (IncorrectResultSizeDataAccessException e) {
@@ -283,9 +309,11 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		JdbcTemplate jt = getJdbcTemplate();
 		try{
 			return jt.queryForObject(
-					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, " +
-					"(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
-							"FROM form_data fd WHERE fd.id = ?",
+					"SELECT fd.id, fd.department_id, fd.state, fd.kind, fd.report_period_id, fd.return_sign, fd.period_order, r.manual,\n" +
+                            "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id\n" +
+                            "FROM form_data fd \n" +
+                            "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on r.form_data_id = fd.id\n" +
+                            "WHERE fd.id = ?",
 					new Object[] { id }, new int[] { Types.NUMERIC },
 					new FormDataWithoutRowMapper());
 		} catch (EmptyResultDataAccessException e) {
@@ -330,5 +358,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             logger.error("Ошибка при поиске используемых версий", e);
             throw new DaoException("Ошибка при поиске используемых версий", e);
         }
+    }
+
+    @Override
+    public boolean existManual(Long formDataId) {
+        return getJdbcTemplate()
+                .queryForInt("select count(*) from data_row where form_data_id = ? and manual = 1", formDataId) > 0;
+    }
+
+    @Override
+    public void deleteManual(long formDataId) {
+        getJdbcTemplate().update("delete from data_row where manual = 1 and form_data_id = ?", formDataId);
     }
 }

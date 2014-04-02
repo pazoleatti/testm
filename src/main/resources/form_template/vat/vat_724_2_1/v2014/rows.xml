@@ -1,1 +1,120 @@
-<?xml version="1.0" encoding="utf-8"?><rows><row alias="R1"><cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010201"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Предоставление арендодателем в аренду на территории Российской Федерации помещений иностранным гражданам или организациям, аккредитованным в Российской Федерации (п.1 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R2"><cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010239"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация услуг по предоставлению в пользование жилых помещений в жилищном фонде всех форм собственности (п/п10 п2 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R3"><cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010242"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация монет из драгоценных металлов (за исключением коллекционных монет), являющихся валютой Российской Федерации или валютой иностранных государств (п/п.11 п.2 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R4"><cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010243"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация долей в уставном (складочном) капитале организаций, паев в паевых фондах кооперативов и паевых инвестиционных фондах, ценных бумаг и инструментов срочных сделок (включая форвардные, фьючерсные контракты, опционы) (п/п.12 п.2 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R5"><cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010275"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Передача в рекламных целях товаров (работ, услуг), расходы на приобретение (создание) единицы которых не превышают 100 рублей (п/п 25 п.3 ст. 149)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R6"><cell alias="rowNum" colSpan="1" numericValue="6" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010276"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Осуществление банками банковских операций (за исключением инкассации) (п/п.3 п.3 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R7"><cell alias="rowNum" colSpan="1" numericValue="7" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010277"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Операции по оказанию услуг, связанных с обслуживанием банковских карт (п/п3.1 п.3 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R8"><cell alias="rowNum" colSpan="1" numericValue="8" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010285"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="TODO ... тут 1639 символов, а в БД ограничение в 1000"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R9"><cell alias="rowNum" colSpan="1" numericValue="9" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010288"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Передача товаров (выполнение работ, оказание услуг) безвозмездно в рамках благотворительной деятельности в соответствии с Федеральным законом &quot;О благотворительной деятельности и благотворительных организациях&quot;, за исключением подакцизных товаров (п/п12 п.3 ст.149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R10"><cell alias="rowNum" colSpan="1" numericValue="10" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010298"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация жилых домов (п/п22, п 3, ст 149 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R11"><cell alias="rowNum" colSpan="1" numericValue="11" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010801"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Операции, указанные в п/п.1 п.2 ст.146 НК РФ (п.3 ст.39 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R12"><cell alias="rowNum" colSpan="1" numericValue="12" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010802"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Передача на безвозмездной основе жилых домов, детских садов, клубов, санаториев и других объектов социально - культурного и жилищно-коммунального назначения, а также дорог, электрических сетей, подстанций, газовых сетей, водозаборных сооружений и других подобных объектов органам государственной власти и органам местного самоуправления (или по решению указанных органов, специализированным организациям, осуществляющим использование или эксплуатацию указанных объектов по их назначению) (п/п.2 п.2 ст.146 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R13"><cell alias="rowNum" colSpan="1" numericValue="13" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010805"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Передача на безвозмездной основе объектов основных средств органам государственной власти и управления и органам местного самоуправления, а также бюджетным учреждениям, государственным и муниципальным унитарным предприятиям (п/п.5 п.2 ст.146 НК РФ) "/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="R14"><cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/><cell alias="code" colSpan="1" rowSpan="1" stringValue="1010806"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация земельных участков (долей в них) (п/п 6 п.2 ст. 146 НК РФ)"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/></row><row alias="itog"><cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/><cell alias="code" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/><cell alias="name" colSpan="1" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/><cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/><cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/></row></rows>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="R1">
+        <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010201"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Предоставление арендодателем в аренду на территории Российской Федерации помещений иностранным гражданам или организациям, аккредитованным в Российской Федерации (п.1 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R2">
+        <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010239"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Реализация услуг по предоставлению в пользование жилых помещений в жилищном фонде всех форм собственности (п/п10 п2 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R3">
+        <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010242"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Реализация монет из драгоценных металлов (за исключением коллекционных монет), являющихся валютой Российской Федерации или валютой иностранных государств (п/п.11 п.2 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R4">
+        <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010243"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Реализация долей в уставном (складочном) капитале организаций, паев в паевых фондах кооперативов и паевых инвестиционных фондах, ценных бумаг и инструментов срочных сделок (включая форвардные, фьючерсные контракты, опционы) (п/п.12 п.2 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R5">
+        <cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010275"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Передача в рекламных целях товаров (работ, услуг), расходы на приобретение (создание) единицы которых не превышают 100 рублей (п/п 25 п.3 ст. 149)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R6">
+        <cell alias="rowNum" colSpan="1" numericValue="6" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010276"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Осуществление банками банковских операций (за исключением инкассации) (п/п.3 п.3 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R7">
+        <cell alias="rowNum" colSpan="1" numericValue="7" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010277"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Операции по оказанию услуг, связанных с обслуживанием банковских карт (п/п3.1 п.3 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R8">
+        <cell alias="rowNum" colSpan="1" numericValue="8" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010285"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="TODO ... тут 1639 символов, а в БД ограничение в 1000"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R9">
+        <cell alias="rowNum" colSpan="1" numericValue="9" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010288"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Передача товаров (выполнение работ, оказание услуг) безвозмездно в рамках благотворительной деятельности в соответствии с Федеральным законом &quot;О благотворительной деятельности и благотворительных организациях&quot;, за исключением подакцизных товаров (п/п12 п.3 ст.149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R10">
+        <cell alias="rowNum" colSpan="1" numericValue="10" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010298"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация жилых домов (п/п22, п 3, ст 149 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R11">
+        <cell alias="rowNum" colSpan="1" numericValue="11" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010801"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Операции, указанные в п/п.1 п.2 ст.146 НК РФ (п.3 ст.39 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R12">
+        <cell alias="rowNum" colSpan="1" numericValue="12" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010802"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Передача на безвозмездной основе жилых домов, детских садов, клубов, санаториев и других объектов социально - культурного и жилищно-коммунального назначения, а также дорог, электрических сетей, подстанций, газовых сетей, водозаборных сооружений и других подобных объектов органам государственной власти и органам местного самоуправления (или по решению указанных органов, специализированным организациям, осуществляющим использование или эксплуатацию указанных объектов по их назначению) (п/п.2 п.2 ст.146 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R13">
+        <cell alias="rowNum" colSpan="1" numericValue="13" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010805"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Передача на безвозмездной основе объектов основных средств органам государственной власти и управления и органам местного самоуправления, а также бюджетным учреждениям, государственным и муниципальным унитарным предприятиям (п/п.5 п.2 ст.146 НК РФ) "/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="R14">
+        <cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010806"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Реализация земельных участков (долей в них) (п/п 6 п.2 ст. 146 НК РФ)"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    </row>
+    <row alias="itog">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="code" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
+        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+</rows>

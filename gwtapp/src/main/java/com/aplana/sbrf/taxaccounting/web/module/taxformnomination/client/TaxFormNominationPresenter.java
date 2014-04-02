@@ -222,7 +222,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickOpenFormDestinations() {
-        formDestinationsPresenter.initAndShowDialog(this);
+        formDestinationsPresenter.initAndShowDialog(this, taxType);
     }
 
     @Override

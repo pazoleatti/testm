@@ -45,6 +45,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         List<Long> getFormTypes();
         // установить фильтр для справочника
         void setFilterForFormTypes(String filter);
+        // обновлели надписей в зависимости от вида налога
+        void updateLabel(TaxType taxType);
     }
 
 
@@ -128,8 +130,9 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                 }, this));
     }
 
-    public void initAndShowDialog(final HasPopupSlot slotForMe) {
+    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
         getView().prepareCreationForm();
+        getView().updateLabel(taxType);
         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
     }
 

@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -70,5 +71,13 @@ public class BlobDataDaoTest {
         blobDataDao.create(blobData);
         blobDataDao.delete(blobData.getUuid());
         Assert.assertNull(blobDataDao.get(blobData.getUuid()));
+    }
+
+    @Test
+    public void deleteListTest(){
+        ArrayList<String> strings = new ArrayList<String>();
+        strings.add(blobDataDao.create(blobData));
+        blobDataDao.delete(strings);
+        Assert.assertNull(blobDataDao.get(strings.get(0)));
     }
 }

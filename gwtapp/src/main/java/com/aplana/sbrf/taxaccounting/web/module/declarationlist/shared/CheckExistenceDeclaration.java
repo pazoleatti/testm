@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -13,6 +14,8 @@ public class CheckExistenceDeclaration extends UnsecuredActionImpl<CheckExistenc
 	private Integer reportPeriodId;
 
 	private Integer departmentId;
+
+    private TaxType taxType;
 
 	public Integer getDeclarationTypeId() {
 		return declarationTypeId;
@@ -38,7 +41,15 @@ public class CheckExistenceDeclaration extends UnsecuredActionImpl<CheckExistenc
 		this.departmentId = departmentId;
 	}
 
-	@Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
+
+    @Override
 	public String getName() {
 		return "Проверка существования декларации";
 	}

@@ -10,10 +10,10 @@
     <ui:style>
 
         .titleText {
-            font-size: 14px !important;
-            color: #636460;
-            white-space: nowrap;
-        }
+                     font-size: 14px !important;
+                     color: #636460;
+                     white-space: nowrap;
+                 }
 
         .titleText div {
             font-size: 14px !important;
@@ -152,7 +152,7 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <g:Label ui:field="editModeLabel" text="Режим редактирования"
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
-                            <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px"/>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px" uploadAsTemporal="true"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -184,7 +184,7 @@
                         <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
                             <g:cell width="145px" >
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="145px">
-                                    <g:Label text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="formKindTitle" text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
@@ -243,7 +243,12 @@
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell>
-                        <style:LinkButton ui:field="manualInputAnchor" text="Редактировать..."
+                        <style:LinkButton ui:field="editAnchor" text="Редактировать..."
+                                          img="resources/img/pencil-16.png"
+                                          title="Перейти в режим редактирования" addStyleNames="{style.btnMarginRight}"/>
+                    </g:cell>
+                    <g:cell>
+                        <style:LinkButton ui:field="manualAnchor" text="Ручной ввод"
                                           img="resources/img/pencil-16.png"
                                           title="Перейти в режим редактирования" addStyleNames="{style.btnMarginRight}"/>
                     </g:cell>
@@ -256,9 +261,22 @@
                     <g:cell width="100%">
                         <g:Label width="100%"/>
                     </g:cell>
-                    <g:cell horizontalAlignment="right">
+                    <g:cell>
                         <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
                                     value="true" text="Показывать контрольные поля" width="225px" height="22px"/>
+                    </g:cell>
+                    <g:cell>
+                        <g:VerticalPanel ui:field="modePanel">
+                            <style:LinkButton ui:field="modeAnchor" text="?"
+                                              img="resources/img/pencil-16.png"
+                                              title="Перейти в автоматический/ручного ввода режим" addStyleNames="{style.btnMarginRight}"/>
+                            <g:Label ui:field="modeLabel" text="Редактировать" width="100%"/>
+                        </g:VerticalPanel>
+                    </g:cell>
+                    <g:cell>
+                        <style:LinkButton ui:field="deleteManualAnchor" text="Удалить версию ручного ввода"
+                                          img="resources/img/row-delete.png"
+                                          title="Удалить версию ручного ввода" addStyleNames="{style.btnMarginRight}"/>
                     </g:cell>
                 </g:HorizontalPanel>
 

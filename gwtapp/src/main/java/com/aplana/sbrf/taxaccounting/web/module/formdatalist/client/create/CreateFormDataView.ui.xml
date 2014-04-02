@@ -24,7 +24,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание налоговой формы" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание налоговой формы" ui:field="title">
         <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
@@ -47,7 +47,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:"/>
+                    <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:" ui:field="formDataKindLabel"/>
                 </g:cell>
                 <g:cell width="100%">
                     <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" searchEnabled="false"
@@ -57,14 +57,14 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:"/>
+                    <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:" ui:field="formTypeIdLabel"/>
                 </g:cell>
                 <g:cell width="100%">
                     <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false" multiSelect="false" width="100%"/>
                 </g:cell>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
+            <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}" ui:field="monthPanel">
                 <g:cell horizontalAlignment="right">
                     <g:Label width="140px" wordWrap="false" text="Месяц:"/>
                 </g:cell>

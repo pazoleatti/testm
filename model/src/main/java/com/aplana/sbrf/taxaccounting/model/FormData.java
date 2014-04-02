@@ -20,6 +20,8 @@ public class FormData extends IdentityObject<Long> {
 	private Integer departmentId;
 	private Integer reportPeriodId;
     private Integer periodOrder;
+    /** Признак формы ручного ввода */
+    private Boolean manual;
 	
 	/**
 	 * Признак возврата
@@ -231,6 +233,14 @@ public class FormData extends IdentityObject<Long> {
         this.periodOrder = periodOrder;
     }
 
+    public Boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(Boolean manual) {
+        this.manual = manual;
+    }
+
     @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -238,6 +248,8 @@ public class FormData extends IdentityObject<Long> {
 		builder.append(state);
 		builder.append(", kind=");
 		builder.append(kind);
+        builder.append(", manual=");
+        builder.append(manual);
 		builder.append(", departmentId=");
 		builder.append(departmentId);
 		builder.append(", reportPeriodId=");
@@ -263,7 +275,4 @@ public class FormData extends IdentityObject<Long> {
 		builder.append("]");
 		return builder.toString();
 	}
-
-
-
 }

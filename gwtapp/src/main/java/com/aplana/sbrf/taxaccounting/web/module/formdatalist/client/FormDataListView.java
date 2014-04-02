@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
@@ -39,7 +40,9 @@ public class FormDataListView extends
 		FormDataListPresenter.MyView {
 	
 	public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы";
 	public static final String FORM_DATA_TYPE_TITLE = "Вид налоговой формы";
+    public static final String FORM_DATA_TYPE_TITLE_D = "Вид формы";
 	public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String PERIOD_YEAR_TITLE = "Год";
 	public static final String REPORT_PERIOD_TITLE = "Период";
@@ -47,8 +50,16 @@ public class FormDataListView extends
 	public static final String FORM_DATA_STATE_TITLE = "Состояние";
 	public static final String FORM_DATA_RETURN_TITLE = "Признак возрата";
 
+    public static final String FORM_DATA_CREATE = "Создать налоговую форму...";
+    public static final String FORM_DATA_CREATE_D = "Создать форму...";
+    public static final String FORM_DATA_CREATE_TITLE = "Создание налоговой формы";
+    public static final String FORM_DATA_CREATE_TITLE_D = "Создание формы";
+
 	interface MyBinder extends UiBinder<Widget, FormDataListView> {
 	}
+
+    private GenericDataGrid.DataGridResizableHeader formKindHeader, formTypeHeader, periodMonthHeader;
+    private TextColumn<FormDataSearchResultItem> periodMonthColumn;
 
 	private FormDataSearchOrdering sortByColumn;
 
@@ -70,7 +81,10 @@ public class FormDataListView extends
 
 	@UiField
 	Label formHeader;
-	
+
+    @UiField
+    LinkButton create;
+
 	private AsyncDataProvider<FormDataSearchResultItem> dataProvider = new  AsyncDataProvider<FormDataSearchResultItem>() {
 		@Override
 		protected void onRangeChanged(HasData<FormDataSearchResultItem> display) {
@@ -131,7 +145,7 @@ public class FormDataListView extends
             }
         };
 
-        TextColumn<FormDataSearchResultItem> periodMonthColumn = new TextColumn<FormDataSearchResultItem>() {
+        periodMonthColumn = new TextColumn<FormDataSearchResultItem>() {
             @Override
             public String getValue(FormDataSearchResultItem object) {
                 Integer periodOrder = object.getReportPeriodMonth();
@@ -162,9 +176,11 @@ public class FormDataListView extends
 			}
 		};
 
-		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE, formKindColumn));
+        formKindHeader = (GenericDataGrid.DataGridResizableHeader)getHeader(FORM_DATA_KIND_TITLE, formKindColumn);
+		formDataTable.addColumn(formKindColumn, formKindHeader);
         formDataTable.setColumnWidth(formKindColumn, 8.5, Style.Unit.EM);
-		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE, linkColumn));
+        formTypeHeader = (GenericDataGrid.DataGridResizableHeader)getHeader(FORM_DATA_TYPE_TITLE, linkColumn);
+		formDataTable.addColumn(linkColumn, formTypeHeader);
 
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE, departmentColumn));
 
@@ -175,7 +191,8 @@ public class FormDataListView extends
         
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE, reportPeriodColumn));
         formDataTable.setColumnWidth(reportPeriodColumn, 7, Style.Unit.EM);
-		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE, periodMonthColumn));
+        periodMonthHeader = (GenericDataGrid.DataGridResizableHeader)getHeader(PERIOD_MONTH_TITLE, periodMonthColumn);
+		formDataTable.addColumn(periodMonthColumn, periodMonthHeader);
         formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE, stateColumn));
         formDataTable.setColumnWidth(stateColumn, 6, Style.Unit.EM);
@@ -187,6 +204,27 @@ public class FormDataListView extends
 		dataProvider.addDataDisplay(formDataTable);
 
 	}
+
+    @Override
+    public void updateFormDataTable(TaxType taxType) {
+        if (!taxType.equals(TaxType.DEAL)) {
+            create.setText(FORM_DATA_CREATE);
+            create.setTitle(FORM_DATA_CREATE_TITLE);
+            formKindHeader.setTitle(FORM_DATA_KIND_TITLE);
+            formTypeHeader.setTitle(FORM_DATA_TYPE_TITLE);
+            periodMonthHeader.setTitle(PERIOD_MONTH_TITLE);
+            formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
+        } else {
+            create.setText(FORM_DATA_CREATE_D);
+            create.setTitle(FORM_DATA_CREATE_TITLE_D);
+            formKindHeader.setTitle(FORM_DATA_KIND_TITLE_D);
+            formTypeHeader.setTitle(FORM_DATA_TYPE_TITLE_D);
+            periodMonthHeader.setTitle("");
+            formDataTable.setColumnWidth(periodMonthColumn, 0, Style.Unit.EM);
+        }
+        formDataTable.redrawHeaders();
+
+    }
 
 	@Override
 	public void setInSlot(Object slot, IsWidget content) {
@@ -255,9 +293,9 @@ public class FormDataListView extends
 	}
 
 	private void setSortByColumn(String sortByColumn){
-		if(FORM_DATA_KIND_TITLE.equals(sortByColumn)){
+		if (FORM_DATA_KIND_TITLE.equals(sortByColumn) || FORM_DATA_KIND_TITLE_D.equals(sortByColumn) ) {
 			this.sortByColumn = FormDataSearchOrdering.KIND;
-		} else if (FORM_DATA_TYPE_TITLE.equals(sortByColumn)){
+		} else if (FORM_DATA_TYPE_TITLE.equals(sortByColumn) || FORM_DATA_TYPE_TITLE_D.equals(sortByColumn)) {
 			this.sortByColumn = FormDataSearchOrdering.FORM_TYPE_NAME;
 		} else if (PERIOD_YEAR_TITLE.equals(sortByColumn)) {
 			this.sortByColumn = FormDataSearchOrdering.YEAR;

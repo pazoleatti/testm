@@ -130,12 +130,12 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
 	public void setFormId(int formId) {
 		List<BaseTab> tabList = tabPanel.getTabList();
 
-		/*if (this.formId != 0) {
+		if (this.formId != 0) {
 			for (BaseTab tab : tabList) {
 				tab.setTargetHistoryToken(tab.getTargetHistoryToken()
 						.substring(0, tab.getTargetHistoryToken().length() - String.valueOf(this.formId).length()));
 			}
-		}*/
+		}
 
 		for (BaseTab tab : tabList) {
 			tab.setTargetHistoryToken(tab.getTargetHistoryToken() + formId);

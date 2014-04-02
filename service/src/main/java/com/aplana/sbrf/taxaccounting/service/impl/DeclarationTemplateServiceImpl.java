@@ -58,7 +58,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public int save(DeclarationTemplate declarationTemplate) {
-		return declarationTemplateDao.save(declarationTemplate);
+        if (declarationTemplate.getId() == null){
+            return declarationTemplateDao.create(declarationTemplate);
+        }
+        DeclarationTemplate declarationTemplateBase = declarationTemplateDao.get(declarationTemplate.getId());
+        int savedId = declarationTemplateDao.save(declarationTemplate);
+        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().equals(declarationTemplateBase.getXsdId()))
+            blobDataService.delete(declarationTemplateBase.getXsdId());
+        return savedId;
 	}
 
     @Override
@@ -84,12 +91,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Override
 	public void setJrxml(int declarationTemplateId, InputStream jrxmlIO) {
         DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
-
+        String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
         String jrxmBlobId = blobDataService.create(
                 jrxmlIO,
                 declarationTemplate.getType().getName() +"_jrxml");
 
         declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);
+        if (jrxmBlobIdOld != null && !jrxmBlobIdOld.isEmpty())
+            blobDataService.delete(jrxmBlobIdOld);
 	}
 
 	@Override
@@ -187,7 +196,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return null;
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 
-        return declarationTemplateDao.getDTVersionEndDate(declarationTemplateId, declarationTemplate.getType().getId(), declarationTemplate.getVersion());
+        return declarationTemplateDao.getDTVersionEndDate(declarationTemplate.getType().getId(), declarationTemplate.getVersion());
     }
 
     @Override

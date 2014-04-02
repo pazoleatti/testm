@@ -93,7 +93,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setJrxmlBlobId("1");
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 
-		int id = declarationTemplateDao.save(declarationTemplate);
+		int id = declarationTemplateDao.create(declarationTemplate);
 
 		DeclarationTemplate savedDeclarationTemplate = declarationTemplateDao.get(id);
 		assertEquals(id, savedDeclarationTemplate.getId().intValue());
@@ -228,13 +228,13 @@ public class DeclarationTemplateDaoTest {
     @Test
     public void testGetDTVersionEndDate(){
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2012, Calendar.JANUARY, 1);
+        calendar.set(2013, Calendar.JANUARY, 1);
         Date actualBeginVersion = new Date(calendar.getTime().getTime());
         calendar.clear();
 
         calendar.set(2013, Calendar.DECEMBER, 31, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, 1, actualBeginVersion));
+        Assert.assertEquals(calendar.getTime(), declarationTemplateDao.getDTVersionEndDate(1, actualBeginVersion));
 
     }
 
@@ -249,21 +249,6 @@ public class DeclarationTemplateDaoTest {
         list.add(VersionedObjectStatus.NORMAL.getId());
         list.add(VersionedObjectStatus.DRAFT.getId());
         Assert.assertEquals(1, declarationTemplateDao.getNearestDTVersionIdRight(1, list, actualBeginVersion));
-
-    }
-
-    @Test
-    public void testGetNearestDTVersionIdLeft(){
-        List<Integer> list = new ArrayList<Integer>();
-        list.add(VersionedObjectStatus.NORMAL.getId());
-        list.add(VersionedObjectStatus.DRAFT.getId());
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2012, Calendar.JANUARY, 1);
-        Date actualBeginVersion = calendar.getTime();
-        calendar.clear();
-
-        Assert.assertEquals(0, declarationTemplateDao.getNearestDTVersionIdLeft(1, list, actualBeginVersion));
 
     }
 

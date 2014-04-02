@@ -20,7 +20,7 @@ import java.util.*;
  * @author Stanislav Yasinskiy
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONF')")
 @Component
 public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 

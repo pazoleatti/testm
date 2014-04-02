@@ -45,7 +45,23 @@ import static java.util.Arrays.asList;
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		implements SourcesPresenter.MyView, ValueChangeHandler<List<Integer>> {
 
-	interface Binder extends UiBinder<Widget, SourcesView> { }
+    public static final String FORM_DEC_ANCHOR_TITLE = "Указание форм источников для деклараций";
+    public static final String FORM_DEC_ANCHOR_TITLE_D = "Указание форм источников для уведомлений";
+    public static final String FORM_DEC_ANCHOR_TITLE_DEC = "Указание источников для налоговых форм";
+    public static final String FORM_DEC_ANCHOR_TITLE_DEC_D = "Указание источников для форм";
+
+    public static final String FORM_TITLE = "Налоговые формы";
+    public static final String FORM_TITLE_DEC  = "Декларации";
+    public static final String FORM_TITLE_D = "Формы";
+    public static final String FORM_TITLE_DEC_D = "Уведомления";
+
+    private GenericDataGrid.DataGridResizableHeader receiverKindHeader, receiverTypeHeader, declarationReceiverTypeColumnHeader;
+
+    private GenericDataGrid.DataGridResizableHeader sourceKindTitle, sourceTypeTitle;
+
+    private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle;
+
+    interface Binder extends UiBinder<Widget, SourcesView> { }
 
 	interface LinkStyle extends CssResource {
 		String enabled();
@@ -122,9 +138,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	public void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
 		this.isForm = isForm;
 
-        titleLabel.setText(isForm ? "Налоговые формы" : "Декларации");
-        formDecAnchor.setText("Указание источников для " + (isForm ? "деклараций" : "налоговых форм"));
-
         formReceiversTable.setVisible(isForm);
 		declarationReceiversTable.setVisible(!isForm);
 		taxTypePicker.setValue(taxType);
@@ -155,6 +168,40 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		declarationReceiversTable.setRowCount(0);
 		currentSourcesTable.setRowCount(0);
 
+        boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+
+        receiverKindHeader.setTitle(getKindColumnTitle(isTaxTypeDeal));
+        receiverTypeHeader.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+        declarationReceiverTypeColumnHeader.setTitle(!isTaxTypeDeal?"Вид декларации":"Вид уведомления");
+
+        sourceKindTitle.setTitle(getKindColumnTitle(isTaxTypeDeal));
+        sourceTypeTitle.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+
+        receiverSourcesKindTitle.setTitle(getKindColumnTitle(isTaxTypeDeal));
+        receiverSourcesTypeTitle.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+
+        formReceiversTable.redrawHeaders();
+        sourcesTable.redrawHeaders();
+        currentSourcesTable.redrawHeaders();
+        declarationReceiversTable.redrawHeaders();
+
+        if (!isTaxTypeDeal) {
+            if (isForm) {
+                formDecAnchor.setText(FORM_DEC_ANCHOR_TITLE);
+                titleLabel.setText(FORM_TITLE);
+            } else {
+                formDecAnchor.setText(FORM_DEC_ANCHOR_TITLE_DEC);
+                titleLabel.setText(FORM_TITLE_DEC);
+            }
+        } else {
+            if (isForm) {
+                formDecAnchor.setText(FORM_DEC_ANCHOR_TITLE_D);
+                titleLabel.setText(FORM_TITLE_D);
+            } else {
+                formDecAnchor.setText(FORM_DEC_ANCHOR_TITLE_DEC_D);
+                titleLabel.setText(FORM_TITLE_DEC_D);
+            }
+        }
         // TODO Установка фокуса на departmentReceiverPicker после реализации метода в http://jira.aplana.com/browse/SBRFACCTAX-5392
 	}
 
@@ -228,9 +275,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		formReceiversTable.addResizableColumn(receiverKindColumn, "Тип налоговой формы");
+        receiverKindHeader = formReceiversTable.createResizableHeader("Тип налоговой формы", receiverKindColumn);
+        formReceiversTable.addColumn(receiverKindColumn, receiverKindHeader);
 		formReceiversTable.setColumnWidth(receiverKindColumn, 150, Style.Unit.PX);
-		formReceiversTable.addResizableColumn(receiverTypeColumn, "Вид налоговой формы");
+
+        receiverTypeHeader = formReceiversTable.createResizableHeader("Вид налоговой формы", receiverTypeColumn);
+		formReceiversTable.addColumn(receiverTypeColumn, receiverTypeHeader);
+
 		formReceiversTable.setSelectionModel(formReceiversSelectionModel);
 		formReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -253,7 +304,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		declarationReceiversTable.addResizableColumn(declarationReceiverTypeColumn, "Вид декларации");
+        declarationReceiverTypeColumnHeader = declarationReceiversTable.createResizableHeader("Вид декларации", declarationReceiverTypeColumn);
+		declarationReceiversTable.addColumn(declarationReceiverTypeColumn, declarationReceiverTypeColumnHeader);
 		declarationReceiversTable.setSelectionModel(declarationReceiversSelectionModel);
 		declarationReceiversSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -290,9 +342,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		sourcesTable.addResizableColumn(sourceKindColumn, "Тип налоговой формы");
+        sourceKindTitle = sourcesTable.createResizableHeader("Тип налоговой формы", sourceKindColumn);
+		sourcesTable.addColumn(sourceKindColumn, sourceKindTitle);
 		sourcesTable.setColumnWidth(sourceKindColumn, 150, Style.Unit.PX);
-		sourcesTable.addResizableColumn(sourceTypeColumn, "Вид налоговой формы");
+
+        sourceTypeTitle = sourcesTable.createResizableHeader("Вид налоговой формы", sourceTypeColumn);
+		sourcesTable.addColumn(sourceTypeColumn, sourceTypeTitle);
 		sourcesTable.setSelectionModel(sourcesSelectionModel);
 		sourcesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
@@ -361,9 +416,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		currentSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
 		currentSourcesTable.addResizableColumn(departmentColumn, "Подразделение");
 		currentSourcesTable.setColumnWidth(departmentColumn, 250, Style.Unit.PX);
-		currentSourcesTable.addResizableColumn(receiverSourcesKindColumn, "Тип налоговой формы");
+        receiverSourcesKindTitle = currentSourcesTable.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
+		currentSourcesTable.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
 		currentSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-		currentSourcesTable.addResizableColumn(receiverSourcesTypeColumn, "Вид налоговой формы");
+        receiverSourcesTypeTitle = currentSourcesTable.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
+		currentSourcesTable.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
 	}
 
 	@UiHandler("assignButton")
@@ -446,4 +503,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			currentSourcesTable.setRowCount(0);
 		}
 	}
+
+    String getTypeColumnTitle(boolean isTaxTypeDeal) {
+        return (!isTaxTypeDeal?"Вид налоговой формы":"Вид формы");
+    }
+
+    String getKindColumnTitle(boolean isTaxTypeDeal) {
+        return (!isTaxTypeDeal?"Тип налоговой формы":"Тип формы");
+    }
 }

@@ -44,7 +44,7 @@ public class FormDataSignerDaoTest {
 
 	@Test
 	public void saveSignersTest() {
-		FormData formData = formDataDao.get(2);
+		FormData formData = formDataDao.get(2, false);
 		List<FormDataSigner> formSigners = formData.getSigners();
 		assertEquals(2, formSigners.size());
 		for(int i=0; i<2; i++) {

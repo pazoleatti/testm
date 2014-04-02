@@ -6,10 +6,11 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -33,9 +34,19 @@ public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
 		DeclarationListPresenter.MyView {
 
+    public static final String DECLARATION_HEADER = "Cписок деклараций";
+    public static final String DECLARATION_HEADER_D = "Cписок уведомлений";
+    public static final String DECLARATION_CREATE = "Создать декларацию...";
+    public static final String DECLARATION_CREATE_D = "Создать уведомление...";
+    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DECLARATION_CREATE_TITLE = "Создание деклараций";
+    public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
+
+    private GenericDataGrid.DataGridResizableHeader declarationTypeHeader;
+    private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
@@ -43,11 +54,14 @@ public class DeclarationListView extends
 
     private Map<Integer, String> departmentFullNames;
 
+    @UiField
+    Label declarationHeader;
+
 	@UiField
 	Panel filterContentPanel;
 
 	@UiField
-    GenericCellTable<DeclarationDataSearchResultItem> declarationTable;
+    GenericDataGrid<DeclarationDataSearchResultItem> declarationTable;
 
     @UiField
     FlexiblePager pager;
@@ -86,36 +100,36 @@ public class DeclarationListView extends
             }
         };
 
-		TextColumn<DeclarationDataSearchResultItem> reportPeriodColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.getReportPeriodName();
-			}
+        Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+                new AbstractCell<DeclarationDataSearchResultItem>() {
+
+                    @Override
+                    public void render(Context context,
+                                       DeclarationDataSearchResultItem declaration,
+                                       SafeHtmlBuilder sb) {
+                        if (declaration == null) {
+                            return;
+                        }
+                        sb.appendHtmlConstant("<a href=\"#"
+                                + DeclarationDataTokens.declarationData + ";"
+                                + DeclarationDataTokens.declarationId + "="
+                                + declaration.getDeclarationDataId() + "\">"
+                                + declaration.getReportPeriodName() + "</a>");
+                    }
+                }) {
+            @Override
+            public DeclarationDataSearchResultItem getValue(
+                    DeclarationDataSearchResultItem object) {
+                return object;
+            }
 		};
 
-		Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> declarationTypeColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
-				new AbstractCell<DeclarationDataSearchResultItem>() {
-
-					@Override
-					public void render(Context context,
-					                   DeclarationDataSearchResultItem declaration,
-					                   SafeHtmlBuilder sb) {
-						if (declaration == null) {
-							return;
-						}
-						sb.appendHtmlConstant("<a href=\"#"
-								+ DeclarationDataTokens.declarationData + ";"
-								+ DeclarationDataTokens.declarationId + "="
-								+ declaration.getDeclarationDataId() + "\">"
-								+ declaration.getDeclarationType() + "</a>");
-					}
-				}) {
-			@Override
-			public DeclarationDataSearchResultItem getValue(
-					DeclarationDataSearchResultItem object) {
-				return object;
-			}
-		};
+        declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.getDeclarationType();
+            }
+        };
 
 		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
 			@Override
@@ -124,16 +138,18 @@ public class DeclarationListView extends
 			}
 		};
 
-		declarationTable.addColumn(declarationTypeColumn, getHeader("Вид декларации", declarationTypeColumn));
+        declarationTypeHeader = (GenericDataGrid.DataGridResizableHeader) getHeader("Вид декларации", declarationTypeColumn);
+        declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
+        declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
 		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
 		declarationTable.addColumn(reportPeriodColumn, getHeader("Период", reportPeriodColumn));
 		declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
 
+        pager.setDisplay(declarationTable);
+
         declarationTable.setPageSize(pager.getPageSize());
         dataProvider.addDataDisplay(declarationTable);
-
-		pager.setDisplay(declarationTable);
 	}
 	
 
@@ -184,8 +200,23 @@ public class DeclarationListView extends
 	}
 
 	@Override
-	public void updateTitle(String title){
-		titleDesc.setText(title);
+	public void updateTitle(TaxType taxType){
+		titleDesc.setText(taxType.getName());
+        if (!taxType.equals(TaxType.DEAL)) {
+            declarationHeader.setText(DECLARATION_HEADER);
+            declarationTable.clearColumnWidth(declarationTypeColumn);
+            create.setText(DECLARATION_CREATE);
+            create.setTitle(DECLARATION_CREATE_TITLE);
+            declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE);
+            declarationHeader.setText(DECLARATION_HEADER);
+        } else {
+            declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
+            create.setText(DECLARATION_CREATE_D);
+            create.setTitle(DECLARATION_CREATE_TITLE_D);
+            declarationTypeHeader.setTitle("");
+            declarationHeader.setText(DECLARATION_HEADER_D);
+        }
+        declarationTable.redrawHeaders();
 	}
 
     @UiHandler("create")
@@ -196,7 +227,7 @@ public class DeclarationListView extends
     }
 
     private Header<String> getHeader(final String columnName, Column<DeclarationDataSearchResultItem, ?> returnColumn) {
-        GenericCellTable.TableCellResizableHeader resizableHeader;
+        GenericDataGrid.DataGridResizableHeader resizableHeader;
         final SortingHeaderCell headerCell = new SortingHeaderCell();
         resizableHeader = declarationTable.createResizableHeader(columnName, returnColumn, headerCell);
 

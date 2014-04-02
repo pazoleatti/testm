@@ -10,10 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Тесты для ScriptUtils
@@ -260,4 +257,31 @@ public class ScriptUtilsTest {
 		new Range(DATE_ALIAS, 0, STRING_ALIAS, 6).getRangeRect(getTestFormData());
 	}
 */
+
+    @Test
+    public void checkHeaderEquals() {
+        Map<Object, String> headerMapping = new HashMap<Object, String>();
+        headerMapping.put("столбец 1", "столбец 1");
+        headerMapping.put("", "");
+        headerMapping.put(null, null);
+        ScriptUtils.checkHeaderEquals(headerMapping);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void checkHeaderEqualsError() {
+        // неодинаковые
+        equalsColumns("столбец 2", "столбец 1");
+        // неодинаковые с %
+        equalsColumns("столбец 1 % столбец 2", "столбец 1");
+        // неодинаковые с %%
+        equalsColumns("столбец 1 %% столбец 2", "столбец 1");
+        // неодинаковые с %%%
+        equalsColumns("столбец 1 % столбец 2", "столбец 1 %% столбец 2");
+    }
+
+    private void equalsColumns(String column1, String column2) {
+        Map<Object, String> headerMapping = new HashMap<Object, String>();
+        headerMapping.put(column1, column2);
+        ScriptUtils.checkHeaderEquals(headerMapping);
+    }
 }

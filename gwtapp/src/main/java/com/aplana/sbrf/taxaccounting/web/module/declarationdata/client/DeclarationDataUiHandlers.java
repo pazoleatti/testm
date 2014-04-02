@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.Date;
@@ -12,4 +13,5 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void downloadExcel();
 	void downloadXml();
 	void onInfoClicked();
+    TaxType getTaxType();
 }

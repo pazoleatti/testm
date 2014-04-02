@@ -78,8 +78,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		// К сожалению, использовать информацию из ScriptException.getLineNumber() не получается - там всегда -1
 		int line = -1;
 		for (StackTraceElement stackElement: rootCause.getStackTrace()) {
-			String className = stackElement.getClassName();
-			if (className.matches("^Script[0-9]+$") && stackElement.getFileName().endsWith(".groovy")) {
+            String className = stackElement.getClassName();
+            if (className.matches("^.*Script[0-9]+$") && stackElement.getFileName().endsWith(".groovy")) {
 				line = stackElement.getLineNumber();
 				break;
 			}

@@ -215,6 +215,8 @@ public class GetMainMenuActionHandler extends
                         + AdminConstants.NameTokens.adminPage));
                 templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
                         + DeclarationTemplateTokens.declarationTemplateList));
+                templateMenu.getSubMenu().add((new MenuItem("Справочники", NUMBER_SIGN
+                        + RefBookListTokens.REFBOOK_LIST_ADMIN)));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
             }
 

@@ -114,7 +114,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	@Override
 	public List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind) {
 		return getJdbcTemplate().query(
-			"with templatesByVersion as (select id, type_id, status, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE)," +
+			"with templatesByVersion as (select id, type_id, status, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE where status != -1)," +
 					"      allTemplates as (select tv.id," +
 					"                         tv.type_id," +
 					"                         tv.VERSION versionFrom," +

@@ -16,6 +16,7 @@ public class AbstractDataRowAction extends UnsecuredActionImpl<DataRowResult> {
 	
 	private FormData formData;
 
+
 	public FormData getFormData() {
 		return formData;
 	}

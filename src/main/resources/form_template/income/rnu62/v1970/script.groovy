@@ -338,7 +338,7 @@ def BigDecimal calc8(def row) {
 }
 
 def BigDecimal calc14(def row, def rowPrev) {
-    if (row.rateWithDiscCoef != null) {
+    if (!isRubleCurrency(row.currencyCode)) {
         return null
     } else {
         return round(rowPrev != null ? rowPrev.sumEndInCurrency : BigDecimal.ZERO)

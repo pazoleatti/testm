@@ -7,7 +7,7 @@ import groovy.transform.Field
 
 /**
  * Форма "(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям".
- * formTemplateId=328
+ * formTemplateId=1328
  *
  * @author rtimerbaev
  */
@@ -114,23 +114,30 @@ void logicCheck() {
     if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
         // строка из предыдущего отчета
         def rowOld = getPrevMonthTotalRow()
-
         if (rowOld != null) {
             for (def column : editableColumns) {
-                if (row.getCell(column).value < rowOld.getCell(column).value) {
-                    def securitiesType = row.securitiesType
-                    logger.error("Процентный (купонный) доход по «$securitiesType» уменьшился!")
+                if (row.getCell(column).value != null
+                        && rowOld.getCell(column).value != null
+                        && row.getCell(column).value < rowOld.getCell(column).value) {
+                    logger.warn("Процентный (купонный) доход по «${row.securitiesType}» уменьшился!")
                 }
             }
         }
     }
 
     // 14-22. Проверка на неотрицательные значения
-    for (def column : editableColumns) {
+    for (def column : ['ofz', 'municipalBonds', 'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore', 'corporateBonds']) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
-            logger.error("Значения графы «$columnName» по строке 1 отрицательное!")
+            logger.error("Значение графы «$columnName» по строке 1 отрицательное!")
+        }
+    }
+    for (def column : ['governmentBonds','ovgvz','eurobondsRF','itherEurobonds']) {
+        def value = row.getCell(column).value
+        if (value != null && value < 0) {
+            def columnName = getColumnName(row, column)
+            logger.warn("Значение графы «$columnName» по строке 1 отрицательное!")
         }
     }
 }
@@ -163,8 +170,7 @@ void consolidation() {
 }
 
 void importData() {
-
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -175,7 +181,6 @@ void importData() {
             (xml.row[0].cell[6]): '9%',
             (xml.row[0].cell[8]): '0%',
             (xml.row[0].cell[9]): '20%',
-
             (xml.row[1].cell[1]): 'Вид ценных бумаг',
             (xml.row[1].cell[2]): 'ОФЗ',
             (xml.row[1].cell[3]): 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет',
@@ -187,7 +192,6 @@ void importData() {
             (xml.row[1].cell[9]): 'Еврооблигации РФ',
             (xml.row[1].cell[10]): 'Прочие еврооблигации',
             (xml.row[1].cell[11]): 'Корпоративные облигации',
-
             (xml.row[2].cell[0]): '1',
             (xml.row[2].cell[1]): '2',
             (xml.row[2].cell[2]): '3',
@@ -203,14 +207,13 @@ void importData() {
     ]
 
     checkHeaderEquals(headerMapping)
-    addData(xml,3)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
 def addData(def xml, int headRowCount) {
-
     if (xml.row.size() > 0) {
-        def xmlRow = xml.row[3]
+        def xmlRow = xml.row[headRowCount]
         def indexCell = 2
         def indexRow = 1
         def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -240,30 +243,6 @@ def addData(def xml, int headRowCount) {
 
         dataRowHelper.save(dataRows)
     }
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
 }
 
 // Получить строку за прошлый месяц

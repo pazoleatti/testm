@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -57,7 +58,7 @@ public class DeclarationDataPresenter
 
 		void setType(String type);
 
-		void setTitle(String title);
+		void setTitle(String title, boolean isTaxTypeDeal);
 
 		void setDepartment(String department);
 
@@ -76,6 +77,7 @@ public class DeclarationDataPresenter
 	private final HistoryPresenter historyPresenter;
 	private long declarationId;
 	private String taxName;
+    private TaxType taxType;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
@@ -113,7 +115,12 @@ public class DeclarationDataPresenter
 									GetDeclarationDataResult result) {
 								declarationId = id;
 								taxName = result.getTaxType().name();
-								getView().setType("Декларация");
+                                taxType = result.getTaxType();
+								if (!taxType.equals(TaxType.DEAL)) {
+                                    getView().setType("Декларация");
+                                } else {
+                                    getView().setType("Уведомление");
+                                }
 								getView().setReportPeriod(
 										result.getReportPeriodYear() + ", " + result.getReportPeriod());
 								getView().setDocDate(result.getDocDate());
@@ -125,7 +132,7 @@ public class DeclarationDataPresenter
 														+ ";nType="
 														+ result.getTaxType(), result.getTaxType()
                                         .getName());
-								getView().setTitle(result.getDeclarationType());
+								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());
 
 								getView().showAccept(result.isCanAccept());
@@ -263,7 +270,7 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void onInfoClicked() {
-		historyPresenter.prepareDeclarationHistory(declarationId);
+		historyPresenter.prepareDeclarationHistory(declarationId, taxType);
 		addToPopupSlot(historyPresenter);
 	}
 
@@ -277,4 +284,9 @@ public class DeclarationDataPresenter
 	private void updateTitle(String declarationType) {
 		TitleUpdateEvent.fire(this, "Декларация", declarationType);
 	}
+
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
 }
