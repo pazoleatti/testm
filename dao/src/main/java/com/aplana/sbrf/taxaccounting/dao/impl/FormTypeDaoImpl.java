@@ -69,12 +69,15 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     public List<Integer> getByFilter(TemplateFilter filter) {
         try {
             StringBuilder query = new StringBuilder("select id from form_type where status = ");
-            query.append(filter.isActive()?0:1);
+            query.append(filter.isActive() ? 0 : 1);
             if (filter.getTaxType() != null) {
-                query.append(" and form_type.TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
+                query.append(" and tax_type = \'").append(filter.getTaxType().getCode()).append("\'");
+            }
+            if (!filter.getSearchText().isEmpty()) {
+                query.append(" and LOWER(name) like \'%").append(filter.getSearchText().toLowerCase()).append("%\'");
             }
             return getJdbcTemplate().queryForList(query.toString(), Integer.class);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("Ошибка при получении данных НФ по фильтру", e);
             throw new DaoException("Ошибка при получении данных НФ по фильтру", e);
         }

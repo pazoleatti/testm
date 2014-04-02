@@ -7,6 +7,15 @@ public class TemplateFilter implements Serializable {
 
     TaxType taxType;
     boolean active;
+    String searchText;
+
+    public String getSearchText() {
+        return searchText != null ? searchText : "";
+    }
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText;
+    }
 
     public TaxType getTaxType() {
         return taxType;
