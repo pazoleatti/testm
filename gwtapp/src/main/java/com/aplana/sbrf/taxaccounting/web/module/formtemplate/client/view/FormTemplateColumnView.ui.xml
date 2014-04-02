@@ -6,6 +6,9 @@
         .marginLeft {
             margin-left: 50px;
         }
+        .marginLeft10 {
+            margin-left: 10px;
+        }
     </ui:style>
 
     <g:FlowPanel width="100%" height="100%">
@@ -78,6 +81,7 @@
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrPanel">
                         <g:Label width="150px">Отображаемый атрибут</g:Label>
                         <g:ValueListBox width="200px" ui:field="refBookAttrBox"/>
+                        <g:ValueListBox addStyleNames="{style.marginLeft10}" width="200px" ui:field="refBookAttrRefBox"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrFilterPanel">
