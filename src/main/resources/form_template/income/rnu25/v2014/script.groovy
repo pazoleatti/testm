@@ -3,7 +3,6 @@ package form_template.income.rnu25.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -35,48 +34,45 @@ def isConsolidated
 isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         prevPeriodCheck()
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         prevPeriodCheck()
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
         formDataService.addRow(formData, currentDataRow, columns, null)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         prevPeriodCheck()
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         calc()
         logicCheck()
-        break
-    case FormDataEvent.MIGRATION :
-        migration()
         break
 }
 
@@ -146,9 +142,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
     def retValue = parseNumber(value, indexRow, indexCol, logger, true)
-    if (formDataEvent == FormDataEvent.MIGRATION && retValue == null) {
-        retValue = 0
-    }
     return retValue
 }
 
@@ -179,13 +172,12 @@ void calc() {
     // строки предыдущего периода
     def prevDataRows = getPrevDataRows()
     // получить номер последний строки предыдущей формы если это не событие импорта
-    def rowNumber = (isImport ? 0 : formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber'))
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
     dataRows.each { row ->
-        if (!isImport) {
-            // графа 1
-            row.rowNumber = ++rowNumber
-        }
+        // графа 1
+        row.rowNumber = ++rowNumber
+
         if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             // графа 4
             row.lotSizePrev = calc4(prevDataRows, row)
@@ -248,7 +240,7 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     def prevDataRows = getPrevDataRows()
-    if (prevDataRows != null && !prevDataRows.isEmpty()) {
+    if (prevDataRows != null && !prevDataRows.isEmpty() && dataRows.size() > 1) {
         // 1. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 11)
         //      в текущем отчетном периоде (выполняется один раз для всего экземпляра)
         def count
@@ -258,7 +250,7 @@ void logicCheck() {
             if (prevRow.getAlias() != null && prevRow.reserveCalcValue > 0) {
                 count = 0
                 dataRows.each { row ->
-                    if (row.tradeNumber == prevRow.tradeNumber) {
+                    if (row.getAlias() == null && row.tradeNumber == prevRow.tradeNumber) {
                         count += 1
                     }
                 }
@@ -405,7 +397,7 @@ void logicCheck() {
         def row
         try {
             row = getDataRow(dataRows, totalRowAlias)
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             loggerError("Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
@@ -423,16 +415,6 @@ void logicCheck() {
     def tmpTotalRow = getCalcTotalRow(dataRows)
     if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
         loggerError('Итоговые значения рассчитаны неверно!')
-    }
-}
-
-void migration() {
-    importData()
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
-        def total = getCalcTotalRow(dataRows)
-        dataRowHelper.insert(total, dataRows.size() + 1)
     }
 }
 
@@ -542,7 +524,7 @@ def getGroupRows(def dataRows, def regNumber) {
  * @param dataRowsOld строки за предыдущий период
  * @param row строка текущего периода
  */
-def calc4(def dataRowsOld, def row) {
+def BigDecimal calc4(def dataRowsOld, def row) {
     if (dataRowsOld == null) {
         return 0
     }
@@ -582,7 +564,7 @@ def calc4(def dataRowsOld, def row) {
  * @param row строка текущего периода
  * @return возвращает найденое значение, иначе возвратит 0
  */
-def calc6(def dataRowsOld, def row) {
+def BigDecimal calc6(def dataRowsOld, def row) {
     if (isConsolidated) {
         return row.reserve
     }
@@ -606,14 +588,14 @@ def calc6(def dataRowsOld, def row) {
     return roundTo2(count == 1 ? value : 0)
 }
 
-def calc10(def row) {
+def BigDecimal calc10(def row) {
     if (row.lotSizeCurrent == null) {
         return 0
     }
     return roundTo2(row.marketQuotation ? row.lotSizeCurrent * row.marketQuotation : 0)
 }
 
-def calc11(def row, def sign) {
+def BigDecimal calc11(def row, def sign) {
     if (sign == null) {
         return 0
     }
@@ -630,7 +612,7 @@ def calc11(def row, def sign) {
     return roundTo2(tmp)
 }
 
-def calc12(def row) {
+def BigDecimal calc12(def row) {
     if (row.reserve == null || row.reserveCalcValue == null) {
         return 0
     }
@@ -638,7 +620,7 @@ def calc12(def row) {
     return roundTo2(tmp > 0 ? tmp : 0)
 }
 
-def calc13(def row) {
+def BigDecimal calc13(def row) {
     if (row.reserve == null || row.reserveCalcValue == null) {
         return 0
     }
@@ -669,20 +651,11 @@ void importData() {
             (xml.row[0].cell[11]): 'Расчётная величина резерва на текущую отчётную дату, руб.коп.',
             (xml.row[0].cell[12]): 'Создание резерва, руб.коп.',
             (xml.row[0].cell[13]): 'Восстановление резерва, руб.коп.',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[2]): '2',
-            (xml.row[1].cell[3]): '3',
-            (xml.row[1].cell[4]): '4',
-            (xml.row[1].cell[5]): '5',
-            (xml.row[1].cell[6]): '6',
-            (xml.row[1].cell[7]): '7',
-            (xml.row[1].cell[8]): '8',
-            (xml.row[1].cell[9]): '9',
-            (xml.row[1].cell[10]): '10',
-            (xml.row[1].cell[11]): '11',
-            (xml.row[1].cell[12]): '12',
-            (xml.row[1].cell[13]): '13',
+            (xml.row[1].cell[0]): '1'
     ]
+    (2..13).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
@@ -696,8 +669,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -715,8 +688,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -726,9 +699,6 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        /* Графа 1 */
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         /* Графа 2 */
         newRow.regNumber = row.cell[2].text()
@@ -775,8 +745,8 @@ void checkTotalRow(def totalRow) {
     def dataRows = dataRowHelper.allCached
     def totalCalc = getCalcTotalRow(dataRows)
 
-    def totalSumColumns = [4 : 'lotSizePrev', 5 : 'lotSizeCurrent', 7 : 'cost', 10 : 'costOnMarketQuotation',
-            11 : 'reserveCalcValue', 12 : 'reserveCreation', 13 : 'reserveRecovery']
+    def totalSumColumns = [4: 'lotSizePrev', 5: 'lotSizeCurrent', 7: 'cost', 10: 'costOnMarketQuotation',
+            11: 'reserveCalcValue', 12: 'reserveCreation', 13: 'reserveRecovery']
     def errorColums = []
     if (totalCalc != null) {
         totalSumColumns.each { index, columnAlias ->

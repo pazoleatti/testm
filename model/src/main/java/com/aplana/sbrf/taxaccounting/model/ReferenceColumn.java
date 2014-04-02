@@ -12,6 +12,8 @@ public class ReferenceColumn extends Column {
 
     private long refBookAttributeId;
 
+    private Long refBookAttributeId2;
+
     private static Formatter formatter = new Formatter() {
         @Override
         public String format(String valueToFormat) {
@@ -40,6 +42,14 @@ public class ReferenceColumn extends Column {
 
     public void setRefBookAttributeId(long refBookAttributeId) {
         this.refBookAttributeId = refBookAttributeId;
+    }
+
+    public Long getRefBookAttributeId2() {
+        return refBookAttributeId2;
+    }
+
+    public void setRefBookAttributeId2(Long refBookAttributeId2) {
+        this.refBookAttributeId2 = refBookAttributeId2;
     }
 
     @Override
