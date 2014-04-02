@@ -184,7 +184,7 @@ void calc() {
         if (row.getAlias() == null) {
             // графа 1
             row.number = ++rowNumber
-            
+
             if (isFirstSection(dataRows, row)) {
                 // графа 6
                 row.debt45_90DaysNormAllocation50per = calc6()
@@ -253,7 +253,7 @@ void logicCheck() {
         def isFirst = isFirstSection(dataRows, row)
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
-        
+
         // 1. Обязательность заполнения полей
         def nonEmptyColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -450,12 +450,9 @@ void importData() {
             (xml.row[1].cell[15]): 'Восстановление резерва на доходах код 13091',
             (xml.row[1].cell[16]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде'
     ]
-
-    // проверки нумерации колонок
     (1..16).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
@@ -472,8 +469,8 @@ def addData(def xml, int headRowCount) {
     ]
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
     def isFirstRow = true
     def section = null //название секции
     def mapRows = [:]
@@ -495,7 +492,7 @@ def addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[1].text() == null || row.cell[1].text() == '') {
+        if (row.cell[0].text() != null && row.cell[0].text() != "") {
             isFirstRow = false
             continue
         }

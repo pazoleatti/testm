@@ -644,30 +644,11 @@ void importData() {
             (xml.row[0].cell[22]): 'Шифр вида реализации (выбытия)',
             (xml.row[1].cell[4]): 'номер',
             (xml.row[1].cell[5]): 'дата',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16',
-            (xml.row[2].cell[17]): '17',
-            (xml.row[2].cell[18]): '18',
-            (xml.row[2].cell[19]): '19',
-            (xml.row[2].cell[20]): '20',
-            (xml.row[2].cell[21]): '21',
-            (xml.row[2].cell[22]): '22'
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..22).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -679,8 +660,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = dataRowHelper.allCached
     //удаляем все нефиксированные строки
@@ -733,7 +714,6 @@ void addData(def xml, int headRowCount) {
 
         xmlIndexCol++
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
         // графа 2
         newRow.firstRecordNumber = row.cell[xmlIndexCol].text()
