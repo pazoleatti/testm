@@ -43,7 +43,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        def columns = isMonthBalance() ? balanceEditableColumns : editableColumns
+        def autoColumns = isMonthBalance() ? ['rowNumber'] : autoFillColumns
+        formDataService.addRow(formData, currentDataRow, columns, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -81,6 +83,9 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost']
+@Field
+def balanceEditableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost',
+                              'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -94,10 +99,6 @@ def totalColumns = ['startCost', 'amortizationMonth', 'amortizationSinceYear', '
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = ['rowNumber', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 @Field
 def isBalance = null
@@ -293,18 +294,18 @@ def logicCheck() {
             def errorMsg = "Строка $index: "
 
             // 1. Проверка на заполнение поля
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isMonthBalance())
 
             // 2. Проверка на уникальность поля «инвентарный номер»
             if (invSet.contains(row.inventoryNumber)) {
-                logger.error(errorMsg + "Инвентарный номер не уникальный!")
+                loggerError(errorMsg + "Инвентарный номер не уникальный!")
             } else {
                 invSet.add(row.inventoryNumber)
             }
 
             // 3. Проверка на нулевые значения
             if (row.startCost == 0 && row.amortizationMonth == 0 && row.amortizationSinceYear == 0 && row.amortizationSinceUsed == 0) {
-                logger.error(errorMsg + "Все суммы по операции нулевые!")
+                loggerError(errorMsg + "Все суммы по операции нулевые!")
             }
 
             if (formData.kind == FormDataKind.PRIMARY) {
@@ -314,11 +315,11 @@ def logicCheck() {
                 prevValues = getPrev10and11(dataOld, row)
                 needValue['amortizationSinceYear'] = calc10(row, dateStart, dateEnd, prevValues[0])
                 needValue['amortizationSinceUsed'] = calc11(row, dateStart, dateEnd, prevValues[1])
-                checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+                checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
             }
         }
         // 5. Арифметические проверки расчета итоговой строки
-        checkTotalSum(dataRows, totalColumns, logger, true)
+        checkTotalSum(dataRows, totalColumns, logger, !isMonthBalance())
     }
 }
 
@@ -427,12 +428,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def columns = isMonthBalance() ? balanceEditableColumns : editableColumns
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
         // графа 1
@@ -473,4 +475,12 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def loggerError(def msg) {
+    if (isMonthBalance()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

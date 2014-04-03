@@ -43,5 +43,13 @@ public interface FormTypeDao {
 
     void delete(int formTypeId);
 
+    /**
+     * Получает макеты, у которых есть активные версии в данном отчетном периоде
+     * @param departmentId идентификатор департамент
+     * @param reportPeriod отчетный период
+     * @param taxType Типы налогов
+     * @param kind  тип НФ
+     * @return активные макеты в данном периоде
+     */
 	List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind);
 }

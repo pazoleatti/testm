@@ -241,7 +241,7 @@ void importData() {
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 1)
 }
 
 // Заполнить форму данными
@@ -325,7 +325,6 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 7
-
         newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
 
@@ -346,6 +345,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         xmlIndexCol++
+
         // графа 13
         xmlIndexCol++
 

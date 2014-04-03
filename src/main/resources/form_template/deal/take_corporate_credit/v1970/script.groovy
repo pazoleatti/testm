@@ -6,6 +6,7 @@ import groovy.transform.Field
 
 /**
  * 397 - Привлечение корпоративных кредитов и депозитов (20)
+ * formTemplateId = 10186
  *
  * @author Stanislav Yasinskiy
  */

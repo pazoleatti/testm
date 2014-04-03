@@ -17,6 +17,12 @@ import java.text.SimpleDateFormat
  * @author rtimerbaev
  * @author Stanislav Yasinskiy
  */
+/** Признак периода ввода остатков. */
+
+@Field
+def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -30,7 +36,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        def cols = isBalancePeriod ? (allColumns - 'number') : editableColumns
+        def autoColumns = isBalancePeriod ? ['number'] : autoFillColumns
+        formDataService.addRow(formData, currentDataRow, cols, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -121,7 +129,6 @@ void prevPeriodCheck() {
     if (formData.kind != FormDataKind.PRIMARY) {
         return
     }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
@@ -279,26 +286,26 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля 1..11
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
 
         // 2. Проверка даты приобретения и границ отчетного периода (графа 3)
         if (row.buyDate > endDate) {
-            logger.error(errorMsg + 'Дата приобретения вне границ отчетного периода!')
+            loggerError(errorMsg + 'Дата приобретения вне границ отчетного периода!')
         }
 
         // 3. Проверка даты реализации (погашения)  и границ отчетного периода (графа 7)
         if (row.implementationDate < startDate || endDate < row.implementationDate) {
-            logger.error(errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
+            loggerError(errorMsg + 'Дата реализации (погашения) вне границ отчетного периода!')
         }
 
         // 4. Проверка на уникальность поля «№ пп» (графа 1) (в рамках текущего года)
         if (++i != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 5. Проверка на уникальность векселя
         if (billsList.contains(row.bill)) {
-            logger.error(errorMsg + "Повторяющееся значения в графе «Вексель»")
+            loggerError(errorMsg + "Повторяющееся значения в графе «Вексель»")
         } else {
             billsList.add(row.bill)
         }
@@ -323,7 +330,7 @@ void logicCheck() {
                             isFind = true
                             // лп 8
                             if (findRow.buyDate != row.buyDate) {
-                                logger.error(errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
+                                loggerError(errorMsg + "Неверное указана Дата приобретения в РНУ-55 за "
                                         + reportPeriod.name)
                             }
                             break
@@ -343,7 +350,7 @@ void logicCheck() {
             cell = row.getCell(it)
             if (cell.getValue() != null && cell.getValue() < 0) {
                 def name = cell.getColumn().getName()
-                logger.error(errorMsg + "Значение графы \"$name\" отрицательное!")
+                loggerError(errorMsg + "Значение графы \"$name\" отрицательное!")
             }
         }
 
@@ -352,12 +359,12 @@ void logicCheck() {
             needValue['percentInRuble'] = calc9(row)
             needValue['sumIncomeinCurrency'] = calc10(row, startDate, reportDate, daysInYear)
             needValue['sumIncomeinRuble'] = calc11(row, reportDate, startDate)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod)
         }
     }
 
     //10. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
 }
 
 // Проверка валюты на рубли
@@ -514,11 +521,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def cols = isBalancePeriod ? (allColumns - 'number') : editableColumns
+        def autoColumns = isBalancePeriod ? ['number'] : autoFillColumns
+        cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        autoFillColumns.each {
+        autoColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -532,7 +541,7 @@ void addData(def xml, int headRowCount) {
         newRow.buyDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
         // графа 4
-        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 5
         newRow.nominal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
@@ -558,4 +567,13 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (isBalancePeriod) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }

@@ -117,10 +117,6 @@ def totalSumColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost', 'cost
 @Field
 def reportPeriodEndDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -364,7 +360,7 @@ void logicCheck() {
             needValue['reserveCalcValue'] = calc11(row, sign)
             needValue['reserveCreation'] = calc12(row)
             needValue['reserveRecovery'] = calc13(row)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
         }
 
         // 18. Проверка итоговых значений по ГРН
@@ -689,13 +685,14 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != "") {
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
             continue
         }
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }

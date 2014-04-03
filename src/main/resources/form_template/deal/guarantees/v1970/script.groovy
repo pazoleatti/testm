@@ -322,6 +322,8 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 11, 3)
 
     def headerMapping = [
+            (xml.row[1].cell[0]): getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[1].cell[2]): getColumnName(tmpRow, 'fullName'),
             (xml.row[1].cell[3]): getColumnName(tmpRow, 'inn'),
             (xml.row[1].cell[4]): getColumnName(tmpRow, 'countryName'),
             (xml.row[1].cell[5]): getColumnName(tmpRow, 'docNumber'),

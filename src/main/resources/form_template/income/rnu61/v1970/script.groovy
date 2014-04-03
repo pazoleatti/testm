@@ -33,6 +33,11 @@ import java.math.RoundingMode
  * @author akadyrgulov
  * @author Stanislav Yasinskiy
  */
+
+@Field
+def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -46,7 +51,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        def autoColumns = isBalancePeriod ? ['rowNumber'] : autoFillColumns
+        formDataService.addRow(formData, currentDataRow, cols, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -109,10 +116,6 @@ def totalColumns = ['percAdjustment']
 @Field
 def reportPeriodEndDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -120,11 +123,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -145,7 +143,6 @@ void prevPeriodCheck() {
     if (formData.kind != FormDataKind.PRIMARY) {
         return
     }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
@@ -341,28 +338,28 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
 
         // Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // Проверка на уникальность поля «инвентарный номер»
         if (invList.contains(row.billNumber)) {
-            logger.error(errorMsg + "Инвентарный номер не уникальный!")
+            loggerError(errorMsg + "Инвентарный номер не уникальный!")
         } else {
             invList.add(row.billNumber)
         }
 
         // 2. Проверка даты совершения операции и границ отчетного периода
         if (row.operationDate < reportDateStart || row.operationDate > reportDate) {
-            logger.error(errorMsg + "Дата совершения операции вне границ отчетного периода!")
+            loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
 
         // 4. Проверка на нулевые значения
         if (row.sum70606 == 0 && row.sumLimit == 0 && row.percAdjustment == 0) {
-            logger.error(errorMsg + "Все суммы по операции нулевые!")
+            loggerError(errorMsg + "Все суммы по операции нулевые!")
         }
 
         // 5. Арифметические проверки
@@ -370,14 +367,11 @@ void logicCheck() {
         needValue['rateBROperation'] = calc6and7(row.currencyCode, row.operationDate)
         needValue['sumLimit'] = calc13(row, daysOfYear)
         needValue['percAdjustment'] = calc14(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-
-        // Проверки соответствия НСИ
-        checkNSI(15, row, 'currencyCode')
+        checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod)
     }
 
     // 5. Арифметические проверки расчета итоговой строки
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
 }
 
 // Проверка валюты на рубли
@@ -461,11 +455,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        def autoColumns = isBalancePeriod ? ['rowNumber'] : autoFillColumns
+        cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        autoFillColumns.each {
+        autoColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -499,4 +495,13 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (isBalancePeriod) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }

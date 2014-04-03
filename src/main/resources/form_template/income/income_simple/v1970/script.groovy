@@ -284,6 +284,8 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    def rowIndexes101 = []
+    def rowIndexes102 = []
     for (row in dataRows) {
         //пропускаем строки где нет 10-й графы
         if (!row.accountingRecords) {
@@ -292,15 +294,21 @@ void logicCheck() {
         if (row.getAlias() in chRows) {
             def income101Records = getIncome101Data(row)
             if (!income101Records || income101Records.isEmpty()) {
-                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+                rowIndexes101 += row.getIndex()
             }
         }
         if (!(row.getAlias() in (rowsNotCalc + chRows))) {
             def income102Records = getIncome102Data(row)
             if (!income102Records || income102Records.isEmpty()) {
-                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+                rowIndexes102 += row.getIndex()
             }
         }
+    }
+    if (!rowIndexes101.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes101.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+    }
+    if (!rowIndexes102.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
     }
 
     dataRows.each {row ->

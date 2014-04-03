@@ -121,16 +121,13 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 					"      allTemplates as (select tv.id," +
 					"                         tv.type_id," +
 					"                         tv.VERSION versionFrom," +
-					"                         case" +
-					"                         when tv2.status=2 then tv2.version" +
-					"                         when (tv2.status=0 or tv2.status=1) then tv2.version - interval '1' day" +
-					"                         end as versionTo" +
+					"                         tv2.version - interval '1' day as versionTo, tv.status as STATUS " +
 					"                       from templatesByVersion tv left outer join templatesByVersion tv2 on tv.type_id = tv2.type_id and tv.rn+1 = tv2.rn)" +
 					"  select distinct t.* from form_type t" +
 					"    join department_form_type dft on t.id=dft.form_type_id" +
 					"    join allTemplates ft on dft.form_type_id=ft.type_id" +
 					"  where dft.kind in " + SqlUtils.transformFormKindsToSqlInStatement(kind) +
-					"  and dft.department_id=? and t.tax_type=? and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
+					"  and dft.department_id=? and t.tax_type=? and ft.status = 0 and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
 			new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
 			new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
 			new FormTypeMapper()
