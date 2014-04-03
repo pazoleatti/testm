@@ -31,7 +31,7 @@
         <name>ИНН/КИО</name>
         <order>3</order>
         <width>7</width>
-        <parentId>18025</parentId>
+        <parentId>21086</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -50,7 +50,7 @@
         <name>Код страны по классификатору ОКСМ</name>
         <order>5</order>
         <width>5</width>
-        <parentId>18027</parentId>
+        <parentId>21088</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
