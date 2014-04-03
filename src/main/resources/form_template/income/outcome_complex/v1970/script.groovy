@@ -207,18 +207,22 @@ void calc() {
 def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
+    def rowIndexes102 = []
+    for (def row in dataRows) {
+        if (rowsCalc.contains(row.getAlias())) {
+            final income102Data = getIncome102Data(row)
+            if (!income102Data || income102Data.isEmpty()) {
+                rowIndexes102 += row.getIndex()
+            }
+        }
+    }
+    if (!rowIndexes102.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+    }
     for (def row in dataRows) {
         if (rowsCalc.contains(row.getAlias())) {
             // Проверка обязательных полей
             checkRequiredColumns(row, nonEmptyColumns)
-        }
-    }
-    dataRows.each { row ->
-        if (rowsCalc.contains(row.getAlias())) {
-            final income102Data = getIncome102Data(row)
-            if (!income102Data || income102Data.isEmpty()) {
-                logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
-            }
         }
     }
     checkTotalSum(getDataRow(dataRows, 'R67'), getSum(dataRows, totalColumn, 'R2', 'R66'))

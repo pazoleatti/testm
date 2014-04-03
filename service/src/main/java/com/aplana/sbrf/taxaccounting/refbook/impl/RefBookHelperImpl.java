@@ -65,7 +65,7 @@ public class RefBookHelperImpl implements RefBookHelper {
         Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
         RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
         // Если найденое значение ссылка, то делаем разыменование для 2 уровня
-        if ((refBookValue.getAttributeType()==RefBookAttributeType.REFERENCE)&&(referenceColumn.getRefBookAttributeId2()!=null)){
+        if ((refBookValue.getReferenceValue()!=null)&&(refBookValue.getAttributeType()==RefBookAttributeType.REFERENCE)&&(referenceColumn.getRefBookAttributeId2()!=null)){
             refAttributeId = referenceColumn.getRefBookAttributeId2();
             RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
             RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
