@@ -347,6 +347,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         else{
             refBookAttrRefBox.setVisible(false);
             refBookAttrRefBox.setValue(null);
+            ((ReferenceColumn) currentColumn).setRefBookAttributeId2(new Long(0));
         }
     }
 
