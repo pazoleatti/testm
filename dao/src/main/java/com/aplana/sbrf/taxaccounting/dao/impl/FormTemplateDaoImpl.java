@@ -113,53 +113,57 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
-		final Integer formTemplateId = formTemplate.getId();
+        try {
+            final Integer formTemplateId = formTemplate.getId();
 
 		/*if (formTemplateId == null) {
-			throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
+            throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
 		}*/
 
 		/*JdbcTemplate jt = getJdbcTemplate();
-		int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
+        int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
 
 		if (storedEdition != formTemplate.getEdition()) {
 			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +
 				" было изменено после того, как данные по ней были считаны");
 		}*/
 
-		String dataRowsXml = null;
-		List<DataRow<Cell>> rows = formTemplate.getRows();
-		if (rows != null && !rows.isEmpty()) {
-			dataRowsXml = xmlSerializationUtils.serialize(rows);
-		}
+            String dataRowsXml = null;
+            List<DataRow<Cell>> rows = formTemplate.getRows();
+            if (rows != null && !rows.isEmpty()) {
+                dataRowsXml = xmlSerializationUtils.serialize(rows);
+            }
 
-		String dataHeadersXml = null;
-		List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
-		if (headers != null && !headers.isEmpty()) {
-			FormDataUtils.cleanValueOners(headers);
-			dataHeadersXml = xmlSerializationUtils.serialize(headers);
-		}
+            String dataHeadersXml = null;
+            List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
+            if (headers != null && !headers.isEmpty()) {
+                FormDataUtils.cleanValueOners(headers);
+                dataHeadersXml = xmlSerializationUtils.serialize(headers);
+            }
 
-        // TODO: создание новых версий формы потребует инсертов в form_template
-		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
-			" monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
-			dataRowsXml,
-			dataHeadersXml,
-			formTemplate.getEdition(),
-			formTemplate.getVersion(),
-			formTemplate.isFixedRows(),
-            formTemplate.getName() != null ? formTemplate.getName() : " ",
-			formTemplate.isMonthly(),
-            formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
-			formTemplate.getCode(),
-            formTemplate.getScript() != null ? formTemplate.getScript() : " ",
-            formTemplate.getStatus().getId(),
-			formTemplateId
-		);
-		formStyleDao.saveFormStyles(formTemplate);
-		columnDao.saveFormColumns(formTemplate);
-		return formTemplateId;
+            getJdbcTemplate().update(
+                    "update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
+                            " monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
+                    dataRowsXml,
+                    dataHeadersXml,
+                    formTemplate.getEdition(),
+                    formTemplate.getVersion(),
+                    formTemplate.isFixedRows(),
+                    formTemplate.getName() != null ? formTemplate.getName() : " ",
+                    formTemplate.isMonthly(),
+                    formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
+                    formTemplate.getCode(),
+                    formTemplate.getScript() != null ? formTemplate.getScript() : " ",
+                    formTemplate.getStatus().getId(),
+                    formTemplateId
+            );
+            formStyleDao.saveFormStyles(formTemplate);
+            columnDao.saveFormColumns(formTemplate);
+            return formTemplateId;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при сохранении шаблона.", e);
+            throw new DaoException("Ошибка при сохранении шаблона.", e);
+        }
 	}
 
     @Override
