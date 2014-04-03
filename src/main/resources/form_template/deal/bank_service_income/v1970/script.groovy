@@ -326,17 +326,3 @@ void addData(def xml, int headRowCount) {
     }
     dataRowHelper.save(rows)
 }
-
-/*
- insert into  FORM_COLUMN values (20753,	'№ п/п', 398,	1,	'rowNum', 'N',	4,	0,	15,	0, null, null, null, null, null);
- insert into  FORM_COLUMN values (20754,	'Полное наименование юридического лица с указанием ОПФ', 398,	2,	'jurName', 'R',	10,	null,	null,	0, null, 32, null, null, null);
- insert into  FORM_COLUMN values (20755,	'ИНН/КИО', 398,	3,	'innKio', 'R',	7,	null,	null,	0, null, 37, null, 20754, null);
- insert into  FORM_COLUMN values (20756,	'Код страны по классификатору ОКСМ', 398,	4,	'countryCode', 'R',	5,	null,	null,	0, null, 50, null, null, null);
- insert into  FORM_COLUMN values (20757,	'Сумма доходов Банка, руб.', 398,	5,	'bankIncomeSum', 'N',	9,	0,	15,	0, null, null, null, null, null);
- insert into  FORM_COLUMN values (20758,	'Номер договора', 398,	6,	'contractNum', 'S',	5,	null,	128,	0, null, null, null, null, null);
- insert into  FORM_COLUMN values (20759,	'Дата договора', 398,	7,	'contractDate', 'D',	7,	null,	null,	0, 0, null, null, null, null);
- insert into  FORM_COLUMN values (20760,	'Вид услуг', 398,	8,	'serviceName', 'R',	5,	null,	null,	0, null, 60, null, null, null);
- insert into  FORM_COLUMN values (20761,	'Цена', 398,	9,	'price', 'N',	9,	0,	15,	0, null, null, null, null, null);
- insert into  FORM_COLUMN values (20762,	'Стоимость', 398,	10,	'cost', 'N',	9,	0,	15,	0, null, null, null, null, null);
- insert into  FORM_COLUMN values (20763,	'Дата совершения сделки', 398,	11,	'transactionDate', 'D',	7,	null,	null,	0, 0, null, null, null, null);
- */

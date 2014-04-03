@@ -48,9 +48,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = (getBalancePeriod() ?
-            ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
-            : editableColumns)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
         formDataService.addRow(formData, currentDataRow, cols, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -87,6 +85,8 @@ def recordCache = [:]
 def refBookCache = [:]
 
 // Редактируемые атрибуты
+@Field
+def balanceEditableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
 @Field
 def editableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
 
@@ -563,12 +563,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
         // графа 1

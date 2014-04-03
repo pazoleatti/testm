@@ -28,6 +28,7 @@ public class Department implements Serializable {
 	private DepartmentType type;
 	private String tbIndex;
 	private String sbrfCode;
+    private Long regionId;
 
 	/**
 	 * Получить идентификатор подразделения
@@ -147,4 +148,12 @@ public class Department implements Serializable {
 	public void setSbrfCode(String sbrfCode) {
 		this.sbrfCode = sbrfCode;
 	}
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
 }

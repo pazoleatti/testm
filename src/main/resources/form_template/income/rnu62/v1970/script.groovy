@@ -242,7 +242,7 @@ void logicCheck() {
             values.sumEndInCurrency = calc16(row, countDaysInYear)
             values.sumEndInRub = calc17(row)
             values.sum = calc18(row)
-            checkCalc(row, arithmeticCheckAliasWithoutNSI, values, logger, true)
+            checkCalc(row, arithmeticCheckAliasWithoutNSI, values, logger, !isBalancePeriod())
         }
 
         if (row.rateBRBillDate != calc7(row)) {
@@ -556,7 +556,7 @@ void importData() {
     }
 
 
-checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
 }
@@ -592,11 +592,12 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        arithmeticCheckAlias.each {
+        (allColumns - columns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 

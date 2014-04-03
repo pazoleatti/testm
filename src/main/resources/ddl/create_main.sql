@@ -250,7 +250,8 @@ create table department (
   type number(9) not null,
   shortname   varchar2(510),
   tb_index    varchar2(3),
-  sbrf_code   varchar2(255)
+  sbrf_code   varchar2(255),
+  region_id number(18)
 );
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
@@ -260,6 +261,7 @@ comment on column department.type is 'Тип подразделения (1 - Б�
 comment on column department.shortname is 'Сокращенное наименование подразделения';
 comment on column department.tb_index is 'Индекс территориального банка';
 comment on column department.sbrf_code is 'Код подразделения в нотации Сбербанка';
+comment on column department.region_id is 'Код региона';
 ---------------------------------------------------------------------------------------------------
 create table report_period (
   id number(9) not null,

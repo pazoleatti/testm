@@ -52,7 +52,7 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow,
                 isMonthBalance() ? balanceColumns : editableColumns,
-                isMonthBalance() ? ['rowNumber'] : autoFillColumns )
+                isMonthBalance() ? ['rowNumber', 'usefulLife'] : autoFillColumns )
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -88,24 +88,24 @@ def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
+def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', 'usefulLifeWithUsed',
         'specCoef', 'exploitationStart', 'rentEnd']
 
 @Field
-def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed', 'usefulLifeWithUsed',
+def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', 'usefulLifeWithUsed',
         'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation', 'amortNorm', 'amortMonth',
         'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup', 'usefulLife', 'monthsUsed',
+def nonEmptyColumns = ['rowNumber', 'invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed',
         'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
         'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = ['rowNumber', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
-        'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation', 'usefullLifeEnd']
+        'amortNorm', 'amortMonth', 'usefulLife', 'amortTaxPeriod', 'amortExploitation', 'usefullLifeEnd']
 
 //// Обертки методов
 
@@ -214,9 +214,6 @@ void calc() {
         // Строка из предыдущей формы с тем же инвентарным номером
         prevRow = getPrevRow(dataPrev, row)
 
-        // Графа 6
-        row.usefulLife = row.amortGroup//calc6(map)
-
         // Графа 8
         row.usefulLifeWithUsed = calc8(row)
 
@@ -246,10 +243,10 @@ void calc() {
 
 // Ресчет графы 8
 BigDecimal calc8(def row) {
-    if (row.monthsUsed == null || row.usefulLife == null || row.specCoef == null) {
+    if (row.monthsUsed == null || row.amortGroup == null || row.specCoef == null) {
         return null
     }
-    def map = getRefBookValue(71, row.usefulLife)
+    def map = getRefBookValue(71, row.amortGroup)
     def term = map.TERM.numberValue
     if (row.monthsUsed < term) {
         if (row.specCoef > 0) {
@@ -343,11 +340,6 @@ Date calc18(def row) {
 
 // Логические проверки
 void logicCheck() {
-    if (isMonthBalance()) {
-        // В периоде ввода остатков нет лог. проверок
-        return
-    }
-
     def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     // Алиасы граф для арифметической проверки
@@ -366,7 +358,7 @@ void logicCheck() {
     def Set<String> invSet = new HashSet<String>()
 
     // Отчет за предыдущий месяц
-    if (formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
         logger.error('Отсутствуют данные за прошлые отчетные периоды!')
     }
 
@@ -386,11 +378,11 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение (графа 1..18)
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isMonthBalance())
 
         // 2. Проверка на уникальность поля «инвентарный номер»
         if (invSet.contains(row.invNumber)) {
-            logger.error(errorMsg + "Инвентарный номер не уникальный!")
+            loggerError(errorMsg + "Инвентарный номер не уникальный!")
         } else {
             invSet.add(row.invNumber)
         }
@@ -402,7 +394,7 @@ void logicCheck() {
                 row.amortNorm &&
                 row.amortMonth == 0 &&
                 row.amortTaxPeriod) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -418,7 +410,7 @@ void logicCheck() {
                     row.cost10perTaxPeriod < row.cost10perMonth ||
                     row.cost10perTaxPeriod != row.cost10perMonth + prevRow.cost10perTaxPeriod ||
                     row.cost10perTaxPeriod != prevSum.cost10perMonth) {
-                logger.error(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
+                loggerError(errorMsg + 'Неверная сумма расходов в виде капитальных вложений с начала года!')
             }
 
             // 7. Проверка суммы начисленной амортизации с начала года
@@ -428,7 +420,7 @@ void logicCheck() {
                     row.amortTaxPeriod < row.amortMonth ||
                     row.amortTaxPeriod != row.amortMonth + prevRow.amortTaxPeriod ||
                     row.amortTaxPeriod != prevSum.amortMonth) {
-                logger.error(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
+                loggerError(errorMsg + 'Неверная сумма начисленной амортизации с начала года!')
             }
 
             // 8. Арифметические проверки расчета граф 8, 10-16, 18
@@ -441,10 +433,10 @@ void logicCheck() {
             needValue['cost10perTaxPeriod'] = calc11and15and16[0]
             needValue['amortTaxPeriod'] = calc11and15and16[1]
             needValue['amortExploitation'] = calc11and15and16[2]
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
 
             if (row.usefullLifeEnd != calc18(row)) {
-                logger.error(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+                loggerError(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
             }
         }
     }
@@ -623,6 +615,7 @@ void addData(def xml, int headRowCount) {
                 newRow.getCell(it).setStyleAlias('Редактируемая')
             }
             newRow.getCell('rowNumber').setStyleAlias('Автозаполняемая')
+            newRow.getCell('usefulLife').setStyleAlias('Автозаполняемая')
         }else{
             editableColumns.each {
                 newRow.getCell(it).editable = true
@@ -649,7 +642,7 @@ void addData(def xml, int headRowCount) {
         newRow.amortGroup =  getRecordIdImport(71, 'GROUP', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 6
-        newRow.usefulLife =  getRecordIdImport(71, 'TERM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        getRecordIdImport(71, 'TERM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 7
         newRow.monthsUsed = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
@@ -694,4 +687,12 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def loggerError(def msg) {
+    if (isMonthBalance()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

@@ -23,6 +23,7 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
 	private Date version;
     private Integer sortAttributeIndex;
     private boolean isSortAscending;
+    private PickerContext context;
 
     // идентификаторы которые нужно выделить
     // может быть пустой
@@ -83,6 +84,15 @@ public class GetRefBookMultiValuesAction extends UnsecuredActionImpl<GetRefMulti
     public void setIdsTofind(List<Long> idsTofind) {
         this.idsTofind = idsTofind;
     }
+
+    public PickerContext getContext() {
+        return context;
+    }
+
+    public void setContext(PickerContext context) {
+        this.context = context;
+    }
+
     @Override
     public String getName() {
         return "Получение значений справочника";

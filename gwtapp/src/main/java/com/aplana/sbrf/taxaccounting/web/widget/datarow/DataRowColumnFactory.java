@@ -12,6 +12,7 @@ public class DataRowColumnFactory {
 	private boolean superEditMode;
 	private Date startDate;
 	private Date endDate;
+    private Long formDataId;
 
 	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
@@ -24,6 +25,7 @@ public class DataRowColumnFactory {
 				columnContext.setMode(ColumnContext.Mode.NORMAL_EDIT_MODE);
 			}
 		}
+        columnContext.setFormDataId(formDataId);
 		columnContext.setDateRange(startDate, endDate);
 		Column<DataRow<Cell>, ?> uiColumn = null;
 		if (col instanceof StringColumn) {
@@ -42,7 +44,7 @@ public class DataRowColumnFactory {
 			RefBookColumn refBookColumn = (RefBookColumn) col;
 			columnContext.setColumn(refBookColumn);
 			uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
-		} else if (col instanceof ReferenceColumn){
+        } else if (col instanceof ReferenceColumn){
             ReferenceColumn referenceColumn = (ReferenceColumn) col;
             columnContext.setColumn(referenceColumn);
             uiColumn = new ReferenceUiColumn(referenceColumn, columnContext);
@@ -75,4 +77,12 @@ public class DataRowColumnFactory {
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}
+
+    public Long getFormDataId() {
+        return formDataId;
+    }
+
+    public void setFormDataId(Long formDataId) {
+        this.formDataId = formDataId;
+    }
 }

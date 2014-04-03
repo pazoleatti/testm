@@ -207,17 +207,19 @@ def calc3_6(def rows, def group) {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        def hasData = false
-        def groupList = 0..10
-        for (def row : rnu46DataRowHelper.allCached) {
-            if (refBookService.getNumberValue(71, row.amortGroup, 'GROUP').intValue() in groupList) {
-                hasData = true
-                break
+    if (formData.kind == FormDataKind.PRIMARY) {
+        if (!isMonthBalance()) {
+            def hasData = false
+            def groupList = 0..10
+            for (def row : rnu46DataRowHelper.allCached) {
+                if (refBookService.getNumberValue(71, row.amortGroup, 'GROUP').intValue() in groupList) {
+                    hasData = true
+                    break
+                }
             }
-        }
-        if (!hasData) {
-            logger.error("Отсутствуют данные РНУ-46!")
+            if (!hasData) {
+                logger.error("Отсутствуют данные РНУ-46!")
+            }
         }
 
         def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
@@ -239,7 +241,7 @@ void logicCheck() {
 
             if (row.getAlias() in groupRowsAliases) {
                 // Проверка на заполнение поля
-                checkNonEmptyColumns(row, index, allColumns, logger, true)
+                checkNonEmptyColumns(row, index, allColumns, logger, !isMonthBalance())
             } else {
                 continue
             }
@@ -248,13 +250,13 @@ void logicCheck() {
             def invalidCapitalForm = errorMsg + "Неверная сумма расходов в виде капитальных вложений с начала года!"
             if (row.sumTaxPeriodTotal != null && row.sumCurrentPeriodTotal != null) {
                 if (row.sumTaxPeriodTotal < row.sumCurrentPeriodTotal) {
-                    logger.error(invalidCapitalForm)
+                    loggerError(invalidCapitalForm)
                 } else
                 //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
                 // (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
                 if (row.sumTaxPeriodTotal != (row.sumCurrentPeriodTotal + getFieldFromPreviousMonth(dataRowsOld, row.getAlias(), "sumTaxPeriodTotal"))) {
                     invalidCapitalForm += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
-                    logger.error(invalidCapitalForm)
+                    loggerError(invalidCapitalForm)
                 } else
                 //2.3	графа 4 = (сумма)графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
                 if (row.sumTaxPeriodTotal != getFieldSumForAllPeriods(row.getAlias(), "sumCurrentPeriodTotal")) {
@@ -270,7 +272,7 @@ void logicCheck() {
                             invalidCapitalForm += "${getDateString(start)} - ${getDateString(end)}"
                         }
                         invalidCapitalForm += " не существует (отсутствуют первичные данные для расчёта)"
-                        logger.error(invalidCapitalForm)
+                        loggerError(invalidCapitalForm)
                     }
                 }
             }
@@ -280,13 +282,13 @@ void logicCheck() {
             //3.1.	графа 6 ? графа 5
             if (row.amortTaxPeriod != null && row.amortPeriod != null) {
                 if (row.amortTaxPeriod < row.amortPeriod) {
-                    logger.error(invalidAmortSumms)
+                    loggerError(invalidAmortSumms)
                 } else
                 //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
                 //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
                 if (row.amortTaxPeriod != (row.amortPeriod + getFieldFromPreviousMonth(dataRowsOld, row.getAlias(), "amortTaxPeriod"))) {
                     invalidAmortSumms += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
-                    logger.error(invalidAmortSumms)
+                    loggerError(invalidAmortSumms)
                 } else
                 //3.3   графа 6 = (сумма)графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
                 if (row.amortTaxPeriod != getFieldSumForAllPeriods(row.getAlias(), "amortPeriod")) {
@@ -302,7 +304,7 @@ void logicCheck() {
                             invalidAmortSumms += "${getDateString(start)} - ${getDateString(end)}"
                         }
                         invalidAmortSumms += " не существует (отсутствуют первичные данные для расчёта)"
-                        logger.error(invalidAmortSumms)
+                        loggerError(invalidAmortSumms)
                     }
                 }
             }

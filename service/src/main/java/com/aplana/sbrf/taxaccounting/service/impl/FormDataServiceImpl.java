@@ -575,8 +575,9 @@ public class FormDataServiceImpl implements FormDataService {
         if (workflowMove.getToState() != WorkflowState.ACCEPTED && workflowMove.getFromState() != WorkflowState.ACCEPTED) {
             return;
         }
-        // Период ввода остатков не обрабатывается.
-        if (reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
+        // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
+        if ((formData.getPeriodOrder() == null || formData.getPeriodOrder() - 1 % 3 == 0) &&
+                reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
             return;
         }
         // Список типов приемников для текущей формы
