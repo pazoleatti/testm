@@ -1,1 +1,120 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent><type><id>397</id><name>Привлечение корпоративных кредитов и депозитов</name><status>NORMAL</status><taxType>DEAL</taxType></type><fixedRows>false</fixedRows><name>Привлечение корпоративных кредитов и депозитов</name><fullName>Привлечение корпоративных кредитов и депозитов</fullName><code>TODO</code><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>rowNumber</alias><checking>false</checking><id>19555</id><name>№ п/п</name><order>1</order><width>4</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>fullNamePerson</alias><checking>false</checking><id>19556</id><name>Полное наименование юридического лица с указанием ОПФ</name><order>2</order><width>10</width><refBookAttributeId>32</refBookAttributeId></columns><columns><alias>inn</alias><checking>false</checking><id>19557</id><name>ИНН/КИО</name><order>3</order><width>7</width></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>countryName</alias><checking>false</checking><id>19558</id><name>Страна регистрации</name><order>4</order><width>5</width><refBookAttributeId>50</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>sum</alias><checking>false</checking><id>19559</id><name>Сумма доходов Банка, руб.</name><order>5</order><width>8</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>docNumber</alias><checking>false</checking><id>19560</id><name>Номер договора</name><order>6</order><width>5</width><maxLength>128</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn"><alias>docDate</alias><checking>false</checking><id>19561</id><name>Дата договора</name><order>7</order><width>7</width><formatId>0</formatId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>count</alias><checking>false</checking><id>19562</id><name>Количество</name><order>8</order><width>5</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>price</alias><checking>false</checking><id>19563</id><name>Цена</name><order>9</order><width>8</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>cost</alias><checking>false</checking><id>19564</id><name>Стоимость</name><order>10</order><width>5</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn"><alias>dealDate</alias><checking>false</checking><id>19565</id><name>Дата совершения сделки</name><order>11</order><width>7</width><formatId>0</formatId></columns><styles><alias>Автозаполняемая</alias><backColor>WHITE</backColor><bold>false</bold><fontColor>DARK_GREEN</fontColor><id>11781</id><italic>false</italic></styles><styles><alias>Редактируемая</alias><backColor>WHITE</backColor><bold>false</bold><fontColor>WHITE</fontColor><id>11780</id><italic>false</italic></styles></formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>Привлечение корпоративных кредитов и депозитов</name>
+    <fullName>Привлечение корпоративных кредитов и депозитов</fullName>
+    <code>TODO</code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>fullNamePerson</alias>
+        <checking>false</checking>
+        <name>Полное наименование юридического лица с указанием ОПФ</name>
+        <order>2</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
+        <refBookAttributeId>32</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>inn</alias>
+        <checking>false</checking>
+        <name>ИНН/КИО</name>
+        <order>3</order>
+        <width>7</width>
+        <parentId>21476</parentId>
+        <refBookAttributeId>37</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>countryName</alias>
+        <checking>false</checking>
+        <name>Страна регистрации</name>
+        <order>4</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
+        <refBookAttributeId>50</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <name>Сумма расходов Банка, руб.</name>
+        <order>5</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>docNumber</alias>
+        <checking>false</checking>
+        <name>Номер договора</name>
+        <order>6</order>
+        <width>5</width>
+        <maxLength>128</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>docDate</alias>
+        <checking>false</checking>
+
+        <name>Дата договора</name>
+        <order>7</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count</alias>
+        <checking>false</checking>
+        <name>Количество</name>
+        <order>8</order>
+        <width>5</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>price</alias>
+        <checking>false</checking>
+        <name>Цена</name>
+        <order>9</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>cost</alias>
+        <checking>false</checking>
+        <name>Стоимость</name>
+        <order>10</order>
+        <width>5</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dealDate</alias>
+        <checking>false</checking>
+        <name>Дата совершения сделки</name>
+        <order>11</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
