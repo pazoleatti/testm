@@ -228,7 +228,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                                 }
                             });
                 } else {
-                    setFormTemplate();
+                    formTemplate.setStatus(VersionedObjectStatus.getStatusById(result.getStatus()));
+                    getView().activateVersionName(result.getStatus() == 0? "Вывести из действия" : "Ввести в действие");
                 }
             }
         }, this));
