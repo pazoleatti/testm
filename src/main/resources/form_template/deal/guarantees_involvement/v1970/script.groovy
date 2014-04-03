@@ -11,6 +11,8 @@ import groovy.transform.Field
  * 401 - Привлечение гарантий (24)
  * (похож на "Предоставление гарантий")
  *
+ * formTemplateId=401
+ *
  * @author Vyacheslav Petrov
  */
 
