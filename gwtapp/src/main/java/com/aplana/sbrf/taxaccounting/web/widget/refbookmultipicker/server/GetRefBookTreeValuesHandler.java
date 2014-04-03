@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -10,7 +11,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -19,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Хендлер для загрузки данных для иерархичного компнента
@@ -41,6 +42,12 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     @Autowired
     LogEntryService logEntryService;
 
+    @Autowired
+    SecurityService securityService;
+
+    @Autowired
+    DepartmentService departmentService;
+
     public GetRefBookTreeValuesHandler() {
         super(GetRefBookTreeValuesAction.class);
     }
@@ -51,7 +58,8 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
-        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook);
+        Department userDep = departmentService.getDepartment(securityService.currentUserInfo().getUser().getDepartmentId());
+        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, userDep);
 
         PagingResult<Map<String, RefBookValue>> refBookPage;
 
@@ -92,10 +100,18 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         return null;
     }
 
-    private static String buildFilter(String filter, String searchPattern, RefBook refBook) {
+    private static String buildFilter(String filter, String searchPattern, RefBook refBook, Department dep) {
         StringBuilder resultFilter = new StringBuilder();
         if (filter != null && !filter.trim().isEmpty()) {
             resultFilter.append(filter.trim());
+        }
+
+        String regionFilter = RefBookPickerUtils.buildRegionFilterForUser(dep == null ? null : Arrays.asList(dep), refBook);
+        if (regionFilter != null) {
+            if (resultFilter.length() > 0) {
+                resultFilter.append(" and ");
+            }
+            resultFilter.append("(" + regionFilter + ")");
         }
 
         StringBuilder resultSearch = new StringBuilder();

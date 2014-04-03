@@ -18,6 +18,8 @@ public class PickerState{
     private String searchPattern;
     private List<Long> setIds = new LinkedList<Long>();
 
+    private PickerContext pickerContext;
+
     public PickerState() {
     }
 
@@ -44,6 +46,7 @@ public class PickerState{
         this.searchPattern = newState.getSearchPattern();
         this.versionDate = newState.getVersionDate();
         this.multiSelect = newState.isMultiSelect();
+        this.pickerContext = newState.getPickerContext();
 
         this.setIds = newState.getSetIds() != null ? new LinkedList<Long>(newState.getSetIds()) : null;
     }
@@ -112,6 +115,14 @@ public class PickerState{
         if (!versionDate.equals(that.versionDate)) return false;
 
         return true;
+    }
+
+    public PickerContext getPickerContext() {
+        return pickerContext;
+    }
+
+    public void setPickerContext(PickerContext pickerContext) {
+        this.pickerContext = pickerContext;
     }
 
     @Override

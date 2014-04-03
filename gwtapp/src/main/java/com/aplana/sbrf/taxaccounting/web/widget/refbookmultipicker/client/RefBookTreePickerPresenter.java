@@ -136,6 +136,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             return;
         }
         GetRefBookTreeValuesAction action = createLoadAction(null, new ArrayList<Long>(ids));
+        action.setFormDataId(ps.getPickerContext().getFormDataId());
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefBookTreeValuesResult>() {
                     @Override
@@ -238,6 +239,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         action.setVersion(ps.getVersionDate());
         action.setParent(parent);
         action.setIdsTofind(longs);
+        action.setFormDataId(ps.getPickerContext().getFormDataId());
         return action;
     }
 

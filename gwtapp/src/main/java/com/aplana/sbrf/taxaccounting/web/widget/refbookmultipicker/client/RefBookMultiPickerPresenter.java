@@ -67,7 +67,8 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
                             trySelect(newState);
                         }
-                    }, this));
+                    }, this)
+            );
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
@@ -102,13 +103,15 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         }
         final int offset = startIndex;
         GetRefBookMultiValuesAction action = getRowsLoadAction(new PagingParams(offset + 1, maxRows), null);
+        action.setContext(ps.getPickerContext());
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
                         getView().setRowData(offset, result.getPage(), result.getPage().getTotalCount());
                     }
-                }, this));
+                }, this
+        ));
 
     }
 
@@ -121,15 +124,17 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
             return;
         }
         GetRefBookMultiValuesAction action = getRowsLoadAction(null, new ArrayList<Long>(ids));
+        action.setContext(ps.getPickerContext());
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
                 new AbstractCallback<GetRefMultiBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
-                        if (result.getUuid() == null){
+                        if (result.getUuid() == null) {
                             getView().setSelection(result.getPage());
                         }
                     }
-                }, this));
+                }, this
+        ));
 
     }
 
@@ -143,7 +148,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         action.setRefBookAttrId(ps.getRefBookAttrId());
         action.setVersion(ps.getVersionDate());
         action.setIdsTofind(idToFinds);
-
+        action.setContext(ps.getPickerContext());
         return action;
     }
 

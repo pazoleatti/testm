@@ -57,6 +57,8 @@ public class RefBook implements Serializable {
 	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
 	private boolean readOnly;
 
+    private RefBookAttribute regionAttribute;
+
 	public static RefBookAttribute getVersionFromAttribute() {
 		RefBookAttribute attr = new RefBookAttribute();
 		attr.setWidth(REF_BOOK_VERSION_FROM_WIDTH);
@@ -264,7 +266,15 @@ public class RefBook implements Serializable {
 		return list.size() > 0 ? list.get(0) : null;
 	}
 
-	@Override
+    public RefBookAttribute getRegionAttribute() {
+        return regionAttribute;
+    }
+
+    public void setRegionAttribute(RefBookAttribute regionAttribute) {
+        this.regionAttribute = regionAttribute;
+    }
+
+    @Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RefBook{");
 		sb.append("attributes=").append(attributes);

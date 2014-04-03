@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.server;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -10,11 +11,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefBookMultiValuesAction;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.GetRefMultiBookValuesResult;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -43,22 +45,32 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     @Autowired
     LogEntryService logEntryService;
 
+    @Autowired
+    SecurityService securityService;
+
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    FormDataService formDataService;
+
     public GetRefBookMultiValuesHandler() {
         super(GetRefBookMultiValuesAction.class);
     }
 
     @Override
     public GetRefMultiBookValuesResult execute(GetRefBookMultiValuesAction action,
-                                               ExecutionContext context) throws ActionException {
+                                               ExecutionContext executionContext) throws ActionException {
 
         Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        PickerContext context = action.getContext();
 
         RefBookAttribute sortAttribute = getRefBookAttributeById(refBook, action.getSortAttributeIndex());
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
-        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook);
+        String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, context);
 
         PagingResult<Map<String, RefBookValue>> refBookPage;
 
@@ -106,10 +118,40 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
     }
 
 
-    private static String buildFilter(String filter, String searchPattern, RefBook refBook) {
+    private String buildFilter(String filter, String searchPattern, RefBook refBook, PickerContext context) {
         StringBuilder resultFilter = new StringBuilder();
         if (filter != null && !filter.trim().isEmpty()) {
             resultFilter.append(filter.trim());
+        }
+
+        if ((refBook != null)
+                && (refBook.getRegionAttribute() != null)
+                && (context != null) ) {
+
+            String regionFilter;
+            switch (context.getRegionFilter()) {
+                case DEPARTMENT_CONFIG_FILTER:
+                    regionFilter = refBook.getRegionAttribute().getAlias() + " = " + context.getAttributeId();
+                    break;
+                case DEFAULT:
+                case FORM_FILTER:
+                    Department department = null;
+                    if (context.getFormDataId() != null) {
+                        department = departmentService.getFormDepartment(context.getFormDataId());
+                    }
+                    regionFilter = RefBookPickerUtils.buildRegionFilterForUser(department == null ? null : Arrays.asList(department), refBook);
+                    break;
+                default:
+                    regionFilter = null;
+            }
+
+            if (regionFilter != null) {
+                if (resultFilter.length() > 0) {
+                    resultFilter.append(" and ");
+                }
+                resultFilter.append("(" + regionFilter + ")");
+            }
+
         }
 
         StringBuilder resultSearch = new StringBuilder();
