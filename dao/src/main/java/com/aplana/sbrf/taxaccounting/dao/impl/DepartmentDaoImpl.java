@@ -174,6 +174,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 			department.setShortName(rs.getString("shortname"));
 			department.setTbIndex(rs.getString("tb_index"));
 			department.setSbrfCode(rs.getString("sbrf_code"));
+            department.setRegionId(rs.getLong("region_id"));
+            if (rs.wasNull()) {
+                department.setRegionId(null);
+            }
 			return department;
 		}
 	}

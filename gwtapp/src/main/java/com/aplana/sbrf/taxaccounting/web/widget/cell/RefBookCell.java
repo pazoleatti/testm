@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -64,6 +65,10 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			template = GWT.create(Template.class);
 		}
         refBookPiker = new RefBookPickerWidget(column.isHierarchical(), false);
+        PickerContext context = new PickerContext();
+        context.setRegionFilter(PickerContext.RegionFilter.FORM_FILTER);
+        context.setFormDataId(columnContext.getFormDataId());
+        refBookPiker.setPickerContext(context);
 		// Create popup panel
         refBookPiker.setTitle(this.column.getName());
         attrId = column.isHierarchical() ? column.getNameAttributeId() : column.getRefBookAttributeId();

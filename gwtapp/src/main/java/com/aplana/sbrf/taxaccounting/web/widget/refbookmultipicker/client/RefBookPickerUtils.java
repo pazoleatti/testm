@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
@@ -70,5 +72,24 @@ public class RefBookPickerUtils {
             }
         }
         return null;
+    }
+
+    public static String buildRegionFilterForUser(List<Department> departments, RefBook refBook) {
+        if (departments == null || departments.isEmpty()) return null;
+        if (refBook == null) return null;
+        if (refBook.getRegionAttribute() == null) return null;
+
+        String attrAlias = refBook.getRegionAttribute().getAlias();
+        StringBuilder regions = new StringBuilder("(");
+        for (Department dep : departments) {
+            if (dep.getRegionId() != null) {
+                regions.append(attrAlias + " = " + dep.getRegionId() + " or ");
+            }
+        }
+        if (departments.size() > 0) {
+            regions.delete(regions.length() - 4, regions.length() - 1);
+        }
+        regions.append(")");
+        return regions.toString();
     }
 }

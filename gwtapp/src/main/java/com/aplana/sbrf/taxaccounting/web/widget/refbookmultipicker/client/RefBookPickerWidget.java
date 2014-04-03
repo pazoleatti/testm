@@ -8,6 +8,7 @@ import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Tooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
@@ -475,5 +476,9 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         }
         label.setText(stringValue);
         tooltip.setTextHtml(stringValue.equals(EMPTY_STRING_VALUE) ? EMPTY_STRING_TITLE : TextUtils.generateTextBoxHTMLTitle(stringValue));
+    }
+
+    public void setPickerContext(PickerContext pickerContext) {
+        state.setPickerContext(pickerContext);
     }
 }

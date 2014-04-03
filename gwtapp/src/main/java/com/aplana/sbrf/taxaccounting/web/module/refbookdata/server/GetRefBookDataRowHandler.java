@@ -1,15 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerUtils;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -25,6 +30,10 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
 	@Autowired
 	RefBookFactory refBookFactory;
+    @Autowired
+    SecurityService securityService;
+    @Autowired
+    DepartmentService departmentService;
 
 	public GetRefBookDataRowHandler() {
 		super(GetRefBookTableDataAction.class);
@@ -40,8 +49,15 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		result.setTableHeaders(refBook.getAttributes());
 		result.setDesc(refBook.getName());
 		if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
+            TAUser currentUser = securityService.currentUserInfo().getUser();
+            String regions = null;
+            if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
+                List<Department> deps = departmentService.getBADepartments(securityService.currentUserInfo().getUser());
+                regions = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
+            }
+
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-					.getRecords(action.getRelevanceDate(), action.getPagingParams(), null, refBook.getAttributes().get(0));
+					.getRecords(action.getRelevanceDate(), action.getPagingParams(), regions, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
 
 			//кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
