@@ -5,10 +5,10 @@ print '--------------------------------'
 print '- Initialization'
 
 # prefix for resources
-suffixForResources = '-0.3.7'
+suffixForResources = '-muks'
 
 # application
-applicationPath = 'c:/taxaccounting-ear-0.3.7.ear'
+applicationPath = 'C:/taxaccounting-muks.ear'
 applicationName = 'taxaccounting'+ suffixForResources
 applicationContext = '/taxaccounting'+ suffixForResources +'/gwtapp'
 
@@ -60,7 +60,6 @@ AdminApp.install(applicationPath, [\
 	'-BindJndiForEJBMessageBinding', [\
 		['mdb.jar', 'TransportMDB', 'mdb.jar,META-INF/ejb-jar.xml', '', SIBJMSActivationSpecJndi, SIBJMSQueueJndi],\
 		['mdb.jar', 'RateMDB', 'mdb.jar,META-INF/ejb-jar.xml', '', MQActivationSpecJndi, MQQueuesJndi],\
-		['scheduler-core', 'CommandListenerMDB', 'scheduler-core.jar,META-INF/ejb-jar.xml', '', SIBJMSActivationSpecJndi, SIBJMSQueueJndi],\
 	],\
 	'-MapResEnvRefToRes', [\
 		['scheduler-core', 'TaskManagerBean', 'scheduler-core.jar,META-INF/ejb-jar.xml', 'sched/TaskScheduler', 'com.ibm.websphere.scheduler.Scheduler', taskSchedulerJndi],\

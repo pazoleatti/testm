@@ -406,59 +406,11 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // Проверка на заполнение обязательных граф
+        // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // 1. Проверка цены приобретения для целей налогообложения
-        if (row.acquisitionPrice > row.marketPriceInRub && row.acquisitionPriceTax != row.marketPriceInRub
-                || row.acquisitionPrice <= row.marketPriceInRub && row.acquisitionPriceTax != row.acquisitionPrice) {
-            logger.error(errorMsg + "Неверно определена цена приобретения для целей налогообложения!")
-        }
-        // 2. Проверка рыночной цены в процентах при погашении
-        if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInPerc1 != 100) {
-            logger.error(errorMsg + 'Неверно указана рыночная цена в % при погашении!')
-        }
-        // 3. Проверка рыночной цены в рублях при погашении
-        if (row.redemptionValue != null && row.redemptionValue > 0 && row.marketPriceInRub1 != row.redemptionValue) {
-            logger.error(errorMsg + "Неверно указана рыночная цена в рублях при погашении!")
-        }
-        // 4. Проверка цены реализации (выбытия) для целей налогообложения
-        def code = getCode(row.tradeNumber)
-        if ((code == 1 || code == 2 || code == 5) && row.priceInFactPerc > row.marketPriceInPerc1
-                && row.priceInFactRub > row.marketPriceInRub1 && row.salePriceTax != row.priceInFactRub
-        ) {
-            logger.error(errorMsg + "Неверно определена цена реализации для целей налогообложения по сделкам на ОРЦБ!")
-        }
-        // 5. Проверка цены реализации для целей налогообложения при погашении
-        if (code == 4 && row.salePriceTax != row.redemptionValue) {
-            logger.error(errorMsg + "Неверно определена цена реализации для целей налогообложения при погашении!")
-        }
-        // 6. Проверка цены реализации для целей налогообложения по переговорным сделкам на ОРЦБ и сделкам,
-        // связанным с открытием-закрытием короткой позиции
-        if ((code == 2 || code == 5) && row.tradeNumber < row.marketPriceInPerc1
-                && row.priceInFactRub < row.marketPriceInRub1 && row.salePriceTax != row.marketPriceInRub1) {
-            logger.error(errorMsg + "Неверно определена цена реализации для целей налогообложения по переговорным " +
-                    "сделкам на ОРЦБ и сделкам, связанным с открытием-закрытием короткой позиции!")
-        }
-        // 7. Проверка итоговой суммы расходов
-        if (row.expensesTotal != (row.costOfAcquisition ?: 0) + (row.acquisitionPriceTax ?: 0) + (row.expensesOnSale ?: 0)) {
-            logger.error(errorMsg + "Неверно определены расходы!")
-        }
-        // 8. Проверка суммы финансового результата
-        if (row.profit != (row.salePriceTax ?: 0) - (row.expensesTotal ?: 0)) {
-            logger.error(errorMsg + "Неверно определен финансовый результат реализации (выбытия)!")
-        }
-        // 9. Проверка превышения цены реализации для целей налогообложения над фактической ценой реализации
-        if ((code != 4 && row.excessSalePriceTax != (row.salePriceTax ?: 0) - (row.priceInFactRub ?: 0))
-                || (code == 4 && row.excessSalePriceTax != 0)
-                || row.excessSalePriceTax < 0
-        ) {
-            logger.error(errorMsg + "Неверно определено превышение цены реализации для целей налогообложения " +
-                    "над фактической ценой реализации!")
-        }
-
         if (formData.kind == FormDataKind.PRIMARY) {
-            // 10. Арифметическая проверка
+            // 3. Арифметическая проверка граф 12, 16, 17, 18, 20, 21, 22
             needValue['acquisitionPriceTax'] = calc12(row)
             needValue['marketPriceInPerc1'] = calc16(row)
             needValue['marketPriceInRub1'] = calc17(row)
@@ -468,21 +420,16 @@ void logicCheck() {
             needValue['excessSalePriceTax'] = calc22(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
         }
-
-        // 13.
-        if(row.redemptionValue<0){
-            logger.error(errorMsg + "Стоимость погашения не может быть отрицательной")
-        }
     }
 
-    // 11. Проверка корректности расчета итоговых значений за текущий квартал
+    // 4. Проверка корректности расчета итоговых значений за текущий квартал
     def totalOneSum = calcTotalOne(dataRows)
     def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
     if (!checkTotalSum(totalOneRow, totalOneSum)) {
         logger.error("Итоговые значения за текущий квартал рассчитаны неверно!")
     }
 
-    // 12. Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
+    // 5. Проверка корректности расчета итоговых значений за текущий отчётный (налоговый) период
     def totalTwoSum = calcTotalTwo(totalOneSum)
     def totalTwoRow = getDataRow(dataRows, 'itogo')
     if (!checkTotalSum(totalTwoSum, totalTwoRow)) {
@@ -812,38 +759,18 @@ void importDataXLS() {
             (xml.row[1].cell[13]): 'В % к номиналу',
             (xml.row[1].cell[14]): 'В рублях и коп.',
             (xml.row[1].cell[15]): 'В % к номиналу',
-            (xml.row[1].cell[16]): 'В рублях и коп.',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12',
-            (xml.row[2].cell[12]): '13',
-            (xml.row[2].cell[13]): '14',
-            (xml.row[2].cell[14]): '15',
-            (xml.row[2].cell[15]): '16',
-            (xml.row[2].cell[16]): '17',
-            (xml.row[2].cell[17]): '18',
-            (xml.row[2].cell[18]): '19',
-            (xml.row[2].cell[19]): '20',
-            (xml.row[2].cell[20]): '21',
-            (xml.row[2].cell[21]): '22'
+            (xml.row[1].cell[16]): 'В рублях и коп.'
     ]
-
+    (0..21).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index+1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
-    addDataXLS(xml, 2)
+    addData(xml, 2)
 }
 
 // Заполнить форму данными
-void addDataXLS(def xml, int headRowCount) {
+void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
@@ -857,8 +784,8 @@ void addDataXLS(def xml, int headRowCount) {
     }
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -877,7 +804,7 @@ void addDataXLS(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 

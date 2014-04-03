@@ -2,6 +2,34 @@ print '********************************'
 print '* Start create resources script'
 
 print '--------------------------------'
+print '- User data'
+
+# prefix for resources
+suffixForResources           = ''
+
+# database info
+jassUserId                   = 'TAX'
+jassUserPass                 = 'TAX'
+dataBaseHost                 = 'nalog-db.aplana.local'
+dataBasePort                 = '1521'
+dataBaseSvcName              = 'orcl.aplana.local'
+
+migrationJassUserId          = 'MIGRATION'
+migrationJassUserPass        = 'MIGRATION'
+migrationDataBaseHost        = 'nalog-db.aplana.local'
+migrationDataBasePort        = '1521'
+migrationDataBaseSvcName     = 'orcl.aplana.local'
+
+# MQ server info
+mqJassUserId                 = 'Administrator@NALOG-WEB'
+mqJassUserPass               = 'XSW@zaq1'
+MQServerHost                 = 'nalog-web.aplana.local'
+MQServerPort                 = '1414'
+MQServerChanel               = 'Q_CH'
+MQServerQueueName            = 'Q_MDB'
+MQServerQueueManager         = 'QM_MDB'
+
+print '--------------------------------'
 print '- System init'
 
 # get line separator
@@ -18,90 +46,10 @@ print 'Found node name='+ nodeName
 cacheProviderId = AdminConfig.getid(resourceRootLocation +'/CacheProvider:CacheProvider/')
 print 'Found cache provider ID='+ cacheProviderId
 
-# prefix for resources
-suffixForResources = '-0.3.7'
-
-# database info
-dataBaseHost                 = 'nalog-db.aplana.local'
-dataBasePort                 = '1521'
-dataBaseSvcName              = 'orcl.aplana.local'
-migrationDataBaseHost        = 'nalog-db.aplana.local'
-migrationDataBasePort        = '1521'
-migrationDataBaseSvcName     = 'orcl.aplana.local'
-
-# MQ server info
-MQServerHost         = 'nalog-db.aplana.local'
-MQServerPort         = '1521'
-MQServerChanel       = 'Q_CH'
-MQServerQueueName    = 'Q_MDB'
-MQServerQueueManager = 'QM_MDB'
-
-# auth info
+# auth alias
 jaasAlias             = 'TAX'+ suffixForResources
-jassUserId            = 'TAX'+ suffixForResources
-jassUserPass          = 'TAX'
 migrationJaasAlias    = 'TAX_MIGRATION'
-migrationJassUserId   = 'MIGRATION'
-migrationJassUserPass = 'MIGRATION'
 mqJaasAlias           = 'mq_admin'
-mqJassUserId          = 'Administrator@NALOG-WEB'
-mqJassUserPass        = 'password'
-
-# JDBC provider
-jdbcProviderName = 'Oracle JDBC Driver'+ suffixForResources
-jdbcDriverPath   = 'C:/ojdbc6.jar'
-jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
-
-# datasource info
-dataSuorceName               = 'TAX Datasource'+ suffixForResources
-dataSourceJndi               = 'jdbc/TaxAccDS'+ suffixForResources
-dataSourceHelpClass          = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
-dataSourceUrl                = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ dataBaseHost +')(PORT='+ dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ dataBaseSvcName +')))'
-migrationDataSuorceName      = 'TAX Datasource Migration'+ suffixForResources
-migrationDataSourceJndi      = 'jdbc/TaxAccDS_MIGRATION'+ suffixForResources
-migrationDataSourceHelpClass = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
-migrationDataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ migrationDataBaseHost +')(PORT='+ migrationDataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ migrationDataBaseSvcName +')))'
-
-# scheduler
-taskSchedulerName = 'TAX Scheduler'+ suffixForResources
-taskSchedulerJndi = 'sched/TaskScheduler'+ suffixForResources
-
-# cache instance
-declarationTemplateName = 'TaxAccounting - DeclarationTemplate'+ suffixForResources
-declarationTemplateJndi = 'services/cache/aplana/taxaccounting/DeclarationTemplate'+ suffixForResources
-declarationTypeName     = 'TaxAccounting - DeclarationType'+ suffixForResources
-declarationTypeJndi     = 'services/cache/aplana/taxaccounting/DeclarationType'+ suffixForResources
-departmentName          = 'TaxAccounting - Department'+ suffixForResources
-departmentJndi          = 'services/cache/aplana/taxaccounting/Department'+ suffixForResources
-formTemplateName        = 'TaxAccounting - FormTemplate'+ suffixForResources
-formTemplateJndi        = 'services/cache/aplana/taxaccounting/FormTemplate'+ suffixForResources
-formTypeName            = 'TaxAccounting - FormType'+ suffixForResources
-formTypeJndi            = 'services/cache/aplana/taxaccounting/FormType'+ suffixForResources
-userCacheName           = 'TaxAccounting - User'+ suffixForResources
-userCacheJndi           = 'services/cache/aplana/taxaccounting/User'+ suffixForResources
-dataBlobsCacheName      = 'TaxAccounting - DataBlobsCache'+ suffixForResources
-dataBlobsCacheJndi      = 'services/cache/aplana/taxaccounting/DataBlobsCache'+ suffixForResources
-permanentDataName      = 'TaxAccounting - PermanentData'+ suffixForResources
-permanentDataJndi      = 'services/cache/aplana/taxaccounting/PermanentData'+ suffixForResources
-
-# service integration bus
-SIBusName                   = 'TAX JMS Bus'+ suffixForResources
-SIBDestinationName          = 'transportQueue'+ suffixForResources
-SIBJMSConnectionFactoryName = 'TAX Connection factories'+ suffixForResources
-SIBJMSConnectionFactoryJndi = 'jms/transportConnectionFactory'+ suffixForResources
-SIBJMSQueueName             = 'TAX Queue'+ suffixForResources
-SIBJMSQueueJndi             = 'jms/transportQueue'+ suffixForResources
-SIBJMSActivationSpecName    = 'TAX Activation specifications'+ suffixForResources
-SIBJMSActivationSpecJndi    = 'jms/transportAS'+ suffixForResources
-
-# MQ messaging provider
-MQConnectionFactoryName     = 'TAX Connection factories for MQ'
-MQConnectionFactoryJndi     = 'jms/mqtransportConnectionFactory'
-MQQueuesName                = 'TAX Rate Queue MQ'
-MQQueuesJndi                = 'jms/rateQueue'+ suffixForResources
-MQActivationSpecName        = 'TAX Activation specifications MQ'
-MQActivationSpecJndi        = 'jms/transportMQ'
-MQActivationSpecDest        = 'jms/transportQueueMQ'
 
 print '--------------------------------'
 print '- JAASAuthData'
@@ -140,6 +88,29 @@ if jassAuthDataNotFound:
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
+print '________________________________'
+jassAuthDataIds = AdminConfig.list('JAASAuthData').split(lineSeparator)
+jassAuthDataNotFound = 1
+if jassAuthDataIds[0] != '':
+	for jassAuthDataId in jassAuthDataIds:
+		jassAuthDataAlias = AdminConfig.showAttribute(jassAuthDataId, 'alias')
+		if jassAuthDataAlias[-len(mqJaasAlias):] == mqJaasAlias:
+			jassAuthDataNotFound = 0
+			print 'Found existing JAASAuthData:'
+			print 'jassAuthDataAlias='+ jassAuthDataAlias
+			print 'jassAuthDataId='+ jassAuthDataId
+			break
+if jassAuthDataNotFound:
+	print 'Initiated the creation of an JAASAuthData'
+	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', mqJaasAlias], ['userId', mqJassUserId], ['password', mqJassUserPass]])
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+# JDBC provider
+jdbcProviderName = 'Oracle JDBC Driver'+ suffixForResources
+jdbcDriverPath   = 'C:/ojdbc6.jar'
+jdbcDriverClass  = 'oracle.jdbc.pool.OracleConnectionPoolDataSource'
+
 print '--------------------------------'
 print '- JDBC Provider'
 jdbcProviderId = AdminConfig.getid(resourceRootLocation +'/JDBCProvider:'+ jdbcProviderName +'/')
@@ -151,6 +122,16 @@ else:
 	print 'id='+ jdbcProviderId
 	AdminConfig.save()
 	print 'Configuration is saved.'
+
+# datasource info
+dataSuorceName               = 'TAX Datasource'+ suffixForResources
+dataSourceJndi               = 'jdbc/TaxAccDS'+ suffixForResources
+dataSourceHelpClass          = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
+dataSourceUrl                = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ dataBaseHost +')(PORT='+ dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ dataBaseSvcName +')))'
+migrationDataSuorceName      = 'TAX Datasource Migration'+ suffixForResources
+migrationDataSourceJndi      = 'jdbc/TaxAccDS_MIGRATION'+ suffixForResources
+migrationDataSourceHelpClass = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
+migrationDataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ migrationDataBaseHost +')(PORT='+ migrationDataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ migrationDataBaseSvcName +')))'
 
 print '--------------------------------'
 print '- Data source'
@@ -180,6 +161,10 @@ else:
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
+# scheduler
+taskSchedulerName = 'TAX Scheduler'+ suffixForResources
+taskSchedulerJndi = 'sched/TaskScheduler'+ suffixForResources
+
 print '--------------------------------'
 print '- Scheduler'
 taskSchedulerId = AdminConfig.getid('/SchedulerConfiguration:'+ taskSchedulerName +'/')
@@ -206,6 +191,24 @@ except:
 		print 'Successfully created the tables.'
 	except:
 		print 'Error creating tables.'
+
+# cache instance
+declarationTemplateName = 'TaxAccounting - DeclarationTemplate'+ suffixForResources
+declarationTemplateJndi = 'services/cache/aplana/taxaccounting/DeclarationTemplate'+ suffixForResources
+declarationTypeName     = 'TaxAccounting - DeclarationType'+ suffixForResources
+declarationTypeJndi     = 'services/cache/aplana/taxaccounting/DeclarationType'+ suffixForResources
+departmentName          = 'TaxAccounting - Department'+ suffixForResources
+departmentJndi          = 'services/cache/aplana/taxaccounting/Department'+ suffixForResources
+formTemplateName        = 'TaxAccounting - FormTemplate'+ suffixForResources
+formTemplateJndi        = 'services/cache/aplana/taxaccounting/FormTemplate'+ suffixForResources
+formTypeName            = 'TaxAccounting - FormType'+ suffixForResources
+formTypeJndi            = 'services/cache/aplana/taxaccounting/FormType'+ suffixForResources
+userCacheName           = 'TaxAccounting - User'+ suffixForResources
+userCacheJndi           = 'services/cache/aplana/taxaccounting/User'+ suffixForResources
+dataBlobsCacheName      = 'TaxAccounting - DataBlobsCache'+ suffixForResources
+dataBlobsCacheJndi      = 'services/cache/aplana/taxaccounting/DataBlobsCache'+ suffixForResources
+permanentDataName      = 'TaxAccounting - PermanentData'+ suffixForResources
+permanentDataJndi      = 'services/cache/aplana/taxaccounting/PermanentData'+ suffixForResources
 
 print '--------------------------------'
 print '- Cache instance'
@@ -288,14 +291,24 @@ else:
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
+# service integration bus
+SIBusName                   = 'TAX JMS Bus'+ suffixForResources
+SIBDestinationName          = 'transportQueue'+ suffixForResources
+SIBJMSConnectionFactoryName = 'TAX Connection factories'+ suffixForResources
+SIBJMSConnectionFactoryJndi = 'jms/transportConnectionFactory'+ suffixForResources
+SIBJMSQueueName             = 'TAX Queue'+ suffixForResources
+SIBJMSQueueJndi             = 'jms/transportQueue'+ suffixForResources
+SIBJMSActivationSpecName    = 'TAX Activation specifications'+ suffixForResources
+SIBJMSActivationSpecJndi    = 'jms/transportAS'+ suffixForResources
+
 print '--------------------------------'
 print '- Service integration bus'
 SIBusesId = AdminTask.listSIBuses().split(lineSeparator)
 SIBusNotFound = 1
 for SIBusId in SIBusesId:
-	if SIBusId[1:1+len(SIBusName)] == SIBusName:
+	if AdminConfig.showAttribute(SIBusId, 'name') == SIBusName:
 		SIBusNotFound = 0
-		print 'Found existing service integration bus id='+ SIBusId
+		print 'Found existing service integration bus name='+ SIBusId
 		break
 if SIBusNotFound:
 	print 'Initiated the creation of an service integration bus'
@@ -335,7 +348,7 @@ print '________________________________'
 SIBJMSConnectionFactoriesId = AdminTask.listSIBJMSConnectionFactories(resourceRootLocationId).split(lineSeparator)
 SIBJMSConnectionFactoryNotFound = 1
 for SIBJMSConnectionFactoryId in SIBJMSConnectionFactoriesId:
-	if SIBJMSConnectionFactoryId[1:1+len(SIBJMSConnectionFactoryName)] == SIBJMSConnectionFactoryName:
+	if AdminConfig.showAttribute(SIBJMSConnectionFactoryId, 'jndiName') == SIBJMSConnectionFactoryJndi:
 		SIBJMSConnectionFactoryNotFound = 0
 		print 'Found existing service integration bus connection factory id='+ SIBJMSConnectionFactoryId
 		break
@@ -349,7 +362,7 @@ print '________________________________'
 SIBJMSQueuesId = AdminTask.listSIBJMSQueues(resourceRootLocationId).split(lineSeparator)
 SIBJMSQueueNotFound = 1
 for SIBJMSQueueId in SIBJMSQueuesId:
-	if SIBJMSQueueId[1:1+len(SIBJMSQueueName)] == SIBJMSQueueName:
+	if AdminConfig.showAttribute(SIBJMSQueueId, 'jndiName') == SIBJMSQueueJndi:
 		SIBJMSQueueNotFound = 0
 		print 'Found existing service integration bus queue id='+ SIBJMSQueueId
 		break
@@ -363,13 +376,65 @@ print '________________________________'
 SIBJMSActivationSpecsId = AdminTask.listSIBJMSActivationSpecs(resourceRootLocationId).split(lineSeparator)
 SIBJMSActivationSpecNotFound = 1
 for SIBJMSActivationSpecId in SIBJMSActivationSpecsId:
-	if SIBJMSActivationSpecId[1:1+len(SIBJMSActivationSpecName)] == SIBJMSActivationSpecName:
+	if AdminConfig.showAttribute(SIBJMSActivationSpecId, 'jndiName') == SIBJMSActivationSpecJndi:
 		SIBJMSActivationSpecNotFound = 0
 		print 'Found existing service integration bus activation specifications id='+ SIBJMSActivationSpecId
 		break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
 	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSActivationSpecName, '-jndiName', SIBJMSActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+# MQ messaging provider
+MQConnectionFactoryName     = 'TAX Connection factories for MQ'+ suffixForResources
+MQConnectionFactoryJndi     = 'jms/mqtransportConnectionFactory'+ suffixForResources
+MQQueueName                 = 'TAX Rate Queue MQ'+ suffixForResources
+MQQueueJndi                 = 'jms/rateQueue'+ suffixForResources
+MQActivationSpecName        = 'TAX Activation specifications MQ'+ suffixForResources
+MQActivationSpecJndi        = 'jms/transportMQ'+ suffixForResources
+MQActivationSpecDest        = 'jms/transportQueueMQ'+ suffixForResources
+
+print '--------------------------------'
+print '- MQ messaging provider'
+MQConnectionFactoriesId = AdminTask.listWMQConnectionFactories(resourceRootLocationId).split(lineSeparator)
+MQConnectionFactoryNotFound = 1
+for MQConnectionFactoryId in MQConnectionFactoriesId:
+	if AdminConfig.showAttribute(MQConnectionFactoryId, 'jndiName') == MQConnectionFactoryJndi:
+		MQConnectionFactoryNotFound = 0
+		print 'Found existing MQ connection factory id='+ MQConnectionFactoryId
+		break
+if MQConnectionFactoryNotFound:
+	print 'Initiated the creation of an MQ connection factory'
+	print 'id='+ AdminTask.createWMQConnectionFactory(resourceRootLocationId, ['-name', MQConnectionFactoryName, '-jndiName', MQConnectionFactoryJndi, '-type', 'CF', '-qmgrName', MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', MQServerHost, '-qmgrPortNumber', MQServerPort, '-qmgrSvrconnChannel', MQServerChanel, '-xaRecoveryAuthAlias', mqJaasAlias, '-containerAuthAlias', mqJaasAlias])
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+print '________________________________'
+MQQueuesId = AdminTask.listWMQQueues(resourceRootLocationId).split(lineSeparator)
+MQQueueNotFound = 1
+for MQQueueId in MQQueuesId:
+	if AdminConfig.showAttribute(MQQueueId, 'jndiName') == MQQueueJndi:
+		MQQueueNotFound = 0
+		print 'Found existing MQ queue id='+ MQQueueId
+		break
+if MQQueueNotFound:
+	print 'Initiated the creation of an MQ queue'
+	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-busName', SIBusName, '-qmgr', MQServerQueueManager])
+	AdminConfig.save()
+	print 'Configuration is saved.'
+
+print '________________________________'
+MQActivationSpecsId = AdminTask.listWMQActivationSpecs(resourceRootLocationId).split(lineSeparator)
+MQActivationSpecNotFound = 1
+for MQActivationSpecId in MQActivationSpecsId:
+	if AdminConfig.showAttribute(MQActivationSpecId, 'jndiName') == MQActivationSpecJndi:
+		MQActivationSpecNotFound = 0
+		print 'Found existing MQ activation specifications id='+ MQActivationSpecId
+		break
+if MQActivationSpecNotFound:
+	print 'Initiated the creation of an MQ activation specifications'
+	print 'id='+ AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', MQServerHost, '-qmgrPortNumber', MQServerPort, '-qmgrSvrconnChannel', MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue', '-authAlias', mqJaasAlias]) 
 	AdminConfig.save()
 	print 'Configuration is saved.'
 

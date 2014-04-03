@@ -427,7 +427,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
 			String formKind, String departmentId, String reportPeriod,
-			String state, Date startDate, Date endDate) {
+			String state, Date startDate, Date endDate, Long formDataId) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
 		title.setTitle(formType);
@@ -444,6 +444,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
         }
 
+        factory.setFormDataId(formDataId);
 	}
 
 	/**

@@ -208,6 +208,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
         Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        if (formTypeIds.isEmpty())
+            return integerMap;
         List<Map<String, Object>> mapList = declarationTemplateDao.versionTemplateCountByType(formTypeIds);
         for (Map<String, Object> map : mapList){
             integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());

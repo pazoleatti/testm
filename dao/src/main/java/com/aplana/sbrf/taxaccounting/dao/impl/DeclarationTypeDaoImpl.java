@@ -101,6 +101,9 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         if (filter.getTaxType() != null) {
             query.append(" and TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
         }
+        if (!filter.getSearchText().isEmpty()) {
+            query.append(" and LOWER(name) LIKE \'%").append(filter.getSearchText().toLowerCase()).append("%\'");
+        }
         return getJdbcTemplate().queryForList(query.toString(), Integer.class);
     }
 

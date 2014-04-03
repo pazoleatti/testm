@@ -46,6 +46,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				((StringColumn) result).setMaxLength(rs.getInt("max_length"));
 			} else if ("R".equals(type)) {
                 long attributeId = rs.getLong("attribute_id");
+                Long attributeId2 = rs.getLong("attribute_id2");
                 int parentColumnId = rs.getInt("parent_column_id");
                 String filter = rs.getString("filter");
                 if (parentColumnId == 0) {
@@ -64,6 +65,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 } else {
                     result = new ReferenceColumn();
                     ((ReferenceColumn)result).setRefBookAttributeId(attributeId);
+                    ((ReferenceColumn)result).setRefBookAttributeId2(attributeId2);
                     ((ReferenceColumn)result).setParentId(parentColumnId);
                 }
 			} else {
@@ -83,7 +85,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		return getJdbcTemplate().query(
 				"SELECT " +
 				"  id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-				"  checking, format, attribute_id, filter, parent_column_id " +
+				"  checking, format, attribute_id, filter, parent_column_id, attribute_id2 " +
 				"FROM form_column " +
 				"WHERE form_template_id = ? " +
 				"ORDER BY ord",
@@ -171,8 +173,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
 			jt.batchUpdate(
 				"INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-                "checking, format, attribute_id, filter, parent_column_id) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "checking, format, attribute_id, filter, parent_column_id, attribute_id2) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -224,14 +226,22 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
                             ps.setString(13, ((RefBookColumn) col).getFilter());
                             ps.setNull(14, Types.NUMERIC);
+                            ps.setNull(15, Types.NUMERIC);
                         } else if (col instanceof ReferenceColumn) {
                             ps.setLong(12, ((ReferenceColumn) col).getRefBookAttributeId());
                             ps.setNull(13, Types.CHAR);
                             ps.setLong(14, ((ReferenceColumn) col).getParentId());
+                            if (((ReferenceColumn) col).getRefBookAttributeId2()== null){
+                                ps.setNull(15, Types.NUMERIC);
+                            }
+                            else {
+                                ps.setLong(15, ((ReferenceColumn) col).getRefBookAttributeId2());
+                            }
                         } else {
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.CHAR);
                             ps.setNull(14, Types.NUMERIC);
+                            ps.setNull(15, Types.NUMERIC);
                         }
                     }
 
@@ -247,7 +257,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			jt.batchUpdate(
 					"UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                             "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
-                            "parent_column_id = ? WHERE id = ?",
+                            "parent_column_id = ?, attribute_id2 = ? WHERE id = ?",
 					new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -272,38 +282,45 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 								ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
                                 ps.setNull(12, Types.NUMERIC);
+                                ps.setNull(13, Types.NUMERIC);
 							} else if(col instanceof NumericColumn){
 								ps.setInt(7, ((NumericColumn) col).getMaxLength());
 								ps.setNull(9, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
                                 ps.setNull(12, Types.NUMERIC);
+                                ps.setNull(13, Types.NUMERIC);
 							} else if (col instanceof DateColumn) {
 								ps.setInt(9, ((DateColumn)col).getFormatId());
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
                                 ps.setNull(12, Types.NUMERIC);
+                                ps.setNull(13, Types.NUMERIC);
 							} else if (col instanceof RefBookColumn) {
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(9, Types.INTEGER);
 								ps.setLong(10, ((RefBookColumn) col).getRefBookAttributeId());
                                 ps.setString(11, ((RefBookColumn) col).getFilter());
                                 ps.setNull(12, Types.NUMERIC);
+                                ps.setNull(13, Types.NUMERIC);
+                                //ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
 							} else if (col instanceof ReferenceColumn) {
                                 ps.setNull(7, Types.INTEGER);
                                 ps.setNull(9, Types.INTEGER);
                                 ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
                                 ps.setNull(11, Types.CHAR);
                                 ps.setLong(12, ((ReferenceColumn) col).getParentId());
+                                ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
                             } else {
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(9, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
                                 ps.setNull(12, Types.NUMERIC);
+                                ps.setNull(13, Types.NUMERIC);
 							}
-							ps.setInt(13, col.getId());
+							ps.setInt(14, col.getId());
 						}
 
 						@Override

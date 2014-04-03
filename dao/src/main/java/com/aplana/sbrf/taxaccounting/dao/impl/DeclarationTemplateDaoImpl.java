@@ -428,7 +428,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeIds", typeIds);
         String sql = "SELECT declaration_type_id as type_id, COUNT(id) as version_count FROM declaration_template " +
-                "where declaration_type_id in(:typeIds) and status in (0,1) GROUP BY declaration_type_id";
+                "where declaration_type_id in (:typeIds) and status in (0,1) GROUP BY declaration_type_id";
 
         try {
             return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);

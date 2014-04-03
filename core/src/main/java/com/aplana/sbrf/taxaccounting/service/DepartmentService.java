@@ -171,4 +171,11 @@ public interface DepartmentService {
 	 * @return строка вида "подразделение/другое подразделение/еще одно подразделение"
 	 */
 	String getParentsHierarchyShortNames(Integer departmentId);
+
+    /**
+     * Получить получить подразделение создавшее форму
+     * @param formDataId идентификатор формы
+     * @return подразделение создавшее форму
+     */
+    Department getFormDepartment(Long formDataId);
 }

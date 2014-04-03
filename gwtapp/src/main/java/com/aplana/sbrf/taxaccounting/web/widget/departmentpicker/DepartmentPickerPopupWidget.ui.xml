@@ -107,7 +107,7 @@
         </g:HorizontalPanel>
 
         <g:HTMLPanel visible="false">
-            <m:ModalWindow ui:field="popupPanel" resizable="true" width="600px" height="350px" minWidth="500px">
+            <m:ModalWindow ui:field="popupPanel" resizable="true" width="622px" height="492px" minWidth="500px">
 
                 <g:FlowPanel addStyleNames="{modal.mainPanel}">
 
