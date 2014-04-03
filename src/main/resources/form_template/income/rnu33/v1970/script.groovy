@@ -625,12 +625,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
         def int xlsIndexRow = xmlIndexRow + rowOffset

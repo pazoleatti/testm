@@ -24,7 +24,6 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -83,16 +82,7 @@ def nonEmptyColumns = ['number', 'date', 'depo', 'reasonNumber', 'reasonDate', '
 @Field
 def totalColumns = ['taxSum', 'factSum']
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -104,19 +94,6 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-    }
 }
 
 //// Кастомные методы
