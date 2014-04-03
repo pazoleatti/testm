@@ -51,7 +51,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -94,6 +95,8 @@ def allColumns = ['number', 'contract', 'contractDate', 'amountOfTheGuarantee', 
 // Редактируемые атрибуты (графа 2..12)
 @Field
 def editableColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'accrualAccountingStartDate', 'accrualAccountingEndDate', 'preAccrualsStartDate', 'preAccrualsEndDate']
+@Field
+def balanceEditableColumns = allColumns - 'number'
 
 // Автозаполняемые атрибуты
 @Field
@@ -115,9 +118,9 @@ def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'a
 @Field
 def endDate = null
 
-// Текущая дата
+// Признак периода ввода остатков
 @Field
-def currentDate = new Date()
+def Boolean isBalancePeriod = null
 
 //// Обертки методов
 // Поиск записи в справочнике по значению (для импорта)
@@ -243,7 +246,7 @@ void logicCheck() {
                         (row.accrualAccountingEndDate != null && (row.accrualAccountingEndDate < a || b < row.accrualAccountingEndDate)) ||
                         (row.preAccrualsEndDate != null && (row.preAccrualsEndDate < a || b < row.preAccrualsEndDate)))
         ) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 2. Проверка на нулевые значения (графа 13..20)
@@ -256,7 +259,7 @@ void logicCheck() {
             }
         }
         if (hasNull) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 3. Проверка на сумму гарантии (графа 4)
@@ -272,11 +275,11 @@ void logicCheck() {
 
         // 5. Проверка на корректность даты договора (графа 3)
         if (row.contractDate > b) {
-            logger.error(errorMsg + 'Дата договора неверная!')
+            loggerError(errorMsg + 'Дата договора неверная!')
         }
 
         // 7. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
 
         // 8. Проверка на заполнение поля «<Наименование поля>»
         // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
@@ -286,12 +289,12 @@ void logicCheck() {
         def checkColumn11and12 = (row.accrualAccountingStartDate != null || row.accrualAccountingEndDate != null) &&
                 row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            logger.error(errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
+            loggerError(errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.number) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -304,7 +307,7 @@ void logicCheck() {
             needValue['preChargeRuble'] = calc18(prevTotalRow)
             needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
             needValue['taxPeriodRuble'] = calc20(row)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !getBalancePeriod())
         }
     }
 
@@ -575,12 +578,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
         // графа 2
@@ -663,8 +667,7 @@ void checkTotalRow(def totalRow) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (formData.kind == FormDataKind.PRIMARY && !getBalancePeriod() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
@@ -675,4 +678,20 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+def getBalancePeriod() {
+    if (isBalancePeriod == null){
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (getBalancePeriod()) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }

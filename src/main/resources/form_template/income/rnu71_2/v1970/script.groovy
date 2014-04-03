@@ -38,7 +38,6 @@ import java.math.RoundingMode
 /** Признак периода ввода остатков. */
 @Field
 def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -54,8 +53,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def columns = (isBalancePeriod ? allColumns - 'rowNumber' : editableColumns)
-        formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
+        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        formDataService.addRow(formData, currentDataRow, columns, (allColumns - columns))
         break
     case FormDataEvent.DELETE_ROW:
         if (!currentDataRow?.getAlias()?.contains('itg')) {
@@ -153,7 +152,7 @@ void logicCheck() {
         /* Проверка заполнения граф */
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
-        if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
+        if (formData.kind == FormDataKind.PRIMARY) {
             def values = [:]
             def rowPrev = getRowPrev(dataRowsPrev, row)
             values.with {
@@ -167,12 +166,10 @@ void logicCheck() {
                 correctThisThis = calc19(row, dTo)
                 correctThisNext = calc20(row, dTo)
             }
-            println('==============='+row)
-            println('---------------'+values)
-            checkCalc(row, autoFillColumns, values, logger, true)
+            checkCalc(row, autoFillColumns, values, logger, !isBalancePeriod())
 
             if (row.part2Date != values.part2Date) {
-                logger.error(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
+                loggerError(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
             }
         }
         /* Проверка даты совершения операции и границ отчетного периода */
@@ -628,11 +625,12 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def columns = (isBalancePeriod ? allColumns - 'rowNumber' : editableColumns)
+        columns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        autoFillColumns.each {
+        (allColumns - columns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
