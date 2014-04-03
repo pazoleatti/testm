@@ -54,8 +54,8 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.DATE, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
             return templateEventId;
         } catch (DataAccessException e){
-            logger.error("Ошибка ппи добавлении истории событий.", e);
-            throw new DaoException("Ошибка ппи добавлении истории событий.", e);
+            logger.error("Ошибка при добавлении истории событий.", e);
+            throw new DaoException("Ошибка при добавлении истории событий.", e);
         }
 
     }

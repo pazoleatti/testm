@@ -207,24 +207,33 @@ void calc() {
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    for (def row : dataRows) {
-        // проверка заполнения обязательных полей
-        checkRequiredColumns(row, editableColumns)
-    }
 
+    def rowIndexes = []
     rowsAliasesFor35to40.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income101Data = getIncome101Data(row)
         if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+            rowIndexes += row.getIndex()
         }
     }
+    if (!rowIndexes.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+    }
+    rowIndexes.clear()
     rowsAliasesFor4to5.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income102Data = getIncome102Data(row)
         if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+            rowIndexes += row.getIndex()
         }
+    }
+    if (!rowIndexes.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+    }
+
+    for (def row : dataRows) {
+        // проверка заполнения обязательных полей
+        checkRequiredColumns(row, editableColumns)
     }
 
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))

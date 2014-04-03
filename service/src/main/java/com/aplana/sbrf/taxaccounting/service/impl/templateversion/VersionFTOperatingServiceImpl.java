@@ -144,7 +144,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             return;
         FormTemplate formTemplateFake = formTemplateService.getNearestFTRight(templateId, VersionedObjectStatus.FAKE);
         if (formTemplateFake != null)
-            formTemplateService.delete(templateId);
+            formTemplateService.delete(formTemplateFake.getId());
     }
 
     private FormTemplate createFakeTemplate(Date date, int formTypeId){
