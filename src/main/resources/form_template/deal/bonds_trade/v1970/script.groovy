@@ -9,6 +9,8 @@ import java.math.RoundingMode
 /**
  * 384 - Реализация и приобретение ценных бумаг (9)
  *
+ * formTemplateId=384
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -166,8 +168,8 @@ void logicCheck() {
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
             def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('courseCB').column.name
-            def msg3 = row.getCell('transactionSumCurrency').column.name
+            def msg2 = row.getCell('transactionSumCurrency').column.name
+            def msg3 = row.getCell('courseCB').column.name
             logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
         }
 
