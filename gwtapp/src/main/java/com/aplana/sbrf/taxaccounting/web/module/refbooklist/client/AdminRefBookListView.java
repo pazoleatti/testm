@@ -74,7 +74,7 @@ public class AdminRefBookListView extends AbstractRefBookListView implements Adm
         TextColumn<TableModel> regionColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel tableModel) {
-                return tableModel.getRegionAttributeId() == null ? "Общий" : "Региональный";
+                return tableModel.getRegionAttribute() == null ? "Общий" : "Региональный";
             }
         };
 
