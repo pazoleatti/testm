@@ -7,6 +7,8 @@ import groovy.transform.Field
 /**
  * 385 - Уступка прав требования по кредитным договорам (10)
  *
+ * formTemplateId=385
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -176,7 +178,7 @@ void logicCheck() {
         if (totalCost != price) {
             def msg1 = row.getCell('totalCost').column.name
             def msg2 = row.getCell('price').column.name
-            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2»!")
+            logger.warn("Строка $rowNum: «$msg1» не может отличаться от «$msg2» сделки!")
         }
     }
 }
