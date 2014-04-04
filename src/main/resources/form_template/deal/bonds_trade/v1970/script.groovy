@@ -72,8 +72,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
-        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub', 'contractNum',
-        'contractDate', 'transactionDate', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
+        'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
