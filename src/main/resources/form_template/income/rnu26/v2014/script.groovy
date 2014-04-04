@@ -722,12 +722,12 @@ void addData(def xml, int headRowCount) {
         def xmlIndexCol = 2
 
         // графа 2 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
         newRow.issuer = record84?.record_id?.value
         xmlIndexCol++
 
         // графа 3 - атрибут 847 - TYPE - «Типы акции», справочник 97 «Типы акции»
-        newRow.shareType = getRecordIdImport(97, 'TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.shareType = getRecordIdImport(97, 'TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 4
@@ -736,7 +736,7 @@ void addData(def xml, int headRowCount) {
 
         if (record84 != null) {
             // графа 5 - зависит от графы 2 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
-            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.CODE_CUR?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.CODE_CUR?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -755,7 +755,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 10 - атрибут 621 - CODE - «Код признака», справочник 62 «Признаки ценных бумаг»
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 11
@@ -768,7 +768,6 @@ void addData(def xml, int headRowCount) {
 
         // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
         newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
 
         rows.add(newRow)
     }
