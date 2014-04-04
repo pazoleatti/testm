@@ -488,29 +488,13 @@ void importData() {
             (xml.row[0].cell[15]): 'Расчетная величина резерва на текущую отчётную дату (руб.коп.)',
             (xml.row[0].cell[16]): 'Создание резерва (руб.коп.)',
             (xml.row[0].cell[17]): 'Восстановление резерва (руб.коп.)',
-
             (xml.row[1].cell[6]): 'Предыдущую',
             (xml.row[1].cell[7]): 'Текущую',
-
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16',
-            (xml.row[2].cell[17]): '17',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..17).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -540,8 +524,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -559,8 +543,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -587,37 +571,37 @@ void addData(def xml, int headRowCount) {
         getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset, false)
 
         /* Графа 6 */
-        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
+        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         /* Графа 7 */
-        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
+        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
 
         /* Графа 8 */
-        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
+        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
 
         /* Графа 9 */
-        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
+        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
 
         /* Графа 10 */
         newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset, false)
 
         /* Графа 11 */
-        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
+        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
 
         /* Графа 12 */
-        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
+        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
 
         /* Графа 14 */
-        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
+        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, false)
 
         /* Графа 15 */
-        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, true)
+        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
 
         /* Графа 16 */
-        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, true)
+        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, false)
 
         /* Графа 17 */
-        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, true)
+        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -648,7 +632,7 @@ void addAllStatic(def dataRows) {
 
         // графа 2 - эмитент - issuer
         def issuer = getRefBookValue(84, row?.issuer)?.ISSUER?.numberValue
-        def nextIssuer =  getRefBookValue(84, nextRow?.issuer)?.ISSUER?.numberValue
+        def nextIssuer = getRefBookValue(84, nextRow?.issuer)?.ISSUER?.numberValue
         if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
             def itogIssuerRow = calcItogIssuer(i)
             dataRows.add(i + 2, itogIssuerRow)
@@ -685,7 +669,7 @@ def calcItogIssuer(int i) {
         def srow = getRow(j)
 
         if (srow.getAlias() == null) {
-            if (((((String)getRefBookValue(84, srow.issuer)?.ISSUER?.numberValue) != tIssuer))) {
+            if (((((String) getRefBookValue(84, srow.issuer)?.ISSUER?.numberValue) != tIssuer))) {
                 break
             }
 
@@ -837,7 +821,7 @@ BigDecimal calc15(DataRow row) {
     BigDecimal a = (row.cost ?: 0)
 
     if (getSign(row.signSecurity) == "+" && a - row.costOnMarketQuotation > 0) {
-            return a - row.costOnMarketQuotation
+        return a - row.costOnMarketQuotation
     } else {
         return BigDecimal.ZERO
     }
@@ -850,7 +834,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue((row.marketQuotation?:0) - row.prev, 2)
+            return roundValue((row.marketQuotation ?: 0) - row.prev, 2)
         } else {
             return (BigDecimal) 0
         }
