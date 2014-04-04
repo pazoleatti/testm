@@ -91,38 +91,38 @@ def refBookCache = [:]
 
 // Все поля
 @Field
-def allColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income",
-        "result", "part2Date", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod",
-        "taxClaimPrice", "finResult", "correctThisPrev", "correctThisThis", "correctThisNext"]
+def allColumns = ['rowNumber', 'fix', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income',
+        'result', 'part2Date', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod',
+        'taxClaimPrice', 'finResult', 'correctThisPrev', 'correctThisThis', 'correctThisNext']
 
 // Поля, для которых подсчитываются итоговые значения
 @Field
-def totalColumns = ["income", "result", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod",
-        "correctThisPrev", "correctThisThis", "correctThisNext"]
+def totalColumns = ['income', 'result', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod',
+        'correctThisPrev', 'correctThisThis', 'correctThisNext']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ["contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income", "taxClaimPrice"]
+def editableColumns = ['contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income', 'taxClaimPrice']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["result", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod",
-        "finResult", "correctThisPrev", "correctThisThis", "correctThisNext"]
+def autoFillColumns = ['result', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod',
+        'finResult', 'correctThisPrev', 'correctThisThis', 'correctThisNext']
 
 // Группируемые атрибуты
 @Field
 def groupColumns = ['contragent']
 
 @Field
-def sortColumns = ["contragent", "assignContractDate", "assignContractNumber"]
+def sortColumns = ['contragent', 'assignContractDate', 'assignContractNumber']
 
 // TODO Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "income", "result", "taxClaimPrice", "finResult",
-        "correctThisThis"]
+def nonEmptyColumns = ['rowNumber', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'income', 'result', 'taxClaimPrice', 'finResult',
+        'correctThisThis']
 
 //// Кастомные методы
 void logicCheck() {
@@ -280,7 +280,8 @@ void calc() {
     }, groupColumns)
     def totalRow = formData.createDataRow()
     totalRow.setAlias('itg')
-    totalRow.contragent = 'Итого'
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -293,8 +294,8 @@ void calc() {
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('contragent').colSpan = 6
-    newRow.contragent = 'Итого по ' + (dataRows.get(i).contragent ?: '')
+    newRow.getCell('fix').colSpan = 6
+    newRow.fix = 'Итого по ' + (dataRows.get(i).contragent ?: '')
     newRow.setAlias('itg#'.concat(i.toString()))
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -544,50 +545,33 @@ void importData() {
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Наименование контрагента',
-            (xml.row[0].cell[2]): 'ИНН (его аналог)',
-            (xml.row[0].cell[3]): 'Договор цессии',
-            (xml.row[0].cell[5]): 'Стоимость права требования',
-            (xml.row[0].cell[6]): 'Стоимость права требования, списанного за счёт резервов',
-            (xml.row[0].cell[7]): 'Дата погашения основного долга',
-            (xml.row[0].cell[8]): 'Дата уступки права требования',
-            (xml.row[0].cell[9]): 'Доход (выручка) от уступки права требования',
-            (xml.row[0].cell[10]): 'Финансовый результат уступки права требования',
-            (xml.row[0].cell[11]): 'Дата отнесения на расходы второй половины убытка',
-            (xml.row[0].cell[12]): 'Убыток, относящийся к расходам',
-            (xml.row[0].cell[15]): 'Рыночная цена прав требования для целей налогообложения',
-            (xml.row[0].cell[16]): 'Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения',
-            (xml.row[0].cell[17]): 'Корректировка финансового результата в отношении убытка, относящегося',
-            (xml.row[1].cell[3]): 'Номер',
-            (xml.row[1].cell[4]): 'Дата',
-            (xml.row[1].cell[12]): 'текущего квартала',
-            (xml.row[1].cell[13]): 'следующего квартала',
-            (xml.row[1].cell[14]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале',
-            (xml.row[1].cell[17]): 'к расходам текущего налогового периода, но полученного в предыдущем налоговом периоде',
-            (xml.row[1].cell[18]): 'к расходам текущего налогового периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)',
-            (xml.row[1].cell[19]): 'полученного в текущем налоговом периоде, но относящегося к расходам следующего налогового периода',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12',
-            (xml.row[2].cell[12]): '13',
-            (xml.row[2].cell[13]): '14',
-            (xml.row[2].cell[14]): '15',
-            (xml.row[2].cell[15]): '16',
-            (xml.row[2].cell[16]): '17',
-            (xml.row[2].cell[17]): '18',
-            (xml.row[2].cell[18]): '19',
-            (xml.row[2].cell[19]): '20'
+            (xml.row[0].cell[2]): 'Наименование контрагента',
+            (xml.row[0].cell[3]): 'ИНН (его аналог)',
+            (xml.row[0].cell[4]): 'Договор цессии',
+            (xml.row[0].cell[6]): 'Стоимость права требования',
+            (xml.row[0].cell[7]): 'Стоимость права требования, списанного за счёт резервов',
+            (xml.row[0].cell[8]): 'Дата погашения основного долга',
+            (xml.row[0].cell[9]): 'Дата уступки права требования',
+            (xml.row[0].cell[10]): 'Доход (выручка) от уступки права требования',
+            (xml.row[0].cell[11]): 'Финансовый результат уступки права требования',
+            (xml.row[0].cell[12]): 'Дата отнесения на расходы второй половины убытка',
+            (xml.row[0].cell[13]): 'Убыток, относящийся к расходам',
+            (xml.row[0].cell[16]): 'Рыночная цена прав требования для целей налогообложения',
+            (xml.row[0].cell[17]): 'Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения',
+            (xml.row[0].cell[18]): 'Корректировка финансового результата в отношении убытка, относящегося',
+            (xml.row[1].cell[4]): 'Номер',
+            (xml.row[1].cell[5]): 'Дата',
+            (xml.row[1].cell[13]): 'текущего квартала',
+            (xml.row[1].cell[14]): 'следующего квартала',
+            (xml.row[1].cell[15]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале',
+            (xml.row[1].cell[18]): 'к расходам текущего налогового периода, но полученного в предыдущем налоговом периоде',
+            (xml.row[1].cell[19]): 'к расходам текущего налогового периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)',
+            (xml.row[1].cell[20]): 'полученного в текущем налоговом периоде, но относящегося к расходам следующего налогового периода',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..20).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -599,8 +583,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -619,7 +603,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -634,45 +618,63 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
+        def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа fix
+        xmlIndexCol++
 
         // графа 2
-        newRow.contragent = row.cell[1].text()
+        newRow.contragent = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 3
-        newRow.inn = row.cell[2].text()
+        newRow.inn = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 4
-        newRow.assignContractNumber = row.cell[3].text()
+        newRow.assignContractNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 5
-        newRow.assignContractDate = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.assignContractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 6
-        newRow.amount = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 7
-        newRow.amountForReserve = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.amountForReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 8
-        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.repaymentDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 9
-        newRow.dateOfAssignment = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.dateOfAssignment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 10
-        newRow.income = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.income = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 11
+        xmlIndexCol++
         // графа 12
+        xmlIndexCol++
         // графа 13
+        xmlIndexCol++
         // графа 14
+        xmlIndexCol++
         // графа 15
+        xmlIndexCol++
 
         // графа 16
-        newRow.taxClaimPrice = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
+        newRow.taxClaimPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }

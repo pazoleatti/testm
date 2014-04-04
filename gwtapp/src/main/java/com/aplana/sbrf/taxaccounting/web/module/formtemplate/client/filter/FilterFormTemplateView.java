@@ -6,6 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -57,6 +60,14 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
+        searchText.addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    getUiHandlers().onApplyClicked();
+                }
+            }
+        });
     }
 
     @Override
