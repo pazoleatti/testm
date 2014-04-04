@@ -9,6 +9,8 @@ import java.math.RoundingMode
 /**
  * 384 - Реализация и приобретение ценных бумаг (9)
  *
+ * formTemplateId=384
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -70,8 +72,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
-        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub', 'contractNum',
-        'contractDate', 'transactionDate', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
+        'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
@@ -166,8 +168,8 @@ void logicCheck() {
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
             def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('courseCB').column.name
-            def msg3 = row.getCell('transactionSumCurrency').column.name
+            def msg2 = row.getCell('transactionSumCurrency').column.name
+            def msg3 = row.getCell('courseCB').column.name
             logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
         }
 
@@ -179,7 +181,7 @@ void logicCheck() {
         }
 
         // Корректность даты заключения сделки
-        if (transactionDeliveryDate < contractDate) {
+        if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
@@ -188,7 +190,7 @@ void logicCheck() {
         // Проверка цены сделки
         def res = null
 
-        if (transactionSumRub != null && bondCount != null) {
+        if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
 

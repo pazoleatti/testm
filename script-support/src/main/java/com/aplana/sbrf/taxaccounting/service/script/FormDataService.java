@@ -250,4 +250,17 @@ public interface FormDataService {
                                                Map<Long, Map<String, RefBookValue>> refBookCache,
                                                String alias, String value, Date date,
                                                int rowIndex, String columnName, Logger logger, boolean required);
+
+    /**
+     * Сравнить зависимое поле с ожидаемым.
+     *
+     * @param referenceValue значение зависомого поля
+     * @param expectedValue ожидаемое значение
+     * @param rowIndex номер строки в транспортном файле
+     * @param colIndex номер колонки в транспортном файле
+     * @param logger для вывода сообщений
+     * @param required фатальность/обязательность
+     */
+    void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
+                             Logger logger, boolean required);
 }

@@ -183,7 +183,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
+    return parseNumber(value, indexRow, indexCol, logger, false)
 }
 
 // Алгоритмы заполнения полей формы
@@ -483,10 +483,7 @@ void logicCheck() {
 
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        def tmpTotalRow = getCalcTotalRow(dataRows)
-        if (isDiffRow(totalRow, tmpTotalRow, totalColumns)) {
-            loggerError('Итоговые значения рассчитаны неверно!')
-        }
+        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
     }
 }
 
@@ -672,11 +669,9 @@ void importData() {
             (xml.row[0].cell[17]): getColumnName(tmpRow, 'reserveRecovery'),
             (xml.row[1].cell[0]):  '1'
     ]
-
     (2..17).each { index ->
         headerMapping.put((xml.row[1].cell[index]), index.toString())
     }
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -687,8 +682,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -707,7 +702,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -721,51 +716,55 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
+        def xmlIndexCol = 2
+
         // графа 2 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        def indexCell = 2
-        def record84 = getRecordImport(84, 'ISSUER', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, true)
+        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
         newRow.issuer = record84?.record_id?.value
+        xmlIndexCol++
 
         // графа 3 - атрибут 847 - TYPE - «Типы акции», справочник 97 «Типы акции»
-        indexCell = 3
-        newRow.shareType = getRecordIdImport(97, 'TYPE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, true)
+        newRow.shareType = getRecordIdImport(97, 'TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        xmlIndexCol++
 
         // графа 4
-        newRow.tradeNumber = row.cell[4].text()
+        newRow.tradeNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         if (record84 != null) {
             // графа 5 - зависит от графы 2 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
-            indexCell = 5
-            formDataService.checkReferenceValue(84, row.cell[indexCell].text(), record84?.CODE_CUR?.value, xlsIndexRow, indexCell + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.CODE_CUR?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
+        xmlIndexCol++
 
         // графа 6
-        indexCell = 6
-        newRow.lotSizePrev = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 7
-        indexCell = 7
-        newRow.lotSizeCurrent = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        xmlIndexCol++
 
         // графа 9
-        indexCell = 9
-        newRow.cost = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 10 - атрибут 621 - CODE - «Код признака», справочник 62 «Признаки ценных бумаг»
-        indexCell = 10
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, true)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        xmlIndexCol++
 
         // графа 11
-        indexCell = 11
-        newRow.marketQuotation = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 12 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
-        indexCell = 12
-        newRow.rubCourse = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
-        indexCell = 13
-        newRow.marketQuotationInRub = getNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }

@@ -172,7 +172,7 @@ void logicCheck() {
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
+            def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('contractDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
@@ -181,12 +181,7 @@ void logicCheck() {
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
             def msg = row.getCell('date1').column.name
-            if (dt1 > dTo) {
-                logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt1 < dFrom) {
-                logger.warn("Строка $rowNum: «$msg» не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
         }
 
         // Корректность даты совершения сделки

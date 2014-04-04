@@ -47,10 +47,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
+        formDataService.doCalc(logger, userInfo, formData);
 		if (!action.getModifiedRows().isEmpty()) {
 			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
-		formDataService.doCalc(logger, userInfo, formData);
 		DataRowResult result = new DataRowResult();
 		result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;

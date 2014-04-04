@@ -11,6 +11,8 @@ import groovy.transform.Field
  * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
  * (похож на guarantees "Предоставление гарантий")
  *
+ * formTemplateId=386
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -73,8 +75,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryCode', 'docNumber', 'docDate', 'dealNumber',
-        'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryCode', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field

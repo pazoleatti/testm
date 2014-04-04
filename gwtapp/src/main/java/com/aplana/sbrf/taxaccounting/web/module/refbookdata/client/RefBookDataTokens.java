@@ -12,4 +12,6 @@ public final class RefBookDataTokens {
 
 	public static final String REFBOOK_DATA_ID = "id";
     public static final String REFBOOK_RECORD_ID = "record";
+
+    public static final String REFBOOK_SCRIPT = "!refbooklistscript";
 }

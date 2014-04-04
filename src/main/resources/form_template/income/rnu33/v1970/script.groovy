@@ -234,7 +234,7 @@ void logicCheck() {
 
         // 1. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.rowNumber) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         // 2. Обязательность заполнения полей
@@ -242,34 +242,34 @@ void logicCheck() {
 
         // 3. Проверка рыночной цены в процентах к номиналу (графа 10, 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.exercisePrice != 100) {
-            logger.error(errorMsg + 'Неверно указана цена в процентах при погашении!')
+            loggerError(errorMsg + 'Неверно указана цена в процентах при погашении!')
         }
 
         def code = getRefBookValue(61, row.code)?.CODE?.value
 
         // 4. Проверка Номера сделки
         if (code != null && code.toString() in codesFromRnu54) {
-            logger.error("Строка $index учитывается в РНУ-64!")
+            loggerError("Строка $index учитывается в РНУ-64!")
         }
 
         // 5. Проверка даты приобретения и даты реализации (графа 2, 5, 6)
         if (code == 5 && row.purchaseDate <= row.implementationDate) {
-            logger.error(errorMsg + 'Неверно указаны даты приобретения и реализации')
+            loggerError(errorMsg + 'Неверно указаны даты приобретения и реализации')
         }
 
         // 6. Проверка рыночной цены в рублях к номиналу (графа 14)
         if (row.marketPriceOnDateAcquisitionInPerc > 0 && row.marketPriceOnDateAcquisitionInPerc != row.exercisePrice) {
-            logger.error(errorMsg + 'Неверно указана цена в рублях при погашении!')
+            loggerError(errorMsg + 'Неверно указана цена в рублях при погашении!')
         }
 
         // 7. Проверка определения срока короткой позиции (графа 2, 21)
         if (code == 5 && row.parPaper >= 0) {
-            logger.error(errorMsg + 'Неверно определен срок короткой позиции!')
+            loggerError(errorMsg + 'Неверно определен срок короткой позиции!')
         }
 
         // 8. Проверка определения процентного дохода по короткой позиции (графа 2, 22)
         if (code == 5 && row.averageWeightedPricePaper >= 0) {
-            logger.error(errorMsg + 'Неверно определен процентный доход по короткой позиции!')
+            loggerError(errorMsg + 'Неверно определен процентный доход по короткой позиции!')
         }
 
         // 9. Арифметическая проверка графы 12, 16, 17, 18, 20, 24, 25, 26, 27
@@ -295,7 +295,7 @@ void logicCheck() {
     def monthRow = getDataRow(dataRows, 'month')
     def tmpMonthRow = getTotalMonthRow(dataRows)
     if (isDiffRow(monthRow, tmpMonthRow, totalSumColumns)) {
-        logger.error("Итоговые значения за текущий месяц рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий месяц рассчитаны неверно!")
     }
 
     // 10. Проверка итоговых значений за текущий отчётный (налоговый) период - подсчет сумм для общих итогов
@@ -303,7 +303,7 @@ void logicCheck() {
     def tmpTotalRow = formData.createDataRow()
     calcTotalRow(monthRow, tmpTotalRow)
     if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
-        logger.error("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
+        loggerError("Итоговые значения за текущий отчётный (налоговый) период рассчитаны неверно!")
     }
 }
 
@@ -628,7 +628,7 @@ void addData(def xml, int headRowCount) {
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
-        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+        def columns = (isMonthBalance() ? allColumns - 'rowNumber' : editableColumns)
         columns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -755,4 +755,12 @@ def getTaxPeriod() {
         taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
     }
     return taxPeriod
+}
+
+def loggerError(def msg) {
+    if (isMonthBalance()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.GetDTHistoryAction;
@@ -37,18 +35,13 @@ public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryActio
 
     @Override
     public GetDTHistoryResult execute(GetDTHistoryAction action, ExecutionContext executionContext) throws ActionException {
-        List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>();
-        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(action.getTypeId(),
-                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL, VersionedObjectStatus.DELETED);
-
-        for (DeclarationTemplate formTemplate : declarationTemplates) {
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            for (TemplateChanges changes : templateChangesService.getByFormTemplateId(formTemplate.getId())){
-                TemplateChangesExt templateChangesExt = new TemplateChangesExt();
-                templateChangesExt.setTemplateChanges(changes);
-                templateChangesExt.setEdition(formTemplate.getEdition());
-                changesList.add(templateChangesExt);
-            }
+        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTemplateId(action.getTypeId());
+        List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
+        for (TemplateChanges changes : changeses){
+            TemplateChangesExt templateChangesExt = new TemplateChangesExt();
+            templateChangesExt.setTemplateChanges(changes);
+            templateChangesExt.setEdition(declarationTemplateService.get(changes.getId()).getEdition());
+            changesList.add(templateChangesExt);
         }
         GetDTHistoryResult result = new GetDTHistoryResult();
         result.setTemplateChangesExts(changesList);

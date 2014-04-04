@@ -43,4 +43,10 @@ public class TemplateChangesDaoTest {
     public void testGetByFormTemplateId(){
         Assert.assertEquals(1, templateChangesDao.getByFormTemplateId(1).get(0).getId());
     }
+
+    @Test
+    public void testGetByTypeId(){
+        Assert.assertEquals(1, templateChangesDao.getByFormTypeIds(1).size());
+        Assert.assertEquals(2, templateChangesDao.getByDeclarationTypeId(1).size());
+    }
 }

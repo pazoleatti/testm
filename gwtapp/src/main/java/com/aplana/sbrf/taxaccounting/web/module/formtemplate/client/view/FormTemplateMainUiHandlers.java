@@ -8,4 +8,5 @@ public interface FormTemplateMainUiHandlers extends UiHandlers {
 	void close();
     void activate(boolean force);
     void onReturnClicked();
+    void onHistoryClicked();
 }

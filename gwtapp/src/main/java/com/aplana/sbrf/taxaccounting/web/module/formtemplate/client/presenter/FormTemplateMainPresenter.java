@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.event.CreateNewVersionEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -41,6 +42,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	private final PlaceManager placeManager;
 	private FormTemplate formTemplate;
     private FormTemplateExt formTemplateExt;
+
+    protected VersionHistoryPresenter versionHistoryPresenter;
 
     @ProxyEvent
     @Override
@@ -148,11 +151,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 	public static final Type<RevealContentHandler<?>> TYPE_SetTabContent = new Type<RevealContentHandler<?>>();
 
 	@Inject
-	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
+	public FormTemplateMainPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
+                                     VersionHistoryPresenter versionHistoryPresenter) {
 		super(eventBus, view, proxy, TYPE_SetTabContent, TYPE_RequestTabs, TYPE_ChangeTab, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
+        this.versionHistoryPresenter = versionHistoryPresenter;
 	}
 
     @Override
@@ -228,7 +233,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                                 }
                             });
                 } else {
-                    setFormTemplate();
+                    formTemplate.setStatus(VersionedObjectStatus.getStatusById(result.getStatus()));
+                    getView().activateVersionName(result.getStatus() == 0? "Вывести из действия" : "Ввести в действие");
                 }
             }
         }, this));
@@ -311,5 +317,21 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.adminPage).build());
         else
             placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateVersionList).with(AdminConstants.NameTokens.formTypeId, String.valueOf(formTemplate.getType().getId())).build());
+    }
+
+    @Override
+    public void onHistoryClicked() {
+        int id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(AdminConstants.NameTokens.formTemplateId, ""));
+        if (id == 0)
+            return;
+        GetVersionHistoryAction action = new GetVersionHistoryAction();
+        action.setFormTemplateId(id);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetVersionHistoryResult>() {
+            @Override
+            public void onSuccess(GetVersionHistoryResult result) {
+                versionHistoryPresenter.initHistory(result.getChanges());
+                addToPopupSlot(versionHistoryPresenter);
+            }
+        }, this));
     }
 }

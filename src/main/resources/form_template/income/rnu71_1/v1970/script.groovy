@@ -35,23 +35,24 @@ import java.math.RoundingMode
 /** Признак периода ввода остатков. */
 @Field
 def isBalancePeriod
+isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
-        formDataService.addRow(formData, currentDataRow, columns, (allColumns - columns))
+        formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (!currentDataRow?.getAlias()?.contains('itg')) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
@@ -64,7 +65,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
@@ -86,37 +87,37 @@ def refBookCache = [:]
 
 // Все поля
 @Field
-def allColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
-            "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income",
-            "result", "part2Date", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod"]
+def allColumns = ['rowNumber', 'fix', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income',
+        'result', 'part2Date', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod']
 
 // Поля, для которых подсчитываются итоговые значения
 @Field
-def totalColumns = ["income", "result", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod"]
+def totalColumns = ['income', 'result', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ["contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "dateOfAssignment", "income"]
+def editableColumns = ['contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ["result", "lossThisQuarter", "lossNextQuarter", "lossThisTaxPeriod"]
+def autoFillColumns = ['result', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod']
 
 // Группируемые атрибуты
 @Field
 def groupColumns = ['contragent']
 
 @Field
-def sortColumns = ["contragent", "assignContractDate", "assignContractNumber"]
+def sortColumns = ['contragent', 'assignContractDate', 'assignContractNumber']
 
 // TODO Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ["rowNumber", "contragent", "inn", "assignContractNumber", "assignContractDate",
-        "amount", "amountForReserve", "repaymentDate", "income", "result"]
+def nonEmptyColumns = ['rowNumber', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate',
+        'amount', 'amountForReserve', 'repaymentDate', 'income', 'result']
 
 //// Кастомные методы
-void logicCheck(){
+void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -131,7 +132,7 @@ void logicCheck(){
     // Номер последний строки предыдущей формы
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
 
-    for (def DataRow row : dataRows){
+    for (def DataRow row : dataRows) {
         //проверка и пропуск итогов
         if (row?.getAlias()?.contains('itg')) {
             continue
@@ -140,7 +141,7 @@ void logicCheck(){
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger,  !isBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         if (formData.kind == FormDataKind.PRIMARY) {
             def values = [:]
@@ -158,30 +159,30 @@ void logicCheck(){
                 loggerError(errorMsg + "Неверное значение графы ${getColumnName(row, 'part2Date')}!")
             }
         }
-        if (!(row.repaymentDate in (dFrom..dTo))){
+        if (!(row.repaymentDate in (dFrom..dTo))) {
             loggerError(errorMsg + "Дата совершения операции вне границ отчетного периода!")
         }
         if (++i != row.rowNumber) {
             loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
-        if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0){
+        if (row.income == 0 && row.lossThisQuarter == 0 && row.lossNextQuarter == 0) {
             loggerError(errorMsg + "Все суммы по операции нулевые!")
         }
         if (row.dateOfAssignment != null && row.dateOfAssignment < row.repaymentDate) {
             loggerError(errorMsg + "Неверно указана дата погашения основного долга!")
         }
         if (row.amount > 0 && row.income > 0 && row.repaymentDate == null &&
-                row.dateOfAssignment == null && row.lossThisTaxPeriod != null){
+                row.dateOfAssignment == null && row.lossThisTaxPeriod != null) {
             loggerError(errorMsg + "В момент уступки права требования «Графа 15» не заполняется!")
         }
         if (row.lossThisTaxPeriod > 0 &&
                 ((row.amount == null && row.result != null) ||
                         row.lossThisQuarter != null ||
-                        row.lossNextQuarter != null)){
+                        row.lossNextQuarter != null)) {
             loggerError(errorMsg + "В момент отнесения второй половины убытка на расходы графы кроме графы 15 и графы 12 не заполняются!")
         }
     }
-    def testRows = dataRows.findAll{ it -> it.getAlias() == null }
+    def testRows = dataRows.findAll { it -> it.getAlias() == null }
 
     addAllAliased(testRows, new CalcAliasRow() {
         @Override
@@ -208,12 +209,12 @@ void logicCheck(){
             return null
         }
     })
-    def sumRowList = dataRows.findAll{ it -> it.getAlias() == null || it.getAlias() == 'itg'}
+    def sumRowList = dataRows.findAll { it -> it.getAlias() == null || it.getAlias() == 'itg' }
     checkTotalSum(sumRowList, totalColumns, logger, !isBalancePeriod())
 }
 
 
-void calc(){
+void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -231,7 +232,7 @@ void calc(){
         def dTo = reportPeriodService.getEndDate(formData.getReportPeriodId())?.time
 
         // Расчет ячеек
-        for(def row : dataRows) {
+        for (def row : dataRows) {
             def rowPrev = getRowPrev(dataRowsPrev, row)
             row.with {
                 rowNumber = ++index
@@ -243,7 +244,7 @@ void calc(){
             }
         }
     } else {
-        for(def row : dataRows) {
+        for (def row : dataRows) {
             row.rowNumber = ++index
         }
     }
@@ -257,11 +258,12 @@ void calc(){
     }, groupColumns)
     def totalRow = formData.createDataRow()
     totalRow.setAlias('itg')
-    totalRow.contragent = 'Итого'
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
-    calcTotalSum(dataRows,totalRow,totalColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
@@ -270,8 +272,8 @@ void calc(){
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def newRow = formData.createDataRow()
 
-    newRow.getCell('contragent').colSpan = 6
-    newRow.contragent = 'Итого по ' + (dataRows.get(i).contragent?:'')
+    newRow.getCell('fix').colSpan = 6
+    newRow.fix = 'Итого по ' + (dataRows.get(i).contragent ?: '')
     newRow.setAlias('itg#'.concat(i.toString()))
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -296,20 +298,20 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     return newRow
 }
 
-def getRowPrev(def dataRowsPrev, def row){
+def getRowPrev(def dataRowsPrev, def row) {
     if (dataRowsPrev != null) {
-        for (def rowPrev in dataRowsPrev){
+        for (def rowPrev in dataRowsPrev) {
             if ((row.contragent == rowPrev.contragent &&
                     row.inn == rowPrev.inn &&
                     row.assignContractNumber == rowPrev.assignContractNumber &&
-                    row.assignContractDate == rowPrev.assignContractDate)){
+                    row.assignContractDate == rowPrev.assignContractDate)) {
                 return rowPrev
             }
         }
     }
 }
 
-def getDataRowsPrev(){
+def getDataRowsPrev() {
     def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
     formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
     if (formDataPrev == null) {
@@ -332,11 +334,11 @@ def Date calc12(def row) {
 
 def BigDecimal calc13(def row, def endDate) {
     def tmp
-    if(row.result != null && row.result < 0){
+    if (row.result != null && row.result < 0) {
         if (row.part2Date != null && endDate != null) {
-            if (row.part2Date <= endDate){
+            if (row.part2Date <= endDate) {
                 tmp = row.result
-            }else{
+            } else {
                 tmp = row.result * 0.5
             }
         }
@@ -346,11 +348,11 @@ def BigDecimal calc13(def row, def endDate) {
 
 def BigDecimal calc14(def row, def endDate) {
     def tmp
-    if(row.result != null && row.result < 0){
+    if (row.result != null && row.result < 0) {
         if (row.part2Date != null && endDate != null) {
-            if (row.part2Date <= endDate){
+            if (row.part2Date <= endDate) {
                 tmp = BigDecimal.ZERO
-            }else{
+            } else {
                 tmp = row.result * 0.5
             }
         }
@@ -362,7 +364,7 @@ def BigDecimal calc15(def row, def rowPrev, def startDate, def endDate) {
     def tmp
     if (startDate != null && endDate != null) {
         def period = (startDate..endDate)
-        if (row.dateOfAssignment != null && row.part2Date != null && !(row.dateOfAssignment in period) && (row.part2Date in period)){
+        if (row.dateOfAssignment != null && row.part2Date != null && !(row.dateOfAssignment in period) && (row.part2Date in period)) {
             tmp = rowPrev?.lossNextQuarter
         }
     }
@@ -393,39 +395,27 @@ void importData() {
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Наименование контрагента',
-            (xml.row[0].cell[2]): 'ИНН (его аналог)',
-            (xml.row[0].cell[3]): 'Договор цессии',
-            (xml.row[0].cell[5]): 'Стоимость права требования',
-            (xml.row[0].cell[6]): 'Стоимость права требования, списанного за счёт резервов',
-            (xml.row[0].cell[7]): 'Дата погашения основного долга',
-            (xml.row[0].cell[8]): 'Дата уступки права требования',
-            (xml.row[0].cell[9]): 'Доход (выручка) от уступки права требования',
-            (xml.row[0].cell[10]): 'Финансовый результат уступки права требования',
-            (xml.row[0].cell[11]): 'Дата отнесения на расходы второй половины убытка',
-            (xml.row[0].cell[12]): 'Убыток, относящийся к расходам',
-            (xml.row[1].cell[3]): 'Номер',
-            (xml.row[1].cell[4]): 'Дата',
-            (xml.row[1].cell[12]): 'текущего квартала',
-            (xml.row[1].cell[13]): 'следующего квартала',
-            (xml.row[1].cell[14]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12',
-            (xml.row[2].cell[12]): '13',
-            (xml.row[2].cell[13]): '14',
-            (xml.row[2].cell[14]): '15'
+            (xml.row[0].cell[2]): 'Наименование контрагента',
+            (xml.row[0].cell[3]): 'ИНН (его аналог)',
+            (xml.row[0].cell[4]): 'Договор цессии',
+            (xml.row[0].cell[6]): 'Стоимость права требования',
+            (xml.row[0].cell[7]): 'Стоимость права требования, списанного за счёт резервов',
+            (xml.row[0].cell[8]): 'Дата погашения основного долга',
+            (xml.row[0].cell[9]): 'Дата уступки права требования',
+            (xml.row[0].cell[10]): 'Доход (выручка) от уступки права требования',
+            (xml.row[0].cell[11]): 'Финансовый результат уступки права требования',
+            (xml.row[0].cell[12]): 'Дата отнесения на расходы второй половины убытка',
+            (xml.row[0].cell[13]): 'Убыток, относящийся к расходам',
+            (xml.row[1].cell[4]): 'Номер',
+            (xml.row[1].cell[5]): 'Дата',
+            (xml.row[1].cell[13]): 'текущего квартала',
+            (xml.row[1].cell[14]): 'следующего квартала',
+            (xml.row[1].cell[15]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..15).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -437,8 +427,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -457,51 +447,62 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
-        columns.each {
+        editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (allColumns - columns).each {
+        autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
+        def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа fix
+        xmlIndexCol++
 
         // графа 2
-        newRow.contragent = row.cell[1].text()
+        newRow.contragent = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 3
-        newRow.inn = row.cell[2].text()
+        newRow.inn = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 4
-        newRow.assignContractNumber = row.cell[3].text()
+        newRow.assignContractNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 5
-        newRow.assignContractDate = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.assignContractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 6
-        newRow.amount = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 7
-        newRow.amountForReserve = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.amountForReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 8
-        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.repaymentDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 9
-        newRow.dateOfAssignment = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.dateOfAssignment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 10
-        newRow.income = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.income = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }

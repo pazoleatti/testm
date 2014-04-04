@@ -640,6 +640,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     public void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual) {
         //System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual + "; "+manual + " ;"+ bankSummaryForm + "; " +canCreatedManual);
         editAnchor.setVisible(readOnlyMode);
+        recalculateButton.setVisible(!readOnlyMode && !manual);
         if (bankSummaryForm) {
             boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
             modeLabel.setVisible(readOnlyMode);
