@@ -34,4 +34,14 @@ public class TemplateChangesServiceImpl implements TemplateChangesService {
     public List<TemplateChanges> getByDeclarationTemplateId(int declarationTemplateId) {
         return templateChangesDao.getByDeclarationTemplateId(declarationTemplateId);
     }
+
+    @Override
+    public List<TemplateChanges> getByFormTypeIds(int ftTypeId) {
+        return templateChangesDao.getByFormTypeIds(ftTypeId);
+    }
+
+    @Override
+    public List<TemplateChanges> getByDeclarationTypeIds(int dtTypeId) {
+        return templateChangesDao.getByDeclarationTypeId(dtTypeId);
+    }
 }
