@@ -370,24 +370,11 @@ void importData() {
             (xml.row[0].cell[13]): 'Регистрация (дата снятия с регистрации)',
             (xml.row[0].cell[14]): 'Сведения об угоне (дата начала розыска ТС)',
             (xml.row[0].cell[15]): 'Сведения об угоне (дата возврата ТС)',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[1]): '2',
-            (xml.row[1].cell[2]): '3',
-            (xml.row[1].cell[3]): '4',
-            (xml.row[1].cell[4]): '5',
-            (xml.row[1].cell[5]): '6',
-            (xml.row[1].cell[6]): '7',
-            (xml.row[1].cell[7]): '8',
-            (xml.row[1].cell[8]): '9',
-            (xml.row[1].cell[9]): '10',
-            (xml.row[1].cell[10]): '11',
-            (xml.row[1].cell[11]): '12',
-            (xml.row[1].cell[12]): '13',
-            (xml.row[1].cell[13]): '14',
-            (xml.row[1].cell[14]): '15',
-            (xml.row[1].cell[15]): '16'
+            (xml.row[1].cell[0]): '1'
     ]
-
+    (0..15).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
@@ -398,8 +385,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -417,11 +404,6 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
-            continue
-        }
-
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
@@ -429,51 +411,69 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
+        def int xmlIndexCol = 0
+
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 2
-        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset)
+        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 3
+        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        xmlIndexCol++
 
         // графа 4
-        newRow.tsTypeCode = getRecordIdImport(42, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.tsTypeCode = getRecordIdImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 5
+        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        xmlIndexCol++
 
         // графа 6
-        newRow.identNumber = row.cell[5].text()
+        newRow.identNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 7
-        newRow.model = row.cell[6].text()
+        newRow.model = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 8
-        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 9
-        newRow.regNumber = row.cell[8].text()
+        newRow.regNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 10
-        newRow.powerVal = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 11
-        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset)
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 13
-        newRow.regDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 14
-        newRow.regDateEnd = parseDate(row.cell[13].text(), "dd.MM.yyyy", xlsIndexRow, 13 + colOffset, logger, false)
+        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 15
-        newRow.stealDateStart = parseDate(row.cell[14].text(), "dd.MM.yyyy", xlsIndexRow, 14 + colOffset, logger, false)
+        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 16
-        newRow.stealDateEnd = parseDate(row.cell[15].text(), "dd.MM.yyyy", xlsIndexRow, 15 + colOffset, logger, false)
+        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }
