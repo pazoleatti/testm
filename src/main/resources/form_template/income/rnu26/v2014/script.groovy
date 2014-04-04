@@ -183,7 +183,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
+    return parseNumber(value, indexRow, indexCol, logger, false)
 }
 
 // Алгоритмы заполнения полей формы
@@ -483,10 +483,7 @@ void logicCheck() {
 
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        def tmpTotalRow = getCalcTotalRow(dataRows)
-        if (isDiffRow(totalRow, tmpTotalRow, totalColumns)) {
-            loggerError('Итоговые значения рассчитаны неверно!')
-        }
+        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
     }
 }
 
