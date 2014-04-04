@@ -9,6 +9,8 @@ import java.math.RoundingMode
 /**
  * 377 - Техническое обслуживание нежилых помещений (2)
  *
+ * formTemplateId=377
+ *
  * @author Dmitriy Levykin
  */
 
@@ -161,8 +163,8 @@ void logicCheck() {
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
-        //Проверка стоимости
-        if (price == null || count != null && cost != price * count) {
+        // Проверка стоимости
+        if (price != null && count != null && cost != price * count) {
             logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
