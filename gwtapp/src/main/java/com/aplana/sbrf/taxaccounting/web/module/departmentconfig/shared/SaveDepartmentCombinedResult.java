@@ -10,7 +10,7 @@ public class SaveDepartmentCombinedResult implements Result {
 
     private String uuid;
     private boolean hasError = false;
-    private String declarationTypes;
+    private boolean declarationFormFound = false;
 
     public String getUuid() {
         return uuid;
@@ -28,11 +28,11 @@ public class SaveDepartmentCombinedResult implements Result {
         this.hasError = hasError;
     }
 
-    public String getDeclarationTypes() {
-        return declarationTypes;
+    public boolean isDeclarationFormFound() {
+        return declarationFormFound;
     }
 
-    public void setDeclarationTypes(String declarationTypes) {
-        this.declarationTypes = declarationTypes;
+    public void setDeclarationFormFound(boolean declarationFormFound) {
+        this.declarationFormFound = declarationFormFound;
     }
 }

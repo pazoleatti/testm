@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.VersionHistoryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -100,13 +101,16 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
     private DeclarationTemplateExt declarationTemplateExt;
 	private DeclarationTemplate declarationTemplate;
 	private HandlerRegistration closeDeclarationTemplateHandlerRegistration;
+    protected VersionHistoryPresenter versionHistoryPresenter;
 
 	@Inject
-	public DeclarationTemplatePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager) {
-		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+    public DeclarationTemplatePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy, DispatchAsync dispatcher, PlaceManager placeManager,
+                                        VersionHistoryPresenter versionHistoryPresenter) {
+        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
+        this.versionHistoryPresenter = versionHistoryPresenter;
 	}
 
 	/**
@@ -277,6 +281,22 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
     @Override
     public int getDeclarationId() {
         return declarationTemplate.getId() != null ? declarationTemplate.getId() : 0;
+    }
+
+    @Override
+    public void onHistoryClicked() {
+        int id = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, ""));
+        if (id == 0)
+            return;
+        GetDTVersionChangesAction action = new GetDTVersionChangesAction();
+        action.setDeclarationTemplateId(id);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDTVersionChangesResult>() {
+            @Override
+            public void onSuccess(GetDTVersionChangesResult result) {
+                versionHistoryPresenter.initHistory(result.getChanges());
+                addToPopupSlot(versionHistoryPresenter);
+            }
+        }, this));
     }
 
     @Override

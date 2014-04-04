@@ -46,6 +46,14 @@ public class DeclarationDataPresenter
 			Place {
 	}
 
+    public static final String DECLARATION_UPDATE_MSG = "Декларация обновлена";
+    public static final String DECLARATION_UPDATE_MSG_D = "Уведомление обновлено";
+
+    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
+    public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
+    public static final String DECLARATION_DELETE_MSG = "Декларация удалена";
+    public static final String DECLARATION_DELETE_MSG_D = "Уведомление удалено";
+
 	public interface MyView extends View,
 			HasUiHandlers<DeclarationDataUiHandlers> {
 		void showAccept(boolean show);
@@ -169,7 +177,7 @@ public class DeclarationDataPresenter
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,
-												"Декларация обновлена");
+                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D);
 										revealPlaceRequest();
 									}
 								}, DeclarationDataPresenter.this));
@@ -203,7 +211,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void delete() {
         final DeclarationDataPresenter t = this;
-        Dialog.confirmMessage("Вы уверены, что хотите удалить декларацию?", new DialogHandler() {
+        Dialog.confirmMessage(!taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_Q : DECLARATION_DELETE_Q_D, new DialogHandler() {
             @Override
             public void yes() {
                 LogCleanEvent.fire(t);
@@ -219,7 +227,7 @@ public class DeclarationDataPresenter
                                                     DeleteDeclarationDataResult result) {
                                                 MessageEvent
                                                         .fire(DeclarationDataPresenter.this,
-                                                                "Декларация удалена");
+                                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_MSG : DECLARATION_DELETE_MSG_D);
                                                 placeManager
                                                         .revealPlace(new PlaceRequest(
                                                                 DeclarationListNameTokens.DECLARATION_LIST)

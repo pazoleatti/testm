@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:npui='urn:import:com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui'
-             xmlns:t='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
         >
@@ -69,13 +68,21 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-
-                <t:LeftBar childValign="middle" marginRight="10" addStyleNames="{style.btnPanel}">
-                    <g:Button text="Сохранить" ui:field="saveButton"/>
-                    <g:Button text="Сбросить" ui:field="resetButton"/>
-                    <g:Button text="Отменить" ui:field="cancelButton"/>
-                    <g:Button text="Ввести в действие" ui:field="activateVersion"/>
-                </t:LeftBar>
+                <g:HorizontalPanel width="100%">
+                    <g:cell>
+                        <style:LeftBar childValign="middle" marginRight="10" addStyleNames="{style.btnPanel}">
+                            <g:Button text="Сохранить" ui:field="saveButton"/>
+                            <g:Button text="Сбросить" ui:field="resetButton"/>
+                            <g:Button text="Отменить" ui:field="cancelButton"/>
+                            <g:Button text="Ввести в действие" ui:field="activateVersion"/>
+                        </style:LeftBar>
+                    </g:cell>
+                    <g:cell horizontalAlignment="right">
+                        <style:RightBar addStyleNames="{style.btnPanel}">
+                            <style:LinkButton text="История изменений" ui:field="historyVersion"/>
+                        </style:RightBar>
+                    </g:cell>
+                </g:HorizontalPanel>
 
                 <g:Label addStyleNames="{style.horSep}"/>
 

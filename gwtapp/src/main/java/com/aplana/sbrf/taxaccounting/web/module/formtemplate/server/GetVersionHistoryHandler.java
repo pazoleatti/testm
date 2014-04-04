@@ -1,10 +1,11 @@
-package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
+package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.GetFTVersionHistoryAction;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.GetFTVersionHistoryResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetVersionHistoryAction;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetVersionHistoryResult;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -21,35 +22,36 @@ import java.util.List;
  */
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
-public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersionHistoryAction, GetFTVersionHistoryResult> {
+public class GetVersionHistoryHandler extends AbstractActionHandler<GetVersionHistoryAction, GetVersionHistoryResult> {
 
     @Autowired
     private TemplateChangesService templateChangesService;
-
     @Autowired
     private FormTemplateService formTemplateService;
 
-    public GetFTVersionHistoryHandler() {
-        super(GetFTVersionHistoryAction.class);
+    public GetVersionHistoryHandler() {
+        super(GetVersionHistoryAction.class);
     }
 
     @Override
-    public GetFTVersionHistoryResult execute(GetFTVersionHistoryAction action, ExecutionContext context) throws ActionException {
-        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(action.getFormTypeId());
+    public GetVersionHistoryResult execute(GetVersionHistoryAction action, ExecutionContext executionContext) throws ActionException {
+        GetVersionHistoryResult result = new GetVersionHistoryResult();
+        List<TemplateChanges> changeses = templateChangesService.getByFormTemplateId(action.getFormTemplateId());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
-        for (TemplateChanges changes : changeses) {
+        FormTemplate formTemplate = formTemplateService.get(action.getFormTemplateId());
+        for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(formTemplateService.get(changes.getFormTemplateId()).getEdition());
+            templateChangesExt.setEdition(formTemplate.getEdition());
             changesList.add(templateChangesExt);
         }
-        GetFTVersionHistoryResult result = new GetFTVersionHistoryResult();
-        result.setChangeses(changesList);
+
+        result.setChanges(changesList);
         return result;
     }
 
     @Override
-    public void undo(GetFTVersionHistoryAction action, GetFTVersionHistoryResult result, ExecutionContext context) throws ActionException {
+    public void undo(GetVersionHistoryAction getVersionHistoryAction, GetVersionHistoryResult getVersionHistoryResult, ExecutionContext executionContext) throws ActionException {
         //Nothing
     }
 }

@@ -14,7 +14,8 @@ public class GetCheckDeclarationResult implements Result {
 
     // Список всех подразделений
     private String uuid;
-    private String declarationTypes;
+    private boolean declarationFormFound = false;
+    private boolean hasError = false;
 
     public String getUuid() {
         return uuid;
@@ -24,11 +25,19 @@ public class GetCheckDeclarationResult implements Result {
         this.uuid = uuid;
     }
 
-    public String getDeclarationTypes() {
-        return declarationTypes;
+    public boolean isDeclarationFormFound() {
+        return declarationFormFound;
     }
 
-    public void setDeclarationTypes(String declarationTypes) {
-        this.declarationTypes = declarationTypes;
+    public void setDeclarationFormFound(boolean declarationFormFound) {
+        this.declarationFormFound = declarationFormFound;
+    }
+
+    public boolean isHasError() {
+        return hasError;
+    }
+
+    public void setHasError(boolean hasError) {
+        this.hasError = hasError;
     }
 }

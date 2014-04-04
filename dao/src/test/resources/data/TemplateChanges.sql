@@ -28,6 +28,8 @@ insert into form_template (id, type_id, data_rows, version, edition, fixed_rows,
   values (2, 2, null, date '2013-01-01', 1, 0, 'name_2', 'fullname_2', 'code_2', 0);
 
 insert into template_changes(id, event, date_event, author, form_template_id, declaration_template_id)
-  values (1, 1, date '2013-01-01', 1, 1, 1);
+  values (1, 1, date '2013-01-01', 1, 1, null);
 insert into template_changes(id, event, date_event, author, form_template_id, declaration_template_id)
-  values (2, 1, date '2013-01-01', 1, 1, 1);
+  values (2, 1, date '2013-01-01', 1, null , 1);
+insert into template_changes(id, event, date_event, author, form_template_id, declaration_template_id)
+  values (3, 1, date '2013-01-01', 1, null , 2);

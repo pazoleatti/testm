@@ -223,4 +223,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         }
     }
 
+    @UiHandler("historyVersion")
+    void onHistoryClick(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onHistoryClicked();
+        }
+    }
+
 }

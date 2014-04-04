@@ -43,6 +43,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
     LinkButton infoAnchor;
 
+    @UiField
+    Label typeLabel;
+
 	@UiField
 	Label type;
 	@UiField
@@ -106,6 +109,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	public void setTitle(String title, boolean isTaxTypeDeal) {
 		this.title.setText(title);
 		this.title.setTitle(title);
+        type.setVisible(!isTaxTypeDeal);
+        typeLabel.setVisible(!isTaxTypeDeal);
         if (!isTaxTypeDeal) {
             dateBoxLabel.setText(DATE_BOX_TITLE + ":");
             dateBoxLabel.setTitle(DATE_BOX_TITLE);
