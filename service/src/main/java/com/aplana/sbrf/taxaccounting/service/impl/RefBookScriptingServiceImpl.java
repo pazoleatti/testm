@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -34,12 +36,16 @@ import java.util.Map;
 public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements RefBookScriptingService {
 
     private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
+    public static final String ERROR_MSG = "Ошибка при записи данных";
 
     @Autowired
     private BlobDataService blobDataService;
 
     @Autowired
     private RefBookFactory refBookFactory;
+
+    @Autowired
+    private RefBookDao refBookDao;
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -104,7 +110,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «"+refBook.getName()+"»"));
+        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «" + refBook.getName() + "»"));
         executeScript(bindings, script, scriptLogger);
         scriptLogger.setMessageDecorator(null);
 
@@ -114,6 +120,55 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceException("Произошли ошибки в скрипте импорта справочника.");
+        }
+    }
+
+    @Override
+    public String getScript(Long refBookId) {
+
+        StringWriter writer = new StringWriter();
+
+        RefBook refBook = refBookFactory.get(refBookId);
+
+        if (refBook.getScriptId() != null) {
+            BlobData blobData = blobDataService.get(refBook.getScriptId());
+
+            try {
+                IOUtils.copy(blobData.getInputStream(), writer, "UTF-8");
+            } catch (IOException e) {
+                throw new ServiceException(ERROR_MSG, e);
+            }
+        }
+
+        return writer.toString();
+    }
+
+    @Override
+    public void saveScript(Long refBookId, String script) {
+
+        RefBook refBook = refBookFactory.get(refBookId);
+        // TODO добавить проверку на whitespace в скрипте
+        if (!script.isEmpty() && script.trim().length() > 0) {
+
+            InputStream inputStream;
+
+            try {
+                inputStream = IOUtils.toInputStream(script, "UTF-8");
+            } catch (IOException e) {
+                throw new ServiceException(ERROR_MSG, e);
+            }
+
+            if (refBook.getScriptId() == null) {
+                String uuid = blobDataService.create(inputStream, null);
+                refBookDao.setScriptId(refBookId, uuid);
+            } else {
+                blobDataService.save(refBook.getScriptId(), inputStream);
+            }
+        } else {
+            if (refBook.getScriptId() != null) {
+                refBookDao.setScriptId(refBookId, null);
+                blobDataService.delete(refBook.getScriptId());
+            }
         }
     }
 

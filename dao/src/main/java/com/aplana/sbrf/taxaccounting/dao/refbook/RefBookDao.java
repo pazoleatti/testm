@@ -337,6 +337,13 @@ public interface RefBookDao {
     List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records);
 
     /**
+     * Устанавливает SCRIPT_ID для справочника
+     * @param refBookId идентификатор справочника
+     * @param scriptId идентификатор скрипта
+     */
+    void setScriptId(Long refBookId, String scriptId);
+
+    /**
      * Создает новые записи в справочнике
      * @param refBookId код справочника
      * @param version дата актуальности новых записей
