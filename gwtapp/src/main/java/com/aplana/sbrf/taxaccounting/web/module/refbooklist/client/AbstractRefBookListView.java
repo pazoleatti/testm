@@ -20,7 +20,6 @@ import java.util.List;
 public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         implements AbstractRefBookListPresenter.MyView {
 
-    public static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
     @UiField
     GenericDataGrid<TableModel> formDataTable;
     @UiField
