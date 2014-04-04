@@ -11,9 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.SaveDepartmentCombinedResult;
@@ -24,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -36,6 +35,15 @@ import static java.util.Arrays.asList;
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
 
+    private static final String FORM_WARN = "В налоговой форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+    private static final String FORM_WARN_S = "В форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+
+    private static final String DECLARATION_WARN = "В декларации \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+    private static final String DECLARATION_WARN_D = "В уведомлении \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+
+    @Autowired
+    private TAUserService userService;
+
     @Autowired
     private PeriodService reportService;
 
@@ -46,7 +54,19 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private DeclarationDataSearchService declarationDataSearchService;
 
     @Autowired
+    private FormDataSearchService formDataSearchService;
+
+    @Autowired
+    private FormDataService formDataService;
+
+    @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    DataRowService dataRowService;
+
+    @Autowired
+    DepartmentService departmentService;
 
     public SaveDepartmentCombinedHandler() {
         super(SaveDepartmentCombinedAction.class);
@@ -171,19 +191,49 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);
             }
 
+            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
+            String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
+            String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
+
+
             DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
             declarationDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
             declarationDataFilter.setDepartmentIds(asList(action.getDepartment()));
             declarationDataFilter.setSearchOrdering(DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME);
             declarationDataFilter.setStartIndex(0);
             declarationDataFilter.setCountOfRecords(10);
+            declarationDataFilter.setTaxType(action.getTaxType());
             PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
-            String text = "";
             for(DeclarationDataSearchResultItem item: page) {
-                if (text != "") text += ", ";
-                text += item.getDeclarationType();
+                logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? DECLARATION_WARN_D : DECLARATION_WARN, item.getDeclarationType(), departmentName, periodName));
+                result.setDeclarationFormFound(true);
             }
-            result.setDeclarationTypes(text);
+
+            FormDataFilter formDataFilter = new FormDataFilter();
+            formDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
+            ArrayList<Long> formTypeIds = new ArrayList<Long>();
+            formTypeIds.add(372L); // приложение 5
+            formTypeIds.add(500L); // сводная 5
+            formDataFilter.setFormTypeId(formTypeIds);
+            formDataFilter.setFormState(WorkflowState.ACCEPTED);
+            formDataFilter.setTaxType(action.getTaxType());
+            TAUserInfo userInfo = new TAUserInfo();
+            userInfo.setIp("127.0.0.1");
+            userInfo.setUser(userService.getUser(TAUser.SYSTEM_USER_ID));
+            boolean manual = true;
+            List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+            for(Long formDataId : formDataIds) {
+                FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
+                PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(userInfo, formDataId, null, true, manual);
+                for(DataRow<Cell> dataRow : resultDataRow) {
+                    BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
+                    if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
+                        logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? FORM_WARN_S : FORM_WARN, formData.getFormType().getName(), departmentName, periodName));
+                        result.setDeclarationFormFound(true);
+                        break;
+                    }
+                }
+            }
 
             // Запись ошибок в лог при наличии
             if (!logger.getEntries().isEmpty()) {
