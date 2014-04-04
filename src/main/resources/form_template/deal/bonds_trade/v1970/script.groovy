@@ -190,7 +190,7 @@ void logicCheck() {
         // Проверка цены сделки
         def res = null
 
-        if (transactionSumRub != null && bondCount != null) {
+        if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
 
