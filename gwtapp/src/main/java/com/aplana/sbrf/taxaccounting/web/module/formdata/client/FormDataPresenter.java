@@ -393,7 +393,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
         if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
-            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \"Создана\"?", new DialogHandler() {
+            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
                 @Override
                 public void yes() {
                     LogCleanEvent.fire(FormDataPresenter.this);
