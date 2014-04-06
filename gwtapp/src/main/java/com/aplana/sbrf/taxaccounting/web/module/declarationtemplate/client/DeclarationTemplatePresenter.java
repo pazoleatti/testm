@@ -62,27 +62,22 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
     @Override
     @ProxyEvent
     public void onCreateDTType(final DTCreateNewTypeEvent event) {
-        CreateNewDTTypeAction action = new CreateNewDTTypeAction();
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateNewDTTypeResult>() {
-                    @Override
-                    public void onSuccess(CreateNewDTTypeResult result) {
-                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
-                                with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
-                        declarationTemplateExt = new DeclarationTemplateExt();
-                        declarationTemplate = new DeclarationTemplate();
-                        declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
-                        declarationTemplate.setVersion(new Date());
-                        DeclarationType declarationType = new DeclarationType();
-                        declarationType.setId(0);
-                        declarationType.setName("");
-                        declarationType.setStatus(VersionedObjectStatus.DRAFT);
-                        declarationType.setTaxType(event.getTaxType());
-                        declarationTemplate.setType(declarationType);
-                        getView().setDeclarationTemplate(declarationTemplateExt);
-                        TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
-                    }
-                }, this).addCallback(new ManualRevealCallback<CreateNewDTTypeResult>(DeclarationTemplatePresenter.this)));
+        declarationTemplateExt = new DeclarationTemplateExt();
+        declarationTemplate = new DeclarationTemplate();
+        declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+        declarationTemplate.setVersion(new Date());
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setId(0);
+        declarationType.setName("");
+        declarationType.setStatus(VersionedObjectStatus.DRAFT);
+        declarationType.setTaxType(event.getTaxType());
+        declarationTemplate.setType(declarationType);
+        getView().setDeclarationTemplate(declarationTemplateExt);
+        TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
+        RevealContentEvent.fire(DeclarationTemplatePresenter.this, RevealContentTypeHolder.getMainContent(), DeclarationTemplatePresenter.this);
+        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                with(DeclarationTemplateTokens.declarationTemplateId, "0").build());
+
     }
 
     @ProxyCodeSplit
@@ -125,11 +120,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	@Override
-	public boolean useManualReveal() {
-		return true;
-	}
-
-	@Override
 	public void reset() {
 		setDeclarationTemplate();
 	}
@@ -158,19 +148,49 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             return;
         }
 
-        UpdateDeclarationAction action = new UpdateDeclarationAction();
-		action.setDeclarationTemplateExt(declarationTemplateExt);
-        dispatcher.execute(action, CallbackUtils
-				.defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
-					@Override
-					public void onSuccess(UpdateDeclarationResult result) {
-                        LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
-						MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
-                        declarationTemplate.setId(result.getDeclarationTemplateId());
-                        placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
-                                with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
-					}
-				}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+        if (declarationTemplate.getId() == null && declarationTemplate.getType().getId() == 0){
+            CreateNewDeclarationTypeAction action = new CreateNewDeclarationTypeAction();
+            action.setDeclarationTemplateExt(declarationTemplateExt);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDeclarationTypeResult>() {
+                @Override
+                public void onSuccess(CreateNewDeclarationTypeResult result) {
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                    MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                    declarationTemplate.setId(result.getDeclarationTemplateId());
+                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                            with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
+                    getView().setDeclarationTemplate(declarationTemplateExt);
+                }
+            }, this));
+        } else if (declarationTemplate.getId() == null && declarationTemplate.getType().getId() != 0){
+            CreateNewDTVersionAction action = new CreateNewDTVersionAction();
+            action.setDeclarationTemplateExt(declarationTemplateExt);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDTVersionResult>() {
+                @Override
+                public void onSuccess(CreateNewDTVersionResult result) {
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                    MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                    declarationTemplate.setId(result.getDeclarationTemplateId());
+                    placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                            with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
+                    getView().setDeclarationTemplate(declarationTemplateExt);
+                }
+            }, this));
+        } else {
+            UpdateDeclarationAction action = new UpdateDeclarationAction();
+            action.setDeclarationTemplateExt(declarationTemplateExt);
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
+                        @Override
+                        public void onSuccess(UpdateDeclarationResult result) {
+                            LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
+                            MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                            /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
+                                    with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());*/
+                        }
+                    }, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+        }
+
 	}
 
 	/**
@@ -196,7 +216,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onSuccess(SetActiveResult result) {
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
-                setDeclarationTemplate();
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
                             "Найдены экземпляры деклараций",
@@ -208,7 +227,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                                 }
                             });
                 } else {
-                    setDeclarationTemplate();
+                    declarationTemplate.setStatus(VersionedObjectStatus.getStatusById(result.getStatus()));
+                    getView().activateButtonName(result.getStatus() == 0 ? "Вывести из действия" : "Ввести в действие");
                 }
             }
         }, this));

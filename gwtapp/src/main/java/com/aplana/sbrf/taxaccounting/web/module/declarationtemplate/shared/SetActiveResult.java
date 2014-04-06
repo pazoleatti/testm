@@ -8,6 +8,15 @@ import com.gwtplatform.dispatch.shared.Result;
 public class SetActiveResult implements Result {
     private String uuid;
     private boolean isSetActiveSuccessfully;
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public String getUuid() {
         return uuid;

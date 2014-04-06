@@ -35,12 +35,12 @@ public class GetDTHistoryHandler extends AbstractActionHandler<GetDTHistoryActio
 
     @Override
     public GetDTHistoryResult execute(GetDTHistoryAction action, ExecutionContext executionContext) throws ActionException {
-        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTemplateId(action.getTypeId());
+        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTypeIds(action.getTypeId());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
         for (TemplateChanges changes : changeses){
             TemplateChangesExt templateChangesExt = new TemplateChangesExt();
             templateChangesExt.setTemplateChanges(changes);
-            templateChangesExt.setEdition(declarationTemplateService.get(changes.getId()).getEdition());
+            templateChangesExt.setEdition(declarationTemplateService.get(changes.getDeclarationTemplateId()).getEdition());
             changesList.add(templateChangesExt);
         }
         GetDTHistoryResult result = new GetDTHistoryResult();

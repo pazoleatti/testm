@@ -35,7 +35,7 @@ public class GetDTVersionChangesHandler extends AbstractActionHandler<GetDTVersi
     @Override
     public GetDTVersionChangesResult execute(GetDTVersionChangesAction action, ExecutionContext executionContext) throws ActionException {
         GetDTVersionChangesResult result = new GetDTVersionChangesResult();
-        List<TemplateChanges> changeses = templateChangesService.getByFormTemplateId(action.getDeclarationTemplateId());
+        List<TemplateChanges> changeses = templateChangesService.getByDeclarationTemplateId(action.getDeclarationTemplateId());
         List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(action.getDeclarationTemplateId());
         for (TemplateChanges changes : changeses){

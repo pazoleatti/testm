@@ -76,7 +76,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.putNextEntry(ze);
 			DeclarationTemplateContent dtc = new DeclarationTemplateContent();
 			dtc.setType(dt.getType());
-			dtc.setVersion(dt.getVersion());
+			//dtc.setVersion(dt.getVersion());
 			JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.marshal(dtc, zos);
@@ -118,7 +118,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 					dtc = (DeclarationTemplateContent) jaxbUnmarshaller.
 							unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
 					dt.setType(dtc.getType());
-					dt.setVersion(dtc.getVersion());
+					//dt.setVersion(dtc.getVersion());
 				}
 				if (files.get("script.groovy").length != 0) {
 					dt.setCreateScript(new String(files.get("script.groovy")));

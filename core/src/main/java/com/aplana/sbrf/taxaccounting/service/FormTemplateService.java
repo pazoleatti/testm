@@ -163,5 +163,11 @@ public interface FormTemplateService {
      */
     boolean isMonthly(int formId);
 
-    int updateVersionStatus(int versionStatus, int formTemplateId);
+    /**
+     * Обновленее статуса деклааации
+     * @param versionStatus статус
+     * @param formTemplateId ижентификатор
+     * @return идентифиактор
+     */
+    int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
 }
