@@ -12,4 +12,6 @@ public interface TemplateChangesService {
     int save(TemplateChanges templateChanges);
     List<TemplateChanges> getByFormTemplateId(int formTemplateId);
     List<TemplateChanges> getByDeclarationTemplateId(int declarationTemplateId);
+    List<TemplateChanges> getByFormTypeIds(int ftTypeId);
+    List<TemplateChanges> getByDeclarationTypeIds(int dtTypeId);
 }

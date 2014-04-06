@@ -13,4 +13,5 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void uploadDectSuccess();
 	void uploadDectFail(String msg);
     int getDeclarationId();
+    void onHistoryClicked();
 }

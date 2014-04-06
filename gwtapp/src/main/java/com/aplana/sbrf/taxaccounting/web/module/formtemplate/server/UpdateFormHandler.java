@@ -48,21 +48,12 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 		Logger logger = new Logger();
 		UpdateFormResult result = new UpdateFormResult();
 
-        int formTemplateId = 0;
-
         makeDates(action);
         formTemplateService.validateFormTemplate(action.getForm(), logger);
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
         }
-		if (logger.getEntries().isEmpty() && action.getForm().getId() != null && action.getForm().getType().getId() != 0) {
-			/*formTemplateService.save(action.getForm());*/
-            formTemplateId = mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
-		} else if(logger.getEntries().isEmpty() && action.getForm().getId() == null && action.getForm().getType().getId() != 0){
-            formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
-        } else if(logger.getEntries().isEmpty() && action.getForm().getId() == null && action.getForm().getType().getId() == 0){
-            formTemplateId = mainOperatingService.createNewType(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
-        }
+        int formTemplateId = mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
 
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));

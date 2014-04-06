@@ -164,4 +164,11 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
         }
 
     }
+
+    @UiHandler("historyVersion")
+    void onHistoryClick(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onHistoryClicked();
+        }
+    }
 }

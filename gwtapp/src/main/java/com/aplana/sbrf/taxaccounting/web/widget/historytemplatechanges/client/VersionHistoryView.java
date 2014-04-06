@@ -9,7 +9,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -68,7 +67,7 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
         versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
-                return String.valueOf(object.getTemplateChanges().getEvent());
+                return String.valueOf(object.getTemplateChanges().getEvent().getName());
             }
         }, "Событие");
 

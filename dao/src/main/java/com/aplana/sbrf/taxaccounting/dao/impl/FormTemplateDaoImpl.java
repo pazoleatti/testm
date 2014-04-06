@@ -142,11 +142,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             }
 
             getJdbcTemplate().update(
-                    "update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
+                    "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
                             " monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
                     dataRowsXml,
                     dataHeadersXml,
-                    formTemplate.getEdition(),
                     formTemplate.getVersion(),
                     formTemplate.isFixedRows(),
                     formTemplate.getName() != null ? formTemplate.getName() : " ",

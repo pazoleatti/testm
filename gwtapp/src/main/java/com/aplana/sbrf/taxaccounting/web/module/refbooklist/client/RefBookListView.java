@@ -23,6 +23,8 @@ import com.google.inject.Inject;
  */
 public class RefBookListView extends AbstractRefBookListView implements RefBookListPresenter.MyView {
 
+    public static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
+
     @Inject
     @UiConstructor
     public RefBookListView(final Binder uiBinder) {
@@ -57,8 +59,8 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
             }
         };
 
-        formDataTable.addResizableColumn(nameColumn, AbstractRefBookListView.COLUMN_NAMES[0]);
-        formDataTable.addResizableColumn(typeColumn, AbstractRefBookListView.COLUMN_NAMES[1]);
+        formDataTable.addResizableColumn(nameColumn, COLUMN_NAMES[0]);
+        formDataTable.addResizableColumn(typeColumn, COLUMN_NAMES[1]);
         formDataTable.setColumnWidth(typeColumn, 400, Style.Unit.PX);
     }
 
