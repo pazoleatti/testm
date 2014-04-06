@@ -49,7 +49,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onEndLoad();
 
-    void onCreateManualClicked(boolean b);
+    void onCreateManualClicked();
 
     void onDeleteManualClicked();
 }

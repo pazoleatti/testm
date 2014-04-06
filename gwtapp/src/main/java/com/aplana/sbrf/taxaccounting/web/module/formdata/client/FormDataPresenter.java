@@ -115,7 +115,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onCreateManualClicked(boolean b) {
+    public void onCreateManualClicked() {
         //Сводная форма банка
         if (!existManual) {
             Dialog.confirmMessage("Подтверждение", "Создать для налоговой формы версию ручного ввода?", new DialogHandler() {
@@ -172,7 +172,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			getView().showSignersAnchor(false);
 			getView().showRecalculateButton(false);
 			getView().showOriginalVersionButton(false);
-            getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, false, canCreatedManual);
+
+            getView().showEditAnchor(false);
+            getView().showModeLabel(false, false);
+            getView().showModeAnchor(false, false);
+            getView().showManualAnchor(false);
 		}
 	}
 
@@ -186,12 +190,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         if (formData.isManual()) {
             CheckManualAction action = new CheckManualAction();
             action.setFormDataId(formData.getId());
-            dispatcher.execute(action, new AbstractCallback<CheckManualResult>() {
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
                 @Override
                 public void onSuccess(CheckManualResult result) {
                     revealFormData(readOnlyMode, formData.isManual(), null);
                 }
-            });
+            }, this));
         } else {
             revealFormData(readOnlyMode, formData.isManual(), null);
         }
@@ -269,7 +273,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	 */
 	@Override
 	public void onSaveClicked() {
-        System.out.println("modifiedRows: "+modifiedRows.size());
         SaveFormDataAction action = new SaveFormDataAction();
         action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
@@ -474,7 +477,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 existManual = result.existManual();
                                 canCreatedManual = result.canCreatedManual();
                                 isBankSummaryForm = result.isBankSummaryForm();
-                                getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, readOnlyMode, canCreatedManual);
                     			
                     			// Регистрируем хендлер на закрытие
                     			if (closeFormDataHandlerRegistration !=null ){

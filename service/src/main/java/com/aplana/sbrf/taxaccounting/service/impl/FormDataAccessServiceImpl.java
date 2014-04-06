@@ -270,9 +270,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     }
                     return;
                 case ACCEPTED:
-                    // Нельзя редактировать в состоянии "Принята"
-                    throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR, formData.getFormType().getName(),
-                            formData.getState().getName()));
+                    if (!manual) {
+                        // Нельзя редактировать в состоянии "Принята"
+                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR, formData.getFormType().getName(),
+                                formData.getState().getName()));
+                    }
             }
         } else {
             // Проверка периода ввода остатков
@@ -289,9 +291,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         return;
                     case ACCEPTED:
-                        // Нельзя редактировать в состоянии "Принята"
-                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                        if (!manual) {
+                            // Нельзя редактировать в состоянии "Принята"
+                            throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                    formData.getFormType().getName(), formData.getState().getName()));
+                        }
                 }
             }
 

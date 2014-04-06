@@ -347,7 +347,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("manualAnchor")
     void onCreateManualClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onCreateManualClicked(false);
+            getUiHandlers().onCreateManualClicked();
         }
     }
 
@@ -503,7 +503,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
-//		checkButton.setVisible(show);
+		//checkButton.setVisible(show);
 	}
 
 	@Override
@@ -521,7 +521,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         editModeLabel.setVisible(show);
     }
 
-	@Override
+    @Override
+    public void showEditAnchor(boolean show) {
+        editAnchor.setVisible(show);
+    }
+
+    @Override
 	public void showDeleteFormButton(boolean show) {
 		deleteFormButton.setVisible(show);
 	}
@@ -531,7 +536,39 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		signersAnchor.setVisible(show);
 	}
 
-	@Override
+    @Override
+    public void showModeLabel(boolean show, boolean manual) {
+        modeLabel.setVisible(show);
+        if (manual) {
+            modeLabel.setText("Версия ручного ввода");
+        } else {
+            modeLabel.setText("Автоматическая версия");
+        }
+    }
+
+    @Override
+    public void showModeAnchor(boolean show, boolean manual) {
+        modeAnchor.setVisible(show);
+        if (manual) {
+            modeAnchor.setText("К автоматической версии");
+            modeAnchor.setImg("resources/img/cogwheel-16.png");
+        } else {
+            modeAnchor.setText("К версии ручного ввода");
+            modeAnchor.setImg("resources/img/pencil-16.png");
+        }
+    }
+
+    @Override
+    public void showManualAnchor(boolean show) {
+        manualAnchor.setVisible(show);
+    }
+
+    @Override
+    public void showDeleteManualAnchor(boolean show) {
+        deleteManualAnchor.setVisible(show);
+    }
+
+    @Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
@@ -633,34 +670,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             this.taxType = taxType;
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
-        }
-    }
-
-    @Override
-    public void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual) {
-        //System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual + "; "+manual + " ;"+ bankSummaryForm + "; " +canCreatedManual);
-        editAnchor.setVisible(readOnlyMode);
-        recalculateButton.setVisible(!readOnlyMode && !manual);
-        if (bankSummaryForm) {
-            boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
-            modeLabel.setVisible(readOnlyMode);
-            modeAnchor.setVisible(needShowMode);
-            manualAnchor.setVisible(!readOnlyMode && canCreatedManual && !existManual);
-            deleteManualAnchor.setVisible(manual && !readOnlyMode);
-            if (manual) {
-                modeAnchor.setText("К автоматической версии");
-                modeAnchor.setImg("resources/img/cogwheel-16.png");
-                modeLabel.setText("Версия ручного ввода");
-            } else {
-                modeAnchor.setText("К версии ручного ввода");
-                modeAnchor.setImg("resources/img/pencil-16.png");
-                modeLabel.setText("Автоматическая версия");
-            }
-        } else {
-            modeAnchor.setVisible(false);
-            modeAnchor.setVisible(false);
-            modeLabel.setVisible(false);
-            deleteManualAnchor.setVisible(false);
         }
     }
 
