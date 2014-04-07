@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRefBookRecordVersionAction, GetRefBookRecordVersionResult> {
 
     @Autowired
