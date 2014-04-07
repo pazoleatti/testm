@@ -106,6 +106,9 @@ def endDate = null
 @Field
 def currentDate = new Date()
 
+@Field
+def taxPeriod = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -228,7 +231,7 @@ void consolidation() {
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 // копирование данных по разделам
@@ -349,13 +352,7 @@ def calc10(def row, def lastDay) {
     tmp = ((row.cost / row.bondsCount) - row.upCost) * ((lastDay - row.buyDate) / row.circulationTerm) * row.bondsCount
     tmp = roundValue(tmp, 2)
 
-    // справочник 22 "Курс валют", атрибут 81 RATE - "Курс валют", атрибут 80 CODE_NUMBER - Цифровой код валюты
-    def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
-    def String cellName = getColumnName(row, 'currencyCode')
-    // TODO (Ramil Timerbaev) проверить (как и в рну 39.1)
-    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-            'CODE_NUMBER', currencyCode, lastDay, row.getIndex(), cellName, logger, true)
-    def rate = record?.RATE?.numberValue
+    def rate = getRate(row, lastDay)
     if (rate == null) {
         return null
     }
@@ -378,6 +375,12 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
+}
 
 // Получение импортируемых данных
 void importData() {
@@ -453,7 +456,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
         if (record30 != null) {
-            formDataService.checkReferenceValue(30, row.cell[1].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 1
+            formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         // графа 3 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
@@ -463,7 +467,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 4 - зависит от графы 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
         if (record84 != null) {
-            formDataService.checkReferenceValue(84, row.cell[4].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol = 4
+            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         // графа 5
@@ -517,4 +522,18 @@ void deleteNotFixedRows(def dataRows) {
         dataRows.removeAll(deleteRows)
         updateIndexes(dataRows)
     }
+}
+
+// Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
+def getRate(def row, def lastDay) {
+    if (row.issuer == null) {
+        return null
+    }
+    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
+    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
+    // получить id записи из справочника валют (15) по цифровому коду валюты
+    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+    // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
+    def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId?.toString(), lastDay, row.getIndex(), null, true)
+    return record22?.RATE?.value
 }
