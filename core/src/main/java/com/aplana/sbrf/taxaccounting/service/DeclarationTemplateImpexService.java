@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 public interface DeclarationTemplateImpexService {
 	
@@ -21,6 +22,6 @@ public interface DeclarationTemplateImpexService {
 	 * @param id
 	 * @param is
 	 */
-	void importDeclarationTemplate(TAUserInfo userInfo, Integer id, InputStream is);
+	DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id, InputStream is);
 
 }

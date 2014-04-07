@@ -19,6 +19,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -86,7 +88,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-		void setDeclarationTemplate(DeclarationTemplateExt declaration);
+        static final String ERROR_RESP = "errorUuid";
+        static final String SUCCESS_RESP = "uuid";
+        static final String ERROR = "error";
+
+        void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
 	}
@@ -288,12 +294,26 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	@Override
-	public void uploadDectSuccess() {
-		MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация импортирована");
+	public void uploadDectResponseWithUuid(String uuid) {
+        if (uuid != null && !uuid.equals("<pre></pre>")){
+            JSONValue jsonValue = JSONParser.parseLenient(uuid);
+            String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
+            LogAddEvent.fire(this, value);
+        }else {
+            MessageEvent.fire(DeclarationTemplatePresenter.this, "Форма сохранена");
+        }
 		setDeclarationTemplate();
 	}
 
-	@Override
+    @Override
+    public void uploadDectResponseWithErrorUuid(String uuid) {
+        JSONValue jsonValue = JSONParser.parseLenient(uuid);
+        String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
+        LogAddEvent.fire(this, value);
+        MessageEvent.fire(this, "Не удалось импортировать шаблон");
+    }
+
+    @Override
 	public void uploadDectFail(String msg) {
 		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
 	}

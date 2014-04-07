@@ -33,12 +33,15 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 		uploadFormTemplatePanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains("error")) {
+                if (event.getResults().contains(ERROR_RESP)) {
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid);
+                }else if (event.getResults().toLowerCase().contains(ERROR)) {
+                    getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
+                } else {
                     String uuid = event.getResults().replaceAll(respPattern, "$2");
-					getUiHandlers().uploadFormTemplateSuccess(uuid);
-				} else {
-					getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
-				}
+                    getUiHandlers().uploadFormTemplateSuccess(uuid);
+                }
 			}
 		});
 	}

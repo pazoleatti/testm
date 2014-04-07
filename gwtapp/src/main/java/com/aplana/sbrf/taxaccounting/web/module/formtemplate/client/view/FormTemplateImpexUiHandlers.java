@@ -6,4 +6,5 @@ public interface FormTemplateImpexUiHandlers extends UiHandlers {
 	void uploadFormTemplateSuccess(String uuid);
 	void uploadFormTemplateFail(String msg);
 	void downloadFormTemplate();
+    void uploadDectResponseWithErrorUuid(String uuid);
 }
