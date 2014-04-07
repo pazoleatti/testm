@@ -465,7 +465,6 @@ def getReportPeriodEndDate() {
 void importData() {
     def tmpRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'currencyCode'), null)
-    // getColumnName(tmpRow, '')
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 2)
     def headerMapping = [

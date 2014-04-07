@@ -83,11 +83,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 def Date date, boolean required = true) {
@@ -172,8 +167,7 @@ def String getKnu(def code) {
     return getRefBookValue(28, code)?.CODE?.stringValue
 }
 
-/* Получение импортируемых данных */
-
+// Получение импортируемых данных
 void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
@@ -194,8 +188,7 @@ void importData() {
     addData(xml, 1)
 }
 
-/* Заполнить форму данными */
-
+// Заполнить форму данными
 void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)

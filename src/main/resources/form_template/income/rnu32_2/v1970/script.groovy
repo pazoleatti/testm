@@ -65,6 +65,9 @@ def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 @Field
 def endDate = null
 
+@Field
+def taxPeriod = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -138,7 +141,7 @@ void consolidation() {
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
             if (it.formTypeId == formData.formType.id) {
@@ -249,7 +252,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
 }
 
 def getFormDataRNU32_1() {
-    def form = formDataService.find(330, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def form = formDataService.findMonth(330, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
     return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
 }
 
@@ -397,4 +400,11 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     }
     return endDate
+}
+
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
 }

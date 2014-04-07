@@ -13,6 +13,7 @@ import groovy.transform.Field
  */
 
 // 1 - number          - № пп
+// fix
 // 2 - inventoryNumber - Инвентарный номер
 // 3 - usefulDate      - Дата ввода в эксплуатацию
 // 4 - amount          - Сумма, включаемая в состав материальных расходов
@@ -84,6 +85,13 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    // получить строку "итого"
+    def totalRow = getDataRow(dataRows, 'total')
+    // очистить итоги
+    totalColumns.each {
+        totalRow[it] = null
+    }
+
     // удалить строку "итого"
     deleteAllAliased(dataRows)
     // сортировка
@@ -93,10 +101,10 @@ void calc() {
     for (def row : dataRows) {
         row.number = ++rowNumber
     }
-    //расчитываем новые итоговые значения
-    def totalRow = getTotalRow(dataRows)
+    // добавить строку "итого"
+    calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
+    dataRowHelper.update(dataRows)
 }
 
 void logicCheck() {
@@ -123,56 +131,21 @@ void logicCheck() {
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
-def getTotalRow(def dataRows) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total')
-    newRow.inventoryNumber = 'Итого'
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, newRow, totalColumns)
-    return newRow
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Инвентарный номер',
-            (xml.row[0].cell[2]): 'Дата ввода в эксплуатацию',
-            (xml.row[0].cell[3]): 'Сумма, включаемая в состав материальных расходов',
+            (xml.row[0].cell[2]): 'Инвентарный номер',
+            (xml.row[0].cell[3]): 'Дата ввода в эксплуатацию',
+            (xml.row[0].cell[4]): 'Сумма, включаемая в состав материальных расходов',
             (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[1]): '2',
-            (xml.row[1].cell[2]): '3',
-            (xml.row[1].cell[3]): '4'
+            (xml.row[1].cell[2]): '2',
+            (xml.row[1].cell[3]): '3',
+            (xml.row[1].cell[4]): '4'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -186,11 +159,20 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
+
+    def dataRows = dataRowHelper.allCached
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalColumns.each { alias ->
+        totalRow[alias] = null
+    }
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -206,7 +188,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
             continue
         }
 
@@ -225,6 +207,8 @@ void addData(def xml, int headRowCount) {
         // графа 1
         newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
+        // fix
+        xmlIndexCol++
         // графа 2
         newRow.inventoryNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
@@ -236,5 +220,6 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    rows.add(totalRow)
     dataRowHelper.save(rows)
 }
