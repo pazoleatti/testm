@@ -10,6 +10,8 @@ import groovy.transform.Field
 /**
  * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта (16)
  *
+ * formTemplateId=391
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -73,8 +75,8 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealType']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNumber', 'docDate',
-        'dealNumber', 'dealDate', 'dealType', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'dealType', 'currencyCode', 'countryDealCode', 'price',
+        'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
