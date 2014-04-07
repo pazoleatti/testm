@@ -7,6 +7,8 @@ import groovy.transform.Field
 /**
  * 389 - Предоставление межбанковских кредитов (14)
  *
+ * formTemplateId=389
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -65,8 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'count'
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNumber', 'docDate',
-        'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'count', 'sum', 'price', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
