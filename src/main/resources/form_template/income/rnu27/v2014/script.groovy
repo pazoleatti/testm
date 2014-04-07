@@ -93,17 +93,6 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.MIGRATION:
-        importData()
-        if (!hasError()) {
-            def data = formDataService.getDataRowHelper(formData)
-            def dataRows = data.getAllCached()
-            addAllStatic(dataRows)
-            def total = getCalcTotalRow(dataRows)
-            dataRows.add(total)
-            data.save(dataRows)
-        }
-        break
 }
 
 /**
