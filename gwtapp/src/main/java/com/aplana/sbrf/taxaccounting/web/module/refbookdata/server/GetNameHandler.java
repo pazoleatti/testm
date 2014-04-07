@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetNameResult> {
 
 	@Autowired

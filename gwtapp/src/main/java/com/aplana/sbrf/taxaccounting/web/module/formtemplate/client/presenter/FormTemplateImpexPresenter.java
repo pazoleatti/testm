@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTe
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateImpexUiHandlers;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,6 +36,10 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateImpexUiHandlers> {
+        static final String ERROR_RESP = "errorUuid";
+        static final String SUCCESS_RESP = "uuid";
+        static final String ERROR = "error";
+
 		void setFormId(int formId);
 	}
 
@@ -52,9 +58,13 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	@Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null && !uuid.equals("<pre></pre>"))
-            LogAddEvent.fire(this, uuid);
-		MessageEvent.fire(this, "Форма импортирована");
+        if (uuid != null && !uuid.equals("<pre></pre>")){
+            JSONValue jsonValue = JSONParser.parseLenient(uuid);
+            String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
+            LogAddEvent.fire(this, value);
+        }else {
+            MessageEvent.fire(FormTemplateImpexPresenter.this, "Форма сохранена");
+        }
 		FormTemplateSaveEvent.fire(this);
 	}
 
@@ -67,4 +77,12 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	public void downloadFormTemplate() {
 		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
 	}
+
+    @Override
+    public void uploadDectResponseWithErrorUuid(String uuid) {
+        JSONValue jsonValue = JSONParser.parseLenient(uuid);
+        String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
+        LogAddEvent.fire(this, value);
+        MessageEvent.fire(FormTemplateImpexPresenter.this, "Не удалось импортировать шаблон");
+    }
 }
