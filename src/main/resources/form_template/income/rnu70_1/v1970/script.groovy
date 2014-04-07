@@ -1,11 +1,11 @@
 package form_template.income.rnu70_1.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import groovy.transform.Field
+
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import groovy.transform.Field
 
 /**
  * (РНУ-70.1) Регистр налогового учёта уступки права требования до наступления предусмотренного кредитным договором
@@ -34,7 +34,7 @@ import groovy.transform.Field
  * 15   loss                     -      Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом
  *                                      ст. 269 НК РФ за период от даты уступки  права требования до даты платежа по
  *                                      договору
- **/
+ */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -62,7 +62,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
@@ -84,7 +84,7 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['rowNumber', 'name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
+def allColumns = ['rowNumber', 'fix', 'name', 'inn', 'number', 'date', 'cost', 'repaymentDate', 'concessionsDate', 'income',
         'financialResult1', 'currencyDebtObligation', 'rateBR', 'interestRate', 'perc', 'loss']
 
 // Редактируемые атрибуты
@@ -142,11 +142,6 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
-}
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
 }
 
 /**
@@ -237,9 +232,6 @@ void logicCheck() {
         if (row.concessionsDate != null && !isInPeriod(row.concessionsDate)) {
             logger.error(errorMsg + '«Графа 8» не принадлежит отчетному периоду')
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(15, row, "currencyDebtObligation")
     }
 
     checkSubTotalSum(dataRows, totalColumns, logger, true)
@@ -291,7 +283,7 @@ BigDecimal getPerc(def dataRow) {
             return null
         if (isRoublel(dataRow)) {
             if (dataRow.concessionsDate.after(firstJan2010) && dataRow.concessionsDate.before(thirtyFirstDec2013)) {
-                if (dataRow.rateBR == null || dataRow.interestRate==null)
+                if (dataRow.rateBR == null || dataRow.interestRate == null)
                     return null
                 if (dataRow.rateBR * 1.8 <= dataRow.interestRate) {
                     x = getXByRateBR(dataRow, repaymentDateDuration, 1.8)
@@ -325,7 +317,7 @@ BigDecimal getPerc(def dataRow) {
  * вычисляем значение для графы 15
  */
 def getLoss(def dataRow) {
-    if (dataRow.cost < 0 && dataRow.financialResult1!=null && dataRow.perc!=null) {
+    if (dataRow.cost < 0 && dataRow.financialResult1 != null && dataRow.perc != null) {
         return dataRow.financialResult1.abs() - dataRow.perc
     } else {
         return new BigDecimal(0)
@@ -362,7 +354,7 @@ def getCountDaysInYear(def date) {
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * «Графа 13» * («Графа 7» - «Графа 8») / 365(366);
 BigDecimal getXByInterestRate(def dataRow, def repaymentDateDuration) {
-    if (dataRow.income == null || dataRow.interestRate == null || repaymentDateDuration== null)
+    if (dataRow.income == null || dataRow.interestRate == null || repaymentDateDuration == null)
         return null
     x2 = dataRow.income * dataRow.interestRate * repaymentDateDuration
     return x2.setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -371,7 +363,7 @@ BigDecimal getXByInterestRate(def dataRow, def repaymentDateDuration) {
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * «Графа 12» * index * («Графа 7» – «Графа 8») / 365(366)
 BigDecimal getXByRateBR(def dataRow, def repaymentDateDuration, BigDecimal index) {
-    if (dataRow.income == null || dataRow.rateBR == null || repaymentDateDuration== null || index== null)
+    if (dataRow.income == null || dataRow.rateBR == null || repaymentDateDuration == null || index == null)
         return null
     x = dataRow.income * dataRow.rateBR * index * repaymentDateDuration
     return x.setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -380,7 +372,7 @@ BigDecimal getXByRateBR(def dataRow, def repaymentDateDuration, BigDecimal index
 // вспомогательная функция для расчета графы 14
 // «Графа 14» = «Графа 9» * 15% * («Графа 7» - «Графа 8») / 365(366);
 BigDecimal getXByIncomeOnly(def dataRow, def repaymentDateDuration, BigDecimal index) {
-    if (dataRow.income == null || repaymentDateDuration== null || index== null)
+    if (dataRow.income == null || repaymentDateDuration == null || index == null)
         return null
     x = dataRow.income * index * repaymentDateDuration
     return x.setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -404,7 +396,8 @@ def getReportDate() {
 def getTotalRow(def dataRows) {
     def newRow = formData.createDataRow()
     newRow.setAlias('total')
-    newRow.name = "Всего"
+    newRow.fix = "Всего"
+    newRow.getCell('fix').colSpan = 2
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -420,7 +413,7 @@ def getCalcTotalName(def dataRows) {
     dataRows.eachWithIndex { row, i ->
         DataRow<Cell> nextRow = getRow(i + 1, dataRows)
         // если код расходы поменялся то создать новую строку "Итого по <Наименование контрагента>"
-        if (nextRow?.name != row.name || i == (dataRows.size()-1)) {
+        if (nextRow?.name != row.name || i == (dataRows.size() - 1)) {
             totalRows.put(i + 1, getCalcTotalNameRow(row, dataRows))
         }
     }
@@ -434,8 +427,8 @@ def getCalcTotalNameRow(def row, def dataRows) {
     def tRow = getPrevRowWithoutAlias(row, dataRows)
     def newRow = formData.createDataRow()
     newRow.setAlias('total' + getRowNumber(tRow.name, dataRows))
-    newRow.name = 'Итого по ' + tRow.name
-    newRow.getCell('name').colSpan = 7
+    newRow.fix = 'Итого по ' + tRow.name
+    newRow.getCell('fix').colSpan = 2
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
         newRow.getCell(it).editable = false
@@ -530,44 +523,32 @@ def getXML(def String startStr, def String endStr) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 2)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Наименование контрагента',
-            (xml.row[0].cell[2]): 'ИНН (его аналог)',
-            (xml.row[0].cell[3]): 'Договор цессии',
-            (xml.row[0].cell[5]): 'Стоимость права требования',
-            (xml.row[0].cell[6]): 'Дата погашения основного долга',
-            (xml.row[0].cell[7]): 'Дата уступки права требования',
-            (xml.row[0].cell[8]): 'Доход (выручка) от уступки права требования',
-            (xml.row[0].cell[9]): 'Финансовый результат уступки права требования',
-            (xml.row[0].cell[10]): 'Валюта долгового обязательства',
-            (xml.row[0].cell[11]): 'Ставка Банка России',
-            (xml.row[0].cell[12]): 'Ставка процента, установленная соглашением сторон',
-            (xml.row[0].cell[13]): 'Проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
-            (xml.row[0].cell[14]): 'Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
-            (xml.row[1].cell[3]): 'Номер',
-            (xml.row[1].cell[4]): 'Дата',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12',
-            (xml.row[2].cell[12]): '13',
-            (xml.row[2].cell[13]): '14',
-            (xml.row[2].cell[14]): '15'
+            (xml.row[0].cell[2]): 'Наименование контрагента',
+            (xml.row[0].cell[3]): 'ИНН (его аналог)',
+            (xml.row[0].cell[4]): 'Договор цессии',
+            (xml.row[0].cell[6]): 'Стоимость права требования',
+            (xml.row[0].cell[7]): 'Дата погашения основного долга',
+            (xml.row[0].cell[8]): 'Дата уступки права требования',
+            (xml.row[0].cell[9]): 'Доход (выручка) от уступки права требования',
+            (xml.row[0].cell[10]): 'Финансовый результат уступки права требования',
+            (xml.row[0].cell[11]): 'Валюта долгового обязательства',
+            (xml.row[0].cell[12]): 'Ставка Банка России',
+            (xml.row[0].cell[13]): 'Ставка процента, установленная соглашением сторон',
+            (xml.row[0].cell[14]): 'Проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
+            (xml.row[0].cell[15]): 'Убыток, превышающий проценты по долговому обязательству, рассчитанные с учётом ст. 269 НК РФ за период от даты уступки права требования до даты платежа по договору',
+            (xml.row[1].cell[4]): 'Номер',
+            (xml.row[1].cell[5]): 'Дата',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..15).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -579,8 +560,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -599,7 +580,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -613,47 +594,43 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-
-        // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
-
         // графа 2
-        newRow.name = row.cell[1].text()
+        newRow.name = row.cell[2].text()
 
         // графа 3
-        newRow.inn = row.cell[2].text()
+        newRow.inn = row.cell[3].text()
 
         // графа 4
-        newRow.number = row.cell[3].text()
+        newRow.number = row.cell[4].text()
 
         // графа 5
-        newRow.date = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 6
-        newRow.cost = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.cost = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         // графа 7
-        newRow.repaymentDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
 
         // графа 8
-        newRow.concessionsDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.concessionsDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
 
         // графа 9
-        newRow.income = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.income = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
 
         // графа 10
 
         // графа 11
-        if (row.cell[10].text() == "Российский рубль") { // TODO http://jira.aplana.com/browse/SBRFACCTAX-6288
-            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", xlsIndexRow, 10 + colOffset)
+        if (row.cell[11].text() == "Российский рубль") { // TODO http://jira.aplana.com/browse/SBRFACCTAX-6288
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", xlsIndexRow, 11 + colOffset)
         } else {
-            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[10].text(), xlsIndexRow, 10 + colOffset)
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[11].text(), xlsIndexRow, 11 + colOffset)
         }
 
         // графа 12
 
         // графа 13
-        newRow.interestRate = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, false)
 
         rows.add(newRow)
     }
