@@ -60,7 +60,7 @@ public class AdminRefBookListView extends AbstractRefBookListView implements Adm
         TextColumn<TableModel> visibleColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel tableModel) {
-                return tableModel.isVisible() ? "Скрытый" : "Видимый";
+                return tableModel.isVisible() ? "Видимый" : "Скрытый";
             }
         };
 

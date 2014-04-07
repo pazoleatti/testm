@@ -2,6 +2,7 @@ package form_template.income.rnu5.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -74,16 +75,15 @@ def reportPeriodEndDate = null
 @Field
 def totalColumns = ['sum']
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
@@ -125,28 +125,26 @@ void calc() {
 
     // посчитать "итого по коду"
     def totalRows = [:]
-    def tmp = null
+    def code = null
     def sum = 0
     dataRows.eachWithIndex { row, i ->
-        if (tmp == null) {
-            tmp = row.number
+        if (code == null) {
+            code = getKnu(row.number)
         }
         // если код расходы поменялся то создать новую строку "итого по коду"
-        if (tmp != row.number) {
-            def code = getKnu(tmp)
-            totalRows.put(i, getNewRow(code, sum, tmp))
+        if (code != getKnu(row.number)) {
+            totalRows.put(i, getNewRow(code, sum))
             sum = 0
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
         if (i == dataRows.size() - 1) {
             sum += (row.sum ?: 0)
-            def code = getKnu(row.number)
-            def totalRowCode = getNewRow(code, sum, row.number)
+            code = getKnu(row.number)
+            def totalRowCode = getNewRow(code, sum)
             totalRows.put(i + 1, totalRowCode)
             sum = 0
         }
         sum += (row.sum ?: 0)
-        tmp = row.number
     }
 
     // добавить "итого по коду" в таблицу
@@ -155,7 +153,7 @@ void calc() {
         dataRowHelper.insert(row, index + i++)
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    dataRows.add(calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
@@ -206,10 +204,11 @@ void logicCheck() {
         }
 
         // 4. Арифметическая проверка итоговых значений по каждому <Коду классификации расходов>
-        if (sumRowsByCode[""+row.number] != null) {
-            sumRowsByCode[""+row.number] += row.sum ?: 0
+        def code = getKnu(row.number)
+        if (sumRowsByCode[code] != null) {
+            sumRowsByCode[code] += row.sum ?: 0
         } else {
-            sumRowsByCode[""+row.number] = row.sum ?: 0
+            sumRowsByCode[code] = row.sum ?: 0
         }
     }
 
@@ -227,9 +226,9 @@ void logicCheck() {
 }
 
 // Получить новую строку подитога
-def getNewRow(def alias, def sum, def alias_id) {
+def getNewRow(def alias, def sum) {
     def newRow = formData.createDataRow()
-    newRow.setAlias('total' + alias_id)
+    newRow.setAlias('total' + alias)
     newRow.sum = sum
     newRow.fix = 'Итого по КНУ ' + alias
     newRow.getCell('fix').colSpan = 4
@@ -281,33 +280,9 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -336,8 +311,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -355,8 +330,7 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк TODO Уточнитиь когда будет постановка
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
             continue
         }
 
@@ -370,14 +344,15 @@ void addData(def xml, int headRowCount) {
         // графа 1
         newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
-        // графа 2
-        // Зависимая
-
-        // графа 3
-        newRow.number = getRecordIdImport(27, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-
-        // графа 4
-        // Зависимая
+        def record27 = getRecordImport(27, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        if (record27 != null) {
+            // графа 2 Зависимая
+            formDataService.checkReferenceValue(27, row.cell[2].text(), record27?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            // графа 3
+            newRow.number = record27?.record_id?.value
+            // графа 4 Зависимая
+            formDataService.checkReferenceValue(27, row.cell[4].text(), record27?.TYPE_EXP?.value, xlsIndexRow, 4 + colOffset, logger, false)
+        }
 
         // графа 5
         newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)

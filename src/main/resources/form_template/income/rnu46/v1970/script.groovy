@@ -583,10 +583,7 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
-            continue
-        }
+        // Нет итогов
 
         def xmlIndexCol = 0
 

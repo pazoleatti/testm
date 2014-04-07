@@ -123,11 +123,14 @@ public class GetFormDataHandler extends
 
 		ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         // http://jira.aplana.com/browse/SBRFACCTAX-6399
-        if (formData.getKind() == FormDataKind.PRIMARY && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+        if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+                && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+
             RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
             Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
             Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-            reportPeriod.setName(ReportPeriodSpecificNave.fromId(code).getName());
+            reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
+
         }
         result.setBalancePeriod(reportPeriodService.isBalancePeriod(formData.getReportPeriodId(), formData.getDepartmentId()));
 		result.setReportPeriod(reportPeriod);

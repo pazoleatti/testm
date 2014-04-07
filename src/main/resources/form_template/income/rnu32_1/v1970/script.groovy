@@ -113,6 +113,9 @@ sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 @Field
 def endDate = null
 
+@Field
+def taxPeriod = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
@@ -262,7 +265,7 @@ void consolidation() {
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 // копирование данных по разделам
@@ -490,6 +493,13 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
     }
     return endDate
+}
+
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
 }
 
 // Получение импортируемых данных
