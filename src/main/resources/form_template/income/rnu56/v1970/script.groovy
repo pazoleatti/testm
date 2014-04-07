@@ -108,6 +108,11 @@ def allColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', '
 @Field
 def autoFillColumns = ['number', 'termDealBill', 'percIncome', 'discountInCurrency', 'discountInRub', 'sumIncomeinCurrency', 'sumIncomeinRuble']
 
+@Field
+def startDate = null
+@Field
+def endDate = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -121,7 +126,7 @@ def getRecord(def Long refBookId, def String alias, def String value, def int ro
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -149,13 +154,20 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    // получить строку "итого"
+    def totalRow = getDataRow(dataRows, 'total')
+    // очистить итоги
+    totalColumns.each {
+        totalRow[it] = null
+    }
+
     // Удаление итогов
     deleteAllAliased(dataRows)
 
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = getStartDate()
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = getEndDate()
     // Номер последний строки предыдущей формы
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
@@ -179,8 +191,8 @@ void calc() {
         row.sumIncomeinRuble = calcSumIncomeinRuble(row, endDate, startDate)
     }
 
-    // Добавление итогов
-    dataRows.add(getTotalRow(dataRows))
+    calcTotalSum(dataRows, totalRow, totalColumns)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
@@ -301,9 +313,9 @@ void logicCheck() {
     def needValue = [:]
 
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = getStartDate()
     // Дата окончания отчетного периода
-    def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def endDate = getEndDate()
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
@@ -438,81 +450,45 @@ def BigDecimal getCalcPrevColumn(def row, def sumColumnName, def startDate) {
     return sum
 }
 
-// Расчет итоговой строки
-def getTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.bill = 'Итого'
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
-    return totalRow
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 3)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Вексель',
-            (xml.row[0].cell[2]): 'Дата приобретения',
-            (xml.row[0].cell[3]): 'Код валюты',
-            (xml.row[0].cell[4]): 'Номинал, ед. валюты',
-            (xml.row[0].cell[5]): 'Цена приобретения, ед. валюты',
-            (xml.row[0].cell[6]): 'Срок платежа',
-            (xml.row[0].cell[7]): 'Возможный срок обращения векселя, дней',
-            (xml.row[0].cell[8]): 'Заявленный процентный доход (дисконт), ед. валюты',
-            (xml.row[0].cell[9]): 'Дата реализации (погашения)',
-            (xml.row[0].cell[10]): 'Сумма, фактически поступившая в оплату, ед. валюты',
-            (xml.row[0].cell[11]): 'Фактически поступившая сумма дисконта',
-            (xml.row[0].cell[13]): 'Сумма начисленного процентного дохода за отчётный период',
-            (xml.row[1].cell[11]): 'в валюте',
-            (xml.row[1].cell[12]): 'в рублях по курсу Банка России',
-            (xml.row[1].cell[13]): 'в валюте',
-            (xml.row[1].cell[14]): 'в рублях по курсу Банка России',
+            (xml.row[0].cell[2]): 'Вексель',
+            (xml.row[0].cell[3]): 'Дата приобретения',
+            (xml.row[0].cell[4]): 'Код валюты',
+            (xml.row[0].cell[5]): 'Номинал, ед. валюты',
+            (xml.row[0].cell[6]): 'Цена приобретения, ед. валюты',
+            (xml.row[0].cell[7]): 'Срок платежа',
+            (xml.row[0].cell[8]): 'Возможный срок обращения векселя, дней',
+            (xml.row[0].cell[9]): 'Заявленный процентный доход (дисконт), ед. валюты',
+            (xml.row[0].cell[10]): 'Дата реализации (погашения)',
+            (xml.row[0].cell[11]): 'Сумма, фактически поступившая в оплату, ед. валюты',
+            (xml.row[0].cell[12]): 'Фактически поступившая сумма дисконта',
+            (xml.row[0].cell[14]): 'Сумма начисленного процентного дохода за отчётный период',
+            (xml.row[1].cell[12]): 'в валюте',
+            (xml.row[1].cell[13]): 'в рублях по курсу Банка России',
+            (xml.row[1].cell[14]): 'в валюте',
+            (xml.row[1].cell[15]): 'в рублях по курсу Банка России',
             (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12',
-            (xml.row[2].cell[12]): '13',
-            (xml.row[2].cell[13]): '14',
-            (xml.row[2].cell[14]): '15'
+            (xml.row[2].cell[2]): '2',
+            (xml.row[2].cell[3]): '3',
+            (xml.row[2].cell[4]): '4',
+            (xml.row[2].cell[5]): '5',
+            (xml.row[2].cell[6]): '6',
+            (xml.row[2].cell[7]): '7',
+            (xml.row[2].cell[8]): '8',
+            (xml.row[2].cell[9]): '9',
+            (xml.row[2].cell[10]): '10',
+            (xml.row[2].cell[11]): '11',
+            (xml.row[2].cell[12]): '12',
+            (xml.row[2].cell[13]): '13',
+            (xml.row[2].cell[14]): '14',
+            (xml.row[2].cell[15]): '15'
     ]
 
     checkHeaderEquals(headerMapping)
@@ -522,15 +498,23 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
+
+    def dataRows = dataRowHelper.allCached
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalColumns.each { alias ->
+        totalRow[alias] = null
+    }
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -546,7 +530,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
             continue
         }
 
@@ -566,6 +550,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 1
         newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // fix
         xmlIndexCol++
         // графа 2
         newRow.bill = row.cell[xmlIndexCol].text()
@@ -611,6 +597,7 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    rows.add(totalRow)
     dataRowHelper.save(rows)
 }
 
@@ -622,3 +609,18 @@ void loggerError(def msg, Object...args) {
         logger.error(msg, args)
     }
 }
+
+def getStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
