@@ -76,8 +76,7 @@ def groupColumns = ['name', 'dependence', 'country', 'countryCode1', 'signPhis',
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'country', 'contractNum',
-        'contractDate', 'transactionNum', 'transactionDeliveryDate', 'innerCode', 'unitCountryCode', 'signPhis',
+def nonEmptyColumns = ['rowNum', 'name', 'dependence', 'dealType', 'country', 'innerCode', 'unitCountryCode', 'signPhis',
         'signTransaction', 'count', 'priceOne', 'totalNds', 'transactionDate']
 
 // Дата окончания отчетного периода
@@ -93,6 +92,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }

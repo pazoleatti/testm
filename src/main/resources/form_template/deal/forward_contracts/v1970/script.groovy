@@ -10,6 +10,8 @@ import groovy.transform.Field
 /**
  * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта (16)
  *
+ * formTemplateId=391
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -73,8 +75,8 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealType']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNumber', 'docDate',
-        'dealNumber', 'dealDate', 'dealType', 'currencyCode', 'countryDealCode', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'dealType', 'currencyCode', 'countryDealCode', 'price',
+        'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -89,6 +91,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

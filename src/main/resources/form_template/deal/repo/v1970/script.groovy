@@ -7,6 +7,8 @@ import groovy.transform.Field
 /**
  * 383 - Сделки РЕПО (8)
  *
+ * formTemplateId = 383
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -84,6 +86,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

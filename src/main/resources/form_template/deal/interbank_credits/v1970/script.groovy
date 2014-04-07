@@ -7,6 +7,8 @@ import groovy.transform.Field
 /**
  * 389 - Предоставление межбанковских кредитов (14)
  *
+ * formTemplateId=389
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -65,8 +67,7 @@ def autoFillColumns = ['rowNumber', 'inn', 'countryName', 'countryCode', 'count'
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'docNumber', 'docDate',
-        'dealNumber', 'dealDate', 'count', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryName', 'count', 'sum', 'price', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -81,6 +82,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

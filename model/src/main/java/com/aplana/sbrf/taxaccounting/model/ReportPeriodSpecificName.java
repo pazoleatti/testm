@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * Date: 20.03.14
  * Time: 18:55
  */
-public enum ReportPeriodSpecificNave {
+public enum ReportPeriodSpecificName {
     FIRST(21, "1 квартал"),
     SECOND(31, "2 квартал"),
     THIRD(33, "3 квартал"),
@@ -16,7 +16,7 @@ public enum ReportPeriodSpecificNave {
     final private int id;
     final private String name;
 
-    ReportPeriodSpecificNave(int id, String name) {
+    ReportPeriodSpecificName(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -25,13 +25,13 @@ public enum ReportPeriodSpecificNave {
         return name;
     }
 
-    public static ReportPeriodSpecificNave fromId(int id) {
-        for (ReportPeriodSpecificNave name : values()) {
+    public static ReportPeriodSpecificName fromId(int id) {
+        for (ReportPeriodSpecificName name : values()) {
             if (name.id == id) {
                 return name;
             }
         }
 
-        throw new IllegalArgumentException("Wrong ReportPeriodSpecificNave id: " + id);
+        throw new IllegalArgumentException("Wrong ReportPeriodSpecificName id: " + id);
     }
 }
