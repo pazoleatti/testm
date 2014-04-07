@@ -252,6 +252,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onFailure(Throwable caught) {
 					modifiedRows.clear();
+                    getView().updateData();
 				}
 
 			};
