@@ -63,7 +63,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByFormTemplateId(int ftId) {
         try {
-            return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE form_template_id = ?",
+            return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE form_template_id = ? ORDER BY date_event",
                     new Object[]{ftId},
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
@@ -76,7 +76,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public List<TemplateChanges> getByDeclarationTemplateId(int dtId) {
         try {
-            return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE declaration_template_id = ?",
+            return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE declaration_template_id = ? ORDER BY date_event",
                     new Object[]{dtId},
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
@@ -90,7 +90,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     public List<TemplateChanges> getByFormTypeIds(int ftTypeId) {
         try {
             return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE form_template_id IN" +
-                    "(SELECT id FROM form_template WHERE type_id = ? AND status != 2)",
+                    "(SELECT id FROM form_template WHERE type_id = ? AND status != 2) ORDER BY date_event",
                     new Object[]{ftTypeId},
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
@@ -104,7 +104,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     public List<TemplateChanges> getByDeclarationTypeId(int dtTypeId) {
         try {
             return getJdbcTemplate().query("SELECT id, event, author, date_event, form_template_id, declaration_template_id FROM template_changes WHERE declaration_template_id IN" +
-                    "(SELECT id FROM declaration_template WHERE declaration_type_id = ? AND status != 2)",
+                    "(SELECT id FROM declaration_template WHERE declaration_type_id = ? AND status != 2) ORDER BY date_event",
                     new Object[]{dtTypeId},
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
