@@ -90,32 +90,32 @@ def refBookCache = [:]
 
 //Все аттрибуты
 @Field
-def allColumns = ["rowNumber", "billNumber", "creationDate", "nominal", "sellingPrice",
-        "currencyCode", "rateBRBillDate", "rateBROperationDate",
-        "paymentTermStart", "paymentTermEnd", "interestRate",
-        "operationDate", "rateWithDiscCoef", "sumStartInCurrency",
-        "sumStartInRub", "sumEndInCurrency", "sumEndInRub", "sum"]
+def allColumns = ['rowNumber', 'fix', 'billNumber', 'creationDate', 'nominal', 'sellingPrice',
+        'currencyCode', 'rateBRBillDate', 'rateBROperationDate',
+        'paymentTermStart', 'paymentTermEnd', 'interestRate',
+        'operationDate', 'rateWithDiscCoef', 'sumStartInCurrency',
+        'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum']
 
 // Поля, для которых подсчитываются итоговые значения (графа 18)
 @Field
-def totalColumns = ["sum"]
+def totalColumns = ['sum']
 
 // TODO (Ramil Timerbaev) уточнить у аналитика: графа 7 и 8 в перечне полей могут редактироваться, но в тоже время расчитываемые
- // Редактируемые атрибуты (графа 2..13)
+// Редактируемые атрибуты (графа 2..13)
 @Field
-def editableColumns = ["billNumber", "creationDate", "nominal", "sellingPrice", "currencyCode", "rateBRBillDate",
-        "rateBROperationDate", "paymentTermStart", "paymentTermEnd", "interestRate", "operationDate", "rateWithDiscCoef"]
+def editableColumns = ['billNumber', 'creationDate', 'nominal', 'sellingPrice', 'currencyCode', 'rateBRBillDate',
+        'rateBROperationDate', 'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'rateWithDiscCoef']
 
 // Автозаполняемые атрибуты
 @Field
 def arithmeticCheckAlias = allColumns - editableColumns
 
 @Field
-def arithmeticCheckAliasWithoutNSI = ["sumStartInCurrency", "sumStartInRub", "sumEndInCurrency", "sumEndInRub", "sum"]
+def arithmeticCheckAliasWithoutNSI = ['sumStartInCurrency', 'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum']
 
 // Сортируемые атрибуты (графа 2, 12)
 @Field
-def sortColumns = ["billNumber", "operationDate"]
+def sortColumns = ['billNumber', 'operationDate']
 
 // Автозаполняемые атрибуты (графа 1..12, 15, 18)
 @Field
@@ -267,7 +267,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
+    if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
     }
 
@@ -318,7 +318,8 @@ void calc() {
 def getTotalRow(def dataRows) {
     def totalRow = formData.createDataRow()
     totalRow.setAlias('itg')
-    totalRow.billNumber = 'Итого'
+    totalRow.fix = 'Итого'
+    totalRow.getCell("fix").setColSpan(2)
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -377,7 +378,7 @@ def BigDecimal calc16(def row, def countDaysInYear) {
     // количество дней в году указаном в 3 графе
     def countDays3 = (row.creationDate != null ? getCountDaysInYear(row.creationDate) : 0)
     // количество дней в году указаном в 10 графе
-    def countDays10 = (row.paymentTermEnd != null  ? getCountDaysInYear(row.paymentTermEnd) : 0)
+    def countDays10 = (row.paymentTermEnd != null ? getCountDaysInYear(row.paymentTermEnd) : 0)
     // если количество дней в графе 3 и 10 отличается
     if (countDays3 != 0 && countDays10 != 0 && (countDays3 != countDays10)) {
         def d1 = row.creationDate
@@ -423,7 +424,7 @@ def BigDecimal calc17(def row) {
                 tmp = round(row.sellingPrice * (row.rateBROperationDate - row.rateBRBillDate)) + row.sumStartInRub
             }
         }
-    // TODO (Ramil Timerbaev) уточнить у аналитика про это уловие: если заполнена только графа 16 среди всех строк или среди граф 13, 14, 16
+        // TODO (Ramil Timerbaev) уточнить у аналитика про это уловие: если заполнена только графа 16 среди всех строк или среди граф 13, 14, 16
     } else if (row.rateWithDiscCoef == null && row.sumStartInCurrency == null && row.sumEndInCurrency != null &&
             row.rateBROperationDate != null) {
         tmp = row.sumEndInCurrency * row.rateBROperationDate
@@ -496,66 +497,39 @@ def loggerError(def msg) {
     }
 }
 
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 18, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[0]) : '№ пп',
-            (xml.row[0].cell[1]) : 'Номер векселя',
-            (xml.row[0].cell[2]) : 'Дата составления',
-            (xml.row[0].cell[3]) : 'Номинал',
-            (xml.row[0].cell[4]) : 'Цена реализации',
-            (xml.row[0].cell[5]) : 'Код валюты',
-            (xml.row[0].cell[6]) : 'Курс Банка России',
-            (xml.row[0].cell[8]) : 'Дата наступления срока платежа',
-            (xml.row[0].cell[9]) : 'Дата окончания срока платежа',
-            (xml.row[0].cell[10]): 'Процентная ставка',
-            (xml.row[0].cell[11]): 'Дата совершения операции',
-            (xml.row[0].cell[12]): 'Ставка с учётом дисконтирующего коэффициента',
-            (xml.row[0].cell[13]): 'Сумма дисконта начисленного на начало отчётного периода',
-            (xml.row[0].cell[15]): 'Сумма дисконта начисленного на конец отчётного периода',
-            (xml.row[0].cell[17]): 'Сумма дисконта начисленного за отчётный период (руб.)',
-            (xml.row[1].cell[6]) : 'на дату составления векселя',
-            (xml.row[1].cell[7]) : 'на дату совершения операции',
-            (xml.row[1].cell[13]): 'в валюте',
-            (xml.row[1].cell[14]): 'в рублях',
-            (xml.row[1].cell[15]): 'в валюте',
-            (xml.row[1].cell[16]): 'в рублях'
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Номер векселя',
+            (xml.row[0].cell[3]): 'Дата составления',
+            (xml.row[0].cell[4]): 'Номинал',
+            (xml.row[0].cell[5]): 'Цена реализации',
+            (xml.row[0].cell[6]): 'Код валюты',
+            (xml.row[0].cell[7]): 'Курс Банка России',
+            (xml.row[0].cell[9]): 'Дата наступления срока платежа',
+            (xml.row[0].cell[10]): 'Дата окончания срока платежа',
+            (xml.row[0].cell[11]): 'Процентная ставка',
+            (xml.row[0].cell[12]): 'Дата совершения операции',
+            (xml.row[0].cell[13]): 'Ставка с учётом дисконтирующего коэффициента',
+            (xml.row[0].cell[14]): 'Сумма дисконта начисленного на начало отчётного периода',
+            (xml.row[0].cell[16]): 'Сумма дисконта начисленного на конец отчётного периода',
+            (xml.row[0].cell[18]): 'Сумма дисконта начисленного за отчётный период (руб.)',
+            (xml.row[1].cell[7]): 'на дату составления векселя',
+            (xml.row[1].cell[8]): 'на дату совершения операции',
+            (xml.row[1].cell[14]): 'в валюте',
+            (xml.row[1].cell[15]): 'в рублях',
+            (xml.row[1].cell[16]): 'в валюте',
+            (xml.row[1].cell[17]): 'в рублях',
+            (xml.row[2].cell[0]): '1'
     ]
-
-    (1..18).each { index ->
-        headerMapping.put((xml.row[2].cell[index - 1]), index.toString())
+    (2..18).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
-
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
@@ -566,8 +540,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -586,7 +560,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -601,55 +575,51 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        // графа 1
-        def xlsIndexCol = 0
-        newRow.rowNumber = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
-
         // графа 2
-        newRow.billNumber = row.cell[1].text()
+        newRow.billNumber = row.cell[2].text()
 
         // графа 3
-        xlsIndexCol = 2
+        def xlsIndexCol = 3
         newRow.creationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 4
-        xlsIndexCol = 3
+        xlsIndexCol = 4
         newRow.nominal = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 5
-        xlsIndexCol = 4
+        xlsIndexCol = 5
         newRow.sellingPrice = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 6
-        xlsIndexCol = 5
+        xlsIndexCol = 6
         newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset)
 
         // графа 7
-        xlsIndexCol = 6
+        xlsIndexCol = 7
         newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 8
-        xlsIndexCol = 7
+        xlsIndexCol = 8
         newRow.rateBROperationDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 9
-        xlsIndexCol = 8
+        xlsIndexCol = 9
         newRow.paymentTermStart = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 10
-        xlsIndexCol = 9
+        xlsIndexCol = 10
         newRow.paymentTermEnd = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 11
-        xlsIndexCol = 10
+        xlsIndexCol = 11
         newRow.interestRate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 12
-        xlsIndexCol = 11
+        xlsIndexCol = 12
         newRow.operationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         // графа 12
-        xlsIndexCol = 12
+        xlsIndexCol = 13
         newRow.rateWithDiscCoef = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         rows.add(newRow)

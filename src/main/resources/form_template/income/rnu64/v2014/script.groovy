@@ -3,10 +3,9 @@ package form_template.income.rnu64.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
  * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
@@ -62,7 +61,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-    case FormDataEvent.MIGRATION:
         importData()
         calc()
         logicCheck()
@@ -120,7 +118,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
+    if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
     }
 
@@ -232,33 +230,9 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
-/** Получение импортируемых данных. */
+// Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -269,19 +243,15 @@ void importData() {
             (xml.row[0].cell[4]): 'Номер сделки',
             (xml.row[0].cell[5]): 'Вид ценных бумаг',
             (xml.row[0].cell[6]): 'Затраты (руб.коп.)',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[2]): '2',
-            (xml.row[1].cell[3]): '3',
-            (xml.row[1].cell[4]): '4',
-            (xml.row[1].cell[5]): '5',
-            (xml.row[1].cell[6]): '6'
+            (xml.row[1].cell[0]): '1'
     ]
-
+    (2..6).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
 }
-
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
@@ -289,8 +259,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -309,7 +279,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -323,14 +293,11 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        // графа 1 - № пп
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
-
         // графа 2 - Дата сделки
         newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
 
         // графа 3 - Часть сделки
-        newRow.part =  getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.part = getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
 
         // графа 4 - Номер сделки
         newRow.dealingNumber = row.cell[4].text()
@@ -349,18 +316,6 @@ void addData(def xml, int headRowCount) {
     rows.add(getDataRow(existRows, 'totalQuarter'))
     rows.add(getDataRow(existRows, 'total'))
     dataRowHelper.save(rows)
-}
-
-/** Для получения данных из RNU или XML */
-String getCellValue(def row, int index, def type, boolean isTextXml = false) {
-    if (type == 1) {
-        if (isTextXml) {
-            return row.field[index].text()
-        } else {
-            return row.field[index].@value.text()
-        }
-    }
-    return row.cell[index + 1].text()
 }
 
 /**

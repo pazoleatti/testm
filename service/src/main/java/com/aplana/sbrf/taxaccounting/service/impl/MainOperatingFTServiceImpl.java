@@ -144,10 +144,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(), template.getStatus(),
                     template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
-            formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT.getId(), templateId);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
         } else {
-            formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL.getId(), templateId);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
             logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
         return true;

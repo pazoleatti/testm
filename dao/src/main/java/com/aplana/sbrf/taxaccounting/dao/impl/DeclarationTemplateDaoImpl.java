@@ -453,4 +453,15 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             throw new DaoException("Ошибка при получении номера редакции макета", e);
         }
     }
+
+    @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true ,key = "#decTemplateId")
+    @Override
+    public int updateVersionStatus(VersionedObjectStatus versionStatus, int decTemplateId) {
+        try {
+            return getJdbcTemplate().update("update declaration_template set status= ? where id = ?", versionStatus.getId(), decTemplateId);
+        } catch (DataAccessException e){
+            logger.error("Ошибка при обновлении статуса версии " + decTemplateId, e);
+            throw new DaoException("Ошибка при обновлении статуса версии", e);
+        }
+    }
 }

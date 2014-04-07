@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
@@ -49,11 +50,12 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
                         if (templateChanges == null) {
                             return;
                         }
-                        sb.appendHtmlConstant("<a href=\"#"
-                                + AdminConstants.NameTokens.formTemplateInfoPage + ";"
-                                + AdminConstants.NameTokens.formTemplateId + "="
-                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">"
-                                + templateChanges.getEdition() + "</a>");
+                        String url = templateChanges.getTemplateChanges().getFormTemplateId() != 0 ?
+                                AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId + "="
+                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">" :
+                                DeclarationTemplateTokens.declarationTemplate + ";" + DeclarationTemplateTokens.declarationTemplateId + "="
+                                + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "\">";
+                        sb.appendHtmlConstant("<a href=\"#" + url + templateChanges.getEdition() + "</a>");
                     }
                 }) {
             @Override

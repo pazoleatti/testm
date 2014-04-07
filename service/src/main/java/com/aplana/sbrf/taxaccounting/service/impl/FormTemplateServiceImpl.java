@@ -236,7 +236,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+    public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         return formTemplateDao.updateVersionStatus(versionStatus, formTemplateId);
     }
 
