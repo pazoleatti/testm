@@ -177,7 +177,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			getView().showOriginalVersionButton(false);
 
             getView().showEditAnchor(false);
-            getView().showModeLabel(false, false);
             getView().showModeAnchor(false, false);
             getView().showManualAnchor(false);
 		}

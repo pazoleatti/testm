@@ -77,8 +77,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void showSignersAnchor(boolean show);
 
-        void showModeLabel(boolean show, boolean manual);
-
         void showModeAnchor(boolean show, boolean manual);
 
         void showManualAnchor(boolean show);
@@ -200,7 +198,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showEditModeLabel(false);
 
         getView().showEditAnchor(false);
-        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
         getView().showModeAnchor(existManual, formData.isManual());
         getView().showManualAnchor(false);
         getView().showDeleteManualAnchor(false);
@@ -223,7 +220,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showCheckButton(formDataAccessParams.isCanRead());
 
         getView().showEditAnchor(formDataAccessParams.isCanEdit());
-        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
         getView().showModeAnchor(existManual, formData.isManual());
         getView().showManualAnchor(canCreatedManual && !existManual);
         getView().showDeleteManualAnchor(false);
@@ -255,7 +251,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setSelectedRow(null, true);
 
         getView().showEditAnchor(false);
-        getView().showModeLabel(false, false);
         getView().showModeAnchor(false, false);
         getView().showManualAnchor(false);
         getView().showDeleteManualAnchor(formData.isManual());

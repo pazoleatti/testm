@@ -13,7 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.DirectionalTextHelper;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHTML;
@@ -82,6 +82,11 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		this.img = url;
 		setHTML(templates.render(UriUtils.fromTrustedString(this.img), this.text));
 	}
+
+    public void setDisableImage(Boolean disable) {
+        DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
+        DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
+    }
 
     public void setImageResource(ImageResource ir) {
         String resourceUrl = getResourceUrl(ir);
