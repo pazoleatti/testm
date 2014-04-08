@@ -2,17 +2,32 @@ package com.aplana.sbrf.taxaccounting.web.module.bookerstatements.client;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.Editor;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -45,11 +60,28 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @UiField
     FileUploadWidget fileUploader;
 
+    @UiField
+    Button searchButton;
+
+    @UiField
+    Button deleteButton;
+
+    @UiField
+    GenericDataGrid<RefBookDataRow> dataTable;
+    @UiField
+    FlexiblePager pager;
+
     @Inject
     @UiConstructor
     public BookerStatementsView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         initListeners();
+
+        dataTable.setSelectionModel(new NoSelectionModel<RefBookDataRow>());
+        dataTable.setPageSize(pager.getPageSize());
+        pager.setDisplay(dataTable);
+        dataTable.setVisible(false);
+        pager.setVisible(false);
     }
 
     @Override
@@ -116,33 +148,121 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     }
 
     @Override
-    public Integer getDepartmentId() {
-        Integer result = null;
+    public Pair<Integer, String> getDepartment() {
+        Pair<Integer, String> result = null;
         if (departmentPicker.getValue() != null && departmentPicker.getValue().size() == 1) {
-            result = departmentPicker.getValue().get(0);
+            result = new Pair<Integer, String> (departmentPicker.getValue().get(0), departmentPicker.getText());
         }
         return result;
     }
 
     @Override
-    public Integer getReportPeriodId() {
-        Integer result = null;
+    public Pair<Integer, String> getReportPeriod() {
+        Pair<Integer, String> result = null;
         if (periodPickerPopup.getValue() != null && periodPickerPopup.getValue().size() == 1) {
-            result = periodPickerPopup.getValue().get(0);
+            result = new Pair<Integer, String> (periodPickerPopup.getValue().get(0), periodPickerPopup.getText());
         }
         return result;
     }
 
     @Override
-    public Integer getType() {
-        Integer result = null;
-        if (bookerReportType.getSelectedIndex() != -1)
-            result = bookerReportType.getSelectedIndex();
+    public Pair<Integer, String> getType() {
+        Pair<Integer, String> result = null;
+        if (bookerReportType.getSelectedIndex() != -1) {
+            result = new Pair<Integer, String>(bookerReportType.getSelectedIndex(),
+                    bookerReportType.getItemText(bookerReportType.getSelectedIndex()));
+        }
         return result;
     }
 
     @Override
     public void addAccImportValueChangeHandler(ValueChangeHandler<String> valueChangeHandler) {
         fileUploader.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
+        dataTable.setVisible(true);
+        pager.setVisible(true);
+        if (dataRows == null) {
+            dataTable.setRowCount(0);
+            dataTable.setRowData(new ArrayList<RefBookDataRow>());
+        } else {
+            if (totalCount == 0) {
+                start = 0;
+                pager.setPage(0);
+            }
+            dataTable.setRowCount(totalCount);
+            dataTable.setRowData(start, dataRows);
+        }
+    }
+
+    @Override
+    public void updateTable() {
+        Range range = new Range(pager.getPageStart(), pager.getPageSize());
+        dataTable.setVisibleRangeAndClearData(range, true);
+    }
+
+    @Override
+    public void setTableColumns(final List<RefBookColumn> columns) {
+        while (dataTable.getColumnCount() > 0) {
+            dataTable.removeColumn(0);
+        }
+
+        for (final RefBookColumn header : columns) {
+            TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
+                @Override
+                public String getValue(RefBookDataRow object) {
+                    return object.getValues().get(header.getAlias());
+                }
+            };
+            column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
+            dataTable.addResizableSortableColumn(column, header.getName());
+            dataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
+        }
+    }
+
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
+    public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
+        dataTable.setPageSize(pageSize);
+        data.addDataDisplay(dataTable);
+    }
+
+    @Override
+    public Date getReportPeriodEndDate() {
+        return periodPickerPopup.getPeriodDates(getReportPeriod().getFirst()).getSecond();
+    }
+
+    @UiHandler("searchButton")
+    void onSearchClick(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onSearch();
+        }
+    }
+
+    @UiHandler("deleteButton")
+    void onDeleteClick(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDelete();
+        }
+
+    }
+
+    private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
+        switch (alignment) {
+            case ALIGN_LEFT:
+                return HasHorizontalAlignment.ALIGN_LEFT;
+            case ALIGN_CENTER:
+                return HasHorizontalAlignment.ALIGN_CENTER;
+            case ALIGN_RIGHT:
+                return HasHorizontalAlignment.ALIGN_RIGHT;
+            default:
+                return HasHorizontalAlignment.ALIGN_LEFT;
+        }
     }
 }

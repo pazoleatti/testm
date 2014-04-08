@@ -8,5 +8,9 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Dmitriy Levykin
  */
 public interface BookerStatementsUiHandlers extends UiHandlers {
-    void ImportData(String uuid);
+    void importData(String uuid);
+
+    void onSearch();
+
+    void onDelete();
 }

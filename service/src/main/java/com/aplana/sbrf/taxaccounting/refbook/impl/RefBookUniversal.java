@@ -90,6 +90,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public List<Long> getUniqueRecordIds(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
         return refBookDao.getRecordIdPairs(refBookId, version, filter);
     }

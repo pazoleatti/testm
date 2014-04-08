@@ -43,6 +43,14 @@ public interface RefBookIncome102Dao {
     PagingResult<Map<String, RefBookValue>> getRecords(Integer reportPeriodId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 
     /**
+     * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
+     * @param reportPeriodId
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    List<Long> getUniqueRecordIds(Integer reportPeriodId, String filter);
+
+    /**
      * Получение записи справочника по recordId
      * @param recordId
      * @return
