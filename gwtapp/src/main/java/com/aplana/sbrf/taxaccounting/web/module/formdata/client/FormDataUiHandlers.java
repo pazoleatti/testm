@@ -46,4 +46,6 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onStartLoad();
 
     void onEndLoad();
+
+    void onOpenSearchDialog();
 }

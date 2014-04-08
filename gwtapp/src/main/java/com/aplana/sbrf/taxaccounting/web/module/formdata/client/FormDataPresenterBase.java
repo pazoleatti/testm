@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
@@ -99,6 +100,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void isCanEditPage(boolean visible);
 
         void updatePageSize(TaxType taxType);
+
+        void setFocus(Long rowIndex);
     }
 
 	public static final String NAME_TOKEN = "!formData";
@@ -113,6 +116,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final SignersPresenter signersPresenter;
 	protected final DialogPresenter dialogPresenter;
 	protected final HistoryPresenter historyPresenter;
+	protected final FormSearchPresenter formSearchPresenter;
 
 	protected FormData formData;
 	
@@ -135,13 +139,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 								 DispatchAsync dispatcher,
 								 SignersPresenter signersPresenter,
 								 DialogPresenter dialogPresenter,
-								 HistoryPresenter historyPresenter) {
+								 HistoryPresenter historyPresenter,
+                                 FormSearchPresenter formDataPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.dispatcher = dispatcher;
 		this.signersPresenter = signersPresenter;
 		this.dialogPresenter = dialogPresenter;
+        this.formSearchPresenter = formDataPresenter;
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 
@@ -136,4 +134,17 @@ public interface DataRowDao {
 	 * @param formDataId
 	 */
 	void rollback(long formDataId);
+
+
+    /**
+     * Поиск по налоговой форме,
+     * ищутся совпадения и выдается номер строки и столбца
+     * на форме
+     *
+     * @param formDataId модель формы
+     * @param range информация о выборке данных, с какой строки и сколько строк выбрать
+     * @param key ключ для поиска
+     * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
+     */
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key);
 }

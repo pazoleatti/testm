@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -13,7 +10,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
@@ -32,9 +30,10 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
-        FormDataUiHandlers {
+        FormDataUiHandlers, SetFocus.SetFocusHandler {
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -48,8 +47,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
-			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
+			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
 	}
@@ -345,6 +344,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     			modifiedRows.clear();
                     			
                     			formData = result.getFormData();
+                                formSearchPresenter.setFormDataId(formData.getId());
+
+                                /**
+                                 * Передаем призентору поиска по форме, данные о скрытых колонках
+                                 */
+                                List<Integer> hiddenColumns = new ArrayList<Integer>();
+                                for(Column c :formData.getFormColumns()){
+                                    if (c.getWidth() == 0){
+                                        hiddenColumns.add(c.getOrder());
+                                    }
+                                }
+                                formSearchPresenter.setHiddenColumns(hiddenColumns);
                     			
                     			// Регистрируем хендлер на закрытие
                     			if (closeFormDataHandlerRegistration !=null ){
@@ -436,5 +447,17 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             }
         };
         getView().addFileUploadValueChangeHandler(fileUploadValueChangeHandler);
+        addRegisteredHandler(SetFocus.getType(), this);
+    }
+
+    @Override
+    public void onOpenSearchDialog() {
+        formSearchPresenter.open();
+        addToPopupSlot(formSearchPresenter);
+    }
+
+    @Override
+    public void onSetFocus(SetFocus event) {
+        getView().setFocus(event.getRowIndex());
     }
 }

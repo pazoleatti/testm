@@ -1,0 +1,58 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+    <ui:style>
+
+        .content {
+            margin: 0 5px;
+        }
+
+        .table {
+            position: absolute !important;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            top: 104px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
+        }
+
+        .pager {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .linkCell{
+            color: #0000CD;
+        }
+    </ui:style>
+
+    <dw:ModalWindow modal="false" glassEnabled="false" iconUrl="resources/img/add.png" title="Поиск" >
+        <g:VerticalPanel height="400px" width="550px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle">
+                <g:cell>
+                    <g:TextBox width="100%" ui:field="filterText"/>
+                </g:cell>
+                <g:cell>
+                    <g:Button width="100px" ui:field="search" text="Поиск"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel>
+                <g:ResizeLayoutPanel ui:field="tableWrapper" styleName="{style.table}">
+                    <style:GenericDataGrid ui:field="searchResultTable" width="100%"/>
+                </g:ResizeLayoutPanel>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel>
+                <pager:FlexiblePager ui:field="pager" location="CENTER" showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" type="formDataList" addStyleNames="{style.pager}"/>
+            </g:HorizontalPanel>
+
+        </g:VerticalPanel>
+
+    </dw:ModalWindow>
+
+</ui:UiBinder> 
