@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>392</id>
-        <name>Беспоставочные срочные сделки</name>
-        <status>NORMAL</status>
-        <taxType>DEAL</taxType>
-    </type>
     <fixedRows>false</fixedRows>
     <name>Беспоставочные срочные сделки</name>
     <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по признанным Контролируемыми сделками
@@ -15,7 +9,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
-        <id>18124</id>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
@@ -25,7 +18,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>itog</alias>
         <checking>false</checking>
-        <id>18365</id>
         <name>itog</name>
         <order>2</order>
         <width>0</width>
@@ -34,10 +26,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
         <checking>false</checking>
-        <id>18125</id>
         <name>Полное наименование с указанием ОПФ</name>
         <order>3</order>
-        <width>5</width>
+        <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>32</nameAttributeId>
         <refBookAttributeId>32</refBookAttributeId>
@@ -45,20 +36,18 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>innKio</alias>
         <checking>false</checking>
-        <id>18126</id>
         <name>ИНН/КИО</name>
         <order>4</order>
         <width>7</width>
-        <parentId>18125</parentId>
+        <parentId>21233</parentId>
         <refBookAttributeId>37</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>country</alias>
         <checking>false</checking>
-        <id>18127</id>
         <name>Наименование страны регистрации</name>
         <order>5</order>
-        <width>5</width>
+        <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
@@ -66,17 +55,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
-        <id>18128</id>
         <name>Код страны по классификатору ОКСМ</name>
         <order>6</order>
-        <width>5</width>
-        <parentId>18127</parentId>
+        <width>7</width>
+        <parentId>21235</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>contractNum</alias>
         <checking>false</checking>
-        <id>18129</id>
         <name>Номер договора</name>
         <order>7</order>
         <width>5</width>
@@ -85,7 +72,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>contractDate</alias>
         <checking>false</checking>
-        <id>18130</id>
         <name>Дата договора</name>
         <order>8</order>
         <width>7</width>
@@ -94,7 +80,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>transactionNum</alias>
         <checking>false</checking>
-        <id>18131</id>
         <name>Номер сделки</name>
         <order>9</order>
         <width>5</width>
@@ -103,7 +88,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transactionDeliveryDate</alias>
         <checking>false</checking>
-        <id>18132</id>
         <name>Дата заключения сделки</name>
         <order>10</order>
         <width>7</width>
@@ -112,7 +96,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>transactionType</alias>
         <checking>false</checking>
-        <id>18133</id>
         <name>Вид срочной сделки</name>
         <order>11</order>
         <width>5</width>
@@ -121,7 +104,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>incomeSum</alias>
         <checking>false</checking>
-        <id>18134</id>
         <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
         <order>12</order>
         <width>8</width>
@@ -131,7 +113,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionSum</alias>
         <checking>false</checking>
-        <id>18135</id>
         <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
         <order>13</order>
         <width>8</width>
@@ -141,7 +122,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
-        <id>18136</id>
         <name>Цена (тариф) за единицу измерения, руб.</name>
         <order>14</order>
         <width>8</width>
@@ -151,7 +131,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <id>18137</id>
         <name>Итого стоимость, руб.</name>
         <order>15</order>
         <width>8</width>
@@ -161,7 +140,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
-        <id>18366</id>
         <name>fix</name>
         <order>16</order>
         <width>0</width>
@@ -170,7 +148,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transactionDate</alias>
         <checking>false</checking>
-        <id>18138</id>
         <name>Дата совершения сделки</name>
         <order>17</order>
         <width>7</width>
@@ -181,7 +158,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>10713</id>
         <italic>false</italic>
     </styles>
     <styles>
@@ -189,7 +165,6 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
-        <id>10857</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

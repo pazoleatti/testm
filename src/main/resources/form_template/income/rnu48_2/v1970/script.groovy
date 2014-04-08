@@ -3,33 +3,41 @@ package form_template.income.rnu48_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import groovy.transform.Field
 
 import java.math.RoundingMode
 
 /**
- * "(РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
+ * (РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
  * formTemplateId=313
  *
  * @author vsergeev
  */
 
-// 1 - number      - № пп
-// fix
-// 2 - kind        - Вид расходов
-// 3 - summ        - Сумма, включаемая в состав материальных расходов , (руб.)
+// графа 1 - number      - № пп
+// графа   - fix
+// графа 2 - kind        - Вид расходов
+// графа 3 - summ        - Сумма, включаемая в состав материальных расходов
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        checkRNU48_1()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
         checkRNU48_1()
         calc()
+        logicCheck()
+        break
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkRNU48_1()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -38,24 +46,11 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        checkRNU48_1()
         importData()
         calc()
         logicCheck()
         break
-}
-
-//// Кэши и константы
-
-// Проверяемые на пустые значения атрибуты (графа )
-@Field
-def nonEmptyColumns = ['summ']
-
-void checkCreation() {
-    if (reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)) {
-        logger.error('Налоговая форма не может создаваться в периоде ввода остатков.')
-        return
-    }
-    formDataService.checkUnique(formData, logger)
 }
 
 void calc() {
@@ -73,7 +68,7 @@ void logicCheck() {
     for (def row : dataRows) {
         if (row.getAlias() != 'total') {
             // 1. Обязательность заполнения поля графы 1..3
-            checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+            checkNonEmptyColumns(row, row.getIndex(), ['summ'], logger, true)
         } else {
             //2. Проверка итоговых значений по всей форме
             if (row.summ != calcTotal(dataRows)) {
@@ -115,42 +110,37 @@ BigDecimal calcTotal(def dataRows) {
 }
 
 def checkRNU48_1() {
-    if (formData.kind == FormDataKind.PRIMARY && getFormDataRNU48_1() == null) {
-        throw new ServiceException("Не найдены экземпляры «${formTypeService.get(343).name}» за текущий отчетный период!")
+    // идентификатор формы рну-48.1
+    def rnuId = 343
+    if (formData.kind == FormDataKind.PRIMARY && getFormDataById(rnuId) == null) {
+        logger.warn("Не найдены экземпляры «${formTypeService.get(rnuId).name}» за текущий отчетный период!")
     }
 }
 
-def getFormDataRNU48_1() {
-    def form = formDataService.find(343, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+def getFormDataById(def formId) {
+    def form = formDataService.find(formId, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
 }
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Вид расходов',
-            (xml.row[0].cell[3]): 'Сумма, включаемая в состав материальных расходов , (руб.)',
+            (xml.row[0].cell[0]): getColumnName(tmpRow, 'number'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'kind'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'summ'),
             (xml.row[1].cell[0]): '1',
             (xml.row[1].cell[2]): '2',
             (xml.row[1].cell[3]): '3',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): 'Стоимость введённого в эксплуатацию инвентаря и принадлежностей, стоимость которых до 40 000 руб.',
-            (xml.row[3].cell[0]): '2',
-            (xml.row[3].cell[2]): 'Расходы на приобретение печатных изданий',
-            (xml.row[4].cell[0]): '3',
-            (xml.row[4].cell[2]): 'Модернизация объектов основных средств (ранее отражённых в РНУ-48 (отчёт 1), относящихся к "0" группе, а также срок полезного использования которых истёк)',
-            (xml.row[5].cell[0]): '4',
-            (xml.row[5].cell[2]): 'Прочие материальные расходы'
     ]
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 2)
 }
 
 void addData(def xml, int headRowCount) {
@@ -160,12 +150,13 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
-    for(int i=1; i<=4; i++) {
-        // графа 3 строки i
-        if (xml.row[headRowCount + i] != null) {
-            dataRows[i - 1].summ = parseNumber(xml.row[headRowCount + i].cell[3].text(), rowOffset + headRowCount + i, 4 + colOffset, logger, false)
+    for (int i = 0; i < 4; i++) {
+        def rowIndex = headRowCount + i
+        if (xml.row[rowIndex] != null) {
+            // графа 3 строки i
+            dataRows[i].summ = parseNumber(xml.row[rowIndex].cell[3].text(), rowOffset + rowIndex + 1, 4 + colOffset, logger, false)
         } else {
-            dataRows[i - 1].summ = null
+            dataRows[i].summ = null
         }
     }
     dataRowHelper.update(dataRows)

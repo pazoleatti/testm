@@ -77,9 +77,8 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySi
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'docNumber',
-        'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'count',
-        'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'dealFocus', 'deliverySign', 'metalName',
+        'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -326,6 +325,15 @@ void checkItog(def dataRows) {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+    // TODO в 0.3.7 перенести в ScriptUtils
+    // Последняя строка должна быть подитоговой
+    if (testItogRows.size() > itogRows.size() && dataRows.size() != 0 && dataRows.get(dataRows.size() - 1).getAlias() == null) {
+        String groupCols = getValuesByGroupColumn(dataRows.get(dataRows.size() - 1));
+        if (groupCols != null) {
+            logger.error(GROUP_WRONG_ITOG, groupCols);
+        }
+    }
 
     checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
         @Override
