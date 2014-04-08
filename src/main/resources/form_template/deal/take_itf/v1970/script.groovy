@@ -260,10 +260,13 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 String getValuesByGroupColumn(DataRow row) {
     def sep = ", "
     def StringBuilder builder = new StringBuilder()
-    if (row.outcomeSum != null)
-        builder.append(row.outcomeSum).append(sep)
-    if (row.total != null)
-        builder.append(row.total).append(sep)
+    def map = getRefBookValue(9, row.fullName)
+    if (map != null)
+        builder.append(map.NAME?.stringValue).append(sep)
+    if (row.docNumber != null)
+        builder.append(row.docNumber).append(sep)
+    if (row.docDate != null)
+        builder.append(row.docDate).append(sep)
     def String retVal = builder.toString()
     if (retVal.length() < 2)
         return null
