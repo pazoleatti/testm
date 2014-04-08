@@ -259,7 +259,7 @@
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell width="100%">
-                        <g:Label width="100%"/>
+                        <style:LinkAnchor title="Поиск" ui:field="search" text="Поиск"/>
                     </g:cell>
                     <g:cell>
                         <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"

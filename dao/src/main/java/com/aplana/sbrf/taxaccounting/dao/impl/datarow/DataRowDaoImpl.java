@@ -577,7 +577,69 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	}
 
-	private void batchRemoveCells(final List<DataRow<Cell>> dataRows) {
+    @Override
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key) {
+        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, key);
+        // get query and params
+        String query = sql.getFirst();
+        Map<String, Object> params = sql.getSecond();
+
+        // calculate count
+        String countQuery = "select count(*) from ("+query+")";
+        int count = getNamedParameterJdbcTemplate().queryForInt(countQuery, params);
+
+        String dataQuery = "select * from ("+query+") WHERE IDX between :from and :to";
+        params.put("from", range.getOffset());
+        params.put("to", range.getLimit() + range.getLimit() - 1);
+
+        List<FormDataSearchResult> dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
+            @Override
+            public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+                FormDataSearchResult result = new FormDataSearchResult();
+                result.setIndex(rs.getLong("IDX"));
+                result.setColumnIndex(rs.getLong("column_index"));
+                result.setRowIndex(rs.getLong("row_index"));
+                result.setStringFound(rs.getString("val"));
+
+                return result;
+            }
+        });
+
+        PagingResult<FormDataSearchResult> pagingResult = new PagingResult<FormDataSearchResult>(dataRows, count);
+
+        return pagingResult;
+    }
+
+    /**
+     * Метод возвращает пару - строку запроса и параметры
+     * @return
+     */
+    private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, String key){
+
+        StringBuffer sql = new StringBuffer();
+        sql.append(
+            "SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, val from \n" +
+                    "(SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, val FROM \n" +
+                    "(SELECT row_id, column_id, TO_CHAR(value) as val \n" +
+                    "                    FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
+                    "                    UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
+                    "                    UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) d\n" +
+                    "                RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id\n" +
+                    "                LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id\n" +
+                    "                ORDER BY dr.ord \n" +
+                    "            ) \n" +
+                    "            WHERE val like :key \n" +
+                    "            ORDER BY row_index, column_index "
+        );
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("fdId", formDataId);
+        params.put("key", "%"+key+"%");
+
+        return new Pair<String, Map<String, Object>>(sql.toString(), params);
+    }
+
+    private void batchRemoveCells(final List<DataRow<Cell>> dataRows) {
 		if (!dataRows.isEmpty()) {
 			BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
 
