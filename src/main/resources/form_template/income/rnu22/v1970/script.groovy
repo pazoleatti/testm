@@ -100,7 +100,7 @@ switch (formDataEvent) {
 
 // Все аттрибуты
 @Field
-def allColumns = ['rowNumber', 'contractNumber', 'contractData', 'base', 'transactionDate',
+def allColumns = ['rowNumber', 'fix', 'contractNumber', 'contractData', 'base', 'transactionDate',
         'course', 'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
         'calcPeriodBeginDate', 'calcPeriodEndDate', 'accruedCommisCurrency', 'accruedCommisRub',
         'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
@@ -301,8 +301,8 @@ void calc() {
     // добавить строку "итого"
     def DataRow totalRow = formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.contractNumber = 'Итого'
-    totalRow.getCell('contractNumber').colSpan = 11
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 11
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -466,7 +466,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -483,61 +483,61 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2
-        newRow.contractNumber = row.cell[1].text()
+        newRow.contractNumber = row.cell[2].text()
 
         // графа 3
-        newRow.contractData = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.contractData = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
 
         // графа 4
-        newRow.base = parseNumber(row.cell[3].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.base = parseNumber(row.cell[4].text(),xlsIndexRow, 4 + colOffset, logger, false)
 
         // графа 5
-        newRow.transactionDate = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.transactionDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 6
-        newRow.course = parseNumber(row.cell[5].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.course = parseNumber(row.cell[6].text(),xlsIndexRow, 6 + colOffset, logger, false)
 
         // графа 7
-        newRow.interestRate = parseNumber(row.cell[6].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[7].text(),xlsIndexRow, 7 + colOffset, logger, false)
 
         // графа 8
-        newRow.basisForCalc = parseNumber(row.cell[7].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.basisForCalc = parseNumber(row.cell[8].text(),xlsIndexRow, 8 + colOffset, logger, false)
 
         // графа 9
-        newRow.calcPeriodAccountingBeginDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.calcPeriodAccountingBeginDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
 
         // графа 10
-        newRow.calcPeriodAccountingEndDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.calcPeriodAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
 
         // графа 11
-        newRow.calcPeriodBeginDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.calcPeriodBeginDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
 
         // графа 12
-        newRow.calcPeriodEndDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.calcPeriodEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
 
         // графа 13
-        newRow.accruedCommisCurrency = parseNumber(row.cell[12].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.accruedCommisCurrency = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, false)
 
         // графа 14
-        newRow.accruedCommisRub = parseNumber(row.cell[13].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.accruedCommisRub = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, false)
 
         // графа 15
-        newRow.commisInAccountingCurrency = parseNumber(row.cell[14].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.commisInAccountingCurrency = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
 
         // графа 16
-        newRow.commisInAccountingRub = parseNumber(row.cell[15].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.commisInAccountingRub = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, false)
 
         // графа 17
-        newRow.accrualPrevCurrency = parseNumber(row.cell[16].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.accrualPrevCurrency = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, false)
 
         // графа 18
-        newRow.accrualPrevRub = parseNumber(row.cell[17].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.accrualPrevRub = parseNumber(row.cell[18].text(), xlsIndexRow, 18 + colOffset, logger, false)
 
         // графа 19
-        newRow.reportPeriodCurrency = parseNumber(row.cell[18].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.reportPeriodCurrency = parseNumber(row.cell[19].text(), xlsIndexRow, 19 + colOffset, logger, false)
 
         // графа 20
-        newRow.reportPeriodRub = parseNumber(row.cell[19].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.reportPeriodRub = parseNumber(row.cell[20].text(), xlsIndexRow, 20 + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -551,40 +551,38 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 4)
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Номер договора',
-            (xml.row[0].cell[2]): 'Дата договора',
-            (xml.row[0].cell[3]): 'База для расчёта комиссии',
-            (xml.row[0].cell[4]): 'Дата совершения операции',
-            (xml.row[0].cell[5]): 'Курс Банка России',
-            (xml.row[0].cell[6]): 'Процентная ставка',
-            (xml.row[0].cell[7]): 'База для расчёта (дни)',
-
-            (xml.row[0].cell[8]): 'Расчётный период',
-
-            (xml.row[1].cell[8]): 'начисление',
-            (xml.row[1].cell[10]): 'доначисление',
-
-            (xml.row[2].cell[8]): 'дата начала',
-            (xml.row[2].cell[9]): 'дата окончания',
-            (xml.row[2].cell[10]): 'дата начала',
-            (xml.row[2].cell[11]): 'дата окончания',
-
-            (xml.row[0].cell[12]): 'Сумма в налоговом учёте',
-            (xml.row[1].cell[12]): 'валюта',
-            (xml.row[1].cell[13]): 'рубли',
-
-            (xml.row[0].cell[14]): 'Сумма в бухгалтерском учёте',
-            (xml.row[1].cell[14]): 'валюта',
-            (xml.row[1].cell[15]): 'рубли',
-
-            (xml.row[0].cell[16]): 'Сумма доначисления',
-            (xml.row[1].cell[16]): 'предыдущий квартал\t',
-            (xml.row[1].cell[18]): 'отчётный квартал\t',
-            (xml.row[2].cell[16]): 'валюта',
-            (xml.row[2].cell[17]): 'рубли',
-            (xml.row[2].cell[18]): 'валюта',
-            (xml.row[2].cell[19]): 'рубли',
+            (xml.row[0].cell[2]): 'Номер договора',
+            (xml.row[0].cell[3]): 'Дата договора',
+            (xml.row[0].cell[4]): 'База для расчёта комиссии',
+            (xml.row[0].cell[5]): 'Дата совершения операции',
+            (xml.row[0].cell[6]): 'Курс Банка России',
+            (xml.row[0].cell[7]): 'Процентная ставка',
+            (xml.row[0].cell[8]): 'База для расчёта (дни)',
+            (xml.row[0].cell[9]): 'Расчётный период',
+            (xml.row[1].cell[9]): 'начисление',
+            (xml.row[1].cell[11]): 'доначисление',
+            (xml.row[2].cell[9]): 'дата начала',
+            (xml.row[2].cell[10]): 'дата окончания',
+            (xml.row[2].cell[11]): 'дата начала',
+            (xml.row[2].cell[12]): 'дата окончания',
+            (xml.row[0].cell[13]): 'Сумма в налоговом учёте',
+            (xml.row[1].cell[13]): 'валюта',
+            (xml.row[1].cell[14]): 'рубли',
+            (xml.row[0].cell[15]): 'Сумма в бухгалтерском учёте',
+            (xml.row[1].cell[15]): 'валюта',
+            (xml.row[1].cell[16]): 'рубли',
+            (xml.row[0].cell[17]): 'Сумма доначисления',
+            (xml.row[1].cell[17]): 'предыдущий квартал\t',
+            (xml.row[1].cell[19]): 'отчётный квартал\t',
+            (xml.row[2].cell[17]): 'валюта',
+            (xml.row[2].cell[18]): 'рубли',
+            (xml.row[2].cell[19]): 'валюта',
+            (xml.row[2].cell[20]): 'рубли',
+            (xml.row[3].cell[0]): '1'
     ]
+    (2..20).each { index ->
+        headerMapping.put((xml.row[3].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
