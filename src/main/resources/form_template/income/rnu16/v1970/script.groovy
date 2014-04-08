@@ -1,7 +1,6 @@
 package form_template.income.rnu16.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -93,6 +92,23 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -225,24 +241,20 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        /* Графа 2 */
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        // графа 2
+        def record = getRecordImport(28, 'TYPE_INCOME', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        if (record != null) {
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+        }
 
-        /* Графа 3 */
-        newRow.incomeType = getRecordIdImport(28, 'TYPE_INCOME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        // графа 3
+        newRow.incomeType = record?.record_id?.value
 
-        /* Графа 4 */
+        // графа 4
         newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
 
         rows.add(newRow)
     }
 
     dataRowHelper.save(rows)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

@@ -2,7 +2,6 @@ package form_template.income.rnu8.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -104,6 +103,16 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -361,13 +370,18 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        def record = getRecordImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        if (record != null) {
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+        }
 
         // графа 3
-        newRow.balance = getRecordIdImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.balance = record?.record_id?.value
 
         // графа 4
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        if (record != null) {
+            formDataService.checkReferenceValue(28, row.cell[4].text(), record?.TYPE_INCOME?.value, xlsIndexRow, 4 + colOffset, logger, false)
+        }
 
         // графа 5
         newRow.income = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
