@@ -40,7 +40,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 		}		
 		try {
 			return getJdbcTemplate().queryForObject(
-				"select * from form_type where id = ?",
+				"select id, name, tax_type, status from form_type where id = ?",
 				new Object[] { typeId },
 				new int[] { Types.NUMERIC },
 				new FormTypeMapper()
@@ -58,7 +58,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
 	public List<FormType> getByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
-			"select * from form_type ft where ft.tax_type = ?",
+			"select id, name, tax_type, status from form_type ft where ft.tax_type = ?",
 			new Object[]{String.valueOf(taxType.getCode())},
 			new int[]{Types.CHAR},
 			new FormTypeMapper()
@@ -69,12 +69,15 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     public List<Integer> getByFilter(TemplateFilter filter) {
         try {
             StringBuilder query = new StringBuilder("select id from form_type where status = ");
-            query.append(filter.isActive()?0:1);
+            query.append(filter.isActive() ? 0 : 1);
             if (filter.getTaxType() != null) {
-                query.append(" and form_type.TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
+                query.append(" and tax_type = \'").append(filter.getTaxType().getCode()).append("\'");
+            }
+            if (!filter.getSearchText().isEmpty()) {
+                query.append(" and LOWER(name) like \'%").append(filter.getSearchText().toLowerCase()).append("%\'");
             }
             return getJdbcTemplate().queryForList(query.toString(), Integer.class);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             logger.error("Ошибка при получении данных НФ по фильтру", e);
             throw new DaoException("Ошибка при получении данных НФ по фильтру", e);
         }
@@ -114,20 +117,17 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	@Override
 	public List<FormType> getFormTypes(int departmentId, ReportPeriod reportPeriod, TaxType taxType, List<FormDataKind> kind) {
 		return getJdbcTemplate().query(
-			"with templatesByVersion as (select id, type_id, status, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE)," +
+			"with templatesByVersion as (select id, type_id, status, version, row_number() over(partition by type_id order by version) rn from FORM_TEMPLATE where status != -1)," +
 					"      allTemplates as (select tv.id," +
 					"                         tv.type_id," +
 					"                         tv.VERSION versionFrom," +
-					"                         case" +
-					"                         when tv2.status=2 then tv2.version" +
-					"                         when (tv2.status=0 or tv2.status=1) then tv2.version - interval '1' day" +
-					"                         end as versionTo" +
+					"                         tv2.version - interval '1' day as versionTo, tv.status as STATUS " +
 					"                       from templatesByVersion tv left outer join templatesByVersion tv2 on tv.type_id = tv2.type_id and tv.rn+1 = tv2.rn)" +
 					"  select distinct t.* from form_type t" +
 					"    join department_form_type dft on t.id=dft.form_type_id" +
 					"    join allTemplates ft on dft.form_type_id=ft.type_id" +
 					"  where dft.kind in " + SqlUtils.transformFormKindsToSqlInStatement(kind) +
-					"  and dft.department_id=? and t.tax_type=? and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
+					"  and dft.department_id=? and t.tax_type=? and ft.status = 0 and ((ft.versionFrom <= ? and ft.versionTo >= ?) or (ft.versionFrom <= ? and ft.versionTo is null))",
 			new Object[]{departmentId, String.valueOf(taxType.getCode()), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate(), reportPeriod.getCalendarStartDate()},
 			new int[]{Types.NUMERIC, Types.CHAR, Types.DATE, Types.DATE, Types.DATE},
 			new FormTypeMapper()

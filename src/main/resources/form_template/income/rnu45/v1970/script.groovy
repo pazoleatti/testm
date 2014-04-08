@@ -43,7 +43,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        def columns = isMonthBalance() ? balanceEditableColumns : editableColumns
+        def autoColumns = isMonthBalance() ? ['rowNumber'] : autoFillColumns
+        formDataService.addRow(formData, currentDataRow, columns, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -81,6 +83,9 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost']
+@Field
+def balanceEditableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost',
+                              'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -95,12 +100,12 @@ def totalColumns = ['startCost', 'amortizationMonth', 'amortizationSinceYear', '
 @Field
 def autoFillColumns = ['rowNumber', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 @Field
 def isBalance = null
+@Field
+def startDate = null
+@Field
+def endDate = null
 
 //// Обертки методов
 
@@ -168,58 +173,49 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    if (!dataRows.isEmpty()) {
+    // получить строку "итого"
+    def totalRow = getDataRow(dataRows, 'total')
+    // очистить итоги
+    totalColumns.each {
+        totalRow[it] = null
+    }
 
-        // Удаление подитогов
-        deleteAllAliased(dataRows)
+    // Удаление подитогов
+    deleteAllAliased(dataRows)
 
-        def endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-        def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    def endDate = getMonthEndDate()
+    def dateStart = getMonthStartDate()
 
-        def dataOld = null
+    def dataOld = null
+    if (formData.kind != FormDataKind.PRIMARY) {
+        dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+    }
+
+    def index = 0
+
+    for (def row in dataRows) {
+        // графа 1
+        row.rowNumber = ++index
+
         if (formData.kind != FormDataKind.PRIMARY) {
-            dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+            continue;
         }
 
-        def index = 0
-
-        for (def row in dataRows) {
-            // графа 1
-            row.rowNumber = ++index
-
-            if (formData.kind != FormDataKind.PRIMARY) {
-                continue;
-            }
-
-            // графа 8
-            row.depreciationRate = calc8(row)
-            // графа 9
-            row.amortizationMonth = calc9(row)
-            // для граф 10 и 11
-            prevValues = getPrev10and11(dataOld, row)
-            // графа 10
-            row.amortizationSinceYear = calc10(row, dateStart, endDate, prevValues[0])
-            // графа 11
-            row.amortizationSinceUsed = calc11(row, dateStart, endDate, prevValues[1])
-        }
+        // графа 8
+        row.depreciationRate = calc8(row)
+        // графа 9
+        row.amortizationMonth = calc9(row)
+        // для граф 10 и 11
+        prevValues = getPrev10and11(dataOld, row)
+        // графа 10
+        row.amortizationSinceYear = calc10(row, dateStart, endDate, prevValues[0])
+        // графа 11
+        row.amortizationSinceUsed = calc11(row, dateStart, endDate, prevValues[1])
     }
-
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
-    dataRowHelper.save(dataRows)
-}
-
-def calcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 6
-    ['rowNumber', 'fix', 'startCost', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear',
-            'amortizationSinceUsed'].each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
+    // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
-
-    return totalRow
+    dataRows.add(totalRow)
+    dataRowHelper.save(dataRows)
 }
 
 // Ресчет графы 8
@@ -276,8 +272,8 @@ def logicCheck() {
             dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
         }
 
-        def dateEnd = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
-        def dateStart = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+        def dateEnd = getMonthEndDate()
+        def dateStart = getMonthStartDate()
 
         // алиасы графов для арифметической проверки
         def arithmeticCheckAlias = ['depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
@@ -293,18 +289,18 @@ def logicCheck() {
             def errorMsg = "Строка $index: "
 
             // 1. Проверка на заполнение поля
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isMonthBalance())
 
             // 2. Проверка на уникальность поля «инвентарный номер»
             if (invSet.contains(row.inventoryNumber)) {
-                logger.error(errorMsg + "Инвентарный номер не уникальный!")
+                loggerError(errorMsg + "Инвентарный номер не уникальный!")
             } else {
                 invSet.add(row.inventoryNumber)
             }
 
             // 3. Проверка на нулевые значения
             if (row.startCost == 0 && row.amortizationMonth == 0 && row.amortizationSinceYear == 0 && row.amortizationSinceUsed == 0) {
-                logger.error(errorMsg + "Все суммы по операции нулевые!")
+                loggerError(errorMsg + "Все суммы по операции нулевые!")
             }
 
             if (formData.kind == FormDataKind.PRIMARY) {
@@ -314,11 +310,11 @@ def logicCheck() {
                 prevValues = getPrev10and11(dataOld, row)
                 needValue['amortizationSinceYear'] = calc10(row, dateStart, dateEnd, prevValues[0])
                 needValue['amortizationSinceUsed'] = calc11(row, dateStart, dateEnd, prevValues[1])
-                checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+                checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
             }
         }
         // 5. Арифметические проверки расчета итоговой строки
-        checkTotalSum(dataRows, totalColumns, logger, true)
+        checkTotalSum(dataRows, totalColumns, logger, !isMonthBalance())
     }
 }
 
@@ -333,33 +329,9 @@ def getPrev10and11(def dataOld, def row) {
     return [null, null]
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 2)
 
@@ -395,15 +367,23 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
+
+    def dataRows = dataRowHelper.allCached
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalColumns.each { alias ->
+        totalRow[alias] = null
+    }
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -419,7 +399,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
             continue
         }
 
@@ -427,12 +407,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+        def columns = isMonthBalance() ? balanceEditableColumns : editableColumns
+        columns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
         // графа 1
@@ -472,5 +453,28 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    rows.add(totalRow)
     dataRowHelper.save(rows)
+}
+
+def getMonthStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return startDate
+}
+
+def getMonthEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
+    }
+    return endDate
+}
+
+def loggerError(def msg) {
+    if (isMonthBalance()) {
+        logger.warn(msg)
+    } else {
+        logger.error(msg)
+    }
 }

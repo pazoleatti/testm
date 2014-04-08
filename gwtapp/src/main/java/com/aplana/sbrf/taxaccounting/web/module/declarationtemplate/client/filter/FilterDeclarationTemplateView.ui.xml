@@ -12,7 +12,7 @@
 
     <g:HorizontalPanel spacing="5">
         <g:cell horizontalAlignment="right" verticalAlignment="middle">
-            <g:Label ui:field="taxTypeLbl" width="70px" text="Вид налога:"/>
+            <g:Label ui:field="taxTypeLbl" width="90px" text="Вид налога:"/>
         </g:cell>
         <g:cell verticalAlignment="middle">
             <g:ValueListBox width="200px" ui:field="taxType"/>
@@ -20,6 +20,10 @@
 
         <g:cell verticalAlignment="middle">
             <g:CheckBox width="150px" ui:field="active" text="Признак активности"/>
+        </g:cell>
+
+        <g:cell verticalAlignment="middle">
+            <g:TextBox width="150px" ui:field="searchText" />
         </g:cell>
 
         <g:cell verticalAlignment="middle">

@@ -9,8 +9,17 @@ public class GetRowsDataResult implements Result {
 	private static final long serialVersionUID = -6510327178774833524L;
 	
 	private PagingResult<DataRow<Cell>> dataRows;
+    private boolean manual;
 
-	public PagingResult<DataRow<Cell>> getDataRows() {
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
+
+    public PagingResult<DataRow<Cell>> getDataRows() {
 		return dataRows;
 	}
 

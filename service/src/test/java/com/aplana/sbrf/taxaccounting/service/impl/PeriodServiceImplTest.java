@@ -2,26 +2,31 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class PeriodServiceImplTest {
     PeriodService service = new PeriodServiceImpl();
+    private static final Long PERIOD_CODE_REFBOOK = 8L;
+    private final static String LOCAL_IP = "127.0.0.1";
+    private static final int CONTROL_USER_ID = 2;
+    ReportPeriodDao reportPeriodDao;
 
     @Before
     public void init(){
@@ -49,12 +54,17 @@ public class PeriodServiceImplTest {
         taxPeriodList.add(taxPeriod1);
         taxPeriodList.add(taxPeriod2);
 
+        List<TaxPeriod> taxPeriodList1 = new ArrayList<TaxPeriod>();
+        taxPeriodList1.add(taxPeriod1);
+
         // Mock для taxPeriodDao
         TaxPeriodDao taxPeriodDao = mock(TaxPeriodDao.class);
         when(taxPeriodDao.get(1)).thenReturn(taxPeriod1);
         when(taxPeriodDao.get(2)).thenReturn(taxPeriod2);
         when(taxPeriodDao.get(3)).thenReturn(taxPeriod3);
         when(taxPeriodDao.listByTaxType(TaxType.TRANSPORT)).thenReturn(taxPeriodList);
+        when(taxPeriodDao.listByTaxTypeAndYear(TaxType.TRANSPORT, 2012)).thenReturn(taxPeriodList1);
+
         ReflectionTestUtils.setField(service, "taxPeriodDao", taxPeriodDao);
 
         /**
@@ -155,7 +165,7 @@ public class PeriodServiceImplTest {
 
 
         // Mock для reportPeriodDao
-        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
+        reportPeriodDao = mock(ReportPeriodDao.class);
 
         // перехват вызова функции получения отчетного периода по налоговому и возвращение нашего reportPeriod
         when(reportPeriodDao.get(1)).thenReturn(reportPeriod11);
@@ -170,6 +180,24 @@ public class PeriodServiceImplTest {
         when(reportPeriodDao.listByTaxPeriod(3)).thenReturn(reportPeriodListBy3Period);
 
         ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
+
+        RefBookFactory rbFactory = mock(RefBookFactory.class);
+        RefBook refBook = new RefBook(){{
+            setId(PERIOD_CODE_REFBOOK);
+            setName("REFBOOK_NAME");
+        }};
+        when(rbFactory.get(PERIOD_CODE_REFBOOK)).thenReturn(refBook);
+
+        RefBookDataProvider provider = mock(RefBookDataProvider.class);
+        when(rbFactory.getDataProvider(PERIOD_CODE_REFBOOK)).thenReturn(provider);
+        Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
+        record.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
+        record.put("ORD", new RefBookValue(RefBookAttributeType.NUMBER, 1));
+        record.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
+        record.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 28)));
+        record.put("CALENDAR_START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
+        when(provider.getRecordData(1L)).thenReturn(record);
+        ReflectionTestUtils.setField(service, "rbFactory", rbFactory);
     }
 
 	private void checkDates(int year, int month, int day, Date date) {
@@ -251,5 +279,20 @@ public class PeriodServiceImplTest {
     public void getPrevReportPeriodOutSide(){
         service.getPrevReportPeriod(5);
         assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 4);
+    }
+
+    @Test
+    public void open() {
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setIp(LOCAL_IP);
+        userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
+        service.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date(), false);
+
+        ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
+        verify(reportPeriodDao, times(1)).save(argument.capture());
+
+        checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getStartDate());
+        checkDates(2012, Calendar.FEBRUARY, 29, argument.getAllValues().get(0).getEndDate());
+        checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getCalendarStartDate());
     }
 }

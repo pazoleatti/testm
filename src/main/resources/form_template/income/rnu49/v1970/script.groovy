@@ -247,11 +247,14 @@ void logicCheck() {
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
     def List<ReportPeriod> reportPeriodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def numbers = []
-    reportPeriodList.each { ReportPeriod period ->
+    for (ReportPeriod period in reportPeriodList) {
         if (period.order < reportPeriod.order) {
             def findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, period.id)
+            if (!findFormData) {
+                continue
+            }
             def findRows = formDataService.getDataRowHelper(findFormData)?.allCached
-            for (row in findRows){
+            for (row in findRows) {
                 numbers += row.invNumber
             }
         }
@@ -438,7 +441,7 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
     // Если «Графа 21» = 2, то
     // «Графа 8» =Значение «Графы 7» РНУ-45, где «Графа 2» = «Графа 6» РНУ-49
     // иначе ручной ввод
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
         if (row46 != null && saledPropertyCode == 1) {
@@ -453,11 +456,11 @@ BigDecimal getGraph8(def DataRow row49, def DataRow row46, def DataRow row45) {
 }
 
 BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.saledPropertyCode != null) {
         def saledPropertyCode = getSaledPropertyCode(row49.saledPropertyCode)
         if (row46 != null && saledPropertyCode == 1) {
-            tmp = row46.cost10perExploitation + row46.amortExploitation
+            tmp = (row46.cost10perExploitation ?: 0) + (row46.amortExploitation ?: 0)
         } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.amortizationSinceUsed
         } else if (saledPropertyCode in [3,5,6,7]) {
@@ -470,7 +473,7 @@ BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
 }
 
 BigDecimal getGraph15(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.marketPrice != null) {
         if (row.sum - row.marketPrice * 0.8 > 0) {
             tmp = BigDecimal.ZERO
@@ -482,7 +485,7 @@ BigDecimal getGraph15(def row) {
 }
 
 BigDecimal getGraph16(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
@@ -490,7 +493,7 @@ BigDecimal getGraph16(def row) {
 }
 
 BigDecimal getGraph17(def row) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row.sum != null && row.price != null && row.amort != null && row.expensesOnSale != null && row.sumIncProfit != null) {
         tmp = row.sum - (row.price - row.amort) - row.expensesOnSale + row.sumIncProfit
     }
@@ -514,7 +517,7 @@ def getGraph19(def DataRow row49) {
 }
 
 BigDecimal getGraph20(def DataRow row49) {
-    def tmp = null
+    BigDecimal tmp = null
     if (row49.monthsLoss != 0 && row49.monthsLoss != null) {
         if (row49.sum > 0 && row49.loss != null) {
             tmp = (row49.loss / row49.monthsLoss)
@@ -641,30 +644,11 @@ void importData() {
             (xml.row[0].cell[22]): 'Шифр вида реализации (выбытия)',
             (xml.row[1].cell[4]): 'номер',
             (xml.row[1].cell[5]): 'дата',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16',
-            (xml.row[2].cell[17]): '17',
-            (xml.row[2].cell[18]): '18',
-            (xml.row[2].cell[19]): '19',
-            (xml.row[2].cell[20]): '20',
-            (xml.row[2].cell[21]): '21',
-            (xml.row[2].cell[22]): '22'
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..22).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -676,8 +660,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = dataRowHelper.allCached
     //удаляем все нефиксированные строки
@@ -706,13 +690,12 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        if (row.cell[0].text() in groupsRus) {
-            section = groups.get(groupsRus.indexOf(row.cell[0].text()))
-            continue
-        }
-
         // Пропуск итоговых строк
-        if (row.cell[1].text() == null || row.cell[1].text() == '') {
+        def hiddenName = row.cell[1].text()
+        if (hiddenName != null && hiddenName != '') {
+            if (hiddenName[0] in groupsRus) {
+                section = groups.get(groupsRus.indexOf(hiddenName[0]))
+            }
             continue
         }
 
@@ -730,7 +713,6 @@ void addData(def xml, int headRowCount) {
 
         xmlIndexCol++
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
         // графа 2
         newRow.firstRecordNumber = row.cell[xmlIndexCol].text()

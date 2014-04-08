@@ -29,6 +29,7 @@ public interface DeclarationTemplateService {
 	/**
 	 * Сохранить шаблон декларации.
 	 * Если сохраняется новый объект, то у него должен быть пустой id (id == null), в этом случае он будет сгенерирован
+     * Производится очистка blob_data, в случае если значение идентификаторов было измененно по сравнению с базой.
 	 * @param declarationTemplate объект шаблона декларации
 	 * @return идентификатор сохранённой записи в БД
 	 * @throws AccessDeniedException если у пользователя нет прав на изменение шаблона декларации 
@@ -157,5 +158,13 @@ public interface DeclarationTemplateService {
      * @return количество активных версий для id макета
      */
     Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds);
+
+    /**
+     * Обновленее статуса НФ
+     * @param versionStatus статус
+     * @param declarationTemplateId ижентификатор
+     * @return идентифиактор
+     */
+    int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId);
 
 }

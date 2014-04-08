@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
@@ -51,7 +50,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setAdditionalFormInfo(String formType, TaxType taxType,
 				String formKind, String departmentId, String reportPeriod,
-                String state, Date startDate, Date endDate);
+                String state, Date startDate, Date endDate, Long formDataId);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
 
@@ -71,11 +70,19 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showEditModeLabel(boolean show);
 
-        void showManualInputAnchor(boolean show);
+        void showEditAnchor(boolean show);
 
 		void showDeleteFormButton(boolean show);
 
 		void showSignersAnchor(boolean show);
+
+        void showModeLabel(boolean show, boolean manual);
+
+        void showModeAnchor(boolean show, boolean manual);
+
+        void showManualAnchor(boolean show);
+
+        void showDeleteManualAnchor(boolean show);
 
 		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 
@@ -101,6 +108,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void updatePageSize(TaxType taxType);
 
+        TaxType getTaxType();
+
         void setFocus(Long rowIndex);
     }
 
@@ -108,6 +117,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	public static final String FORM_DATA_ID = "formDataId";
 	public static final String READ_ONLY = "readOnly";
+    public static final String MANUAL = "manual";
+    public static final String UUID = "uuid";
 
 	protected HandlerRegistration closeFormDataHandlerRegistration;
 
@@ -121,7 +132,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected FormData formData;
 	
 	protected FormDataAccessParams formDataAccessParams;
-	
+
+    /** Признак сводной формы банка */
+    protected boolean isBankSummaryForm;
+
+    /** Признак существования версии ручного ввода */
+    protected boolean existManual;
+
+    protected boolean canCreatedManual;
 
 	protected boolean readOnlyMode;
 
@@ -173,17 +191,22 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
-		view.showManualInputAnchor(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(true, lockDate, lockedBy);
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(false);
         view.showEditModeLabel(false);
+
+        getView().showEditAnchor(false);
+        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
+        getView().showModeAnchor(existManual, formData.isManual());
+        getView().showManualAnchor(false);
+        getView().showDeleteManualAnchor(false);
 	}
 
 	protected void setReadUnlockedMode() {
-		readOnlyMode = true;
+        readOnlyMode = true;
 		
 		MyView view = getView();
 		view.showSaveCancelPanel(false);
@@ -192,12 +215,17 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
-		view.showManualInputAnchor(formDataAccessParams.isCanEdit());
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
 		view.setLockInformation(false, null, null);
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead());
+
+        getView().showEditAnchor(formDataAccessParams.isCanEdit());
+        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
+        getView().showModeAnchor(existManual, formData.isManual());
+        getView().showManualAnchor(canCreatedManual && !existManual);
+        getView().showDeleteManualAnchor(false);
 	}
 
 	protected void setEditMode() {
@@ -218,13 +246,18 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showAddRemoveRowsBlock(!fixedRows);
 
 		view.showPrintAnchor(false);
-		view.showManualInputAnchor(false);
 		view.showDeleteFormButton(false);
 		view.setLockInformation(false, null, null);
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
 		view.setSelectedRow(null, true);
+
+        getView().showEditAnchor(false);
+        getView().showModeLabel(false, false);
+        getView().showModeAnchor(false, false);
+        getView().showManualAnchor(false);
+        getView().showDeleteManualAnchor(formData.isManual());
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
@@ -244,10 +277,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				String.valueOf(formData.getFormType().getTaxType())).build());
 	}
 	
-	protected void revealFormData(Boolean readOnly) {
+	protected void revealFormData(Boolean readOnly, boolean isManual, String uuid) {
 		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
-				.with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
-				.with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build());
+                .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
+                .with(FormDataPresenterBase.MANUAL, String.valueOf(isManual))
+                .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build()
+                .with(UUID, uuid)
+        );
 	}
 
 	@SuppressWarnings("unchecked")

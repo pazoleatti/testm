@@ -2,18 +2,17 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -21,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationTypeDaoTest.xml"})
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class DeclarationTypeDaoTest {
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
@@ -69,5 +69,17 @@ public class DeclarationTypeDaoTest {
         DeclarationType dt = declarationTypeDao.get(1);
         declarationTypeDao.delete(dt.getId());
         assertEquals(VersionedObjectStatus.DELETED, declarationTypeDao.get(dt.getId()).getStatus());
+    }
+
+    @Test
+    public void testGetTypes(){
+        Calendar calendar = Calendar.getInstance();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        calendar.set(2012, Calendar.JANUARY, 1);
+        reportPeriod.setStartDate(calendar.getTime());
+        reportPeriod.setCalendarStartDate(calendar.getTime());
+        calendar.set(2013, Calendar.DECEMBER, 31);
+        reportPeriod.setEndDate(calendar.getTime());
+        Assert.assertEquals(0, declarationTypeDao.getTypes(1, reportPeriod, TaxType.INCOME).size());
     }
 }

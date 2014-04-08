@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -45,7 +47,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "insert into blob_data (id, name, data, creation_date, type, data_size) values (?,?,?,?,?,?)");
+                                    "INSERT INTO blob_data (id, name, data, creation_date, type, data_size) VALUES (?,?,?,?,?,?)");
                     ps.setString(1, blobData.getUuid());
                     ps.setString(2, blobData.getName());
                     ps.setBlob(3, blobData.getInputStream());
@@ -57,7 +59,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
             };
             getJdbcTemplate().update(psc);
             return blobData.getUuid();
-        }catch (DataAccessException e) {
+        } catch (DataAccessException e) {
                 throw new DaoException("Не удалось создать отчет." + e.toString());
         }
     }
@@ -66,11 +68,24 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     /*@CacheEvict(value = "DataBlobsCache", key = "#uuid", beforeInvocation = true)*/
     public void delete(String uuid) {
         try{
-            getJdbcTemplate().update("delete from blob_data where id = ?",
+            getJdbcTemplate().update("DELETE FROM blob_data WHERE id = ?",
                     new Object[]{uuid},
                     new int[]{Types.CHAR});
-        }catch (DataAccessException e){
+        } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить запись с id = %s", uuid), e);
+        }
+    }
+
+    @Override
+    public void delete(List<String> uuidStrings) {
+        try {
+            HashMap<String, Object> valuesMap = new HashMap<String, Object>();
+            valuesMap.put("uuids", uuidStrings);
+            getNamedParameterJdbcTemplate().update("DELETE FROM blob_data WHERE id in (:uuids)",
+                    valuesMap);
+        } catch (DataAccessException e){
+            logger.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
+            throw new DaoException(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
         }
     }
 
@@ -86,7 +101,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
 
                     PreparedStatement ps = con
                             .prepareStatement(
-                                    "update blob_data set data = ? where id = ?");
+                                    "UPDATE blob_data SET data = ? WHERE id = ?");
                     ps.setBlob(1, blobData.getInputStream());
                     ps.setString(2, blobData.getUuid());
                     return ps;
@@ -96,7 +111,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
             if(rowNum == 0)
                 throw new DaoException(String.format("Не существует записи с id = %s", blobData.getUuid()));
 
-        }catch (DataAccessException e){
+        } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось обновить данные для id = %s", blobData.getUuid()), e);
         }
     }
@@ -105,7 +120,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     /*@Cacheable("DataBlobsCache")*/
     public BlobData get(String uuid) {
         try{
-            return getJdbcTemplate().queryForObject("select * from blob_data where id = ?",
+            return getJdbcTemplate().queryForObject("SELECT id, name, data, creation_date, type, data_size FROM blob_data WHERE id = ?",
                     new Object[]{uuid},
                     new int[]{Types.CHAR},
                     new BlobDataRowMapper());

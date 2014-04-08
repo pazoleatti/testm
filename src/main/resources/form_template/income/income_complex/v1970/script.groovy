@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -17,6 +18,7 @@ import java.math.RoundingMode
  *      - непонятно что делать при отсутствии простых доходов в getIncomeSimpleDataRows().
  *              В расчетах контрольных графов пока будут нули при отсутствии данных в доходах простых.
  *      - неясно что с проверками статуса декларации банка при принятии и отмене принятия формы
+ *      - консолидация из первичек недоописана(вопросы к заказчику)
  *
  * @author vsergeev
  *
@@ -71,10 +73,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        consolidationBank()
-        if (isTerBank()) {
-            calc()
-        }
+        consolidation()
+        calc()
         break
     // подготовить/утвердить
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
@@ -92,6 +92,12 @@ switch (formDataEvent) {
         importData()
         break
 }
+
+//// Кэши и константы
+@Field
+def refBookCache = [:]
+@Field
+def recordCache = [:]
 
 // Редактируемые атрибуты (графа 6, 7, 9)
 @Field
@@ -144,6 +150,25 @@ def rbIncome101 = null
 @Field
 def rbIncome102 = null
 
+// Получение Id записи с использованием кэширования
+def getRecordId(def ref_id, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    }
+    return null
+}
+
 // Получение xml с общими проверками
 def getXML(def String startStr, def String endStr) {
     def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
@@ -176,30 +201,39 @@ void calc() {
     getDataRow(dataRows, firstTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum)
     getDataRow(dataRows, secondTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum)
 
-    dataRowsHelper.save(dataRows)
+    dataRowsHelper.update(dataRows)
 }
 
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    for (def row : dataRows) {
-        // проверка заполнения обязательных полей
-        checkRequiredColumns(row, editableColumns)
-    }
 
+    def rowIndexes = []
     rowsAliasesFor35to40.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income101Data = getIncome101Data(row)
         if (!income101Data || income101Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+            rowIndexes += row.getIndex()
         }
     }
+    if (!rowIndexes.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Оборотная ведомость\"")
+    }
+    rowIndexes.clear()
     rowsAliasesFor4to5.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income102Data = getIncome102Data(row)
         if (!income102Data || income102Data.isEmpty()) { // Нет данных об оборотной ведомости
-            logger.warn("Cтрока ${row.getIndex()}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+            rowIndexes += row.getIndex()
         }
+    }
+    if (!rowIndexes.isEmpty()) {
+        logger.warn("Cтроки ${rowIndexes.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
+    }
+
+    for (def row : dataRows) {
+        // проверка заполнения обязательных полей
+        checkRequiredColumns(row, editableColumns)
     }
 
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
@@ -207,15 +241,22 @@ void logicCheck() {
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         // контрольные графы
-        calc4to5(dataRows)      // рассчет строк 4 и 5
-        calc35to40(dataRows)    // рассчет строк 35-40
+        calc4to5(dataRows)      // расчет строк 4 и 5
+        calc35to40(dataRows)    // расчет строк 35-40
     }
-    dataRowHelper.save(dataRows)
+    dataRowHelper.update(dataRows)
 }
 
-void consolidationBank() {
+// Консолидация формы
+def consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = dataRowHelper.getAllCached()
+    isBank() ? consolidationBank(dataRows) : consolidationSummary(dataRows)
+    dataRowHelper.update(dataRows)
+}
+
+void consolidationBank(def dataRows) {
+    println("consolidationBank")
     if (dataRows == null || dataRows.isEmpty()) {
         return
     }
@@ -223,12 +264,12 @@ void consolidationBank() {
     dataRows.each { row ->
         editableColumns.each { alias ->
             if (row.getCell(alias).isEditable()) {
-                row.getCell(alias).setValue(0, row.getIndex())
+                row[alias] = 0
             }
         }
         // графа 11, 13..16
         ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
-            row.getCell(alias).setValue(null, row.getIndex())
+            row[alias] = null
         }
         if (row.getAlias() in [firstTotalRowAlias, secondTotalRowAlias]) {
             row.incomeTaxSumS = 0
@@ -252,8 +293,210 @@ void consolidationBank() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
-    logger.info("Формирование формы прошло успешно: «${formData.formType.name}».")
+    logger.info('Формирование сводной формы уровня Банка прошло успешно.')
+}
+
+// Консолидация из первичек
+void consolidationSummary(def dataRows) {
+    println("consolidationSummary")
+    // очистить форму
+    dataRows.each { row ->
+        editableColumns.each { alias ->
+            if (row.getCell(alias).isEditable()) {
+                row[alias] = 0
+            }
+        }
+        // графа 11, 13..16
+        ['logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference'].each { alias ->
+            row[alias] = null
+        }
+        if (row.getAlias() in [firstTotalRowAlias, secondTotalRowAlias]) {
+            row.incomeTaxSumS = 0
+        }
+    }
+
+    /** Отчётный период. */
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+    // получить формы-источники в текущем налоговом периоде
+    departmentFormTypeService.getSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+        def isMonth = it.formTypeId in [332, 328] //ежемесячная
+        if (!isMonth && prevReportPeriod != null) {
+            def childOld = formDataService.find(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id)
+            //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
+            if (childOld != null && childOld.formType.id == 366) {
+                def dataRowsChildOld = formDataService.getDataRowHelper(childOld)?.allCached
+                // графа 7 = сумма граф 7 итогов форм за предыдущий период
+                addChildTotalData(dataRows, '10650', 'incomeBuhSumPrevTaxPeriod', dataRowsChildOld, 'total', ['factSum'])
+                addChildTotalData(dataRows, '10670', 'incomeBuhSumPrevTaxPeriod', dataRowsChildOld, 'total', ['factSum'])
+            }
+        }
+        def children = []
+        if (isMonth) {
+            for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
+                def child = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, reportPeriod.taxPeriod.id, periodOrder)
+                children.add(child)
+            }
+        } else {
+            children.add(formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId))
+        }
+        for (def child in children) {
+            if (child != null) {
+                def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
+                switch (child.formType.id) {
+                    case 366: //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
+                        // графа 6 = сумма граф 7 итогов форм
+                        addChildTotalData(dataRows, '10650', 'incomeBuhSumAccepted', dataRowsChild, 'total', ['factSum'])
+                        addChildTotalData(dataRows, '10670', 'incomeBuhSumAccepted', dataRowsChild, 'total', ['factSum'])
+                        // графа 9 = сумма граф 6 итогов форм
+                        addChildTotalData(dataRows, '10650', 'incomeTaxSumS', dataRowsChild, 'total', ['taxSum'])
+                        addChildTotalData(dataRows, '10670', 'incomeTaxSumS', dataRowsChild, 'total', ['taxSum'])
+                        break
+                    case 312: //(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»
+                        // графа 9 = сумма граф 11 и 15 итогов раздела А форм
+                        addChildTotalData(dataRows, '10840', 'incomeTaxSumS', dataRowsChild, 'totalA', ['sum', 'sumIncProfit'])
+                        // графа 9 = сумма граф 16 итогов раздела А форм
+                        addChildTotalData(dataRows, '10845', 'incomeTaxSumS', dataRowsChild, 'totalA', ['profit'])
+                        // графа 9 = сумма граф 11 и 15 итогов раздела Б форм
+                        addChildTotalData(dataRows, '10850', 'incomeTaxSumS', dataRowsChild, 'totalB', ['sum', 'sumIncProfit'])
+                        // графа 9 = сумма граф 11 и 15 итогов раздела Г форм
+                        addChildTotalData(dataRows, '10880', 'incomeTaxSumS', dataRowsChild, 'totalG', ['sum', 'sumIncProfit'])
+                        // графа 9 = сумма граф 11 и 15 итогов раздела Д форм
+                        addChildTotalData(dataRows, '10890', 'incomeTaxSumS', dataRowsChild, 'totalD', ['sum', 'sumIncProfit'])
+                        // графа 9 = сумма граф 11 и 15 итогов раздела Е форм
+                        addChildTotalData(dataRows, '10900', 'incomeTaxSumS', dataRowsChild, 'totalE', ['sum', 'sumIncProfit'])
+                        // графа 9 = сумма граф 13 итогов раздела В форм
+                        addChildTotalData(dataRows, '13250', 'incomeTaxSumS', dataRowsChild, 'totalV', ['costProperty'])
+                        break
+                    case 358: //(РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с закладными
+                        // графа 9 = сумма граф 5 итогов форм
+                        addChildTotalData(dataRows, '10855', 'incomeTaxSumS', dataRowsChild, 'total', ['income'])
+                        break
+                    case 340: //(РНУ-44) Регистр налогового учёта доходов, в виде восстановленной амортизационной премии при реализации ранее, чем по истечении 5 лет с даты ввода в эксплуатацию Взаимозависимым лицам и резидентам оффшорных зон основных средств введённых в эксплуатацию после 01.01.2013
+                        // графа 9 = сумма граф 7 итогов форм
+                        addChildTotalData(dataRows, '10910', 'incomeTaxSumS', dataRowsChild, 'total', ['summ'])
+                        break
+                    case 345: //(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
+                        // графа 9 = сумма граф 18 итогов форм
+                        addChildTotalData(dataRows, '11190', 'incomeTaxSumS', dataRowsChild, 'itogo', ['salePriceTax'])
+                        // графа 9 = сумма граф 22 итогов форм
+                        addChildTotalData(dataRows, '11280', 'incomeTaxSumS', dataRowsChild, 'itogo', ['excessSalePriceTax'])
+                        break
+                    case 353: //(РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
+                        // графа 9 = сумма граф 11 итогов форм
+                        addChildTotalData(dataRows, '11260', 'incomeTaxSumS', dataRowsChild, 'total', ['implementationpPriceTax'])
+                        // графа 9 = сумма граф 13 итогов форм
+                        addChildTotalData(dataRows, '11300', 'incomeTaxSumS', dataRowsChild, 'total', ['implementationPriceUp'])
+                        break
+                    case 332: //(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО
+                        // графа 9 = сумма граф 27 итогов форм
+                        addChildTotalData(dataRows, '11270', 'incomeTaxSumS', dataRowsChild, 'total', ['excessOfTheSellingPrice'])
+                        break
+                    case 320: //(РНУ-8) Простой регистр налогового учёта «Требования»
+                        ['13040', '13045', '13050', '13055', '13060', '13065'].each { knu ->
+                            // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
+                            def row = getRow(dataRows, knu)
+                            dataRowsChild.each { rowChild ->
+                                def recordId = getRecordId(28, 'CODE', row.incomeTypeId, getReportPeriodEndDate())
+                                if (recordId == rowChild.balance && isEqualNum(row.incomeBuhSumAccountNumber, rowChild.balance)) {
+                                    (row.incomeTaxSumS) ? (row.incomeTaxSumS += (rowChild.outcome - rowChild.income)) : (row.incomeTaxSumS = (rowChild.outcome - rowChild.income))
+                                }
+                            }
+                        }
+                        break
+                    case 374: //(РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 8 итогов форм
+                        //addChildTotalData(dataRows, '13070', 'incomeTaxSumS', dataRowsChild, 'total', ['incomeDate'])
+                        // графа 9 = сумма граф 15 итогов форм
+                        //addChildTotalData(dataRows, '14280', 'incomeTaxSumS', dataRowsChild, 'total', ['sum'])
+                        break
+                    case 324: //(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения
+                        // графа 9 = сумма граф 13 итогов форм
+                        addChildTotalData(dataRows, '13090', 'incomeTaxSumS', dataRowsChild, 'total', ['reserveRecovery'])
+                        break
+                    case 325: //(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения
+                        // графа 9 = сумма граф 17 итогов форм
+                        addChildTotalData(dataRows, '13100', 'incomeTaxSumS', dataRowsChild, 'total', ['reserveRecovery'])
+                        break
+                    case 326: //(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
+                        // графа 9 = сумма граф 17 итогов форм
+                        addChildTotalData(dataRows, '13110', 'incomeTaxSumS', dataRowsChild, 'total', ['recovery'])
+                        break
+                    case 329: //(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.
+                        // графа 9 = сумма граф 15 итогов форм
+                        addChildTotalData(dataRows, '13120', 'incomeTaxSumS', dataRowsChild, 'total', ['reserveRecovery'])
+                        break
+                    case 328: //(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям
+                        // графа 9 = сумма граф 10, 11 и 12 итогов форм
+                        addChildTotalData(dataRows, '13650', 'incomeTaxSumS', dataRowsChild, 'total', ['eurobondsRF', 'itherEurobonds', 'corporateBonds'])
+                        // графа 9 = сумма граф 3, 4, 5, 6 итогов форм
+                        addChildTotalData(dataRows, '13655', 'incomeTaxSumS', dataRowsChild, 'total', ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds'])
+                        // графа 9 = сумма граф 7, 8 итогов форм
+                        addChildTotalData(dataRows, '13660', 'incomeTaxSumS', dataRowsChild, 'total', ['municipalBondsBefore', 'rtgageBondsBefore'])
+                        // графа 9 = сумма граф 9 итогов форм
+                        addChildTotalData(dataRows, '13665', 'incomeTaxSumS', dataRowsChild, 'total', ['ovgvz'])
+                        break
+                    case 348: //(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов
+                        // графа 9 = сумма граф 11 итогов форм
+                        addChildTotalData(dataRows, '13715', 'incomeTaxSumS', dataRowsChild, 'total', ['sumIncomeinRuble'])
+                        break
+                    case 349: //(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов
+                        // графа 9 = сумма граф 15 итогов форм
+                        addChildTotalData(dataRows, '13720', 'incomeTaxSumS', dataRowsChild, 'total', ['sumIncomeinRuble'])
+                        break
+                    case 370: //(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 10.1 итогов форм
+                        //addChildTotalData(dataRows, '13940', 'incomeTaxSumS', dataRowsChild, 'itg', ['income'])
+                        // графа 9 = сумма граф 11.1 итогов форм
+                        //addChildTotalData(dataRows, '13970', 'incomeTaxSumS', dataRowsChild, 'itg', ['deviationMinPrice'])
+                        break
+                    case 373: //(РНУ-118) Регистр налогового учёта доходов и расходов, по операциям со сделками опцион, квалифицированным в качестве операций с ФИСС для целей налогообложения.
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 13.1 итогов форм
+                        //addChildTotalData(dataRows, '13950', 'incomeTaxSumS', dataRowsChild, 'itg', ['income'])
+                        // графа 9 = сумма граф 11.1 итогов форм
+                        //addChildTotalData(dataRows, '13980', 'incomeTaxSumS', dataRowsChild, 'itg', ['deviationMinPrice'])
+                        break
+                    case 371: //(РНУ-119) Регистр налогового учёта доходов и расходов, по сделкам своп, квалифицированным в качестве операций с ФИСС для целей налогообложения
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 14.1 итогов форм
+                        //addChildTotalData(dataRows, '13960', 'incomeTaxSumS', dataRowsChild, 'itg', ['income'])
+                        // графа 9 = сумма граф 15.1 итогов форм
+                        //addChildTotalData(dataRows, '13990', 'incomeTaxSumS', dataRowsChild, 'itg', ['deviationMinPrice'])
+                        break
+                    case 502: //(РНУ-107) Регистр налогового учёта доходов, возникающих в связи с применением в сделках с Взаимозависимыми лицами и резидентами оффшорных зон тарифов, не соответствующих рыночному уровню
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 12 итогов форм
+                        //addChildTotalData(dataRows, '14170', 'incomeTaxSumS', dataRowsChild, 'total', ['incomeSumBefore'])
+                        break
+                    case 396: //(РНУ-110) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам и резидентам оффшорных зон цен, не соответствующих рыночному уровню
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        //TODO актуализировать, общих итогов нет
+                        // графа 9 = сумма граф 11 итогов форм
+                        break
+                    case 367: //(РНУ-111) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок, не соответствующих рыночному уровню
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 17 итогов форм
+                        //addChildTotalData(dataRows, '14190', 'incomeTaxSumS', dataRowsChild, 'total', ['incomeAddSum'])
+                        break
+                    case 369: //(РНУ-115) Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению Межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон Процентных ставок, не соответствующих рыночному уровню
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 19 итогов форм
+                        //addChildTotalData(dataRows, '14200', 'incomeTaxSumS', dataRowsChild, 'total', ['liability'])
+                        break
+                    case 368: //(РНУ-116) Регистр налогового учёта доходов и расходов, возникающих в связи с применением в конверсионных сделках со Взаимозависимыми  лицами и резидентами оффшорных зон курса, не соответствующих рыночному уровню
+                        //TODO пропускаю пока не определились с РНУ-100+
+                        // графа 9 = сумма граф 19 итогов форм
+                        addChildTotalData(dataRows, '14210', 'incomeTaxSumS', dataRowsChild, 'total', ['liability'])
+                        break
+                }
+            }
+        }
+    }
+    logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
 
 void checkCreation() {
@@ -285,9 +528,6 @@ void calc35to40(def dataRows) {
     rowsAliasesFor35to40.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
         final income101Data = getIncome101Data(row)
-        if (!income101Data) { // Нет данных об оборотной ведомости
-            return
-        }
         // графа 14
         row.opuSumByTableD = getOpuSumByTableDFor35to40(row, income101Data)
         // графа 15
@@ -438,17 +678,64 @@ def getSum(def dataRows, def colName, def rowsAliases) {
     }
 }
 
-// Проверка на террбанк
-def isTerBank() {
-    boolean isTerBank = false
-    def departmentFormTypes = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY)
-    for (def form : departmentFormTypes) {
+// Проверка на банк
+def isBank() {
+    boolean isBank = true
+    for (def form : departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY)) {
         if (form.departmentId != formData.departmentId) {
-            isTerBank = true
+            isBank = false
             break
         }
     }
-    return isTerBank
+    return isBank
+}
+
+def getBalanceValue(def value) {
+    formDataService.getRefBookValue(28, value, refBookCache)?.NUMBER?.stringValue
+}
+
+boolean isEqualNum(String accNum, def balance) {
+    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
+}
+
+
+/**
+ * Метод для консолидации - расчет ячейки из итоговой строки источника
+ * @param dataRows - строки сводной
+ * @param knu - КНУ рассчитываемой строки сводной
+ * @param column - рассчитываемый столбец сводной
+ * @param dataRowsChild - строки источника
+ * @param totalAlias - псевдоним итоговой строки
+ * @param columnsChild - графы для сложения из источников
+ */
+void addChildTotalData(def dataRows, String knu, def column, def dataRowsChild, String totalAlias, def columnsChild) {
+    if (!(dataRows && knu && column && dataRowsChild && columnsChild)){
+        logger.info("Ошибка при консолидации")//TODO заменить на что-то более адекватное
+        return
+    }
+    def addValue = 0
+    for (def rowChild : dataRowsChild) {
+        //ищем итоговую строку
+        if (rowChild.getAlias() == totalAlias) {
+            addValue += columnsChild.sum { columnChild ->
+                rowChild[columnChild] ?: 0
+            }
+        }
+    }
+    def row = getRow(dataRows, knu)
+    if (row[column] == null) {
+        logger.info("Пустая ячейка при КНУ = ${knu}")//TODO убрать
+    }
+    row[column] ? (row[column] += addValue) : (row[column] = addValue)
+}
+
+def getRow(def dataRows, def knu) {
+    for (def row : dataRows) {
+        // ищем по кну строку в сводной
+        if (row.incomeTypeId == knu){
+            return row
+        }
+    }
 }
 
 // Получение импортируемых данных

@@ -53,6 +53,8 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     TextBox text;
 
     private List<Integer> value = new LinkedList<Integer>();
+    /* Разименованные значения.   */
+    private List<String> valueDereference = new LinkedList<String>();
 
     private TakesValueEditor<List<Integer>> editor;
 
@@ -153,16 +155,17 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private void dereference(List<Integer> value) {
-        Collection<String> strings = new ArrayList<String>();
+        valueDereference.clear();
+        valueDereference = new ArrayList<String>();
         if (value != null && dereferenceValue != null) {
             for (Integer val : value) {
                 String name = dereferenceValue.get(val);
                 if (name != null) {
-                    strings.add(reportPeriodYears.get(val) + ":" + name);
+                    valueDereference.add(reportPeriodYears.get(val) + ":" + name);
                 }
             }
         }
-        String txt = TextUtils.joinListToString(strings);
+        String txt = TextUtils.joinListToString(valueDereference);
         this.text.setText(txt);
         this.text.setTitle(TextUtils.generateTextBoxTitle(txt));
     }
@@ -177,5 +180,10 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
 
     public void setWidth(String width) {
         wrappingPanel.setWidth(width);
+    }
+
+    @Override
+    protected void updateLabelValue() {
+        setLabelValue(TextUtils.joinListToString(valueDereference));
     }
 }

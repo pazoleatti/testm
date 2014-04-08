@@ -148,11 +148,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
-            declarationTemplateService.save(declarationTemplate);
+            declarationTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
         } else {
             declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
-            declarationTemplateService.save(declarationTemplate);
+            declarationTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
             logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
         return true;

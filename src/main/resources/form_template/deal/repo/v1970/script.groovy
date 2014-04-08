@@ -1,13 +1,13 @@
 package form_template.deal.repo.v1970
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * 383 - Сделки РЕПО (8)
+ *
+ * formTemplateId = 383
  *
  * @author Dmitriy Levykin
  */
@@ -86,6 +86,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -112,16 +115,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -174,7 +177,7 @@ void logicCheck() {
 
         // Корректность даты (заключения) сделки
         if (transactionDeliveryDate < contractDate) {
-            def msg1 = row.getCell('transactionDate').column.name
+            def msg1 = row.getCell('transactionDeliveryDate').column.name
             def msg2 = row.getCell('contractDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
@@ -183,12 +186,7 @@ void logicCheck() {
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
             def msg = row.getCell('date1').column.name
-            if (dt1 > dTo) {
-                logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt1 < dFrom) {
-                logger.warn("Строка $rowNum: «$msg» не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
         }
 
         // Корректность даты совершения сделки
@@ -220,28 +218,29 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование с указанием ОПФ', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(getColumnName(tmpRow, 'jurName'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 18, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Наименование страны регистрации',
-            (xml.row[0].cell[3]): 'Код страны регистрации по классификатору ОКСМ',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Номер сделки',
-            (xml.row[0].cell[7]): 'Дата (заключения) сделки',
-            (xml.row[0].cell[8]): 'Режим переговорных сделок',
-            (xml.row[0].cell[9]): 'Дата исполнения 1-ой части сделки',
-            (xml.row[0].cell[10]): 'Дата исполнения 2-ой части сделки',
-            (xml.row[0].cell[11]): 'Сумма процентного дохода (руб.)',
-            (xml.row[0].cell[12]): 'Сумма процентного расхода (руб.)',
-            (xml.row[0].cell[13]): 'Цена 1-ой части сделки, ед. валюты',
-            (xml.row[0].cell[14]): 'Код валюты расчетов по сделке',
-            (xml.row[0].cell[16]): 'Цена 1-ой части сделки, руб.',
-            (xml.row[0].cell[17]): 'Дата совершения сделки',
-            (xml.row[0].cell[15]): 'Курс ЦБ РФ',
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'country'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'transactionNum'),
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (xml.row[0].cell[8]): getColumnName(tmpRow, 'dealsMode'),
+            (xml.row[0].cell[9]): getColumnName(tmpRow, 'date1'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'date2'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'percentIncomeSum'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'percentConsumptionSum'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'priceFirstCurrency'),
+            (xml.row[0].cell[14]): getColumnName(tmpRow, 'currencyCode'),
+            (xml.row[0].cell[16]): getColumnName(tmpRow, 'priceFirstRub'),
+            (xml.row[0].cell[17]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[0].cell[15]): getColumnName(tmpRow, 'courseCB'),
             (xml.row[1].cell[0]): 'Гр. 2',
             (xml.row[1].cell[1]): 'Гр. 3',
             (xml.row[1].cell[2]): 'Гр. 4.1',

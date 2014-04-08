@@ -97,7 +97,7 @@
         </g:HorizontalPanel>
 
         <g:HTMLPanel visible="false">
-            <m:ModalWindow ui:field="modalPanel" title="Выбор из справочника" resizable="true" width="780px" height="385px">
+            <m:ModalWindow ui:field="modalPanel" title="Выбор из справочника" resizable="true" width="780px" height="492px">
 
                 <g:FlowPanel addStyleNames="{modal.mainPanel}">
 

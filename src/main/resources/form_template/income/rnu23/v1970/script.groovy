@@ -11,11 +11,8 @@ import groovy.transform.Field
  * Форма "(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям"
  * formTemplateId=323
  *
- * @version 59
- *
  * TODO:
  *      - неясности с консолидацией. Пока убрал расчеты и проверки после консолидации http://jira.aplana.com/browse/SBRFACCTAX-4455.
- *      - поправить загрузку (возможно загрузка не нужна)
  *
  * @author rtimerbaev
  */
@@ -54,7 +51,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -80,9 +78,6 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.MIGRATION:
-        migration()
-        break
 }
 
 //// Кэши и константы
@@ -100,6 +95,8 @@ def allColumns = ['number', 'contract', 'contractDate', 'amountOfTheGuarantee', 
 // Редактируемые атрибуты (графа 2..12)
 @Field
 def editableColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'dateOfTransaction', 'rateOfTheBankOfRussia', 'interestRate', 'baseForCalculation', 'accrualAccountingStartDate', 'accrualAccountingEndDate', 'preAccrualsStartDate', 'preAccrualsEndDate']
+@Field
+def balanceEditableColumns = allColumns - 'number'
 
 // Автозаполняемые атрибуты
 @Field
@@ -121,9 +118,9 @@ def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'a
 @Field
 def endDate = null
 
-// Текущая дата
+// Признак периода ввода остатков
 @Field
-def currentDate = new Date()
+def Boolean isBalancePeriod = null
 
 //// Обертки методов
 // Поиск записи в справочнике по значению (для импорта)
@@ -141,8 +138,9 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required = true) {
+def getRefBookRecord(
+        def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+        boolean required = true) {
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
             day, rowIndex, cellName, logger, required)
 }
@@ -168,7 +166,14 @@ void calc() {
         totalRowOld = (prevDataRows ? getDataRow(prevDataRows, 'total') : null)
     }
 
-    // удалить строку "итого" и "итого по ГРН: ..."
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalSumColumns.each { alias ->
+        totalRow.getCell(alias).setValue(null, null)
+    }
+
+    // удалить строку "итого"
     deleteAllAliased(dataRows)
 
     // отсортировать/группировать
@@ -197,8 +202,8 @@ void calc() {
             row.taxPeriodRuble = calc20(row)
         }
     }
-    // добавить строки "итого"
-    def totalRow = getTotalRow(dataRows)
+    // Итого
+    calcTotalSum(dataRows, totalRow, totalSumColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
@@ -241,7 +246,7 @@ void logicCheck() {
                         (row.accrualAccountingEndDate != null && (row.accrualAccountingEndDate < a || b < row.accrualAccountingEndDate)) ||
                         (row.preAccrualsEndDate != null && (row.preAccrualsEndDate < a || b < row.preAccrualsEndDate)))
         ) {
-            logger.error(errorMsg + 'дата совершения операции вне границ отчётного периода!')
+            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 2. Проверка на нулевые значения (графа 13..20)
@@ -254,27 +259,27 @@ void logicCheck() {
             }
         }
         if (hasNull) {
-            logger.error(errorMsg + 'все суммы по операции нулевые!')
+            loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 3. Проверка на сумму гарантии (графа 4)
         if (row.amountOfTheGuarantee != null && row.amountOfTheGuarantee == 0) {
-            logger.warn(errorMsg + 'суммы гарантии равны нулю!')
+            logger.warn(errorMsg + 'Суммы гарантии равны нулю!')
         }
 
         // 4. Проверка задания расчётного периода (графа 9, 10, 11, 12)
         if (row.accrualAccountingStartDate > row.accrualAccountingEndDate ||
                 row.preAccrualsStartDate > row.preAccrualsEndDate) {
-            logger.warn(errorMsg + 'неправильно задан расчётный период!')
+            logger.warn(errorMsg + 'Неправильно задан расчётный период!')
         }
 
         // 5. Проверка на корректность даты договора (графа 3)
         if (row.contractDate > b) {
-            logger.error(errorMsg + 'дата договора неверная!')
+            loggerError(errorMsg + 'Дата договора неверная!')
         }
 
         // 7. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
 
         // 8. Проверка на заполнение поля «<Наименование поля>»
         // При заполнении граф 9 и 10, графы 11 и 12 должны быть пустыми.
@@ -284,12 +289,12 @@ void logicCheck() {
         def checkColumn11and12 = (row.accrualAccountingStartDate != null || row.accrualAccountingEndDate != null) &&
                 row.preAccrualsStartDate != null && row.preAccrualsEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            logger.error(errorMsg + 'поля в графе 9, 10, 11, 12 заполены неверно!')
+            loggerError(errorMsg + 'Поля в графе 9, 10, 11, 12 заполены неверно!')
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++rowNumber != row.number) {
-            logger.error(errorMsg + 'нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -302,7 +307,7 @@ void logicCheck() {
             needValue['preChargeRuble'] = calc18(prevTotalRow)
             needValue['taxPeriodCurrency'] = calc19(row, row.preAccrualsStartDate, row.preAccrualsEndDate)
             needValue['taxPeriodRuble'] = calc20(row)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, false)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !getBalancePeriod())
         }
     }
 
@@ -322,6 +327,12 @@ void consolidation() {
     def dataRows = dataRowHelper.allCached
 
     // удалить все строки и собрать из источников их строки
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalSumColumns.each { alias ->
+        totalRow.getCell(alias).setValue(null, null)
+    }
     dataRows.clear()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
@@ -357,116 +368,74 @@ void consolidation() {
         }
     }
 
-    // TODO (Ramil Timerbaev)
-    // добавить строки "итого"
-    def totalRow = getTotalRow(dataRows)
+    // Расчет итогов
+    calcTotalSum(dataRows, totalRow, totalSumColumns)
+
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
-
-    if (!dataRows.isEmpty()) {
-        dataRowHelper.save(dataRows)
-    }
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
-
 /** Получение импортируемых данных. */
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 20, 4)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Номер договора',
-            (xml.row[0].cell[2]): 'Дата договора',
-            (xml.row[0].cell[3]): 'Сумма гарантии',
-            (xml.row[0].cell[4]): 'Дата совершения операции',
-            (xml.row[0].cell[5]): 'Курс Банка России',
-            (xml.row[0].cell[6]): 'Процентная ставка',
-            (xml.row[0].cell[7]): 'База для расчёта (дни)',
-            (xml.row[0].cell[8]): 'Расчётный период',
-            (xml.row[0].cell[12]): 'Сумма в налоговом учёте',
-            (xml.row[0].cell[14]): 'Сумма в бухгалтерском учёте',
-            (xml.row[0].cell[16]): 'Сумма доначисления',
-            (xml.row[1].cell[8]): 'начисление/факт',
-            (xml.row[1].cell[10]): 'доначисление',
-            (xml.row[1].cell[12]): 'валюта',
-            (xml.row[1].cell[13]): 'рубли',
-            (xml.row[1].cell[14]): 'валюта',
-            (xml.row[1].cell[15]): 'рубли',
-            (xml.row[1].cell[16]): 'предыдущий период',
-            (xml.row[1].cell[18]): 'отчётный период',
-            (xml.row[2].cell[8]): 'дата начала',
-            (xml.row[2].cell[9]): 'дата окончания',
-            (xml.row[2].cell[10]): 'дата начала',
-            (xml.row[2].cell[11]): 'дата окончания',
-            (xml.row[2].cell[16]): 'валюта',
-            (xml.row[2].cell[17]): 'рубли',
-            (xml.row[2].cell[18]): 'валюта',
-            (xml.row[2].cell[19]): 'рубли',
+            (xml.row[0].cell[2]): 'Номер договора',
+            (xml.row[0].cell[3]): 'Дата договора',
+            (xml.row[0].cell[4]): 'Сумма гарантии',
+            (xml.row[0].cell[5]): 'Дата совершения операции',
+            (xml.row[0].cell[6]): 'Курс Банка России',
+            (xml.row[0].cell[7]): 'Процентная ставка',
+            (xml.row[0].cell[8]): 'База для расчёта (дни)',
+            (xml.row[0].cell[9]): 'Расчётный период',
+            (xml.row[0].cell[13]): 'Сумма в налоговом учёте',
+            (xml.row[0].cell[15]): 'Сумма в бухгалтерском учёте',
+            (xml.row[0].cell[17]): 'Сумма доначисления',
+            (xml.row[1].cell[9]): 'начисление/факт',
+            (xml.row[1].cell[11]): 'доначисление',
+            (xml.row[1].cell[13]): 'валюта',
+            (xml.row[1].cell[14]): 'рубли',
+            (xml.row[1].cell[15]): 'валюта',
+            (xml.row[1].cell[16]): 'рубли',
+            (xml.row[1].cell[17]): 'предыдущий период',
+            (xml.row[1].cell[19]): 'отчётный период',
+            (xml.row[2].cell[9]): 'дата начала',
+            (xml.row[2].cell[10]): 'дата окончания',
+            (xml.row[2].cell[11]): 'дата начала',
+            (xml.row[2].cell[12]): 'дата окончания',
+            (xml.row[2].cell[17]): 'валюта',
+            (xml.row[2].cell[18]): 'рубли',
+            (xml.row[2].cell[19]): 'валюта',
+            (xml.row[2].cell[20]): 'рубли',
             (xml.row[3].cell[0]): '1',
-            (xml.row[3].cell[1]): '2',
-            (xml.row[3].cell[2]): '3',
-            (xml.row[3].cell[3]): '4',
-            (xml.row[3].cell[4]): '5',
-            (xml.row[3].cell[5]): '6',
-            (xml.row[3].cell[6]): '7',
-            (xml.row[3].cell[7]): '8',
-            (xml.row[3].cell[8]): '9',
-            (xml.row[3].cell[9]): '10',
-            (xml.row[3].cell[10]): '11',
-            (xml.row[3].cell[11]): '12',
-            (xml.row[3].cell[12]): '13',
-            (xml.row[3].cell[13]): '14',
-            (xml.row[3].cell[14]): '15',
-            (xml.row[3].cell[15]): '16',
-            (xml.row[3].cell[16]): '17',
-            (xml.row[3].cell[17]): '18',
-            (xml.row[3].cell[18]): '19',
-            (xml.row[3].cell[19]): '20'
+            (xml.row[3].cell[2]): '2',
+            (xml.row[3].cell[3]): '3',
+            (xml.row[3].cell[4]): '4',
+            (xml.row[3].cell[5]): '5',
+            (xml.row[3].cell[6]): '6',
+            (xml.row[3].cell[7]): '7',
+            (xml.row[3].cell[8]): '8',
+            (xml.row[3].cell[9]): '9',
+            (xml.row[3].cell[10]): '10',
+            (xml.row[3].cell[11]): '11',
+            (xml.row[3].cell[12]): '12',
+            (xml.row[3].cell[13]): '13',
+            (xml.row[3].cell[14]): '14',
+            (xml.row[3].cell[15]): '15',
+            (xml.row[3].cell[16]): '16',
+            (xml.row[3].cell[17]): '17',
+            (xml.row[3].cell[18]): '18',
+            (xml.row[3].cell[19]): '19',
+            (xml.row[3].cell[20]): '20'
     ]
 
     checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
-
-
-
-}
-
-void migration() {
-    importData()
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
-        def total = getTotalRow(dataRows)
-        dataRowHelper.insert(total, dataRows.size() + 1)
-    }
 }
 
 /*
@@ -561,19 +530,6 @@ def getPrevDataRows() {
     return null
 }
 
-/** Получить новую стролу с заданными стилями. */
-def getNewRow() {
-    def newRow = formData.createDataRow()
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-    autoFillColumns.each {
-        newRow.getCell(it).setStyleAlias('Автозаполняемая')
-    }
-    return newRow
-}
-
 /**
  * Заполнить форму данными.
  *
@@ -587,11 +543,20 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
+
+    def dataRows = dataRowHelper.allCached
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalSumColumns.each { alias ->
+        totalRow.getCell(alias).setValue(null, null)
+    }
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -607,58 +572,57 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
-
-        // графа 1
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        cols.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
 
         // графа 2
-        newRow.contract =    row.cell[1].text()
+        newRow.contract = row.cell[2].text()
 
         // графа 3
-        newRow.contractDate    = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+        newRow.contractDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
 
         // графа 4
-        newRow.amountOfTheGuarantee = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, false)
+        newRow.amountOfTheGuarantee = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
 
         // графа 5
-        newRow.dateOfTransaction = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.dateOfTransaction = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
 
         // графа 6
-        newRow.rateOfTheBankOfRussia  = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         // графа 7
-        newRow.interestRate = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
 
         // графа 8
-        newRow.baseForCalculation = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.baseForCalculation = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
 
         // графа 9
-        newRow.accrualAccountingStartDate =  parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.accrualAccountingStartDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
 
         // графа 10
-        newRow.accrualAccountingEndDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.accrualAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
 
         // графа 11
-        newRow.preAccrualsStartDate =   parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.preAccrualsStartDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
 
         // графа 12
-        newRow.preAccrualsEndDate =    parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.preAccrualsEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
 
         rows.add(newRow)
     }
+    rows.add(totalRow)
     dataRowHelper.save(rows)
 }
 
@@ -701,22 +665,9 @@ void checkTotalRow(def totalRow) {
     }
 }
 
-/** Получить итоговую строку с суммами. */
-def getTotalRow(def dataRows) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total')
-    newRow.contract = 'Итого'
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, newRow, totalSumColumns)
-    return newRow
-}
-
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    def isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (formData.kind == FormDataKind.PRIMARY && !getBalancePeriod() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.getFormType().getName()
         throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
     }
@@ -727,4 +678,20 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+def getBalancePeriod() {
+    if (isBalancePeriod == null){
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (getBalancePeriod()) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }

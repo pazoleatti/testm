@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -26,6 +28,7 @@ import java.util.UUID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("BlobDataDaoTest.xml")
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class BlobDataDaoTest {
 
     @Autowired
@@ -68,5 +71,13 @@ public class BlobDataDaoTest {
         blobDataDao.create(blobData);
         blobDataDao.delete(blobData.getUuid());
         Assert.assertNull(blobDataDao.get(blobData.getUuid()));
+    }
+
+    @Test
+    public void deleteListTest(){
+        ArrayList<String> strings = new ArrayList<String>();
+        strings.add(blobDataDao.create(blobData));
+        blobDataDao.delete(strings);
+        Assert.assertNull(blobDataDao.get(strings.get(0)));
     }
 }

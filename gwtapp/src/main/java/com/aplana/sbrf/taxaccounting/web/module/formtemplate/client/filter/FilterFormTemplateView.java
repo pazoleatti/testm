@@ -1,18 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -35,6 +36,9 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
     @UiField
     CheckBox active;
 
+    @UiField
+    TextBox searchText;
+
 	@Ignore
 	@UiField
 	Label taxTypeLbl;
@@ -56,6 +60,14 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
 		initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
+        searchText.addKeyDownHandler(new KeyDownHandler() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    getUiHandlers().onApplyClicked();
+                }
+            }
+        });
     }
 
     @Override

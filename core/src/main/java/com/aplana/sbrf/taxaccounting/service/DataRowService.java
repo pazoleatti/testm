@@ -10,32 +10,37 @@ public interface DataRowService {
 	/**
 	 * Получение страныцы с набором строк НФ
 	 * 
-	 * @param userInfo
-	 * @param formDataId
-	 * @param range
-	 * @param saved
-	 * @return
+	 *
+     * @param userInfo
+     * @param formDataId
+     * @param range
+     * @param saved
+     * @param manual
+     * @return
 	 */
-	PagingResult<DataRow<Cell>> getDataRows(TAUserInfo userInfo, long formDataId, DataRowRange range, boolean saved);
+	PagingResult<DataRow<Cell>> getDataRows(TAUserInfo userInfo, long formDataId, DataRowRange range, boolean saved, boolean manual);
 	
 	/**
 	 * Получени количество строк НФ
 	 * 
-	 * @param userInfo
-	 * @param formDataId
-	 * @param saved
-	 * @return
+	 *
+     * @param userInfo
+     * @param formDataId
+     * @param saved
+     * @param manual
+     * @return
 	 */
-	int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved); 
+	int getRowCount(TAUserInfo userInfo, long formDataId, boolean saved, boolean manual);
 	
 	/**
 	 * Обновление набора строк во временном срезе НФ
-	 * 
-	 * @param userInfo
-	 * @param formDataId
-	 * @param dataRows
-	 */
-	void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows);
+	 *
+     * @param userInfo
+     * @param formDataId
+     * @param dataRows
+     * @param manual
+     */
+	void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual);
 	
 	
 	

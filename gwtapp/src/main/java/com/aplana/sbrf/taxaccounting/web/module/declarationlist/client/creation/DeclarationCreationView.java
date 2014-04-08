@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.aplana.gwt.client.ListBoxWithTooltipWidget;
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,6 +23,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -32,11 +35,21 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public interface Binder extends UiBinder<PopupPanel, DeclarationCreationView> {
     }
 
+    public static final String DECLARATION_TITLE = "Создание декларации";
+    public static final String DECLARATION_TITLE_D = "Создание уведомления";
+    public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
+
+    @UiField
+    ModalWindow modalWindowTitle;
+
     @UiField
     PeriodPickerPopupWidget periodPicker;
 
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
+
+    @UiField
+    Label declarationTypeLabel;
 
     @UiField(provided = true)
     ListBoxWithTooltipWidget<Integer> declarationTypeBox;
@@ -71,14 +84,16 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         });
 
         initWidget(uiBinder.createAndBindUi(this));
-        updateEnabled();
+        //updateEnabled();
     }
 
     private void updateEnabled() {
         // "Подразделение" недоступно если не выбран отчетный период
+        TaxType taxType = getUiHandlers().getTaxType();
         departmentPicker.setEnabled(periodPicker.getValue() != null && !periodPicker.getValue().isEmpty() );
         declarationTypeBox.setEnabled(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty());
-        continueButton.setEnabled(declarationTypeBox.getValue() != null);
+        continueButton.setEnabled(declarationTypeBox.getValue() != null ||
+                (taxType != null && departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() && taxType.equals(TaxType.DEAL)));
     }
 
 
@@ -170,5 +185,18 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public List<Integer> getSelectedDepartment() {
         return departmentPicker.getValue();
+    }
+
+    @Override
+    public void updateLabel(TaxType taxType) {
+        if (!taxType.equals(TaxType.DEAL)) {
+            modalWindowTitle.setText(DECLARATION_TITLE);
+            declarationTypeLabel.setText(DECLARATION_TYPE_TITLE);
+            declarationTypeBox.setVisible(true);
+        } else {
+            modalWindowTitle.setText(DECLARATION_TITLE_D);
+            declarationTypeLabel.setText("");
+            declarationTypeBox.setVisible(false);
+        }
     }
 }

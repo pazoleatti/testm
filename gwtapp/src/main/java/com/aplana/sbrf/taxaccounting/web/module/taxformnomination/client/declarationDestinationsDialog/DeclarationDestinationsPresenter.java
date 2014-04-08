@@ -90,6 +90,8 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 	    List<Integer> getSelectedDeclarationTypes();
 	    void setDepartments(List<Department> departments, Set<Integer> availableValues);
 	    void setDeclarationTypes(List<DeclarationType> declarationTypes);
+        // обновлели надписей в зависимости от вида налога
+        void updateLabel(TaxType taxType);
     }
 
     @Inject
@@ -104,6 +106,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         //getView().resetForm();
 	    this.taxType = taxType;
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
+        getView().updateLabel(taxType);
 
 	    GetDeclarationPopUpFilterAction action = new GetDeclarationPopUpFilterAction();
 	    action.setTaxType(taxType);

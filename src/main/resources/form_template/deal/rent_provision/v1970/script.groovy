@@ -68,8 +68,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'incomeBankSum', 'outcomeBankSum', 'contractNum',
-        'contractDate', 'country', 'count', 'price', 'cost', 'transactionDate']
+def nonEmptyColumns = ['rowNum', 'jurName', 'countryCode', 'contractNum', 'contractDate', 'country', 'count', 'price',
+        'cost', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -84,6 +84,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -110,16 +113,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -271,26 +274,27 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(getColumnName(tmpRow, 'jurName'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
-            (xml.row[0].cell[3]): 'Сумма доходов Банка, руб.',
-            (xml.row[0].cell[4]): 'Сумма расходов Банка, руб.',
-            (xml.row[0].cell[5]): 'Номер договора',
-            (xml.row[0].cell[6]): 'Дата договора',
-            (xml.row[0].cell[7]): 'Адрес местонахождения объекта недвижимости ',
-            (xml.row[0].cell[11]): 'Количество',
-            (xml.row[0].cell[12]): 'Цена',
-            (xml.row[0].cell[13]): 'Стоимость',
-            (xml.row[0].cell[14]): 'Дата совершения сделки',
-            (xml.row[1].cell[7]): 'Страна (код)',
-            (xml.row[1].cell[8]): 'Регион (код)',
-            (xml.row[1].cell[9]): 'Город',
-            (xml.row[1].cell[10]): 'Населенный пункт',
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'incomeBankSum'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'outcomeBankSum'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[0].cell[7]): 'Адрес местонахождения объекта недвижимости',
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'count'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'price'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[14]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[1].cell[7]): getColumnName(tmpRow, 'country'),
+            (xml.row[1].cell[8]): getColumnName(tmpRow, 'region'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'city'),
+            (xml.row[1].cell[10]): getColumnName(tmpRow, 'settlement'),
             (xml.row[2].cell[0]): 'гр. 2',
             (xml.row[2].cell[1]): 'гр. 3',
             (xml.row[2].cell[2]): 'гр. 4',

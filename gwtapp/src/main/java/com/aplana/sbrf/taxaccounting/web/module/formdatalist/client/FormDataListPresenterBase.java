@@ -66,6 +66,8 @@ public abstract class FormDataListPresenterBase<Proxy_ extends Proxy<?>>
 		void updateHeader(String title);
 
         void updatePageSize(TaxType taxType);
+
+        void updateFormDataTable(TaxType taxType);
 	}
 	
 	protected final PlaceManager placeManager;

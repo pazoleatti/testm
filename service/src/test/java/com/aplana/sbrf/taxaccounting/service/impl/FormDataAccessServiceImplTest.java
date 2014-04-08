@@ -367,15 +367,15 @@ public class FormDataAccessServiceImplTest {
 
 		//Все могут редактировать форму в статусе "Создана"
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
-        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID);
+        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID, false);
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID);
+        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID, false);
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID);
+        service.canEdit(userInfo, BANK_CREATED_ADDITIONAL_FORMDATA_ID, false);
 
 		//Все, кроме Оператора, могут редактировать форму в статусе "Подготовлена"
-        service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
-        service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
+        service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
+        service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
 		/*userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 		assertFalse(service.canEdit(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID));*/
 
@@ -394,7 +394,7 @@ public class FormDataAccessServiceImplTest {
 
 		//Никто не может редактировать налоговые формы данного жизненного цикла
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-        service.canEdit(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
+        service.canEdit(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID, false); //TODO (Marat Fayzullin 20.03.2013) временно до появления первичных форм
 		/*assertFalse(service.canEdit(userInfo, BANK_ACCEPTED_SUMMARY_FORMDATA_ID));
 		userInfo.setUser(mockUser(BANK_OPERATOR_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_OPER));
 		assertFalse(service.canEdit(userInfo, BANK_CREATED_SUMMARY_FORMDATA_ID));
@@ -411,9 +411,9 @@ public class FormDataAccessServiceImplTest {
 
 		//Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
-        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID);
+        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID, false);
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
-        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID);
+        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID, false);
 
 
 	}
@@ -422,7 +422,7 @@ public class FormDataAccessServiceImplTest {
     public void testCanEditForThirdLifeCycleFalseResult(){
         //Оператор не может редактировать НФ данного жизненного цикла в состоянии "Создана"
         userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPER));
-        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID);
+        service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID, false);
 
         //Никто не может редактировать НФ данного жизненного цикла в состоянии "Утверждена" и "Принята"
         /*assertFalse(service.canEdit(userInfo, TB1_ACCEPTED_FORMDATA_ID));
@@ -668,7 +668,7 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		// Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
 		// а мы их уже оттестировали отдельно
-		FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID);
+		FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
 		assertTrue(params.isCanRead());
 		assertTrue(params.isCanEdit());
 		assertFalse(params.isCanDelete());

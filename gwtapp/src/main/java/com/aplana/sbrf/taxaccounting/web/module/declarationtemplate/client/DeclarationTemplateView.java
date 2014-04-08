@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
@@ -95,6 +97,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -105,10 +109,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		uploadDectForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains("error")) {
-					getUiHandlers().uploadDectSuccess();
+                if (event.getResults().contains(ERROR_RESP)) {
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid);
+                }else if (event.getResults().toLowerCase().contains(ERROR)) {
+                    getUiHandlers().uploadDectFail(event.getResults().replaceFirst("error ", ""));
 				} else {
-					getUiHandlers().uploadDectFail(event.getResults().replaceFirst("error ", ""));
+                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithUuid(uuid);
 				}
 			}
 		});
@@ -180,7 +188,20 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().close();
+        if (getUiHandlers() == null)
+            return;
+        Dialog.confirmMessage(getUiHandlers().getDeclarationId() != 0 ? "Редактирование версии макета" : "Создание версии макета", "Сохранить изменения?",
+                new DialogHandler() {
+                    @Override
+                    public void no() {
+                        getUiHandlers().close();
+                    }
+
+                    @Override
+                    public void yes() {
+                        getUiHandlers().save();
+                    }
+                });
 	}
 
 	@UiHandler("downloadJrxmlButton")
@@ -205,6 +226,13 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
             getUiHandlers().close();
             event.preventDefault();
             event.stopPropagation();
+        }
+    }
+
+    @UiHandler("historyVersion")
+    void onHistoryClick(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onHistoryClicked();
         }
     }
 

@@ -44,13 +44,39 @@ public class RefBookHelperImpl implements RefBookHelper {
                     Cell parentCell = dataRow.getCellByColumnId(column.getParentId());
                     value = parentCell.getValue();
                     if (value != null) {
-                        Long refAttributeId = column.getRefBookAttributeId();
-                        dereferenceRefBookValue(providers, refAttributeId, cell, value);
+                        dereferenceReferenceValue(providers, column, cell, value);
                     }
                 }
 			}
 		}
 	}
+
+    private void dereferenceReferenceValue (Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
+                                            ReferenceColumn referenceColumn, Cell cell, Object value){
+        Long refAttributeId = referenceColumn.getRefBookAttributeId();
+        Pair<RefBookDataProvider, RefBookAttribute> pair = providers.get(refAttributeId);
+        if (pair == null) {
+            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+            pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
+            providers.put(refAttributeId, pair);
+        }
+        Map<String, RefBookValue> record = pair.getFirst().getRecordData((Long) value);
+        RefBookValue refBookValue = record.get(pair.getSecond().getAlias());
+        // Если найденое значение ссылка, то делаем разыменование для 2 уровня
+        if ((refBookValue.getReferenceValue()!=null)&&(refBookValue.getAttributeType()==RefBookAttributeType.REFERENCE)&&(referenceColumn.getRefBookAttributeId2()!=null)){
+            refAttributeId = referenceColumn.getRefBookAttributeId2();
+            RefBook refBook = refBookFactory.getByAttribute(refAttributeId);
+            RefBookAttribute attribute = refBook.getAttribute(refAttributeId);
+            RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
+            pair = new Pair<RefBookDataProvider, RefBookAttribute>(provider, attribute);
+            providers.put(refAttributeId, pair);
+            record = pair.getFirst().getRecordData(refBookValue.getReferenceValue());
+            refBookValue = record.get(pair.getSecond().getAlias());
+        }
+        cell.setRefBookDereference(String.valueOf(refBookValue));
+    }
 
     private void dereferenceRefBookValue(Map<Long, Pair<RefBookDataProvider, RefBookAttribute>> providers,
                                          Long refAttributeId, Cell cell, Object value) {

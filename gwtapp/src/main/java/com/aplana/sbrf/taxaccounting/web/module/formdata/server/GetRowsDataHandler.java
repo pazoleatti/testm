@@ -43,19 +43,19 @@ public class GetRowsDataHandler extends
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		if (!action.getModifiedRows().isEmpty()) {
 			dataRowService.update(userInfo, action.getFormDataId(),
-					action.getModifiedRows());
+					action.getModifiedRows(), action.isManual());
 		}
 		DataRowRange dataRowRange;
 		if (fixedRows) {
 			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(
-					userInfo, action.getFormDataId(), action.isReadOnly()));
+					userInfo, action.getFormDataId(), action.isReadOnly(), action.isManual()));
 		} else {
 			dataRowRange = new DataRowRange(action.getRange().getOffset(),
 					action.getRange().getLimit());
 		}
 
 		result.setDataRows(dataRowService.getDataRows(userInfo,
-				action.getFormDataId(), dataRowRange, action.isReadOnly()));
+				action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual()));
 
         refBookHelper.dataRowsDereference(result.getDataRows(),
                 formTemplate.getColumns());

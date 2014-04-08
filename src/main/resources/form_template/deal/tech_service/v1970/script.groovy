@@ -1,7 +1,5 @@
 package form_template.deal.tech_service.v1970
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -10,6 +8,8 @@ import java.math.RoundingMode
 
 /**
  * 377 - Техническое обслуживание нежилых помещений (2)
+ *
+ * formTemplateId=377
  *
  * @author Dmitriy Levykin
  */
@@ -87,6 +87,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -113,16 +116,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -155,7 +158,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
-        //Наименования колонок
+        // Наименования колонок
         def contractDateName = row.getCell('contractDate').column.name
         def transactionDateName = row.getCell('transactionDate').column.name
         def priceName = row.getCell('price').column.name
@@ -163,8 +166,8 @@ void logicCheck() {
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
-        //Проверка стоимости
-        if (price == null || count != null && cost != price * count) {
+        // Проверка стоимости
+        if (price != null && count != null && cost != price * count) {
             logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
@@ -251,40 +254,31 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Полное наименование юридического лица с указанием ОПФ', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(getColumnName(tmpRow, 'jurName'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 14, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[1]): 'ИНН/ КИО',
-            (xml.row[0].cell[2]): 'Код страны по классификатору ОКСМ',
-            (xml.row[0].cell[3]): 'Сумма расходов Банка, руб.',
-            (xml.row[0].cell[4]): 'Номер договора',
-            (xml.row[0].cell[5]): 'Дата договора',
-            (xml.row[0].cell[6]): 'Адрес нахождения объекта недвижимости ',
-            (xml.row[0].cell[10]): 'Количество',
-            (xml.row[0].cell[11]): 'Цена',
-            (xml.row[0].cell[12]): 'Стоимость',
-            (xml.row[0].cell[13]): 'Дата совершения сделки',
-            (xml.row[1].cell[6]): 'Страна (код)',
-            (xml.row[1].cell[7]): 'Регион (код)',
-            (xml.row[1].cell[8]): 'Город',
-            (xml.row[1].cell[9]): 'Населенный пункт',
-            (xml.row[2].cell[0]): 'гр. 2',
-            (xml.row[2].cell[1]): 'гр. 3',
-            (xml.row[2].cell[2]): 'гр. 4',
-            (xml.row[2].cell[3]): 'гр. 5',
-            (xml.row[2].cell[4]): 'гр. 6',
-            (xml.row[2].cell[5]): 'гр. 7',
-            (xml.row[2].cell[6]): 'гр. 8',
-            (xml.row[2].cell[7]): 'гр. 9',
-            (xml.row[2].cell[8]): 'гр. 10',
-            (xml.row[2].cell[9]): 'гр. 11',
-            (xml.row[2].cell[10]): 'гр. 12',
-            (xml.row[2].cell[11]): 'гр. 13',
-            (xml.row[2].cell[12]): 'гр. 14',
-            (xml.row[2].cell[13]): 'гр. 15'
+            (xml.row[0].cell[1]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'countryCode'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'bankSum'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[0].cell[6]): 'Адрес местонахождения объекта недвижимости',
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'count'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'price'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[1].cell[6]): getColumnName(tmpRow, 'country'),
+            (xml.row[1].cell[7]): getColumnName(tmpRow, 'region'),
+            (xml.row[1].cell[8]): getColumnName(tmpRow, 'city'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'settlement')
     ]
+
+    (0..13).each{
+        headerMapping.put(xml.row[2].cell[it], 'гр. ' + (it + 2))
+    }
 
     checkHeaderEquals(headerMapping)
 

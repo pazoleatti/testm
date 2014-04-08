@@ -44,6 +44,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		Integer getSelectedDeclarationType();
 		List<Integer> getSelectedReportPeriod();
 		List<Integer> getSelectedDepartment();
+        void updateLabel(TaxType taxType);
 	}
 
 	private DispatchAsync dispatcher;
@@ -92,6 +93,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
 			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
 			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+            checkCommand.setTaxType(taxType);
 			dispatcher.execute(checkCommand, CallbackUtils
 					.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
 						@Override
@@ -132,6 +134,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 								command.setDeclarationTypeId(filter.getDeclarationTypeId());
 								command.setDepartmentId(filter.getDepartmentIds().iterator().next());
 								command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+                                command.setTaxType(taxType);
 								dispatcher.execute(command, CallbackUtils
 										.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
 											@Override
@@ -169,7 +172,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	}
 
 	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
-		if(filter.getDeclarationTypeId() == null){
+		if(filter.getDeclarationTypeId() == null && !taxType.equals(TaxType.DEAL)){
 			MessageEvent.fire(this, "Для создания декларации необходимо выбрать вид декларации");
 			return false;
 		}
@@ -194,6 +197,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(dataFilter.getTaxType());
 	    this.taxType = dataFilter.getTaxType();
+        getView().updateLabel(this.taxType);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
             @Override
             public void onSuccess(GetDeclarationFilterDataResult result) {
@@ -203,5 +207,10 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }
         }, this) );
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
     }
 }

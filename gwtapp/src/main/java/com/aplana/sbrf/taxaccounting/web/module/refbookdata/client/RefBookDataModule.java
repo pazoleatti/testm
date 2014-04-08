@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.R
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBookScriptPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script.RefBookScriptView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class RefBookDataModule extends AbstractPresenterModule {
@@ -24,5 +26,9 @@ public class RefBookDataModule extends AbstractPresenterModule {
         bindPresenter(RefBookVersionPresenter.class, RefBookVersionPresenter.MyView.class,
                 RefBookVersionView.class, RefBookVersionPresenter.MyProxy.class);
         bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
+
+        // Для скрипта
+        bindPresenter(RefBookScriptPresenter.class, RefBookScriptPresenter.MyView.class,
+                RefBookScriptView.class, RefBookScriptPresenter.MyProxy.class);
     }
 }

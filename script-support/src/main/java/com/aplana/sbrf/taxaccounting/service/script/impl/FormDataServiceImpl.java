@@ -343,11 +343,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBook rb = refBookFactory.get(refBookId);
         String msg = columnName == null ?
                 String.format(REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
-                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName, rb.getName());
+                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName.replaceAll("%%", "%"), rb.getName());
         if (required) {
-            throw new ServiceException(msg);
+            throw new ServiceException("%s", msg);
         } else {
-            logger.warn(msg);
+            logger.warn("%s", msg);
         }
         return null;
     }
@@ -367,9 +367,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
         if (required) {
-            throw new ServiceException(msg);
+            throw new ServiceException("%s", msg);
         } else {
-            logger.warn(msg);
+            logger.warn("%s", msg);
         }
         return null;
     }
@@ -389,9 +389,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
         if (required) {
-            throw new ServiceException(msg);
+            throw new ServiceException("%s", msg);
         } else {
-            logger.warn(msg);
+            logger.warn("%s", msg);
         }
         return null;
     }
@@ -411,11 +411,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBook rb = refBookFactory.get(refBookId);
         String msg = columnName == null ?
                 String.format(REF_BOOK_NOT_FOUND_ERROR, rb.getName(), value, rb.getAttribute(alias).getName()) :
-                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName, rb.getName());
+                String.format(REF_BOOK_ROW_NOT_FOUND_ERROR, rowIndex, columnName.replaceAll("%%", "%"), rb.getName());
         if (required) {
-            throw new ServiceException(msg);
+            throw new ServiceException("%s", msg);
         } else {
-            logger.warn(msg);
+            logger.warn("%s", msg);
         }
         return null;
     }
@@ -449,9 +449,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             String msg = String.format(REF_BOOK_DEREFERENCE_ERROR, row.getIndex(), cell.getColumn().getName(),
                     rb.getName(), value);
             if (required) {
-                logger.error(msg);
+                logger.error("%s", msg);
             } else {
-                logger.warn(msg);
+                logger.warn("%s", msg);
             }
             return false;
         }
@@ -564,17 +564,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         return false;
     }
 
-    /**
-     * Сравнить зависимое поле с ожидаемым.
-     *
-     * @param referenceValue значение зависомого поля
-     * @param expectedValue ожидаемое значение
-     * @param rowIndex номер строки в транспортном файле
-     * @param colIndex номер колонки в транспортном файле
-     * @param logger для вывода сообщений
-     * @param required фатальность/обязательность
-     */
-    void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
+    @Override
+    public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                              Logger logger, boolean required) {
         if (referenceValue == null && expectedValue == null) {
             return;
@@ -585,9 +576,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, rb.getName());
         if (required) {
-            throw new ServiceException(msg);
+            throw new ServiceException("%s", msg);
         } else {
-            logger.warn(msg);
+            logger.warn("%s", msg);
         }
     }
 }

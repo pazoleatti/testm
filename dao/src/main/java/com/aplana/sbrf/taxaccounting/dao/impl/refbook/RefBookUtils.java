@@ -128,6 +128,7 @@ public class RefBookUtils extends AbstractDao {
      * @param isSortAscending
      * @return
      */
+	//TODO вместо PARENT_ID использовать com.aplana.sbrf.taxaccounting.model.refbook.RefBook.RECORD_PARENT_ID_ALIAS (Marat Fayzullin 26.03.2014)
     private PreparedStatementData getChildRecordsQuery(RefBook refBook, String tableName, Long parentId, RefBookAttribute sortAttribute,
                                                 String filter, PagingParams pagingParams, boolean isSortAscending) {
         String orderBy = "";

@@ -96,7 +96,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	@Override
 	public void onUpdateForm(UpdateForm event) {
-		getView().updateTable();
+        if (this.isVisible()) {
+            getView().updateTable();
+        }
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplateContent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
@@ -12,9 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -72,15 +68,16 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.closeEntry();
 
 			// content
-			ze = new ZipEntry(CONTENT_FILE);
+            //Убрал в связи с тем, что ввели версионирование
+			/*ze = new ZipEntry(CONTENT_FILE);
 			zos.putNextEntry(ze);
 			DeclarationTemplateContent dtc = new DeclarationTemplateContent();
 			dtc.setType(dt.getType());
-			dtc.setVersion(dt.getVersion());
+			//dtc.setVersion(dt.getVersion());
 			JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.marshal(dtc, zos);
-			zos.closeEntry();
+			zos.closeEntry();*/
 			
 			zos.finish();
 		} catch (Exception e) {
@@ -89,7 +86,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 	}
 
 	@Override
-	public void importDeclarationTemplate(TAUserInfo userInfo, Integer id,
+	public DeclarationTemplate importDeclarationTemplate(TAUserInfo userInfo, Integer id,
 			InputStream is) {
 		try {
 			ZipInputStream zis = new ZipInputStream(is);
@@ -111,15 +108,15 @@ public class DeclarationTemplateImpexServiceImpl implements
             if ("1.0".equals(version)){
             	DeclarationTemplate dt = declarationTemplateDao.get(id);
 
-				if (files.get(CONTENT_FILE).length != 0) {
+				/*if (files.get(CONTENT_FILE).length != 0) {
 					DeclarationTemplateContent dtc;
 					JAXBContext jaxbContext = JAXBContext.newInstance(DeclarationTemplateContent.class);
 					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 					dtc = (DeclarationTemplateContent) jaxbUnmarshaller.
 							unmarshal(new ByteArrayInputStream(files.get(CONTENT_FILE)));
 					dt.setType(dtc.getType());
-					dt.setVersion(dtc.getVersion());
-				}
+					//dt.setVersion(dtc.getVersion());
+				}*/
 				if (files.get("script.groovy").length != 0) {
 					dt.setCreateScript(new String(files.get("script.groovy")));
 				}
@@ -127,6 +124,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 				if (files.get("report.jrxml").length != 0) {
 					declarationTemplateService.setJrxml(id, new ByteArrayInputStream(files.get("report.jrxml")));
 				}
+                return dt;
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
             }

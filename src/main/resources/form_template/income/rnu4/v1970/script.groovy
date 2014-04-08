@@ -1,9 +1,7 @@
 package form_template.income.rnu4.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -117,12 +115,11 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
 
         // сортируем по кодам
-        dataRowHelper.save(dataRows.sort { getKnu(it.balance) })
+        dataRows.sort { getKnu(it.balance) }
 
         // номер последний строки предыдущей формы
         def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
@@ -135,37 +132,36 @@ void calc() {
 
     // посчитать "итого по коду"
     def totalRows = [:]
-    def tmp = null
+
     def sum = 0
+    def prevBalance = null
     dataRows.eachWithIndex { row, i ->
-        if (tmp == null) {
-            tmp = row.balance
+        def code = getKnu(row.balance)
+        if (code != null) { // Строки без кода не образуют группы
+            // Если код поменялся, то создать новую строку итого с предыдущей суммой
+            if (prevBalance != null && prevBalance != row.balance) {
+                totalRows.put(i, getNewRow(getKnu(prevBalance), sum))
+                sum = 0
+            }
+            // Если строка последняя то тоже создать строку итого с предудущей суммой + слагаемое из текущей строки
+            if (i == dataRows.size() - 1) {
+                sum += row.sum ?: 0
+                totalRows.put(i + 1, getNewRow(code, sum))
+                sum = 0
+            }
+            sum += row.sum ?: 0
         }
-        // если код расходы поменялся то создать новую строку "итого по коду"
-        if (tmp != row.balance) {
-            def code = getKnu(tmp)
-            totalRows.put(i, getNewRow(code, sum))
-            sum = 0
-        }
-        // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-        if (i == dataRows.size() - 1) {
-            sum += (row.sum ?: 0)
-            def code = getKnu(row.balance)
-            def totalRowCode = getNewRow(code, sum)
-            totalRows.put(i + 1, totalRowCode)
-            sum = 0
-        }
-        sum += (row.sum ?: 0)
-        tmp = row.balance
+        prevBalance = row.balance
     }
 
     // добавить "итого по коду" в таблицу
-    def i = 1
+    def i = 0
     totalRows.each { index, row ->
-        dataRowHelper.insert(row, index + i++)
+        dataRows.add(index + i++, row)
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
+    // Общий итог
+    dataRows.add(dataRows.size(), calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
 }
 
@@ -228,7 +224,7 @@ void logicCheck() {
     //4. Арифметическая проверка итоговых значений по каждому <Коду классификации доходов>
     totalRows.each { key, val ->
         if (totalRows.get(key) != sumRowsByCode.get(key)) {
-            def msg =  formData.createDataRow().getCell('sum').column.name
+            def msg = formData.createDataRow().getCell('sum').column.name
             logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
@@ -251,6 +247,9 @@ def getNewRow(def alias, def sum) {
 }
 
 def String getKnu(def code) {
+    if (code == null) {
+        return null
+    }
     return getRefBookValue(28, code)?.CODE?.stringValue
 }
 
@@ -292,33 +291,9 @@ void consolidation() {
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -347,8 +322,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -367,7 +342,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -389,8 +364,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[2].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 2 " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
@@ -398,8 +372,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[4].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец 4 " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 

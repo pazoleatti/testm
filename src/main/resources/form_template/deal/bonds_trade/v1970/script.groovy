@@ -9,6 +9,8 @@ import java.math.RoundingMode
 /**
  * 384 - Реализация и приобретение ценных бумаг (9)
  *
+ * formTemplateId=384
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -70,8 +72,8 @@ def autoFillColumns = ['rowNum', 'innKio', 'contraCountry', 'contraCountryCode',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNum', 'transactionDeliveryDate', 'contraName', 'transactionMode', 'contraCountry',
-        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub', 'contractNum',
-        'contractDate', 'transactionDate', 'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
+        'transactionSumCurrency', 'currency', 'courseCB', 'transactionSumRub',
+        'bondRegCode', 'bondCount', 'priceOne', 'transactionType']
 
 // Дата окончания отчетного периода
 @Field
@@ -86,6 +88,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -112,16 +117,16 @@ def getXML(def String startStr, def String endStr) {
     if (is == null) {
         throw new ServiceException('Поток данных пуст')
     }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
+    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
+        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
     }
     def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
     if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     def xml = new XmlSlurper().parseText(xmlString)
     if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
+        throw new ServiceException('Отсутствие значения после обработки потока данных')
     }
     return xml
 }
@@ -166,8 +171,8 @@ void logicCheck() {
         // Проверка конверсии
         if (courseCB == null || transactionSumCurrency == null || transactionSumRub != (courseCB * transactionSumCurrency).setScale(0, RoundingMode.HALF_UP)) {
             def msg1 = row.getCell('transactionSumRub').column.name
-            def msg2 = row.getCell('courseCB').column.name
-            def msg3 = row.getCell('transactionSumCurrency').column.name
+            def msg2 = row.getCell('transactionSumCurrency').column.name
+            def msg3 = row.getCell('courseCB').column.name
             logger.warn("Строка $rowNum: «$msg1» не соответствует «$msg2» с учетом данных «$msg3»!")
         }
 
@@ -179,7 +184,7 @@ void logicCheck() {
         }
 
         // Корректность даты заключения сделки
-        if (transactionDeliveryDate < contractDate) {
+        if (transactionDate < contractDate) {
             def msg1 = row.getCell('transactionDate').column.name
             def msg2 = row.getCell('contractDate').column.name
             logger.warn("Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
@@ -188,7 +193,7 @@ void logicCheck() {
         // Проверка цены сделки
         def res = null
 
-        if (transactionSumRub != null && bondCount != null) {
+        if (transactionSumRub != null && bondCount != null && bondCount != 0) {
             res = (transactionSumRub / bondCount).setScale(0, RoundingMode.HALF_UP)
         }
 
@@ -225,28 +230,29 @@ void calc() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('Сокращенная форма\nДанные для расчета сумм доходов по сделкам', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML('Сокращенная форма Данные для расчета сумм доходов по сделкам', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[10]): 'Номер договора',
-            (xml.row[0].cell[11]): 'Дата договора',
-            (xml.row[0].cell[12]): 'Дата (заключения) сделки',
-            (xml.row[0].cell[13]): 'Регистрационный код ценной бумаги',
-            (xml.row[0].cell[14]): 'Количество бумаг по сделке, шт.',
-            (xml.row[0].cell[15]): 'Цена за 1 шт., руб. ',
-            (xml.row[0].cell[16]): 'Тип сделки',
-            (xml.row[1].cell[0]): 'Дата сделки (поставки)',
-            (xml.row[1].cell[1]): 'Наименование контрагента и ОПФ',
-            (xml.row[1].cell[2]): 'Режим переговорных сделок',
-            (xml.row[1].cell[3]): 'ИНН/ КИО контрагента',
-            (xml.row[1].cell[4]): 'Страна местонахождения контрагента',
-            (xml.row[1].cell[5]): 'Код страны местонахождения контрагента',
-            (xml.row[1].cell[6]): 'Сумма сделки (с учетом НКД), в валюте расчетов',
-            (xml.row[1].cell[7]): 'Валюта расчетов по сделке',
-            (xml.row[1].cell[8]): 'Курс ЦБ РФ',
-            (xml.row[1].cell[9]): 'Сумма сделки (с учетом НКД), руб.',
+            (xml.row[1].cell[0]): getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (xml.row[1].cell[1]): getColumnName(tmpRow, 'contraName'),
+            (xml.row[1].cell[2]): getColumnName(tmpRow, 'transactionMode'),
+            (xml.row[1].cell[3]): getColumnName(tmpRow, 'innKio'),
+            (xml.row[1].cell[4]): getColumnName(tmpRow, 'contraCountry'),
+            (xml.row[1].cell[5]): getColumnName(tmpRow, 'contraCountryCode'),
+            (xml.row[1].cell[6]): getColumnName(tmpRow, 'transactionSumCurrency'),
+            (xml.row[1].cell[7]): getColumnName(tmpRow, 'currency'),
+            (xml.row[1].cell[8]): getColumnName(tmpRow, 'courseCB'),
+            (xml.row[1].cell[9]): getColumnName(tmpRow, 'transactionSumRub'),
+            (xml.row[1].cell[10]): getColumnName(tmpRow, 'contractNum'),
+            (xml.row[1].cell[11]): getColumnName(tmpRow, 'contractDate'),
+            (xml.row[1].cell[12]): getColumnName(tmpRow, 'transactionDate'),
+            (xml.row[1].cell[13]): getColumnName(tmpRow, 'bondRegCode'),
+            (xml.row[1].cell[14]): getColumnName(tmpRow, 'bondCount'),
+            (xml.row[1].cell[15]): getColumnName(tmpRow, 'priceOne'),
+            (xml.row[1].cell[16]): getColumnName(tmpRow, 'transactionType'),
             (xml.row[2].cell[0]): 'гр. 2',
             (xml.row[2].cell[1]): 'гр. 3',
             (xml.row[2].cell[2]): 'гр. 4',
@@ -256,16 +262,11 @@ void importData() {
             (xml.row[2].cell[6]): 'гр. 7.1',
             (xml.row[2].cell[7]): 'гр. 7.2',
             (xml.row[2].cell[8]): 'гр. 7.3',
-            (xml.row[2].cell[9]): 'гр. 7.4',
-            (xml.row[2].cell[10]): 'гр. 8',
-            (xml.row[2].cell[11]): 'гр. 9',
-            (xml.row[2].cell[12]): 'гр. 10',
-            (xml.row[2].cell[13]): 'гр. 11',
-            (xml.row[2].cell[14]): 'гр. 12',
-            (xml.row[2].cell[15]): 'гр. 13',
-            (xml.row[2].cell[16]): 'гр. 14'
+            (xml.row[2].cell[9]): 'гр. 7.4'
     ]
-
+    (10..16).each{
+        headerMapping.put(xml.row[2].cell[it], 'гр. ' + (it-2))
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)

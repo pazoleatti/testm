@@ -59,7 +59,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK :
         def rnu49FormData = getRnu49FormData()
         if (rnu49FormData == null) {
-            logger.error("Отсутствуют данные РНУ-49!")
+            logger.error("Не найдены экземпляры РНУ-49 за текущий отчетный период")
             return
         }
         logicCheck()
@@ -67,10 +67,10 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE :
         def rnu49FormData = getRnu49FormData()
         if (rnu49FormData == null) {
-            logger.error("Отсутствуют данные РНУ-49!")
+            logger.error("Не найдены экземпляры РНУ-49 за текущий отчетный период")
             return
         }
-        calc()
+        calc(rnu49FormData)
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
@@ -97,12 +97,12 @@ switch (formDataEvent) {
 // обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
-        calc()
+        calc(null)
         logicCheck()
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        calc(null)
         logicCheck()
         break
 }
@@ -135,55 +135,56 @@ def arithmeticCheckAlias = ['summ']
 def otherCheckAlias = ['operationDate', 'baseNumber', 'baseDate']
 
 // Дата окончания отчетного периода
-@Field def reportPeriodEndDate = null
-
-// Текущая дата
-@Field def currentDate = new Date()
+@Field
+def reportPeriodEndDate = null
 
 //границы раздела "А" в РНУ-49
-@Field String rnu49AIndex = 'A'
+@Field
+String rnu49AIndex = 'A'
 
 //границы раздела "А" в РНУ-49
-@Field String rnu49TotalAIndex = 'totalA'
+@Field
+String rnu49TotalAIndex = 'totalA'
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, true)
-}
-
-/**
- * заполняем ячейки, вычисляемые автоматически
- */
-
-def calc() {
+// заполняем ячейки, вычисляемые автоматически
+def calc(def rnu49FormData) {
+    if (!rnu49FormData){
+        rnu49FormData = getRnu49FormData()
+    }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def rnu49Rows = getRnu49FormData()?.getAllCached()
-    if (rnu49Rows == null) return
+    def rnu49Rows = rnu49FormData?.getAllCached()
+    if (rnu49Rows == null || rnu49Rows.isEmpty()) return
+
+    // получить строку "итого"
+    def totalRow = getDataRow(dataRows, 'total')
+    // очистить итоги
+    totalSumColumns.each {
+        totalRow[it] = null
+    }
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
     def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
-    if (rnu49FormData != null) {
-        for (def dataRow : dataRows) {
-            def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
+    for (def dataRow : dataRows) {
+        def rnu49Row = getRnu49Row(rnu49Rows, dataRow)
 
-            dataRow.number = ++index
+        dataRow.number = ++index
 
+        if (rnu49Row) {
             def values = getValues(rnu49Row)
             values.keySet().each { colName ->
                 dataRow[colName] = values[colName]
             }
         }
-
-        // добавить строку "итого"
-        def totalRow = getTotalRow(dataRows)
-        dataRows.add(totalRow)
     }
+    // добавить строку "итого"
+    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 }
 
@@ -297,46 +298,9 @@ boolean logicCheck(){
     checkTotalSum(dataRows, totalSumColumns, logger, true)
 }
 
-/** Сформировать итоговую строку с суммами. */
-def getTotalRow(def dataRows) {
-    def newRow = formData.createDataRow()
-    newRow.setAlias('total')
-    newRow.fix = 'Итого'
-    newRow.getCell('fix').colSpan = 1
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, newRow, totalSumColumns)
-    return newRow
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 6, 2)
 
@@ -370,11 +334,20 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
+
+    def dataRows = dataRowHelper.allCached
+
+    // Итоговая строка
+    def totalRow = getDataRow(dataRows, 'total')
+    // Очистка итогов
+    totalSumColumns.each { alias ->
+        totalRow[alias] = null
+    }
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -390,7 +363,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
             continue
         }
 
@@ -431,5 +404,6 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    rows.add(totalRow)
     dataRowHelper.save(rows)
 }

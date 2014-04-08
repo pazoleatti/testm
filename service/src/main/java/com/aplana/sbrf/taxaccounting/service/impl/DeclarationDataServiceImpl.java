@@ -134,9 +134,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationData.setXmlDataUuid(null);
         }
         declarationDataDao.update(declarationData);
-        //TODO dloshkarev: можно переделать на in запрос
-        for (String s : strings)
-            blobDataService.delete(s);
+        blobDataService.delete(strings);
 
 		setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 		logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);

@@ -81,7 +81,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
         logger.setMessageDecorator(d);
 
-        executeScript(b, script, logger, d);
+        executeScript(b, script, logger);
 
         logger.setMessageDecorator(null);
 
@@ -138,16 +138,13 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     }
 
 
-    private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
+    private void executeScript(Bindings bindings, String script, Logger logger) {
         try {
             scriptEngine.eval(script, bindings);
-            return true;
         } catch (ScriptException e) {
             logScriptException(e, logger);
-            return false;
         } catch (Exception e) {
-            logger.error(e);
-            return false;
+            logger.error(e.getMessage());
         }
     }
 

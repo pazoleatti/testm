@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -38,6 +40,15 @@ public class BlobDataServiceImpl implements BlobDataService {
     @Override
     public void delete(String blobId) {
         blobDataDao.delete(blobId);
+    }
+
+    @Override
+    public void delete(List<String> blobIdStrings) {
+        try {
+            blobDataDao.delete(blobIdStrings);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при удалении записей.");
+        }
     }
 
     @Override

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>Приобретение прав требования</name>
+    <fullName>Приобретение прав требования</fullName>
+    <code></code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <name>Полное наименование с указанием ОПФ</name>
+        <order>2</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>32</nameAttributeId>
+        <refBookAttributeId>32</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>innKio</alias>
+        <checking>false</checking>
+        <name>ИНН/КИО</name>
+        <order>3</order>
+        <width>7</width>
+        <parentId>20765</parentId>
+        <refBookAttributeId>37</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>country</alias>
+        <checking>false</checking>
+        <name>Страна регистрации</name>
+        <order>4</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
+        <refBookAttributeId>53</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>contractNum</alias>
+        <checking>false</checking>
+        <name>Номер договора</name>
+        <order>5</order>
+        <width>5</width>
+        <maxLength>128</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>contractDate</alias>
+        <checking>false</checking>
+        <name>Дата договора</name>
+        <order>6</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>okeiCode</alias>
+        <checking>false</checking>
+        <name>Код единицы измерения по ОКЕИ</name>
+        <order>7</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>58</nameAttributeId>
+        <refBookAttributeId>57</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>count</alias>
+        <checking>false</checking>
+        <name>Количество</name>
+        <order>8</order>
+        <width>5</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>price</alias>
+        <checking>false</checking>
+        <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
+        <order>9</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>totalCost</alias>
+        <checking>false</checking>
+        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <order>10</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>transactionDate</alias>
+        <checking>false</checking>
+        <name>Дата совершения сделки</name>
+        <order>11</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

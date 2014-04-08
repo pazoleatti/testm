@@ -199,7 +199,7 @@ void calc() {
             continue
         }
         // графа 4 - кпп
-        row.kpp = incomeParam.get('record_id').getNumberValue()
+        row.kpp = incomeParam.KPP?.stringValue
 
         // графа 8 - Признак расчёта
         row.calcFlag = incomeParam.get('TYPE').getReferenceValue()
@@ -214,7 +214,7 @@ void calc() {
         row.baseTaxOfRub = calc11(row, taxBase)
 
         // графа 12
-        row.subjectTaxStavka = row.kpp
+        row.subjectTaxStavka = incomeParam.get('record_id').getNumberValue()
 
         // графа 13..21
         calcColumnFrom13To21(row, sumNal, reportPeriod)
@@ -448,6 +448,7 @@ void consolidation() {
             }
         }
     }
+    dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 

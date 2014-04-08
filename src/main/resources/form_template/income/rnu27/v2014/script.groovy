@@ -93,17 +93,6 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.MIGRATION:
-        importData()
-        if (!hasError()) {
-            def data = formDataService.getDataRowHelper(formData)
-            def dataRows = data.getAllCached()
-            addAllStatic(dataRows)
-            def total = getCalcTotalRow(dataRows)
-            dataRows.add(total)
-            data.save(dataRows)
-        }
-        break
 }
 
 /**
@@ -289,37 +278,6 @@ def logicCheck() {
         dataPrevRows = dataPrev?.getAllCached()
     }
 
-    /** 1. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
-     * http://jira.aplana.com/browse/SBRFACCTAX-2609
-     */
-    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null) {
-        List notFound = []
-        List foundMany = []
-        if (dataPrevRows != null) {
-            for (DataRow rowPrev in dataPrevRows) {
-                if (rowPrev.getAlias() == null && rowPrev.reserveCalcValue > 0) {
-                    int count = 0
-                    for (DataRow row in dataRows) {
-                        if (row.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber) {
-                            count++
-                        }
-                    }
-                    if (count == 0) {
-                        notFound.add(rowPrev.tradeNumber)
-                    } else if (count > 1) {
-                        foundMany.add(rowPrev.tradeNumber)
-                    }
-                }
-            }
-        }
-        if (!notFound.isEmpty()) {
-            logger.warn(getMessageLP1(notFound, "Отсутствуют строки с номерами сделок:"))
-        }
-        if (!foundMany.isEmpty()) {
-            logger.warn(getMessageLP1(foundMany, "Существует несколько строк с номерами сделок:"))
-        }
-    }
-
     def number = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (DataRow row in data.getAllCached()) {
         if (row?.getAlias() == null) {
@@ -328,55 +286,55 @@ def logicCheck() {
             def errorMsg = "Строка ${index}: "
 
             if (row.current == 0) {
-                // 2. LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
-                if (row.reserveCalcValuePrev != row.current) {
+                // 4. LC Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
+                if (row.reserveCalcValuePrev != row.recovery) {
                     logger.warn(errorMsg + "Графы 8 и 17 неравны!")
                 }
-                // 3. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
+                // 5. LC • Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7 = 0)
                 if (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0) {
                     logger.warn(errorMsg + "Графы 9, 14 и 15 ненулевые!")
                 }
             }
-            // 4. LC • Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6 = 0)
-            if (row.prev == 0 && (row.reserveCalcValuePrev != row.recovery || row.recovery != 0)) {
+            // 6. LC • Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6 = 0)
+            if (row.prev == 0 && (row.reserveCalcValuePrev != 0 || row.recovery != 0)) {
                 loggerError(errorMsg + "Графы 8 и 17 ненулевые!")
             }
-            // 5. LC • Проверка необращающихся облигаций (графа 10 = «x»)
-            if (getSign(row.signSecurity) == "x" && (row.reserveCalcValue != row.reserveCreation || row.reserveCreation != 0)) {
+            // 7. LC • Проверка необращающихся облигаций (графа 10 = «x»)
+            if (getSign(row.signSecurity) == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 logger.warn(errorMsg + "Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
             if (getSign(row.signSecurity) == "+") {
-                // 6. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
+                // 8. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
-                // 7. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
+                // 9. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
-                // 8. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
+                // 10. LC • Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev == 0 && (row.reserveCreation != 0 || row.recovery != 0)) {
                     loggerError(errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
                 }
             }
-            // 9. LC • Проверка корректности формирования резерва
+            // 11. LC • Проверка корректности формирования резерва
             if (row.reserveCalcValuePrev != null && row.reserveCreation != null && row.reserveCalcValue != null && row.recovery != null
                     && row.reserveCalcValuePrev + row.reserveCreation != row.reserveCalcValue + row.recovery) {
                 loggerError(errorMsg + "Резерв сформирован неверно!")
             }
-            // 10. LC • Проверка на положительные значения при наличии созданного резерва
-            if (row.reserveCreation > 0 && (row.current < 0 || row.cost < 0 || row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
+            // 12. LC • Проверка на положительные значения при наличии созданного резерва
+            if (row.reserveCreation > 0 && (row.current <= 0 || row.cost <= 0 || row.costOnMarketQuotation <= 0 || row.reserveCalcValue <= 0)) {
                 logger.warn(errorMsg + "Резерв сформирован. Графы 7, 9, 14 и 15 неположительные!")
             }
-            // 11. LC • Проверка корректности заполнения РНУ
+            // 13. LC • Проверка корректности заполнения РНУ
             if (formData.kind == FormDataKind.PRIMARY && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
-                        logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
+                        logger.warn(errorMsg + "РНУ сформирован некорректно! Не выполняется условие: Если «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
                     }
                 }
             }
-            // 12. LC • Проверка корректности заполнения РНУ
+            // 14. LC • Проверка корректности заполнения РНУ
             if (formData.kind == FormDataKind.PRIMARY && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
@@ -385,15 +343,15 @@ def logicCheck() {
                 }
             }
 
-            // 15. LC Проверка на заполнение поля «<Наименование поля>»
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            // 1. LC Проверка на заполнение поля «<Наименование поля>»
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
 
-            // 16. Проверка на уникальность поля «№ пп»
+            // 2. Проверка на уникальность поля «№ пп»
             if (number != row.number) {
                 logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
             }
 
-            if (getCurrency(row.currency) == 'RUR') {
+            if (getCurrency(row.issuer) == 'RUR') {
                 // 17. LC Проверка графы 11
                 if (row.marketQuotation != null) {
                     loggerError(errorMsg + "Неверно заполнена графа «Рыночная котировка одной ценной бумаги в иностранной валюте»!")
@@ -426,7 +384,8 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    loggerError("Итоговые значения по «" + getPrevRowWithoutAlias(dataRows, row).regNumber + "» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
+                    def regNumber = getRefBookValue(84, getPrevRowWithoutAlias(dataRows, row)?.issuer)?.REG_NUM?.stringValue
+                    loggerError("Итоговые значения по «" + regNumber + "» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
         }
@@ -437,7 +396,8 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    loggerError("Итоговые значения для «" + getPrevRowWithoutAlias(dataRows, row).issuer + "» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
+                    def issuer = getRefBookValue(84, getPrevRowWithoutAlias(dataRows, row)?.issuer)?.ISSUER?.numberValue
+                    loggerError("Итоговые значения для «" + issuer + "» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
         }
@@ -458,7 +418,38 @@ def logicCheck() {
     }
 
     // 22. Проверка итоговых значений по всей форме
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+
+    /** 3. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
+     * http://jira.aplana.com/browse/SBRFACCTAX-2609
+     */
+    if (formData.kind == FormDataKind.PRIMARY && dataPrev != null) {
+        List notFound = []
+        List foundMany = []
+        if (dataPrevRows != null) {
+            for (DataRow rowPrev in dataPrevRows) {
+                if (rowPrev.getAlias() == null && rowPrev.reserveCalcValue > 0) {
+                    int count = 0
+                    for (DataRow row in dataRows) {
+                        if (row.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber) {
+                            count++
+                        }
+                    }
+                    if (count == 0) {
+                        notFound.add(rowPrev.tradeNumber)
+                    } else if (count > 1) {
+                        foundMany.add(rowPrev.tradeNumber)
+                    }
+                }
+            }
+        }
+        if (!notFound.isEmpty()) {
+            logger.warn(getMessageLP1(notFound, "Отсутствуют строки с номерами сделок:"))
+        }
+        if (!foundMany.isEmpty()) {
+            logger.warn(getMessageLP1(foundMany, "Существует несколько строк с номерами сделок:"))
+        }
+    }
 }
 
 /**
@@ -486,29 +477,13 @@ void importData() {
             (xml.row[0].cell[15]): 'Расчетная величина резерва на текущую отчётную дату (руб.коп.)',
             (xml.row[0].cell[16]): 'Создание резерва (руб.коп.)',
             (xml.row[0].cell[17]): 'Восстановление резерва (руб.коп.)',
-
             (xml.row[1].cell[6]): 'Предыдущую',
             (xml.row[1].cell[7]): 'Текущую',
-
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16',
-            (xml.row[2].cell[17]): '17',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..17).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -538,8 +513,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -557,8 +532,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -576,46 +551,46 @@ void addData(def xml, int headRowCount) {
         newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[2].text(), xlsIndexRow, 2 + colOffset, false)
 
         /* Графа 3 */
-//        newRow.regNumber = row.cell[3].text()
+        getRecordIdImport(84, 'REG_NUM', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
 
         /* Графа 4 */
         newRow.tradeNumber = row.cell[4].text()
 
         /* Графа 5 */
-//        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset, false)
+        getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset, false)
 
         /* Графа 6 */
-        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
+        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         /* Графа 7 */
-        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
+        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
 
         /* Графа 8 */
-        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
+        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
 
         /* Графа 9 */
-        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
+        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
 
         /* Графа 10 */
         newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset, false)
 
         /* Графа 11 */
-        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
+        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
 
         /* Графа 12 */
-        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
+        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
 
         /* Графа 14 */
-        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
+        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, false)
 
         /* Графа 15 */
-        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, true)
+        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
 
         /* Графа 16 */
-        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, true)
+        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, false)
 
         /* Графа 17 */
-        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, true)
+        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -636,14 +611,18 @@ void addAllStatic(def dataRows) {
         int j = 0
 
         // графа 3 - грн - regNumber
-        if (row.getAlias() == null && nextRow == null || row.regNumber != nextRow.regNumber || row.issuer != nextRow.issuer) {
+        def regNum = getRefBookValue(84, row?.issuer)?.REG_NUM?.stringValue
+        def nextRegNum = getRefBookValue(84, nextRow?.issuer)?.REG_NUM?.stringValue
+        if (row.getAlias() == null && nextRow == null || regNum != nextRegNum) {
             def itogRegNumberRow = calcItogRegNumber(i)
             dataRows.add(i + 1, itogRegNumberRow)
             j++
         }
 
         // графа 2 - эмитент - issuer
-        if (row.getAlias() == null && nextRow == null || row.issuer != nextRow.issuer) {
+        def issuer = getRefBookValue(84, row?.issuer)?.ISSUER?.numberValue
+        def nextIssuer = getRefBookValue(84, nextRow?.issuer)?.ISSUER?.numberValue
+        if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
             def itogIssuerRow = calcItogIssuer(i)
             dataRows.add(i + 2, itogIssuerRow)
             j++
@@ -664,7 +643,7 @@ def calcItogIssuer(int i) {
     String tIssuer = 'Эмитент'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
-            tIssuer = getRefBookValue(84, getRow(j).issuer)?.ISSUER
+            tIssuer = getRefBookValue(84, getRow(j).issuer)?.ISSUER?.numberValue
             break
         }
     }
@@ -679,7 +658,7 @@ def calcItogIssuer(int i) {
         def srow = getRow(j)
 
         if (srow.getAlias() == null) {
-            if (((getRow(j).issuer != tIssuer))) {
+            if (((((String) getRefBookValue(84, srow.issuer)?.ISSUER?.numberValue) != tIssuer))) {
                 break
             }
 
@@ -708,7 +687,7 @@ def calcItogRegNumber(int i) {
     String tRegNumber = 'ГРН'
     for (int j = i; j >= 0; j--) {
         if (getRow(j).getAlias() == null) {
-            tRegNumber = getRefBookValue(84, getRow(j).issuer)?.REG_NUM
+            tRegNumber = getRefBookValue(84, getRow(j).issuer)?.REG_NUM?.stringValue
             break
         }
     }
@@ -716,7 +695,7 @@ def calcItogRegNumber(int i) {
     newRow.fix = tRegNumber?.concat(' Итог')
 
     for (column in totalColumns) {
-        newRow.getCell(column).setValue(new BigDecimal(0), null)
+        newRow[column] = 0
     }
 
     // идем от текущей позиции вверх и ищем нужные строки
@@ -724,13 +703,13 @@ def calcItogRegNumber(int i) {
         def srow = getRow(j)
 
         if (srow.getAlias() == null) {
-            if (getRow(j).regNumber != tRegNumber) {
+            if (getRefBookValue(84, srow.issuer)?.REG_NUM?.stringValue != tRegNumber) {
                 break
             }
 
             for (column in totalColumns) {
-                if (srow.get(column) != null) {
-                    newRow.getCell(column).setValue(newRow.getCell(column).value + (BigDecimal) srow.get(column), null)
+                if (srow[column] != null) {
+                    newRow[column] += (BigDecimal) srow[column]
                 }
             }
         }
@@ -774,7 +753,7 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
     if (tempCount == 1) {
         return roundValue(temp, 2)
     } else {
-        return (BigDecimal) 0
+        return BigDecimal.ZERO
     }
 }
 
@@ -783,7 +762,7 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
  * @author ivildanov
  */
 BigDecimal calc11(DataRow row) {
-    if (getCurrency(row.currency)?.contains("RUR")) {
+    if (getCurrency(row.issuer)?.contains("RUR")) {
         return null
     }
     return row.marketQuotation
@@ -793,11 +772,10 @@ BigDecimal calc11(DataRow row) {
  * Расчет графы 12
  */
 BigDecimal calc12(DataRow row) {
-    if (getCurrency(row.currency)?.contains("RUR")) {
+    if (getCurrency(row.issuer)?.contains("RUR")) {
         return null
     }
     return row.rubCourse
-    //return getCourse(row.currency,reportDate)
 }
 
 /**
@@ -818,7 +796,7 @@ BigDecimal calc13(DataRow row) {
  */
 BigDecimal calc14(DataRow row) {
     if (row.marketQuotationInRub == null) {
-        return (BigDecimal) 0
+        return BigDecimal.ZERO
     } else {
         return roundValue(row.current * row.marketQuotationInRub, 2)
     }
@@ -829,24 +807,12 @@ BigDecimal calc14(DataRow row) {
  * @author ivildanov
  */
 BigDecimal calc15(DataRow row) {
-    BigDecimal a
+    BigDecimal a = (row.cost ?: 0)
 
-    if (row.cost != null) {
-        a = row.cost
+    if (getSign(row.signSecurity) == "+" && a - row.costOnMarketQuotation > 0) {
+        return a - row.costOnMarketQuotation
     } else {
-        a = 0
-    }
-
-    if (getSign(row.signSecurity) == "+") {
-        if (a - row.costOnMarketQuotation > 0) {
-            return a - row.costOnMarketQuotation
-        } else {
-            return (BigDecimal) 0
-        }
-    } else if (getSign(row.signSecurity) == "-") {
-        return (BigDecimal) 0
-    } else {
-        return null
+        return BigDecimal.ZERO
     }
 }
 
@@ -857,7 +823,7 @@ BigDecimal calc15(DataRow row) {
 BigDecimal calc16(DataRow row) {
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            return roundValue((row.marketQuotation?:0) - row.prev, 2)
+            return roundValue((row.marketQuotation ?: 0) - row.prev, 2)
         } else {
             return (BigDecimal) 0
         }
@@ -965,8 +931,11 @@ def getRecords(def ref_id, String code, String value, Date date, def cache) {
 /**
  * Получить буквенный код валюты
  */
-def getCurrency(def currencyCode) {
-    return getRefBookValue(15, currencyCode)?.CODE_2?.getStringValue()
+def getCurrency(def issuerRecordId) {
+    def currencyCode = getRefBookValue(84, issuerRecordId)?.CODE_CUR?.stringValue
+    def recordId = getRecords(15, 'CODE', currencyCode, getReportPeriodEndDate(), recordCache)
+    def value = getRefBookValue(15, recordId)?.CODE_2?.stringValue
+    return value
 }
 
 /**
@@ -981,19 +950,6 @@ def getSign(def sign) {
  */
 def isRubleCurrency(def currencyCode) {
     return getRefBookValue(15, currencyCode)?.CODE?.stringValue == '810'
-}
-
-/**
- * Получить курс валюты
- */
-def getCourse(def currency, def date) {
-    if (currency != null && date != null)
-        if (isRubleCurrency(currency)) {
-            return 1
-        } else {
-            return getRefBookRecord(22, 'CODE_NUMBER', "${currency}", date, -1, null, true)?.RATE.getNumberValue()
-        }
-    return null
 }
 
 def getNewRow() {

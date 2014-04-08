@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -45,6 +46,14 @@ public class DeclarationDataPresenter
 			Place {
 	}
 
+    public static final String DECLARATION_UPDATE_MSG = "Декларация обновлена";
+    public static final String DECLARATION_UPDATE_MSG_D = "Уведомление обновлено";
+
+    public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
+    public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
+    public static final String DECLARATION_DELETE_MSG = "Декларация удалена";
+    public static final String DECLARATION_DELETE_MSG_D = "Уведомление удалено";
+
 	public interface MyView extends View,
 			HasUiHandlers<DeclarationDataUiHandlers> {
 		void showAccept(boolean show);
@@ -57,7 +66,7 @@ public class DeclarationDataPresenter
 
 		void setType(String type);
 
-		void setTitle(String title);
+		void setTitle(String title, boolean isTaxTypeDeal);
 
 		void setDepartment(String department);
 
@@ -76,6 +85,7 @@ public class DeclarationDataPresenter
 	private final HistoryPresenter historyPresenter;
 	private long declarationId;
 	private String taxName;
+    private TaxType taxType;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
@@ -113,7 +123,12 @@ public class DeclarationDataPresenter
 									GetDeclarationDataResult result) {
 								declarationId = id;
 								taxName = result.getTaxType().name();
-								getView().setType("Декларация");
+                                taxType = result.getTaxType();
+								if (!taxType.equals(TaxType.DEAL)) {
+                                    getView().setType("Декларация");
+                                } else {
+                                    getView().setType("Уведомление");
+                                }
 								getView().setReportPeriod(
 										result.getReportPeriodYear() + ", " + result.getReportPeriod());
 								getView().setDocDate(result.getDocDate());
@@ -125,7 +140,7 @@ public class DeclarationDataPresenter
 														+ ";nType="
 														+ result.getTaxType(), result.getTaxType()
                                         .getName());
-								getView().setTitle(result.getDeclarationType());
+								getView().setTitle(result.getDeclarationType(), result.getTaxType().equals(TaxType.DEAL));
 								updateTitle(result.getDeclarationType());
 
 								getView().showAccept(result.isCanAccept());
@@ -162,7 +177,7 @@ public class DeclarationDataPresenter
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 										MessageEvent.fire(
 												DeclarationDataPresenter.this,
-												"Декларация обновлена");
+                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D);
 										revealPlaceRequest();
 									}
 								}, DeclarationDataPresenter.this));
@@ -196,7 +211,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void delete() {
         final DeclarationDataPresenter t = this;
-        Dialog.confirmMessage("Вы уверены, что хотите удалить декларацию?", new DialogHandler() {
+        Dialog.confirmMessage(!taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_Q : DECLARATION_DELETE_Q_D, new DialogHandler() {
             @Override
             public void yes() {
                 LogCleanEvent.fire(t);
@@ -212,7 +227,7 @@ public class DeclarationDataPresenter
                                                     DeleteDeclarationDataResult result) {
                                                 MessageEvent
                                                         .fire(DeclarationDataPresenter.this,
-                                                                "Декларация удалена");
+                                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_DELETE_MSG : DECLARATION_DELETE_MSG_D);
                                                 placeManager
                                                         .revealPlace(new PlaceRequest(
                                                                 DeclarationListNameTokens.DECLARATION_LIST)
@@ -263,7 +278,7 @@ public class DeclarationDataPresenter
 
 	@Override
 	public void onInfoClicked() {
-		historyPresenter.prepareDeclarationHistory(declarationId);
+		historyPresenter.prepareDeclarationHistory(declarationId, taxType);
 		addToPopupSlot(historyPresenter);
 	}
 
@@ -277,4 +292,9 @@ public class DeclarationDataPresenter
 	private void updateTitle(String declarationType) {
 		TitleUpdateEvent.fire(this, "Декларация", declarationType);
 	}
+
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
+    }
 }

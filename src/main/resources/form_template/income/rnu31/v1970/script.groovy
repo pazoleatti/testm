@@ -177,7 +177,7 @@ void importData() {
             }
         }
     } catch(Exception e) {
-        logger.error('Во время загрузки данных произошла ошибка! ' + e.toString())
+        logger.error('Во время загрузки данных произошла ошибка! ' + e.message)
     }
 }
 

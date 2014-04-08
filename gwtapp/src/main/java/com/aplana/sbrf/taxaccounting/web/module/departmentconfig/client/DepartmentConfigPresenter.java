@@ -37,6 +37,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public interface MyProxy extends ProxyPlace<DepartmentConfigPresenter>, Place {
     }
 
+    private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
+    private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
+
+    private static final String EDIT_FOUND_TEXT = "Настройки используются для налоговых форм/деклараций. Желаете внести изменения в Настройки?";
+    private static final String EDIT_FOUND_TEXT_D = "Настройки используются для форм/уведомлений. Желаете внести изменения в Настройки?";
+
     private final DispatchAsync dispatcher;
 
     private Department userDepartment;
@@ -158,9 +164,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         }
                         if(!result.isHasError()){
-                            MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
-                            if (!result.getDeclarationTypes().equals("")) {
-                                Dialog.infoMessage("В декларациях " + result.getDeclarationTypes() + " используется старая версия настроек. Для вступления изменений в силу каждую декларацию нужно обновить.");
+                            //MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
+                            if (result.isDeclarationFormFound()) {
+                                Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
                             }
                             getView().reloadDepartmentParams();
                         }
@@ -177,13 +183,17 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         GetCheckDeclarationAction action = new GetCheckDeclarationAction();
         action.setReportPeriodId(period);
         action.setDepartment(department);
+        action.setTaxType(getView().getTaxType());
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {
                             @Override
                             public void onSuccess(GetCheckDeclarationResult result) {
-                                if (!result.getDeclarationTypes().equals("")) {
-                                    Dialog.confirmMessage("Настройки используются для деклараций " + result.getDeclarationTypes() + ". Желаете внести изменения в Настройки?",
+                                if (result.getUuid() != null) {
+                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                }
+                                if (result.isDeclarationFormFound()) {
+                                    Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT,
                                             new DialogHandler() {
                                                 @Override
                                                 public void yes() {

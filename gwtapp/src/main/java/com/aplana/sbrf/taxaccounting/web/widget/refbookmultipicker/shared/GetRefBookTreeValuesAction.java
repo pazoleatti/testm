@@ -19,6 +19,8 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
     private String filter;
     private Date version;
 
+    private Long formDataId;
+
     // идентификаторы которые нужно выделить
     // может быть пустой
     // используется только при попытке выделения засеченный виджету значений
@@ -73,6 +75,14 @@ public class GetRefBookTreeValuesAction extends UnsecuredActionImpl<GetRefBookTr
 
     public void setIdsTofind(List<Long> idsTofind) {
         this.idsTofind = idsTofind;
+    }
+
+    public Long getFormDataId() {
+        return formDataId;
+    }
+
+    public void setFormDataId(Long formDataId) {
+        this.formDataId = formDataId;
     }
 
     @Override

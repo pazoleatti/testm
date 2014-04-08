@@ -66,6 +66,14 @@ public final class ScriptUtils {
 
     private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
 
+    private static final String WRONG_XLS_PARSE = "Отсутствие значения после обработки потока данных!";
+
+    private static final String WRONG_XLS_FILE_NAME = "Имя файла не должно быть пустым!";
+
+    private static final String WRONG_XLS_INPUT_STREAM = "Поток данных пуст!";
+
+    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -484,7 +492,7 @@ public final class ScriptUtils {
                     if (nextRow == null || nextRow.getAlias() == null && isDiffRow(row, nextRow, groupColums)) {
                         String groupCols = groupString.getString(row);
                         if (groupCols != null) {
-                            logger.error(String.format(GROUP_WRONG_ITOG, groupCols));
+                            logger.error(GROUP_WRONG_ITOG, groupCols);
                         }
                     }
                 }
@@ -494,7 +502,7 @@ public final class ScriptUtils {
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
                     if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
-                        logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                        logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
             }
@@ -504,7 +512,7 @@ public final class ScriptUtils {
                 DataRow<Cell> realItogRow = itogRows.get(i);
                 int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
                 if (dataRows.get(itg).getAlias() != null) {
-                    logger.error(String.format(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex()));
+                    logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                 } else {
                     String groupCols = groupString.getString(dataRows.get(itg));
                     if (groupCols != null) {
@@ -565,10 +573,13 @@ public final class ScriptUtils {
             if (currentString == null || referenceString == null) {
                 continue;
             }
-            if (currentString.toString().trim().equalsIgnoreCase(referenceString.trim())) {
+            String s1 = currentString.toString().trim().replaceAll("%%", "%").replaceAll("  ", " ");
+            String s2 = referenceString.trim().replaceAll("%%", "%").replaceAll("  ", " ");
+
+            if (s1.equalsIgnoreCase(s2)) {
                 continue;
             }
-            throw new ServiceException(String.format(WRONG_HEADER_EQUALS, referenceString, currentString.toString()));
+            throw new ServiceException(WRONG_HEADER_EQUALS, s2, s1);
         }
     }
 
@@ -801,32 +812,41 @@ public final class ScriptUtils {
 
     /**
      * Получение xml с общими проверками
+     * Используется при импорте из собственного формата системы
      */
     public static GPathResult getXML(BufferedInputStream inputStream, ImportService importService, String fileName, String startStr, String endStr) {
+        return getXML(inputStream, importService, fileName, startStr, endStr, null, null);
+    }
+
+    /**
+     * Получение xml с общими проверками (указана шапка)
+     * Используется при импорте из собственного формата системы
+     */
+    public static GPathResult getXML(BufferedInputStream inputStream, ImportService importService, String fileName, String startStr, String endStr, Integer columnsCount, Integer headerRowCount) {
         fileName = fileName != null ? fileName.toLowerCase() : null;
         if (fileName == null || fileName == "") {
-            throw new ServiceException("Имя файла не должно быть пустым");
+            throw new ServiceException(WRONG_XLS_FILE_NAME);
         }
 
         if (inputStream == null) {
-            throw new ServiceException("Поток данных пуст");
+            throw new ServiceException(WRONG_XLS_INPUT_STREAM);
         }
 
-        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
-            throw new ServiceException("Выбранный файл не соответствует формату xlsx/xlsm!");
+        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
+            throw new ServiceException(WRONG_XLS_FORMAT);
         }
 
-        String xmlString = null;
+        String xmlString;
         try {
-            xmlString = importService.getData(inputStream, fileName, "windows-1251", startStr, endStr);
+            xmlString = importService.getData(inputStream, fileName, "windows-1251", startStr, endStr, columnsCount, headerRowCount);
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
         if (xmlString == null) {
-            throw new ServiceException("Отсутствие значения после обработки потока данных");
+            throw new ServiceException(WRONG_XLS_PARSE);
         }
 
-        GPathResult xml = null;
+        GPathResult xml;
         try {
             xml = new XmlSlurper().parseText(xmlString);
         } catch (IOException e) {
@@ -837,7 +857,7 @@ public final class ScriptUtils {
             throw new ServiceException(e.getMessage());
         }
         if (xml == null) {
-            throw new ServiceException("Отсутствие значения после обработки потока данных");
+            throw new ServiceException(WRONG_XLS_PARSE);
         }
 
         return xml;

@@ -14,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.Departme
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -175,6 +177,22 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     onReportPeriodsSelected(null);
                     isReportPeriodActive = false;
                 }
+            }
+        });
+        dictRegionId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
+                PickerContext pickerContext = new PickerContext();
+                Long attributeId = event.getValue().get(0);
+                pickerContext.setAttributeId(attributeId);
+                pickerContext.setRegionFilter(PickerContext.RegionFilter.DEPARTMENT_CONFIG_FILTER);
+                reorgFormCode.setPickerContext(pickerContext);
+                signatoryId.setPickerContext(pickerContext);
+                taxPlaceTypeCode.setPickerContext(pickerContext);
+                obligation.setPickerContext(pickerContext);
+                oktmo.setPickerContext(pickerContext);
+                okvedCode.setPickerContext(pickerContext);
+                type.setPickerContext(pickerContext);
             }
         });
 		// Подразделение

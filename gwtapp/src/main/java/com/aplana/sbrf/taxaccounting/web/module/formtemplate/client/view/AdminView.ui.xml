@@ -53,7 +53,7 @@
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Макеты налоговых форм"/>
+                        <g:Label text="Список макетов налоговых форм"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

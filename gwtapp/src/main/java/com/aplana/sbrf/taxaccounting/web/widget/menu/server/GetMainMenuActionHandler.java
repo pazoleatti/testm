@@ -158,7 +158,7 @@ public class GetMainMenuActionHandler extends
                 || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
             MenuItem nsiMenuItem = new MenuItem("НСИ");
 
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
                 nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
             }
 
@@ -215,6 +215,8 @@ public class GetMainMenuActionHandler extends
                         + AdminConstants.NameTokens.adminPage));
                 templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
                         + DeclarationTemplateTokens.declarationTemplateList));
+                templateMenu.getSubMenu().add((new MenuItem("Справочники", NUMBER_SIGN
+                        + RefBookListTokens.REFBOOK_LIST_ADMIN)));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
             }
 

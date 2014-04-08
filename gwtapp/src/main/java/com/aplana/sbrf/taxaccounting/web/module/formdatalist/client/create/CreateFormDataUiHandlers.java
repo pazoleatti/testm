@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface CreateFormDataUiHandlers extends UiHandlers {
@@ -14,4 +15,5 @@ public interface CreateFormDataUiHandlers extends UiHandlers {
      * @return true - ежемесячная, false - не ежемесячная
      */
     void isMonthly(Integer formId, Integer reportPeriodId);
+    TaxType getTaxType();
 }

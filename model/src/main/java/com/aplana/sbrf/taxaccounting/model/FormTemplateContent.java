@@ -24,6 +24,14 @@ public class FormTemplateContent {
 	private List<FormStyle> styles;
 
 	public void fillFormTemplateContent(FormTemplate formTemplate) {
+        // Для правильного назначения Parent_id при импорте, проставляем алиас.
+        for (Column col : formTemplate.getColumns()){
+            if(col instanceof ReferenceColumn){
+                ((ReferenceColumn) col).setParentAlias(
+                        formTemplate.getColumn(
+                                ((ReferenceColumn) col).getParentId()).getAlias());
+            }
+        }
 		/*this.type = formTemplate.getType();*/
 		this.fixedRows = formTemplate.isFixedRows();
 		this.name = formTemplate.getName();

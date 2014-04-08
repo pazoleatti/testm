@@ -144,7 +144,7 @@ def editableColumns = ['balanceNumber', 'operationType', 'signContractor', 'cont
         'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
         'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
         'marketPriceInRub', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD', 'realizationPriceInPerc',
-        'realizationPriceInRub', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'lossRealization']
+        'realizationPriceInRub', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'lossRealization']
 
 // Обязательно заполняемые атрибуты
 @Field
@@ -156,7 +156,7 @@ def nonEmptyColumns = ['balanceNumber', 'operationType', 'signContractor', 'cont
 
 @Field
 def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquisition', 'marketPriceRealizationInPerc',
-        'marketPriceRealizationInRub', 'costRealization', 'totalLoss', 'averageWeightedPrice', 'termIssue', 'termHold',
+        'marketPriceRealizationInRub', 'totalLoss', 'averageWeightedPrice', 'termIssue', 'termHold',
         'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult', 'excessSellingPrice']
 
 @Field
@@ -252,7 +252,6 @@ void calc() {
             costAcquisition = getGraph21(row)
             marketPriceRealizationInPerc = getGraph27(row, row)
             marketPriceRealizationInRub = getGraph28(row, row)
-            costRealization = getGraph29(row)
             totalLoss = getGraph31(row)
             averageWeightedPrice = getGraph32(row, row)
             termIssue = getGraph33(row, row)
@@ -394,7 +393,6 @@ void logicCheck() {
             costAcquisition = getGraph21(values)
             marketPriceRealizationInPerc = getGraph27(values, row)
             marketPriceRealizationInRub = getGraph28(values, row)
-            costRealization = getGraph29(values)
             totalLoss = getGraph31(values)
             averageWeightedPrice = getGraph32(values, row)
             termIssue = getGraph33(values, row)
@@ -526,36 +524,6 @@ BigDecimal getGraph28(def values, def row) {
     } else {
         return row.marketPriceRealizationInRub
     }
-}
-
-//TODO Левыкин: http://jira.aplana.com/browse/SBRFACCTAX-2522
-// Подразумевается два значения с "4", у нас только одно
-BigDecimal getGraph29(def row) {
-    def signContractor = getSignContractor(row.signContractor)
-    if (signContractor == 4 // ???
-            || signContractor == 4
-            && row.realizationPriceInPerc >= row.marketPriceRealizationInPerc
-            && row.realizationPriceInRub >= row.marketPriceRealizationInRub
-            || signContractor == 5
-            && row.realizationPriceInPerc >= row.marketPriceRealizationInPerc
-            && row.realizationPriceInRub >= row.marketPriceRealizationInRub
-    ) {
-        return row.realizationPriceInRub
-    }
-
-    if (getOperationType(row.operationType).equals('Погашение') && signContractor == 3) {
-        return row.repaymentWithoutNKD
-    }
-
-    if (signContractor == 4
-            && row.realizationPriceInPerc < row.marketPriceRealizationInPerc
-            && row.realizationPriceInRub < row.marketPriceRealizationInRub
-            || signContractor == 5
-            && row.realizationPriceInPerc < row.marketPriceRealizationInPerc
-            && row.realizationPriceInRub < row.marketPriceRealizationInRub) {
-        return row.marketPriceRealizationInRub
-    }
-    return null
 }
 
 BigDecimal getGraph31(def row) {

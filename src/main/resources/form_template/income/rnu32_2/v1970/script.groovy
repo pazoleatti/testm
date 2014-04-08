@@ -9,9 +9,6 @@ import groovy.transform.Field
 /**
  * Форма "(РНУ-32.2) Регистр налогового учёта начисленного процентного дохода по облигациям, по которым открыта короткая позиция. Отчёт 2".
  * formTemplateId=331
-
- * TODO:
- *      - невозможно проверить форму пока не будет готова рну 32.1.
  *
  * @author rtimerbaev
  */
@@ -64,6 +61,13 @@ def nonEmptyColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent'
 @Field
 def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+@Field
+def taxPeriod = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -105,7 +109,7 @@ void logicCheck() {
             logger.error("Неверно рассчитаны значения графов для раздела $number")
             continue
         }
-            if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
+        if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
         }
         for (def row : rows32_2) {
@@ -133,9 +137,11 @@ void consolidation() {
     // удалить нефиксированные строки
     deleteRows(dataRows)
 
+    def lastDay = getReportPeriodEndDate()
+
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
             if (it.formTypeId == formData.formType.id) {
@@ -153,10 +159,11 @@ void consolidation() {
                     def rows32_2 = getRowsBySection(dataRows, section)
                     def newRows = []
                     for (def row : rows32_1) {
-                        if (hasCalcRow(row.name, row.issuer, rows32_2)) {
+                        def code = getCode(row, lastDay)
+                        if (hasCalcRow(row.name, code, rows32_2)) {
                             continue
                         }
-                        def newRow = getCalcRowFromRNU_32_1(row.name, row.issuer, rows32_1)
+                        def newRow = getCalcRowFromRNU_32_1(row.name, code, rows32_1)
                         newRows.add(newRow)
                         rows32_2.add(newRow)
                     }
@@ -245,7 +252,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
 }
 
 def getFormDataRNU32_1() {
-    def form = formDataService.find(330, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    def form = formDataService.findMonth(330, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
     return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
 }
 
@@ -322,7 +329,8 @@ def getCalcRowFromRNU_32_1(def name, def code, def rows32_1) {
     }
     def calcRow = null
     for (def row : rows32_1) {
-        if (row.name == name && row.code == code) {
+        def code32_1 = getCode(row, getReportPeriodEndDate())
+        if (row.name == name && code32_1 == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
                 calcRow.number = name
@@ -350,7 +358,7 @@ def getCalcRowFromRNU_32_1(def name, def code, def rows32_1) {
  * @return true - строка с такими параметрами уже есть, false - строки нет
  */
 def hasCalcRow(def name, def code, def rows32_2) {
-    if (rows32_2 != null && !rows32_2.isEmpty()) {
+    if (rows32_2) {
         for (def row : rows32_2) {
             if (row.name == name && row.code == code) {
                 return true
@@ -367,4 +375,36 @@ def roundValue(def value, int precision) {
     } else {
         return null
     }
+}
+
+/**
+ * Получить код валюты номинала по id записи из справочнкиа ценной бумаги (84).
+ *
+ * @param row строку из рну-32.1
+ * @param lastDay последний день отчетного месяца
+ * @return id записи справочника 15
+ */
+def getCode(def row, def lastDay) {
+    if (row.issuer == null) {
+        return null
+    }
+    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
+    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
+    // получить id записи из справочника валют (15) по цифровому коду валюты
+    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+    return recordId
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    }
+    return endDate
+}
+
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
 }

@@ -49,7 +49,7 @@ public class DeleteRowHandler extends AbstractActionHandler<DeleteRowAction, Dat
 		FormData formData = action.getFormData();
 		if (!action.getModifiedRows().isEmpty()) {
 			TAUserInfo userInfo = securityService.currentUserInfo();
-			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows());
+			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.deleteRow(logger, securityService.currentUserInfo(), formData, action.getCurrentDataRow());
 		

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -86,6 +87,11 @@ public class FormTemplateController {
         if (!logger.getEntries().isEmpty())
             resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(logger.getEntries()));
 	}
+
+    @ExceptionHandler(ServiceLoggerException.class)
+    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
+        response.getWriter().printf("{errorUuid: \"%s\"}", e.getUuid());
+    }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {

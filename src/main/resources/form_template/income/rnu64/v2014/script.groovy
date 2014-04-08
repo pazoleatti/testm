@@ -3,10 +3,9 @@ package form_template.income.rnu64.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
  * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
@@ -62,15 +61,11 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-    case FormDataEvent.MIGRATION:
         importData()
         calc()
         logicCheck()
         break
 }
-
-@Field
-def refBookCache = [:]
 
 @Field
 def recordCache = [:]
@@ -120,7 +115,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (formDataEvent != FormDataEvent.IMPORT && formDataEvent != FormDataEvent.MIGRATION) {
+    if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
     }
 
@@ -160,7 +155,7 @@ void logicCheck() {
     def dataRows = dataRowHelper.allCached
     def totalRow = null
     def totalQuarterRow = null
-    def dFrom = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
+    def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
     def dTo = getEndDate()
     def i = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
@@ -229,36 +224,12 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getEndDate(), rowIndex, colIndex, logger, required)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
-/** Получение импортируемых данных. */
+// Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -267,30 +238,24 @@ void importData() {
             (xml.row[0].cell[2]): 'Дата сделки',
             (xml.row[0].cell[3]): 'Часть сделки',
             (xml.row[0].cell[4]): 'Номер сделки',
-            (xml.row[0].cell[5]): 'Вид ценных бумаг',
-            (xml.row[0].cell[6]): 'Затраты (руб.коп.)',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[2]): '2',
-            (xml.row[1].cell[3]): '3',
-            (xml.row[1].cell[4]): '4',
-            (xml.row[1].cell[5]): '5',
-            (xml.row[1].cell[6]): '6'
+            (xml.row[0].cell[5]): 'Затраты (руб.коп.)',
+            (xml.row[1].cell[0]): '1'
     ]
-
+    (2..5).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
 }
 
-
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -309,7 +274,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -323,23 +288,17 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
-        // графа 1 - № пп
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
-
         // графа 2 - Дата сделки
         newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
 
         // графа 3 - Часть сделки
-        newRow.part =  getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        newRow.part = getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
 
         // графа 4 - Номер сделки
         newRow.dealingNumber = row.cell[4].text()
 
-        // графа 5 - Вид ценных бумаг
-        newRow.bondKind = row.cell[5].text()
-
         // графа 6 - Затраты (руб.коп.)
-        newRow.costs = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.costs = parseNumber(row.cell[5].text(), xlsIndexRow, 6 + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -349,63 +308,6 @@ void addData(def xml, int headRowCount) {
     rows.add(getDataRow(existRows, 'totalQuarter'))
     rows.add(getDataRow(existRows, 'total'))
     dataRowHelper.save(rows)
-}
-
-/** Для получения данных из RNU или XML */
-String getCellValue(def row, int index, def type, boolean isTextXml = false) {
-    if (type == 1) {
-        if (isTextXml) {
-            return row.field[index].text()
-        } else {
-            return row.field[index].@value.text()
-        }
-    }
-    return row.cell[index + 1].text()
-}
-
-/**
- * Рассчитать, проверить и сравнить итоги.
- * @param totalRow итоговая строка из транспортного файла
- */
-void checkTotalRow(def totalRow) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def totalColumns = [6: 'costs']
-
-    def totalCalc = getCalcTotalRow(dataRows)
-    def errorColumns = []
-    if (totalCalc != null) {
-        totalColumns.each { index, columnAlias ->
-            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
-                errorColumns.add(index)
-            }
-        }
-    }
-    if (!errorColumns.isEmpty()) {
-        def columns = errorColumns.join(', ')
-        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
-    }
-}
-
-/** Получить итоговую строку с суммами. */
-def getCalcTotalRow(def dataRows) {
-    def totalRow = formData.createDataRow()
-    totalRow.getCell("fix").setColSpan(4)
-    totalRow.fix = "Итоги"
-    totalRow.setAlias("total")
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    def from = 0
-    def to = dataRows.size() - 1
-    def sum
-    if (from > to) {
-        sum = 0
-    } else {
-        sum = summ(formData, dataRows, new ColumnRange('costs', from, to))
-    }
-    totalRow.costs = sum
-    return totalRow
 }
 
 def loggerError(def msg) {
@@ -455,13 +357,13 @@ void consolidation() {
 
     rows.add(getDataRow(dataRows, 'totalQuarter'))
     rows.add(totalRow)
-
-    formDataService.getDataRowHelper(formData).save(rows)
+    dataRowHelper.save(rows)
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (reportPeriod && reportPeriod.order != 1 && !isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         def formName = formData.formType.name
         // http://jira.aplana.com/browse/SBRFACCTAX-6015
         //throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")

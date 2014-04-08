@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"FormTypeDaoTest.xml"})
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FormTypeDaoTest {
 	@Autowired
 	private FormTypeDao formTypeDao;
@@ -74,6 +76,7 @@ public class FormTypeDaoTest {
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.INCOME);
         filter.setActive(true);
+        filter.setSearchText("IncOmE");
         Assert.assertEquals(1, formTypeDao.getByFilter(filter).size());
         filter.setActive(false);
         Assert.assertEquals(0, formTypeDao.getByFilter(filter).size());

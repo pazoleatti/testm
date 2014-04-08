@@ -127,7 +127,7 @@
                         <g:HorizontalPanel ui:field="centerBlock" height="58px" addStyleNames="{style.centerBlock}" >
                             <g:cell>
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="80px">
-                                    <g:Label text="Тип:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="typeLabel" text="Тип:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
@@ -172,7 +172,7 @@
                         </style:LeftBar>
                         <g:HorizontalPanel>
                             <g:cell width="205px" verticalAlignment="middle">
-                                <g:Label title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
+                                <g:Label ui:field="dateBoxLabel" title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
                             </g:cell>
                             <g:cell verticalAlignment="middle">
                                 <d:DateMaskBoxPicker ui:field="dateBox" />

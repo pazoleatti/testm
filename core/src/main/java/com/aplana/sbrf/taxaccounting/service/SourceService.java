@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 /**
  * Интерфейс сервиса для работы с привязкой департаментов к подразделениям
@@ -215,6 +216,16 @@ public interface SourceService {
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
+
+    /**
+     * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
+     * @param sourceDepartmentId идентификатор подразделения формы-источника
+     * @param sourceFormTypeId   вид налоговой формы-источника
+     * @param sourceKind         тип налоговой формы-источника
+     * @param reportPeriodId     идентификатор отчетного периода
+     * @return список найденных пар "вид приёмника-подразделение приёмника"
+     */
+    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
 
     /**
      * Обновление исполнителя для назначенной формы

@@ -67,7 +67,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -151,13 +152,13 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
 
         // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
         if (!(dFrom != null && dTo != null && ((row.transactionDate != null && row.transactionDate <= dFrom) ||
                 (row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingEndDate <= dTo) ||
                 (row.calcPeriodEndDate != null && row.calcPeriodEndDate <= dTo)))) {
-            logger.error(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
+            loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
         // 2. Проверка на нулевые значения (графа 13..20)
@@ -173,7 +174,7 @@ void logicCheck() {
             }
         }
         if (allNull) {
-            logger.error(errorMsg + 'Все суммы по операции нулевые!')
+            loggerError(errorMsg + 'Все суммы по операции нулевые!')
         }
 
         // 3. Проверка на сумму платы (графа 4)
@@ -189,7 +190,7 @@ void logicCheck() {
 
         // 5. Проверка на корректность даты договора
         if (row.contractData > dTo) {
-            logger.error(errorMsg + 'Дата договора неверная!')
+            loggerError(errorMsg + 'Дата договора неверная!')
         }
 
         // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода (графа 14, 16)
@@ -205,18 +206,18 @@ void logicCheck() {
         def checkColumn11and12 = (row.calcPeriodAccountingBeginDate != null || row.calcPeriodAccountingEndDate != null) &&
                 row.calcPeriodBeginDate != null && row.calcPeriodEndDate != null
         if (checkColumn9and10 || checkColumn11and12) {
-            logger.error(errorMsg + 'Поля в графах 9, 10, 11, 12 заполены неверно!')
+            loggerError(errorMsg + 'Поля в графах 9, 10, 11, 12 заполены неверно!')
         }
 
         def date1 = row.calcPeriodBeginDate
         def date2 = row.calcPeriodEndDate
         if (date1 != null && date2 != null && row.basisForCalc != null && row.basisForCalc * (date2 - date1 + 1) == 0) {
-            logger.error(errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
+            loggerError(errorMsg + "Деление на ноль. Возможно неправильно выбраны даты.")
         }
 
         // 9. Проверка на уникальность поля «№ пп» (графа 1)
         if (++i != row.rowNumber) {
-            logger.error(errorMsg + 'Нарушена уникальность номера по порядку!')
+            loggerError(errorMsg + 'Нарушена уникальность номера по порядку!')
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
@@ -238,10 +239,10 @@ void logicCheck() {
             values.accrualPrevRub = rowPrev?.reportPeriodRub
             values.reportPeriodCurrency = getGraph19(row)
             values.reportPeriodRub = getGraph20(row)
-            checkCalc(row, arithmeticCheckAlias, values, logger, false)
+            checkCalc(row, arithmeticCheckAlias, values, logger, !isBalancePeriod)
         }
     }
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
 }
 
 void calc() {
@@ -449,8 +450,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -464,23 +465,22 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
         // Пропуск итоговых строк
         if (row.cell[0].text() == null || row.cell[0].text() == '') {
             continue
         }
 
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-
-        // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
         newRow.contractNumber = row.cell[1].text()
@@ -495,7 +495,7 @@ void addData(def xml, int headRowCount) {
         newRow.transactionDate = parseDate(row.cell[4].text(), "dd.MM.yyyy", xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 6
-        newRow.base = parseNumber(row.cell[5].text(),xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.course = parseNumber(row.cell[5].text(),xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 7
         newRow.interestRate = parseNumber(row.cell[6].text(),xlsIndexRow, 0 + colOffset, logger, false)
@@ -546,11 +546,9 @@ void addData(def xml, int headRowCount) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 20, 4)
     // проверка шапки таблицы
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 3)
-
-
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 4)
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
             (xml.row[0].cell[1]): 'Номер договора',
@@ -590,4 +588,13 @@ void importData() {
     checkHeaderEquals(headerMapping)
 
     addData(xml, 3)
+}
+
+/** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
+void loggerError(def msg, Object...args) {
+    if (isBalancePeriod) {
+        logger.warn(msg, args)
+    } else {
+        logger.error(msg, args)
+    }
 }

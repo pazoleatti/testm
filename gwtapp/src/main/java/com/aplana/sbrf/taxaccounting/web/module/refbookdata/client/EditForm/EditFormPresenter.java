@@ -280,7 +280,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
-            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Редактирование версии", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);

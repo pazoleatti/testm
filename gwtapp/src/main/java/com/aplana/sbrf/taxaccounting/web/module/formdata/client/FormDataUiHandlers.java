@@ -17,7 +17,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onRemoveRowClicked();
 
-	void onManualInputClicked(boolean readOnlyMode);
+    void onModeChangeClicked();
+
+	void onEditClicked(boolean readOnlyMode);
 
 	void onInfoClicked();
 
@@ -48,4 +50,8 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onEndLoad();
 
     void onOpenSearchDialog();
+
+    void onCreateManualClicked();
+
+    void onDeleteManualClicked();
 }

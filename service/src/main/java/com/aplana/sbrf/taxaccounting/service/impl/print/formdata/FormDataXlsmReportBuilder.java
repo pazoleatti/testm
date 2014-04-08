@@ -174,27 +174,45 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
         char[] arr;
         Date printDate;
-        printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
-                ? acceptanceDate :
-                ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
-                        ? creationDate : new Date();
+        boolean isTaxTypeDeal = data.getFormType().getTaxType().equals(TaxType.DEAL);
+        if (isTaxTypeDeal) {
+            printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
+                    ? acceptanceDate :
+                    ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
+                            ? creationDate : new Date();
 
-        arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
-        if(XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
-                XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август"))
-        {
-            String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
-            arr = month.toCharArray();
+            arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
+            if(XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
+                    XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август"))
+            {
+                String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
+                arr = month.toCharArray();
+            } else {
+                arr[arr.length - 1] = 'я';
+            }
+            sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
+                    new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
         } else {
-            arr[arr.length - 1] = 'я';
+            sb.append(String.format(XlsxReportMetadata.DATE_CREATE, "__",
+                    "______", "__"));
         }
-        sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
-                new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
+
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
 
+        AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
+        Row r = sheet.getRow(ar.getFirstCell().getRow()) != null ? sheet.getRow(ar.getFirstCell().getRow())
+                : sheet.createRow(ar.getFirstCell().getRow());
+        CellStyle cellStyle = r.getCell(0).getCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_CENTER_SELECTION);
+        cellStyle.setWrapText(true);
+        for(int i = 1; i < formTemplate.getColumns().size(); i++) {
+            r.createCell(i).setCellStyle(cellStyle);
+        }
+        r.setHeight((short) -1);
+
         //Fill report name
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, formTemplate.getColumns().size()/2 - 1);
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, 0);
 
         //Fill code
         StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
@@ -211,7 +229,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
         else
             sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, "", String.valueOf(reportPeriod.getTaxPeriod().getYear())));
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2 - 1);
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
 	protected void createTableHeaders(){

@@ -65,20 +65,21 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean isShowChecked) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked) {
         formDataAccessService.canRead(userInfo, formDataId);
         FormDataReport data = new FormDataReport();
-        FormData formData = formDataDao.get(formDataId);
+        FormData formData = formDataDao.get(formDataId, manual);
         FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         Department department =  departmentDao.getDepartment(formData.getPerformer() != null ?
                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
         ReportPeriod reportPeriod = reportPeriodDao.get(formData.getReportPeriodId());
         // http://jira.aplana.com/browse/SBRFACCTAX-6399
-        if (formData.getKind() == FormDataKind.PRIMARY && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
+        if ((formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED)
+                && reportPeriod.getTaxPeriod().getTaxType() == TaxType.INCOME) {
             RefBookDataProvider dataProvider = refBookFactory.getDataProvider(REF_BOOK_ID);
             Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
             Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
-            reportPeriod.setName(ReportPeriodSpecificNave.fromId(code).getName());
+            reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
         }
         data.setData(formData);
         data.setDepartmentName(department.getId() != 0 ? departmentDao.getParentsHierarchy(department.getId()) : department.getName());

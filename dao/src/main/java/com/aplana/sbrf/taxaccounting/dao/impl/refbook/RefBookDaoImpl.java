@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -65,7 +66,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(@NotNull Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, region_attribute_id from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -122,6 +123,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setAttributes(getAttributes(result.getId()));
 			result.setType(rs.getInt("type"));
 			result.setReadOnly(rs.getBoolean("read_only"));
+            BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
+            if (regionAttributeId == null) {
+                result.setRegionAttribute(null);
+            } else {
+                result.setRegionAttribute(getAttribute(regionAttributeId.longValue()));
+            }
             return result;
         }
     }
@@ -190,6 +197,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		ps.appendQuery(" as ");
 		ps.appendQuery(RefBook.RECORD_SORT_ALIAS);
 	}
+
+    private RefBookAttribute getAttribute(@NotNull Long attributeId) {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
+                            "is_unique, sort_order " +
+                            "from ref_book_attribute where id = ?",
+                    new Object[]{attributeId}, new int[]{Types.NUMERIC},
+                    new RefBookAttributeRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найден атрибут с id = %d", attributeId));
+        }
+    }
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(@NotNull Long refBookId, Date version, PagingParams pagingParams,
@@ -351,7 +372,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			}
 		});
 		if (result.get(RefBook.RECORD_ID_ALIAS).getNumberValue() == null) { // если элемент не найден
-			throw new DaoException(String.format("В справочнике \"%s\"(id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
+			throw new DaoException(String.format("В справочнике \"%s\" (id = %d) не найден элемент с id = %d", refBook.getName(), refBookId, recordId));
 		}
 		return result;
     }
@@ -1062,6 +1083,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }  else {
             return new ArrayList<Pair<Long, Integer>>();
         }
+    }
+
+    @Override
+    @CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    public void setScriptId(Long refBookId, String scriptId) {
+        getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }
 
     @Override

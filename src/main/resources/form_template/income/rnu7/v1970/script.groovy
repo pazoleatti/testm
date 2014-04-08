@@ -2,9 +2,7 @@ package form_template.income.rnu7.v1970
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -48,7 +46,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -86,6 +85,8 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'taxAccountingCurrency', 'accountingCurrency']
+@Field
+def balanceEditableColumns = ['date', 'code', 'docNumber', 'docDate', 'currencyCode', 'rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -94,10 +95,6 @@ def nonEmptyColumns = ['number', 'date', 'code', 'docNumber', 'docDate', 'curren
 // Сумируемые колонки в фиксированной с троке
 @Field
 def totalColumns = ['taxAccountingRuble', 'ruble']
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 // дата начала периода
 @Field
@@ -135,7 +132,7 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
-        dataRows.eachWithIndex{ row, index ->
+        dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
 
@@ -216,7 +213,7 @@ def BigDecimal calc12(DataRow row) {
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    if(res.getRecords().isEmpty()) {
+    if (res.getRecords().isEmpty()) {
         SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
         throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
     } else {
@@ -334,8 +331,8 @@ void logicCheck() {
                 def c10 = 0
                 for (rowSum in dataRows) {
                     if (rowSum.docNumber == row.docNumber && rowSum.docDate == row.docDate) {
-                        c12 += (rowSum.ruble?:0)
-                        c10 += (rowSum.taxAccountingRuble?:0)
+                        c12 += (rowSum.ruble ?: 0)
+                        c10 += (rowSum.taxAccountingRuble ?: 0)
                     }
                 }
                 if (c10 < c12) {
@@ -424,7 +421,6 @@ void logicCheck() {
         }
     }
 
-
     // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     totalRows.each { key, val ->
         if (val != sumRowsByCode[key]) {
@@ -455,14 +451,14 @@ def getStartDate() {
 }
 
 def getBalancePeriod() {
-    if (isBalancePeriod == null){
+    if (isBalancePeriod == null) {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object...args) {
+void loggerError(def msg, Object... args) {
     if (getBalancePeriod()) {
         logger.warn(msg, args)
     } else {
@@ -482,10 +478,9 @@ def getReportPeriodEndDate() {
  */
 
 void importData() {
-
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 12, 2 )
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 12, 2)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
@@ -503,34 +498,24 @@ void importData() {
             (xml.row[1].cell[10]): 'Рубли',
             (xml.row[1].cell[11]): 'Валюта',
             (xml.row[1].cell[12]): 'Рубли',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..12).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
 }
 
-/* Заполнить форму данными */
-
+// Заполнить форму данными
 void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -548,24 +533,35 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        def cols = (getBalancePeriod() ? balanceEditableColumns : editableColumns)
+        cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        /* Графа 1 */
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        def int xmlIndexCol = 0
 
-        /* Графа 2 */
-        /* Зависимая */
-        def id = getRecordIdImport(27, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+        // графа 1
+        xmlIndexCol++
+
+        // графа fix
+        xmlIndexCol++
+
+        xmlIndexCol++
+
+        // графа 3
+        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+
+        // графа 2
+        def id = getRecordIdImport(27, 'NUMBER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         def map = formDataService.getRefBookValue(27, id, refBookCache)
         if (map != null) {
             def text = row.cell[2].text()
@@ -574,33 +570,35 @@ void addData(def xml, int headRowCount) {
                         "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(27).getName() + "»!")
             }
         }
+        xmlIndexCol++
 
-        /* Графа 3 */
-        newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
-
-        /* Графа 4 */
+        // графа 4
         newRow.code = id
 
-        /* Графа 5 */
-        newRow.docNumber = row.cell[5].text()
+        // графа 5
+        newRow.docNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
-        /* Графа 6 */
-        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
+        // графа 6
+        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
-        /* Графа 7 */
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
+        // графа 7
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
-        /* Графа 8 */
-        /* Автозаполняемая */
+        // графа 8
+        xmlIndexCol++
 
-        /* Графа 9*/
-        newRow.taxAccountingCurrency = parseNumber(row.cell[9].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        // графа 9
+        newRow.taxAccountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
-        /* Графа 10 */
-        /* Автозаполняемая */
+        // графа 10
+        xmlIndexCol++
 
-        /* Графа 11 */
-        newRow.accountingCurrency = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        // графа 11
+        newRow.accountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }

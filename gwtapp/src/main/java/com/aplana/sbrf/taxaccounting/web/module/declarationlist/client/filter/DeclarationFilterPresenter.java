@@ -39,6 +39,8 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
         void setFormStateList(List<WorkflowState> list);
 
+        void updateFilter(TaxType taxType);
+
         void clean();
 	}
 

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -29,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "RefBookDaoTest.xml" })
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RefBookDaoTest {
 
 	public static final String ATTRIBUTE_PAGECOUNT = "order";
@@ -550,4 +552,18 @@ public class RefBookDaoTest {
         assertEquals(getZeroTimeDate(getDate(1,1,2013)), getZeroTimeDate(versions.get(0)));
     }
 
+    @Test
+    public void testSetScriptId() {
+
+        RefBook refBook = refBookDao.get(3L);
+        assertTrue(refBook.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+
+        refBookDao.setScriptId(3L, null);
+        RefBook refBook1 = refBookDao.get(3L);
+        assertTrue(refBook1.getScriptId() == null);
+
+        refBookDao.setScriptId(3L, "24af57ef-ec1c-455f-a4fa-f0fb29483066");
+        RefBook refBook2 = refBookDao.get(3L);
+        assertTrue(refBook2.getScriptId().equals("24af57ef-ec1c-455f-a4fa-f0fb29483066"));
+    }
 }

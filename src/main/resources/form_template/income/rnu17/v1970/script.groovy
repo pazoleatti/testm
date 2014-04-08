@@ -1,7 +1,6 @@
 package form_template.income.rnu17.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -13,8 +12,6 @@ import groovy.transform.Field
  * графа - rowNumber
  * графа - knu
  * графа - incomeType
- *
- * // TODO заголовок доходы?
  * графа - sum
  *
  * @author akadyrgulov
@@ -85,11 +82,6 @@ def currentDate = new Date()
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
                 def Date date, boolean required = true) {
@@ -100,6 +92,23 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -174,13 +183,11 @@ def String getKnu(def knu) {
     return getRefBookValue(27, knu)?.CODE?.stringValue
 }
 
-/* Получение импортируемых данных */
-
+// Получение импортируемых данных
 void importData() {
-
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1 )
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
@@ -192,21 +199,19 @@ void importData() {
             (xml.row[1].cell[3]): '3',
             (xml.row[1].cell[4]): '4',
     ]
-
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
 }
 
-/* Заполнить форму данными */
-
+// Заполнить форму данными
 void addData(def xml, int headRowCount) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 10
-    def int colOffset = 1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
@@ -224,8 +229,8 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        /* Пропуск итоговых строк */
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -236,26 +241,19 @@ void addData(def xml, int headRowCount) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        /* Графа 1 */
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        // графа 2
+        def record = getRecordImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        if (record != null) {
+            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+        }
 
-        /* Графа 2 */
-        /* Автозаполняемое */
+        // графа 3
+        newRow.incomeType = record?.record_id?.value
 
-        /* Графа 3 */
-        newRow.incomeType = getRecordIdImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
-
-        /* Графа 4 */
+        // графа 4
         newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
 
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

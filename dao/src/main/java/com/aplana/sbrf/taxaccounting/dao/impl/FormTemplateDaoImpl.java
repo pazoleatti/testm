@@ -113,53 +113,56 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
-		final Integer formTemplateId = formTemplate.getId();
+        try {
+            final Integer formTemplateId = formTemplate.getId();
 
 		/*if (formTemplateId == null) {
-			throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
+            throw new UnsupportedOperationException("Saving of new FormTemplate is not implemented");
 		}*/
 
 		/*JdbcTemplate jt = getJdbcTemplate();
-		int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
+        int storedEdition = jt.queryForInt("select edition from form_template where id = ? for update", formTemplateId);
 
 		if (storedEdition != formTemplate.getEdition()) {
 			throw new DaoException("Сохранение описания налоговой формы невозможно, так как её состояние в БД" +
 				" было изменено после того, как данные по ней были считаны");
 		}*/
 
-		String dataRowsXml = null;
-		List<DataRow<Cell>> rows = formTemplate.getRows();
-		if (rows != null && !rows.isEmpty()) {
-			dataRowsXml = xmlSerializationUtils.serialize(rows);
-		}
+            String dataRowsXml = null;
+            List<DataRow<Cell>> rows = formTemplate.getRows();
+            if (rows != null && !rows.isEmpty()) {
+                dataRowsXml = xmlSerializationUtils.serialize(rows);
+            }
 
-		String dataHeadersXml = null;
-		List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
-		if (headers != null && !headers.isEmpty()) {
-			FormDataUtils.cleanValueOners(headers);
-			dataHeadersXml = xmlSerializationUtils.serialize(headers);
-		}
+            String dataHeadersXml = null;
+            List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
+            if (headers != null && !headers.isEmpty()) {
+                FormDataUtils.cleanValueOners(headers);
+                dataHeadersXml = xmlSerializationUtils.serialize(headers);
+            }
 
-        // TODO: создание новых версий формы потребует инсертов в form_template
-		getJdbcTemplate().update(
-			"update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
-			" monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
-			dataRowsXml,
-			dataHeadersXml,
-			formTemplate.getEdition(),
-			formTemplate.getVersion(),
-			formTemplate.isFixedRows(),
-            formTemplate.getName() != null ? formTemplate.getName() : " ",
-			formTemplate.isMonthly(),
-            formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
-			formTemplate.getCode(),
-            formTemplate.getScript() != null ? formTemplate.getScript() : " ",
-            formTemplate.getStatus().getId(),
-			formTemplateId
-		);
-		formStyleDao.saveFormStyles(formTemplate);
-		columnDao.saveFormColumns(formTemplate);
-		return formTemplateId;
+            getJdbcTemplate().update(
+                    "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
+                            " monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
+                    dataRowsXml,
+                    dataHeadersXml,
+                    formTemplate.getVersion(),
+                    formTemplate.isFixedRows(),
+                    formTemplate.getName() != null ? formTemplate.getName() : " ",
+                    formTemplate.isMonthly(),
+                    formTemplate.getFullName() != null ? formTemplate.getFullName() : " ",
+                    formTemplate.getCode(),
+                    formTemplate.getScript() != null ? formTemplate.getScript() : " ",
+                    formTemplate.getStatus().getId(),
+                    formTemplateId
+            );
+            formStyleDao.saveFormStyles(formTemplate);
+            columnDao.saveFormColumns(formTemplate);
+            return formTemplateId;
+        } catch (DataAccessException e){
+            logger.error("Ошибка при сохранении шаблона.", e);
+            throw new DaoException("Ошибка при сохранении шаблона.", e);
+        }
 	}
 
     @Override
@@ -334,18 +337,17 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    public Date getFTVersionEndDate(int templateId, int formTypeId, Date actualBeginVersion) {
+    public Date getFTVersionEndDate(int formTypeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            return new Date(getJdbcTemplate().queryForObject("select * from (select  version - INTERVAL '1' day" +
-                    " from form_template where type_id = :typeId and version > ? and status in (0,1,2) and id <> :templateId order by version) where rownum = 1",
-                    new Object[]{formTypeId, actualBeginVersion, templateId},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.NUMERIC},
-                    Date.class).getTime());
-        } catch(EmptyResultDataAccessException e){
-            return null;
+            Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
+                    " from form_template where type_id = ? and TRUNC(version, 'DD') > ? and status in (0,1,2)",
+                    new Object[]{formTypeId, actualBeginVersion},
+                    new int[]{Types.NUMERIC, Types.DATE},
+                    Date.class);
+            return date != null ? new Date(date.getTime()) : null;
         } catch (DataAccessException e){
             throw new DaoException("Ошибки при получении даты окончания версии.", e);
         }
@@ -353,44 +355,16 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     public int getNearestFTVersionIdRight(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
+        HashMap<String, Object> valueMap =  new HashMap<String, Object>();
+        valueMap.put("typeId", formTypeId);
+        valueMap.put("statusList", statusList);
+        valueMap.put("actualBeginVersion", actualBeginVersion);
         try {
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
 
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and TRUNC(version, 'DD') > :actualBeginVersion");
-            builder.append(" and version > :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version, edition) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
-        } catch(EmptyResultDataAccessException e){
-            return 0;
-        } catch (DataAccessException e){
-            throw new DaoException("Ошибки при получении ближайшей версии.", e);
-        }
-    }
-
-    @Override
-    public int getNearestFTVersionIdLeft(int formTypeId, List<Integer> statusList, Date actualBeginVersion) {
-        try {
-            if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
-
-            Map<String, Object> valueMap =  new HashMap<String, Object>();
-            valueMap.put("typeId", formTypeId);
-            valueMap.put("statusList", statusList);
-            valueMap.put("actualBeginVersion", actualBeginVersion);
-
-            StringBuilder builder = new StringBuilder("select * from (select id");
-            builder.append(" from form_template where type_id = :typeId");
-            builder.append(" and version < :actualBeginVersion");
-            builder.append(" and status in (:statusList) order by version desc, edition desc) where rownum = 1");
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForInt("select MIN(id) from form_template where type_id = :typeId " +
+                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList)", valueMap);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
@@ -477,7 +451,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     public List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> formTypeIds) {
         Map<String, Object> valueMap =  new HashMap<String, Object>();
         valueMap.put("typeId", formTypeIds);
-        String sql = "SELECT type_id, COUNT(id) as version_count FROM form_template where type_id in(:typeId) and status in (0,1) GROUP BY type_id";
+        String sql = "SELECT type_id, COUNT(id) as version_count FROM form_template where type_id in (:typeId) and status in (0,1) GROUP BY type_id";
 
         try {
             return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
@@ -506,9 +480,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
-    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+    public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         try {
-            return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus, formTemplateId);
+            return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus.getId(), formTemplateId);
         } catch (DataAccessException e){
             logger.error("Ошибка при обновлении статуса версии " + formTemplateId, e);
             throw new DaoException("Ошибка при обновлении статуса версии", e);

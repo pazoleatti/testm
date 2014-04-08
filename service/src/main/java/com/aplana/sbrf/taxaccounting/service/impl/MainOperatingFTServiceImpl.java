@@ -74,8 +74,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         type.setName(formTemplate.getName() != null ? formTemplate.getName() : "");
         int formTypeId = formTypeService.save(type);
         formTemplate.getType().setId(formTypeId);
-        formTemplate.setEdition(1);//т.к. первый
-        formTemplate.setStatus(VersionedObjectStatus.NORMAL);
+
         versionOperatingService.isIntersectionVersion(0, formTypeId, VersionedObjectStatus.NORMAL,
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
@@ -93,7 +92,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger);
-        formTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = formTemplateService.save(formTemplate);
 
         logging(id, TemplateChangesEvent.CREATED, user);
@@ -146,10 +144,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             versionOperatingService.isUsedVersion(template.getId(), template.getType().getId(), template.getStatus(),
                     template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
-            formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT.getId(), templateId);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
             logging(templateId, TemplateChangesEvent.DEACTIVATED, user);
         } else {
-            formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL.getId(), templateId);
+            formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
             logging(templateId, TemplateChangesEvent.ACTIVATED, user);
         }
         return true;

@@ -204,7 +204,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (formTemplateId == 0)
             return null;
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        return formTemplateDao.getFTVersionEndDate(formTemplateId, formTemplate.getType().getId(), formTemplate.getVersion());
+        return formTemplateDao.getFTVersionEndDate(formTemplate.getType().getId(), formTemplate.getVersion());
     }
 
     @Override
@@ -226,6 +226,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     public Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds) {
         Map<Long, Integer> integerMap = new HashMap<Long, Integer>();
+        if (formTypeIds.isEmpty())
+            return integerMap;
         List<Map<String, Object>> mapList = formTemplateDao.versionTemplateCountByType(formTypeIds);
         for (Map<String, Object> map : mapList){
             integerMap.put(((BigDecimal) map.get("type_id")).longValue(), ((BigDecimal)map.get("version_count")).intValue());
@@ -234,7 +236,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+    public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         return formTemplateDao.updateVersionStatus(versionStatus, formTemplateId);
     }
 

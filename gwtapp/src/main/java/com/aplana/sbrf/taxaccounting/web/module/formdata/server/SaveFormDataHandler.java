@@ -41,7 +41,7 @@ public class SaveFormDataHandler extends
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
 		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows());
+			dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 

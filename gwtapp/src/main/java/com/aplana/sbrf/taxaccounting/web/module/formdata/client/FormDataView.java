@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -24,7 +25,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,14 +49,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
 	private SingleSelectionModel<DataRow<Cell>> selectionModel;
+    public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы:";
+    public static final String FORM_DATA_KIND_TITLE_D = "Тип формы:";
+
     private TaxType taxType;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
 
 	private DataRowColumnFactory factory = new DataRowColumnFactory();
-
-    private HandlerRegistration handlerRegistration;
 
 	private AsyncDataProvider<DataRow<Cell>> dataProvider = new  AsyncDataProvider<DataRow<Cell>>() {
 		@Override
@@ -110,6 +111,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
     HorizontalPanel saveCancelPanel;
 
+    @UiField
+    Label formKindTitle;
 	@UiField
 	Label formKindLabel;
 	@UiField
@@ -137,7 +140,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel centerBlock;
     @UiField
-    LinkButton manualInputAnchor;
+    LinkButton editAnchor;
+
+    @UiField
+    LinkButton manualAnchor;
+
+    @UiField
+    LinkButton deleteManualAnchor;
 
     @UiField
     Label editModeLabel;
@@ -145,6 +154,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     ResizeLayoutPanel tableWrapper;
     @UiField
     LinkAnchor search;
+
+    @UiField
+    LinkButton modeAnchor;
+    @UiField
+    Label modeLabel;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -335,12 +349,26 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		selectionModel.setSelected(item, selected);
 	}
 
-	@UiHandler("manualInputAnchor")
-	void onManualInputButtonClicked(ClickEvent event) {
+	@UiHandler("modeAnchor")
+	void onModeClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onManualInputClicked(false);
+			getUiHandlers().onModeChangeClicked();
 		}
 	}
+
+    @UiHandler("editAnchor")
+    void onEditButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onEditClicked(false);
+        }
+    }
+
+    @UiHandler("manualAnchor")
+    void onCreateManualClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCreateManualClicked();
+        }
+    }
 
 	@UiHandler("infoAnchor")
 	void onInfoButtonClicked(ClickEvent event) {
@@ -400,6 +428,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+    @UiHandler("deleteManualAnchor")
+    void onDeleteManualButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onDeleteManualClicked();
+        }
+    }
+
 	@UiHandler("showCheckedColumns")
 	void onShowCheckedColumnsClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -411,7 +446,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setAdditionalFormInfo(
 			String formType, TaxType taxType,
 			String formKind, String departmentId, String reportPeriod,
-			String state, Date startDate, Date endDate) {
+			String state, Date startDate, Date endDate, Long formDataId) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
 		title.setTitle(formType);
@@ -422,6 +457,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
+        if (!taxType.equals(TaxType.DEAL)) {
+            formKindTitle.setText(FORM_DATA_KIND_TITLE);
+        } else {
+            formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
+        }
+
+        factory.setFormDataId(formDataId);
 	}
 
 	/**
@@ -480,7 +522,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
-//		checkButton.setVisible(show);
+		//checkButton.setVisible(show);
 	}
 
 	@Override
@@ -498,12 +540,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         editModeLabel.setVisible(show);
     }
 
-	@Override
-	public void showManualInputAnchor(boolean show) {
-        manualInputAnchor.setVisible(show);
-	}
+    @Override
+    public void showEditAnchor(boolean show) {
+        editAnchor.setVisible(show);
+    }
 
-	@Override
+    @Override
 	public void showDeleteFormButton(boolean show) {
 		deleteFormButton.setVisible(show);
 	}
@@ -513,7 +555,39 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		signersAnchor.setVisible(show);
 	}
 
-	@Override
+    @Override
+    public void showModeLabel(boolean show, boolean manual) {
+        modeLabel.setVisible(show);
+        if (manual) {
+            modeLabel.setText("Версия ручного ввода");
+        } else {
+            modeLabel.setText("Автоматическая версия");
+        }
+    }
+
+    @Override
+    public void showModeAnchor(boolean show, boolean manual) {
+        modeAnchor.setVisible(show);
+        if (manual) {
+            modeAnchor.setText("К автоматической версии");
+            modeAnchor.setImg("resources/img/cogwheel-16.png");
+        } else {
+            modeAnchor.setText("К версии ручного ввода");
+            modeAnchor.setImg("resources/img/pencil-16.png");
+        }
+    }
+
+    @Override
+    public void showManualAnchor(boolean show) {
+        manualAnchor.setVisible(show);
+    }
+
+    @Override
+    public void showDeleteManualAnchor(boolean show) {
+        deleteManualAnchor.setVisible(show);
+    }
+
+    @Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
@@ -616,6 +690,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             pager.setType("formData" + taxType.getCode());
             formDataTable.setPageSize(pager.getPageSize());
         }
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return taxType;
     }
 
     @UiHandler("search")

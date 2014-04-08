@@ -1,43 +1,29 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 /**
- * View для формы списка справочников
+ * Представление списка справочников. Для конфигуратора
  *
- * @author Stanislav Yasinskiy
+ * @author Fail Mukhametdinov
  */
-public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
-        implements RefBookListPresenter.MyView {
+public class RefBookListView extends AbstractRefBookListView implements RefBookListPresenter.MyView {
 
-    @UiField
-    GenericDataGrid<TableModel> formDataTable;
-    @UiField
-    TextBox filterText;
-
-    private static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
-
-    interface Binder extends UiBinder<Widget, RefBookListView> {
-    }
+    public static final String[] COLUMN_NAMES = {"Наименование справочника", "Тип справочника"};
 
     @Inject
     @UiConstructor
@@ -78,31 +64,15 @@ public class RefBookListView extends ViewWithUiHandlers<RefBookListUiHandlers>
         formDataTable.setColumnWidth(typeColumn, 400, Style.Unit.PX);
     }
 
-    @Override
-    public void setTableData(List<TableModel> tableData) {
-        formDataTable.setRowData(tableData);
-    }
-
-    @Override
-    public String getFilter(){
-        return filterText.getText();
-    }
-
-    public void setFilter(String filterText){
-        this.filterText.setText(filterText);
-    }
-
-    @UiHandler("findButton")
-    void onFindClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onFindClicked();
-        }
-    }
-
+    @SuppressWarnings("GwtUiHandlerErrors")
     @UiHandler("loadButton")
     void onLoadClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
             getUiHandlers().onLoadClicked();
         }
+    }
+
+    @UiTemplate("RefBookListView.ui.xml")
+    interface Binder extends UiBinder<Widget, RefBookListView> {
     }
 }

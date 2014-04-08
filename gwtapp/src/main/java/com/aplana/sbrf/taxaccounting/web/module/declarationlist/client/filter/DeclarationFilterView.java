@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationDataFilter;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.gwt.client.ListBoxWithTooltip;
@@ -17,6 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -40,6 +38,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     @UiField
     @Path("departmentIds")
     DepartmentPicker departmentPicker;
+
+    @UiField
+    @Ignore
+    Label declarationTypeLabel;
 
 	@UiField(provided = true)
 	ListBoxWithTooltip<Integer> declarationTypeId;
@@ -121,6 +123,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 			getUiHandlers().onApplyFilter();
 		}
 	}
+
+    @Override
+    public void updateFilter(TaxType taxType) {
+        boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+        declarationTypeId.setVisible(!isTaxTypeDeal);
+        declarationTypeLabel.setVisible(!isTaxTypeDeal);
+    }
 
     @Override
     public void clean() {
