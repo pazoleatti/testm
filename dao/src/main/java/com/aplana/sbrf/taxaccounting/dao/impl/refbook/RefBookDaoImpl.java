@@ -1118,7 +1118,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return values;
     }
 
-    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id=:excludedRecordId)),\n" +
+    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
             "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id),\n" +
             "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
             "select num, id, version, status, nextversion, nextstatus, \n" +
