@@ -610,17 +610,16 @@ def buildRow(def srcRow, def matrixRow) {
         def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
         def String code = null;
         if ("A33".equals(innerCode)) {
-            code = '17 5140 2'
+            code = '17 5140'
         } else if ("A76".equals(innerCode)) {
-            code = '17 5120 0'
+            code = '17 5120'
         } else if ("A98".equals(innerCode)) {
-            code = '17 5340 7'
+            code = '17 5340'
         } else if ("A99".equals(innerCode)) {
-            code = '17 5220 4'
+            code = '17 5220'
         }
         if (code != null){
-            // TODO нет в бд
-            //row.dealSubjectCode2 = getRecordId(68, 'CODE', code)
+            row.dealSubjectCode2 = getRecordId(68, 'CODE', code)
         }
     }
 
@@ -638,8 +637,7 @@ def buildRow(def srcRow, def matrixRow) {
             break
         case 379:
         case 380:
-            // TODO SBRFACCTAX-6488 (val27 = '74.8')
-            val27 = '72.20'
+            val27 = '74.8'
             break
         case 381:
         case 384:
@@ -667,8 +665,7 @@ def buildRow(def srcRow, def matrixRow) {
             break
         case 398:
         case 399:
-            // TODO SBRFACCTAX-6488 (val27 = '74')
-            val27 = '65.12'
+            val27 = '74'
             break
     }
 
