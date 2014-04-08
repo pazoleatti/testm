@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.TextBox;
@@ -47,6 +49,16 @@ public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBook
     void onFindClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
             getUiHandlers().onFindClicked();
+        }
+    }
+
+    @SuppressWarnings("GwtUiHandlerErrors")
+    @UiHandler("filterText")
+    void onFilterPressClicked(KeyPressEvent event) {
+        if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
+            if (getUiHandlers() != null) {
+                getUiHandlers().onFindClicked();
+            }
         }
     }
 }
