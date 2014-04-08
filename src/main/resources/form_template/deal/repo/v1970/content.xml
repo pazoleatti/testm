@@ -39,7 +39,7 @@
         <checking>false</checking>
         <name>Наименование страны регистрации</name>
         <order>4</order>
-        <width>5</width>
+        <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>53</refBookAttributeId>
@@ -49,7 +49,7 @@
         <checking>false</checking>
         <name>Код страны по классификатору ОКСМ</name>
         <order>5</order>
-        <width>5</width>
+        <width>7</width>
         <parentId>21088</parentId>
         <refBookAttributeId>50</refBookAttributeId>
     </columns>
@@ -90,7 +90,7 @@
         <checking>false</checking>
         <name>Режим переговорных сделок</name>
         <order>10</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>63</nameAttributeId>
         <refBookAttributeId>63</refBookAttributeId>
