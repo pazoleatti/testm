@@ -187,7 +187,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
 
     private void modalWind() {
-        final ModalWindow mw = new ModalWindow("тест", "http://127.0.0.1:8888/resources/img/question_mark.png");
+        final ModalWindow mw = new ModalWindow("тест", "resources/img/question_mark.png");
         HTMLPanel lbl1 = new HTMLPanel("Тут будет содержаться любой объект. А пока закрой меня.");
         lbl1.setHeight("100%");
 //        lbl1.addClickHandler(new ClickHandler() {

@@ -219,6 +219,38 @@ public class RefBookUtils extends AbstractDao {
         return result;
     }
 
+    public List<Long> getUniqueRecordIds(Long refBookId, String tableName, String filter) {
+        RefBook refBook = refBookDao.get(refBookId);
+
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("SELECT ");
+        ps.appendQuery("id ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery(" FROM ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" t");
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+        simpleFilterTreeListener.setPs(filterPS);
+
+        Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (filterPS.getParams().size() > 0) {
+                ps.addParam(filterPS.getParams());
+            }
+        }
+        return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Long>() {
+            @Override
+            public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getLong(RefBook.RECORD_ID_ALIAS);
+            }
+        });
+    }
+
 	/**
      * Возвращает дочерние записи справочника учитывая иерархичность таблицы
      * @param tableName название таблицы

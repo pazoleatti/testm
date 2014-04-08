@@ -54,6 +54,14 @@ public interface RefBookDataProvider {
                                                        String filter, RefBookAttribute sortAttribute);
 
     /**
+     * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
+     * @param version дата актуальности
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @return
+     */
+    List<Long> getUniqueRecordIds(Date version, String filter);
+
+    /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param filter

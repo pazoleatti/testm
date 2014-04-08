@@ -34,4 +34,10 @@ public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEdit
     void setSelectButtonFocus(boolean focused);
 
     void clearFilter();
+
+    /**
+     * Возвращает текстовое представление для выбранных элементов
+     * @return
+     */
+    String getText();
 }
