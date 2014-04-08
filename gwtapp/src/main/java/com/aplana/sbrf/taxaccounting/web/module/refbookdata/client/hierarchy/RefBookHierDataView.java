@@ -49,6 +49,12 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
             addRow,
             deleteRow;
 
+    @UiField
+    LinkButton edit;
+    @UiField
+    Button cancelEdit;
+    @UiField
+    HTML separator;
     private PickerState pickerState = new PickerState();
 
     @Inject
@@ -195,5 +201,49 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                     }
                 });
     }
+    @UiHandler("cancelEdit")
+    void cancelEditButtonClicked(ClickEvent event) {
+        Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onSetDefaultMode();
+            }
+        });
+    }
 
+    @UiHandler("edit")
+    void editButtonClicked(ClickEvent event) {
+        getUiHandlers().onSetEditMode();
+    }
+
+
+    @Override
+    public void setEditMode() {
+        updateView(true);
+    }
+
+    @Override
+    public void setDefaultMode(){
+        updateView(false);
+    }
+
+    /**
+     * Обновляет видимость элементов
+     * в зависимости от режима
+     *
+     * @param isEditMode - режим редактирования true, false в противном случае
+     */
+    private void updateView(boolean isEditMode) {
+        setVisibleEditLink(!isEditMode);
+        addRow.setVisible(isEditMode);
+        deleteRow.setVisible(isEditMode);
+        cancelEdit.setVisible(isEditMode);
+    }
+
+    @Override
+    public void setVisibleEditLink(boolean visible){
+        edit.setVisible(visible);
+        // для красовы на форме
+        separator.setVisible(visible);
+    }
 }
