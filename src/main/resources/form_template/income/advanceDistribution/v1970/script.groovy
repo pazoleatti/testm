@@ -1,5 +1,6 @@
 package form_template.income.advanceDistribution.v1970
 
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -323,8 +324,14 @@ void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    def Department department = departmentService.get(formData.departmentId)
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), getReportPeriodEndDate(), -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
+        logger.error("Для подразделения ${department.name} на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+    }
+
+    def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    if (sumTaxUnpRecords == null || sumTaxUnpRecords.isEmpty() || getValue(sumTaxUnpRecords, 'SUM_TAX') == null) {
         logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
