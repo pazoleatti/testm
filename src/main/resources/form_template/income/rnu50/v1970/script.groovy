@@ -269,16 +269,16 @@ void importData() {
 
     def headerMapping = [
             (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Номер записи в РНУ-49',
-            (xml.row[0].cell[2]): 'Инвентарный номер',
-            (xml.row[0].cell[3]): 'Убыток, приходящийся на отчётный период',
-            (xml.row[1].cell[3]): 'от реализации в отчётном налоговом периоде',
-            (xml.row[1].cell[4]): 'от реализации в предыдущих налоговых периодах',
+            (xml.row[0].cell[2]): 'Номер записи в РНУ-49',
+            (xml.row[0].cell[3]): 'Инвентарный номер',
+            (xml.row[0].cell[4]): 'Убыток, приходящийся на отчётный период',
+            (xml.row[1].cell[4]): 'от реализации в отчётном налоговом периоде',
+            (xml.row[1].cell[5]): 'от реализации в предыдущих налоговых периодах',
             (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5'
+            (xml.row[2].cell[2]): '2',
+            (xml.row[2].cell[3]): '3',
+            (xml.row[2].cell[4]): '4',
+            (xml.row[2].cell[5]): '5'
     ]
     checkHeaderEquals(headerMapping)
 
@@ -320,6 +320,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 1
         newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
+        // fix
         xmlIndexCol++
         // графа 2
         newRow.rnu49rowNumber = row.cell[xmlIndexCol].text()
