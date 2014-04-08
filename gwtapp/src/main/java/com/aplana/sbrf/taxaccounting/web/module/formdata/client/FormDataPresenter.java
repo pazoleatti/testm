@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
@@ -31,9 +33,10 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
-        FormDataUiHandlers {
+        FormDataUiHandlers, SetFocus.SetFocusHandler {
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -47,8 +50,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
-			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter);
+			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
 	}
@@ -115,7 +118,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onCreateManualClicked(boolean b) {
+    public void onCreateManualClicked() {
         //Сводная форма банка
         if (!existManual) {
             Dialog.confirmMessage("Подтверждение", "Создать для налоговой формы версию ручного ввода?", new DialogHandler() {
@@ -172,7 +175,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			getView().showSignersAnchor(false);
 			getView().showRecalculateButton(false);
 			getView().showOriginalVersionButton(false);
-            getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, false, canCreatedManual);
+
+            getView().showEditAnchor(false);
+            getView().showModeLabel(false, false);
+            getView().showModeAnchor(false, false);
+            getView().showManualAnchor(false);
 		}
 	}
 
@@ -186,12 +193,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         if (formData.isManual()) {
             CheckManualAction action = new CheckManualAction();
             action.setFormDataId(formData.getId());
-            dispatcher.execute(action, new AbstractCallback<CheckManualResult>() {
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
                 @Override
                 public void onSuccess(CheckManualResult result) {
                     revealFormData(readOnlyMode, formData.isManual(), null);
                 }
-            });
+            }, this));
         } else {
             revealFormData(readOnlyMode, formData.isManual(), null);
         }
@@ -248,6 +255,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onFailure(Throwable caught) {
 					modifiedRows.clear();
+                    getView().updateData();
 				}
 
 			};
@@ -269,7 +277,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	 */
 	@Override
 	public void onSaveClicked() {
-        System.out.println("modifiedRows: "+modifiedRows.size());
         SaveFormDataAction action = new SaveFormDataAction();
         action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
@@ -390,7 +397,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
         if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
-            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \"Создана\"?", new DialogHandler() {
+            Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
                 @Override
                 public void yes() {
                     LogCleanEvent.fire(FormDataPresenter.this);
@@ -474,7 +481,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 existManual = result.existManual();
                                 canCreatedManual = result.canCreatedManual();
                                 isBankSummaryForm = result.isBankSummaryForm();
-                                getView().setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, readOnlyMode, canCreatedManual);
+                                formSearchPresenter.setFormDataId(formData.getId());
+
+                                /**
+                                 * Передаем призентору поиска по форме, данные о скрытых колонках
+                                 */
+                                List<Integer> hiddenColumns = new ArrayList<Integer>();
+                                for(Column c :formData.getFormColumns()){
+                                    if (c.getWidth() == 0){
+                                        hiddenColumns.add(c.getOrder());
+                                    }
+                                }
+                                formSearchPresenter.setHiddenColumns(hiddenColumns);
                     			
                     			// Регистрируем хендлер на закрытие
                     			if (closeFormDataHandlerRegistration !=null ){
@@ -566,5 +584,17 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             }
         };
         getView().addFileUploadValueChangeHandler(fileUploadValueChangeHandler);
+        addRegisteredHandler(SetFocus.getType(), this);
+    }
+
+    @Override
+    public void onOpenSearchDialog() {
+        formSearchPresenter.open();
+        addToPopupSlot(formSearchPresenter);
+    }
+
+    @Override
+    public void onSetFocus(SetFocus event) {
+        getView().setFocus(event.getRowIndex());
     }
 }

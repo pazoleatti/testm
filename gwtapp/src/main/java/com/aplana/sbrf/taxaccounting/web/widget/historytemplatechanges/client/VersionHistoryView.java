@@ -1,15 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.DeclarationTemplateTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.shared.TemplateChangesExt;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -25,7 +25,7 @@ import java.util.List;
 public class VersionHistoryView extends PopupViewImpl implements VersionHistoryPresenter.MyView {
 
     @UiField
-    GenericCellTable<TemplateChangesExt> versionHistoryCellTable;
+    GenericDataGrid<TemplateChangesExt> versionHistoryCellTable;
 
     @Override
     public void fillTemplate(List<TemplateChangesExt> templateChangeses) {
@@ -50,11 +50,12 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
                         if (templateChanges == null) {
                             return;
                         }
-                        sb.appendHtmlConstant("<a href=\"#"
-                                + AdminConstants.NameTokens.formTemplateInfoPage + ";"
-                                + AdminConstants.NameTokens.formTemplateId + "="
-                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">"
-                                + templateChanges.getEdition() + "</a>");
+                        String url = templateChanges.getTemplateChanges().getFormTemplateId() != 0 ?
+                                AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId + "="
+                                + templateChanges.getTemplateChanges().getFormTemplateId() + "\">" :
+                                DeclarationTemplateTokens.declarationTemplate + ";" + DeclarationTemplateTokens.declarationTemplateId + "="
+                                + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "\">";
+                        sb.appendHtmlConstant("<a href=\"#" + url + templateChanges.getEdition() + "</a>");
                     }
                 }) {
             @Override
@@ -68,7 +69,7 @@ public class VersionHistoryView extends PopupViewImpl implements VersionHistoryP
         versionHistoryCellTable.addResizableColumn(new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
-                return String.valueOf(object.getTemplateChanges().getEvent());
+                return String.valueOf(object.getTemplateChanges().getEvent().getName());
             }
         }, "Событие");
 

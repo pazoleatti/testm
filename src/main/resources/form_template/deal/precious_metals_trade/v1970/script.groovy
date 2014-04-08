@@ -77,9 +77,8 @@ def groupColumns = ['fullName', 'docNumber', 'docDate', 'dealFocus', 'deliverySi
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'docNumber',
-        'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign', 'metalName', 'foreignDeal', 'count',
-        'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNum', 'fullName', 'interdependence', 'countryName', 'dealFocus', 'deliverySign', 'metalName',
+        'foreignDeal', 'count', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -94,6 +93,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -323,6 +325,15 @@ void checkItog(def dataRows) {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+    // TODO в 0.3.7 перенести в ScriptUtils
+    // Последняя строка должна быть подитоговой
+    if (testItogRows.size() > itogRows.size() && dataRows.size() != 0 && dataRows.get(dataRows.size() - 1).getAlias() == null) {
+        String groupCols = getValuesByGroupColumn(dataRows.get(dataRows.size() - 1));
+        if (groupCols != null) {
+            logger.error(GROUP_WRONG_ITOG, groupCols);
+        }
+    }
 
     checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
         @Override

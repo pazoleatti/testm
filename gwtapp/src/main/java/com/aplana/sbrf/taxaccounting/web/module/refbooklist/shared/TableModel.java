@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 
 import java.io.Serializable;
@@ -15,15 +16,19 @@ public class TableModel implements Serializable {
     private String name;
     private RefBookType refBookType;
 	private boolean readOnly;
+    private boolean visible;
+    private RefBookAttribute regionAttribute;
 
     public TableModel() {
     }
 
-    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly) {
-        setId(id);
-        setName(name);
-        setType(refBookType);
-		setReadOnly(readOnly);
+    public TableModel(Long id, String name, RefBookType refBookType, boolean readOnly, boolean visible, RefBookAttribute regionAttribute) {
+        this.id = id;
+        this.name = name;
+        this.refBookType = refBookType;
+        this.readOnly = readOnly;
+        this.visible = visible;
+        this.regionAttribute = regionAttribute;
     }
 
     public String getName() {
@@ -57,4 +62,28 @@ public class TableModel implements Serializable {
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
+
+    public RefBookType getRefBookType() {
+        return refBookType;
+    }
+
+    public void setRefBookType(RefBookType refBookType) {
+        this.refBookType = refBookType;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    public RefBookAttribute getRegionAttribute() {
+        return regionAttribute;
+    }
+
+    public void setRegionAttribute(RefBookAttribute regionAttribute) {
+        this.regionAttribute = regionAttribute;
+    }
 }

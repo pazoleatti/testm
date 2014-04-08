@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -1082,6 +1083,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }  else {
             return new ArrayList<Pair<Long, Integer>>();
         }
+    }
+
+    @Override
+    @CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    public void setScriptId(Long refBookId, String scriptId) {
+        getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }
 
     @Override

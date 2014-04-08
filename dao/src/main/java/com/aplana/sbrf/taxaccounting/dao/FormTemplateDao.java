@@ -157,5 +157,5 @@ public interface FormTemplateDao {
      */
     int getLastVersionEdition(int formTypeId);
 
-    int updateVersionStatus(int versionStatus, int formTemplateId);
+    int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId);
 }

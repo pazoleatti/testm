@@ -9,7 +9,7 @@ public enum TemplateChangesEvent {
     CREATED(1, "Версия создана"),
     MODIFIED(2, "Версия изменена"),
     ACTIVATED(3, "Версия введена в действие"),
-    DEACTIVATED(4, "Версия выведена в действия"),
+    DEACTIVATED(4, "Версия выведена из действия"),
     DELETED(5, "Версия удалена");
 
     private Integer id;

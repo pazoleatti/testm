@@ -2,9 +2,7 @@ package form_template.income.rnu6.v1970
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -72,7 +70,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
+        //logicCheck()
         break
 }
 
@@ -138,6 +136,16 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 //// Кастомные методы
 
 // Алгоритмы заполнения полей формы
@@ -153,7 +161,7 @@ void calc() {
         // сортируем по кодам
         dataRowHelper.save(dataRows.sort { getKnu(it.code) })
 
-        dataRows.eachWithIndex{ row, index ->
+        dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
 
@@ -210,7 +218,7 @@ void calc() {
 }
 
 def BigDecimal calc8(DataRow row) {
-    if(row.currencyCode==null || row.date == null) {
+    if (row.currencyCode == null || row.date == null) {
         return null
     }
     if (isRubleCurrency(row.currencyCode)) {
@@ -236,7 +244,7 @@ def BigDecimal calc12(DataRow row) {
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
     def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    if(res.getRecords().isEmpty()) {
+    if (res.getRecords().isEmpty()) {
         SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
         throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
     } else {
@@ -250,7 +258,7 @@ def isRubleCurrency(def currencyCode) {
 }
 
 def calcTotalRow(def dataRows) {
-    def totalRow =  getTotalRow('total','Итого')
+    def totalRow = getTotalRow('total', 'Итого')
     calcTotalSum(dataRows, totalRow, totalColumns)
 
     return totalRow
@@ -258,13 +266,13 @@ def calcTotalRow(def dataRows) {
 
 // Получить новую строку подитога
 def getNewRow(def alias, def sum, def sum2) {
-    def newRow = getTotalRow('total' + alias,'Итого по КНУ ' + alias)
+    def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + alias)
     newRow.taxAccountingRuble = sum
     newRow.ruble = sum2
     return newRow
 }
 
-def getTotalRow(def alias, def title){
+def getTotalRow(def alias, def title) {
     def newRow = formData.createDataRow()
     newRow.setAlias(alias)
     newRow.helper = title
@@ -344,8 +352,8 @@ void logicCheck() {
                     def c10 = 0
                     for (rowSum in dataRows) {
                         if (rowSum.docNumber == row.docNumber && rowSum.docDate == row.docDate) {
-                            c12 += (rowSum.ruble?:0)
-                            c10 += (rowSum.taxAccountingRuble?:0)
+                            c12 += (rowSum.ruble ?: 0)
+                            c10 += (rowSum.taxAccountingRuble ?: 0)
                         }
                     }
                     if (c10 < c12) {
@@ -444,14 +452,14 @@ def getStartDate() {
 }
 
 def getBalancePeriod() {
-    if (isBalancePeriod == null){
+    if (isBalancePeriod == null) {
         isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
-void loggerError(def msg, Object...args) {
+void loggerError(def msg, Object... args) {
     if (getBalancePeriod()) {
         logger.warn(msg, args)
     } else {
@@ -466,33 +474,9 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('№ пп', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
 
@@ -512,20 +496,11 @@ void importData() {
             (xml.row[1].cell[10]): 'Рубли',
             (xml.row[1].cell[11]): 'Валюта',
             (xml.row[1].cell[12]): 'Рубли',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12'
+            (xml.row[2].cell[0]): '1'
     ]
-
+    (2..12).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -537,8 +512,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -557,7 +532,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             continue
         }
 
@@ -576,13 +551,16 @@ void addData(def xml, int headRowCount) {
         newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
-        // Зависимая
+        def record = getRecordImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset, false)
+        if (record != null) {
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+        }
 
         // графа 3
         newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
 
         // графа 4
-        newRow.code = getRecordIdImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+        newRow.code = record?.record_id?.value
 
         // графа 5
         newRow.docNumber = row.cell[5].text()
@@ -607,7 +585,6 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         newRow.ruble = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
-
 
         rows.add(newRow)
     }

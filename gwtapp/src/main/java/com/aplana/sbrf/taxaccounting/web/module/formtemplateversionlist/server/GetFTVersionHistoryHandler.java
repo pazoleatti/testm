@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.TemplateChangesService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.GetFTVersionHistoryAction;
@@ -37,17 +35,13 @@ public class GetFTVersionHistoryHandler extends AbstractActionHandler<GetFTVersi
 
     @Override
     public GetFTVersionHistoryResult execute(GetFTVersionHistoryAction action, ExecutionContext context) throws ActionException {
-        List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(action.getFormTypeId(),
-                VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL, VersionedObjectStatus.DELETED);
-        List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>();
-        for (FormTemplate formTemplate : formTemplates) {
-            //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-            for (TemplateChanges changes : templateChangesService.getByFormTemplateId(formTemplate.getId())){
-                TemplateChangesExt templateChangesExt = new TemplateChangesExt();
-                templateChangesExt.setTemplateChanges(changes);
-                templateChangesExt.setEdition(formTemplate.getEdition());
-                changesList.add(templateChangesExt);
-            }
+        List<TemplateChanges> changeses = templateChangesService.getByFormTypeIds(action.getFormTypeId());
+        List<TemplateChangesExt> changesList = new ArrayList<TemplateChangesExt>(changeses.size());
+        for (TemplateChanges changes : changeses) {
+            TemplateChangesExt templateChangesExt = new TemplateChangesExt();
+            templateChangesExt.setTemplateChanges(changes);
+            templateChangesExt.setEdition(formTemplateService.get(changes.getFormTemplateId()).getEdition());
+            changesList.add(templateChangesExt);
         }
         GetFTVersionHistoryResult result = new GetFTVersionHistoryResult();
         result.setChangeses(changesList);

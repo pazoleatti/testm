@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
@@ -42,34 +41,18 @@ public class UpdateDeclarationHandler extends AbstractActionHandler<UpdateDeclar
 
         Logger logger = new Logger();
         makeDates(action);
-        if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null
-                && action.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId() != 0){
-            int dtId = mainOperatingService.createNewTemplateVersion(action.getDeclarationTemplateExt().getDeclarationTemplate(),
-                    action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo().getUser());
-            fillResult(result, dtId, logger);
+        int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
+                action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo().getUser());
+        if (!logger.getEntries().isEmpty())
+            result.setLogUuid(logEntryService.save(logger.getEntries()));
+        result.setDeclarationTemplateId(dtId);
 
-        }else if(action.getDeclarationTemplateExt().getDeclarationTemplate().getId() != null){
-            int dtId = mainOperatingService.edit(action.getDeclarationTemplateExt().getDeclarationTemplate(),
-                    action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo().getUser());
-            fillResult(result, dtId, logger);
-        }else if (action.getDeclarationTemplateExt().getDeclarationTemplate().getId() == null &&
-                action.getDeclarationTemplateExt().getDeclarationTemplate().getType().getId() == 0){
-            int dtId = mainOperatingService.createNewType(action.getDeclarationTemplateExt().getDeclarationTemplate(),
-                    action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo().getUser());
-            fillResult(result, dtId, logger);
-        }
 		return result;
     }
 
     @Override
     public void undo(UpdateDeclarationAction action, UpdateDeclarationResult result, ExecutionContext context) throws ActionException {
         // Nothing!
-    }
-
-    private void fillResult(UpdateDeclarationResult result, int dtId, Logger logger){
-        if (!logger.getEntries().isEmpty())
-            result.setLogUuid(logEntryService.save(logger.getEntries()));
-        result.setDeclarationTemplateId(dtId);
     }
 
     private void makeDates(UpdateDeclarationAction action){

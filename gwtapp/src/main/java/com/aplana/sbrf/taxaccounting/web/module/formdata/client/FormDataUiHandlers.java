@@ -49,7 +49,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onEndLoad();
 
-    void onCreateManualClicked(boolean b);
+    void onOpenSearchDialog();
+
+    void onCreateManualClicked();
 
     void onDeleteManualClicked();
 }

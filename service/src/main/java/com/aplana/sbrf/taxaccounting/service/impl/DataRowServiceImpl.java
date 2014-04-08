@@ -1,21 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -63,4 +58,8 @@ public class DataRowServiceImpl implements DataRowService {
 		dataRowDao.rollback(formDataId);
 	}
 
+    @Override
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key) {
+        return dataRowDao.searchByKey(formDataId, range, key);
+    }
 }

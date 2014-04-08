@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Зависимая графа
  *
@@ -9,6 +11,9 @@ package com.aplana.sbrf.taxaccounting.model;
 public class ReferenceColumn extends Column {
 
 	private int parentId;
+
+    // только для экспорта/импорта
+    private String parentAlias;
 
     private long refBookAttributeId;
 
@@ -21,12 +26,21 @@ public class ReferenceColumn extends Column {
         }
     };
 
+    @XmlTransient
     public int getParentId() {
         return parentId;
     }
 
     public void setParentId(int parentId) {
         this.parentId = parentId;
+    }
+
+    public String getParentAlias() {
+        return parentAlias;
+    }
+
+    public void setParentAlias(String parentAlias){
+        this.parentAlias = parentAlias;
     }
 
     private static ValidationStrategy validationStrategy = new ValidationStrategy() {

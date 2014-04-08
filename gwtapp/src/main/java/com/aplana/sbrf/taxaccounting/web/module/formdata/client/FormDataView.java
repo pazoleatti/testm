@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEven
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -28,6 +30,7 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -45,10 +48,10 @@ import java.util.List;
 public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		implements FormDataPresenterBase.MyView {
 
+	private SingleSelectionModel<DataRow<Cell>> selectionModel;
     public static final String FORM_DATA_KIND_TITLE = "Тип налоговой формы:";
     public static final String FORM_DATA_KIND_TITLE_D = "Тип формы:";
 
-    private NoSelectionModel<DataRow<Cell>> selectionModel;
     private TaxType taxType;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
@@ -63,6 +66,18 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onRangeChange(range.getStart(), range.getLength());
 		}
 	};
+
+    /*
+    * Провайдер для идентификации конкретноого объекта в строке
+    * С помощью провайдера при листании селектшнМодел понимает что
+    * за объект был выделе или развыделен
+    */
+    public static final ProvidesKey<DataRow<Cell>> KEY_PROVIDER = new ProvidesKey<DataRow<Cell>>() {
+        @Override
+        public Object getKey(DataRow<Cell> item) {
+            return item.getIndex();
+        }
+    };
 
 	@UiField
 	DataGrid<DataRow<Cell>> formDataTable;
@@ -82,7 +97,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button deleteFormButton;
 
 	@UiField
-	UIObject printAnchor;
+    LinkButton printAnchor;
 	@UiField
 	Anchor returnAnchor;
 
@@ -137,6 +152,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     Label editModeLabel;
     @UiField
     ResizeLayoutPanel tableWrapper;
+    @UiField
+    LinkAnchor search;
 
     @UiField
     LinkButton modeAnchor;
@@ -165,9 +182,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-		selectionModel = new NoSelectionModel<DataRow<Cell>>();
+		selectionModel = new SingleSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
 		formDataTable.setSelectionModel(selectionModel);
-		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
 				FormDataUiHandlers handlers = getUiHandlers();
@@ -322,7 +341,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public DataRow<Cell> getSelectedRow() {
-		return selectionModel.getLastSelectedObject();
+		return selectionModel.getSelectedObject();
 	}
 
 	@Override
@@ -347,7 +366,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("manualAnchor")
     void onCreateManualClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onCreateManualClicked(false);
+            getUiHandlers().onCreateManualClicked();
         }
     }
 
@@ -503,7 +522,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
-//		checkButton.setVisible(show);
+		//checkButton.setVisible(show);
 	}
 
 	@Override
@@ -521,7 +540,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         editModeLabel.setVisible(show);
     }
 
-	@Override
+    @Override
+    public void showEditAnchor(boolean show) {
+        editAnchor.setVisible(show);
+    }
+
+    @Override
 	public void showDeleteFormButton(boolean show) {
 		deleteFormButton.setVisible(show);
 	}
@@ -531,7 +555,39 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		signersAnchor.setVisible(show);
 	}
 
-	@Override
+    @Override
+    public void showModeLabel(boolean show, boolean manual) {
+        modeLabel.setVisible(show);
+        if (manual) {
+            modeLabel.setText("Версия ручного ввода");
+        } else {
+            modeLabel.setText("Автоматическая версия");
+        }
+    }
+
+    @Override
+    public void showModeAnchor(boolean show, boolean manual) {
+        modeAnchor.setVisible(show);
+        if (manual) {
+            modeAnchor.setText("К автоматической версии");
+            modeAnchor.setImg("resources/img/cogwheel-16.png");
+        } else {
+            modeAnchor.setText("К версии ручного ввода");
+            modeAnchor.setImg("resources/img/pencil-16.png");
+        }
+    }
+
+    @Override
+    public void showManualAnchor(boolean show) {
+        manualAnchor.setVisible(show);
+    }
+
+    @Override
+    public void showDeleteManualAnchor(boolean show) {
+        deleteManualAnchor.setVisible(show);
+    }
+
+    @Override
 	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
@@ -637,35 +693,23 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual) {
-        //System.out.println("setVisibilityMode: "+readOnlyMode + "; "+existManual + "; "+manual + " ;"+ bankSummaryForm + "; " +canCreatedManual);
-        editAnchor.setVisible(readOnlyMode);
-        recalculateButton.setVisible(!manual);
-        if (bankSummaryForm) {
-            boolean needShowMode = (manual && readOnlyMode) || (!manual && existManual);
-            modeLabel.setVisible(readOnlyMode);
-            modeAnchor.setVisible(needShowMode);
-            manualAnchor.setVisible(!readOnlyMode && canCreatedManual && !existManual);
-            deleteManualAnchor.setVisible(manual && !readOnlyMode);
-            if (manual) {
-                modeAnchor.setText("К автоматической версии");
-                modeAnchor.setImg("resources/img/cogwheel-16.png");
-                modeLabel.setText("Версия ручного ввода");
-            } else {
-                modeAnchor.setText("К версии ручного ввода");
-                modeAnchor.setImg("resources/img/pencil-16.png");
-                modeLabel.setText("Автоматическая версия");
-            }
-        } else {
-            modeAnchor.setVisible(false);
-            modeAnchor.setVisible(false);
-            modeLabel.setVisible(false);
-            deleteManualAnchor.setVisible(false);
-        }
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    @UiHandler("search")
+    public void onSearchClicked(ClickEvent event){
+        getUiHandlers().onOpenSearchDialog();
     }
 
     @Override
-    public TaxType getTaxType() {
-        return taxType;
+    public void setFocus(final Long rowIndex) {
+        DataRow<Cell> row = new DataRow<Cell>();
+        row.setIndex(rowIndex.intValue());
+        selectionModel.setSelected(row, true);
+
+        // go to essential page
+        Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0);
+        pager.setPage(page.intValue() - 1);
     }
 }

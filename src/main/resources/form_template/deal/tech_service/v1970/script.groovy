@@ -87,6 +87,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -155,7 +158,7 @@ void logicCheck() {
         def transactionDate = row.transactionDate
         def contractDate = row.contractDate
 
-        //Наименования колонок
+        // Наименования колонок
         def contractDateName = row.getCell('contractDate').column.name
         def transactionDateName = row.getCell('transactionDate').column.name
         def priceName = row.getCell('price').column.name

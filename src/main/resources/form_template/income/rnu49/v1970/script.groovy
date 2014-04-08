@@ -690,13 +690,12 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        if (row.cell[0].text() in groupsRus) {
-            section = groups.get(groupsRus.indexOf(row.cell[0].text()))
-            continue
-        }
-
         // Пропуск итоговых строк
-        if (row.cell[1].text() == null || row.cell[1].text() == '') {
+        def hiddenName = row.cell[1].text()
+        if (hiddenName != null && hiddenName != '') {
+            if (hiddenName[0] in groupsRus) {
+                section = groups.get(groupsRus.indexOf(hiddenName[0]))
+            }
             continue
         }
 

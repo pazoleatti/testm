@@ -165,7 +165,13 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             for (Column column : columns) {
                 if (column instanceof ReferenceColumn) {
                     ReferenceColumn referenceColumn = ((ReferenceColumn)column);
-                    if (referenceColumn.getParentId() < 0) {
+                    // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
+                    if((referenceColumn.getParentId()==0)&&(referenceColumn.getParentAlias()!=null)){
+                        referenceColumn.setParentId(
+                                formTemplate.getColumn(
+                                        referenceColumn.getParentAlias()).getId());
+                    }
+                    else if(referenceColumn.getParentId() < 0) {
                         referenceColumn.setParentId(idsMapping.get(referenceColumn.getParentId()));
                     }
                 }

@@ -7,6 +7,8 @@ import groovy.transform.Field
 /**
  * 383 - Сделки РЕПО (8)
  *
+ * formTemplateId = 383
+ *
  * @author Dmitriy Levykin
  */
 switch (formDataEvent) {
@@ -84,6 +86,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -181,12 +186,7 @@ void logicCheck() {
         def dt1 = row.date1
         if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
             def msg = row.getCell('date1').column.name
-            if (dt1 > dTo) {
-                logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода!")
-            }
-            if (dt1 < dFrom) {
-                logger.warn("Строка $rowNum: «$msg» не может быть меньше даты начала отчётного периода!")
-            }
+            logger.warn("Строка $rowNum: «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
         }
 
         // Корректность даты совершения сделки

@@ -77,6 +77,9 @@ def endDate = null
 def currentDate = new Date()
 
 @Field
+def taxPeriod = null
+
+@Field
 def sourceFormData = null
 
 //// Обертки методов
@@ -168,7 +171,7 @@ void consolidation() {
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
             if (it.formTypeId == formData.formType.id) {
@@ -387,10 +390,17 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
+}
+
 /** Получить данные формы РНУ-40.1 (id = 338) */
 def getFormDataSource() {
     if (sourceFormData == null) {
-        sourceFormData = formDataService.find(338, FormDataKind.PRIMARY, formDataDepartment.id, formData.reportPeriodId)
+        sourceFormData = formDataService.findMonth(338, FormDataKind.PRIMARY, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
     }
     return sourceFormData
 }

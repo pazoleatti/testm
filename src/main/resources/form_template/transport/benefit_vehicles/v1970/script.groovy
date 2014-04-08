@@ -31,7 +31,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -90,6 +90,10 @@ def editableColumns = ['codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'bas
 @Field
 def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'identNumber', 'regNumber', 'powerVal', 'baseUnit',
         'taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = ['rowNumber']
 
 // дата начала отчетного периода
 @Field
@@ -157,7 +161,7 @@ def logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index?:0, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
 
         if (row.benefitStartDate != null && row.benefitEndDate != null) {
             // 2. Поверка на соответствие дат использования льготы
@@ -202,9 +206,11 @@ def logicCheck() {
          */
         if (row.taxBenefitCode != null && getRefBookValue(6, row.taxBenefitCode)?.CODE?.stringValue in ['20210', '20220', '20230']) {
             def region = getRegionByOKTMO(row.codeOKATO, errorMsg)
-            query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
-            if (getRecord(7, query, getReportDate()) == null) {
-                logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+            if (region != null) {
+                query = "TAX_BENEFIT_ID =" + row.taxBenefitCode + " AND DICT_REGION_ID = " + region.record_id
+                if (getRecord(7, query, getReportDate()) == null) {
+                    logger.error(errorMsg + "Выбранная льгота для текущего региона не предусмотрена!")
+                }
             }
         }
     }
@@ -360,17 +366,17 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
             def dFrom = getReportPeriodStartDate()
             def dTo = getReportPeriodEndDate()
             for (def row in dataRowsOld) {
-                if (( row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
+                if ((row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
                     continue
                 }
 
                 // эта часть вроде как лишняя
-                def  benefitEndDate = row.benefitEndDate
-                if(benefitEndDate == null || benefitEndDate > dTo){
+                def benefitEndDate = row.benefitEndDate
+                if (benefitEndDate == null || benefitEndDate > dTo) {
                     benefitEndDate = dTo
                 }
-                def  benefitStartDate = row.benefitStartDate
-                if(benefitStartDate < dFrom){
+                def benefitStartDate = row.benefitStartDate
+                if (benefitStartDate < dFrom) {
                     benefitStartDate = dFrom
                 }
                 if (benefitStartDate > dTo || benefitEndDate < dFrom) {
@@ -398,7 +404,7 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
 }
 
 def isEquals(def row1, def row2) {
-    if (row1.codeOKATO== null || row1.identNumber== null || row1.powerVal == null || row1.baseUnit == null){
+    if (row1.codeOKATO == null || row1.identNumber == null || row1.powerVal == null || row1.baseUnit == null) {
         return true
     }
     return (row1.codeOKATO.equals(row2.codeOKATO) && row1.identNumber.equals(row2.identNumber)
@@ -435,18 +441,11 @@ void importData() {
             (xml.row[0].cell[6]): 'Код налоговой льготы',
             (xml.row[0].cell[7]): 'Использование льготы',
             (xml.row[1].cell[7]): 'Дата начала',
-            (xml.row[1].cell[8]): 'Дата окончания',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9'
+            (xml.row[1].cell[8]): 'Дата окончания'
     ]
-
+    (0..8).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -457,8 +456,9 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
 
     def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
@@ -476,44 +476,51 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == '') {
-            continue
-        }
-
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        def int xmlIndexCol = 0
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 2
-        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[1].text(), xlsIndexRow, 1 + colOffset)
+        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 3
-        newRow.identNumber = row.cell[2].text()
+        newRow.identNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 4
-        newRow.regNumber = row.cell[3].text()
+        newRow.regNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графа 5
-        newRow.powerVal = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 6
-        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[5].text(), xlsIndexRow, 5 + colOffset)
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 7
-        newRow.taxBenefitCode = getRecordIdImport(6, 'CODE', row.cell[6].text(), xlsIndexRow, 6 + colOffset)
+        newRow.taxBenefitCode = getRecordIdImport(6, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
 
         // графа 8
-        newRow.benefitStartDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        xmlIndexCol++
 
         // графа 9
-        newRow.benefitEndDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }

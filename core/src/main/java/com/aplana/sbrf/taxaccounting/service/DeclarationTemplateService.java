@@ -159,4 +159,12 @@ public interface DeclarationTemplateService {
      */
     Map<Long, Integer> versionTemplateCountByFormType(Collection<Integer> formTypeIds);
 
+    /**
+     * Обновленее статуса НФ
+     * @param versionStatus статус
+     * @param declarationTemplateId ижентификатор
+     * @return идентифиактор
+     */
+    int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId);
+
 }

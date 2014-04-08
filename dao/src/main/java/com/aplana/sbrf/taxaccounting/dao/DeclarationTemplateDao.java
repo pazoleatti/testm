@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 
 import java.util.Collection;
 import java.util.Date;
@@ -154,4 +155,6 @@ public interface DeclarationTemplateDao {
      * @return номер последней редакции шаблона
      */
     int getLastVersionEdition(int typeId);
+
+    int updateVersionStatus(VersionedObjectStatus versionStatus, int decTemplateId);
 }

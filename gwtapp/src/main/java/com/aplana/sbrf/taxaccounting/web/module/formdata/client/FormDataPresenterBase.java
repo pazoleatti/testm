@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
@@ -70,9 +71,19 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showEditModeLabel(boolean show);
 
+        void showEditAnchor(boolean show);
+
 		void showDeleteFormButton(boolean show);
 
 		void showSignersAnchor(boolean show);
+
+        void showModeLabel(boolean show, boolean manual);
+
+        void showModeAnchor(boolean show, boolean manual);
+
+        void showManualAnchor(boolean show);
+
+        void showDeleteManualAnchor(boolean show);
 
 		void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
 
@@ -98,9 +109,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void updatePageSize(TaxType taxType);
 
-        void setVisibilityMode(boolean bankSummaryForm, boolean manual, boolean existManual, boolean readOnlyMode, boolean canCreatedManual);
-
         TaxType getTaxType();
+
+        void setFocus(Long rowIndex);
     }
 
 	public static final String NAME_TOKEN = "!formData";
@@ -117,6 +128,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final SignersPresenter signersPresenter;
 	protected final DialogPresenter dialogPresenter;
 	protected final HistoryPresenter historyPresenter;
+	protected final FormSearchPresenter formSearchPresenter;
 
 	protected FormData formData;
 	
@@ -146,13 +158,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 								 DispatchAsync dispatcher,
 								 SignersPresenter signersPresenter,
 								 DialogPresenter dialogPresenter,
-								 HistoryPresenter historyPresenter) {
+								 HistoryPresenter historyPresenter,
+                                 FormSearchPresenter formDataPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
 		this.dispatcher = dispatcher;
 		this.signersPresenter = signersPresenter;
 		this.dialogPresenter = dialogPresenter;
+        this.formSearchPresenter = formDataPresenter;
 	}
 
 	@Override
@@ -184,11 +198,16 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setWorkflowButtons(null);
 		view.showCheckButton(false);
         view.showEditModeLabel(false);
-        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, false, canCreatedManual);
+
+        getView().showEditAnchor(false);
+        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
+        getView().showModeAnchor(existManual, formData.isManual());
+        getView().showManualAnchor(false);
+        getView().showDeleteManualAnchor(false);
 	}
 
 	protected void setReadUnlockedMode() {
-		readOnlyMode = true;
+        readOnlyMode = true;
 		
 		MyView view = getView();
 		view.showSaveCancelPanel(false);
@@ -202,7 +221,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead());
-        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, formDataAccessParams.isCanEdit(), canCreatedManual);
+
+        getView().showEditAnchor(formDataAccessParams.isCanEdit());
+        getView().showModeLabel(isBankSummaryForm && canCreatedManual, formData.isManual());
+        getView().showModeAnchor(existManual, formData.isManual());
+        getView().showManualAnchor(canCreatedManual && !existManual);
+        getView().showDeleteManualAnchor(false);
 	}
 
 	protected void setEditMode() {
@@ -229,7 +253,12 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
 		view.setSelectedRow(null, true);
-        view.setVisibilityMode(isBankSummaryForm, formData.isManual(), existManual, readOnlyMode, canCreatedManual);
+
+        getView().showEditAnchor(false);
+        getView().showModeLabel(false, false);
+        getView().showModeAnchor(false, false);
+        getView().showManualAnchor(false);
+        getView().showDeleteManualAnchor(formData.isManual());
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {

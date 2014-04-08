@@ -1,11 +1,17 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import java.io.*;
+import java.util.Date;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 
 import org.apache.commons.fileupload.FileItem;
@@ -17,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +44,13 @@ public class DeclarationTemplateController {
 	
 	@Autowired
 	DeclarationTemplateImpexService declarationTemplateImpexService;
+
+    @Autowired
+    @Qualifier("declarationTemplateMainOperatingService")
+    private MainOperatingService mainOperatingService;
+
+    @Autowired
+    LogEntryService logEntryService;
 	
 	
 	@RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
@@ -63,9 +77,14 @@ public class DeclarationTemplateController {
 
         if (items.get(0) != null && items.get(0).getSize() == 0)
             exceptionHandler(new ServiceException("Файл jrxml пустой."), resp);
-		declarationTemplateImpexService.importDeclarationTemplate
-				(securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
+		DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
+                (securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
+        Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
+        Logger customLog = new Logger();
+        mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
+        if (!customLog.getEntries().isEmpty())
+            resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(customLog.getEntries()));
 	}
 
 	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
@@ -105,6 +124,11 @@ public class DeclarationTemplateController {
         } catch (IOException e) {
             exceptionHandler(e, resp);
         }
+    }
+
+    @ExceptionHandler(ServiceLoggerException.class)
+    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
+        response.getWriter().printf("{errorUuid: \"%s\"}", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)

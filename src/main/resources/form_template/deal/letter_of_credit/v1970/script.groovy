@@ -11,6 +11,8 @@ import groovy.transform.Field
  * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
  * (похож на guarantees "Предоставление гарантий")
  *
+ * formTemplateId=386
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -73,8 +75,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'fullName', 'countryCode', 'docNumber', 'docDate', 'dealNumber',
-        'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['rowNumber', 'fullName', 'countryCode', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -89,6 +90,9 @@ def currentDate = new Date()
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -205,6 +209,15 @@ void checkItog(def dataRows) {
     def testItogRows = testRows.findAll { it -> it.getAlias() != null }
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it -> it.getAlias() != null }
+
+    // TODO в 0.3.7 перенести в ScriptUtils
+    // Последняя строка должна быть подитоговой
+    if (testItogRows.size() > itogRows.size() && dataRows.size() != 0 && dataRows.get(dataRows.size() - 1).getAlias() == null) {
+        String groupCols = getValuesByGroupColumn(dataRows.get(dataRows.size() - 1));
+        if (groupCols != null) {
+            logger.error(GROUP_WRONG_ITOG, groupCols);
+        }
+    }
 
     checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
         @Override

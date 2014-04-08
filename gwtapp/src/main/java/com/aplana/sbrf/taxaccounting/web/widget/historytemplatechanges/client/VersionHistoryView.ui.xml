@@ -23,9 +23,7 @@
     <dw:ModalWindow title="Информация по форме/декларации">
         <g:VerticalPanel addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:cell>
-                <g:VerticalPanel addStyleNames="{style.content}">
-                    <style:GenericCellTable ui:field="versionHistoryCellTable" width="450px"/>
-                </g:VerticalPanel>
+                <style:GenericDataGrid ui:field="versionHistoryCellTable" height="500px" width="450px"/>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel width="100%" addStyleNames="{style.footerPanel}">

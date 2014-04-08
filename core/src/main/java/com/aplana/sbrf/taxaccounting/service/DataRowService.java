@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+
+import java.util.List;
 
 public interface DataRowService {
 	
@@ -52,8 +49,18 @@ public interface DataRowService {
 	 * @param formDataId
 	 */
 	void rollback(TAUserInfo userInfo, long formDataId);
-	
-	
-	
+
+
+    /**
+     * Поиск по налоговой форме,
+     * ищутся совпадения и выдается номер строки и столбца
+     * на форме
+     *
+     * @param formDataId
+     * @param range информация о выборке данных, с какой строки и сколько строк выбрать
+     * @param key ключ для поиска
+     * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
+     */
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key);
 
 }

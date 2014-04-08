@@ -142,11 +142,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             }
 
             getJdbcTemplate().update(
-                    "update form_template set data_rows = ?, data_headers = ?, edition = ?, version = ?, fixed_rows = ?, name = ?, " +
+                    "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
                             " monthly = ?, fullname = ?, code = ?, script=?, status=? where id = ?",
                     dataRowsXml,
                     dataHeadersXml,
-                    formTemplate.getEdition(),
                     formTemplate.getVersion(),
                     formTemplate.isFixedRows(),
                     formTemplate.getName() != null ? formTemplate.getName() : " ",
@@ -481,9 +480,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Override
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
-    public int updateVersionStatus(int versionStatus, int formTemplateId) {
+    public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         try {
-            return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus, formTemplateId);
+            return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus.getId(), formTemplateId);
         } catch (DataAccessException e){
             logger.error("Ошибка при обновлении статуса версии " + formTemplateId, e);
             throw new DaoException("Ошибка при обновлении статуса версии", e);
