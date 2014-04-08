@@ -253,7 +253,7 @@ public class ModalWindow extends DialogBox implements CanHide {
             }
             if (Event.ONMOUSEDOWN == eventType) {
                 if (isCursorResize(event)) {
-                    //enable/disable resize
+                    // вклчюение/выключение резайза
                     if (!bDragDrop) {
                         bDragDrop = true;
 
@@ -263,12 +263,11 @@ public class ModalWindow extends DialogBox implements CanHide {
                     }
                 }
             } else if (Event.ONMOUSEMOVE == eventType) {
-                //reset cursor-type
                 if (!isCursorResize(event)) {
                     DOM.setStyleAttribute(this.getElement(), "cursor", "default");
                 }
 
-                //calculate and set the new size
+                //расчет и установка нового размера
                 if (bDragDrop) {
                     int absX = DOM.eventGetClientX(event);
                     int absY = DOM.eventGetClientY(event);
@@ -332,6 +331,10 @@ public class ModalWindow extends DialogBox implements CanHide {
             return false;
     }
 
+    /**
+     * Добавление обработчиков при резайзе
+     * @param listener обработчик
+     */
     public void addPanelResizedListener(ModalWindowResizeListener listener) {
         panelResizedListeners.add(listener);
     }
@@ -346,6 +349,10 @@ public class ModalWindow extends DialogBox implements CanHide {
         return isResizable;
     }
 
+    /**
+     * Установка возможности изменения размера окна
+     * @param isResizable тру фолс
+     */
     public void setResizable(boolean isResizable) {
         this.isResizable = isResizable;
     }
