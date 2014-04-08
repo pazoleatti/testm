@@ -81,7 +81,7 @@
                     <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
                                       img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
                     <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
-                    <g:Button title="Завершить редактирование" width="70px" text="Завершить редактирование" ui:field="cancelEdit"/>
+                    <g:Button title="Завершить редактирование" width="100%" text="Завершить редактирование" ui:field="cancelEdit"/>
                     <g:Label wordWrap="false" text="Дата актуальности: "/>
                     <d:DateMaskBoxPicker ui:field="relevanceDate"/>
                 </g:HorizontalPanel>
