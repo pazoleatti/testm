@@ -184,4 +184,14 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void updateData() {
         searchResultTable.setVisibleRangeAndClearData(searchResultTable.getVisibleRange(), true);
     }
+
+    @Override
+    public void clearTableData() {
+        searchResultTable.setRowCount(0);
+    }
+
+    @Override
+    public void clearSearchInput() {
+        filterText.setText("");
+    }
 }
