@@ -308,11 +308,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             }
         }
 
-        versionStart.setEnabled(!readOnly);
-        versionEnd.setEnabled(!readOnly);
+        setReadOnlyMode(enabled);
+        versionStart.setEnabled(readOnly);
+        versionEnd.setEnabled(readOnly);
 		save.setEnabled(enabled);
 		cancel.setEnabled(enabled);
-        setReadOnlyMode(enabled);
 	}
 
     @Override
