@@ -13,7 +13,6 @@ import groovy.transform.Field
  * @author ivildanov
  * @author Stanislav Yasinskiy
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -95,7 +94,6 @@ def editableColumns = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoCl
 def nonEmptyColumns = ['rowNumber', 'codeOKATO', 'tsTypeCode', 'identNumber', 'model',
         'regNumber', 'powerVal', 'baseUnit', 'year', 'regDate']
 
-
 // дата начала отчетного периода
 @Field
 def start = null
@@ -116,6 +114,16 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -417,19 +425,25 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 2
-        newRow.codeOKATO = getRecordIdImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.codeOKATO = record?.record_id?.value
         xmlIndexCol++
 
         // графа 3
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        if (record != null) {
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
         xmlIndexCol++
 
         // графа 4
-        newRow.tsTypeCode = getRecordIdImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        if (record != null) {
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        }
         xmlIndexCol++
 
         // графа 6

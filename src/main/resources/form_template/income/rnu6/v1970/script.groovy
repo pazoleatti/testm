@@ -136,6 +136,16 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                    def boolean required) {
+    if (value == null || value == '') {
+        return null
+    }
+    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 //// Кастомные методы
 
 // Алгоритмы заполнения полей формы
@@ -541,13 +551,16 @@ void addData(def xml, int headRowCount) {
         newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
 
         // графа 2
-        // TODO Зависимая http://jira.aplana.com/browse/SBRFACCTAX-6587
+        def record = getRecordImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset, false)
+        if (record != null) {
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+        }
 
         // графа 3
         newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
 
         // графа 4
-        newRow.code = getRecordIdImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
+        newRow.code = record?.record_id?.value
 
         // графа 5
         newRow.docNumber = row.cell[5].text()
@@ -572,7 +585,6 @@ void addData(def xml, int headRowCount) {
 
         // графа 12
         newRow.ruble = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
-
 
         rows.add(newRow)
     }
