@@ -43,6 +43,11 @@
             border-top: 1px solid #aeaeac;
         }
 
+        .verSep {
+            height: 22px;
+            margin: 0 9px;
+            border-right: 1px solid #aeaeac;
+        }
     </ui:style>
 
 
@@ -70,10 +75,13 @@
             <fm:BodyContainer>
 
                 <g:HorizontalPanel spacing="4" addStyleNames="{style.btnPanel}">
+                    <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" addStyleNames="{style.marginRight5}"/>
                     <style:LinkButton title="Добавить строку" text="Добавить строку" ui:field="addRow"
                                       img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
                     <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
                                       img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
+                    <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
+                    <g:Button title="Завершить редактирование" width="70px" text="Завершить редактирование" ui:field="cancelEdit"/>
                     <g:Label wordWrap="false" text="Дата актуальности: "/>
                     <d:DateMaskBoxPicker ui:field="relevanceDate"/>
                 </g:HorizontalPanel>
