@@ -356,6 +356,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public Long getRefBookRecordIdImport(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                          Map<Long, RefBookDataProvider> providerCache, String alias, String value,
                                          Date date, int rowIndex, int colIndex, Logger logger, boolean required) {
+        if (refBookId == null) {
+            return null;
+        }
+
         Map<String, RefBookValue> record = getRefBookRecord(refBookId, recordCache, providerCache, alias, value, date);
 
         if (record != null) {

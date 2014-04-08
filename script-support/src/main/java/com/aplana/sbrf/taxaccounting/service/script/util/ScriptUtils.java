@@ -497,6 +497,16 @@ public final class ScriptUtils {
                     }
                 }
             }
+            // Последняя строка должна быть подитоговой
+            if (dataRows.size() > 0) {
+                DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
+                if (lastRow.getAlias() == null) {
+                    String groupCols = groupString.getString(lastRow);
+                    if (groupCols != null) {
+                        logger.error(GROUP_WRONG_ITOG, groupCols);
+                    }
+                }
+            }
         } else if (testItogRows.size() < itogRows.size()) {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {

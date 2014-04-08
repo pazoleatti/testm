@@ -131,6 +131,11 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
         return reportPeriodDates.get(reportPeriodId);
     }
 
+    @Override
+    public String getText() {
+        return text.getText();
+    }
+
     @UiHandler("okButton")
     public void onOkButtonClick(ClickEvent event) {
         this.setValue(periodPicker.getValue(), true);

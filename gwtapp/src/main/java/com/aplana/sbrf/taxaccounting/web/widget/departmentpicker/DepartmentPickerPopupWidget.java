@@ -239,6 +239,11 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
         filter.setText("");
     }
 
+    @Override
+    public String getText() {
+        return selected.getText();
+    }
+
     /**
      * Установить выбранными элементы по идентификаторам.
      */

@@ -14,4 +14,10 @@ public interface PeriodPickerPopup extends PeriodPicker, HasEnabled, HasHandlers
      * @return пара значений дат: начало и конец отченого периода
      */
     Pair<Date, Date> getPeriodDates(Integer reportPeriodId);
+
+    /**
+     * Возвращает текстовое представление для выбранных элементов
+     * @return
+     */
+    String getText();
 }

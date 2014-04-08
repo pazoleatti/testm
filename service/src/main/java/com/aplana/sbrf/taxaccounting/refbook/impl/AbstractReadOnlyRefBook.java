@@ -136,6 +136,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
+    public List<Long> getUniqueRecordIds(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Long getFirstRecordId(Long uniqueRecordId) {
         throw new UnsupportedOperationException();
     }
