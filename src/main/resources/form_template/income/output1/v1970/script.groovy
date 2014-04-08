@@ -2,6 +2,7 @@ package form_template.income.output1.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -111,7 +112,12 @@ def BigDecimal calc18(def row) {
     if (row.dividendRussianMembersAll == null || row.dividendAgentWithStavka0 == null) {
         return null
     }
-    return (row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0)
+    def temp = (row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0)
+    if (temp.abs() >= 1e15) {
+        // http://jira.aplana.com/browse/SBRFACCTAX-6371 Реализовать предрасчётную проверку в форме "Сведения для расчёта налога с доходов в виде дивидендов"
+        throw new ServiceException("Строка ${row.getIndex()}: Значение «Графы 18» превышает допустимую разрядность (15 знаков). «Графа 18» рассчитывается как «графа 11» - «графа 17»!")
+    }
+    return temp
 }
 
 def BigDecimal calc19(def row) {

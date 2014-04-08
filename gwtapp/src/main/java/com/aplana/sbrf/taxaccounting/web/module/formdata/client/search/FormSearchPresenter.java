@@ -25,6 +25,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         void updateData();
         void updatePageSize();
         void updateData(int pageNumber);
+        void clearTableData();
+        void clearSearchInput();
     }
 
     private final DispatchAsync dispatcher;
@@ -43,10 +45,12 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     @Override
     public void setFormDataId(Long formDataId){
         this.formDataId = formDataId;
+        getView().clearSearchInput();
     }
 
     @Override
     public void open(){
+        getView().clearTableData();
     }
 
     @Override

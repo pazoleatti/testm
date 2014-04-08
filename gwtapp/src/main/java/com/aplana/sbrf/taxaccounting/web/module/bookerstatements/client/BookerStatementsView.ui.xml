@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
              xmlns:picker="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
@@ -22,6 +23,20 @@
         .fileUploader {
             margin-right: 10px;
             margin-left: 10px;
+        }
+
+        .pager {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .table {
+            position: absolute !important;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            top: 50px;
         }
     </ui:style>
 
@@ -53,35 +68,52 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
-                    <g:cell horizontalAlignment="right" width="1%">
-                        <g:Label width="105px" text="Подразделение:"/>
-                    </g:cell>
-                    <g:cell horizontalAlignment="left" width="1%">
-                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="300px" />
-                    </g:cell>
 
-                    <g:cell horizontalAlignment="right" width="1%">
+                    <g:cell>
                         <g:Label width="55px" text="Период:"/>
                     </g:cell>
-                    <g:cell horizontalAlignment="left" width="1%">
+                    <g:cell>
                         <g:FlowPanel>
                             <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false" width="200px"/>
                         </g:FlowPanel>
                     </g:cell>
 
-                    <g:cell horizontalAlignment="right" width="1%">
+                    <g:cell>
+                        <g:Label width="105px" text="Подразделение:"/>
+                    </g:cell>
+                    <g:cell>
+                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="300px" />
+                    </g:cell>
+
+                    <g:cell>
                         <g:Label width="190px" wordWrap="false" text="Вид бухгалтерской отчётности:"/>
                     </g:cell>
-                    <g:cell horizontalAlignment="left" width="1%">
+                    <g:cell>
                         <g:ListBox ui:field="bookerReportType" width="100px"/>
                     </g:cell>
 
-                    <g:cell width="100%">
+                    <g:cell>
+                        <g:Button ui:field="searchButton" text="Найти"/>
+                    </g:cell>
+
+                    <g:cell>
                         <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="true"
                                                     addStyleNames="{style.fileUploader}" simpleButton="true"/>
                         <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
                     </g:cell>
+
+                    <g:cell>
+                        <g:Button ui:field="deleteButton" text="Удалить"/>
+                    </g:cell>
                 </g:HorizontalPanel>
+
+                <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="dataTable" height="100%" width="100%"/>
+                </g:ResizeLayoutPanel>
+
+                <pager:FlexiblePager ui:field="pager" location="CENTER"
+                                     showFastForwardButton="false" fastForwardRows="0"
+                                     showLastPageButton="true" styleName="{style.pager}" type="historyBusiness"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
