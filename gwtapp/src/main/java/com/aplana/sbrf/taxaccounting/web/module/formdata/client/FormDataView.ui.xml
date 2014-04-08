@@ -252,7 +252,7 @@
 
                     <g:HorizontalPanel ui:field="saveCancelPanel">
                         <g:Button ui:field="saveButton" text="Сохранить" addStyleNames="{style.btnMarginRight}"/>
-                        <g:Button ui:field="cancelButton" text="Выход"/>
+                        <g:Button ui:field="cancelButton" text="Выход" addStyleNames="{style.btnMarginRight}"/>
                     </g:HorizontalPanel>
 
                     <g:cell width="100%">
