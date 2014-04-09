@@ -11,6 +11,8 @@ public class LogBusinessFilterValuesDao {
     private Date fromSearchDate;
     private Date toSearchDate;
     private List<Long> userIds;
+    private boolean ascOrdering;
+    private HistoryBusinessSearchOrdering ordering;
 
     /*Стартовый индекс списка записей */
     private int startIndex;
@@ -64,5 +66,21 @@ public class LogBusinessFilterValuesDao {
 
     public void setToSearchDate(Date toSearchDate) {
         this.toSearchDate = toSearchDate;
+    }
+
+    public HistoryBusinessSearchOrdering getOrdering() {
+        return ordering;
+    }
+
+    public void setOrdering(HistoryBusinessSearchOrdering ordering) {
+        this.ordering = ordering;
+    }
+
+    public boolean isAscOrdering() {
+        return ascOrdering;
+    }
+
+    public void setAscOrdering(boolean isAscOrdering) {
+        this.ascOrdering = isAscOrdering;
     }
 }
