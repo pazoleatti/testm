@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -139,9 +140,13 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         });
 
         searchResultTable.addColumn(counterColumn, "№");
+        searchResultTable.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         searchResultTable.addColumn(rowIndexColumn, "Строка");
+        searchResultTable.setColumnWidth(rowIndexColumn, 50, Style.Unit.PX);
         searchResultTable.addColumn(columnIndexColumn, "Графа");
+        searchResultTable.setColumnWidth(columnIndexColumn, 50, Style.Unit.PX);
         searchResultTable.addColumn(valueColumn, "Значение");
+        searchResultTable.setColumnWidth(valueColumn, 100, Style.Unit.PCT);
         searchResultTable.setRowCount(0);
     }
 
