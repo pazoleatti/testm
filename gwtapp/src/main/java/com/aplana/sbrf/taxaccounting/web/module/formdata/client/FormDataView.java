@@ -705,7 +705,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         // go to essential page
         Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
         if (pager.getPage() != page.intValue()){
-            pager.setPage(page.intValue() - 1);
+            pager.setPage(page.intValue());
         }
     }
 }
