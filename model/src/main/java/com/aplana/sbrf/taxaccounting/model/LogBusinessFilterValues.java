@@ -20,6 +20,8 @@ public class LogBusinessFilterValues implements Serializable {
     private Integer departmentId;
     private Date fromSearchDate;
     private Date toSearchDate;
+    private boolean isAscOrdering;
+    private HistoryBusinessSearchOrdering searchOrdering;
 
     /*Стартовый индекс списка записей */
     private int startIndex;
@@ -121,5 +123,21 @@ public class LogBusinessFilterValues implements Serializable {
 
     public void setAuditFormTypeId(Integer auditFormTypeId) {
         this.auditFormTypeId = auditFormTypeId;
+    }
+
+    public HistoryBusinessSearchOrdering getSearchOrdering() {
+        return searchOrdering;
+    }
+
+    public void setSearchOrdering(HistoryBusinessSearchOrdering searchOrdering) {
+        this.searchOrdering = searchOrdering;
+    }
+
+    public boolean isAscOrdering() {
+        return isAscOrdering;
+    }
+
+    public void setAscOrdering(boolean isAscSorting) {
+        this.isAscOrdering = isAscSorting;
     }
 }

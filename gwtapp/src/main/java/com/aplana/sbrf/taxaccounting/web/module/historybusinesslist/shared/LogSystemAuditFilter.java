@@ -57,7 +57,7 @@ public class LogSystemAuditFilter implements Serializable {
     /*Количество записей, которые нужно вернуть*/
     private int countOfRecords;
 
-    private FormDataSearchOrdering searchOrdering;
+    private HistoryBusinessSearchOrdering searchOrdering;
 
     /*true, если сортируем по возрастанию, false - по убыванию*/
     private boolean ascSorting;
@@ -142,11 +142,11 @@ public class LogSystemAuditFilter implements Serializable {
         this.countOfRecords = countOfRecords;
     }
 
-    public FormDataSearchOrdering getSearchOrdering() {
+    public HistoryBusinessSearchOrdering getSearchOrdering() {
         return searchOrdering;
     }
 
-    public void setSearchOrdering(FormDataSearchOrdering searchOrdering) {
+    public void setSearchOrdering(HistoryBusinessSearchOrdering searchOrdering) {
         this.searchOrdering = searchOrdering;
     }
 
@@ -180,6 +180,8 @@ public class LogSystemAuditFilter implements Serializable {
         systemFilter.setReportPeriodIds(this.getReportPeriodIds());
         systemFilter.setUserIds(this.getUserIds());
         systemFilter.setStartIndex(this.getStartIndex());
+        systemFilter.setSearchOrdering(this.getSearchOrdering());
+        systemFilter.setAscOrdering(this.isAscSorting());
 
         return systemFilter;
     }

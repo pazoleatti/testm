@@ -103,6 +103,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
         filterValuesDao.setStartIndex(filter.getStartIndex());
         filterValuesDao.setDepartmentId(filter.getDepartmentId());
         filterValuesDao.setUserIds(filter.getUserIds());
+        filterValuesDao.setOrdering(filter.getSearchOrdering());
+        filterValuesDao.setAscOrdering(filter.isAscOrdering());
 
         return logBusinessDao.getLogsBusiness(formDataIds, declarationDataIds, filterValuesDao);
     }

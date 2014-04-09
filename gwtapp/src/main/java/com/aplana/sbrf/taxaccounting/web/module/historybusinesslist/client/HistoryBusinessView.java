@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client;
 
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,6 +13,8 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -30,6 +35,9 @@ import java.util.List;
 public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHandler> implements HistoryBusinessPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, HistoryBusinessView> {}
+
+    private HistoryBusinessSearchOrdering sortByColumn;
+    private boolean isAscSorting;
 
     @UiField
     Panel filterContentPanel;
@@ -162,16 +170,16 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         };
 
         logBusinessTable.setPageSize(pager.getPageSize());
-        logBusinessTable.addResizableColumn(dateColumn, dateColumnHeader);
-        logBusinessTable.addResizableColumn(eventColumn, eventColumnHeader);
-        logBusinessTable.addResizableColumn(noteColumn, noteColumnHeader);
-        logBusinessTable.addResizableColumn(reportPeriodColumn, reportPeriodColumnHeader);
-        logBusinessTable.addResizableColumn(departmentColumn, departmentColumnHeader);
+        logBusinessTable.addColumn(dateColumn, getHeader(dateColumnHeader, dateColumn));
+        logBusinessTable.addColumn(eventColumn, getHeader(eventColumnHeader, eventColumn));
+        logBusinessTable.addColumn(noteColumn, getHeader(noteColumnHeader, noteColumn));
+        logBusinessTable.addColumn(reportPeriodColumn, getHeader(reportPeriodColumnHeader, reportPeriodColumn));
+        logBusinessTable.addColumn(departmentColumn, getHeader(departmentColumnHeader, departmentColumn));
         logBusinessTable.addResizableColumn(typeColumn, typeColumnHeader);
-        logBusinessTable.addResizableColumn(formDataKindColumn, formDataKindColumnHeader);
-        logBusinessTable.addResizableColumn(formDeclTypeColumn, formTypeColumnHeader);
-        logBusinessTable.addResizableColumn(userLoginColumn, userLoginColumnHeader);
-        logBusinessTable.addResizableColumn(userRolesColumn, userRolesColumnHeader);
+        logBusinessTable.addColumn(formDataKindColumn, getHeader(formDataKindColumnHeader, formDataKindColumn));
+        logBusinessTable.addColumn(formDeclTypeColumn, getHeader(formTypeColumnHeader, formDeclTypeColumn));
+        logBusinessTable.addColumn(userLoginColumn, getHeader(userLoginColumnHeader, userLoginColumn));
+        logBusinessTable.addColumn(userRolesColumn, getHeader(userRolesColumnHeader, userRolesColumn));
         logBusinessTable.addResizableColumn(userIpColumn, userIpColumnHeader);
         logBusinessTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
@@ -193,6 +201,11 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     }
 
     @Override
+    public boolean isAscSorting(){
+        return isAscSorting;
+    }
+
+    @Override
     public void setInSlot(Object slot, IsWidget content) {
         if (slot == HistoryBusinessPresenter.TYPE_historyBusinessPresenter){
             filterContentPanel.clear();
@@ -209,6 +222,11 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
     }
 
     @Override
+    public void updateData() {
+        logBusinessTable.setVisibleRangeAndClearData(logBusinessTable.getVisibleRange(), true);
+    }
+
+    @Override
     public void updateData(int pageNumber) {
         if (pager.getPage() == pageNumber){
             logBusinessTable.setVisibleRangeAndClearData(logBusinessTable.getVisibleRange(), true);
@@ -222,9 +240,66 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
     }
 
+    @Override
+    public HistoryBusinessSearchOrdering getSearchOrdering() {
+        if (sortByColumn == null){
+            setSortByColumn("");
+        }
+        return sortByColumn;
+    }
+
     @UiHandler("printButton")
     void onPrintClicked(ClickEvent event){
         if (getUiHandlers() != null)
             getUiHandlers().onPrintButtonClicked();
+    }
+
+    private void setSortByColumn(String sortByColumn) {
+        if (dateColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.DATE;
+        } else if (eventColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.EVENT;
+        } else if (noteColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.NOTE;
+        } else if (reportPeriodColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.REPORT_PERIOD;
+        } else if (departmentColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.DEPARTMENT;
+        } else if (typeColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.TYPE;
+        } else if (formDataKindColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.FORM_DATA_KIND;
+        } else if (formTypeColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.FORM_TYPE;
+        } else if (userLoginColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.USER;
+        } else if (userRolesColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.USER_ROLE;
+        } else if (userIpColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.IP_ADDRESS;
+        }
+
+    }
+
+    private Header<String> getHeader(final String columnName, Column<LogSearchResultItem, ?> returnColumn){
+        GenericDataGrid.DataGridResizableHeader resizableHeader;
+        final SortingHeaderCell headerCell = new SortingHeaderCell();
+        resizableHeader = logBusinessTable.createResizableHeader(columnName, returnColumn, headerCell);
+
+        resizableHeader.setUpdater(new ValueUpdater<String>() {
+            @Override
+            public void update(String value) {
+                setAscSorting(headerCell.isAscSort());
+                setSortByColumn(columnName);
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onSortingChanged();
+                }
+            }
+        });
+        return resizableHeader;
+    }
+
+    private void setAscSorting(boolean ascSorting){
+        this.isAscSorting = ascSorting;
     }
 }
