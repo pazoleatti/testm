@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.client;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.shared.TableModel;
 import com.google.gwt.cell.client.AbstractCell;
@@ -45,8 +44,7 @@ public class AdminRefBookListView extends AbstractRefBookListView implements Adm
                         if (model == null) {
                             return;
                         }
-                        sb.appendHtmlConstant("<a href=\"#" +
-                                (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.REFBOOK_SCRIPT : RefBookDataTokens.refBookHierData) + ";"
+                        sb.appendHtmlConstant("<a href=\"#" + RefBookDataTokens.REFBOOK_SCRIPT + ";"
                                 + RefBookDataTokens.REFBOOK_DATA_ID + "=" + model.getId() + "\">"
                                 + model.getName() + "</a>");
                     }
