@@ -126,13 +126,14 @@ void calc() {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     for (def row : dataRows) {
-        def rowA = getTotalRowFromRNU(col[dataRows.indexOf(row)], dataRowsRNU)
+        def index = dataRows.indexOf(row)
+        def rowA = getTotalRowFromRNU(col[index], dataRowsRNU)
         if (rowA != null) {
             // 3 - графа 8 строки А + (графа 5 строки А – графа 6 строки А)
             row.sum = (rowA.rnu5Field5Accepted ?: 0) + (rowA.rnu7Field10Sum ?: 0) - (rowA.rnu7Field12Accepted ?: 0)
             // 4 - сумма по всем (графа 8 строки B + (графа 5 строки B – графа 6 строки B)),
             // КНУ которых совпадает со значениями в colBase (или colTax если налоговый период)
-            if (dataRows.indexOf(row) != 4 && dataRows.indexOf(row) != 1) {//не 5-я и 2-я строка
+            if (index != 4 && index != 1) {//не 5-я и 2-я строка
                 def normBase = 0
                 /** Признак налоговый ли это период. */
                 def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
@@ -143,7 +144,7 @@ void calc() {
                     }
                 }
                 row.normBase = normBase
-            } else if (dataRows.indexOf(row) == 1) {//2-я строка(сложнее)
+            } else if (index == 1) {//2-я строка(сложнее)
                 def normBase = 0
                 //Сумма значений по графе 9 (столбец «Доход по данным налогового учёта. Сумма») в сложных доходах где КНУ = ...
                 //объединил
@@ -173,7 +174,7 @@ void calc() {
             }
             // 6
             if (row.normBase != null) {
-                row.limitSum = koeffNormBase[dataRows.indexOf(row)] * row.normBase
+                row.limitSum = koeffNormBase[index] * row.normBase
             }
             def diff6_3 = (row.limitSum ?: 0) - (row.sum ?: 0)
             if (diff6_3 != null) {
@@ -198,10 +199,9 @@ void calc() {
 }
 
 void logicCheck() {
-    for (def row : formDataService.getDataRowHelper(formData).allCached) {
-        // 1. Обязательность заполнения полей графы 4
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
-    }
+    def row = formDataService.getDataRowHelper(formData)?.allCached?.get(4)
+    // 1. Обязательность заполнения полей графы 4 строки 5
+    checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 }
 
 /**
@@ -233,33 +233,9 @@ def getFormDataSimple() {
     return formDataService.find(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('КНУ', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 2)
 
@@ -294,8 +270,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     // графа 4 строки 5
     if (xml.row[headRowCount + 5] != null) {
