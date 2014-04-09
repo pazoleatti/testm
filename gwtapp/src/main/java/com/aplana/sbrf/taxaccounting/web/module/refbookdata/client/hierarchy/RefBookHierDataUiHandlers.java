@@ -7,4 +7,6 @@ public interface RefBookHierDataUiHandlers extends UiHandlers {
 	void onDeleteRowClicked();
 	void onSelectionChanged();
 	void onRelevanceDateChanged();
+    void onSetEditMode();
+    void onSetDefaultMode();
 }

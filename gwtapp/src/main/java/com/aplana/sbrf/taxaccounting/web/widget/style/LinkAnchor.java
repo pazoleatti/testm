@@ -46,6 +46,7 @@ public class LinkAnchor extends Anchor{
         getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
         getElement().getStyle().setColor("#004276");
         getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
 	}
 
 	public void setText(String text){

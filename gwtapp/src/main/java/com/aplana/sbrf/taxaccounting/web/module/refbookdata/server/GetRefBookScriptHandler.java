@@ -29,7 +29,6 @@ public class GetRefBookScriptHandler extends AbstractActionHandler<GetRefBookScr
         super(GetRefBookScriptAction.class);
     }
 
-    // TODO добавить проверку на whitespace в скрипте
     @Override
     public GetRefBookScriptResult execute(GetRefBookScriptAction action, ExecutionContext context) throws ActionException {
 

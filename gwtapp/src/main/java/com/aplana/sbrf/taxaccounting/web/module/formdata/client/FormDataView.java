@@ -107,7 +107,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button saveButton;
 
 	@UiField
-	LeftBar workflowButtons;
+    HorizontalPanel workflowButtons;
 	@UiField
     HorizontalPanel saveCancelPanel;
 
@@ -156,9 +156,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     LinkAnchor search;
 
     @UiField
-    LinkButton modeAnchor;
+    LinkButton manualVersionLink;
     @UiField
-    Label modeLabel;
+    Label manualVersionLabel;
+    @UiField
+    LinkButton autoVersionLink;
+    @UiField
+    Label autoVersionLabel;
+    @UiField
+    HorizontalPanel versionBlock;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -349,12 +355,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		selectionModel.setSelected(item, selected);
 	}
 
-	@UiHandler("modeAnchor")
-	void onModeClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onModeChangeClicked();
-		}
-	}
+    @UiHandler(value = {"manualVersionLink", "autoVersionLink"})
+    void onModeClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onModeChangeClicked();
+        }
+    }
 
     @UiHandler("editAnchor")
     void onEditButtonClicked(ClickEvent event) {
@@ -484,6 +490,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 								getUiHandlers().onWorkflowMove(workflowMove);
 							}
 						});
+                button.getElement().getStyle().setMarginRight(9, Style.Unit.PX);
 				workflowButtons.add(button);
 			}
 			show = true;
@@ -556,25 +563,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
     @Override
-    public void showModeLabel(boolean show, boolean manual) {
-        modeLabel.setVisible(show);
-        if (manual) {
-            modeLabel.setText("Версия ручного ввода");
-        } else {
-            modeLabel.setText("Автоматическая версия");
-        }
-    }
-
-    @Override
     public void showModeAnchor(boolean show, boolean manual) {
-        modeAnchor.setVisible(show);
-        if (manual) {
-            modeAnchor.setText("К автоматической версии");
-            modeAnchor.setImg("resources/img/cogwheel-16.png");
-        } else {
-            modeAnchor.setText("К версии ручного ввода");
-            modeAnchor.setImg("resources/img/pencil-16.png");
-        }
+        versionBlock.setVisible(show);
+
+        autoVersionLabel.setVisible(!manual);
+        autoVersionLink.setVisible(manual);
+
+        manualVersionLabel.setVisible(manual);
+        manualVersionLink.setVisible(!manual);
     }
 
     @Override
