@@ -933,9 +933,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		return getRecordData(refBook.getId(), recordId).get(attribute.getAlias());
     }
 
-    private static final String GET_RECORD_VERSION = "with currentRecord as (select r.id, r.ref_book_id, r.record_id, r.version from ref_book_record r where r.id=?),\n" +
-            "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id)\n" +
-            "select cr.id as %s, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv";
+    private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id, ref_book_id from ref_book_record where id = ?),\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "select cv.id as %s, \n" +
+            "cv.version as versionStart, \n" +
+            "nve.version - interval '1' day as versionEnd, \n" +
+            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+            "from currentVersion cv \n" +
+            "left join nextVersionEnd nve on (nve.record_id= cv.record_id and nve.ref_book_id= cv.ref_book_id)";
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(@NotNull(message = UNKNOWN_RECORD_ERROR) Long uniqueRecordId) {
@@ -1479,14 +1485,41 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return new ArrayList<String>(results);
     }
 
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id=? and r.record_id=? and r.status=0 and r.version  = " +
-            "   (select min(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and version > ?)),\n" +
-            "nextVersionEnd as (select min(r.version) as versionEnd from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id=nv.record_id and r.ref_book_id=nv.ref_book_id)\n" +
-            "select nv.id as %s, nv.version as versionStart, nve.versionEnd - interval '1' day as versionEnd from nextVersion nv, nextVersionEnd nve";
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +
+            "\t(select min(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and status=0 and version > ?)),\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.ref_book_id= nv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "select nv.id as %s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
+            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+            "from nextVersion nv \n" +
+            "left join nextVersionEnd nve on (nve.record_id= nv.record_id and nve.ref_book_id= nv.ref_book_id)";
 
     @Override
     public RefBookRecordVersion getNextVersion(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom) {
         String sql = String.format(GET_NEXT_RECORD_VERSION, RefBook.RECORD_ID_ALIAS);
+        try {
+            return getJdbcTemplate().queryForObject(sql,
+                    new Object[] {
+                            refBookId, recordId, versionFrom
+                    },
+                    new RefBookUtils.RecordVersionMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private static final String GET_PREVIOUS_RECORD_VERSION = "with previousVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +
+            "\t(select max(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and status=0 and version < ?)),\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.ref_book_id= pv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "select pv.id as %s, pv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
+            "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
+            "from previousVersion pv \n" +
+            "left join nextVersionEnd nve on (nve.record_id= pv.record_id and nve.ref_book_id= pv.ref_book_id)";
+
+    @Override
+    public RefBookRecordVersion getPreviousVersion(Long refBookId, Long recordId, Date versionFrom) {
+        String sql = String.format(GET_PREVIOUS_RECORD_VERSION, RefBook.RECORD_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {

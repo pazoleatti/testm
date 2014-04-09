@@ -268,6 +268,15 @@ public interface RefBookDao {
     RefBookRecordVersion getNextVersion(Long refBookId, Long recordId, Date versionFrom);
 
     /**
+     * Возвращает данные о версии следующей до указанной
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор записи справочника (без учета версий)
+     * @param versionFrom дата начала актуальности версии текущей версии, после которой будет выполняться поиск следующей версии
+     * @return данные версии
+     */
+    RefBookRecordVersion getPreviousVersion(Long refBookId, Long recordId, Date versionFrom);
+
+    /**
      * Возвращает идентификатор записи справочника без учета версий
      * @param uniqueRecordId уникальный идентификатор версии записи
      * @return
