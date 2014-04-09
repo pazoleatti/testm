@@ -152,7 +152,9 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
 
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
-        getUiHandlers().onRangeChange(0, pager.getPageSize());
+        if (!filterText.getText().isEmpty()){
+            getUiHandlers().onRangeChange(0, pager.getPageSize());
+        }
     }
 
     @Override
