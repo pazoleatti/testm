@@ -65,7 +65,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
-        sql.append(" order by ls.log_date desc");
+        sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
 
 		sql.append(") dat) ordDat");
         List<LogSearchResultItem> records;
@@ -270,4 +270,76 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 				}
 		);
 	}
+
+    public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
+
+        StringBuilder order = new StringBuilder();
+
+        order.append(" order by ");
+
+        String column = null;
+
+        if (ordering == null) {
+            ordering = HistoryBusinessSearchOrdering.ID;
+        }
+
+        switch (ordering) {
+            case ID:
+                // Сортировка по умолчанию
+                break;
+            case DATE:
+                column = "ls.log_date";
+                break;
+            case EVENT:
+                column = "ls.event_id";
+                break;
+            case NOTE:
+                column = "ls.note";
+                break;
+            case REPORT_PERIOD:
+                column = "tp.year";
+                if (!ascSorting) {
+                    column = column + " DESC";
+                }
+                column = column + ", rp.name";
+                break;
+            case DEPARTMENT:
+                column = "dep.name";
+                break;
+            case TYPE:
+                column = "CASE WHEN ls.declaration_type_id != NULL THEN ls.declaration_type_id ELSE ls.form_type_id END";
+                break;
+            case FORM_DATA_KIND:
+                column = "ls.form_kind_id";
+                break;
+            case FORM_TYPE:
+                column = "ft.name";
+                break;
+            case USER:
+                column = "su.name";
+                break;
+            case USER_ROLE:
+                column = "ls.roles";
+                break;
+            case IP_ADDRESS:
+                column = "ls.ip";
+                break;
+        }
+
+        if (column != null) {
+            order.append(column);
+            if (!ascSorting) {
+                order.append(" DESC");
+            }
+            order.append(", ");
+        }
+
+        // Сортировка по умолчанию
+        order.append("ls.id");
+        if (!ascSorting) {
+            order.append(" DESC");
+        }
+
+        return order.toString();
+    }
 }

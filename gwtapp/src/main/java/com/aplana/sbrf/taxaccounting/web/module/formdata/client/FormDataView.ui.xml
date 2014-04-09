@@ -10,10 +10,10 @@
     <ui:style>
 
         .titleText {
-                     font-size: 14px !important;
-                     color: #636460;
-                     white-space: nowrap;
-                 }
+            font-size: 14px !important;
+            color: #636460;
+            white-space: nowrap;
+        }
 
         .titleText div {
             font-size: 14px !important;
@@ -34,7 +34,7 @@
             overflow: hidden;
         }
 
-        .depAttr{
+        .depAttr {
             line-height: 17px;
         }
 
@@ -67,11 +67,7 @@
 
         .btnPanel {
             padding-left: 7px;
-            height: 23px;
-        }
-
-        .btnPanel td{
-           vertical-align: middle !important;
+            height: 22px;
         }
 
         .showCheckedColumns {
@@ -102,21 +98,30 @@
 
         .verSep {
             height: 22px;
-            margin: 0 9px;
+            margin-right: 8px;
             border-right: 1px solid #aeaeac;
         }
 
-        .btnMarginRight{
+        .btnMarginRight {
             margin-right: 9px;
         }
 
-        .marginRight5{
+        .marginRight5 {
             margin-right: 5px;
+        }
+
+        .fontBold {
+            font-weight: bold;
+        }
+
+        .versionSep {
+            margin-right: 2px;
+            margin-left: 2px;
         }
 
     </ui:style>
 
-    <ui:style field="lockInformationStyle">
+    <ui:style field="lock">
         .lockInformation {
             height: 25px;   /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.LOCK_INFO_BLOCK_HEIGHT*/
             line-height: 24px;
@@ -221,68 +226,60 @@
 
                 <!--Панель кнопок-->
 
-                <g:HorizontalPanel addStyleNames="{style.btnPanel}">
-                    <g:cell>
-                        <g:HorizontalPanel ui:field="addRemoveRowsBlock">
-                            <style:LinkButton ui:field="addRowButton" text="Добавить строку" addStyleNames="{style.btnMarginRight}"
-                                              img="resources/img/row-add.png" />
-                            <style:LinkButton ui:field="removeRowButton" text="Удалить строку"
-                                              img="resources/img/row-delete.png"/>
-                            <g:Label addStyleNames="{style.verSep}"/>
-                        </g:HorizontalPanel>
-                    </g:cell>
-                    <g:cell>
-                        <g:HorizontalPanel>
-                            <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}"/>
-                            <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}"/>
-                            <style:LeftBar ui:field="workflowButtons" marginRight="9" addStyleNames="{style.btnMarginRight}"/>
-                            <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}"/>
-                            <g:Button ui:field="originalVersionButton" text="Исходная версия"/>
+                <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.btnPanel}">
+                    <g:HorizontalPanel ui:field="addRemoveRowsBlock">
+                        <style:LinkButton ui:field="addRowButton" text="Добавить строку" addStyleNames="{style.btnMarginRight}"
+                                          img="resources/img/row-add.png"/>
+                        <style:LinkButton ui:field="removeRowButton" text="Удалить строку"
+                                          img="resources/img/row-delete.png"/>
+                        <g:Label addStyleNames="{style.verSep}"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel >
+                        <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}"/>
+                        <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}"/>
+                        <g:HorizontalPanel ui:field="workflowButtons"/>
+                        <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}"/>
+                        <g:Button ui:field="originalVersionButton" text="Исходная версия"/>
 
-                            <g:Label addStyleNames="{style.verSep}"/>
-                        </g:HorizontalPanel>
-                    </g:cell>
-                    <g:cell>
-                        <style:LinkButton ui:field="editAnchor" text="Редактировать..."
-                                          img="resources/img/pencil-16.png"
-                                          title="Перейти в режим редактирования" addStyleNames="{style.btnMarginRight}"/>
-                    </g:cell>
-                    <g:cell>
-                        <style:LinkButton ui:field="manualAnchor" text="Ручной ввод"
-                                          img="resources/img/pencil-16.png"
-                                          title="Перейти в режим редактирования" addStyleNames="{style.btnMarginRight}"/>
-                    </g:cell>
-                    <g:cell>
-                        <g:HorizontalPanel ui:field="saveCancelPanel">
-                                <g:Button ui:field="saveButton" text="Сохранить" addStyleNames="{style.btnMarginRight}"/>
-                                <g:Button ui:field="cancelButton" text="Выход"/>
-                        </g:HorizontalPanel>
-                    </g:cell>
+                        <g:Label addStyleNames="{style.verSep}"/>
+                    </g:HorizontalPanel>
+
+                    <style:LinkButton ui:field="editAnchor" text="Редактировать..." addStyleNames="{style.btnMarginRight}"
+                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" />
+
+                    <style:LinkButton ui:field="manualAnchor" text="Ручной ввод" addStyleNames="{style.btnMarginRight}"
+                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" />
+
+                    <g:HorizontalPanel ui:field="saveCancelPanel">
+                        <g:Button ui:field="saveButton" text="Сохранить" addStyleNames="{style.btnMarginRight}"/>
+                        <g:Button ui:field="cancelButton" text="Выход" addStyleNames="{style.btnMarginRight}"/>
+                    </g:HorizontalPanel>
+
                     <g:cell width="100%">
                         <style:LinkAnchor title="Поиск" ui:field="search" text="Поиск"/>
                     </g:cell>
-                    <g:cell>
-                        <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
-                                    value="true" text="Показывать контрольные поля" width="225px" height="22px"/>
-                    </g:cell>
-                    <g:cell>
-                        <g:VerticalPanel ui:field="modePanel">
-                            <style:LinkButton ui:field="modeAnchor" text="?"
-                                              img="resources/img/pencil-16.png"
-                                              title="Перейти в автоматический/ручного ввода режим" addStyleNames="{style.btnMarginRight}"/>
-                            <g:Label ui:field="modeLabel" text="Редактировать" width="100%"/>
-                        </g:VerticalPanel>
-                    </g:cell>
-                    <g:cell>
-                        <style:LinkButton ui:field="deleteManualAnchor" text="Удалить версию ручного ввода"
-                                          img="resources/img/row-delete.png"
-                                          title="Удалить версию ручного ввода" addStyleNames="{style.btnMarginRight}"/>
-                    </g:cell>
+
+                    <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
+                                value="true" text="Показывать контрольные поля" width="225px"/>
+
+                    <g:HorizontalPanel verticalAlignment="middle" ui:field="versionBlock">
+                        <g:Label addStyleNames="{style.verSep}"/>
+                        <g:Label text="Версия:" width="48px"/>
+                        <style:LinkButton ui:field="manualVersionLink" text="ручного ввода"
+                                          title="Перейти к версии ручного ввода" disableImage="true"/>
+                        <g:Label ui:field="manualVersionLabel" wordWrap="false" text="ручного ввода" addStyleNames="{style.fontBold}"/>
+                        <g:Label text="/" addStyleNames="{style.versionSep}"/>
+                        <style:LinkButton ui:field="autoVersionLink" text="автоматическая" addStyleNames="{style.btnMarginRight}"
+                                          title="Перейти к автоматической версии" disableImage="true"/>
+                        <g:Label ui:field="autoVersionLabel" text="автоматическая" addStyleNames="{style.fontBold}, {style.btnMarginRight}"/>
+                    </g:HorizontalPanel>
+
+                    <style:LinkButton ui:field="deleteManualAnchor" text="Удалить версию ручного ввода" addStyleNames="{style.btnMarginRight}"
+                                      img="resources/img/row-delete.png" title="Удалить версию ручного ввода"/>
+
                 </g:HorizontalPanel>
 
-
-                <g:Label ui:field="lockInformation" visible="false"
-                         addStyleNames="{lockInformationStyle.lockInformation}"/>
+                <g:Label ui:field="lockInformation" visible="false"  addStyleNames="{lock.lockInformation}"/>
 
                 <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.table}">
                     <style:GenericDataGrid ui:field="formDataTable" width="100%" height="100%"/>

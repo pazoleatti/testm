@@ -147,7 +147,6 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     public void saveScript(Long refBookId, String script) {
 
         RefBook refBook = refBookFactory.get(refBookId);
-        // TODO добавить проверку на whitespace в скрипте
         if (!script.isEmpty() && script.trim().length() > 0) {
 
             InputStream inputStream;
@@ -159,7 +158,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             }
 
             if (refBook.getScriptId() == null) {
-                String uuid = blobDataService.create(inputStream, null);
+                String uuid = blobDataService.create(inputStream, refBook.getName());
                 refBookDao.setScriptId(refBookId, uuid);
             } else {
                 blobDataService.save(refBook.getScriptId(), inputStream);

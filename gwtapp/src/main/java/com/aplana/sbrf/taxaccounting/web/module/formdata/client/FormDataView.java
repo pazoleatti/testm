@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
@@ -107,7 +105,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button saveButton;
 
 	@UiField
-	LeftBar workflowButtons;
+    HorizontalPanel workflowButtons;
 	@UiField
     HorizontalPanel saveCancelPanel;
 
@@ -156,9 +154,15 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     LinkAnchor search;
 
     @UiField
-    LinkButton modeAnchor;
+    LinkButton manualVersionLink;
     @UiField
-    Label modeLabel;
+    Label manualVersionLabel;
+    @UiField
+    LinkButton autoVersionLink;
+    @UiField
+    Label autoVersionLabel;
+    @UiField
+    HorizontalPanel versionBlock;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -349,12 +353,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		selectionModel.setSelected(item, selected);
 	}
 
-	@UiHandler("modeAnchor")
-	void onModeClicked(ClickEvent event) {
-		if (getUiHandlers() != null) {
-			getUiHandlers().onModeChangeClicked();
-		}
-	}
+    @UiHandler(value = {"manualVersionLink", "autoVersionLink"})
+    void onModeClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onModeChangeClicked();
+        }
+    }
 
     @UiHandler("editAnchor")
     void onEditButtonClicked(ClickEvent event) {
@@ -484,6 +488,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 								getUiHandlers().onWorkflowMove(workflowMove);
 							}
 						});
+                button.getElement().getStyle().setMarginRight(9, Style.Unit.PX);
 				workflowButtons.add(button);
 			}
 			show = true;
@@ -556,25 +561,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
     @Override
-    public void showModeLabel(boolean show, boolean manual) {
-        modeLabel.setVisible(show);
-        if (manual) {
-            modeLabel.setText("Версия ручного ввода");
-        } else {
-            modeLabel.setText("Автоматическая версия");
-        }
-    }
-
-    @Override
     public void showModeAnchor(boolean show, boolean manual) {
-        modeAnchor.setVisible(show);
-        if (manual) {
-            modeAnchor.setText("К автоматической версии");
-            modeAnchor.setImg("resources/img/cogwheel-16.png");
-        } else {
-            modeAnchor.setText("К версии ручного ввода");
-            modeAnchor.setImg("resources/img/pencil-16.png");
-        }
+        versionBlock.setVisible(show);
+
+        autoVersionLabel.setVisible(!manual);
+        autoVersionLink.setVisible(manual);
+
+        manualVersionLabel.setVisible(manual);
+        manualVersionLink.setVisible(!manual);
     }
 
     @Override
@@ -709,7 +703,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         selectionModel.setSelected(row, true);
 
         // go to essential page
-        Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0);
-        pager.setPage(page.intValue() - 1);
+        Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
+        if (pager.getPage() != page.intValue()){
+            pager.setPage(page.intValue());
+        }
     }
 }
