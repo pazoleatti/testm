@@ -1,10 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
@@ -22,11 +17,16 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class DeclarationCreationView extends PopupViewWithUiHandlers<DeclarationCreationUiHandlers>
@@ -124,7 +124,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        Dialog.confirmMessage("Создание декларации", "Хотите отменить создание декларации?", new DialogHandler() {
+        Dialog.confirmMessage("Отмена создания", "Отменить создание?", new DialogHandler() {
             @Override
             public void yes() {
                 Dialog.hideMessage();

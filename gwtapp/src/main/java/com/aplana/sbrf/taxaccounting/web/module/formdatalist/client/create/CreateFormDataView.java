@@ -184,7 +184,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        Dialog.confirmMessage("Отмена создания", "Хотите отменить создание?", new DialogHandler() {
+        Dialog.confirmMessage("Отмена создания", "Отменить создание?", new DialogHandler() {
             @Override
             public void yes() {
                 Dialog.hideMessage();
