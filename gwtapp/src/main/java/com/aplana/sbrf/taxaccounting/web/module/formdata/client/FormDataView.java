@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
-import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -14,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LeftBar;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
@@ -705,7 +703,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         selectionModel.setSelected(row, true);
 
         // go to essential page
-        Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0);
-        pager.setPage(page.intValue() - 1);
+        Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
+        if (pager.getPage() != page.intValue()){
+            pager.setPage(page.intValue());
+        }
     }
 }
