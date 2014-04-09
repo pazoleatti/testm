@@ -175,7 +175,7 @@ public class HistoryBusinessView extends ViewWithUiHandlers<HistoryBusinessUIHan
         logBusinessTable.addColumn(noteColumn, getHeader(noteColumnHeader, noteColumn));
         logBusinessTable.addColumn(reportPeriodColumn, getHeader(reportPeriodColumnHeader, reportPeriodColumn));
         logBusinessTable.addColumn(departmentColumn, getHeader(departmentColumnHeader, departmentColumn));
-        logBusinessTable.addResizableColumn(typeColumn, typeColumnHeader);
+        logBusinessTable.addColumn(typeColumn, getHeader(typeColumnHeader, typeColumn));
         logBusinessTable.addColumn(formDataKindColumn, getHeader(formDataKindColumnHeader, formDataKindColumn));
         logBusinessTable.addColumn(formDeclTypeColumn, getHeader(formTypeColumnHeader, formDeclTypeColumn));
         logBusinessTable.addColumn(userLoginColumn, getHeader(userLoginColumnHeader, userLoginColumn));

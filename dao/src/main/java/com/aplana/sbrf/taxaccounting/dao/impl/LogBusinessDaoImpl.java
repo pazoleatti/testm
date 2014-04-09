@@ -317,7 +317,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                     column = "dep.name";
                     break;
                 case TYPE:
-                    column = "";//TODO деделать
+                    column = "CASE WHEN lb.declaration_data_id != NULL THEN lb.declaration_data_id ELSE lb.form_data_id END";
                     break;
                 case FORM_DATA_KIND:
                     column = "fd.kind";
