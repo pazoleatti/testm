@@ -27,4 +27,8 @@ public class AdminRefBookListPresenter extends AbstractRefBookListPresenter<Admi
     public interface MyView extends AbstractRefBookListPresenter.MyView {
     }
 
+    @Override
+    protected boolean getOnlyVisible() {
+        return false;
+    }
 }
