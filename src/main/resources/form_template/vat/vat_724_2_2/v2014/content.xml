@@ -30,18 +30,25 @@
         <checking>false</checking>
         <name>Наименование операции</name>
         <order>3</order>
-        <width>20</width>
-        <maxLength>255</maxLength>
+        <width>60</width>
+        <maxLength>500</maxLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>base</alias>
         <checking>false</checking>
         <name>Налоговая база</name>
         <order>4</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
     <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
@@ -53,13 +60,6 @@
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

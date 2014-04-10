@@ -85,10 +85,9 @@ def editableColumns = ['name', 'issuer', 'buyDate', 'cost', 'bondsCount', 'upCos
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// TODO (Ramil Timerbaev) сделать обязательным графу 3, когда появятся данные в справочнике "ценные бумаги"
 // Проверяемые на пустые значения атрибуты (графа 2, 3, 5..10)
 @Field
-def nonEmptyColumns = ['name', /*'issuer',*/ 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent']
+def nonEmptyColumns = ['name', 'issuer', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 7, 10)
 @Field
@@ -129,6 +128,26 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 // Поиск записи в справочнике по значению
 def getRecord(def refBookId, def String alias, def String value) {
     return getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, getReportPeriodEndDate())
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                def Date date, boolean required = true) {
+    if (value == null) {
+        return null
+    }
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
+            cellName, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для расчетов) + по дате
+def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+                     boolean required) {
+    if (value == null) {
+        return null
+    }
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
+            day, rowIndex, cellName, logger, required)
 }
 
 // Получение числа из строки при импорте
