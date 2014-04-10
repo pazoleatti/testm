@@ -167,6 +167,7 @@ void calc() {
         row.dealNum1 = index
         row.dealNum2 = index
         row.dealNum3 = index
+        row.dealMemberNum = index
         index++
     }
     dataRowHelper.save(dataRows)
@@ -923,9 +924,6 @@ def buildRow(def srcRow, def matrixRow) {
     // Графа 45
     // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
     row.dealDoneDate = matrixRow.dealDoneDate
-
-    // Графа 47
-    row.dealMemberNum = row.otherNum
 
     // Графа 49
     // countryCode3 заполняется после графы 50
