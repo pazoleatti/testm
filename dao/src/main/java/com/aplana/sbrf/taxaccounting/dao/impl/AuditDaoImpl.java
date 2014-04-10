@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +38,18 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
+        boolean isEventColumn = filter.getSearchOrdering() == HistoryBusinessSearchOrdering.EVENT;
+
+        if (isEventColumn) {
+            try {
+                getJdbcTemplate().execute("CREATE GLOBAL TEMPORARY TABLE event_map (event_id NUMBER, event_title CHAR(100)) ON COMMIT DELETE ROWS");
+            } catch (Throwable e) {
+                // Выкидывает исключение если таблица существует
+            }
+
+            getJdbcTemplate().execute(insertEventTitles());
+        }
+
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         sql.append("ls.id, ");
         sql.append("ls.log_date, ");
@@ -52,6 +63,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("ls.form_type_id, ");
         sql.append("ls.form_kind_id, ");
         sql.append("ls.note, ");
+        if (isEventColumn) {
+            sql.append("em.event_title, ");
+        }
         sql.append("ls.user_department_id ");
 
         sql.append(" from log_system ls ");
@@ -62,6 +76,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("left join sec_user su on ls.user_id=su.\"ID\" ");
         sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
+        if (isEventColumn) {
+            sql.append("LEFT JOIN event_map em ON ls.event_id=em.\"EVENT_ID\" ");
+        }
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
@@ -291,7 +308,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.log_date";
                 break;
             case EVENT:
-                column = "ls.event_id";
+                column = "em.event_title";
                 break;
             case NOTE:
                 column = "ls.note";
@@ -341,5 +358,19 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         return order.toString();
+    }
+
+    private String insertEventTitles() {
+        StringBuilder query = new StringBuilder();
+        FormDataEvent values[] = FormDataEvent.values();
+
+        query.append("INSERT ALL ");
+
+        for (FormDataEvent value : values) {
+            query.append("INTO event_map(event_id, event_title) VALUES (" + value.getCode() + ", '" + value.getTitle() + "') ");
+        }
+        query.append("SELECT * FROM DUAL ");
+
+        return query.toString();
     }
 }
