@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 /**
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
  * formTemplateId=333
- * formTemplateId=315
  *
  * @author rtimerbaev
  */
