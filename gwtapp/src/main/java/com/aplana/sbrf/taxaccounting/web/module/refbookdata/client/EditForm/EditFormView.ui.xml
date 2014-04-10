@@ -70,9 +70,9 @@
 
                                 <g:cell width="80%">
                                     <g:HorizontalPanel>
-                                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px"/>
+                                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px" forceSetValue="true"/>
                                         <g:Label text=" по:" width="20px" addStyleNames="{style.bothMargin}"/>
-                                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px"/>
+                                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px" forceSetValue="true"/>
                                     </g:HorizontalPanel>
                                 </g:cell>
                             </g:HorizontalPanel>
