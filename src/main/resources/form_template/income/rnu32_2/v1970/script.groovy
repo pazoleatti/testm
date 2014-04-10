@@ -128,7 +128,6 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRowsFromSource = getDataRowsFromSource()
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -143,6 +142,7 @@ void logicCheck() {
     }
 
     // . Арифметическая проверка графы 1..6
+    def dataRowsFromSource = getDataRowsFromSource()
     for (def section : sections) {
         def rows32_1 = getRowsBySection32_1(dataRowsFromSource, section)
         def rows32_2 = getRowsBySection(dataRows, section)
@@ -158,7 +158,6 @@ void logicCheck() {
         }
         for (def row : rows32_2) {
             def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
-            "Строка %d: Неверное значение граф: %s!"
             def msg = []
             allColumns.each { alias ->
                 def value1 = row.getCell(alias).value
