@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
@@ -255,7 +254,13 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         Dialog.infoMessage("Не удалось загрузить файл. Ошибка: " + error);
 	}
 
-	private void setDeclarationTemplate() {
+    @Override
+    public void uploadFormTemplateSuccess() {
+        Dialog.infoMessage("Форма сохранена");
+        setDeclarationTemplate();
+    }
+
+    private void setDeclarationTemplate() {
         final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
 			closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
@@ -295,7 +300,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Override
 	public void uploadDectResponseWithUuid(String uuid) {
-        if (uuid != null && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
             JSONValue jsonValue = JSONParser.parseLenient(uuid);
             String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
             LogAddEvent.fire(this, value);
