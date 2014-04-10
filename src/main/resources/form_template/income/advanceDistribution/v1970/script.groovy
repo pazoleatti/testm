@@ -326,16 +326,6 @@ void logicalCheckBeforeCalc() {
     def dataRows = dataRowHelper.allCached
     def Department department = departmentService.get(formData.departmentId)
 
-    summaryMap.each { key, value ->
-        def formDataSummary = getFormDataSummary(key)
-        if (formDataSummary == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
-        }
-        if (getData(formDataSummary) == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
-        }
-    }
-
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), getReportPeriodEndDate(), -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
         logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
@@ -400,6 +390,16 @@ void logicalCheckBeforeCalc() {
             if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('TAX_RATE')?.getNumberValue() == null) {
                 logger.error(errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «Ставка налога в бюджет субъекта (%%)»!")
             }
+        }
+    }
+
+    summaryMap.each { key, value ->
+        def formDataSummary = getFormDataSummary(key)
+        if (formDataSummary == null) {
+            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+        }
+        if (getData(formDataSummary) == null) {
+            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
         }
     }
 }
