@@ -192,7 +192,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceRows = formDataService.getDataRowHelper(source).allCached
+            def dataRowsFromSource = formDataService.getDataRowHelper(source).allCached
 
             def sourceFixedRowsMap = getFixedRows(dataRowsFromSource)
             def totalRowASource = sourceFixedRowsMap['totalA']

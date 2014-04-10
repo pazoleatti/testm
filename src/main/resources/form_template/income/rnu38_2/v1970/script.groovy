@@ -3,15 +3,12 @@ package form_template.income.rnu38_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * Форма "РНУ-38.2 Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 2".
  * formTemplateId=335
- *
- * TODO:
- *      - логических проверок в чтз нет, в скрипте сказали пока оставить проверки
- *      - импорт и миграция
  *
  * @author rtimerbaev
  */
@@ -21,9 +18,24 @@ import groovy.transform.Field
 // графа 3  - incomeShortPosition
 // графа 4  - totalPercIncome
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.CHECK:
+        checkSourceAccepted()
+        logicCheck()
+        break
+    case FormDataEvent.CALCULATE:
+        checkSourceAccepted()
+        if (!isConsolidated) {
+            calc()
+        }
+        logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
@@ -31,6 +43,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -46,79 +59,122 @@ switch (formDataEvent) {
 @Field
 def allColumns = ['amount', 'incomePrev', 'incomeShortPosition', 'totalPercIncome']
 
-// TODO (Ramil Timerbaev) логических проверок в чтз нет, в скрипте сказали пока оставить проверки
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+@Field
+def taxPeriod = null
+
+@Field
+def sourceFormData = null
+
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def totalRow = getDataRow(dataRows, 'total')
+
+    //очистка значений
+    allColumns.each {
+        totalRow[it] = 0
+    }
+
+    // получение данных из первичной рну-36.1
+    def dataRowsFromSource = getDataRowsFromSource()
+    if (!dataRowsFromSource) {
+        dataRowHelper.save(dataRows)
+        return
+    }
+
+    def totalRowSource = getDataRow(dataRowsFromSource, 'total')
+    allColumns.each {
+        totalRow[it] = totalRowSource[it]
+    }
+
+    dataRowHelper.save(dataRows)
+}
+
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    if (dataRows.isEmpty()) {
-        return
-    }
-    def row = dataRows.get(0)
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    // 1. Обязательность заполнения полей (графа 1..4)
-    checkNonEmptyColumns(row, 1, allColumns, logger, true)
+    def totalRow = getDataRow(dataRows, 'total')
 
-    // если нф консолидированная, то не надо проверять данные из рну 38.1
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
+    // . Обязательность заполнения поля графы 1..4
+    checkNonEmptyColumns(totalRow, totalRow.getIndex(), allColumns, logger, true)
+
+    if (isConsolidated) {
         return
     }
 
-    def totalRow = getTotalRowFromRNU38_1()
-    if (totalRow == null) {
-        logger.error('Отсутствует РНУ-38.1.')
-        return
-    }
-
-    // 2, 3, 4, 5. Арифметическая проверка (графа 1..4)
-    def needValue = [:]
-    allColumns.each { alias ->
-        needValue[alias] = totalRow.getCell(alias).value
-    }
-    checkCalc(row, allColumns, needValue, logger, false)
+    // . Арифметическая проверка графы 1..4
+    def dataRowsFromSource = getDataRowsFromSource()
+    def totalRowSource = getDataRow(dataRowsFromSource, 'total')
+    checkCalc(totalRow, allColumns, totalRowSource, logger, true)
 }
 
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // удалить все строки и собрать из источников их строки
-    dataRows.clear()
+    def totalRow = getDataRow(dataRows, 'total')
+
+    //очистка значений
+    allColumns.each {
+        totalRow[it] = 0
+    }
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, getTaxPeriod()?.id, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceDataRows = formDataService.getDataRowHelper(source)?.allCached
-            if (it.formTypeId == formData.formType.id) {
-                // Консолидация данных из первичной рну-38.2 в консолидированную рну-38.2.
-                sourceDataRows.each { row ->
-                    dataRows.add(row)
-                }
-            } else {
-                // Консолидация данных из первичной рну-38.1 в первичную рну-38.2.
-                def totalRow = getDataRow(sourceDataRows, 'total')
-                def newRow = formData.createDataRow()
-                // графа 1..4
-                newRow.amount = totalRow.amount
-                newRow.incomePrev = totalRow.incomePrev
-                newRow.incomeShortPosition = totalRow.incomeShortPosition
-                newRow.totalPercIncome = newRow.incomePrev + newRow.incomeShortPosition
-                dataRows.add(newRow)
+            def sourceRows = formDataService.getDataRowHelper(source).allCached
+            def totalRowSource = getDataRow(sourceRows, 'total')
+            allColumns.each {
+                totalRow[it] += totalRowSource[it]
             }
         }
     }
     dataRowHelper.save(dataRows)
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        logger.info('Формирование консолидированной формы прошло успешно.')
-    } else {
-        logger.info('Формирование первичной формы РНУ-38.2 прошло успешно.')
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder)?.time
+    }
+    return endDate
+}
+
+def getTaxPeriod() {
+    if (taxPeriod == null) {
+        taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
+    }
+    return taxPeriod
+}
+
+/** Получить данные формы РНУ-38.1 (id = 334) */
+def getFormDataSource() {
+    if (sourceFormData == null) {
+        sourceFormData = formDataService.findMonth(334, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
+    }
+    return sourceFormData
+}
+
+void checkSourceAccepted() {
+    if (isConsolidated) {
+        return
+    }
+    def form = getFormDataSource()
+    if (form == null || form.state != WorkflowState.ACCEPTED) {
+        throw new ServiceException('Не найдены экземпляры РНУ-38.1 за текущий отчетный период!')
     }
 }
 
-/** Получить итоговую строку из нф (РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая позиция. Отчёт 1. */
-def getTotalRowFromRNU38_1() {
-    def formDataRNU_38_1 = formDataService.find(334, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    if (formDataRNU_38_1 != null) {
-        def dataRows = formDataService.getDataRowHelper(formDataRNU_38_1)?.allCached
-        return getDataRow(dataRows, 'total')
+/** Получить строки из нф РНУ-38.1. */
+def getDataRowsFromSource() {
+    def formDataSource = getFormDataSource()
+    if (formDataSource != null) {
+        return formDataService.getDataRowHelper(formDataSource)?.allCached
     }
     return null
 }
