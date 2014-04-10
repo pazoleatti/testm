@@ -83,6 +83,7 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
     private void loadData(String filter) {
         GetTableDataAction action = new GetTableDataAction();
         action.setFilter(filter);
+        action.setOnlyVisible(getOnlyVisible());
         dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetTableDataResult>() {
@@ -102,6 +103,10 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
                                 getProxy().manualRevealFailed();
                             }
                         }, this));
+    }
+
+    protected boolean getOnlyVisible() {
+        return true;
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookListUiHandlers> {
