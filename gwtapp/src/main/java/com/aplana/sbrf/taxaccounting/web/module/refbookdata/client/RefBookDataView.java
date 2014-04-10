@@ -61,6 +61,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     Button cancelEdit;
     @UiField
     HTML separator;
+    @UiField
+    Label editModeLabel;
 
 
     SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
@@ -299,13 +301,14 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         setVisibleEditLink(!isEditMode);
         addRow.setVisible(isEditMode);
         deleteRow.setVisible(isEditMode);
+        editModeLabel.setVisible(isEditMode);
+        // для красовы на форме
+        separator.setVisible(isEditMode);
         cancelEdit.setVisible(isEditMode);
     }
 
     @Override
     public void setVisibleEditLink(boolean visible){
         edit.setVisible(visible);
-        // для красовы на форме
-        separator.setVisible(visible);
     }
 }
