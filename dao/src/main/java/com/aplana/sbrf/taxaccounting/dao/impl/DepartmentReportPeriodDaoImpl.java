@@ -31,6 +31,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		public DepartmentReportPeriod mapRow(ResultSet rs, int index)
 				throws SQLException {
 			DepartmentReportPeriod reportPeriod = new DepartmentReportPeriod();
+            reportPeriod.setId(rs.getLong("ID"));
 			reportPeriod.setDepartmentId(rs.getLong("DEPARTMENT_ID"));
 			reportPeriod.setReportPeriod(reportPeriodDao.get(rs
 					.getInt("REPORT_PERIOD_ID")));
@@ -65,10 +66,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 	@Override
 	@Transactional(readOnly=false)
 	public void save(DepartmentReportPeriod departmentReportPeriod) {
+        Long id = departmentReportPeriod.getId();
+        if (id == null) {
+            id = generateId("seq_department_report_period", Long.class);
+        }
 		getJdbcTemplate()
-				.update("insert into DEPARTMENT_REPORT_PERIOD (DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD," +
+				.update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD," +
                         "CORRECTION_DATE, IS_CORRECT_PERIOD)"
-						+ " values (?, ?, ?, ?, ?, ?)",
+						+ " values (?, ?, ?, ?, ?, ?, ?)",
+                        id,
 						departmentReportPeriod.getDepartmentId(),
 						departmentReportPeriod.getReportPeriod().getId(),
 						departmentReportPeriod.isActive(),

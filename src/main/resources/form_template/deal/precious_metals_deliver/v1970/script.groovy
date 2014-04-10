@@ -219,24 +219,6 @@ void logicCheck() {
             logger.warn("Строка $rowNum: «$msg14» не соответствует сведениям о стране отправке и о стране доставки драгоценных металлов!")
         }
 
-        // Проверка населенного пункта 1
-        if (settlement1 != null && !settlement1.toString().isEmpty() && city1 != null && !city1.toString().isEmpty()) {
-            def msg1 = row.getCell('settlement1').column.name
-            def msg2 = getGrafNum('settlement1')
-            def msg3 = row.getCell('city1').column.name
-            def msg4 = getGrafNum('city1')
-            logger.warn("Строка $rowNum: Если указан «$msg1»($msg2), не должен быть указан «$msg3»($msg4)")
-        }
-
-        // Проверка населенного пункта 2
-        if (settlement2 != null && !settlement2.toString().isEmpty() && city2 != null && !city2.toString().isEmpty()) {
-            def msg1 = row.getCell('settlement2').column.name
-            def msg2 = getGrafNum('settlement2')
-            def msg3 = row.getCell('city2').column.name
-            def msg4 = getGrafNum('city2')
-            logger.warn("Строка $rowNum: Если указан «$msg1»($msg2), не должен быть указан «$msg3»($msg4)")
-        }
-
         // Проверка доходов и расходов
         if (incomeSum == null && consumptionSum == null) {
             def msg1 = row.getCell('incomeSum').column.name

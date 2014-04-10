@@ -167,6 +167,7 @@ void calc() {
         row.dealNum1 = index
         row.dealNum2 = index
         row.dealNum3 = index
+        row.dealMemberNum = index
         index++
     }
     dataRowHelper.save(dataRows)
@@ -208,16 +209,8 @@ void consolidation() {
     // итоговые строки (всё то, что в итоге попадет в сводный отчет)
     def summaryRows = []
 
-    //for (int j = 0; j < matrixRows.size(); j++) {
-    //    logger.info("<< " + matrixRows.get(j).dealNum3)
-    //}
-
     // Сортировка по dealNum3
     sortRows(matrixRows, ['dealNum3'])
-
-    //for (int j = 0; j < matrixRows.size(); j++) {
-    //    logger.info(">> " + matrixRows.get(j).dealNum3)
-    //}
 
     def Long currentGroup
     def mapForSummary = [:]
@@ -226,7 +219,7 @@ void consolidation() {
         def srcRow = rowsMap.get(matrixRow)
         def Long reportClass = matrixRow.dealNum2.longValue()
 
-        if ((reportClass.equals(2L) && isGroupClass2(matrixRow, srcRow))
+        if ((reportClass.equals(2L) && !isGroupClass2(matrixRow, srcRow))
                 || (reportClass.equals(3L) && !getRecSWId().equals(srcRow.serviceType))
                 || reportClass.equals(4L)) { // копируем построчно
             if (mapForSummary.size() > 0) {
@@ -932,9 +925,6 @@ def buildRow(def srcRow, def matrixRow) {
     // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
     row.dealDoneDate = matrixRow.dealDoneDate
 
-    // Графа 47
-    row.dealMemberNum = row.otherNum
-
     // Графа 49
     // countryCode3 заполняется после графы 50
 
@@ -1065,22 +1055,23 @@ def getRow(def map) {
     // для отчетов 16..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        if (matrixRow.dealNum1 in [391, 394, 392, 393]) {
-            totalSum = matrixRow.income - matrixRow.outcome
+        if (matrixRow.dealNum1.longValue() in [391L, 394L]) {
+            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
+        } else if (matrixRow.dealNum1.longValue() in [392L, 393L]) {
+            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
         }
     }
 
     def row = formData.createDataRow()
     def boolean first = true
     map.each { matrixRow, srcRow ->
-
         if (first) {
             first = false
 
             row = buildRow(srcRow, matrixRow)
 
-            if (matrixRow.dealNum1.equals(375)) {
-                if (map.size > 1) {
+            if (matrixRow.dealNum1.longValue().equals(375L)) {
+                if (map.size() > 1) {
                     row.similarDealGroup = getRecYesId()
                 } else {
                     row.similarDealGroup = getRecNoId()
@@ -1138,20 +1129,20 @@ def getRow(def map) {
             case 391: // 16
                 def String dealName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'доход'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расход'
                 }
                 break
             case 392: // 17
                 def String dealName = 'Беспоставочные (расчетные) срочные сделки - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'доходные'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
                 break
@@ -1159,10 +1150,10 @@ def getRow(def map) {
                 def String dealName = 'Срочные поставочные сделки купли-продажи драгоценных металлов (сделки с ' +
                         'отсрочкой исполнения), ' + (getRecRUSId().equals(srcRow.unitCountryCode) ? "покупка, " : "продажа, ")
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.priceOne ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
                     row.dealSubjectName = dealName + 'доход'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.priceOne ?: 0)
                     row.dealSubjectName = dealName + 'расход'
                 }
                 break
@@ -1170,10 +1161,10 @@ def getRow(def map) {
                 def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
                 def String dealName = 'Кассовые сделки ' + (dealBuy ? "покупки " : "продажи ") + ' драгоценных металлов - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.incomeSum ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.incomeSum ?: 0)
                     row.dealSubjectName = dealName + 'доходные'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.outcomeSum ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
                 break
@@ -1286,7 +1277,7 @@ def Long getRecSWId() {
 
 // дополнительное условие для отчетов "класс 2" на попадание в группу
 boolean isGroupClass2(def matrixRow, def srcRow) {
-    def boolean class2ext = matrixRow.contractDate != null && matrixRow.contractNum != null
+    def boolean class2ext = false
     switch (matrixRow.dealNum1) {
         case 383: // 8
         case 392: // 17
@@ -1310,14 +1301,12 @@ boolean isGroupClass2(def matrixRow, def srcRow) {
             class2ext = srcRow.dealNumber == null && srcRow.transactionDeliveryDate == null
             break
     }
-    return class2ext
+    return class2ext || (matrixRow.contractDate != null && matrixRow.contractNum != null)
 }
 
 // Заполняем каждую строку полученную из источника необходимыми предварительными значениями
 def getPreRow(def srcRow, def BigDecimal formTypeId) {
     def row = formData.createDataRow()
-    // Временный алиас строки
-    row.setAlias("group_$formTypeId")
     // тип отчета
     row.dealNum1 = formTypeId
     // класс отчет

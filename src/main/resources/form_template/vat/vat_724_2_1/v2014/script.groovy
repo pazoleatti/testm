@@ -1,12 +1,11 @@
 package form_template.vat.vat_724_2_1.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * Операции, не подлежащие налогообложению (освобождаемые от налогообложения), операции, не признаваемые объектом
+ * (724.2.1) Операции, не подлежащие налогообложению (освобождаемые от налогообложения), операции, не признаваемые объектом
  * налогообложения, операции по реализации товаров (работ, услуг), местом реализации которых не признается территория
  * Российской Федерации, а также суммы оплаты, частичной оплаты в счет предстоящих поставок (выполнения работ,
  * оказания услуг), длительность производственного цикла изготовления которых составляет свыше шести месяцев
@@ -15,15 +14,13 @@ import groovy.transform.Field
  *
  * @author Stanislav Yasinskiy
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (hasReport()) {
-            calc()
-        }
+        checkIncome102()
+        calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -38,10 +35,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
+        checkIncome102()
         consolidation()
-        if (hasReport()) {
-            calc()
-        }
+        calc()
         logicCheck()
         break
 }
@@ -72,13 +68,20 @@ def autoFillColumns = ['realizeCost', 'obtainCost']
 @Field
 def nonEmptyColumns = ['rowNum', 'code', 'name', 'realizeCost']
 
-// дата начала отчетного периода
+// Дата начала отчетного периода
 @Field
 def startDate = null
 
-// дата окончания отчетного периода
+// Дата окончания отчетного периода
 @Field
 def endDate = null
+
+// Cправочник «Отчет о прибылях и убытках (Форма 0409102-СБ)»
+@Field
+def income102Data = null
+
+@Field
+def dateFormat = "dd.MM.yyyy"
 
 //// Обертки методов
 
@@ -101,8 +104,12 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def i4 = 0, i5 = 0
+
     for (def row in dataRows) {
         // TODO посчитать графы 4 и 5 из "форма 102 бухгалтерской отчетности"
+        // TODO Нужны соответствия кодов ОПУ о кодов операций
+        // getIncome102DataByOPU()
+        // income102Row.TOTAL_SUM.numberValue
 
         i4 += row.realizeCost
         i5 += row.obtainCost
@@ -111,6 +118,16 @@ void calc() {
     itog.realizeCost = i4
     itog.obtainCost = i5
     dataRowHelper.save(dataRows);
+}
+
+// Строки справочника «Отчет о прибылях и убытках» по ОПУ-коду
+def getIncome102DataByOPU(def String opuCode) {
+    def retVal = []
+    for (def income102Row : getIncome102Data()) {
+        if (income102Row.OPU_CODE.numberValue == opuCode) {
+            retVal.add(income102Row)
+        }
+    }
 }
 
 def logicCheck() {
@@ -152,13 +169,22 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-def boolean hasReport() {
-    boolean have = false
-    // TODO have = Наличие "форма 102 бухгалтерской отчетности" подразделения и периода, для которых сформирована текущая форма
-    def String dFormat = "dd.MM.yyyy"
-    if (!have) {
-        logger.error("Экземпляр Отчета о прибылях и убытках за период " + getReportPeriodStartDate().format(dFormat) +
-                " - " + getReportPeriodEndDate().format(dFormat) + " не существует (отсутствуют данные для расчета)!")
+// Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
+def getIncome102Data() {
+    if (income102Data == null) {
+        income102Data = refBookFactory.getDataProvider(52L)?.getRecords(getReportPeriodEndDate(), null,
+                "REPORT_PERIOD_ID = '${formData.reportPeriodId}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+    }
+    return income102Data
+}
+
+// Проверка наличия необходимых записей в справочнике «Отчет о прибылях и убытках»
+void checkIncome102() {
+    // Наличие экземпляра Отчета о прибылях и убытках подразделения и периода, для которых сформирована текущая форма
+    if (getIncome102Data() == null) {
+        throw new ServiceException("Экземпляр Отчета о прибылях и убытках за период " +
+                "${getReportPeriodStartDate().format(dateFormat)} - ${getReportPeriodEndDate().format(dateFormat)} " +
+                "не существует (отсутствуют данные для расчета)!")
     }
 }
 
@@ -169,7 +195,7 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.DEAL) {
+        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 if (srcRow.getAlias()!= null && !srcRow.getAlias().equals('itog')) {
                     def row= dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
