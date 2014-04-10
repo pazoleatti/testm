@@ -46,6 +46,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE: // Консолидация
         consolidation()
+        // расчет после консолидации не нужен
         logicCheck()
         break
     case FormDataEvent.IMPORT:
