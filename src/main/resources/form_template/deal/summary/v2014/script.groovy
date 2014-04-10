@@ -1055,8 +1055,10 @@ def getRow(def map) {
     // для отчетов 16..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        if (matrixRow.dealNum1.longValue() in [391L, 394L, 392L, 393L]) {
-            totalSum = matrixRow.income - matrixRow.outcome
+        if (matrixRow.dealNum1.longValue() in [391L, 394L]) {
+            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
+        } else if (matrixRow.dealNum1.longValue() in [392L, 393L]) {
+            totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
         }
     }
 
