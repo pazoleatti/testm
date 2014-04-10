@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -137,7 +138,7 @@ public class DeclarationTemplateListPresenter
     @Override
     public void onCreateClicked() {
         if (filterPresenter.getFilterData().getTaxType() == null){
-            MessageEvent.fire(this, "Выберите вид налога");
+            Dialog.infoMessage("Выберите вид налога");
             return;
         }
         DTCreateNewTypeEvent.fire(this, filterPresenter.getFilterData().getTaxType());

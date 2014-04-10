@@ -19,6 +19,9 @@ public class RefBookRecordVersion implements Serializable {
     /** Дата конца действия версии */
     private Date versionEnd;
 
+    /** Признак того, что дата окочания задана фиктивной версией */
+    private boolean isVersionEndFake;
+
     public Long getRecordId() {
         return recordId;
     }
@@ -43,12 +46,21 @@ public class RefBookRecordVersion implements Serializable {
         this.versionEnd = versionEnd;
     }
 
+    public boolean isVersionEndFake() {
+        return isVersionEndFake;
+    }
+
+    public void setVersionEndFake(boolean versionEndFake) {
+        isVersionEndFake = versionEndFake;
+    }
+
     @Override
     public String toString() {
         return "RefBookRecordVersion{" +
                 "recordId=" + recordId +
                 ", versionStart=" + versionStart +
                 ", versionEnd=" + versionEnd +
+                ", isVersionEndFake=" + isVersionEndFake +
                 '}';
     }
 }

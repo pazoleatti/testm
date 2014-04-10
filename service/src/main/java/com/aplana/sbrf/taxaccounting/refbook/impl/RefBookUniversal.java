@@ -52,6 +52,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
+    private final static String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
+
 	public void setRefBookId(Long refBookId) {
 		this.refBookId = refBookId;
 	}
@@ -301,7 +303,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     private void crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.FATAL_ERROR) {
-                throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
+                throw new ServiceException(CROSS_ERROR_MSG);
             }
         }
 
@@ -309,7 +311,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
                 boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, result.getRecordId(), versionFrom);
                 if (isReferenceToVersionExists) {
-                    throw new ServiceException("Обнаружено пересечение указанного срока актуальности с существующей версией!");
+                    throw new ServiceException(CROSS_ERROR_MSG);
                 } else {
                     if (logger != null) {
                         logger.info("Установлена дата окончания актуальности версии "+sdf.format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
@@ -378,8 +380,21 @@ public class RefBookUniversal implements RefBookDataProvider {
 
                 if (isRelevancePeriodChanged) {
                     //Проверка пересечения версий
-                    crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
-                            versionFrom, versionTo, logger);
+                    //Проверяем следующую версию после даты окочания
+                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+                    if (versionTo != null && nextVersion != null && versionTo.after(nextVersion.getVersionStart())) {
+                        throw new ServiceException(CROSS_ERROR_MSG);
+                    }
+                    //Проверяем предыдущую версию до даты начала
+                    RefBookRecordVersion previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+                    if (previousVersion != null &&
+                            (previousVersion.isVersionEndFake() && versionFrom.before(previousVersion.getVersionEnd()))
+                            || versionFrom.before(previousVersion.getVersionStart())) {
+                        throw new ServiceException(CROSS_ERROR_MSG);
+                    }
+                    //Выполняем стандартную проверку пересечечения
+                    //crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
+                    //        versionFrom, versionTo, logger);
                 }
 
                 //Проверка использования
@@ -440,8 +455,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                 refBookUtils.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
             }
             Long recordId = refBookDao.getRecordId(uniqueRecordId);
-            crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionEnd, null, null),
-                    versionEnd, null, logger);
+            //Проверяем следующую версию после даты окочания
+            RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
+            RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+            if (versionEnd != null && nextVersion != null && versionEnd.after(nextVersion.getVersionStart())) {
+                throw new ServiceException(CROSS_ERROR_MSG);
+            }
+            //crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionEnd, null, null),
+            //        versionEnd, null, logger);
             refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
         }
     }

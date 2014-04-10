@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -49,6 +50,8 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         LogSystemAuditFilter filter = auditFilterPresenter.getLogSystemFilter();
         filter.setStartIndex(start);
         filter.setCountOfRecords(length);
+        filter.setAscSorting(getView().isAscSorting());
+        filter.setSearchOrdering(getView().getSearchOrdering());
         action.setLogSystemFilter(filter);
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetAuditDataListResult>() {
@@ -93,6 +96,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         addToPopupSlot(auditArchiveDialogPresenter);
     }
 
+    @Override
+    public void onSortingChanged() {
+        getView().updateData();
+    }
+
     @ProxyEvent
     @Override
     public void onAuditArchiveClickEvent(AuditArchiveDialogEvent event) {
@@ -121,8 +129,12 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     interface MyView extends View,HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
         void getBlobFromServer(String uuid);
+        void updateData();
         void updateData(int pageNumber);
         void updateArchiveDateLbl(String archiveDate);
+        boolean isAscSorting();
+        HistoryBusinessSearchOrdering getSearchOrdering();
+
     }
 
     @ProxyCodeSplit

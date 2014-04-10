@@ -1,3 +1,4 @@
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -145,6 +146,18 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+
+    // удаляем строки-группировки по организациям
+    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
+        row = (DataRow) iter.next()
+        if (row.getAlias() != null) {
+            iter.remove()
+            dataRowHelper.delete(row)
+        }
+    }
+    // сортируем по организациям
+    dataRows.sort { it.organName }
+
     def int index = 1
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -157,6 +170,9 @@ void calc() {
         index++
     }
     dataRowHelper.save(dataRows)
+
+    // добавляем строки-группировки по организациям
+    addAllStatic()
 }
 
 // Консолидация
@@ -192,23 +208,32 @@ void consolidation() {
     // итоговые строки (всё то, что в итоге попадет в сводный отчет)
     def summaryRows = []
 
-    // Сортировка по row.dealNum3
+    //for (int j = 0; j < matrixRows.size(); j++) {
+    //    logger.info("<< " + matrixRows.get(j).dealNum3)
+    //}
+
+    // Сортировка по dealNum3
     sortRows(matrixRows, ['dealNum3'])
+
+    //for (int j = 0; j < matrixRows.size(); j++) {
+    //    logger.info(">> " + matrixRows.get(j).dealNum3)
+    //}
 
     def Long currentGroup
     def mapForSummary = [:]
 
     matrixRows.each { matrixRow ->
-        def sourceRow = rowsMap.get(matrixRow)
+        def srcRow = rowsMap.get(matrixRow)
         def Long reportClass = matrixRow.dealNum2.longValue()
-        if ((reportClass.equals(2L) && isGroupClass2(matrixRow, sourceRow))
-                || (reportClass.equals(3L) && !getRecSWId().equals(sourceRow.serviceType))
+
+        if ((reportClass.equals(2L) && isGroupClass2(matrixRow, srcRow))
+                || (reportClass.equals(3L) && !getRecSWId().equals(srcRow.serviceType))
                 || reportClass.equals(4L)) { // копируем построчно
             if (mapForSummary.size() > 0) {
                 summaryRows.add(getRow(mapForSummary))
             }
             mapForSummary.clear()
-            mapForSummary.put(matrixRow, sourceRow)
+            mapForSummary.put(matrixRow, srcRow)
             summaryRows.add(getRow(mapForSummary))
             mapForSummary.clear()
             currentGroup = null
@@ -216,9 +241,9 @@ void consolidation() {
         } else { // группируем перед копированием
             if (currentGroup == null) { // первая строка
                 currentGroup = matrixRow.dealNum3
-                mapForSummary.put(matrixRow, sourceRow)
+                mapForSummary.put(matrixRow, srcRow)
             } else if (currentGroup.equals(matrixRow.dealNum3.longValue())) { // строка из той же группы что предыдущая
-                mapForSummary.put(matrixRow, sourceRow)
+                mapForSummary.put(matrixRow, srcRow)
             } else { // строка из новой группы
 
                 // получаем итоговую строку для предыдущей группы
@@ -226,7 +251,7 @@ void consolidation() {
 
                 currentGroup = matrixRow.dealNum3
                 mapForSummary.clear()
-                mapForSummary.put(matrixRow, sourceRow)
+                mapForSummary.put(matrixRow, srcRow)
             }
         }
     }
@@ -911,7 +936,7 @@ def buildRow(def srcRow, def matrixRow) {
     row.dealMemberNum = row.otherNum
 
     // Графа 49
-    // зависимая в конфигураторе
+    // countryCode3 заполняется после графы 50
 
     // Графа 50
     // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
@@ -937,6 +962,10 @@ def buildRow(def srcRow, def matrixRow) {
         // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является
         // резидентом Сколково» = 1, то заполняется значением «1». В ином случае заполняется значением «0».
         row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : recNoId
+
+        // Графа 49
+        // Код страны
+        row.countryCode3 = val.COUNTRY?.referenceValue
     }
 
     // Графа 48, 51, 52, 53, 54, 55
@@ -981,6 +1010,9 @@ def String getGroupId(def matrixRow, def srcRow) {
         case 376: // 1
             group.append(srcRow.incomeBankSum != null).append("#")
             group.append(srcRow.outcomeBankSum != null)
+            break
+        case 375: // 3
+            group.append(srcRow.serviceType)
             break
         case 381: // 6
             group.append(getRecRPCId().equals(srcRow.dealSign)).append("#")
@@ -1065,11 +1097,8 @@ def getRow(def map) {
             case 376: // 1
             case 383: // 8
             case 390: // 15
-                if (matrixRow.income != null) {
-                    row.income = row.income + matrixRow.income
-                } else if (matrixRow.outcome != null) {
-                    row.outcome = row.outcome + matrixRow.outcome
-                }
+                row.income = row.income + matrixRow.income
+                row.outcome = row.outcome + matrixRow.outcome
                 break
             case 377: // 2
             case 375: // 3
@@ -1256,16 +1285,16 @@ def Long getRecSWId() {
 }
 
 // дополнительное условие для отчетов "класс 2" на попадание в группу
-boolean isGroupClass2(def matrixRow, def sourceRow) {
+boolean isGroupClass2(def matrixRow, def srcRow) {
     def boolean class2ext = matrixRow.contractDate != null && matrixRow.contractNum != null
     switch (matrixRow.dealNum1) {
         case 383: // 8
         case 392: // 17
         case 393: // 18
-            class2ext = sourceRow.transactionNum == null && sourceRow.transactionDeliveryDate == null
+            class2ext = srcRow.transactionNum == null && srcRow.transactionDeliveryDate == null
             break
         case 384: // 9
-            class2ext = sourceRow.transactionDeliveryDate == null
+            class2ext = srcRow.transactionDeliveryDate == null
             break
         case 386: // 11
         case 389: // 14
@@ -1275,10 +1304,10 @@ boolean isGroupClass2(def matrixRow, def sourceRow) {
         case 402: // 23
         case 401: // 24
         case 403: // 25
-            class2ext = sourceRow.dealNumber == null && sourceRow.dealDate == null
+            class2ext = srcRow.dealNumber == null && srcRow.dealDate == null
             break
         case 388: // 13
-            class2ext = sourceRow.dealNumber == null && sourceRow.transactionDeliveryDate == null
+            class2ext = srcRow.dealNumber == null && srcRow.transactionDeliveryDate == null
             break
     }
     return class2ext
@@ -1540,4 +1569,35 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
     }
 
     return row
+}
+
+// Проставляет статические строки
+void addAllStatic() {
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.getAllCached()
+        def int index = 1
+        for (int i = 0; i < dataRows.size(); i++) {
+            def row = dataRows.get(i)
+            def nextRow = null
+
+            if (i < dataRows.size() - 1) {
+                nextRow = dataRows.get(i + 1)
+            }
+            if (row.getAlias() == null) {
+            }
+            if (nextRow == null || row.organName != nextRow.organName) {
+
+                def newRow = formData.createDataRow()
+                newRow.getCell('groupName').colSpan = 56
+                if (row.organName != null)
+                    newRow.groupName = getRefBookValue(9, row.organName).NAME.stringValue
+                newRow.setAlias('grp#'.concat(i.toString()))
+                dataRowHelper.insert(newRow, ++i + 1 - index)
+                index = 1
+            } else {
+                index++
+            }
+        }
+    }
 }
