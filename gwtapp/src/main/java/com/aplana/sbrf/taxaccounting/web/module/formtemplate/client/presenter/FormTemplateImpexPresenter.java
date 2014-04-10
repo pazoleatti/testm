@@ -57,9 +57,15 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 		getView().setFormId(formTemplate.getId() != null?formTemplate.getId():0);
 	}
 
-	@Override
+    @Override
+    public void uploadFormTemplateSuccess() {
+        MessageEvent.fire(FormTemplateImpexPresenter.this, "Форма сохранена");
+        FormTemplateSaveEvent.fire(this);
+    }
+
+    @Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
             JSONValue jsonValue = JSONParser.parseLenient(uuid);
             String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
             LogAddEvent.fire(this, value);

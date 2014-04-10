@@ -35,9 +35,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE :
         checkSourceAccepted()
-        if (!isConsolidated) {
-            calc()
-        }
+        calc()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
@@ -92,6 +90,12 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    if (isConsolidated) {
+        sort(dataRows)
+        dataRowHelper.save(dataRows)
+        return
+    }
+
     // удалить нефиксированные строки
     deleteRows(dataRows)
 
@@ -128,7 +132,6 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRowsFromSource = getDataRowsFromSource()
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -143,6 +146,7 @@ void logicCheck() {
     }
 
     // . Арифметическая проверка графы 1..6
+    def dataRowsFromSource = getDataRowsFromSource()
     for (def section : sections) {
         def rows32_1 = getRowsBySection32_1(dataRowsFromSource, section)
         def rows32_2 = getRowsBySection(dataRows, section)
@@ -156,9 +160,9 @@ void logicCheck() {
         if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
         }
+        // сравнить значения строк
         for (def row : rows32_2) {
             def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
-            "Строка %d: Неверное значение граф: %s!"
             def msg = []
             allColumns.each { alias ->
                 def value1 = row.getCell(alias).value

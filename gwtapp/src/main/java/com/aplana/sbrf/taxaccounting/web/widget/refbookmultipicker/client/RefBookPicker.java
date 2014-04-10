@@ -92,4 +92,8 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
      * @param hideHandler
      */
     void setOnHideHandler(OnHideHandler<CanHide> hideHandler);
+
+    public boolean isVisible();
+
+    public void setVisible(boolean visible);
 }

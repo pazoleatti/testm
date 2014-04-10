@@ -107,15 +107,14 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                         break;
                     case FAKE:
                         compareResult = newIntersection.compareTo(intersection);
-                        //Варианты 15
-                        if (compareResult == -2){
+                        //Варианты 15,19,18a
+                        if (compareResult == -2 || compareResult == -7 || compareResult == -16){
                             FormTemplate formTemplate = formTemplateService.get(intersection.getTemplateId());
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, newIntersection.getEndDate().getTime()));
                             formTemplateService.save(formTemplate);
                         }
-                        //Варианты 16,19,20,18a
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10
-                                || compareResult == 16){
+                        //Варианты 16,19,20,18a,10a,1a
+                        else if (compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
                             formTemplateService.delete(intersection.getTemplateId());
                         }
                         break;

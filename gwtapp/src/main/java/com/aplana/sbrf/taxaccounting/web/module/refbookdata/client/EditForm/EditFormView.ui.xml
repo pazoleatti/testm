@@ -5,6 +5,7 @@
 
     <ui:style>
         .editPadding {
+            padding-top: 0;
             padding: 5px;
             width: 100%;
             height: 100%;
@@ -61,7 +62,7 @@
         <g:ScrollPanel addStyleNames="{style.scrPanel}">
             <g:VerticalPanel styleName="{style.editPadding}">
                 <g:cell height="30px">
-                    <g:HorizontalPanel spacing="10" width="100%" addStyleNames="{style.childMiddle}">
+                    <g:HorizontalPanel spacing="5" width="100%" addStyleNames="{style.childMiddle}">
                         <g:VerticalPanel width="100%">
                             <g:HorizontalPanel width="100%">
                                 <g:cell width="20%" horizontalAlignment="right">
@@ -70,9 +71,9 @@
 
                                 <g:cell width="80%">
                                     <g:HorizontalPanel>
-                                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px"/>
+                                        <d:DateMaskBoxPicker ui:field="versionStart" width="110px" forceSetValue="true"/>
                                         <g:Label text=" по:" width="20px" addStyleNames="{style.bothMargin}"/>
-                                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px"/>
+                                        <d:DateMaskBoxPicker ui:field="versionEnd" canBeEmpty="true" width="110px" forceSetValue="true"/>
                                     </g:HorizontalPanel>
                                 </g:cell>
                             </g:HorizontalPanel>
@@ -94,7 +95,7 @@
             </g:VerticalPanel>
         </g:ScrollPanel>
 
-        <g:HorizontalPanel width="100%" height="30px" spacing="5" addStyleNames="{style.saveCancel}">
+        <g:HorizontalPanel ui:field="buttonBlock" width="100%" height="30px" spacing="5" addStyleNames="{style.saveCancel}">
             <g:cell width="50%" horizontalAlignment="right">
                 <g:Button ui:field="save" enabled="false" text="Сохранить" width="80px"/>
             </g:cell>
