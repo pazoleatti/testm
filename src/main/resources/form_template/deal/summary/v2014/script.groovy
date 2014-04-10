@@ -208,16 +208,8 @@ void consolidation() {
     // итоговые строки (всё то, что в итоге попадет в сводный отчет)
     def summaryRows = []
 
-    //for (int j = 0; j < matrixRows.size(); j++) {
-    //    logger.info("<< " + matrixRows.get(j).dealNum3)
-    //}
-
     // Сортировка по dealNum3
     sortRows(matrixRows, ['dealNum3'])
-
-    //for (int j = 0; j < matrixRows.size(); j++) {
-    //    logger.info(">> " + matrixRows.get(j).dealNum3)
-    //}
 
     def Long currentGroup
     def mapForSummary = [:]
@@ -226,7 +218,7 @@ void consolidation() {
         def srcRow = rowsMap.get(matrixRow)
         def Long reportClass = matrixRow.dealNum2.longValue()
 
-        if ((reportClass.equals(2L) && isGroupClass2(matrixRow, srcRow))
+        if ((reportClass.equals(2L) && !isGroupClass2(matrixRow, srcRow))
                 || (reportClass.equals(3L) && !getRecSWId().equals(srcRow.serviceType))
                 || reportClass.equals(4L)) { // копируем построчно
             if (mapForSummary.size() > 0) {
@@ -1065,7 +1057,7 @@ def getRow(def map) {
     // для отчетов 16..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        if (matrixRow.dealNum1 in [391, 394, 392, 393]) {
+        if (matrixRow.dealNum1.longValue() in [391L, 394L, 392L, 393L]) {
             totalSum = matrixRow.income - matrixRow.outcome
         }
     }
@@ -1073,14 +1065,13 @@ def getRow(def map) {
     def row = formData.createDataRow()
     def boolean first = true
     map.each { matrixRow, srcRow ->
-
         if (first) {
             first = false
 
             row = buildRow(srcRow, matrixRow)
 
-            if (matrixRow.dealNum1.equals(375)) {
-                if (map.size > 1) {
+            if (matrixRow.dealNum1.longValue().equals(375L)) {
+                if (map.size() > 1) {
                     row.similarDealGroup = getRecYesId()
                 } else {
                     row.similarDealGroup = getRecNoId()
@@ -1286,7 +1277,7 @@ def Long getRecSWId() {
 
 // дополнительное условие для отчетов "класс 2" на попадание в группу
 boolean isGroupClass2(def matrixRow, def srcRow) {
-    def boolean class2ext = matrixRow.contractDate != null && matrixRow.contractNum != null
+    def boolean class2ext = false
     switch (matrixRow.dealNum1) {
         case 383: // 8
         case 392: // 17
@@ -1310,14 +1301,12 @@ boolean isGroupClass2(def matrixRow, def srcRow) {
             class2ext = srcRow.dealNumber == null && srcRow.transactionDeliveryDate == null
             break
     }
-    return class2ext
+    return class2ext || (matrixRow.contractDate != null && matrixRow.contractNum != null)
 }
 
 // Заполняем каждую строку полученную из источника необходимыми предварительными значениями
 def getPreRow(def srcRow, def BigDecimal formTypeId) {
     def row = formData.createDataRow()
-    // Временный алиас строки
-    row.setAlias("group_$formTypeId")
     // тип отчета
     row.dealNum1 = formTypeId
     // класс отчет
