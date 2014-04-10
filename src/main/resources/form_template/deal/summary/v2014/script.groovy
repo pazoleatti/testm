@@ -1129,20 +1129,20 @@ def getRow(def map) {
             case 391: // 16
                 def String dealName = 'Срочные поставочные конверсионные сделки (сделки с отсрочкой исполнения) - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'доход'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расход'
                 }
                 break
             case 392: // 17
                 def String dealName = 'Беспоставочные (расчетные) срочные сделки - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'доходные'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.price ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.price ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
                 break
@@ -1150,10 +1150,10 @@ def getRow(def map) {
                 def String dealName = 'Срочные поставочные сделки купли-продажи драгоценных металлов (сделки с ' +
                         'отсрочкой исполнения), ' + (getRecRUSId().equals(srcRow.unitCountryCode) ? "покупка, " : "продажа, ")
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.priceOne ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
                     row.dealSubjectName = dealName + 'доход'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.priceOne ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.priceOne ?: 0)
                     row.dealSubjectName = dealName + 'расход'
                 }
                 break
@@ -1161,10 +1161,10 @@ def getRow(def map) {
                 def boolean dealBuy = getRecDealBuyId().equals(srcRow.dealFocus)
                 def String dealName = 'Кассовые сделки ' + (dealBuy ? "покупки " : "продажи ") + ' драгоценных металлов - '
                 if (totalSum >= 0) {
-                    row.outcome = (row.outcome ?: 0) + (srcRow.incomeSum ?: 0)
+                    row.income = (row.income ?: 0) + (srcRow.incomeSum ?: 0)
                     row.dealSubjectName = dealName + 'доходные'
                 } else {
-                    row.income = (row.income ?: 0) + (srcRow.outcomeSum ?: 0)
+                    row.outcome = (row.outcome ?: 0) + (srcRow.outcomeSum ?: 0)
                     row.dealSubjectName = dealName + 'расходные'
                 }
                 break
