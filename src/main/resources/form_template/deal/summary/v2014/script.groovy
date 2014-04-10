@@ -1,3 +1,5 @@
+package form_template.deal.summary.v2014
+
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
@@ -108,9 +110,6 @@ def providerCache = [:]
 // Кэш id записей справочника
 @Field
 def recordCache = [:]
-// Кэш значений справочника
-@Field
-def refBookCache = [:]
 
 // Дата окончания отчетного периода
 @Field
@@ -124,7 +123,7 @@ def getReportPeriodEndDate() {
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value) {
+def Long getRecordId(def Long refBookId, def String alias, def String value) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), -1, null, logger, true)
 }
@@ -303,19 +302,22 @@ def buildRow(def srcRow, def matrixRow) {
         case 377: // 2
         case 380: // 5
         case 382: // 7
+        case 397: // 20
         case 399: // 22
             row.similarDealGroup = getRecYesId()
             break
-        case 375: // 3
-            // Заполняется уже для сгруппировонной строки
-            break
         case 379: // 4
         case 381: // 6
+        case 385: // 10
+        case 387: // 12
+        case 398: // 21
+        case 404: // 26
+            row.similarDealGroup = getRecNoId()
+            break
+        case 375: // 3
         case 383: // 8
         case 384: // 9
-        case 385: // 10
         case 386: // 11
-        case 387: // 12
         case 388: // 13
         case 389: // 14
         case 390: // 15
@@ -323,13 +325,10 @@ def buildRow(def srcRow, def matrixRow) {
         case 392: // 17
         case 393: // 18
         case 394: // 19
-        case 397: // 20
-        case 398: // 21
         case 402: // 23
         case 401: // 24
         case 403: // 25
-        case 404: // 26
-            row.similarDealGroup = getRecNoId()
+            // Заполняется уже для сгруппировонной строки
             break
     }
 
@@ -1070,7 +1069,8 @@ def getRow(def map) {
 
             row = buildRow(srcRow, matrixRow)
 
-            if (matrixRow.dealNum1.longValue().equals(375L)) {
+            if (matrixRow.dealNum1.longValue()
+                    in [375L, 383L, 384L, 386L, 388L, 389L, 390L, 391L, 392L, 393L, 394L, 402L, 401L, 403L]) {
                 if (map.size() > 1) {
                     row.similarDealGroup = getRecYesId()
                 } else {
@@ -1572,8 +1572,6 @@ void addAllStatic() {
 
             if (i < dataRows.size() - 1) {
                 nextRow = dataRows.get(i + 1)
-            }
-            if (row.getAlias() == null) {
             }
             if (nextRow == null || row.organName != nextRow.organName) {
 
