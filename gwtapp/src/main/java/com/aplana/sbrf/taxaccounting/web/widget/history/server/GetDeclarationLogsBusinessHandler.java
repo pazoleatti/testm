@@ -47,7 +47,7 @@ public class GetDeclarationLogsBusinessHandler extends
 		for (LogBusiness log : logs) {
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			names.put(log.getUserId(), userService.getUser(log.getUserId()).getName());
-			departments.put(log.getDepartmentId(), departmentService.getParentsHierarchy(log.getDepartmentId()));
+			departments.put(log.getDepartmentId(), departmentService.getParentsHierarchyShortNames(log.getDepartmentId()));
 		}
 		result.setUserNames(names);
 		result.setUserDepartments(departments);

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -148,7 +149,7 @@ public class AdminPresenter
     public void onCreateClicked() {
         TaxType taxType = filterPresenter.getFilterData().getTaxType();
         if (taxType == null){
-            MessageEvent.fire(this, "Выберите вид налога");
+            Dialog.infoMessage("Выберите вид налога");
             return;
         }
         FormTemplateMainEvent.fire(this, taxType);

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client;
 
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -47,6 +48,8 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
         LogSystemAuditFilter logSystemAuditFilter = historyBusinessFilterPresenter.getLogSystemFilter();
         logSystemAuditFilter.setStartIndex(start);
         logSystemAuditFilter.setCountOfRecords(length);
+        logSystemAuditFilter.setAscSorting(getView().isAscSorting());
+        logSystemAuditFilter.setSearchOrdering(getView().getSearchOrdering());
         action.setFilterValues(logSystemAuditFilter.convertTo());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetHistoryBusinessListResult>() {
             @Override
@@ -74,9 +77,13 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
     }
 
     interface MyView extends View, HasUiHandlers<HistoryBusinessUIHandler>{
+        boolean isAscSorting();
+
         void setAuditTableData(int startIndex, long count,  List<LogSearchResultItem> itemList);
+        void updateData();
         void updateData(int pageNumber);
         void getBlobFromServer(String uuid);
+        HistoryBusinessSearchOrdering getSearchOrdering();
     }
 
     @Override
@@ -121,5 +128,10 @@ public class HistoryBusinessPresenter extends Presenter<HistoryBusinessPresenter
             MessageEvent.fire(this,
                     "Не удалось напечатать журнал аудита", e);
         }
+    }
+
+    @Override
+    public void onSortingChanged() {
+        getView().updateData();
     }
 }

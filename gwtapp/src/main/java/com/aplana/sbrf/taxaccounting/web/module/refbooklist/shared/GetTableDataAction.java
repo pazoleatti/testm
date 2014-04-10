@@ -11,6 +11,7 @@ public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> 
 
     private RefBookType refBookType;
     private String filter;
+    private boolean onlyVisible;
 
     public RefBookType getType() {
         return refBookType;
@@ -31,5 +32,13 @@ public class GetTableDataAction extends UnsecuredActionImpl<GetTableDataResult> 
 
     public void setFilter(String filter) {
         this.filter = filter;
+    }
+
+    public boolean isOnlyVisible() {
+        return onlyVisible;
+    }
+
+    public void setOnlyVisible(boolean onlyVisible) {
+        this.onlyVisible = onlyVisible;
     }
 }

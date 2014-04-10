@@ -76,20 +76,19 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         @Override
         public LogSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
             LogSearchResultItem log = new LogSearchResultItem();
-            log.setId(rs.getLong("id"));
-            log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
-            log.setRoles(rs.getString("roles"));
-            log.setFormKind(rs.getInt("form_kind_id") != 0 ? FormDataKind.fromId(rs.getInt("form_kind_id")) :null);
-            log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
-            log.setUser(userDao.getUser(rs.getInt("user_id")));
-            log.setRoles(rs.getString("roles"));
+            log.setId(rs.getLong("lb_id"));
+            log.setLogDate(new Date(rs.getTimestamp("lb_log_date").getTime()));
+            log.setRoles(rs.getString("lb_roles"));
+            log.setFormKind(rs.getInt("form_kind_id") != 0 ? FormDataKind.fromId(rs.getInt("form_kind_id")) : null);
+            log.setEvent(FormDataEvent.getByCode(rs.getInt("lb_event_id")));
+            log.setUser(userDao.getUser(rs.getInt("lb_user_id")));
             /*log.setDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));*/
             log.setReportPeriod(reportPeriodDao.get(rs.getInt("report_period_id")));
             log.setDeclarationType(rs.getInt("declaration_type_id") != 0 ? declarationTypeDao.get(rs.getInt("declaration_type_id")) : null);
             log.setFormType(rs.getInt("form_type_id") != 0? formTypeDao.get(rs.getInt("form_type_id")) : null);
-            log.setNote(rs.getString("note"));
-            log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
-            int departmentId = rs.getInt("form_data_id") != 0?rs.getInt("fd_department_id") : rs.getInt("dd_department_id");
+            log.setNote(rs.getString("lb_note"));
+            log.setUserDepartment(departmentDao.getDepartment(rs.getInt("lb_user_department_id")));
+            int departmentId = rs.getInt("lb_form_data_id") != 0?rs.getInt("fd_department_id") : rs.getInt("dd_department_id");
             String s = departmentDao.getParentsHierarchy(departmentId);
             log.setDepartmentName(s != null ? s : departmentDao.getDepartment(departmentId).getName());
             return log;
@@ -124,6 +123,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
+        boolean isEventColumn = filter.getOrdering() == HistoryBusinessSearchOrdering.EVENT;
+
         Map<String, Object> names = new HashMap<String, Object>();
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
@@ -134,20 +135,41 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         names.put("startIndex", filter.getStartIndex() + 1);
         names.put("endIndex", filter.getStartIndex() + filter.getCountOfRecords());
 
-        StringBuilder sql = new StringBuilder("select * from (select fd.department_id as fd_department_id, dd.department_id as dd_department_id, fd.kind as form_kind_id, lb.*, rp.id as report_period_id, dt.id as declaration_type_id, ft.id as form_type_id, " +
-                "rownum as rn from log_business lb ");
-        sql.append("left join form_data fd on lb.form_data_id=fd.\"ID\" ");
-        sql.append("left join form_template ftemp on fd.form_template_id=ftemp.\"ID\" ");
-        sql.append("left join form_type ft on ftemp.type_id=ft.\"ID\" ");
-        sql.append("left join sec_user su on lb.user_id=su.\"ID\" ");
-        sql.append("left join REPORT_PERIOD rp on fd.report_period_id=rp.\"ID\" ");
-        sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
-        sql.append("left join declaration_data dd on lb.declaration_data_id=dd.\"ID\" ");
-        sql.append("left join department dep on dd.department_id=dep.\"ID\" and fd.department_id=dep.\"ID\" ");
-        sql.append("left join declaration_template dtemp on dd.declaration_template_id=dtemp.\"ID\" ");
-        sql.append("left join declaration_type dt on dtemp.declaration_type_id=dt.\"ID\" ");
-        sql.append(" WHERE lb.log_date between :fromDate and :toDate + interval '1' day");
-        sql.append(filter.getDepartmentId() == null?"":" and fd.department_id = :departmentId or dd.department_id = :departmentId ");
+        StringBuilder sql = new StringBuilder("SELECT * FROM (SELECT ");
+        sql.append("fd.department_id AS fd_department_id, ");
+        sql.append("dd.department_id AS dd_department_id, ");
+        sql.append("fd.kind AS form_kind_id, ");
+        sql.append("lb.id AS lb_id, ");
+        sql.append("lb.log_date AS lb_log_date, ");
+        sql.append("lb.roles AS lb_roles, ");
+        sql.append("lb.event_id AS lb_event_id, ");
+        sql.append("lb.user_id AS lb_user_id, ");
+        sql.append("lb.note AS lb_note, ");
+        sql.append("lb.user_department_id AS lb_user_department_id, ");
+        sql.append("lb.form_data_id AS lb_form_data_id, ");
+        if (isEventColumn) {
+            sql.append("em.event_title, ");
+        }
+        sql.append("rp.id AS report_period_id, ");
+        sql.append("dt.id AS declaration_type_id, ");
+        sql.append("ft.id AS form_type_id, ");
+        sql.append(orderByClause(filter.getOrdering(), filter.isAscOrdering()));
+        sql.append("FROM log_business lb ");
+        sql.append("LEFT JOIN form_data fd ON lb.form_data_id=fd.\"ID\" ");
+        sql.append("LEFT JOIN form_template ftemp ON fd.form_template_id=ftemp.\"ID\" ");
+        sql.append("LEFT JOIN form_type ft ON ftemp.type_id=ft.\"ID\" ");
+        sql.append("LEFT JOIN sec_user su ON lb.user_id=su.\"ID\" ");
+        sql.append("LEFT JOIN REPORT_PERIOD rp ON fd.report_period_id=rp.\"ID\" ");
+        sql.append("LEFT JOIN TAX_PERIOD tp ON rp.tax_period_id=tp.\"ID\" ");
+        sql.append("LEFT JOIN declaration_data dd ON lb.declaration_data_id=dd.\"ID\" ");
+        sql.append("LEFT JOIN department dep ON dd.department_id=dep.\"ID\" OR fd.department_id=dep.\"ID\" ");
+        sql.append("LEFT JOIN declaration_template dtemp ON dd.declaration_template_id=dtemp.\"ID\" ");
+        sql.append("LEFT JOIN declaration_type dt ON dtemp.declaration_type_id=dt.\"ID\" ");
+        if (isEventColumn) {
+            sql.append("LEFT JOIN event_map em ON lb.event_id=em.\"EVENT_ID\" ");
+        }
+        sql.append("WHERE lb.log_date BETWEEN :fromDate AND :toDate + INTERVAL '1' DAY");
+        sql.append(filter.getDepartmentId() == null?"":" AND fd.department_id = :departmentId or dd.department_id = :departmentId ");
         if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
 
             List<Long> userList = filter.getUserIds();
@@ -160,18 +182,29 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                     userSql = userSql + ", " + temp.toString();
                 }
             }
-            sql.append(" AND user_id in ").append("(").append(userSql).append(")");
+            sql.append(" AND user_id IN ").append("(").append(userSql).append(")");
         }
         if (formDataIds != null && !formDataIds.isEmpty() && declarationDataIds != null && !declarationDataIds.isEmpty())
-            sql.append(" and (form_data_id in (:formDataIds) or declaration_data_id in (:declarationDataIds))");
+            sql.append(" AND (form_data_id IN (:formDataIds) OR declaration_data_id IN (:declarationDataIds))");
         else if (formDataIds != null && !formDataIds.isEmpty())
-            sql.append(" and form_data_id in (:formDataIds)");
+            sql.append(" AND form_data_id IN (:formDataIds)");
         else if (declarationDataIds != null && !declarationDataIds.isEmpty())
-            sql.append(" and declaration_data_id in (:declarationDataIds)");
+            sql.append(" AND declaration_data_id IN (:declarationDataIds)");
 
-        sql.append(")");
+        sql.append(") ");
         if (filter.getCountOfRecords() != 0)
-            sql.append(" where rn between :startIndex and :endIndex order by id desc");
+            sql.append("WHERE RN BETWEEN :startIndex and :endIndex");
+
+        if (isEventColumn) {
+            try {
+                getJdbcTemplate().execute("CREATE GLOBAL TEMPORARY TABLE event_map (event_id NUMBER, event_title CHAR(100)) ON COMMIT DELETE ROWS");
+            } catch (Throwable e) {
+                // Выкидывает исключение если таблица существует
+            }
+
+            getJdbcTemplate().execute(insertEventTitles());
+        }
+
         List<LogSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
                 names,
                 new LogSystemSearchResultItemRowMapper()
@@ -264,5 +297,96 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
             sql.append(" and declaration_data_id in (:declarationDataIds)");
         return getNamedParameterJdbcTemplate().queryForInt(sql.toString(),
                 names);
+    }
+
+    public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
+
+        StringBuilder order = new StringBuilder();
+
+        if (isSupportOver()) {
+            order.append("ROW_NUMBER () OVER (ORDER BY ");
+
+            String column = null;
+
+            if (ordering == null) {
+                ordering = HistoryBusinessSearchOrdering.ID;
+            }
+
+            switch (ordering) {
+                case ID:
+                    // Сортировка по умолчанию
+                    break;
+                case DATE:
+                    column = "lb.log_date";
+                    break;
+                case EVENT:
+                    column = "em.event_title";
+                    break;
+                case NOTE:
+                    column = "lb.note";
+                    break;
+                case REPORT_PERIOD:
+                    column = "tp.year";
+                    if (!ascSorting) {
+                        column = column + " DESC";
+                    }
+                    column = column + ", rp.name";
+                    break;
+                case DEPARTMENT:
+                    column = "dep.name";
+                    break;
+                case TYPE:
+                    column = "CASE WHEN lb.declaration_data_id != NULL THEN lb.declaration_data_id ELSE lb.form_data_id END";
+                    break;
+                case FORM_DATA_KIND:
+                    column = "fd.kind";
+                    break;
+                case FORM_TYPE:
+                    column = "ftemp.name";
+                    break;
+                case USER:
+                    column = "su.name";
+                    break;
+                case USER_ROLE:
+                    column = "lb.roles";
+                    break;
+                case IP_ADDRESS:
+                    column = "";//TODO отсутствует в history_business
+                    break;
+            }
+
+            if (column != null) {
+                order.append(column);
+                if (!ascSorting) {
+                    order.append(" DESC");
+                }
+                order.append(", ");
+            }
+
+            // Сортировка по умолчанию
+            order.append("lb.id");
+            if (!ascSorting) {
+                order.append(" DESC");
+            }
+            order.append(") RN ");
+        } else {
+            order.append("ROW_NUMBER () OVER () RN ");
+        }
+
+        return order.toString();
+    }
+
+    private String insertEventTitles() {
+        StringBuilder query = new StringBuilder();
+        FormDataEvent values[] = FormDataEvent.values();
+
+        query.append("INSERT ALL ");
+
+        for (FormDataEvent value : values) {
+            query.append("INTO event_map(event_id, event_title) VALUES (" + value.getCode() + ", '" + value.getTitle() + "') ");
+        }
+        query.append("SELECT * FROM DUAL ");
+
+        return query.toString();
     }
 }

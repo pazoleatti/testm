@@ -109,26 +109,6 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(0, reportPeriodList.size());
 	}
 
-	@Test(expected = DuplicateKeyException.class)
-	public void saveDublicatePKErrorTest() {
-
-		DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-		departmentReportPeriod.setDepartmentId(1l);
-		departmentReportPeriod.setActive(true);
-		departmentReportPeriod.setBalance(true);
-		departmentReportPeriod.setReportPeriod(reportPeriod1);
-
-		departmentReportPeriodDao.save(departmentReportPeriod);
-
-		departmentReportPeriod = new DepartmentReportPeriod();
-		departmentReportPeriod.setDepartmentId(1l);
-		departmentReportPeriod.setActive(true);
-		departmentReportPeriod.setBalance(true);
-		departmentReportPeriod.setReportPeriod(reportPeriod1);
-
-		departmentReportPeriodDao.save(departmentReportPeriod);
-	}
-
 	@Test
 	public void saveAndGetSuccessTest() {
 
@@ -146,6 +126,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(true, departmentReportPeriod.isActive());
 		assertEquals(true, departmentReportPeriod.isBalance());
 		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
+        assertEquals(Long.valueOf(1000), departmentReportPeriod.getId());
 	
 	}
 	

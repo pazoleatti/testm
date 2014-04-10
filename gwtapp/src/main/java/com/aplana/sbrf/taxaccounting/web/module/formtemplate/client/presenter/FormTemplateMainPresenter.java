@@ -284,13 +284,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 
 	private void saveAfterFlush() {
         if (formTemplate.getName().isEmpty() || formTemplate.getFullName().isEmpty() || formTemplate.getCode().isEmpty()){
-            MessageEvent.fire(FormTemplateMainPresenter.this, "Не заполнено одно из обязательных полей. " +
+            Dialog.infoMessage("Не заполнено одно из обязательных полей. " +
                     "Проверьте поля \"Наименование формы\", \"Полное наименование формы\", \"Код формы\"");
             return;
         }
         if (formTemplateExt.getActualEndVersionDate() != null &&
                 formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) > 0 ){
-            MessageEvent.fire(FormTemplateMainPresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
         //Новый макет
@@ -305,7 +305,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                             with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
-                    MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+                    Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     formTemplate.setType(result.getFormType());
                     getView().setTitle(formTemplate.getName());
@@ -326,7 +326,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                             with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
-                    MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+                    Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
@@ -346,7 +346,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                     with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());*/
-                            MessageEvent.fire(FormTemplateMainPresenter.this, "Форма сохранена");
+                            Dialog.infoMessage("Форма сохранена");
                         }
                     }, this));
         }

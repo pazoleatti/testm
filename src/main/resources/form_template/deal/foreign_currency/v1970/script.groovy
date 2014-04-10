@@ -10,6 +10,8 @@ import groovy.transform.Field
 /**
  * 390 - Купля-продажа иностранной валюты (15)
  *
+ * formTemplateId=390
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -263,10 +265,10 @@ void calc() {
         row.rowNumber = index++
 
         // Расчет поля "Цена"
-        if (row.incomeSum != null && row.outcomeSum != null) {
-            row.price = (row.incomeSum - row.outcomeSum).abs()
-        } else {
-            row.price = row.incomeSum != null ? row.incomeSum : row.outcomeSum
+        if (row.incomeSum != null && row.outcomeSum == null) {
+            row.price = row.incomeSum
+        } else if (row.incomeSum == null && row.outcomeSum != null) {
+            row.price = row.outcomeSum
         }
 
         // Расчет поля "Итого"
