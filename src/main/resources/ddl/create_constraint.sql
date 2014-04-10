@@ -216,7 +216,6 @@ alter table log_system add constraint log_system_fk_decl_type_id foreign key (de
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
 alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department(id);
 
-alter table department_report_period add constraint department_report_period_pk primary key (department_id, report_period_id);
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_correct_per check (is_correct_period in (0, 1));
