@@ -6,6 +6,8 @@ import java.util.Date;
 public class DepartmentReportPeriod implements Serializable{
 	private static final long serialVersionUID = 5623552659772659276L;
 
+    private Long id;
+
 	private ReportPeriod reportPeriod;
 	
 	private Long departmentId;
@@ -18,7 +20,15 @@ public class DepartmentReportPeriod implements Serializable{
 
     private Date correctPeriod;
 
-	public Long getDepartmentId() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getDepartmentId() {
 		return departmentId;
 	}
 
