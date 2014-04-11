@@ -34,12 +34,16 @@
 
     <dw:ModalWindow modal="false" glassEnabled="false" iconUrl="resources/img/add.png" title="Поиск" >
         <g:VerticalPanel height="400px" width="600px" addStyleNames="aplana-ModalWindow-contentBackWhite">
-            <g:HorizontalPanel height="50px" spacing="6" verticalAlignment="middle">
-                <g:VerticalPanel>
+            <g:HorizontalPanel height="50px" spacing="10" verticalAlignment="middle" width="100%">
+                <g:VerticalPanel width="100%">
                     <g:cell>
-                        <g:HorizontalPanel verticalAlignment="middle">
-                            <g:TextBox width="100%" ui:field="filterText"/>
-                            <g:Button width="100px" ui:field="search" text="Поиск"/>
+                        <g:HorizontalPanel verticalAlignment="middle" width="100%">
+                            <g:cell>
+                                <g:TextBox width="100%" ui:field="filterText"/>
+                            </g:cell>
+                            <g:cell width="100px">
+                                <g:Button width="100px" ui:field="search" text="Поиск"/>
+                            </g:cell>
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell>
