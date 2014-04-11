@@ -323,6 +323,7 @@ void logicCheck() {
         if ((index == 11 || index == 12) &&
                 !(row.sumCurrentPeriodTotal == totalValues[index].sumCurrentPeriodTotal &&
                         row.sumTaxPeriodTotal == totalValues[index].sumTaxPeriodTotal)) {
+            // TODO Исправить на WRONG_TOTAL
             loggerError('Итоговые значения рассчитаны неверно!')
             break
         }
