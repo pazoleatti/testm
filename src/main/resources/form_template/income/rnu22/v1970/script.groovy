@@ -155,9 +155,9 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
 
         // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
-        if (!(dFrom != null && dTo != null && ((row.transactionDate != null && row.transactionDate <= dFrom) ||
-                (row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingEndDate <= dTo) ||
-                (row.calcPeriodEndDate != null && row.calcPeriodEndDate <= dTo)))) {
+        if (row.transactionDate != null && dFrom > row.transactionDate
+                || row.calcPeriodAccountingEndDate != null && row.calcPeriodAccountingEndDate > dTo
+                || row.calcPeriodEndDate != null && row.calcPeriodEndDate > dTo) {
             loggerError(errorMsg + 'Дата совершения операции вне границ отчётного периода!')
         }
 
