@@ -28,9 +28,9 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
@@ -116,7 +116,6 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     return map
 }
 
-
 // Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -127,9 +126,9 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        editSignCode = refBookService.getRecordData(80, row.editSign).CODE.numberValue
+        editSignCode = (row.editSign != null) ? refBookService.getRecordData(80, row.editSign).CODE.numberValue : null
         // Проверка заполненности полей в строках НЕ на удаление
-        if (row.editSign == null || editSignCode != 2) {
+        if (editSignCode == null || editSignCode != 2) {
             checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
         } else {
             // Проверка заполненности полей в строках на удаление
