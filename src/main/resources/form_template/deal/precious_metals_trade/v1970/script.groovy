@@ -381,7 +381,7 @@ void calc() {
         // Признак физической поставки
         def Boolean deliveryPhis = null
         if (row.deliverySign != null) {
-            deliveryPhis = getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1
+            deliveryPhis = (getRefBookValue(18, row.deliverySign)?.CODE?.numberValue == 1)
         }
         if (deliveryPhis != null && deliveryPhis) {
             row.countryCodeNumeric = null
@@ -392,6 +392,9 @@ void calc() {
             row.region2 = null
             row.city2 = null
             row.locality2 = null
+        } else {
+            row.locality = row.city ?: row.locality
+            row.locality2 = row.city2 ?: row.locality2
         }
 
         row.foreignDeal = (row.countryCodeNumeric == row.countryCodeNumeric2 || deliveryPhis) ? recNoId : recYesId

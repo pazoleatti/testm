@@ -374,6 +374,7 @@ def logicalCheck(){
                     totalRow.outcome != outcome ||
                     totalRow.outcome269st != outcome269st ||
                     totalRow.outcomeTax != outcomeTax){
+                // TODO Исправить на WRONG_TOTAL
                 loggerError('Итоговые значения рассчитаны неверно!')//TODO вернуть error
                 return false
             }

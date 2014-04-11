@@ -1,3 +1,7 @@
+insert into form_kind (id, name) values (1, 'Первичная');
+insert into form_kind (id, name) values (2, 'Консолидированная');
+insert into form_kind (id, name) values (3, 'Сводная');
+
 insert into department_form_type (id, department_id, form_type_id, kind) values (1, 1, 1, 3);
 insert into department_form_type (id, department_id, form_type_id, kind) values (2, 1, 2, 3);
 insert into department_form_type (id, department_id, form_type_id, kind) values (3, 1, 3, 3);

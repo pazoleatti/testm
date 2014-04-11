@@ -1,22 +1,18 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Абстрактный класс, позволяющий делать автовайринг с DataSource'ом
  * и содержащий вспомогательные методы, востребованные наследниками
  */
 public abstract class AbstractDao {
-	protected Log logger = LogFactory.getLog(getClass());
+
+	protected static final Log logger = LogFactory.getLog(AbstractDao.class);
 
     @Autowired
     DBInfo dbInfo;
