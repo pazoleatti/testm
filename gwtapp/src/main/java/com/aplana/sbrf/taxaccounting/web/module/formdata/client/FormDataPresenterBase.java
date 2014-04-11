@@ -110,6 +110,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         TaxType getTaxType();
 
         void setFocus(Long rowIndex);
+
+        void setupSelectionModel(boolean fixedRows);
     }
 
 	public static final String NAME_TOKEN = "!formData";

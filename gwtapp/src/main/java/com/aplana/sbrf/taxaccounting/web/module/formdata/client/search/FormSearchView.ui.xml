@@ -3,7 +3,8 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
-             xmlns:dw="urn:import:com.aplana.gwt.client">
+             xmlns:dw="urn:import:com.aplana.gwt.client"
+             xmlns:fm="urn:import:com.aplana.gwt.client.form">
     <ui:style>
 
         .content {
@@ -12,47 +13,55 @@
 
         .table {
             position: absolute !important;
-            bottom: 30px;
-            right: 0;
-            left: 0;
-            top: 104px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
+            bottom: 60px;
+            right: 10px;
+            left: 10px;
+            top: 114px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
         }
 
         .pager {
             position: absolute;
-            bottom: 0;
+            bottom: 10px;
             right: 0;
         }
 
-        .linkCell{
-            color: #0000CD;
+        .footerPanel {
+            background-color: #E8E1CF;
+            width: 100%;
+            height: 38px;
         }
     </ui:style>
 
     <dw:ModalWindow modal="false" glassEnabled="false" iconUrl="resources/img/add.png" title="Поиск" >
-        <g:VerticalPanel height="400px" width="550px" addStyleNames="aplana-ModalWindow-contentBackWhite">
-
-            <g:HorizontalPanel spacing="6" verticalAlignment="middle">
-                <g:cell>
-                    <g:TextBox width="100%" ui:field="filterText"/>
-                </g:cell>
-                <g:cell>
-                    <g:Button width="100px" ui:field="search" text="Поиск"/>
-                </g:cell>
+        <g:VerticalPanel height="400px" width="600px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:HorizontalPanel height="50px" spacing="6" verticalAlignment="middle">
+                <g:VerticalPanel>
+                    <g:cell>
+                        <g:HorizontalPanel verticalAlignment="middle">
+                            <g:TextBox width="100%" ui:field="filterText"/>
+                            <g:Button width="100px" ui:field="search" text="Поиск"/>
+                        </g:HorizontalPanel>
+                    </g:cell>
+                    <g:cell>
+                        <g:Label ui:field="countLabel" text="Найдено: "/>
+                    </g:cell>
+                </g:VerticalPanel>
             </g:HorizontalPanel>
 
             <g:HorizontalPanel>
-                <g:ResizeLayoutPanel ui:field="tableWrapper" styleName="{style.table}">
-                    <style:GenericDataGrid ui:field="searchResultTable" width="100%"/>
-                </g:ResizeLayoutPanel>
-            </g:HorizontalPanel>
-
-            <g:HorizontalPanel>
-                <pager:FlexiblePager ui:field="pager" location="CENTER" showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" type="formDataList" addStyleNames="{style.pager}"/>
+                <g:VerticalPanel>
+                    <g:cell>
+                        <g:ResizeLayoutPanel ui:field="tableWrapper" styleName="{style.table}">
+                            <style:GenericDataGrid ui:field="searchResultTable" width="100%"/>
+                        </g:ResizeLayoutPanel>
+                    </g:cell>
+                    <g:cell>
+                        <pager:FlexiblePager ui:field="pager" location="CENTER" showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" type="formDataList" addStyleNames="{style.pager}"/>
+                    </g:cell>
+                </g:VerticalPanel>
             </g:HorizontalPanel>
 
         </g:VerticalPanel>
-
     </dw:ModalWindow>
 
 </ui:UiBinder> 
