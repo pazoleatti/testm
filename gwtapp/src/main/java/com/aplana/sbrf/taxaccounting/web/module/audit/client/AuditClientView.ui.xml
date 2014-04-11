@@ -13,8 +13,7 @@
 
         .btnPanel {
             width: 100%;
-            padding-left: 15px;
-            padding-top: 5px;
+            height: 85px;
         }
 
         .pager {
@@ -28,7 +27,7 @@
             bottom: 30px;
             right: 0;
             left: 0;
-            top: 95px;
+            top: 90px;
         }
 
         .marginRight5 {
@@ -81,7 +80,7 @@
 
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="2" ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
+                <g:HTMLPanel ui:field="filterContentPanel" addStyleNames="{style.btnPanel}"/>
                 <g:ResizeLayoutPanel addStyleNames="{style.table}">
                     <style:GenericDataGrid ui:field="auditTable" height="100%" width="100%"/>
                 </g:ResizeLayoutPanel>

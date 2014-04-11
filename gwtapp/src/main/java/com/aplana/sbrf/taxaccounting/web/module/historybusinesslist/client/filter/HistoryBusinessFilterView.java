@@ -17,6 +17,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -70,18 +71,16 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiField(provided = true)
     ValueListBox<AuditFormType> auditFormTypeId;
 
-    @UiField
-    Panel formPanel;
-
-    @UiField
-    Panel reportPeriodPanel;
-
-    @UiField
-    Panel declarationTypePanel;
-
     @Path("userIds")
     @UiField
     RefBookPicker user;
+
+    @Editor.Ignore
+    @UiField
+    Label formKindDecTypeLabel;
+    @Editor.Ignore
+    @UiField
+    Label formTypeLabel;
 
     private Map<Integer, String> declarationTypesMap;
 
@@ -138,11 +137,17 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @Override
     public void clear() {
         taxType.setValue(null, true);
-        formPanel.setVisible(false);
         formTypeId.setValue(null, true);
         formDataKind.setValue(new ArrayList<Long>());
-        declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
+
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+
+        formKindDecTypeLabel.setVisible(false);
+
+        declarationTypeIds.setVisible(false);
     }
 
     @Inject
@@ -189,34 +194,57 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         user.setPeriodDates(null, new Date());
         // т.к. справочник не версионный, а дату выставлять обязательно
         formDataKind.setPeriodDates(new Date(), new Date());
-        reportPeriodPanel.setVisible(false);
         formTypeId.setPeriodDates(new Date(), new Date());
 
         driver.initialize(this);
     }
 
     private void setVisibleTaxFields() {
-        formPanel.setVisible(true);
-        declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
         List<Long> ids = new ArrayList<Long>();
         ids.add((long) FormDataKind.PRIMARY.getId());
         formDataKind.setValue(ids);
+
+        //насйтрока видимости
+        formTypeId.setVisible(true);
+        formDataKind.setVisible(true);
+        formTypeLabel.setVisible(true);
+        declarationTypeIds.setVisible(false);
+        setLabelFormsType(true);
     }
 
     private void setVisibleDeclarationFields() {
-        formPanel.setVisible(false);
         formTypeId.setValue(null, true);
         formDataKind.setValue(new ArrayList<Long>());
-        declarationTypePanel.setVisible(true);
+
+        //насйтрока видимости
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+        declarationTypeIds.setVisible(true);
+        setLabelFormsType(false);
     }
 
     private void hideAll() {
-        formPanel.setVisible(false);
         formTypeId.setValue(null, true);
         formDataKind.setValue(new ArrayList<Long>());
-        declarationTypePanel.setVisible(false);
         declarationTypeIds.setValue(null);
+
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+
+        declarationTypeIds.setVisible(false);
+        formKindDecTypeLabel.setVisible(false);
+    }
+
+    /**
+     * Переключить текст лейбла на вид делариции или тип НФ
+     * @param isTax true если НФ
+     */
+    private void setLabelFormsType(boolean isTax){
+        formKindDecTypeLabel.setVisible(true);
+        formKindDecTypeLabel.setText(isTax ? "Тип нал. формы:" : "Вид декларации:");
     }
 
     @UiHandler("auditFormTypeId")
@@ -250,8 +278,8 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
+            reportPeriodIds.setEnabled(false);
             formTypeId.setFilter(null);
             return;
         } else {
@@ -260,7 +288,7 @@ public class HistoryBusinessFilterView extends ViewWithUiHandlers<HistoryBusines
         if (getUiHandlers() != null) {
             reportPeriodIds.setValue(null, true);
             getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodPanel.setVisible(true);
+            reportPeriodIds.setEnabled(true);
         }
     }
 

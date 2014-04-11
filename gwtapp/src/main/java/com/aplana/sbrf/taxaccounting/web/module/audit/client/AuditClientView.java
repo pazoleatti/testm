@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,6 +15,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -34,6 +39,9 @@ import java.util.List;
 public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> implements AuditClientPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, AuditClientView>{}
+
+    private HistoryBusinessSearchOrdering sortByColumn;
+    private boolean isAscSorting;
 
     @UiField
     Panel filterContentPanel;
@@ -177,17 +185,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
 
         dataProvider.addDataDisplay(auditTable);
 
-        auditTable.addResizableColumn(dateColumn, dateColumnHeader);
-        auditTable.addResizableColumn(eventColumn, eventColumnHeader);
-        auditTable.addResizableColumn(noteColumn, noteColumnHeader);
-        auditTable.addResizableColumn(reportPeriodColumn, reportPeriodColumnHeader);
-        auditTable.addResizableColumn(departmentColumn, departmentColumnHeader);
-        auditTable.addResizableColumn(typeColumn, typeColumnHeader);
-        auditTable.addResizableColumn(formDataKindColumn, formDataKindColumnHeader);
-        auditTable.addResizableColumn(formDeclTypeColumn, formTypeColumnHeader);
-        auditTable.addResizableColumn(userLoginColumn, userLoginColumnHeader);
-        auditTable.addResizableColumn(userRolesColumn, userRolesColumnHeader);
-        auditTable.addResizableColumn(userIpColumn, userIpColumnHeader);
+        auditTable.addColumn(dateColumn, getHeader(dateColumnHeader, dateColumn));
+        auditTable.addColumn(eventColumn, getHeader(eventColumnHeader, eventColumn));
+        auditTable.addColumn(noteColumn, getHeader(noteColumnHeader, noteColumn));
+        auditTable.addColumn(reportPeriodColumn, getHeader(reportPeriodColumnHeader, reportPeriodColumn));
+        auditTable.addColumn(departmentColumn, getHeader(departmentColumnHeader, departmentColumn));
+        auditTable.addColumn(typeColumn, getHeader(typeColumnHeader, typeColumn));
+        auditTable.addColumn(formDataKindColumn, getHeader(formDataKindColumnHeader, formDataKindColumn));
+        auditTable.addColumn(formDeclTypeColumn, getHeader(formTypeColumnHeader, formDeclTypeColumn));
+        auditTable.addColumn(userLoginColumn, getHeader(userLoginColumnHeader, userLoginColumn));
+        auditTable.addColumn(userRolesColumn, getHeader(userRolesColumnHeader, userRolesColumn));
+        auditTable.addColumn(userIpColumn, getHeader(userIpColumnHeader, userIpColumn));
 	    auditTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
 		    @Override
 		    public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {
@@ -232,6 +240,11 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     }
 
     @Override
+    public void updateData() {
+        auditTable.setVisibleRangeAndClearData(auditTable.getVisibleRange(), true);
+    }
+
+    @Override
     public void updateData(int pageNumber) {
         if (pager.getPage() == pageNumber){
             auditTable.setVisibleRangeAndClearData(auditTable.getVisibleRange(), true);
@@ -243,6 +256,19 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @Override
     public void updateArchiveDateLbl(String archiveDate) {
         archiveDateLbl.setText(archiveDate);
+    }
+
+    @Override
+    public boolean isAscSorting() {
+        return isAscSorting;
+    }
+
+    @Override
+    public HistoryBusinessSearchOrdering getSearchOrdering() {
+        if (sortByColumn == null){
+            setSortByColumn("");
+        }
+        return sortByColumn;
     }
 
     @UiHandler("printButton")
@@ -259,4 +285,51 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         }
     }
 
+    private void setSortByColumn(String sortByColumn) {
+        if (dateColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.DATE;
+        } else if (eventColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.EVENT;
+        } else if (noteColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.NOTE;
+        } else if (reportPeriodColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.REPORT_PERIOD;
+        } else if (departmentColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.DEPARTMENT;
+        } else if (typeColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.TYPE;
+        } else if (formDataKindColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.FORM_DATA_KIND;
+        } else if (formTypeColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.FORM_TYPE;
+        } else if (userLoginColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.USER;
+        } else if (userRolesColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.USER_ROLE;
+        } else if (userIpColumnHeader.equals(sortByColumn)) {
+            this.sortByColumn = HistoryBusinessSearchOrdering.IP_ADDRESS;
+        }
+    }
+
+    private Header<String> getHeader(final String columnName, Column<LogSearchResultItem, ?> returnColumn){
+        GenericDataGrid.DataGridResizableHeader resizableHeader;
+        final SortingHeaderCell headerCell = new SortingHeaderCell();
+        resizableHeader = auditTable.createResizableHeader(columnName, returnColumn, headerCell);
+
+        resizableHeader.setUpdater(new ValueUpdater<String>() {
+            @Override
+            public void update(String value) {
+                setAscSorting(headerCell.isAscSort());
+                setSortByColumn(columnName);
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onSortingChanged();
+                }
+            }
+        });
+        return resizableHeader;
+    }
+
+    private void setAscSorting(boolean ascSorting){
+        this.isAscSorting = ascSorting;
+    }
 }

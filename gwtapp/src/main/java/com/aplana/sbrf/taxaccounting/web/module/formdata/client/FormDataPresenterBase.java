@@ -275,12 +275,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 				String.valueOf(formData.getFormType().getTaxType())).build());
 	}
 	
-	protected void revealFormData(Boolean readOnly, boolean isManual, String uuid) {
+	protected void revealFormData(Boolean readOnly, boolean isManual) {
 		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
                 .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
                 .with(FormDataPresenterBase.MANUAL, String.valueOf(isManual))
                 .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId())).build()
-                .with(UUID, uuid)
         );
 	}
 

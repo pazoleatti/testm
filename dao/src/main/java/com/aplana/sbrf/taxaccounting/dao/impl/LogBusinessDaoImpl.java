@@ -123,6 +123,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(List<Long> formDataIds, List<Long> declarationDataIds, LogBusinessFilterValuesDao filter) {
+        boolean isEventColumn = filter.getOrdering() == HistoryBusinessSearchOrdering.EVENT;
+
         Map<String, Object> names = new HashMap<String, Object>();
         names.put("formDataIds", formDataIds);
         names.put("declarationDataIds", declarationDataIds);
@@ -145,6 +147,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append("lb.note AS lb_note, ");
         sql.append("lb.user_department_id AS lb_user_department_id, ");
         sql.append("lb.form_data_id AS lb_form_data_id, ");
+        if (isEventColumn) {
+            sql.append("em.event_title, ");
+        }
         sql.append("rp.id AS report_period_id, ");
         sql.append("dt.id AS declaration_type_id, ");
         sql.append("ft.id AS form_type_id, ");
@@ -160,6 +165,9 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append("LEFT JOIN department dep ON dd.department_id=dep.\"ID\" OR fd.department_id=dep.\"ID\" ");
         sql.append("LEFT JOIN declaration_template dtemp ON dd.declaration_template_id=dtemp.\"ID\" ");
         sql.append("LEFT JOIN declaration_type dt ON dtemp.declaration_type_id=dt.\"ID\" ");
+        if (isEventColumn) {
+            sql.append("LEFT JOIN event_map em ON lb.event_id=em.\"EVENT_ID\" ");
+        }
         sql.append("WHERE lb.log_date BETWEEN :fromDate AND :toDate + INTERVAL '1' DAY");
         sql.append(filter.getDepartmentId() == null?"":" AND fd.department_id = :departmentId or dd.department_id = :departmentId ");
         if (filter.getUserIds()!=null && !filter.getUserIds().isEmpty()){
@@ -186,6 +194,17 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         sql.append(") ");
         if (filter.getCountOfRecords() != 0)
             sql.append("WHERE RN BETWEEN :startIndex and :endIndex");
+
+        if (isEventColumn) {
+            try {
+                getJdbcTemplate().execute("CREATE GLOBAL TEMPORARY TABLE event_map (event_id NUMBER, event_title CHAR(100)) ON COMMIT DELETE ROWS");
+            } catch (Throwable e) {
+                // Выкидывает исключение если таблица существует
+            }
+
+            getJdbcTemplate().execute(insertEventTitles());
+        }
+
         List<LogSearchResultItem> records = getNamedParameterJdbcTemplate().query(sql.toString(),
                 names,
                 new LogSystemSearchResultItemRowMapper()
@@ -301,7 +320,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                     column = "lb.log_date";
                     break;
                 case EVENT:
-                    column = "lb.event_id";
+                    column = "em.event_title";
                     break;
                 case NOTE:
                     column = "lb.note";
@@ -317,7 +336,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                     column = "dep.name";
                     break;
                 case TYPE:
-                    column = "";//TODO деделать
+                    column = "CASE WHEN lb.declaration_data_id != NULL THEN lb.declaration_data_id ELSE lb.form_data_id END";
                     break;
                 case FORM_DATA_KIND:
                     column = "fd.kind";
@@ -355,5 +374,19 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
         }
 
         return order.toString();
+    }
+
+    private String insertEventTitles() {
+        StringBuilder query = new StringBuilder();
+        FormDataEvent values[] = FormDataEvent.values();
+
+        query.append("INSERT ALL ");
+
+        for (FormDataEvent value : values) {
+            query.append("INTO event_map(event_id, event_title) VALUES (" + value.getCode() + ", '" + value.getTitle() + "') ");
+        }
+        query.append("SELECT * FROM DUAL ");
+
+        return query.toString();
     }
 }

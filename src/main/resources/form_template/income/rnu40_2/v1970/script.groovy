@@ -3,6 +3,7 @@ package form_template.income.rnu40_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -21,14 +22,21 @@ import groovy.transform.Field
 // графа 5  - bondsCount
 // графа 6  - percent
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        if (!checkSourceAccepted()) {
-            return
-        }
+        checkSourceAccepted()
+        logicCheck()
+        break
+    case FormDataEvent.CALCULATE :
+        checkSourceAccepted()
+        calc()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
@@ -37,9 +45,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        if (!checkSourceAccepted()) {
-            return
-        }
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -72,10 +78,6 @@ def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 @Field
 def endDate = null
 
-// Текущая дата
-@Field
-def currentDate = new Date()
-
 @Field
 def taxPeriod = null
 
@@ -93,6 +95,33 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    if (isConsolidated) {
+        sort(dataRows)
+        dataRowHelper.save(dataRows)
+        return
+    }
+
+    // удалить нефиксированные строки
+    deleteRows(dataRows)
+
+    // Консолидация данных из первичной рну-40.1 в первичную рну-40.2.
+    def sourceDataRows = getDataRowsFromSource()
+    sections.each { section ->
+        def rows40_1 = getRowsBySection(sourceDataRows, section)
+        def newRows = []
+        for (def row : rows40_1) {
+            if (hasCalcRow(row.name, row.issuer, newRows)) {
+                continue
+            }
+            def newRow = getCalcRowFromRNU_40_1(row.name, row.issuer, rows40_1)
+            newRows.add(newRow)
+        }
+        if (!newRows.isEmpty()) {
+            dataRows.addAll(getDataRow(dataRows, 'total' + section).getIndex() - 1, newRows)
+            updateIndexes(dataRows)
+        }
+    }
+
     // отсортировать/группировать
     sort(dataRows)
 
@@ -108,16 +137,21 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRows40_1 = getRowsRNU40_1()
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            return
+            continue
         }
         // 1. Обязательность заполнения поля графы 1..6
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
+
+    if (isConsolidated) {
+        return
+    }
+
+    def dataRows40_1 = getDataRowsFromSource()
 
     // алиасы графов для арифметической проверки (графа 1..6)
     def arithmeticCheckAlias = nonEmptyColumns
@@ -127,8 +161,7 @@ void logicCheck() {
     for (def section : sections) {
         def rows40_1 = getRowsBySection(dataRows40_1, section)
         def rows40_2 = getRowsBySection(dataRows, section)
-        // если в разделе рну 40.1 есть данные, а в аналогичном разделе рну 40.2 нет данных, то ошибка
-        // или наоборот, то тоже ошибка
+        // если в разделе рну 40.1 есть данные, а в аналогичном разделе рну 40.2 нет данных, то ошибка или наоборот, то тоже ошибка
         if (rows40_1.isEmpty() && !rows40_2.isEmpty() ||
                 !rows40_1.isEmpty() && rows40_2.isEmpty()) {
             def number = section
@@ -138,10 +171,21 @@ void logicCheck() {
         if (rows40_1.isEmpty() && rows40_2.isEmpty()) {
             continue
         }
+        // сравнить значения строк
         for (def row : rows40_2) {
             def tmpRow = getCalcRowFromRNU_40_1(row.name, row.code, rows40_1)
-            if (tmpRow) {
-                checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
+            def msg = []
+            arithmeticCheckAlias.each { alias ->
+                def value1 = row.getCell(alias).value
+                def value2 = tmpRow.getCell(alias).value
+                if (value1 != value2) {
+                    msg.add('«' + getColumnName(row, alias) + '»')
+                }
+            }
+            if (!msg.isEmpty()) {
+                def columns = msg.join(', ')
+                def index = row.getIndex()
+                logger.error("Строка $index: Неверное значение граф: $columns")
             }
         }
     }
@@ -150,14 +194,17 @@ void logicCheck() {
     sections.each { section ->
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
+        def msg = []
         for (def col : totalColumns) {
             def value = roundValue(lastRow.getCell(col).value ?: 0, 6)
             def sum = roundValue(getSum(dataRows, col, firstRow, lastRow), 6)
             if (value != sum) {
-                def name = getColumnName(lastRow, col)
-                def number = section
-                logger.error("Неверно рассчитаны итоговые значения для раздела $number в графе \"$name\"!")
+                msg.add('«' + getColumnName(lastRow, col) + '»')
             }
+        }
+        if (!msg.isEmpty()) {
+            def columns = msg.join(', ')
+            logger.error("Неверно рассчитаны итоговые значения для раздела $section в графе: $columns!")
         }
     }
 }
@@ -175,38 +222,15 @@ void consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRows = formDataService.getDataRowHelper(source).allCached
             if (it.formTypeId == formData.formType.id) {
-                // Консолидация данных из первичной рну-40.2 в консолидированную рну-40.2.
                 // копирование данных по разделам
                 sections.each { section ->
                     copyRows(sourceDataRows, dataRows, section, 'total' + section)
-                }
-            } else {
-                // Консолидация данных из первичной рну-40.1 в первичную рну-40.2.
-                sections.each { section ->
-                    def rows40_1 = getRowsBySection(sourceDataRows, section)
-                    def rows40_2 = getRowsBySection(dataRows, section)
-                    def newRows = []
-                    for (def row : rows40_1) {
-                        if (hasCalcRow(row.name, row.currencyCode, rows40_2)) {
-                            continue
-                        }
-                        def newRow = getCalcRowFromRNU_40_1(row.name, row.currencyCode, rows40_1)
-                        newRows.add(newRow)
-                    }
-                    if (!newRows.isEmpty()) {
-                        dataRows.addAll(getDataRow(dataRows, 'total' + section).getIndex() - 1, newRows)
-                        updateIndexes(dataRows)
-                    }
                 }
             }
         }
     }
     dataRowHelper.save(dataRows)
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        logger.info('Формирование консолидированной формы прошло успешно.')
-    } else {
-        logger.info('Формирование первичной формы РНУ-40.2 прошло успешно.')
-    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -271,15 +295,6 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
-/** Получить строки из нф РНУ-40.1. */
-def getRowsRNU40_1() {
-    def formDataRNU = getFormDataSource()
-    if (formDataRNU != null) {
-        return formDataService.getDataRowHelper(formDataRNU)?.allCached
-    }
-    return null
-}
-
 /** Удалить нефиксированные строки. */
 void deleteRows(def dataRows) {
     def deleteRows = []
@@ -330,7 +345,7 @@ def getCalcRowFromRNU_40_1(def name, def code, def rows40_1) {
     }
     def calcRow = null
     for (def row : rows40_1) {
-        if (row.name == name && row.currencyCode == code) {
+        if (row.name == name && row.issuer == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
                 calcRow.number = name
@@ -368,13 +383,6 @@ def hasCalcRow(def name, def code, def rows40_2) {
     return false
 }
 
-/**
- * Округляет число до требуемой точности.
- *
- * @param value округляемое число
- * @param precision точность округления, знаки после запятой
- * @return округленное число
- */
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -400,19 +408,26 @@ def getTaxPeriod() {
 /** Получить данные формы РНУ-40.1 (id = 338) */
 def getFormDataSource() {
     if (sourceFormData == null) {
-        sourceFormData = formDataService.findMonth(338, FormDataKind.PRIMARY, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
+        sourceFormData = formDataService.findMonth(338, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
     }
     return sourceFormData
 }
 
-def checkSourceAccepted() {
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        return true
+void checkSourceAccepted() {
+    if (isConsolidated) {
+        return
     }
     def form = getFormDataSource()
     if (form == null || form.state != WorkflowState.ACCEPTED) {
-        logger.error('Не найдены экземпляры РНУ-40.1 за текущий отчетный период!')
-        return false
+        throw new ServiceException('Не найдены экземпляры РНУ-40.1 за текущий отчетный период!')
     }
-    return true
+}
+
+/** Получить строки из нф РНУ-40.1. */
+def getDataRowsFromSource() {
+    def formDataSource = getFormDataSource()
+    if (formDataSource != null) {
+        return formDataService.getDataRowHelper(formDataSource)?.allCached
+    }
+    return null
 }

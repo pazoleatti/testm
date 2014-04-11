@@ -35,7 +35,7 @@ public class GetRefBookTableDataHandler extends AbstractActionHandler<GetTableDa
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
 
-        List<RefBook> list = refBookFactory.getAll(true);
+        List<RefBook> list = refBookFactory.getAll(action.isOnlyVisible());
 
         List<TableModel> returnList = new ArrayList<TableModel>();
         boolean isFiltered = action.getFilter() != null && !action.getFilter().isEmpty();

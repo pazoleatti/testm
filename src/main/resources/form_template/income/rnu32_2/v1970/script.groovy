@@ -3,6 +3,7 @@ package form_template.income.rnu32_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -20,14 +21,20 @@ import groovy.transform.Field
 // графа 5  - bondsCount
 // графа 6  - percent
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
+        checkSourceAccepted()
         calc()
         logicCheck()
         break
@@ -37,6 +44,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -55,7 +63,7 @@ def refBookCache = [:]
 
 // Проверяемые на пустые значения атрибуты (графа 1..6)
 @Field
-def nonEmptyColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
+def allColumns = ['number', 'name', 'code', 'cost', 'bondsCount', 'percent']
 
 // список алиасов подразделов
 @Field
@@ -68,6 +76,9 @@ def endDate = null
 @Field
 def taxPeriod = null
 
+@Field
+def sourceFormData = null
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -78,29 +89,66 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+
+    if (isConsolidated) {
+        sort(dataRows)
+        dataRowHelper.save(dataRows)
+        return
+    }
+
+    // удалить нефиксированные строки
+    deleteRows(dataRows)
+
+    // получение данных из первичной рну-32.1
+    def dataRowsFromSource = getDataRowsFromSource()
+    if (!dataRowsFromSource) {
+        dataRowHelper.save(dataRows)
+        return
+    }
+
+    // подразделы, собрать список списков строк каждого раздела
+    sections.each { section ->
+        def rows32_1 = getRowsBySection32_1(dataRowsFromSource, section)
+        def rows32_2 = getRowsBySection(dataRows, section)
+        def newRows = []
+        for (def row : rows32_1) {
+            def code = getCode(row, getReportPeriodEndDate())
+            if (hasCalcRow(row.name, code, rows32_2)) {
+                continue
+            }
+            def newRow = getCalcRowFromRNU_32_1(row.name, code, rows32_1)
+            newRows.add(newRow)
+            rows32_2.add(newRow)
+        }
+        if (!newRows.isEmpty()) {
+            dataRows.addAll(getDataRow(dataRows, section).getIndex(), newRows)
+            updateIndexes(dataRows)
+        }
+    }
+
     sort(dataRows)
+
     dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
-    def dataRows32_1 = getDataRowsRNU32_1()
-    if (dataRows32_1 == null) {
-        logger.error("Не найдены экземпляры «${formTypeService.get(330).name}» за прошлый отчетный период!")
-        return
-    }
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            return
+            continue
         }
-        // 2. Обязательность заполнения поля графы 1..6
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        // . Обязательность заполнения поля графы 1..6
+        checkNonEmptyColumns(row, row.getIndex(), allColumns, logger, true)
     }
 
-    // 3. Арифметическая проверка графы 1..6
-    def arithmeticCheckAlias = nonEmptyColumns
+    if (isConsolidated) {
+        return
+    }
+
+    // . Арифметическая проверка графы 1..6
+    def dataRowsFromSource = getDataRowsFromSource()
     for (def section : sections) {
-        def rows32_1 = getRowsBySection32_1(dataRows32_1, section)
+        def rows32_1 = getRowsBySection32_1(dataRowsFromSource, section)
         def rows32_2 = getRowsBySection(dataRows, section)
         // если в разделе рну 32.1 есть данные, а в аналогичном разделе рну 32.2 нет данных, то ошибка или наоборот, то тоже ошибка
         if (rows32_1.isEmpty() && !rows32_2.isEmpty() ||
@@ -112,22 +160,24 @@ void logicCheck() {
         if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
         }
+        // сравнить значения строк
         for (def row : rows32_2) {
             def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
-            if (tmpRow) {
-                checkCalc(row, arithmeticCheckAlias, tmpRow, logger, true)
+            def msg = []
+            allColumns.each { alias ->
+                def value1 = row.getCell(alias).value
+                def value2 = tmpRow.getCell(alias).value
+                if (value1 != value2) {
+                    msg.add('«' + getColumnName(row, alias) + '»')
+                }
+            }
+            if (!msg.isEmpty()) {
+                def columns = msg.join(', ')
+                def index = row.getIndex()
+                logger.error("Строка $index: Неверное значение граф: $columns")
             }
         }
     }
-}
-
-void checkCreation() {
-    // форма должна создаваться только при принятии рну 32.1
-    if (formData.kind == FormDataKind.PRIMARY && getFormDataRNU32_1() == null) {
-        logger.error("Отсутствует или не находится в статусе «принята» форма «${formTypeService.get(330).name}» за текущий отчетный период!")
-        return
-    }
-    formDataService.checkUnique(formData, logger)
 }
 
 void consolidation() {
@@ -136,8 +186,6 @@ void consolidation() {
 
     // удалить нефиксированные строки
     deleteRows(dataRows)
-
-    def lastDay = getReportPeriodEndDate()
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -148,39 +196,14 @@ void consolidation() {
                 // Консолидация данных из первичной рну-32.2 в консолидированную рну-32.2.
                 // копирование данных по разделам
                 sections.each { section ->
-                    def toAlias = (Integer.valueOf(section) + 1).toString()
+                    def toAlias = (section.toInteger() + 1).toString()
                     copyRows(sourceDataRows, dataRows, section, toAlias)
-                }
-            } else {
-                // Консолидация данных из первичной рну-32.1 в первичную рну-32.2.
-                // подразделы, собрать список списков строк каждого раздела
-                sections.each { section ->
-                    def rows32_1 = getRowsBySection32_1(sourceDataRows, section)
-                    def rows32_2 = getRowsBySection(dataRows, section)
-                    def newRows = []
-                    for (def row : rows32_1) {
-                        def code = getCode(row, lastDay)
-                        if (hasCalcRow(row.name, code, rows32_2)) {
-                            continue
-                        }
-                        def newRow = getCalcRowFromRNU_32_1(row.name, code, rows32_1)
-                        newRows.add(newRow)
-                        rows32_2.add(newRow)
-                    }
-                    if (!newRows.isEmpty()) {
-                        dataRows.addAll(getDataRow(dataRows, section).getIndex(), newRows)
-                        updateIndexes(dataRows)
-                    }
                 }
             }
         }
     }
     dataRowHelper.save(dataRows)
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        logger.info('Формирование консолидированной формы прошло успешно.')
-    } else {
-        logger.info('Формирование первичной формы РНУ-32.2 прошло успешно.')
-    }
+    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /**
@@ -194,7 +217,7 @@ void consolidation() {
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
     def from = getDataRow(sourceDataRows, fromAlias).getIndex()
-    def to = (toAlias != '8' ? getDataRow(sourceDataRows, toAlias).getIndex() - 1 : sourceDataRows.size())
+    def to = (toAlias != '9' ? getDataRow(sourceDataRows, toAlias).getIndex() - 1 : sourceDataRows.size())
     if (from >= to) {
         return
     }
@@ -251,20 +274,6 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
-def getFormDataRNU32_1() {
-    def form = formDataService.findMonth(330, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
-    return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
-}
-
-/** Получить строки из нф РНУ-32.1. */
-def getDataRowsRNU32_1() {
-    def formDataRNU = getFormDataRNU32_1()
-    if (formDataRNU != null) {
-        return formDataService.getDataRowHelper(formDataRNU)?.allCached
-    }
-    return null
-}
-
 /** Удалить нефиксированные строки. */
 void deleteRows(def dataRows) {
     def deleteRows = []
@@ -304,11 +313,10 @@ def getRowsBySection32_1(def dataRows, def section) {
  */
 def getRowsBySection(def dataRows, def section) {
     def from = getDataRow(dataRows, section).getIndex()
-    def toAlias = (Integer.valueOf(section) + 1).toString()
+    def toAlias = (section.toInteger() + 1).toString()
     def to = (section != '8' ? getDataRow(dataRows, toAlias).getIndex() - 2 : dataRows.size() - 1)
     return (from <= to ? dataRows[from..to] : [])
 }
-
 
 /**
  * Получить посчитанную строку для рну 32.2 из рну 32.1.
@@ -333,12 +341,12 @@ def getCalcRowFromRNU_32_1(def name, def code, def rows32_1) {
         if (row.name == name && code32_1 == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
-                calcRow.number = name
-                calcRow.name = name
-                calcRow.code = code
-                calcRow.cost = 0
-                calcRow.bondsCount = 0
-                calcRow.percent = 0
+                calcRow.number = name as BigDecimal
+                calcRow.name = name as BigDecimal
+                calcRow.code = code as BigDecimal
+                calcRow.cost = BigDecimal.ZERO
+                calcRow.bondsCount = BigDecimal.ZERO
+                calcRow.percent = BigDecimal.ZERO
             }
             // графа 4, 5, 6 = графа 7, 8, 18
             calcRow.cost += (row.faceValue ?: 0)
@@ -407,4 +415,31 @@ def getTaxPeriod() {
         taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
     }
     return taxPeriod
+}
+
+/** Получить данные формы РНУ-32.1 (id = 330) */
+def getFormDataSource() {
+    if (sourceFormData == null) {
+        sourceFormData = formDataService.findMonth(330, formData.kind, formDataDepartment.id, getTaxPeriod()?.id, formData.periodOrder)
+    }
+    return sourceFormData
+}
+
+void checkSourceAccepted() {
+    if (isConsolidated) {
+        return
+    }
+    def form = getFormDataSource()
+    if (form == null || form.state != WorkflowState.ACCEPTED) {
+        throw new ServiceException('Не найдены экземпляры РНУ-32.1 за текущий отчетный период!')
+    }
+}
+
+/** Получить строки из нф РНУ-32.1. */
+def getDataRowsFromSource() {
+    def formDataSource = getFormDataSource()
+    if (formDataSource != null) {
+        return formDataService.getDataRowHelper(formDataSource)?.allCached
+    }
+    return null
 }

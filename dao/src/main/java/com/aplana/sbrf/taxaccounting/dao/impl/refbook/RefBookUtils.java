@@ -479,6 +479,7 @@ public class RefBookUtils extends AbstractDao {
             result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
             result.setVersionStart(rs.getDate("versionStart"));
             result.setVersionEnd(rs.getDate("versionEnd"));
+            result.setVersionEndFake(rs.getBoolean("endIsFake"));
             return result;
         }
     }

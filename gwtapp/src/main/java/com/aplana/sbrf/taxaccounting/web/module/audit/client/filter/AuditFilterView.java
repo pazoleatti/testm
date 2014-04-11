@@ -20,10 +20,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -82,19 +79,15 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     @Editor.Ignore
     @UiField
-    Panel declarationTypePanel;
-
-    @Editor.Ignore
-    @UiField
-    Panel formPanel;
-
-    @Editor.Ignore
-    @UiField
-    Panel reportPeriodPanel;
-
-    @Editor.Ignore
-    @UiField
     Button search;
+
+    @Editor.Ignore
+    @UiField
+    Label formKindDecTypeLabel;
+
+    @Editor.Ignore
+    @UiField
+    Label formTypeLabel;
 
     private Map<Integer, String> declarationTypesMap;
 
@@ -140,8 +133,14 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         formTypeId.setValue(null, true);
         formDataKind.setValue(null, true);
         declarationTypeId.setValue(null);
-        formPanel.setVisible(false);
-        declarationTypePanel.setVisible(false);
+
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+
+        formKindDecTypeLabel.setVisible(false);
+
+        declarationTypeId.setVisible(false);
     }
 
     @Override
@@ -219,8 +218,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiHandler("taxType")
     void onTaxTypeValueChange(ValueChangeEvent<TaxType> event) {
         if (taxType.getValue() == null){
-            reportPeriodPanel.setVisible(false);
             reportPeriodIds.setValue(null, true);
+            reportPeriodIds.setEnabled(false);
             formTypeId.setFilter(null);
             return;
         } else {
@@ -229,7 +228,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         if (getUiHandlers() != null) {
             reportPeriodIds.setValue(null, true);
             getUiHandlers().getReportPeriods(event.getValue());
-            reportPeriodPanel.setVisible(true);
+            reportPeriodIds.setEnabled(true);
         }
     }
 
@@ -288,22 +287,48 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
 
     private void setVisibleTaxFields() {
         declarationTypeId.setValue(null);
-        formPanel.setVisible(true);
-        declarationTypePanel.setVisible(false);
+
+        formTypeId.setVisible(true);
+        formDataKind.setVisible(true);
+        formTypeLabel.setVisible(true);
+
+        setLabelFormsType(true);
+
+        declarationTypeId.setVisible(false);
     }
 
     private void setVisibleDeclarationFields() {
         /*formTypeId.setValue(new ArrayList<Long>());*/
         formDataKind.setValue(null, true);
-        formPanel.setVisible(false);
-        declarationTypePanel.setVisible(true);
+
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+
+        setLabelFormsType(false);
+
+        declarationTypeId.setVisible(true);
     }
 
     private void hideAll() {
         formTypeId.setValue(null, true);
         formDataKind.setValue(null, true);
         declarationTypeId.setValue(null);
-        formPanel.setVisible(false);
-        declarationTypePanel.setVisible(false);
+
+        formTypeId.setVisible(false);
+        formDataKind.setVisible(false);
+        formTypeLabel.setVisible(false);
+
+        declarationTypeId.setVisible(false);
+        formKindDecTypeLabel.setVisible(false);
+    }
+
+    /**
+     * Переключить текст лейбла на вид делариции или тип НФ
+     * @param isTax true если НФ
+     */
+    private void setLabelFormsType(boolean isTax){
+        formKindDecTypeLabel.setVisible(true);
+        formKindDecTypeLabel.setText(isTax ? "Тип нал. формы:" : "Вид декларации:");
     }
 }

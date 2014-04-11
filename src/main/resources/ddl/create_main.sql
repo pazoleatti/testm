@@ -673,6 +673,7 @@ comment on column log_system.user_department_id is 'Код подразделе�
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------
 create table department_report_period (
+  id                  number(18, 0)  primary key,
   department_id       number(9) not null,
   report_period_id    number(9) not null,
   is_active           number(1) not null,
@@ -681,12 +682,15 @@ create table department_report_period (
   correction_date     date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
+comment on column department_report_period.id is 'Идентификатор записи';
 comment on column department_report_period.department_id is 'Код подразделения';
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
 comment on column department_report_period.is_correct_period is 'Признак корректирующего периода (0 - обычный период, 1 - корректирующий период)';
 comment on column department_report_period.correction_date is 'Период сдачи корректировки';
+
+create sequence seq_department_report_period start with 1000;
 ------------------------------------------------------------------------------------------------------
 create table task_context(
 id  number(18,0) primary key,

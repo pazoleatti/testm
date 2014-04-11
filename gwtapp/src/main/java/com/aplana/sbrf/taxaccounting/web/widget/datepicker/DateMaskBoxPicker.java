@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
@@ -54,6 +55,11 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     private final PopupPanel datePickerPanel = new PopupPanel(true, true);
     private boolean widgetEnabled = true;
     private boolean canBeEmpty = false;
+    /**
+     *  Признак для возможности присваивать значение без проведения проверки isDateWasChange(),
+     *  необходимо для сбрасывания некорректных значений dateBox при setValue()
+     */
+    private boolean isForceSetValue = false;
 
     private Date prevValue;
 
@@ -221,7 +227,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     @Override
     public void setValue(Date value, boolean fireEvents) {
-        if (isDateWasChange(prevValue, value)) {
+        if (isForceSetValue || isDateWasChange(prevValue, value)) {
             if (isInLimitPeriod(startLimitDate, endLimitDate, value)) {
                 setCheckedValue(value, fireEvents);
             } else {
@@ -311,4 +317,7 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
         mainPanel.setVisible(visible);
     }
 
+    public void setForceSetValue(boolean isForceSetValue) {
+        this.isForceSetValue = isForceSetValue;
+    }
 }

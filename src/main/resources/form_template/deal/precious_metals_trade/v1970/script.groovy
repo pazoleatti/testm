@@ -203,18 +203,6 @@ void logicCheck() {
             }
         }
 
-        // Проверка заполнения населенного пункта
-        localityCell = row.getCell('locality')
-        cityCell = row.getCell('city')
-        if (localityCell.value != null && !localityCell.value.toString().isEmpty() && cityCell.value != null && !cityCell.value.toString().isEmpty()) {
-            logger.warn("Строка $rowNum: Если указан «${localityCell.column.name}», не должен быть указан «${cityCell.column.name}»!")
-        }
-        localityCell = row.getCell('locality2')
-        cityCell = row.getCell('city2')
-        if (localityCell.value != null && !localityCell.value.toString().isEmpty() && cityCell.value != null && !cityCell.value.toString().isEmpty()) {
-            logger.warn("Строка $rowNum: Если указан «${localityCell.column.name}», не должен быть указан «${cityCell.column.name}»!")
-        }
-
         // Проверка доходов и расходов
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('outcomeSum')

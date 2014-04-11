@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +38,18 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogs(LogSystemFilter filter) {
+        boolean isEventColumn = filter.getSearchOrdering() == HistoryBusinessSearchOrdering.EVENT;
+
+        if (isEventColumn) {
+            try {
+                getJdbcTemplate().execute("CREATE GLOBAL TEMPORARY TABLE event_map (event_id NUMBER, event_title CHAR(100)) ON COMMIT DELETE ROWS");
+            } catch (Throwable e) {
+                // Выкидывает исключение если таблица существует
+            }
+
+            getJdbcTemplate().execute(insertEventTitles());
+        }
+
 		StringBuilder sql = new StringBuilder("select ordDat.* from (select dat.*, rownum as rn from ( select ");
         sql.append("ls.id, ");
         sql.append("ls.log_date, ");
@@ -52,6 +63,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("ls.form_type_id, ");
         sql.append("ls.form_kind_id, ");
         sql.append("ls.note, ");
+        if (isEventColumn) {
+            sql.append("em.event_title, ");
+        }
         sql.append("ls.user_department_id ");
 
         sql.append(" from log_system ls ");
@@ -62,10 +76,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("left join sec_user su on ls.user_id=su.\"ID\" ");
         sql.append("left join REPORT_PERIOD rp on ls.report_period_id=rp.\"ID\" ");
         sql.append("left join TAX_PERIOD tp on rp.tax_period_id=tp.\"ID\" ");
+        if (isEventColumn) {
+            sql.append("LEFT JOIN event_map em ON ls.event_id=em.\"EVENT_ID\" ");
+        }
 
 		appendSelectWhereClause(sql, filter, "ls.");
 
-        sql.append(" order by ls.log_date desc");
+        sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
 
 		sql.append(") dat) ordDat");
         List<LogSearchResultItem> records;
@@ -270,4 +287,90 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 				}
 		);
 	}
+
+    public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
+
+        StringBuilder order = new StringBuilder();
+
+        order.append(" order by ");
+
+        String column = null;
+
+        if (ordering == null) {
+            ordering = HistoryBusinessSearchOrdering.ID;
+        }
+
+        switch (ordering) {
+            case ID:
+                // Сортировка по умолчанию
+                break;
+            case DATE:
+                column = "ls.log_date";
+                break;
+            case EVENT:
+                column = "em.event_title";
+                break;
+            case NOTE:
+                column = "ls.note";
+                break;
+            case REPORT_PERIOD:
+                column = "tp.year";
+                if (!ascSorting) {
+                    column = column + " DESC";
+                }
+                column = column + ", rp.name";
+                break;
+            case DEPARTMENT:
+                column = "dep.name";
+                break;
+            case TYPE:
+                column = "CASE WHEN ls.declaration_type_id != NULL THEN ls.declaration_type_id ELSE ls.form_type_id END";
+                break;
+            case FORM_DATA_KIND:
+                column = "ls.form_kind_id";
+                break;
+            case FORM_TYPE:
+                column = "ft.name";
+                break;
+            case USER:
+                column = "su.name";
+                break;
+            case USER_ROLE:
+                column = "ls.roles";
+                break;
+            case IP_ADDRESS:
+                column = "ls.ip";
+                break;
+        }
+
+        if (column != null) {
+            order.append(column);
+            if (!ascSorting) {
+                order.append(" DESC");
+            }
+            order.append(", ");
+        }
+
+        // Сортировка по умолчанию
+        order.append("ls.id");
+        if (!ascSorting) {
+            order.append(" DESC");
+        }
+
+        return order.toString();
+    }
+
+    private String insertEventTitles() {
+        StringBuilder query = new StringBuilder();
+        FormDataEvent values[] = FormDataEvent.values();
+
+        query.append("INSERT ALL ");
+
+        for (FormDataEvent value : values) {
+            query.append("INTO event_map(event_id, event_title) VALUES (" + value.getCode() + ", '" + value.getTitle() + "') ");
+        }
+        query.append("SELECT * FROM DUAL ");
+
+        return query.toString();
+    }
 }

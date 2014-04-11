@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -56,21 +57,27 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 		getView().setFormId(formTemplate.getId() != null?formTemplate.getId():0);
 	}
 
-	@Override
+    @Override
+    public void uploadFormTemplateSuccess() {
+        MessageEvent.fire(FormTemplateImpexPresenter.this, "Форма сохранена");
+        FormTemplateSaveEvent.fire(this);
+    }
+
+    @Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
             JSONValue jsonValue = JSONParser.parseLenient(uuid);
             String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
             LogAddEvent.fire(this, value);
         }else {
-            MessageEvent.fire(FormTemplateImpexPresenter.this, "Форма сохранена");
+            Dialog.infoMessage("Форма сохранена");
         }
 		FormTemplateSaveEvent.fire(this);
 	}
 
 	@Override
 	public void uploadFormTemplateFail(String msg) {
-		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
+        Dialog.infoMessage("Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
 
 	@Override
@@ -83,6 +90,6 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
         JSONValue jsonValue = JSONParser.parseLenient(uuid);
         String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
         LogAddEvent.fire(this, value);
-        MessageEvent.fire(FormTemplateImpexPresenter.this, "Не удалось импортировать шаблон");
+        Dialog.infoMessage("Не удалось импортировать шаблон");
     }
 }

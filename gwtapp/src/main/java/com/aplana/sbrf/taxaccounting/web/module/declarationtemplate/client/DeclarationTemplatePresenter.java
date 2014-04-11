@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
@@ -146,11 +145,11 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void save() {
         if (declarationTemplateExt.getEndDate() != null &&
                 declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >=0 ){
-            MessageEvent.fire(DeclarationTemplatePresenter.this, "Дата окончания не может быть меньше даты начала актуализации.");
+            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
         if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
-            MessageEvent.fire(DeclarationTemplatePresenter.this, "Введите имя декларации");
+            Dialog.infoMessage("Введите имя декларации");
             return;
         }
 
@@ -161,7 +160,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 @Override
                 public void onSuccess(CreateNewDeclarationTypeResult result) {
                     LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
-                    MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                    Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
@@ -175,7 +174,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 @Override
                 public void onSuccess(CreateNewDTVersionResult result) {
                     LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
-                    MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                    Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
@@ -190,7 +189,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                         @Override
                         public void onSuccess(UpdateDeclarationResult result) {
                             LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
-                            MessageEvent.fire(DeclarationTemplatePresenter.this, "Декларация сохранена");
+                            Dialog.infoMessage("Декларация сохранена");
                             /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                                     with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());*/
                         }
@@ -252,10 +251,16 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Override
 	public void uploadJrxmlFail(String error) {
-		MessageEvent.fire(this, "Не удалось загрузить файл. Ошибка: " + error);
+        Dialog.infoMessage("Не удалось загрузить файл. Ошибка: " + error);
 	}
 
-	private void setDeclarationTemplate() {
+    @Override
+    public void uploadFormTemplateSuccess() {
+        Dialog.infoMessage("Форма сохранена");
+        setDeclarationTemplate();
+    }
+
+    private void setDeclarationTemplate() {
         final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
 			closeDeclarationTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
@@ -295,12 +300,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Override
 	public void uploadDectResponseWithUuid(String uuid) {
-        if (uuid != null && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
             JSONValue jsonValue = JSONParser.parseLenient(uuid);
             String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
             LogAddEvent.fire(this, value);
         }else {
-            MessageEvent.fire(DeclarationTemplatePresenter.this, "Форма сохранена");
+            Dialog.infoMessage("Форма сохранена");
         }
 		setDeclarationTemplate();
 	}
@@ -310,12 +315,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         JSONValue jsonValue = JSONParser.parseLenient(uuid);
         String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
         LogAddEvent.fire(this, value);
-        MessageEvent.fire(this, "Не удалось импортировать шаблон");
+        Dialog.infoMessage("Не удалось импортировать шаблон");
     }
 
     @Override
 	public void uploadDectFail(String msg) {
-		MessageEvent.fire(this, "Не удалось импортировать шаблон. Ошибка: " + msg);
+        Dialog.infoMessage("Не удалось импортировать шаблон. Ошибка: " + msg);
 	}
 
     @Override
