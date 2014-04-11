@@ -191,7 +191,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                             /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                                     with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());*/
                         }
-                    }, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+                    }, this));
         }
 
 	}
@@ -221,7 +221,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
-                            "Найдены экземпляры деклараций",
+                            "Найдены экземпляры деклараций, использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {

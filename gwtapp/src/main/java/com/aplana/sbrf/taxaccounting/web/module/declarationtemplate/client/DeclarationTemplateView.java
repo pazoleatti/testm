@@ -200,6 +200,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     @Override
                     public void yes() {
                         getUiHandlers().save();
+                        getUiHandlers().close();
                     }
                 });
 	}
