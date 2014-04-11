@@ -301,10 +301,10 @@ void logicCheck() {
 
         // 5,6. Проверка существования необходимых данных (РНУ-45, РНУ-46)
         if (getSaledPropertyCode(row.saledPropertyCode) == 2 && row45 == null) {
-            logger.error(errorMsg + 'Отсутствуют данные РНУ-45!!')
+            logger.error(errorMsg + 'Отсутствуют данные РНУ-45!')
         }
         if (getSaledPropertyCode(row.saledPropertyCode) == 1 && row46 == null) {
-            logger.error(errorMsg + 'Отсутствуют данные РНУ-46!!')
+            logger.error(errorMsg + 'Отсутствуют данные РНУ-46!')
         }
 
         def values = [:]
