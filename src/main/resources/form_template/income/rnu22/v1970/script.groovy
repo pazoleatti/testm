@@ -183,7 +183,7 @@ void logicCheck() {
         }
 
         // 4. Проверка задания расчётного периода
-        if (row.calcPeriodAccountingBeginDate > row.calcPeriodAccountingEndDate &&
+        if (row.calcPeriodAccountingBeginDate > row.calcPeriodAccountingEndDate ||
                 row.calcPeriodBeginDate > row.calcPeriodEndDate) {
             logger.warn(errorMsg + 'Неправильно задан расчётный период!')
         }

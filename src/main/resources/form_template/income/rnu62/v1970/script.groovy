@@ -259,6 +259,7 @@ void logicCheck() {
 
     // 7. Проверка итоговых значений по всей форме
     if (totalRow == null || totalRow.sum != sum) {
+        // TODO Исправить на WRONG_TOTAL
         loggerError("Итоговые значения рассчитаны неверно!")
     }
 }

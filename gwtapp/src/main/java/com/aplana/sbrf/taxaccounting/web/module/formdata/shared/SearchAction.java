@@ -14,6 +14,7 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private Long formDataId;
     private int from;
     private int to;
+    private boolean caseSensitive;
 
     public Long getFormDataId() {
         return formDataId;
@@ -45,6 +46,14 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
 
     public void setTo(int to) {
         this.to = to;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     @Override

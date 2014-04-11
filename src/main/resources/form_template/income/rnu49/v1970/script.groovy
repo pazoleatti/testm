@@ -371,6 +371,7 @@ void logicCheck() {
         for (def column : totalColumns) {
             if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
                 def index = lastRow.getIndex()
+                // TODO Исправить на WRONG_TOTAL
                 logger.error("Строка $index: Итоговые значения рассчитаны неверно!")
                 break
             }

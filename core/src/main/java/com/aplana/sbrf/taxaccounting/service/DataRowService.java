@@ -59,8 +59,9 @@ public interface DataRowService {
      * @param formDataId
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
+     * @param isCaseSensitive чувствительность к регистру
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive);
 
 }

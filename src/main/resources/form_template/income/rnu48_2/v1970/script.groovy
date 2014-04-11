@@ -72,6 +72,7 @@ void logicCheck() {
         } else {
             //2. Проверка итоговых значений по всей форме
             if (row.summ != calcTotal(dataRows)) {
+                // TODO Исправить на WRONG_TOTAL
                 logger.error('Итоговые значения рассчитаны неверно!')
             }
         }
