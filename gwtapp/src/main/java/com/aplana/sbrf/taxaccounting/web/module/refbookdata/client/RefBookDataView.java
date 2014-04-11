@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -27,7 +29,9 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.ibm.icu.text.SimpleDateFormat;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
