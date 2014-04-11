@@ -30,7 +30,6 @@ import java.util.Map;
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
-	private final Log logger = LogFactory.getLog(getClass());
 
 	@Autowired
 	DepartmentFormTypeDao departmentFormTypeDao;

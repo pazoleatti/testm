@@ -14,4 +14,5 @@ public interface FormSearchUiHandlers extends UiHandlers {
     public void setFormDataId(Long formDataId);
     public void setHiddenColumns(List<Integer> hiddenColumns);
     public int getHiddenColumnsCountBefore(Integer columnId);
+    void close();
 }

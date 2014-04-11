@@ -59,7 +59,7 @@ public class DataRowServiceImpl implements DataRowService {
 	}
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key) {
-        return dataRowDao.searchByKey(formDataId, range, key);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive) {
+        return dataRowDao.searchByKey(formDataId, range, key, isCaseSensitive);
     }
 }

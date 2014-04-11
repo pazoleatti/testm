@@ -33,7 +33,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
             "Пользователь", "Роль пользователя", "IP пользователя"};
 
-    private final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(LogSystemXlsxReportBuilder.class);
 
     public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {
         super(fileName, postfix);
