@@ -16,11 +16,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColumnUiHandlers>
@@ -133,7 +137,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     @UiField
     TextArea refBookAttrFilterArea;
 
-	@Inject
+    @UiField
+    Label errorMsg;
+
+    @Inject
 	@UiConstructor
 	public FormTemplateColumnView(Binder binder) {
 		init();
@@ -310,7 +317,31 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiHandler("stringMaxLengthBox")
 	public void onStringMaxLengthBox(KeyUpEvent event) {
-		((StringColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(stringMaxLengthBox.getValue());
+        final Integer maxLength = ((StringColumn) columns.get(columnListBox.getSelectedIndex())).MAX_LENGTH;
+        int length = stringMaxLengthBox.getValue();
+
+        Timer timer = new Timer() {
+            @Override
+            public void run() {
+                errorMsg.setText(null);
+                stringMaxLengthPanel.getElement().getStyle().clearColor();
+            }
+        };
+
+        if (length > maxLength) {
+            errorMsg.setText("Ограничение длины " + maxLength);
+            stringMaxLengthPanel.getElement().getStyle().setProperty("color", "red");
+            stringMaxLengthBox.setText(maxLength.toString());
+            timer.schedule(3000);
+        } else {
+            errorMsg.setText(null);
+            stringMaxLengthPanel.getElement().getStyle().clearColor();
+            stringMaxLengthBox.getElement().getStyle().clearBorderColor();
+        }
+
+        StringColumn column = ((StringColumn) columns.get(columnListBox.getSelectedIndex()));
+        column.setPrevLength(column.getMaxLength());
+        column.setMaxLength(stringMaxLengthBox.getValue());
 	}
 
 	@UiHandler("numericMaxLengthBox")

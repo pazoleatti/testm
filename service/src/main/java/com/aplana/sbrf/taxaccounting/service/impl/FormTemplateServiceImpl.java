@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
@@ -56,6 +57,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Autowired
     TAUserService userService;
+
+    @Autowired
+    FormDataDao formDataDao;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -266,12 +270,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
 		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
 
-		validateFormColumns(formTemplate.getColumns(), logger);
+		validateFormColumns(formTemplate.getColumns(), formTemplate.getType().getId(), logger);
 		validateFormStyles(formTemplate.getStyles(), logger);
 		validateFormRows(formTemplate.getRows(), logger);
 	}
 
-	private void validateFormColumns(List<Column> columns, Logger logger){
+	private void validateFormColumns(List<Column> columns, Integer formTemplateTypeId, Logger logger){
 		checkSet.clear();
 
 		for (Column column : columns) {
@@ -290,7 +294,17 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 						"\" слишком велико (фактическое: " + column.getAlias().getBytes().length
 						+ ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
 			}
-		}
+
+            if (column instanceof StringColumn && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
+                List<String> formDataList = formDataDao.getStringList(column.getId(), formTemplateTypeId);
+                for (String string : formDataList) {
+                    if (string != null && string.length() > ((StringColumn) column).getMaxLength()) {
+                        logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
+                        break;
+                    }
+                }
+            }
+        }
 	}
 
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
