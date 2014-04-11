@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.Formats;
+
 import java.io.Serializable;
 
 /**
@@ -57,6 +59,9 @@ public class RefBookAttribute implements Serializable {
 
 	/** Определяет порядок сортировки данных по умолчанию */
 	private Integer sortOrder;
+
+    /** формат отображения даты */
+    private Formats format;
 
 	/**
 	 * Возвращает код атрибута
@@ -234,7 +239,15 @@ public class RefBookAttribute implements Serializable {
 		this.sortOrder = sortOrder;
 	}
 
-	@Override
+    public Formats getFormat() {
+        return format;
+    }
+
+    public void setFormat(Formats format) {
+        this.format = format;
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
@@ -279,6 +292,9 @@ public class RefBookAttribute implements Serializable {
 		if (sortOrder != null ? !sortOrder.equals(that.sortOrder) : that.sortOrder != null) {
 			return false;
 		}
+        if (format != null ? format.equals(that.format) : that.format != null){
+            return false;
+        }
 		return true;
 	}
 
@@ -302,6 +318,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", required=").append(required);
         sb.append(", unique=").append(unique);
 		sb.append(", sortOrder=").append(sortOrder);
+        sb.append(", format=").append(format.getFormat());
 		sb.append('}');
 		return sb.toString();
 	}

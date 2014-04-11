@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -87,7 +89,15 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 								break;
 							case DATE:
 								if (value.getDateValue() == null) tableCell = "";
-								else tableCell = value.getDateValue().toString();
+								else {
+                                    if (attribute.getFormat()!=null){
+                                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(attribute.getFormat().getFormat());
+                                        tableCell = simpleDateFormat.format(value.getDateValue());
+                                    }
+                                    else {
+                                        tableCell = value.getDateValue().toString();
+                                    }
+                                }
 								break;
 							case STRING:
 								if (value.getStringValue() == null) tableCell = "";
