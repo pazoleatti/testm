@@ -578,8 +578,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key) {
-        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, key);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive) {
+        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, key, isCaseSensitive);
         // get query and params
         String query = sql.getFirst();
         Map<String, Object> params = sql.getSecond();
@@ -614,7 +614,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
      * Метод возвращает пару - строку запроса и параметры
      * @return
      */
-    private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, String key){
+    private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, String key, boolean isCaseSensitive){
 
         StringBuffer sql = new StringBuffer();
         sql.append(
@@ -628,7 +628,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                     "                LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id\n" +
                     "                ORDER BY dr.ord \n" +
                     "            ) \n" +
-                    "            WHERE val like :key \n" +
+
+                    // check case sensitive
+                    (
+                            isCaseSensitive ?
+                    "            WHERE val like :key \n":
+                    "            WHERE LOWER(val) like LOWER(:key) \n"
+                    )+
+
                     "            ORDER BY row_index, column_index "
         );
 

@@ -63,6 +63,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     Button close;
     @UiField
     ModalWindow modalWindow;
+    @UiField
+    CheckBox caseSensitive;
 
     @Inject
     public FormSearchView(Binder uiBinder, EventBus eventBus) {
@@ -212,5 +214,10 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public void clearSearchInput() {
         filterText.setText("");
+    }
+
+    @Override
+    public boolean isCaseSensitive(){
+        return caseSensitive.getValue();
     }
 }
