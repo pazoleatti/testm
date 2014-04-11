@@ -499,6 +499,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
                                 fixedRows = result.isFixedRows();
+                                getView().setupSelectionModel(fixedRows);
 
                                 switch (result.getFormMode()) {
                                     case READ_UNLOCKED:
