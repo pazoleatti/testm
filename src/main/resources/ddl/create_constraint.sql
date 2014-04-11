@@ -1,3 +1,4 @@
+alter table form_kind add constraint form_kind_pk primary key (id);
 alter table configuration add constraint configuration_pk primary key (code);
 
 alter table ref_book_oktmo add constraint ref_book_oktmo_pk primary key (id);
@@ -120,12 +121,11 @@ alter table declaration_data add constraint declaration_data_fk_data_xlsx foreig
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique(report_period_id, department_id, declaration_template_id);
 
-
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_id foreign key (department_id) references department(id);
 alter table form_data add constraint form_data_fk_period_id foreign key (report_period_id) references report_period(id);
-alter table form_data add constraint form_data_chk_kind check(kind in (1,2,3,4,5));
+alter table form_data add constraint form_data_fk_kind foreign key (kind) references form_kind(id);
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));
@@ -167,9 +167,9 @@ alter table date_value add constraint date_value_fk_row_id foreign key (row_id) 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
+alter table department_form_type add constraint dept_form_type_fk_kind foreign key (kind) references form_kind(id);
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);
-alter table department_form_type add constraint dept_form_type_chk_kind check (kind in (1,2,3,4,5));
 
 alter table declaration_source add constraint declaration_source_pk primary key (department_declaration_type_id,src_department_form_type_id );
 alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type(id);
@@ -205,10 +205,10 @@ alter table log_business add constraint log_business_chk_event_id check (event_i
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
 alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
-alter table log_system add constraint log_system_chk_form_kind_id check (form_kind_id in (1, 2, 3, 4, 5));
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 503, 601));
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 501, 502, 503, 601) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_id is not null);
+alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
 alter table log_system add constraint log_system_fk_report_period_id foreign key (report_period_id) references report_period(id);

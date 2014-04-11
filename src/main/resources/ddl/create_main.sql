@@ -1,3 +1,11 @@
+create table form_kind (
+  id number(18) not null,
+  name varchar2(100) not null
+);
+comment on table form_kind is 'Тип налоговой формы';
+comment on column form_kind.id is 'Идентификатор записи';
+comment on column form_kind.name is 'Наименование';
+--------------------------------------------------------------------------------------------------------------
 create table ref_book_oktmo (
   id number(18) not null,
   code varchar2(4000) not null,
