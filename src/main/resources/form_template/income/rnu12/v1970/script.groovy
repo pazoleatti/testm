@@ -233,8 +233,7 @@ def getTotalRow(def alias, def title) {
 }
 
 def BigDecimal calc11(def row) {
-    if (row.advancePayment != null && row.advancePayment > 0
-            && row.advancePayment != null && row.periodCounts != null && row.periodCounts != 0) {
+    if (row.advancePayment != null && row.advancePayment > 0 && row.periodCounts != null && row.periodCounts != 0) {
         return (row.advancePayment / row.periodCounts).setScale(2, RoundingMode.HALF_UP)
     }
     return null

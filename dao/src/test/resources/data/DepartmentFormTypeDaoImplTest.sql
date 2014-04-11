@@ -1,3 +1,9 @@
+insert into form_kind (id, name) values (1, 'Первичная');
+insert into form_kind (id, name) values (2, 'Консолидированная');
+insert into form_kind (id, name) values (3, 'Сводная');
+insert into form_kind (id, name) values (4, 'Форма УНП');
+insert into form_kind (id, name) values (5, 'Выходная');
+
 insert into declaration_type (id, name, tax_type) values (1, 'Вид декларации (тест)', 'T');
 
 -- TODO: сейчас с источниками бардак формы являются источниками друг друга без учёта вида налога

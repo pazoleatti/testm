@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
@@ -58,6 +59,12 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     FlexiblePager pager;
     @UiField
     Label countLabel;
+    @UiField
+    Button close;
+    @UiField
+    ModalWindow modalWindow;
+    @UiField
+    CheckBox caseSensitive;
 
     @Inject
     public FormSearchView(Binder uiBinder, EventBus eventBus) {
@@ -162,6 +169,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         }
     }
 
+    @UiHandler("close")
+    public void onCloseClicked(ClickEvent event){
+        modalWindow.hide();
+    }
+
     @Override
     public String getSearchKey() {
         return filterText.getText();
@@ -202,5 +214,10 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public void clearSearchInput() {
         filterText.setText("");
+    }
+
+    @Override
+    public boolean isCaseSensitive(){
+        return caseSensitive.getValue();
     }
 }
