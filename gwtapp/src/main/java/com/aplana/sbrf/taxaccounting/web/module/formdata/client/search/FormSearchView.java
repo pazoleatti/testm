@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
@@ -58,6 +59,10 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     FlexiblePager pager;
     @UiField
     Label countLabel;
+    @UiField
+    Button close;
+    @UiField
+    ModalWindow modalWindow;
 
     @Inject
     public FormSearchView(Binder uiBinder, EventBus eventBus) {
@@ -160,6 +165,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         if (!filterText.getText().isEmpty()){
             getUiHandlers().onRangeChange(0, pager.getPageSize());
         }
+    }
+
+    @UiHandler("close")
+    public void onCloseClicked(ClickEvent event){
+        modalWindow.hide();
     }
 
     @Override

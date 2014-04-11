@@ -10,9 +10,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualReveal
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
@@ -594,5 +594,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     public void onSetFocus(SetFocus event) {
         getView().setFocus(event.getRowIndex());
+    }
+
+    @Override
+    protected void onHide() {
+        removeFromPopupSlot(formSearchPresenter);
+        formSearchPresenter.close();
     }
 }

@@ -89,4 +89,10 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
 
         return count;
     }
+
+    @Override
+    public void close(){
+        getView().clearSearchInput();
+        getView().clearTableData();
+    }
 }

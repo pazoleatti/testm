@@ -13,15 +13,15 @@
 
         .table {
             position: absolute !important;
-            bottom: 60px;
+            bottom: 90px;
             right: 10px;
             left: 10px;
-            top: 114px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
+            top: 90px;     /*@see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataView.DEFAULT_TABLE_TOP_POSITION"*/
         }
 
         .pager {
             position: absolute;
-            bottom: 10px;
+            bottom: 50px;
             right: 0;
         }
 
@@ -30,9 +30,15 @@
             width: 100%;
             height: 38px;
         }
+
+        .floatRight{
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
     </ui:style>
 
-    <dw:ModalWindow modal="false" glassEnabled="false" iconUrl="resources/img/add.png" title="Поиск" >
+    <dw:ModalWindow modal="false" glassEnabled="false" iconUrl="resources/img/add.png" title="Поиск" ui:field="modalWindow">
         <g:VerticalPanel height="400px" width="600px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:HorizontalPanel height="50px" spacing="10" verticalAlignment="middle" width="100%">
                 <g:VerticalPanel width="100%">
@@ -61,6 +67,9 @@
                     </g:cell>
                     <g:cell>
                         <pager:FlexiblePager ui:field="pager" location="CENTER" showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true" type="formDataList" addStyleNames="{style.pager}"/>
+                    </g:cell>
+                    <g:cell verticalAlignment="middle">
+                        <g:Button addStyleNames="{style.floatRight}" ui:field="close" text="Закрыть"/>
                     </g:cell>
                 </g:VerticalPanel>
             </g:HorizontalPanel>
