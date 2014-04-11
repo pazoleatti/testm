@@ -215,18 +215,27 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
             List<RefBookRecordDereferenceValue> refBookDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-            List<RefBookAttribute> attribute = refBook.getAttributes();
+            List<RefBookAttribute> attributes = refBook.getAttributes();
 
-            Map<String, String> dereferenceRecord = refBookHelper.singleRecordDereference(refBook, provider, attribute, record);
+            Map<Long, String> dereferenceRecord = refBookHelper.singleRecordDereferenceWithAttrId2(refBook, provider, attributes, record);
+            Map<Long, List<Long>> attrId2Map = refBookHelper.getAttrToListAttrId2Map(attributes);
 
-            for (RefBookAttribute refBookAttribute : attribute) {
-                String dereferanceValue = dereferenceRecord.get(refBookAttribute.getAlias());
+            for (RefBookAttribute refBookAttribute : attributes) {
+                String dereferanceValue = dereferenceRecord.get(refBookAttribute.getId());
                 if (refBookAttribute.isVisible()) {
+
                     RefBookRecordDereferenceValue dereferenceValue = new RefBookRecordDereferenceValue(
                             refBookAttribute.getId(),
                             refBookAttribute.getAlias(),
                             dereferanceValue);
                     refBookDereferenceValues.add(dereferenceValue);
+
+                    // добавляем разоименованные значения по аттрибутам второго уровня
+                    if (attrId2Map.get(refBookAttribute.getId()) != null) {
+                        for (Long id2 : attrId2Map.get(refBookAttribute.getId())) {
+                            dereferenceValue.getAttrId2DerefValueMap().put(id2, dereferenceRecord.get(id2));
+                        }
+                    }
                 }
                 if (refBookAttribute.getId().equals(action.getRefBookAttrId())) {
                     item.setDereferenceValue(dereferanceValue);
