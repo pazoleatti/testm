@@ -227,11 +227,11 @@
                 <!--Панель кнопок-->
 
                 <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.btnPanel}">
-                    <g:HorizontalPanel ui:field="addRemoveRowsBlock">
+                    <g:HorizontalPanel ui:field="addRemoveRowsBlock" verticalAlignment="middle">
                         <style:LinkButton ui:field="addRowButton" text="Добавить строку" addStyleNames="{style.btnMarginRight}"
                                           img="resources/img/row-add.png"/>
                         <style:LinkButton ui:field="removeRowButton" text="Удалить строку"
-                                          img="resources/img/row-delete.png"/>
+                                          img="resources/img/row-delete.png" addStyleNames="{style.btnMarginRight}"/>
                         <g:Label addStyleNames="{style.verSep}"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel >

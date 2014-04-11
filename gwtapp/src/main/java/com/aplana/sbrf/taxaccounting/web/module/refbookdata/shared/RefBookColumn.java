@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public class RefBookColumn implements Serializable{
 	private RefBookAttributeType attributeType;
 	private Long refBookAttributeId;
 	private HorizontalAlignment alignment;
+    private Formats format;
 
    /** Обязательность заполнения */
     private boolean required;
@@ -87,5 +89,13 @@ public class RefBookColumn implements Serializable{
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public Formats getFormat() {
+        return format;
+    }
+
+    public void setFormat(Formats format) {
+        this.format = format;
     }
 }

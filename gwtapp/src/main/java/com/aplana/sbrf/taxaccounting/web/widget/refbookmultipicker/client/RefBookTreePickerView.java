@@ -429,6 +429,17 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
+    public String getOtherDereferenceValue(Long attrId, Long attrId2) {
+        Set<RefBookUiTreeItem> selectedItems = getSelectedSet();
+        if (selectedItems != null && !selectedItems.isEmpty()) {
+            List<RefBookRecordDereferenceValue> dereferenceValues =
+                    selectedItems.iterator().next().getRefBookTreeItem().getRefBookRecordDereferenceValues();
+            return RefBookPickerUtils.getDereferenceValue(dereferenceValues, attrId, attrId2);
+        }
+        return null;
+    }
+
+    @Override
     public Boolean isMultiSelect() {
         return multiSelect;
     }
