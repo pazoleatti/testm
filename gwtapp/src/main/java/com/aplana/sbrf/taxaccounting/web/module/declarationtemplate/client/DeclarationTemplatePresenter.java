@@ -18,8 +18,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -87,9 +85,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        static final String ERROR_RESP = "errorUuid";
-        static final String SUCCESS_RESP = "uuid";
-        static final String ERROR = "error";
+        static final String ERROR_RESP = "errorUuid ";
+        static final String SUCCESS_RESP = "uuid ";
+        static final String ERROR = "error ";
 
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
@@ -301,9 +299,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void uploadDectResponseWithUuid(String uuid) {
         if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
-            JSONValue jsonValue = JSONParser.parseLenient(uuid);
-            String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
-            LogAddEvent.fire(this, value);
+            LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Форма сохранена");
         }
@@ -312,9 +308,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
-        JSONValue jsonValue = JSONParser.parseLenient(uuid);
-        String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
-        LogAddEvent.fire(this, value);
+        LogAddEvent.fire(this, uuid);
         Dialog.infoMessage("Не удалось импортировать шаблон");
     }
 
