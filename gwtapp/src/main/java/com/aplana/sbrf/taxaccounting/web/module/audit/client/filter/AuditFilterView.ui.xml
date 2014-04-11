@@ -93,7 +93,7 @@
         </g:cell>
 
         <g:cell width="50%">
-            <g:VerticalPanel spacing="0" width="100%">
+            <g:VerticalPanel spacing="0" width="100%" height="78px">
                 <g:cell  height="28px">
                     <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%" addStyleNames="{style.borderCollapse}">
                         <g:cell horizontalAlignment="right" width="145px">

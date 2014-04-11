@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 
+import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.google.gwt.cell.client.Cell;
@@ -14,10 +15,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
@@ -59,6 +57,14 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     Button search;
     @UiField
     FlexiblePager pager;
+    @UiField
+    Label countLabel;
+    @UiField
+    Button close;
+    @UiField
+    ModalWindow modalWindow;
+    @UiField
+    CheckBox caseSensitive;
 
     @Inject
     public FormSearchView(Binder uiBinder, EventBus eventBus) {
@@ -163,6 +169,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         }
     }
 
+    @UiHandler("close")
+    public void onCloseClicked(ClickEvent event){
+        modalWindow.hide();
+    }
+
     @Override
     public String getSearchKey() {
         return filterText.getText();
@@ -172,6 +183,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void setTableData(int start, List<FormDataSearchResult> resultList, int size) {
         searchResultTable.setRowData(start, resultList);
         searchResultTable.setRowCount(size, true);
+        countLabel.setText("Найдено:" + size);
     }
 
     @Override
@@ -196,10 +208,16 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public void clearTableData() {
         searchResultTable.setRowCount(0);
+        countLabel.setText("Найдено:");
     }
 
     @Override
     public void clearSearchInput() {
         filterText.setText("");
+    }
+
+    @Override
+    public boolean isCaseSensitive(){
+        return caseSensitive.getValue();
     }
 }

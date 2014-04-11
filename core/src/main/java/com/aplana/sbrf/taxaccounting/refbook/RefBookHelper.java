@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * User: avanteev
+ * Универсальный помощник для работы со справочниками
+ * @author avanteev
  */
 public interface RefBookHelper {
 
@@ -21,4 +22,23 @@ public interface RefBookHelper {
 
 	Map<String, String> singleRecordDereference(RefBook refBook, RefBookDataProvider provider,
 			List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
+
+    /**
+     * Получить спискок атрибутов второго уровня (для отображения в связной ячейке) для списка атрибутов справочника
+     * @param attributes список атрибутов
+     * @return список соответсвий атрубут к списку атрибутов(потому что один атрибут может быть в разных колонках)
+     */
+    Map<Long, List<Long>> getAttrToListAttrId2Map(List<RefBookAttribute> attributes);
+
+    /**
+     * Получить список соотвествий идентификатора к разименованному значению записи справочника
+     * В том же списке разименованные значения ссылочных атрибутов полученные по атрибуту второго уровня
+     * @param refBook справоник
+     * @param provider продайдер спраовчнка
+     * @param attributes список атрибутов видимых колонок
+     * @param record запись в справочнике
+     * @return список соответсвий
+     */
+    Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
+                                                         List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
 }

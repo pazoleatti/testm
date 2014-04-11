@@ -390,7 +390,7 @@ void calc() {
         // Признак физической поставки
         def Boolean deliveryPhis = null
         if (row.signPhis != null) {
-            deliveryPhis = getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1
+            deliveryPhis = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
         }
         if (deliveryPhis != null && deliveryPhis) {
             row.countryCode2 = null
@@ -401,6 +401,9 @@ void calc() {
             row.region2 = null
             row.city2 = null
             row.settlement2 = null
+        } else {
+            row.settlement1 = row.city1 ?: row.settlement1
+            row.settlement2 = row.city2 ?: row.settlement2
         }
 
         // Сбарсываем "Регион РФ" если страна не Россия

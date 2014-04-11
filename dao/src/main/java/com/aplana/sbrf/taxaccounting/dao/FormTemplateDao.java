@@ -48,7 +48,7 @@ public interface FormTemplateDao {
 	 * @param formTypeId идентификатор вида налоговой формы
 	 * @return идентификатор описания налоговой формы
 	 * @throws com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException если не удалось найти активное описание налоговой формы по заданному типу,
-	 * 	или если обнаружено несколько действуюшие описаний по данному виду формы 
+	 * 	или если обнаружено несколько действуюших описаний по данному виду формы
 	 */
 	int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 

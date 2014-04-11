@@ -1,3 +1,6 @@
+insert into form_kind (id, name) values (1, 'Первичная');
+insert into form_kind (id, name) values (2, 'Консолидированная');
+
 -- DEPARTMENT
 insert into department (id, name, parent_id, type) values (1, 'testName1', null, 1);
 insert into department (id, name, parent_id, type) values (2, 'testName2', 1, 2);

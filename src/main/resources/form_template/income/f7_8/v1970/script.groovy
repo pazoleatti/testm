@@ -485,6 +485,7 @@ def writeResultsToRowOrCheck(def dataRowsList, def totalRow, def check) {
             if (totalResults[col] != totalRow[col]) {
                 def index = totalRow.getIndex()
                 def errorMsg = "Строка $index: "
+                // TODO Исправить на WRONG_TOTAL
                 logger.error(errorMsg + "Итоговые значения рассчитаны неверно!")
                 return
             }

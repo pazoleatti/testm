@@ -21,4 +21,11 @@ public interface ColumnDao {
 	 * @param form форма
 	 */
 	void saveFormColumns(FormTemplate form);
+
+    /**
+     * Получить список атрибутов второго уровня для атрибута который используется в колонках
+     * @param attributeId атррибут
+     * @return список атрибутов второго уровня всех колонок где используется attributeId
+     */
+    List<Long> getAttributeId2(Long attributeId);
 }

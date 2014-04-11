@@ -135,8 +135,11 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
                     if (linkedCells != null) {
                         for (Cell refCell : linkedCells) {
                             ReferenceColumn referenceColumn = (ReferenceColumn)refCell.getColumn();
-                            refCell.setRefBookDereference(refBookPiker.getOtherDereferenceValue(
-                                    referenceColumn.getRefBookAttributeId()));
+                            Long attrId = referenceColumn.getRefBookAttributeId();
+                            Long attrId2 = referenceColumn.getRefBookAttributeId2();
+                            refCell.setRefBookDereference( attrId2 != null && attrId2 != 0 ?
+                                    refBookPiker.getOtherDereferenceValue(attrId, attrId2):
+                                    refBookPiker.getOtherDereferenceValue(attrId));
                         }
                     }
 

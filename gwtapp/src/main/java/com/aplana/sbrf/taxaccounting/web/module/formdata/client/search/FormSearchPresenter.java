@@ -27,6 +27,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         void updateData(int pageNumber);
         void clearTableData();
         void clearSearchInput();
+
+        boolean isCaseSensitive();
     }
 
     private final DispatchAsync dispatcher;
@@ -60,6 +62,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         action.setFrom(start+1);
         action.setTo(start + count);
         action.setFormDataId(formDataId);
+        action.setCaseSensitive(getView().isCaseSensitive());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
             @Override
             public void onSuccess(SearchResult result) {
@@ -88,5 +91,11 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         }
 
         return count;
+    }
+
+    @Override
+    public void close(){
+        getView().clearSearchInput();
+        getView().clearTableData();
     }
 }

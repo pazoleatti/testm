@@ -1,3 +1,6 @@
+insert into form_kind (id, name) values (1, 'Первичная');
+insert into form_kind (id, name) values (2, 'Консолидированная');
+
 -- DEPARTMENT
 insert into department (id, name, parent_id, type) values (1, 'testName1', null, 1);
 insert into department (id, name, parent_id, type) values (2, 'testName2', 1, 2);
@@ -7,11 +10,11 @@ insert into department (id, name, parent_id, type) values (5, 'testName5', 1, 2)
 insert into department (id, name, parent_id, type) values (6, 'testName6', 2, 3);
 insert into department (id, name, parent_id, type) values (7, 'testName7', 6, 4);
 insert into department (id, name, parent_id, type) values (8, 'testName8', 2, 3);
-insert into department (id, name, parent_id, type) values (9, 'testName9', 6, 4)
+insert into department (id, name, parent_id, type) values (9, 'testName9', 6, 4);
 insert into department (id, name, parent_id, type) values (10, 'testName10', 2, 3)
-insert into department (id, name, parent_id, type) values (11, 'testName11', 1, 2)
-insert into department (id, name, parent_id, type) values (12, 'testName12', 1, 2)
-insert into department (id, name, parent_id, type) values (13, 'testName13', 1, 2)
+insert into department (id, name, parent_id, type) values (11, 'testName11', 1, 2);
+insert into department (id, name, parent_id, type) values (12, 'testName12', 1, 2);
+insert into department (id, name, parent_id, type) values (13, 'testName13', 1, 2);
 
 -- DECLARATION_TYPE
 insert into declaration_type (id, tax_type, name) values (1, 'T', 'testName1');

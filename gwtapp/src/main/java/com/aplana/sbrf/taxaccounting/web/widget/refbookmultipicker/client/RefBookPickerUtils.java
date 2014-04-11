@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBoo
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.google.gwt.view.client.ProvidesKey;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,13 +41,34 @@ public class RefBookPickerUtils {
      *
      * @param recordDereferenceValues recordDereferenceValues разименновоннаые значения атрибутов у записи справоника
      * @param attrId                  идентификатор атрибута
-     * @return разименног ованного значение или null
+     * @return разименованного значение или null
      */
     public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, Long attrId) {
         if (recordDereferenceValues != null && !recordDereferenceValues.isEmpty() && attrId != null) {
             for (RefBookRecordDereferenceValue value : recordDereferenceValues) {
                 if (attrId.equals(value.getValueAttrId())) {
                     return value.getDereferenceValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Поиск разименноованного значения для атрибута записи справочника по идентификатору атрибута и атрибуту второго уровня
+     *
+     * @param recordDereferenceValues recordDereferenceValues разименновоннаые значения атрибутов у записи справоника
+     * @param attrId                  идентификатор атрибута
+     * @param attrId2                 идентификатор атрибута второго уровня
+     * @return разименованного значение или null
+     */
+    public static String getDereferenceValue(List<RefBookRecordDereferenceValue> recordDereferenceValues, Long attrId, Long attrId2) {
+        if (recordDereferenceValues != null && !recordDereferenceValues.isEmpty() && attrId != null) {
+            for (RefBookRecordDereferenceValue value : recordDereferenceValues) {
+                if (attrId.equals(value.getValueAttrId())) {
+                    if (value.getAttrId2DerefValueMap().containsKey(attrId2)){
+                        return value.getAttrId2DerefValueMap().get(attrId2);
+                    }
                 }
             }
         }

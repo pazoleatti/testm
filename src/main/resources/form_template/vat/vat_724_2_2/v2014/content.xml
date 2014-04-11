@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Расчёт суммы налога по операциям по реализации товаров (работ, услуг), обоснованность применения налоговой
         ставки 0 процентов по которым документально подтверждена
     </name>

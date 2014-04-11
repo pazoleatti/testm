@@ -203,6 +203,7 @@ void logicCheck() {
     // 5. Проверка итоговых значений по всей форме
     def total = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
     if (getDataRow(dataRows, 'total').percIncome != total) {
+        // TODO Исправить на WRONG_TOTAL
         logger.error('Итоговые значения рассчитаны неверно!')
     }
 }

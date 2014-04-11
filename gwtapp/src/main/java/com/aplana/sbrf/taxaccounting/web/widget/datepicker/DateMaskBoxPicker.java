@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
+import com.aplana.gwt.client.mask.ui.DayMonthMaskBox;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -40,8 +43,14 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
 
+    /*@UiField(provided = true)
+    DateMaskBoxAbstract dateBox;*/
+
+    private DateMaskBoxAbstract dateBox;
+
     @UiField
-    DateMaskBox dateBox;
+    HorizontalPanel dateBoxPanel;
+
     @UiField
     Image calendarImage,
             clearImage;
@@ -68,7 +77,21 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     private Date endLimitDate;
 
     public DateMaskBoxPicker() {
+        this(Formats.DD_MM_YYYY);
+    }
+
+    public DateMaskBoxPicker(Formats format) {
+        if (Formats.DD_MM.equals(format)){
+            dateBox = new DayMonthMaskBox();
+        }
+        else
+        {
+            dateBox = new DateMaskBox();
+        }
         initWidget(ourUiBinder.createAndBindUi(this));
+
+        dateBoxPanel.clear();
+        dateBoxPanel.add(dateBox);
 
         MouseOverHandler mouseOverHandler = new MouseOverHandler() {
             @Override
