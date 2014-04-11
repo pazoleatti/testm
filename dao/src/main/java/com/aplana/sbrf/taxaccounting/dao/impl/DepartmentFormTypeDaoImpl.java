@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -22,10 +24,12 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class DepartmentFormTypeDaoImpl extends AbstractDao implements DepartmentFormTypeDao {
 
+	private static final Log logger = LogFactory.getLog(DepartmentFormTypeDaoImpl.class);
+
     @Autowired
     DepartmentDao departmentDao;
 	
-	public static final String DUBLICATE_ERROR = "Налоговая форма указанного типа и вида уже назначена подразделению";
+	public static final String DUPLICATE_ERROR = "Налоговая форма указанного типа и вида уже назначена подразделению";
 	
     private static final RowMapper<DepartmentFormType> DFT_MAPPER = new RowMapper<DepartmentFormType>() {
         @Override
@@ -177,7 +181,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             } else{
                 formTypeKind.setPerformer(departmentDao.getDepartment(performerId));
             }
-
             return formTypeKind;
         }
     };
@@ -292,6 +295,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	                }
 	        );
     	} catch (DataIntegrityViolationException e){
+			logger.error(e.getMessage(), e);
     		throw new DaoException("Назначение является источником или приемником данных", e);
     	}
     }
@@ -305,7 +309,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	                        " values (?, ?, seq_department_form_type.nextval, ?)",
 	                new Object[]{ departmentId, formTypeId, formKindId });
     	} catch (DataIntegrityViolationException e){
-    		throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
+			logger.error(e.getMessage(), e);
+    		throw new DaoException(DUPLICATE_ERROR, e);
     	} 
     }
 
@@ -318,7 +323,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                             " values (?, ?, seq_department_form_type.nextval, ?, ?)",
                     new Object[]{ departmentId, typeId, kindId, performerId });
         } catch (DataIntegrityViolationException e){
-            throw new DaoException("Налоговая форма указанного типа и вида уже назначена подразделению", e);
+			logger.error(e.getMessage(), e);
+            throw new DaoException(DUPLICATE_ERROR, e);
         }
     }
 

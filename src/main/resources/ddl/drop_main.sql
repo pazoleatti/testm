@@ -78,3 +78,4 @@ drop sequence seq_form_type;
 drop table configuration;
 drop table ref_book_oktmo;
 drop sequence seq_ref_book_oktmo;
+drop table form_kind;

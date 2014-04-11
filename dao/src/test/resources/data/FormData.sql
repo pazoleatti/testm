@@ -1,3 +1,10 @@
+-- Типы налоговых форм
+insert into form_kind (id, name) values (1, 'Первичная');
+insert into form_kind (id, name) values (2, 'Консолидированная');
+insert into form_kind (id, name) values (3, 'Сводная');
+insert into form_kind (id, name) values (4, 'Форма УНП');
+insert into form_kind (id, name) values (5, 'Выходная');
+
 insert into form_data(id, form_template_id, department_id, state, kind, report_period_id, return_sign) values (1, 1, 1, 1, 3, 1, 0);
 	
 -- Для проверки FormDataDao.find

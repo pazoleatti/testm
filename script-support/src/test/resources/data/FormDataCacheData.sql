@@ -1,10 +1,14 @@
+-- Типы налоговых форм
+INSERT INTO form_kind (id, name) VALUES (1, 'Первичная');
+INSERT INTO form_kind (id, name) VALUES (2, 'Консолидированная');
+INSERT INTO form_kind (id, name) VALUES (3, 'Сводная');
+INSERT INTO form_kind (id, name) VALUES (4, 'Форма УНП');
+INSERT INTO form_kind (id, name) VALUES (5, 'Выходная');
+
 -- Справочники
-insert into ref_book(id, name) values
-(1, 'Книга');
-insert into ref_book(id, name) values
-(2, 'Человек');
-insert into ref_book(id, name) values
-(3, 'Библиотека');
+insert into ref_book(id, name) values (1, 'Книга');
+insert into ref_book(id, name) values (2, 'Человек');
+insert into ref_book(id, name) values (3, 'Библиотека');
 
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width) values
   (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10);
