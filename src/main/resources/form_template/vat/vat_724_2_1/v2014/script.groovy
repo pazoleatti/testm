@@ -150,8 +150,9 @@ def logicCheck() {
     }
 
     // 2. Проверка итоговых значений
-    if (i4 != f4 || i5 != f5)
+    if (i4 != f4 || i5 != f5) {
         logger.error("Итоговые значения рассчитаны неверно!")
+    }
 
 }
 
@@ -197,8 +198,8 @@ void consolidation() {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
-                if (srcRow.getAlias()!= null && !srcRow.getAlias().equals('itog')) {
-                    def row= dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
+                if (srcRow.getAlias() != null && !srcRow.getAlias().equals('itog')) {
+                    def row = dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
                     row.realizeCost = (row.realizeCost ?: 0) + (srcRow.realizeCost ?: 0)
                     row.obtainCost = (row.obtainCost ?: 0) + (srcRow.obtainCost ?: 0)
                 }

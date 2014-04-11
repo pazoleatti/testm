@@ -103,14 +103,13 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
                     case FAKE:
                         compareResult = newIntersection.compareTo(intersection);
                         //Варианты 15
-                        if (compareResult == -2){
+                        if (compareResult == -2 || compareResult == -7 || compareResult == -16){
                             DeclarationTemplate formTemplate = declarationTemplateService.get(intersection.getTemplateId());
                             formTemplate.setVersion(createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime()));
                             declarationTemplateService.save(formTemplate);
                         }
                         //Варианты 16,18a,19,20
-                        else if (compareResult == 5 || compareResult == -7 || compareResult == -1 || compareResult == -16 || compareResult == 10
-                                || compareResult == 16){
+                        else if (compareResult == 5 || compareResult == -1 || compareResult == 10 || compareResult == 16){
                             declarationTemplateService.delete(intersection.getTemplateId());
                         }
                         break;

@@ -48,6 +48,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     DateMaskBoxPicker versionEnd;
     @UiField
     LinkAnchor allVersion;
+    @UiField
+    HorizontalPanel buttonBlock;
 
     private boolean isVersionMode = false;
     private boolean readOnly;
@@ -360,8 +362,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setReadOnlyMode(boolean readOnly) {
         this.readOnly = readOnly;
-        save.setVisible(readOnly);
-        cancel.setVisible(readOnly);
+        buttonBlock.setVisible(readOnly);
     }
 
     @Override

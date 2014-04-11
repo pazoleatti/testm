@@ -9966,7 +9966,7 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{NomDog}.charAt( 16 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{gorod1}.charAt( 16 )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="2065bf57-91f0-46a3-8e12-bedeb5a3e159" style="mark" x="339" y="545" width="15" height="20"/>
