@@ -47,6 +47,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 declarationTemplateExt = new DeclarationTemplateExt();
                 declarationTemplate = new DeclarationTemplate();
                 declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+                declarationTemplateExt.setEndDate(null);
                 declarationTemplate.setVersion(new Date());
                 declarationTemplate.setType(result.getDeclarationType());
                 getView().setDeclarationTemplate(declarationTemplateExt);
@@ -64,6 +65,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         declarationTemplateExt = new DeclarationTemplateExt();
         declarationTemplate = new DeclarationTemplate();
         declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+        declarationTemplateExt.setEndDate(null);
         declarationTemplate.setVersion(new Date());
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(0);

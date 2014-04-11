@@ -199,6 +199,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
                     @Override
                     public void yes() {
+                        driver.flush();
                         getUiHandlers().save();
                         getUiHandlers().close();
                     }

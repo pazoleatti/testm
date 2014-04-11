@@ -151,7 +151,7 @@
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Файл jrxml"/>
                             <!--TODO (Ramil Timerbaev) нужно допилить виджеты загрузки на подобие "загрузить"-->
-                            <g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
+                            <g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data; charset=utf-8" method="post">
                                 <g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
                             </g:FormPanel>
                             <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton"
