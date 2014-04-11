@@ -49,7 +49,7 @@ def autoFillColumns = ['rowNum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign', 'offshore', 'skolkovo']
+def nonEmptyColumns = ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign']
 
 void accepted() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
@@ -130,22 +130,10 @@ void logicCheck() {
         editSignCode = refBookService.getRecordData(80, row.editSign).CODE.numberValue
         // Проверка заполненности полей в строках НЕ на удаление
         if (row.editSign == null || editSignCode != 2) {
-            nonEmptyColumns.each {
-                def rowCell = row.getCell(it)
-                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                    def msg = rowCell.column.name
-                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-                }
-            }
+            checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
         } else {
             // Проверка заполненности полей в строках на удаление
-            ['rowNum', 'editSign'].each {
-                def rowCell = row.getCell(it)
-                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                    def msg = rowCell.column.name
-                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-                }
-            }
+            checkNonEmptyColumns(row, rowNum, ['rowNum', 'editSign'], logger, false)
         }
         // Проверка на заполнение атрибута «Запись справочника»
         if (row.editSign != null && row.refBookRecord == null && editSignCode != 0) {
