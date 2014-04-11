@@ -4162,7 +4162,7 @@ Arrays.asList(1)]]></variableExpression>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="83" width="595" height="30" uuid="e308ee3d-2174-4ea5-96bc-1c445a4bf7ed">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.1_Лист01"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 01"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.12f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
@@ -13777,7 +13777,7 @@ Arrays.asList(1)]]></variableExpression>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="811" width="595" height="16" uuid="15f2a087-551b-48b4-8736-beee08da8611">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.2_Разд.1_1.1"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 1, 1.1"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.05f"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -13890,7 +13890,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="99216e12-757b-43f5-b8a7-b6a4c026fc95">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.3_Разд.1_1.2"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 1, 1.2"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -16439,7 +16439,7 @@ Arrays.asList(1)]]></variableExpression>
 			</staticText>
 			<staticText>
 				<reportElement x="-1" y="812" width="595" height="16" uuid="49fae53e-25d5-4ec9-aa16-23fc536af204">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.3_Разд.1_1.2"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 1, 1.2"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.05f"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -16540,7 +16540,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="084085d2-b5fe-486a-8abc-797b522b2388">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.4_Разд.1_1.3"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 1, 1.3"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -17704,7 +17704,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="82c52bb9-4979-4f85-9507-70837be5a35c">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.5_Лист02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -20398,7 +20398,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="ee2338d0-0a8c-4bdf-ae7f-cbb3e024a606">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.6_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -22802,7 +22802,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="845a2902-686e-4a07-9994-4ab7c90d857d">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.7_Прил.1_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.1 к листу 02"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.06f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -25586,7 +25586,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="c03c90f1-53b7-4461-b942-acaa36db4ef0">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.8_Прил.2_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.2 к листу 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -28589,7 +28589,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="30a790d5-ce97-45a2-a682-529d5253177b">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.9_Пр.2_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.2 к листу 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -31347,7 +31347,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="86717ec5-e60a-4146-a779-d5c7237319b4">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.10_Пр.2_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.2 к листу 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -32145,7 +32145,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="53249532-7f43-47c7-8349-0043e16dee12">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.11_Пр.3_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.3 к листу 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -34363,7 +34363,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="a6ea715d-5012-4dfe-a782-be8325435b95">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.12_Пр.3_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.3 к листу 02"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -36610,7 +36610,7 @@ Arrays.asList(1)]]></variableExpression>
 			</textField>
 			<staticText>
 				<reportElement x="140" y="23" width="35" height="20" isPrintWhenDetailOverflows="true" uuid="54edf8cc-8530-4076-8c3e-a305e28746ab">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.14_Прил.5_Л.02"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил.5 к листу 02"/>
 					<property name="net.sf.jasperreports.export.xls.column.width.ratio" value="1.05f"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -39993,7 +39993,7 @@ Arrays.asList(1)]]></variableExpression>
 						</staticText>
 						<staticText>
 							<reportElement x="2" y="0" width="589" height="20" uuid="23e8f338-17aa-4021-be6c-6253618b6194">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.17_Лист03"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 03, А"/>
 							</reportElement>
 							<textElement textAlignment="Right">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -45104,7 +45104,7 @@ Arrays.asList(1)]]></variableExpression>
 						</staticText>
 						<staticText>
 							<reportElement x="2" y="13" width="593" height="20" uuid="0e9b18b8-795e-48a8-a3df-7411357b18b6">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.18_Л.03"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 03, Б"/>
 							</reportElement>
 							<textElement textAlignment="Right">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -46505,7 +46505,7 @@ $F{ВидДоход}]]></textFieldExpression>
 					<jr:listContents height="760" width="596">
 						<staticText>
 							<reportElement x="2" y="2" width="594" height="20" uuid="36b6e29e-42e3-4f12-822b-c0ecfe5bc420">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.19_Л.03"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 03, В"/>
 							</reportElement>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -52975,7 +52975,7 @@ cтроки]]></text>
 						</staticText>
 						<staticText>
 							<reportElement x="2" y="3" width="593" height="20" uuid="b36893a9-df14-4a1d-b864-ed561f5d9c93">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.20_Лист04"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 04"/>
 							</reportElement>
 							<textElement textAlignment="Right">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -55190,7 +55190,7 @@ cтроки]]></text>
 						</staticText>
 						<staticText>
 							<reportElement x="1" y="1" width="596" height="20" uuid="5809f0ca-bdb9-496d-88c4-3c788f61f2c4">
-								<property name="net.sf.jasperreports.export.xls.sheet.name" value="стр.21_Лист05"/>
+								<property name="net.sf.jasperreports.export.xls.sheet.name" value="Лист 05"/>
 							</reportElement>
 							<textElement textAlignment="Right" verticalAlignment="Bottom">
 								<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
@@ -58402,7 +58402,7 @@ $F{ВидОпер}]]></textFieldExpression>
 			</image>
 			<staticText>
 				<reportElement x="0" y="48" width="594" height="14" isPrintWhenDetailOverflows="true" uuid="dc6f3184-b273-4bb0-85af-9982bfa5d0ff">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Стр.26_прил."/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Приложение"/>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="9" isBold="true" pdfFontName="Arialbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
