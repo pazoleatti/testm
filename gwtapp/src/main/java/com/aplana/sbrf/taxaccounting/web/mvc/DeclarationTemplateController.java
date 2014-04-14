@@ -84,7 +84,7 @@ public class DeclarationTemplateController {
         mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
         if (!customLog.getEntries().isEmpty())
-            resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(customLog.getEntries()));
+            resp.getWriter().printf("uuid %s", logEntryService.save(customLog.getEntries()));
 	}
 
 	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
@@ -128,7 +128,7 @@ public class DeclarationTemplateController {
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
-        response.getWriter().printf("{errorUuid: \"%s\"}", e.getUuid());
+        response.getWriter().printf("errorUuid %s}", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)

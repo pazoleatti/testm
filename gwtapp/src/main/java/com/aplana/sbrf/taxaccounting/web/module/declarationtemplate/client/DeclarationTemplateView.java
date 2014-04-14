@@ -97,8 +97,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
-    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
-
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -110,17 +108,15 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if(event.getResults() == null){
-                    getUiHandlers().uploadFormTemplateSuccess();
+                    getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid);
+                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadDectFail(event.getResults().replaceFirst("error ", ""));
+                    getUiHandlers().uploadDectFail(event.getResults().replaceFirst(ERROR, ""));
 				} else {
-                    String uuid = event.getResults().replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectResponseWithUuid(uuid);
+                    getUiHandlers().uploadDectResponseWithUuid(event.getResults().replaceFirst(SUCCESS_RESP, ""));
 				}
 			}
 		});
@@ -128,7 +124,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 		uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains("error ")) {
+				if (!event.getResults().toLowerCase().contains(ERROR)) {
 					getUiHandlers().save();
 				}
 				else {
@@ -203,7 +199,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
                     @Override
                     public void yes() {
+                        driver.flush();
                         getUiHandlers().save();
+                        getUiHandlers().close();
                     }
                 });
 	}

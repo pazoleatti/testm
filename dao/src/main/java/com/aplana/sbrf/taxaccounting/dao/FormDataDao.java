@@ -135,4 +135,12 @@ public interface FormDataDao {
      * @param formDataId идентификатор нф
      */
     void deleteManual(long formDataId);
+
+    /**
+     * Получить список строк
+     * @param columnId идентификатор столбца
+     * @param formTemplateTypeId идентификатор макета НФ
+     * @return
+     */
+    List<String> getStringList(Integer columnId, Integer formTemplateTypeId);
 }

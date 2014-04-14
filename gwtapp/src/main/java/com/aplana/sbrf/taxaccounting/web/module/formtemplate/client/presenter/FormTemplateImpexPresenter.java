@@ -9,14 +9,14 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTe
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateImpexUiHandlers;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.gwtplatform.mvp.client.*;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 
 public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPresenter.MyView, FormTemplateImpexPresenter.MyProxy>
@@ -37,9 +37,9 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateImpexUiHandlers> {
-        static final String ERROR_RESP = "errorUuid";
-        static final String SUCCESS_RESP = "uuid";
-        static final String ERROR = "error";
+        static final String ERROR_RESP = "errorUuid ";
+        static final String SUCCESS_RESP = "uuid ";
+        static final String ERROR = "error ";
 
 		void setFormId(int formId);
 	}
@@ -66,9 +66,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
     @Override
 	public void uploadFormTemplateSuccess(String uuid) {
         if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
-            JSONValue jsonValue = JSONParser.parseLenient(uuid);
-            String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
-            LogAddEvent.fire(this, value);
+            LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Форма сохранена");
         }
@@ -87,9 +85,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
-        JSONValue jsonValue = JSONParser.parseLenient(uuid);
-        String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
-        LogAddEvent.fire(this, value);
+        LogAddEvent.fire(this, uuid);
         Dialog.infoMessage("Не удалось импортировать шаблон");
     }
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
@@ -90,7 +91,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					widget = new TextBox();
 					break;
 				case DATE:
-					widget = new DateMaskBoxPicker();
+					widget = new DateMaskBoxPicker(col.getFormat());
 					break;
 				case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);

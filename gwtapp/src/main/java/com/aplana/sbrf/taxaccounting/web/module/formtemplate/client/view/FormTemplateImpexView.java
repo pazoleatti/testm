@@ -24,9 +24,7 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 	@UiField
 	Button downloadFormTemplateButton;
 
-    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
-
-	@Inject
+    @Inject
 	public FormTemplateImpexView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 
@@ -34,17 +32,15 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if(event.getResults() == null){
-                    getUiHandlers().uploadFormTemplateSuccess();
+                    getUiHandlers().uploadFormTemplateFail("Ошибки при импорте формы.");
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
-                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid);
+                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst("error ", ""));
+                    getUiHandlers().uploadFormTemplateFail(event.getResults().replaceFirst(ERROR, ""));
                 } else {
-                    String uuid = event.getResults().replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadFormTemplateSuccess(uuid);
+                    getUiHandlers().uploadFormTemplateSuccess(event.getResults().replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
 		});

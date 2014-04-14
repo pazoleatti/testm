@@ -323,6 +323,15 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         return null;
     }
 
+    @Override
+    public String getOtherDereferenceValue(Long attrId, Long attrId2) {
+        Set<RefBookItem> selectedItems = getSelectedSet();
+        if (selectedItems != null && !selectedItems.isEmpty()) {
+            return RefBookPickerUtils.getDereferenceValue(selectedItems.iterator().next().getRefBookRecordDereferenceValues(), attrId, attrId2);
+        }
+        return null;
+    }
+
 
 //    /**
 //     * Получить разименованные значения выбранных строк в виде строки через ";".

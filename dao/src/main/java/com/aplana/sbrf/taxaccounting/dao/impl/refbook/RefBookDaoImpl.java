@@ -138,7 +138,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().query(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-							"is_unique, sort_order " +
+							"is_unique, sort_order, format " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -152,6 +152,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      */
     private class RefBookAttributeRowMapper implements RowMapper<RefBookAttribute> {
         public RefBookAttribute mapRow(ResultSet rs, int index) throws SQLException {
+
             RefBookAttribute result = new RefBookAttribute();
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
@@ -165,6 +166,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setRequired(rs.getBoolean("required"));
             result.setUnique(rs.getBoolean("is_unique"));
 			result.setSortOrder(rs.getInt("sort_order"));
+            Integer formatId = rs.getInt("format");
+            if (formatId!=0){
+                result.setFormat(Formats.getById(formatId));
+            }
             return result;
         }
     }
@@ -202,7 +207,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-                            "is_unique, sort_order " +
+                            "is_unique, sort_order, format " +
                             "from ref_book_attribute where id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper()
@@ -239,17 +244,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         universalFilterTreeListener.setPs(filterPS);
         Filter.getFilterQuery(filter, universalFilterTreeListener);
 
-        StringBuilder fromSql = new StringBuilder("\nfrom\n");
-
-        if (version != null) {
-            fromSql.append("  ref_book_record r join t on (r.version = t.version and r.record_id = t.record_id)\n");
-            ps.appendQuery(WITH_STATEMENT);
-            ps.addParam(refBookId);
-            ps.addParam(version);
-            ps.addParam(version);
-        } else {
-            fromSql.append("  ref_book_record r\n");
-        }
+        StringBuilder fromSql = new StringBuilder("\nfrom ref_book_record r\n");
 
         ps.appendQuery("select\n");
         ps.appendQuery(" r.id as ID, r.record_id as RECORD_ID\n");
@@ -281,9 +276,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         ps.appendQuery(fromSql.toString());
-        ps.appendQuery("where\n  r.ref_book_id = ");
-        ps.appendQuery("?");
+        ps.appendQuery("where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
+        if (version != null) {
+            ps.appendQuery(" and  r.version = ?");
+            ps.addParam(version);
+        }
         ps.appendQuery(" and\n  status <> -1\n");
 
         // обработка параметров фильтра
@@ -928,9 +926,37 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public RefBookValue getValue(@NotNull(message = UNKNOWN_RECORD_ERROR) Long recordId, @NotNull(message = UNKNOWN_ATTRIBUTE_ERROR) Long attributeId) {
-        RefBook refBook = getByAttribute(attributeId);
-        RefBookAttribute attribute = refBook.getAttribute(attributeId);
-		return getRecordData(refBook.getId(), recordId).get(attribute.getAlias());
+        final RefBookAttribute attribute = getAttribute(attributeId);
+        return getJdbcTemplate().queryForObject("select record_id, attribute_id, string_value, number_value, date_value, reference_value from ref_book_value where record_id = ? and attribute_id = ?",
+                new Object[] {
+                        recordId, attributeId
+                },
+                new RowMapper<RefBookValue>() {
+                    @Override
+                    public RefBookValue mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        Object value = null;
+                        String columnName = attribute.getAttributeType() + "_VALUE";
+                        switch (attribute.getAttributeType()) {
+                            case STRING: {
+                                value = rs.getString(columnName);
+                            }
+                            break;
+                            case NUMBER: {
+                                value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision());
+                            }
+                            break;
+                            case DATE: {
+                                value = rs.getDate(columnName);
+                            }
+                            break;
+                            case REFERENCE: {
+                                value = rs.getLong(columnName);
+                            }
+                            break;
+                        }
+                        return new RefBookValue(attribute.getAttributeType(), value);
+                    }
+                });
     }
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id, ref_book_id from ref_book_record where id = ?),\n" +
