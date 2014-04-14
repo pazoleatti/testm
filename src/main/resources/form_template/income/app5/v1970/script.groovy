@@ -15,10 +15,12 @@ import groovy.transform.Field
 // графа -  - fix
 // графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
-// графа 4  - kpp                       атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
+// графа 4  - kpp                       абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
 // графа 5  - propertyPrice
 // графа 6  - workersCount
 // графа 7  - subjectTaxCredit
+// графа 8  - decreaseTaxSum
+// графа 9  - taxRate
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -69,11 +71,12 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice',
+        'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
+def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -81,7 +84,8 @@ def autoFillColumns = ['regionBank', 'kpp']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit']
+def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount',
+        'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Группируемые атрибуты
 @Field
@@ -89,7 +93,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit']
+def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
 
 @Field
 def endDate = null
@@ -120,6 +124,11 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
                      boolean required) {
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
             day, rowIndex, cellName, logger, required)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, false)
 }
 
 //// Кастомные методы
@@ -179,6 +188,7 @@ void logicCheck() {
         return
     }
 
+    def dataProvider = refBookFactory.getDataProvider(33)
     def rowNumber = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -195,8 +205,20 @@ void logicCheck() {
         if (rowNumber != row.number) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
+
+        // Проверки НСИ
+        // 1. Проверка значения графы «КПП» - графа 4 - kpp - абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
+        if (row.regionBankDivision != null && row.kpp != null && row.kpp != '') {
+            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            if (incomeParam?.KPP?.stringValue != row.kpp) {
+                def name = getColumnName(row, 'kpp')
+                logger.error("Значение графы «$name» не соответствует значению на форме Настроек подразделений.")
+            }
+        }
     }
 
+    // 3. Арифметические проверки расчета итоговой строки
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
@@ -261,7 +283,7 @@ def calc2(def row) {
 
 // графа 4 - кпп
 def calc4(def row) {
-    def incomeParam
+    def incomeParam = null
     if (row.regionBankDivision != null) {
         incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
     }
@@ -290,26 +312,31 @@ def getReportPeriodEndDate() {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 7, 1)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Территориальный банк',
-            (xml.row[0].cell[3]): 'Подразделение территориального банка',
-            (xml.row[0].cell[4]): 'КПП',
-            (xml.row[0].cell[5]): 'Средняя остаточная стоимость амортизируемого имущества (руб.)',
-            (xml.row[0].cell[6]): 'Среднесписочная численность работников (чел.)',
-            (xml.row[0].cell[7]): 'Начислено налога в бюджет субъекта (руб.)',
-            (xml.row[1].cell[0]): '1'
+            (xml.row[0].cell[0]): getColumnName(tmpRow, 'number'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'regionBank'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'regionBankDivision'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'kpp'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'propertyPrice'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'workersCount'),
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'subjectTaxCredit'),
+            (xml.row[0].cell[8]): 'Льготы по налогу в бюджет субъекта (руб.)',
+            (xml.row[1].cell[8]): 'Уменьшение суммы налога (руб.)',
+            (xml.row[1].cell[9]): 'Ставка налога (%)',
+
+            (xml.row[2].cell[0]): '1'
     ]
-    (2..7).each { index ->
+    (2..9).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
@@ -326,10 +353,9 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -342,6 +368,8 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
@@ -353,16 +381,28 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 3
-        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        def indexCol = 3
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         // графа 5
-        newRow.propertyPrice = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        indexCol = 5
+        newRow.propertyPrice = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         // графа 6
-        newRow.workersCount = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        indexCol = 6
+        newRow.workersCount = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         // графа 7
-        newRow.subjectTaxCredit = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        indexCol = 7
+        newRow.subjectTaxCredit = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+
+        // графа 8
+        indexCol = 8
+        newRow.decreaseTaxSum = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+
+        // графа 9
+        indexCol = 9
+        newRow.taxRate = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         rows.add(newRow)
     }
