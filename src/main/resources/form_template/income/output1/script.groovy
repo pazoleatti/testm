@@ -2,6 +2,7 @@ package form_template.income.output1
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -86,17 +87,17 @@ void calc() {
             // графа 2
             row.taxPeriod = '34'
             // графа 11
-            row.dividendRussianMembersAll = calc11(row)
+            row.dividendRussianMembersAll = checkOverpower(calc11(row), row, "dividendRussianMembersAll")
             // графа 18
-            row.dividendSumForTaxAll = calc18(row)
+            row.dividendSumForTaxAll = checkOverpower(calc18(row), row, "dividendSumForTaxAll")
             // графа 19
-            row.dividendSumForTaxStavka9 = calc19(row)
+            row.dividendSumForTaxStavka9 = checkOverpower(calc19(row), row, "dividendSumForTaxStavka9")
             // графа 20
-            row.dividendSumForTaxStavka0 = calc20(row)
+            row.dividendSumForTaxStavka0 = checkOverpower(calc20(row), row, "dividendSumForTaxStavka0")
             // графа 21
-            row.taxSum = calc21(row)
+            row.taxSum = checkOverpower(calc21(row), row, "taxSum")
             // графа 22
-            row.taxSumFromPeriod = calc22(row)
+            row.taxSumFromPeriod = checkOverpower(calc22(row), row, "taxSumFromPeriod")
         }
         dataRowHelper.update(dataRows);
     }
@@ -195,7 +196,7 @@ def roundValue(BigDecimal value, def precision) {
     value.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
-void checkOverpower(def row) {
+def checkOverpower(def value, def row, def alias) {
     def checksMap = [
             'dividendRussianMembersAll': "ОКРУГЛ ( «графа 4» – «графа 5» – «графа 6» ; 0)",
             'dividendSumForTaxAll'     : "ОКРУГЛ ( «графа 11» – «графа 17» ; 0)",
@@ -213,9 +214,8 @@ void checkOverpower(def row) {
             'taxSum' : '21',
             'taxSumFromPeriod' : '22'
     ]
-    checksMap.each { key, value ->
-        if (row[key]?.abs() >= 1e16) {
-            logger.error("Строка ${row.getIndex()}: значение «Графы ${aliasMap[key]}» превышает допустимую разрядность (15 знаков). «Графа ${aliasMap[key]}» рассчитывается как «$value»!")
-        }
+    if (value?.abs() >= 1e15) {
+        throw new ServiceException("Строка ${row.getIndex()}: значение «Графы ${aliasMap[alias]}» превышает допустимую разрядность (15 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
     }
+    return value
 }
