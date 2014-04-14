@@ -270,11 +270,11 @@ void generateXML() {
                                     }
                                 }
                             }
-                            def String organInfo = row.organInfo != null ? getRefBookValue(70, row.organInfo).CODE.numberValue : null
                             def String countryCode3 = row.countryCode3 != null ? getRefBookValue(10, row.countryCode3).CODE.stringValue : null
-                            def String organName, organINN, organKPP, organRegNum, taxpayerCode, address
+                            def String organInfo, organName, organINN, organKPP, organRegNum, taxpayerCode, address
                             if (row.organName != null) {
                                 def map = getRefBookValue(9, row.organName)
+                                organInfo = getRefBookValue(70, map.ORGANIZATION.referenceValue)?.CODE?.numberValue
                                 organName = map.NAME.stringValue
                                 organINN = map.INN_KIO.stringValue
                                 organKPP = map.KPP.numberValue

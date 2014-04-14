@@ -370,4 +370,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public void deleteManual(long formDataId) {
         getJdbcTemplate().update("delete from data_row where manual = 1 and form_data_id = ?", formDataId);
     }
+
+    @Override
+    public List<String> getStringList(Integer columnId, Integer formTemplateTypeId) {
+        return getJdbcTemplate().queryForList("SELECT sv.value FROM FORM_COLUMN FC\n" +
+                "LEFT JOIN FORM_DATA FD ON FC.FORM_TEMPLATE_ID = FD.FORM_TEMPLATE_ID\n" +
+                "LEFT JOIN DATA_ROW DR ON DR.FORM_DATA_ID = FD.ID\n" +
+                "LEFT JOIN STRING_VALUE SV ON SV.ROW_ID = DR.ID AND SV.COLUMN_ID = FC.ID\n" +
+                "WHERE FC.id = ? AND fd.form_template_id = ?",
+                new Object[]{columnId, formTemplateTypeId},
+                String.class);
+    }
 }
