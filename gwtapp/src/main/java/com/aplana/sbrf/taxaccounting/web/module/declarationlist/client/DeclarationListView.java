@@ -38,15 +38,22 @@ public class DeclarationListView extends
     public static final String DECLARATION_HEADER_D = "Cписок уведомлений";
     public static final String DECLARATION_CREATE = "Создать декларацию...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
-    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String DECLARATION_CREATE_TITLE = "Создание деклараций";
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
+
+    public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String PERIOD_TITLE = "Период";
+    public static final String PERIOD_YEAR_TITLE = "Год";
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
 
     private GenericDataGrid.DataGridResizableHeader declarationTypeHeader;
     private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
+    private GenericDataGrid.DataGridResizableHeader reportPeriodHeader;
+    private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn;
+    private GenericDataGrid.DataGridResizableHeader reportPeriodYearHeader;
+    private TextColumn<DeclarationDataSearchResultItem> reportPeriodYearColumn;
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
@@ -93,14 +100,14 @@ public class DeclarationListView extends
 			}
 		};
 
-        TextColumn<DeclarationDataSearchResultItem> reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+        reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
                 return String.valueOf(object.getReportPeriodYear());
             }
         };
 
-        Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+        reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                 new AbstractCell<DeclarationDataSearchResultItem>() {
 
                     @Override
@@ -138,12 +145,17 @@ public class DeclarationListView extends
 			}
 		};
 
-        declarationTypeHeader = (GenericDataGrid.DataGridResizableHeader) getHeader("Вид декларации", declarationTypeColumn);
+        declarationTypeHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
+        reportPeriodHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(PERIOD_TITLE, reportPeriodColumn);
+        reportPeriodYearHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(PERIOD_YEAR_TITLE, reportPeriodYearColumn);
+
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
 		declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
-		declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
-		declarationTable.addColumn(reportPeriodColumn, getHeader("Период", reportPeriodColumn));
+		declarationTable.addColumn(reportPeriodYearColumn, reportPeriodYearHeader);
+        declarationTable.setColumnWidth(reportPeriodYearColumn, 0, Style.Unit.EM);
+		declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
+        declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
 		declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
 
         pager.setDisplay(declarationTable);
@@ -205,15 +217,23 @@ public class DeclarationListView extends
         if (!taxType.equals(TaxType.DEAL)) {
             declarationHeader.setText(DECLARATION_HEADER);
             declarationTable.clearColumnWidth(declarationTypeColumn);
+            declarationTable.clearColumnWidth(reportPeriodYearColumn);
+            declarationTable.clearColumnWidth(reportPeriodColumn);
             create.setText(DECLARATION_CREATE);
             create.setTitle(DECLARATION_CREATE_TITLE);
             declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE);
+            reportPeriodYearHeader.setTitle(PERIOD_YEAR_TITLE);
+            reportPeriodHeader.setTitle(PERIOD_TITLE);
             declarationHeader.setText(DECLARATION_HEADER);
         } else {
             declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
+            declarationTable.setColumnWidth(reportPeriodYearColumn, 0, Style.Unit.EM);
+            declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
             create.setText(DECLARATION_CREATE_D);
             create.setTitle(DECLARATION_CREATE_TITLE_D);
             declarationTypeHeader.setTitle("");
+            reportPeriodYearHeader.setTitle("");
+            reportPeriodHeader.setTitle("");
             declarationHeader.setText(DECLARATION_HEADER_D);
         }
         declarationTable.redrawHeaders();

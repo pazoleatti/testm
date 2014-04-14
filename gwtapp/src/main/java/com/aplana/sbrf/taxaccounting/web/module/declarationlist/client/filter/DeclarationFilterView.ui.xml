@@ -42,7 +42,7 @@
             <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
         </g:cell>
         <g:cell horizontalAlignment="right">
-            <g:Label wordWrap="false" text="Период:" addStyleNames="{margin.left10}, {margin.right5}"/>
+            <g:Label ui:field="reportPeriodIdsLabel" wordWrap="false" text="Период:" addStyleNames="{margin.left10}, {margin.right5}"/>
         </g:cell>
         <g:cell width="24%">
             <per:PeriodPickerPopupWidget multiselect="true" width="100%" ui:field="reportPeriodIds"/>
