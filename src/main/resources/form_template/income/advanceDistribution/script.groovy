@@ -1,8 +1,10 @@
 package form_template.income.advanceDistribution
 
+import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -78,8 +80,6 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicalCheckAfterCalc()
-        // для сохранения изменении приемников
-//        getData(formData).commit()
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -97,12 +97,12 @@ def refBookCache = [:]
 // Все атрибуты
 @Field
 def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
-        'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
-        'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-        'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
+                  'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+                  'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
+                  'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+                  'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                  'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                  'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
 
 // Редактируемые атрибуты
 @Field
@@ -115,13 +115,13 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
-        'kpp', 'propertyPrice', 'workersCount',
-        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-        'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax'
+                       'kpp', 'propertyPrice', 'workersCount',
+                       'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+                       'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+                       'taxSum', 'taxSumOutside', 'taxSumToPay',
+                       'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                       'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                       'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax'
 ]
 
 // Группируемые атрибуты
@@ -131,11 +131,20 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
-        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-        'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+                    'everyMonthForThirdKvartalNextPeriod',
+                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+
+@Field
+def formDataCache = [:]
+@Field
+def helperCache = [:]
+
+@Field
+def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
+                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def endDate = null
@@ -157,7 +166,7 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
  */
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     // удалить фиксированные строки
     deleteAllAliased(dataRows)
@@ -195,7 +204,7 @@ void calc() {
             continue
         }
         // графа 4 - кпп
-        row.kpp = incomeParam.get('record_id').getNumberValue()
+        row.kpp = incomeParam.KPP?.stringValue
 
         // графа 8 - Признак расчёта
         row.calcFlag = incomeParam.get('TYPE').getReferenceValue()
@@ -261,10 +270,10 @@ void calc() {
         // расчеты для строки ЦА (скорректированный) графы 1, 3..21
         // графа 1, 3..10, 12, 13, 15-21
         ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
-                'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-                'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-                'everyMonthForFourthKvartalNextPeriod'].each { alias ->
+         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
+         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+         'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+         'everyMonthForFourthKvartalNextPeriod'].each { alias ->
             caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
         }
 
@@ -362,10 +371,16 @@ def logicalCheck() {
 
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
+    def Department department = departmentService.get(formData.departmentId)
 
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), getReportPeriodEndDate(), -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
+        logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+    }
+
+    def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    if (sumTaxUnpRecords == null || sumTaxUnpRecords.isEmpty() || getValue(sumTaxUnpRecords, 'SUM_TAX') == null) {
         logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
@@ -425,11 +440,21 @@ void logicalCheckBeforeCalc() {
             }
         }
     }
+
+    summaryMap.each { key, value ->
+        def formDataSummary = getFormDataSummary(key)
+        if (formDataSummary == null) {
+            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+        }
+        if (getData(formDataSummary) == null) {
+            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+        }
+    }
 }
 
 void logicalCheckAfterCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     def departmentRefDataProvider = refBookFactory.getDataProvider(30)
 
@@ -457,7 +482,7 @@ void logicalCheckAfterCalc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     // удалить все строки и собрать из источников их строки
     dataRowHelper.clear()
@@ -470,7 +495,7 @@ void consolidation() {
         if (it.formTypeId == id) {
             def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).getAllCached()
+                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 sourceDataRows.each { row ->
                     if ((row.getAlias() == null || row.getAlias() == '') && row.regionBankDivision != null) {
                         newRow = dataRows.find {
@@ -493,6 +518,7 @@ void consolidation() {
             }
         }
     }
+    dataRowHelper.save(dataRows)
     logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
@@ -516,13 +542,6 @@ void checkDeclaration() {
  */
 def isFixedRow(def row) {
     return row != null && row.getAlias() != null
-}
-
-/**
- * Проверка пустое ли значение.
- */
-def isEmpty(def value) {
-    return value == null || value == '' || value == 0
 }
 
 /**
@@ -562,26 +581,19 @@ def getSumAll(def dataRows, def columnAlias) {
     return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
 }
 
-/**
- * Получить данные формы.
- *
- * @param formData форма
- */
-def getData(def formData) {
-    if (formData != null && formData.id != null) {
-        return formDataService.getDataRowHelper(formData)
+// Получить данные сводной
+def getFormDataSummary(def id) {
+    if (!formDataCache[id]) {
+        formDataCache[id] = formDataService.find(id, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId)
     }
-    return null
+    return formDataCache[id]
 }
 
-/**
- * Вставить новыую строку в конец нф.
- *
- * @param data данные нф
- * @param row строка
- */
-void insert(def data, def row) {
-    data.insert(row, data.getAllCached().size() + 1)
+def getData(def formData) {
+    if (formData != null && formData.id != null && formData.state == WorkflowState.ACCEPTED && !helperCache[formData.id]) {
+        helperCache[formData.id] = formDataService.getDataRowHelper(formData)
+    }
+    return helperCache[formData.id]
 }
 
 /**
@@ -590,24 +602,17 @@ void insert(def data, def row) {
  * @author ekuvshinov
  */
 def getTaxBase() {
-    def departmentId = formData.departmentId
-    def reportPeriodId = formData.reportPeriodId
+    // доходы простые
+    def dataIncomeSimple = getData(getFormDataSummary(301))
 
     // доходы сложные
-    def formDataComplexIncome = formDataService.find(302, FormDataKind.SUMMARY, departmentId, reportPeriodId)
-    def dataComplexIncome = getData(formDataComplexIncome)
-
-    // доходы простые
-    def formDataSimpleIncome = formDataService.find(301, FormDataKind.SUMMARY, departmentId, reportPeriodId)
-    def dataSimpleIncome = getData(formDataSimpleIncome)
+    def dataIncomeComplex = getData(getFormDataSummary(302))
 
     // расходы сложные
-    def formDataComplexConsumption = formDataService.find(303, FormDataKind.SUMMARY, departmentId, reportPeriodId)
-    def dataComplexConsumption = getData(formDataComplexConsumption)
+    def dataOutcomeComplex = getData(getFormDataSummary(303))
 
     // расходы простые
-    def formDataSimpleConsumption = formDataService.find(304, FormDataKind.SUMMARY, departmentId, reportPeriodId)
-    def dataSimpleConsumption = getData(formDataSimpleConsumption)
+    def dataOutcomeSimple = getData(getFormDataSummary(304))
 
     BigDecimal taxBase = 0
     BigDecimal group1 = 0
@@ -616,9 +621,9 @@ def getTaxBase() {
     BigDecimal group4 = 0
     BigDecimal group5 = 0
     // доходы сложные
-    if (dataComplexIncome != null) {
-        for (row in dataComplexIncome.getAllCached()) {
-            // Если ячейка не объеденена то она должна быть в списке
+    if (dataIncomeComplex != null) {
+        for (row in dataIncomeComplex.allCached) {
+            // Если ячейка не объединена, то она должна быть в списке
             String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
 
             BigDecimal incomeTaxSumS = (BigDecimal) (row.getCell('incomeTaxSumS').hasValueOwner() ? row.getCell('incomeTaxSumS').getValueOwner().value : row.getCell('incomeTaxSumS').value)
@@ -666,8 +671,8 @@ def getTaxBase() {
         }
     }
     // Доходы простые
-    if (dataSimpleIncome != null) {
-        for (row in dataSimpleIncome.getAllCached()) {
+    if (dataIncomeSimple != null) {
+        for (row in dataIncomeSimple.allCached) {
             String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
 
             // графа 8
@@ -712,8 +717,8 @@ def getTaxBase() {
         }
     }
     // Расходы сложные
-    if (dataComplexConsumption != null) {
-        for (row in dataComplexConsumption.getAllCached()) {
+    if (dataOutcomeComplex != null) {
+        for (row in dataOutcomeComplex.allCached) {
             String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
 
             // 9
@@ -787,8 +792,8 @@ def getTaxBase() {
         }
     }
     // Расходы простые
-    if (dataSimpleConsumption != null) {
-        for (row in dataSimpleConsumption.getAllCached()) {
+    if (dataOutcomeSimple != null) {
+        for (row in dataOutcomeSimple.allCached) {
             String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
 
             // 8
