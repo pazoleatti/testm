@@ -361,10 +361,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         if(data.getPerformer()!=null){
             r = sheet.createRow(rowNumber);
             c = createNotHiddenCell(0, r);
-            c.setCellValue("Исполнитель:");
-            c = createNotHiddenCell(1, r);
-            c.setCellValue((data.getPerformer().getName()!=null?data.getPerformer().getName():"") + "/" +
-                    (data.getPerformer().getPhone()!=null?data.getPerformer().getPhone():""));
+            String performer = "Исполнитель: " + (data.getPerformer().getName() != null ? data.getPerformer().getName() : "") + "/" +
+                    (data.getPerformer().getPhone() != null ? data.getPerformer().getPhone() : "");
+            c.setCellValue(performer);
             sheet.shiftRows(sheet.getLastRowNum(), sheet.getLastRowNum(), 1);
         }
 
