@@ -39,7 +39,7 @@
             bottom: 30px;
             right: 0;
             left: 0;
-            top: 50px;
+            top: 34px;
         }
     </ui:style>
 
@@ -60,11 +60,17 @@
                         <g:Label ui:field="versionLabel" text="Версии макета"/>
                     </fm:Resizable>
                 </fm:resizable>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <g:Label ui:field="versionKind" addStyleNames="{style.labelKind}"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:Label ui:field="versionKind" addStyleNames="{style.labelKind}"/>
                 <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
                     <style:LinkButton text="Создать версию" ui:field="createVersion"/>
                     <style:LinkButton text="Удалить версию" ui:field="deleteVersion" enabled="false"/>
