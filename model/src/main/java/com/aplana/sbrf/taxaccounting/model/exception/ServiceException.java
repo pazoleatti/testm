@@ -9,6 +9,10 @@ package com.aplana.sbrf.taxaccounting.model.exception;
 public class ServiceException extends TAException {
 	private static final long serialVersionUID = 1L;
 
+	public ServiceException() {
+		super();
+	}
+
 	public ServiceException(String message, Object... params) {
 		super(message, params);
 	}
