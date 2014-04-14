@@ -85,12 +85,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	    initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
-        reportPeriodIds.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+       /* reportPeriodIds.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                departmentPicker.se
+                //To change body of implemented methods use File | Settings | File Templates.
             }
-        });
+        });*/
     }
 
 	@Override
