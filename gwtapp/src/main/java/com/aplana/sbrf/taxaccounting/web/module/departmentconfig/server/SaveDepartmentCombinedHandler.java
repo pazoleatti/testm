@@ -84,7 +84,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 && !depCombined.getDepartmentId().isEmpty()
                 && action.getTaxType() != null
                 && action.getReportPeriodId() != null) {
-
             if (!reportService.isActivePeriod(action.getReportPeriodId(), depCombined.getDepartmentId().get(0))) {
                 throw new ActionException("Выбранный отчетный период закрыт!");
             }
@@ -103,7 +102,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
 
-            Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
+            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи
@@ -175,7 +174,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
-            recordPairs = provider.checkRecordExistence(calendarFrom.getTime(), filter);
+            recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
             if (recordPairs.size() != 0) {
                 needEdit = true;
                 // Запись нашлась
@@ -186,12 +185,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!needEdit) {
-                provider.createRecordVersion(logger, calendarFrom.getTime(), null, Arrays.asList(record));
+                provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
             } else {
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
             }
 
-            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
             String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
 
