@@ -130,7 +130,7 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
     for (def row : dataRows) {
         // исключить итоговые строки
-        if (row.getAlias() in ['R67', 'R93']) {
+        if (row.getAlias() in ['R67', 'R90']) {
             continue
         }
         if (!isEmpty(row.consumptionTaxSumS) && !isEmpty(row.consumptionBuhSumAccepted) &&
@@ -220,7 +220,7 @@ def logicCheck() {
         }
     }
     checkTotalSum(getDataRow(dataRows, 'R67'), getSum(dataRows, totalColumn, 'R2', 'R66'))
-    checkTotalSum(getDataRow(dataRows, 'R93'), getSum(dataRows, totalColumn, 'R69', 'R92'))
+    checkTotalSum(getDataRow(dataRows, 'R90'), getSum(dataRows, totalColumn, 'R69', 'R89'))
 }
 
 /**
@@ -230,11 +230,11 @@ void calcTotal(def rows) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = rows ?: dataRowHelper.getAllCached()
     def totalRow1 = getDataRow(dataRows, 'R67')
-    def totalRow2 = getDataRow(dataRows, 'R93')
+    def totalRow2 = getDataRow(dataRows, 'R90')
 
     // суммы для графы 9
     totalRow1.getCell(totalColumn).setValue(getSum(dataRows, totalColumn, 'R2', 'R66'), totalRow1.getIndex())
-    totalRow2.getCell(totalColumn).setValue(getSum(dataRows, totalColumn, 'R69', 'R92'), totalRow2.getIndex())
+    totalRow2.getCell(totalColumn).setValue(getSum(dataRows, totalColumn, 'R69', 'R89'), totalRow2.getIndex())
 }
 
 /**
@@ -259,7 +259,7 @@ void consolidation() {
         ['logicalCheck', 'opuSumByEnclosure3', 'opuSumByTableP', 'opuSumTotal', 'difference'].each { alias ->
             row.getCell(alias).setValue(null, row.getIndex())
         }
-        if (row.getAlias() in ['R67', 'R93']) {
+        if (row.getAlias() in ['R67', 'R90']) {
             row.consumptionTaxSumS = 0
         }
     }
@@ -434,7 +434,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = 3
     def int colOffset = 0
-    def int maxRow = 93
+    def int maxRow = 90
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1

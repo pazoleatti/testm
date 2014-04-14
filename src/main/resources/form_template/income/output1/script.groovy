@@ -54,7 +54,7 @@ def refBookCache = [:]
 def editableColumns = ['financialYear', 'dividendSumRaspredPeriod', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
         'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10',
         'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
-        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSum', 'taxSumFromPeriodAll']
+        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriodAll']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -93,6 +93,8 @@ void calc() {
             row.dividendSumForTaxStavka9 = calc19(row)
             // графа 20
             row.dividendSumForTaxStavka0 = calc20(row)
+            // графа 21
+            row.taxSum = calc21(row)
             // графа 22
             row.taxSumFromPeriod = calc22(row)
         }
@@ -104,22 +106,35 @@ def BigDecimal calc11(def row) {
     if (row.dividendSumRaspredPeriod == null || row.dividendForgeinOrgAll == null || row.dividendForgeinPersonalAll == null) {
         return null
     }
-    return row.dividendSumRaspredPeriod - row.dividendForgeinOrgAll - row.dividendForgeinPersonalAll
+    return roundValue(row.dividendSumRaspredPeriod - row.dividendForgeinOrgAll - row.dividendForgeinPersonalAll, 0)
 }
 
 def BigDecimal calc18(def row) {
     if (row.dividendRussianMembersAll == null || row.dividendAgentWithStavka0 == null) {
         return null
     }
-    return (row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0)
+    return roundValue((row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0), 0)
 }
 
 def BigDecimal calc19(def row) {
-    return row.dividendRussianOrgStavka9
+    if (row.dividendRussianOrgStavka9 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
+        return null
+    }
+    return roundValue(row.dividendRussianOrgStavka9 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
 }
 
 def BigDecimal calc20(def row) {
-    return row.dividendRussianOrgStavka0
+    if (row.dividendRussianOrgStavka0 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
+        return null
+    }
+    return roundValue(row.dividendRussianOrgStavka0 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
+}
+
+def BigDecimal calc21(def row) {
+    if (row.dividendSumForTaxStavka9 == null) {
+        return null
+    }
+    return roundValue(row.dividendSumForTaxStavka9 * 0.09, 0)
 }
 
 def BigDecimal calc22(def row) {
@@ -148,11 +163,15 @@ def logicCheck() {
 
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['dividendRussianMembersAll', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
-            'dividendSumForTaxStavka0', 'taxSumFromPeriod']
+            'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod']
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
     for (def row in dataRows) {
+
+        // проверка на превышение разрядности
+        checkOverpower(row)
+
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
@@ -161,12 +180,42 @@ def logicCheck() {
         needValue['dividendSumForTaxAll'] = calc18(row)
         needValue['dividendSumForTaxStavka9'] = calc19(row)
         needValue['dividendSumForTaxStavka0'] = calc20(row)
+        needValue['taxSum'] = calc21(row)
         needValue['taxSumFromPeriod'] = calc22(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 2. Проверка наличия формы за предыдущий отчётный период
         if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
             logger.warn('Форма за предыдущий отчётный период не создавалась!')
+        }
+    }
+}
+
+def roundValue(BigDecimal value, def precision) {
+    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+}
+
+void checkOverpower(def row) {
+    def checksMap = [
+            'dividendRussianMembersAll': "ОКРУГЛ ( «графа 4» – «графа 5» – «графа 6» ; 0)",
+            'dividendSumForTaxAll'     : "ОКРУГЛ ( «графа 11» – «графа 17» ; 0)",
+            'dividendSumForTaxStavka9' : "ОКРУГЛ ( «графа 12» / «графа 11» * «графа 18» ; 0) ",
+            'dividendSumForTaxStavka0' : "ОКРУГЛ ( «графа 13» / «графа 11» * «графа 18» ; 0) ",
+            'taxSum'                   : "ОКРУГЛ ( «графа 19» / 100 * 9; 0)",
+            'taxSumFromPeriod'         : "«графа 22» предыдущего отчётного периода + «графа 23» предыдущего отчётного периода.\n Значения граф текущей формы и формы предудущего отчётного периода берутся для строк с одинаковым годом , т. е. «графа 3» в текущем отчётном периоде = «графе 3» в предыдущем отчётном периоде.\n" +
+                    "Если отчёт по году («графа 3») впервые, то «графа 22» принимает значение «0»"
+    ]
+    def aliasMap = [
+            'dividendRussianMembersAll' : '11',
+            'dividendSumForTaxAll' : '18',
+            'dividendSumForTaxStavka9' : '19',
+            'dividendSumForTaxStavka0' : '20',
+            'taxSum' : '21',
+            'taxSumFromPeriod' : '22'
+    ]
+    checksMap.each { key, value ->
+        if (row[key]?.abs() >= 1e16) {
+            logger.error("Строка ${row.getIndex()}: значение «Графы ${aliasMap[key]}» превышает допустимую разрядность (15 знаков). «Графа ${aliasMap[key]}» рассчитывается как «$value»!")
         }
     }
 }
