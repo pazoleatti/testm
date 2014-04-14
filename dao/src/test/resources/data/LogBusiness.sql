@@ -5,6 +5,7 @@ insert into form_template (id, type_id, data_rows, version, edition, fixed_rows,
 insert into form_template (id, type_id, data_rows, version, edition, fixed_rows, name, fullname, code, status) 
   values (3, 2, null, date '2013-02-01', 1, 0, 'name_3', 'fullname_3', 'code_2', 1);
 
+insert into form_kind (id, name) values (3, 'Сводная');
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into tax_period(id, tax_type, year) values (11, 'T', 2012);
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');

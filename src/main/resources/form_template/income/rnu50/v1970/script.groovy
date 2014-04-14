@@ -16,23 +16,26 @@ import java.math.RoundingMode
  */
 
 // графа 1  - rowNumber
+// графа    - fix
 // графа 2  - rnu49rowNumber
 // графа 3  - invNumber
 // графа 4  - lossReportPeriod
 // графа 5  - lossTaxPeriod
 
+@Field
+def isConsolidated
+isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
-        if (formData.kind != FormDataKind.CONSOLIDATED) {
-            // если форма консолидированная то не надо брать данные из рну 49
-            consolidationFrom49()
-        }
+        checkSourceAccepted()
         calc()
         logicCheck()
         break
@@ -42,10 +45,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        checkSourceAccepted()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        consolidation()
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
         break
@@ -58,7 +62,7 @@ switch (formDataEvent) {
 
 // Все атрибуты
 @Field
-def allColumns = ['rowNumber', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
+def allColumns = ['rowNumber', 'fix', 'rnu49rowNumber', 'invNumber', 'lossReportPeriod', 'lossTaxPeriod']
 
 // Группируемые атрибуты (графа 2, 3)
 @Field
@@ -80,36 +84,45 @@ def reportPeriodStartDate = null
 @Field
 def reportPeriodEndDate = null
 
+@Field
+def sourceFormData = null
+
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // удалить строку "итого"
-    deleteAllAliased(dataRows)
+    if (!isConsolidated && formDataEvent != FormDataEvent.IMPORT) {
+        // удалить все строки
+        dataRows.clear()
+        dataRows = getCalcDataRows()
+    } else {
+        // удалить строку "итого"
+        deleteAllAliased(dataRows)
+    }
 
-    // сортировка
-    sortRows(dataRows, groupColumns)
+    if (dataRows) {
+        // сортировка
+        sortRows(dataRows, groupColumns)
+
+        def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')?.intValue()
+        dataRows.eachWithIndex { row, i ->
+            row.setIndex(i + 1)
+
+            // графа 1
+            row.rowNumber = ++rowNumber
+        }
+    }
 
     // итоги
     def totalRow = getTotalRow(dataRows)
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
-
     dataRows.add(totalRow)
+
     dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
-    // 4. Проверки существования необходимых экземпляров форм
-    if (getDataRowsRNU49() == null) {
-        logger.error('Отсутствуют данные РНУ-49!')
-        return
-    }
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    if (dataRows.isEmpty()) {
-        return
-    }
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')?.intValue()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -129,43 +142,81 @@ void logicCheck() {
         if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
             logger.error(errorMsg + "Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
         }
+
+        // . Проверка на уникальность поля «№ пп» (графа 1)
+        if (++rowNumber != row.rowNumber) {
+            logger.warn(errorMsg + 'Нарушена уникальность номера по порядку!')
+        }
     }
 
     // 5. Проверка итоговых значений формы	Заполняется автоматически
     checkTotalSum(dataRows, totalColumns, logger, true)
-}
 
-void consolidation() {
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
-        // если форма консолидированная то брать данные из рну 50 (обычная консолидация)
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
-    } else {
-        // если форма не консолидированная (первичная) то брать данные из рну 49
-        consolidationFrom49()
-        logger.info('Формирование первичной формы РНУ-50 прошло успешно.')
-    }
-}
-
-void consolidationFrom49() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    // удалить все строки
-    dataRows.clear()
-    def dataRows49 = getDataRowsRNU49()
-    if (dataRows49 == null) {
-        dataRowHelper.save(dataRows)
+    if (isConsolidated) {
         return
     }
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')?.intValue()
+
+    // 4. Проверки существования необходимых экземпляров форм
+    def dataRowsFromSource = getDataRowsFromSource()
+    if (!dataRowsFromSource) {
+        logger.error('Отсутствуют данные РНУ-49!')
+    }
+
+    // . Арифметическая проверка графы 1..5
+    def currentRows = dataRows.findAll { row -> row.getAlias() == null }
+    def tmpRows = getCalcDataRows()
+    if ((!currentRows && tmpRows) || (currentRows && !tmpRows)) {
+        logger.error('Значения не соответствуют данным РНУ-49')
+    } else if (currentRows && tmpRows) {
+        def arithmeticCheckAlias = nonEmptyColumns - 'rowNumber'
+        def errorRows = []
+        for (def row : currentRows) {
+            def tmpRow = tmpRows.find { it.invNumber == row.invNumber }
+            if (tmpRow == null) {
+                errorRows.add(row.getIndex())
+                continue
+            }
+            def msg = []
+            arithmeticCheckAlias.each { alias ->
+                def value1 = row.getCell(alias).value
+                def value2 = tmpRow.getCell(alias).value
+                if (value1 != value2) {
+                    msg.add('«' + getColumnName(row, alias) + '»')
+                }
+            }
+            if (!msg.isEmpty()) {
+                def columns = msg.join(', ')
+                def index = row.getIndex()
+                logger.error("Строка $index: Неверное значение граф: $columns")
+            }
+            tmpRows.remove(tmpRow)
+        }
+        if (!errorRows.isEmpty()) {
+            def indexes = errorRows.join(', ')
+            logger.error("Значения не соответствуют данным РНУ-49 в строках: $indexes")
+        }
+        if (!tmpRows.isEmpty()) {
+            logger.error('Значения не соответствуют данным РНУ-49. Необходимо рассчитать данные')
+        }
+    }
+}
+
+// Выполняется при расчете. Получение данных из рну 49
+def getCalcDataRows() {
+    def dataRows = []
+    def dataRows49 = getDataRowsFromSource()
+    if (dataRows49 == null) {
+        return dataRows
+    }
+
     def start = getStartDate()
     def end = getEndDate()
+
     for (def row49 : dataRows49) {
         if (row49.getAlias() == null && row49.usefullLifeEnd != null &&
                 row49.monthsLoss != null && row49.expensesSum != null) {
             def newRow = formData.createDataRow()
-            // графа 1
-            newRow.rowNumber = ++rowNumber
+
             // графа 3
             newRow.invNumber = calc3(row49)
             // графа 2
@@ -174,32 +225,36 @@ void consolidationFrom49() {
             newRow.lossReportPeriod = calc4(row49, start, end)
             // графа 5
             newRow.lossTaxPeriod = calc5(row49, start, end)
+
             dataRows.add(newRow)
         }
     }
-    dataRowHelper.save(dataRows)
+    return dataRows
 }
 
-void checkCreation() {
-    if (formData.kind != FormDataKind.CONSOLIDATED) {
-        // проверка наличия формы рну 49 в статусе подготовлена или выше (но не создана)
-        def formData49 = getFormDataRNU49()
-        if (formData49 == null || formData49.state != WorkflowState.ACCEPTED) {
-            logger.error("Отсутствует или не находится в статусе «Подготовлена» или выше форма «${formTypeService.get(312).name}» за текущий отчетный период!")
-            return
-        }
+/** Получить данные формы РНУ-49 (id = 312) */
+def getFormDataSource() {
+    if (sourceFormData == null) {
+        sourceFormData = formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
     }
-    formDataService.checkUnique(formData, logger)
+    return sourceFormData
 }
 
-def getFormDataRNU49() {
-    return formDataService.find(312, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+void checkSourceAccepted() {
+    if (isConsolidated) {
+        return
+    }
+    def form = getFormDataSource()
+    if (form == null || form.state != WorkflowState.ACCEPTED) {
+        throw new ServiceException('Не найдены экземпляры РНУ-49 за текущий отчетный период!')
+    }
 }
 
-def getDataRowsRNU49() {
-    def formDataRNU = getFormDataRNU49()
-    if (formDataRNU != null) {
-        return formDataService.getDataRowHelper(formDataRNU)?.allCached
+/** Получить строки из нф РНУ-32.1. */
+def getDataRowsFromSource() {
+    def formDataSource = getFormDataSource()
+    if (formDataSource != null) {
+        return formDataService.getDataRowHelper(formDataSource)?.allCached
     }
     return null
 }
@@ -228,12 +283,15 @@ def calc2(def row49, def row) {
 
 def calc4(def row49, def startDate, def endDate) {
     def result = null
-    def date = row49.operationDate
-    if (date >= startDate && date <= endDate) {
-        if (row49.usefullLifeEnd > row49.operationDate) {
-            result = row49.expensesSum * (endDate[Calendar.MONTH] - date[Calendar.MONTH])
+    def column3 = row49.operationDate
+    def column18 = row49.usefullLifeEnd
+    def column20 = row49.expensesSum
+
+    if (startDate <= column3 && column3 <= endDate) {
+        if (column18 > column3) {
+            result = column20 * (endDate[Calendar.MONTH] - row49.operationDate[Calendar.MONTH])
         } else {
-            result = row49.expensesSum
+            result = column20
         }
     }
     return result?.setScale(2, RoundingMode.HALF_UP)
@@ -241,11 +299,13 @@ def calc4(def row49, def startDate, def endDate) {
 
 def calc5(def row49, def startDate, def endDate) {
     def result = null
-    def date = row49.usefullLifeEnd // 18 графа РНУ-49
-    if (date < startDate) {
-        result = row49.expensesSum * 3
-    } else if (date >= startDate && date <= endDate) {
-        result = row49.expensesSum * (endDate[Calendar.MONTH] - date[Calendar.MONTH])
+    def column18 = row49.usefullLifeEnd
+    def column20 = row49.expensesSum
+
+    if (column18 < startDate) {
+        result = column20 * 3
+    } else if (startDate <= column18&& column18 <= endDate) {
+        result = column20 * (endDate[Calendar.MONTH] - column18[Calendar.MONTH])
     }
     return result?.setScale(2, RoundingMode.HALF_UP)
 }
@@ -263,26 +323,27 @@ def getTotalRow(def dataRows) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Номер записи в РНУ-49',
-            (xml.row[0].cell[3]): 'Инвентарный номер',
+            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'rnu49rowNumber'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'invNumber'),
             (xml.row[0].cell[4]): 'Убыток, приходящийся на отчётный период',
             (xml.row[1].cell[4]): 'от реализации в отчётном налоговом периоде',
             (xml.row[1].cell[5]): 'от реализации в предыдущих налоговых периодах',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5'
+            (xml.row[2].cell[0]): '1'
     ]
+    (2..5).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
+
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
@@ -298,10 +359,9 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -314,12 +374,11 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
+        def int xlsIndexRow = xmlIndexRow + rowOffset
         def xmlIndexCol = 0
         def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
         // fix
         xmlIndexCol++
@@ -334,7 +393,6 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
         // графа 5
         newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        xmlIndexCol++
 
         rows.add(newRow)
     }

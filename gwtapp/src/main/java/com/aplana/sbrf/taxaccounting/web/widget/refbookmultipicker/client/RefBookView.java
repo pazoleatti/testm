@@ -55,6 +55,17 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      */
     String getOtherDereferenceValue(Long attrId);
 
+    /**
+     * Возвращает разименованное значение поля в выбранной строке по attrId и attrId2
+     *
+     * !!!!! Не предназначен для мультиселекта
+     *
+     * @param attrId основной атррубут для отображения
+     * @param attrId2 аттрибут второго уровня
+     * @return строку с единичным значением(даже если выбрано куча)
+     */
+    String getOtherDereferenceValue(Long attrId, Long attrId2);
+
     Boolean isMultiSelect();
 
     /**

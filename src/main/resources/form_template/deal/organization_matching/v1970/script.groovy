@@ -28,9 +28,9 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
     case FormDataEvent.AFTER_MOVE_APPROVED_TO_ACCEPTED:
@@ -49,7 +49,7 @@ def autoFillColumns = ['rowNum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign', 'offshore', 'skolkovo']
+def nonEmptyColumns = ['rowNum', 'name', 'country', 'address', 'inn', 'code', 'editSign']
 
 void accepted() {
     def List<Map<String, RefBookValue>> updateList = new ArrayList<Map<String, RefBookValue>>()
@@ -116,7 +116,6 @@ Map<String, RefBookValue> getRecord(DataRow<Cell> row) {
     return map
 }
 
-
 // Логические проверки
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -127,25 +126,13 @@ void logicCheck() {
             continue
         }
         def rowNum = row.getIndex()
-        editSignCode = refBookService.getRecordData(80, row.editSign).CODE.numberValue
+        editSignCode = (row.editSign != null) ? refBookService.getRecordData(80, row.editSign).CODE.numberValue : null
         // Проверка заполненности полей в строках НЕ на удаление
-        if (row.editSign == null || editSignCode != 2) {
-            nonEmptyColumns.each {
-                def rowCell = row.getCell(it)
-                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                    def msg = rowCell.column.name
-                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-                }
-            }
+        if (editSignCode == null || editSignCode != 2) {
+            checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
         } else {
             // Проверка заполненности полей в строках на удаление
-            ['rowNum', 'editSign'].each {
-                def rowCell = row.getCell(it)
-                if (rowCell.value == null || rowCell.value.toString().isEmpty()) {
-                    def msg = rowCell.column.name
-                    logger.warn("Строка $rowNum: Графа «$msg» не заполнена!")
-                }
-            }
+            checkNonEmptyColumns(row, rowNum, ['rowNum', 'editSign'], logger, false)
         }
         // Проверка на заполнение атрибута «Запись справочника»
         if (row.editSign != null && row.refBookRecord == null && editSignCode != 0) {

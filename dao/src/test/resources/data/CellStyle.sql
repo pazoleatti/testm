@@ -1,3 +1,4 @@
+insert into form_kind (id, name) values (3, 'Сводная');
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);
 insert into form_template (id, type_id, data_rows, version, is_active, edition, fixed_rows, name, fullname, code) values (1, 1, null, '0.1', 1, 1, 1, 'name', 'fullname', 'code');

@@ -64,6 +64,14 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     String getOtherDereferenceValue(Long attrId);
 
+    /**
+     * Получить разименнованное значение выбранной записи по атрибуту и атрибуту второго уровня
+     * @param attrId атрибут справочника колонки
+     * @param attrId2 атрибут второго уровня для альтернативного отображения
+     * @return строка с разименованных значением
+     */
+    String getOtherDereferenceValue(Long attrId, Long attrId2);
+
     boolean getSearchEnabled();
 
     void setSearchEnabled(boolean isSearchEnabled);

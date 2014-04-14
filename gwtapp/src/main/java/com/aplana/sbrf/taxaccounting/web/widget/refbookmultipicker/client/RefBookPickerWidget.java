@@ -338,6 +338,15 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         return refBookView.getOtherDereferenceValue(attrId);
     }
 
+    @Override
+    public String getOtherDereferenceValue(Long attrId, Long attrId2) {
+        if (attrId2 != null && attrId2 != 0) {
+            return refBookView.getOtherDereferenceValue(attrId, attrId2);
+        } else {
+            return refBookView.getOtherDereferenceValue(attrId);
+        }
+    }
+
     private void clearSearchPattern(){
         state.setSearchPattern(null);
         searchTextBox.setText(null);

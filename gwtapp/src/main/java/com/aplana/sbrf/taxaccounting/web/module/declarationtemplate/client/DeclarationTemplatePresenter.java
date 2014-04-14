@@ -18,8 +18,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -49,6 +47,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 declarationTemplateExt = new DeclarationTemplateExt();
                 declarationTemplate = new DeclarationTemplate();
                 declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+                declarationTemplateExt.setEndDate(null);
                 declarationTemplate.setVersion(new Date());
                 declarationTemplate.setType(result.getDeclarationType());
                 getView().setDeclarationTemplate(declarationTemplateExt);
@@ -66,6 +65,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         declarationTemplateExt = new DeclarationTemplateExt();
         declarationTemplate = new DeclarationTemplate();
         declarationTemplateExt.setDeclarationTemplate(declarationTemplate);
+        declarationTemplateExt.setEndDate(null);
         declarationTemplate.setVersion(new Date());
         DeclarationType declarationType = new DeclarationType();
         declarationType.setId(0);
@@ -87,9 +87,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        static final String ERROR_RESP = "errorUuid";
-        static final String SUCCESS_RESP = "uuid";
-        static final String ERROR = "error";
+        static final String ERROR_RESP = "errorUuid ";
+        static final String SUCCESS_RESP = "uuid ";
+        static final String ERROR = "error ";
 
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
@@ -193,7 +193,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                             /*placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                                     with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());*/
                         }
-                    }, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+                    }, this));
         }
 
 	}
@@ -223,7 +223,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
-                            "Найдены экземпляры деклараций",
+                            "Найдены экземпляры деклараций, использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -301,9 +301,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void uploadDectResponseWithUuid(String uuid) {
         if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
-            JSONValue jsonValue = JSONParser.parseLenient(uuid);
-            String value = jsonValue.isObject().get(MyView.SUCCESS_RESP).toString().replaceAll("\"", "").trim();
-            LogAddEvent.fire(this, value);
+            LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Форма сохранена");
         }
@@ -312,9 +310,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
-        JSONValue jsonValue = JSONParser.parseLenient(uuid);
-        String value = jsonValue.isObject().get(MyView.ERROR_RESP).toString().replaceAll("\"", "").trim();
-        LogAddEvent.fire(this, value);
+        LogAddEvent.fire(this, uuid);
         Dialog.infoMessage("Не удалось импортировать шаблон");
     }
 
