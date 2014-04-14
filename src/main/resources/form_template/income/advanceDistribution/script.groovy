@@ -336,7 +336,7 @@ def calc13(def row) {
     def temp = 0
     if (row.baseTaxOfRub > 0) {
         if (row.minimizeTaxSum == 0) {
-            temp = roundValue(row.baseTaxOfRub * getTaxRateAttribute(row.subjectTaxStavka) / 100, 0)
+            temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
             if (row.baseTaxOfRub * 0.135 - row.minimizeTaxSum < 0) {
                 temp = roundValue(row.baseTaxOfRub * 0.135, 0)
@@ -952,15 +952,6 @@ def getValue(def record, def alias) {
  */
 def roundValue(BigDecimal value, def precision) {
     value.setScale(precision, BigDecimal.ROUND_HALF_UP)
-}
-
-/**
- * Получить атрибут 200 - "Ставка налога" справочник 33 - "Параметры подразделения по налогу на прибыль".
- *
- * @param id идентификатор записи справочника
- */
-def getTaxRateAttribute(def id) {
-    return getRefBookValue(33, id)?.TAX_RATE?.getNumberValue()
 }
 
 def getReportPeriodEndDate() {

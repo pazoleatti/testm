@@ -52,8 +52,8 @@ switch (formDataEvent) {
 def refBookCache = [:]
 
 @Field
-def editableColumns = ['financialYear', 'dividendSumRaspredPeriod', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
-        'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10',
+def editableColumns = ['financialYear', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
+        'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendRussianMembersAll',
         'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
         'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriodAll']
 
@@ -86,8 +86,8 @@ void calc() {
             row.dividendType = '2'
             // графа 2
             row.taxPeriod = '34'
-            // графа 11
-            row.dividendRussianMembersAll = checkOverpower(calc11(row), row, "dividendRussianMembersAll")
+            // графа 4
+            row.dividendSumRaspredPeriod = checkOverpower(calc4(row), row, "dividendSumRaspredPeriod")
             // графа 18
             row.dividendSumForTaxAll = checkOverpower(calc18(row), row, "dividendSumForTaxAll")
             // графа 19
@@ -103,11 +103,11 @@ void calc() {
     }
 }
 
-def BigDecimal calc11(def row) {
-    if (row.dividendSumRaspredPeriod == null || row.dividendForgeinOrgAll == null || row.dividendForgeinPersonalAll == null) {
+def BigDecimal calc4(def row) {
+    if (row.dividendRussianMembersAll == null || row.dividendForgeinOrgAll == null || row.dividendForgeinPersonalAll == null) {
         return null
     }
-    return roundValue(row.dividendSumRaspredPeriod - row.dividendForgeinOrgAll - row.dividendForgeinPersonalAll, 0)
+    return roundValue(row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendRussianMembersAll, 0)
 }
 
 def BigDecimal calc18(def row) {
@@ -163,21 +163,18 @@ def logicCheck() {
     def dataRows = dataRowHelper.getAllCached()
 
     // Алиасы граф для арифметической проверки
-    def arithmeticCheckAlias = ['dividendRussianMembersAll', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
+    def arithmeticCheckAlias = ['dividendSumRaspredPeriod', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
             'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod']
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
     for (def row in dataRows) {
 
-        // проверка на превышение разрядности
-        checkOverpower(row)
-
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // Арифметические проверки расчета граф 11, 18, 19, 20, 22
-        needValue['dividendRussianMembersAll'] = calc11(row)
+        // Арифметические проверки расчета граф 4, 18, 19, 20, 22
+        needValue['dividendSumRaspredPeriod'] = calc4(row)
         needValue['dividendSumForTaxAll'] = calc18(row)
         needValue['dividendSumForTaxStavka9'] = calc19(row)
         needValue['dividendSumForTaxStavka0'] = calc20(row)
@@ -198,7 +195,7 @@ def roundValue(BigDecimal value, def precision) {
 
 def checkOverpower(def value, def row, def alias) {
     def checksMap = [
-            'dividendRussianMembersAll': "ОКРУГЛ ( «графа 4» – «графа 5» – «графа 6» ; 0)",
+            'dividendSumRaspredPeriod' : "ОКРУГЛ («графа 5» + «графа 6» + «графа 11»; 0)",
             'dividendSumForTaxAll'     : "ОКРУГЛ ( «графа 11» – «графа 17» ; 0)",
             'dividendSumForTaxStavka9' : "ОКРУГЛ ( «графа 12» / «графа 11» * «графа 18» ; 0) ",
             'dividendSumForTaxStavka0' : "ОКРУГЛ ( «графа 13» / «графа 11» * «графа 18» ; 0) ",
@@ -207,7 +204,7 @@ def checkOverpower(def value, def row, def alias) {
                     "Если отчёт по году («графа 3») впервые, то «графа 22» принимает значение «0»"
     ]
     def aliasMap = [
-            'dividendRussianMembersAll' : '11',
+            'dividendSumRaspredPeriod' : '4',
             'dividendSumForTaxAll' : '18',
             'dividendSumForTaxStavka9' : '19',
             'dividendSumForTaxStavka0' : '20',
