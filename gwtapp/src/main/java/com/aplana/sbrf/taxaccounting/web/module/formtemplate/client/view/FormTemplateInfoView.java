@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
+import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateInfoPresenter;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,10 +17,10 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	public interface Binder extends UiBinder<Widget, FormTemplateInfoView> { }
 
     @UiField
-    DateMaskBoxAbstract versionDateBegin;
+    YearMaskBox versionDateBegin;
 
     @UiField
-    DateMaskBoxAbstract versionDateEnd;
+    YearMaskBox versionDateEnd;
 
 	@UiField
 	CheckBox fixedRowsCheckBox;
