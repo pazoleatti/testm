@@ -297,9 +297,13 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsResult>() {
                     @Override
                     public void onSuccess(GetBookerStatementsResult result) {
-                        getView().setTableColumns(result.getColumns());
-                        getView().setTableData(range.getStart(),
-                                result.getTotalCount(), result.getDataRows());
+                        if (result.getTotalCount() != 0) {
+                            getView().setTableColumns(result.getColumns());
+                            getView().setTableData(range.getStart(),
+                                    result.getTotalCount(), result.getDataRows());
+                        } else {
+                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: <вид бухгалтерской отчётности>!");
+                        }
                     }
                 }, BookerStatementsPresenter.this));
             }
