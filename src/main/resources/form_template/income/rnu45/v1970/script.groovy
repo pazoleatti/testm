@@ -61,7 +61,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -331,38 +331,32 @@ def getPrev10and11(def dataOld, def row) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Инвентарный номер',
-            (xml.row[0].cell[3]): 'Наименование',
-            (xml.row[0].cell[4]): 'Дата приобретения',
-            (xml.row[0].cell[5]): 'Срок полезного использования (мес.)',
-            (xml.row[0].cell[6]): 'Дата истечения срока полезного использования',
-            (xml.row[0].cell[7]): 'Первоначальная стоимость (руб.)',
-            (xml.row[0].cell[8]): 'Норма амортизации (% в мес.)',
-            (xml.row[0].cell[9]): 'Сумма начисленной амортизации за месяц (руб.)',
-            (xml.row[0].cell[10]): 'Сумма начисленной амортизации с начала года (руб.)',
-            (xml.row[0].cell[11]): 'Сумма начисленной амортизации с даты ввода в эксплуатацию (руб.)',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[2]): '2',
-            (xml.row[1].cell[3]): '3',
-            (xml.row[1].cell[4]): '4',
-            (xml.row[1].cell[5]): '5',
-            (xml.row[1].cell[6]): '6',
-            (xml.row[1].cell[7]): '7',
-            (xml.row[1].cell[8]): '8',
-            (xml.row[1].cell[9]): '9',
-            (xml.row[1].cell[10]): '10',
-            (xml.row[1].cell[11]): '11'
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'inventoryNumber'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'name'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'buyDate'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'usefulLife'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'expirationDate'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'startCost'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'depreciationRate'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'amortizationMonth'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'amortizationSinceYear'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'amortizationSinceUsed'),
+            (xml.row[1].cell[0]) : '1'
     ]
+    (2..11).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 1)
+    addData(xml, 2)
 }
 
 // Заполнить форму данными
@@ -387,10 +381,9 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -404,6 +397,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def xmlIndexCol = 0
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)

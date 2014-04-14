@@ -15,9 +15,11 @@ public class StringColumn extends Column  implements Serializable {
 	 * Максимально допустимое значение поля {@link #setMaxLength}
 	 * (Ограничение накладывается параметрами таблицы STRING_VALUE в БД)
 	 */
-	public static final int MAX_LENGTH = 1000;
+	public static final int MAX_LENGTH = 2000;
 
 	private int maxLength = MAX_LENGTH;
+
+    private int prevLength;
 
 	/**
 	 * Получить максимально допустимую длину строки в этом столбце
@@ -44,7 +46,15 @@ public class StringColumn extends Column  implements Serializable {
 		this.maxLength = maxLength;
 	}
 
-	@Override
+    public int getPrevLength() {
+        return prevLength;
+    }
+
+    public void setPrevLength(int prevLength) {
+        this.prevLength = prevLength;
+    }
+
+    @Override
 	public ValidationStrategy getValidationStrategy() {
 		return new ValidationStrategy() {
 			@Override

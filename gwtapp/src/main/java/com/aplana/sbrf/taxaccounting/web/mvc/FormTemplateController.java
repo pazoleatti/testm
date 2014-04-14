@@ -79,28 +79,25 @@ public class FormTemplateController {
         List<FileItem> items = upload.parseRequest(req);
         FormTemplate formTemplate = formTemplateImpexService.importFormTemplate(formTemplateId, items.get(0).getInputStream());
         mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo().getUser());
-        /*if (logger.containsLevel(LogLevel.ERROR))
-            throw new ServiceLoggerException("Найдены пересечения.", logEntryService.save(logger.getEntries()));*/
-
 
 		IOUtils.closeQuietly(items.get(0).getInputStream());
         if (!logger.getEntries().isEmpty())
-            resp.getWriter().printf("{uuid : \"%s\"}", logEntryService.save(logger.getEntries()));
+            resp.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
 	}
 
     @ExceptionHandler(ServiceLoggerException.class)
     public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
-        response.getWriter().printf("{errorUuid: \"%s\"}", e.getUuid());
+        response.getWriter().printf("errorUuid %s", e.getUuid());
     }
 
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        /*response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);*/
 		response.setContentType("text/html");
 		response.setCharacterEncoding("UTF-8");
 		logger.warn(e.getLocalizedMessage(), e);
 		try {
-			response.getWriter().append("error ").append(e.getMessage()).close();
+            response.getWriter().printf("error %s", e.getMessage());
 		} catch (IOException ioException) {
 			logger.error(ioException.getMessage(), ioException);
 		}
