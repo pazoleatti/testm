@@ -1,6 +1,5 @@
 package com.aplana.gwt.client.mask.ui;
 
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.gwt.client.mask.parser.YearDateParser;
 
 /**
@@ -8,7 +7,7 @@ import com.aplana.gwt.client.mask.parser.YearDateParser;
  *
  * @author aivanov
  */
-public class YearMaskBox extends DateMaskBoxAbstract {
+public class YearMaskBox extends DateMaskBox {
 
     public YearMaskBox() {
         super(YearDateParser.formatY, YearDateParser.instanceY(), "9999");

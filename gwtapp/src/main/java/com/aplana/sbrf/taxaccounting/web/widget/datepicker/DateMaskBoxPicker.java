@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datepicker;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.DayMonthMaskBox;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -15,8 +13,6 @@ import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -43,13 +39,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
 
     private static DateBoxUiBinder ourUiBinder = GWT.create(DateBoxUiBinder.class);
 
-    /*@UiField(provided = true)
-    DateMaskBoxAbstract dateBox;*/
-
-    private DateMaskBoxAbstract dateBox;
-
-    @UiField
-    HorizontalPanel dateBoxPanel;
+    @UiField(provided = true)
+    DateMaskBox dateBox;
 
     @UiField
     Image calendarImage,
@@ -81,17 +72,8 @@ public class DateMaskBoxPicker extends Composite implements HasEnabled, HasVisib
     }
 
     public DateMaskBoxPicker(Formats format) {
-        if (Formats.DD_MM.equals(format)){
-            dateBox = new DayMonthMaskBox();
-        }
-        else
-        {
-            dateBox = new DateMaskBox();
-        }
+        dateBox = Formats.DD_MM.equals(format) ? new DayMonthMaskBox() : new DateMaskBox();
         initWidget(ourUiBinder.createAndBindUi(this));
-
-        dateBoxPanel.clear();
-        dateBoxPanel.add(dateBox);
 
         MouseOverHandler mouseOverHandler = new MouseOverHandler() {
             @Override

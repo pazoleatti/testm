@@ -48,7 +48,6 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     private Integer currentDepartmentId;
 
     @UiField
-    @Editor.Ignore
     PeriodPickerPopup periodPickerPopup;
 
     @UiField
@@ -92,8 +91,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
 
     private void initListeners() {
         // Подразделение
-        departmentPicker.addValueChangeHandler(
-                new ValueChangeHandler<List<Integer>>() {
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
 

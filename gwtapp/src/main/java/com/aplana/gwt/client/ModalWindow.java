@@ -207,6 +207,10 @@ public class ModalWindow extends DialogBox implements CanHide {
         setMainInnerElementProperty("minWidth", minWidth);
     }
 
+    public void setMinHeight(String minHeight){
+        setMainInnerElementProperty("minHeight", minHeight);
+    }
+
     public void setWidth(String width) {
         setMainInnerElementProperty("width", width);
         //getWidget().setWidth(width);
