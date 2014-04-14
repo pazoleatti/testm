@@ -235,6 +235,7 @@ alter table template_changes add constraint template_changes_fk_user_id foreign 
 alter table template_changes add constraint changes_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table template_changes add constraint changes_fk_dec_template_id foreign key (declaration_template_id) references declaration_template(id) on delete cascade;
 alter table template_changes add constraint changes_check_event check (event in (1,2,3,4,5));
+alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null) or (form_template_id is null and declaration_template_id is not null));
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
