@@ -350,7 +350,29 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		);
 	}
 
-	private String getTypeFromCode(Column col) {
+    @Override
+    public List<Long> getAttributeId2(Long attributeId) {
+        if (attributeId == null) {
+            return null;
+        }
+        StringBuilder query = new StringBuilder("SELECT DISTINCT ATTRIBUTE_ID2" +
+                " FROM FORM_COLUMN" +
+                " WHERE ATTRIBUTE_ID=" + attributeId +
+                " AND ATTRIBUTE_ID2 is not null" +
+                " AND ATTRIBUTE_ID2<>0"
+        );
+
+        List<Long> result = getJdbcTemplate().queryForList(
+                query.toString(),
+                Long.class
+        );
+        if (result.isEmpty()) {
+            return null;
+        }
+        return result;
+    }
+
+    private String getTypeFromCode(Column col) {
         if (col instanceof NumericColumn) {
             return "N";
         } else if (col instanceof StringColumn) {

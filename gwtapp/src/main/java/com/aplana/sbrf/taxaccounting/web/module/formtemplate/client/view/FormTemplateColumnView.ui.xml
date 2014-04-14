@@ -51,6 +51,7 @@
                     <g:HorizontalPanel height="30px" ui:field="stringMaxLengthPanel">
                         <g:Label width="150px">Максимальный размер строки</g:Label>
                         <g:IntegerBox width="100px" ui:field="stringMaxLengthBox"/>
+                        <g:Label ui:field="errorMsg" styleName="{style.marginLeft10}"></g:Label>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="precisionPanel">

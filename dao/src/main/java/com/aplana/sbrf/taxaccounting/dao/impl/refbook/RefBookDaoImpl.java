@@ -138,7 +138,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().query(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-							"is_unique, sort_order " +
+							"is_unique, sort_order, format " +
                             "from ref_book_attribute where ref_book_id = ? order by ord",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper());
@@ -152,6 +152,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      */
     private class RefBookAttributeRowMapper implements RowMapper<RefBookAttribute> {
         public RefBookAttribute mapRow(ResultSet rs, int index) throws SQLException {
+
             RefBookAttribute result = new RefBookAttribute();
             result.setId(rs.getLong("id"));
             result.setName(rs.getString("name"));
@@ -165,6 +166,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             result.setRequired(rs.getBoolean("required"));
             result.setUnique(rs.getBoolean("is_unique"));
 			result.setSortOrder(rs.getInt("sort_order"));
+            Integer formatId = rs.getInt("format");
+            if (formatId!=0){
+                result.setFormat(Formats.getById(formatId));
+            }
             return result;
         }
     }
@@ -202,7 +207,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "select id, name, alias, type, reference_id, attribute_id, visible, precision, width, required, " +
-                            "is_unique, sort_order " +
+                            "is_unique, sort_order, format " +
                             "from ref_book_attribute where id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC},
                     new RefBookAttributeRowMapper()
