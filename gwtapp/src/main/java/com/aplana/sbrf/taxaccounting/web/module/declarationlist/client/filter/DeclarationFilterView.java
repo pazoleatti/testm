@@ -7,6 +7,8 @@ import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -31,6 +33,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     interface MyDriver extends SimpleBeanEditorDriver<DeclarationDataFilter, DeclarationFilterView> {}
 
     private MyDriver driver;
+
+    @UiField
+    @Ignore
+    Label reportPeriodIdsLabel;
 
     @UiField
     PeriodPickerPopupWidget reportPeriodIds;
@@ -79,6 +85,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	    initWidget(binder.createAndBindUi(this));
         this.driver = driver;
         this.driver.initialize(this);
+        reportPeriodIds.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                departmentPicker.se
+            }
+        });
     }
 
 	@Override
@@ -129,6 +141,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
         declarationTypeId.setVisible(!isTaxTypeDeal);
         declarationTypeLabel.setVisible(!isTaxTypeDeal);
+        reportPeriodIds.setVisible(!isTaxTypeDeal);
+        reportPeriodIdsLabel.setVisible(!isTaxTypeDeal);
     }
 
     @Override

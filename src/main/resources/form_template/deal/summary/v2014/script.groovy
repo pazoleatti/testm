@@ -366,8 +366,8 @@ def buildRow(def srcRow, def matrixRow) {
             break
         case 386: // 11
         case 388: // 13
-        case 401:
-        case 402:
+        case 402: // 23
+        case 401: // 24
         case 403: // 25
             val13 = '003'
             break
@@ -378,7 +378,7 @@ def buildRow(def srcRow, def matrixRow) {
         case 390: // 15
             val13 = '017'
             break
-        case 397:
+        case 397: // 20
             val13 = '004'
             break
     }
@@ -593,16 +593,14 @@ def buildRow(def srcRow, def matrixRow) {
             row.dealSubjectName = 'Привлечение денежных средств'
             break
         case 398: // 21
-            row.dealSubjectName = 'Предоставление лицензий на программное обеспечение'
-            break
         case 399: // 22
             row.dealSubjectName = getRefBookValue(13, srcRow.serviceName)?.NAME?.stringValue
             break
         case 402: // 23
-            row.dealSubjectName = 'Привлечение денежных средств в межбанковские кредиты'
+            row.dealSubjectName = 'Привлечение средств на межбанковском рынке'
             break
         case 401: // 24
-            row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
+            row.dealSubjectName = 'Привлечение гарантий'
             break
         case 403: // 25
             row.dealSubjectName = 'Привлечение гарантий (открытие аккредитивов и других инструментов торгового финансирования)'
@@ -661,7 +659,7 @@ def buildRow(def srcRow, def matrixRow) {
         case 388: // 13
         case 391: // 16
         case 392: // 17
-        case 401:
+        case 401: // 24
         case 403: // 25
             val27 = '65.23'
             break
@@ -676,8 +674,8 @@ def buildRow(def srcRow, def matrixRow) {
             val27 = '65.22'
             break
         case 390: // 15
-        case 397:
-        case 402:
+        case 397: // 20
+        case 402: // 23
             val27 = '65.12'
             break
         case 398: // 21
@@ -701,7 +699,7 @@ def buildRow(def srcRow, def matrixRow) {
     // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
     row.contractDate = matrixRow.contractDate
 
-    // Заполнение графы 15
+    // Графа 15
     Calendar compareCalendar15 = Calendar.getInstance()
     compareCalendar15.set(2011, 12, 28)
     if (compareCalendar15.getTime().equals(row.contractDate) && "123".equals(row.contractNum)) {
@@ -800,11 +798,11 @@ def buildRow(def srcRow, def matrixRow) {
         case 389: // 14
         case 393: // 18
         case 394: // 19
-        case 397:
+        case 397: // 20
         case 398: // 21
         case 399: // 22
-        case 402:
-        case 401:
+        case 402: // 23
+        case 401: // 24
         case 403: // 25
             val41 = '796'
             break
@@ -826,49 +824,8 @@ def buildRow(def srcRow, def matrixRow) {
     // заполняется позже, для группы
 
     // Графа 44
-    switch (formTypeId) {
-        case 375: // 3
-        case 376: // 1
-        case 377: // 2
-        case 379: // 4
-        case 380: // 5
-        case 381: // 6
-        case 382: // 7
-        case 387: // 12
-        case 392: // 17
-        case 397:
-        case 398: // 21
-        case 399: // 22
-            row.total = srcRow.cost
-            break
-        case 383: // 8
-            if (srcRow.percentIncomeSum != null)
-                row.total = srcRow.percentIncomeSum
-            if (srcRow.percentConsumptionSum != null)
-                row.total = srcRow.percentConsumptionSum
-            break
-        case 384: // 9
-            row.total = srcRow.transactionSumRub
-            break
-        case 385: // 10
-        case 404: // 26
-            row.total = srcRow.totalCost
-            break
-        case 386: // 11
-        case 388: // 13
-        case 389: // 14
-        case 390: // 15
-        case 391: // 16
-        case 394: // 19
-        case 402:
-        case 401:
-        case 403: // 25
-            row.total = srcRow.total
-            break
-        case 393: // 18
-            row.total = srcRow.totalNds
-            break
-    }
+    // заполняется позже, для группы
+    row.total = 0
 
     // Графа 45
     // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
@@ -920,15 +877,15 @@ def Long getReportClass(def BigDecimal formTypeId) {
         case 376: // 1
         case 377: // 2
         case 380: // 5
-        case 381: // 6
         case 382: // 7
-        case 385: // 10
-        case 397:
+        case 397: // 20
         case 399: // 22
             return 1
         case 375: // 3
             return 3
         case 379: // 4
+        case 381: // 6
+        case 385: // 10
         case 387: // 12
         case 398: // 21
         case 404: // 26
@@ -1052,6 +1009,51 @@ def getRow(def map) {
                 break
             default:
                 row.count = 1
+                break
+        }
+
+        // Графа 44 п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
+        switch (matrixRow.dealNum1) {
+            case 376: // 1
+            case 377: // 2
+            case 375: // 3
+            case 379: // 4
+            case 380: // 5
+            case 381: // 6
+            case 382: // 7
+            case 387: // 12
+            case 392: // 17
+            case 397: // 20
+            case 398: // 21
+            case 399: // 22
+                row.total = row.total + srcRow.cost
+                break
+            case 383: // 8
+                if (srcRow.percentIncomeSum != null)
+                    row.total = row.total + srcRow.percentIncomeSum
+                else if (srcRow.percentConsumptionSum != null)
+                    row.total = row.total + srcRow.percentConsumptionSum
+                break
+            case 384: // 9
+                row.total = row.total + srcRow.transactionSumRub
+                break
+            case 385: // 10
+            case 404: // 26
+                row.total = row.total + srcRow.totalCost
+                break
+            case 386: // 11
+            case 388: // 13
+            case 389: // 14
+            case 390: // 15
+            case 391: // 16
+            case 394: // 19
+            case 402: // 23
+            case 401: // 24
+            case 403: // 25
+                row.total = row.total + srcRow.total
+                break
+            case 393: // 18
+                row.total = row.total + srcRow.totalNds
                 break
         }
 
@@ -1414,9 +1416,9 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 390: // 15
         case 391: // 16
         case 394: // 19
-        case 397:
-        case 402:
-        case 401:
+        case 397: // 20
+        case 402: // 23
+        case 401: // 24
         case 403: // 25
             row.contractDate = srcRow.docDate
             break
@@ -1446,13 +1448,13 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 389: // 14
         case 391: // 16
         case 394: // 19
-        case 397:
-        case 401:
+        case 397: // 20
+        case 401: // 24
         case 403: // 25
             row.contractNum = srcRow.docNumber
             break
         case 390: // 15
-        case 402:
+        case 402: // 23
             row.contractNum = srcRow.docNum
             break
     }
@@ -1475,7 +1477,7 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 379: // 4
         case 381: // 6
         case 387: // 12
-        case 397:
+        case 397: // 20
             row.dealDoneDate = srcRow.dealDate
             break
         case 380: // 5
@@ -1487,8 +1489,8 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 390: // 15
         case 391: // 16
         case 394: // 19
-        case 402:
-        case 401:
+        case 402: // 23
+        case 401: // 24
         case 403: // 25
             row.dealDoneDate = srcRow.dealDoneDate
             break
@@ -1512,8 +1514,8 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 380: // 5
         case 381: // 6
         case 387: // 12
-        case 397:
-        case 402:
+        case 397: // 20
+        case 402: // 23
             row.organName = srcRow.fullNamePerson
             break
         case 384: // 9
@@ -1531,7 +1533,7 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
         case 390: // 15
         case 391: // 16
         case 394: // 19
-        case 401:
+        case 401: // 24
         case 403: // 25
             row.organName = srcRow.fullName
             break

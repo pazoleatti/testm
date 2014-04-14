@@ -137,8 +137,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
             public void render(Cell.Context context, FormDataSearchResult object, SafeHtmlBuilder sb) {
                 String key = filterText.getText();
                 String link =
-                    "<p style=\"color: #0000CD\">"+
-                            object.getStringFound().replaceAll(key, "<span style=\"color: #ff0000;\">"+key+"</span>") +
+                    "<p style=\"color: #0000CD\">" +
+                        object.getStringFound().replaceAll("(?iu)"+key, "<span style=\"color: #ff0000;\">$0</span>") +
                     "<p>";
                 sb.appendHtmlConstant(link);
             }
