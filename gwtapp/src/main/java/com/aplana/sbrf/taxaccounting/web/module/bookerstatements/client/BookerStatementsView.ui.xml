@@ -9,20 +9,21 @@
     <ui:style>
         .header {
             font-size: 14px;
-            color:  #636460;
+            color: #636460;
+        }
+
+        .btnFindPanel {
+            padding-left: 10px;
+            padding-right: 10px;
         }
 
         .btnPanel {
-            height: 30px;
-        }
 
-        .btnPanel td {
-            vertical-align: middle !important;
         }
 
         .fileUploader {
-            margin-right: 10px;
-            margin-left: 10px;
+            margin-right: 5px;
+            margin-left: 5px;
         }
 
         .pager {
@@ -36,7 +37,31 @@
             bottom: 30px;
             right: 0;
             left: 0;
-            top: 50px;
+            top: 66px;
+        }
+
+        .paddingRight15 {
+            padding-right: 15px;
+        }
+
+        .marginRight3 {
+            margin-right: 3px;
+        }
+
+        .separator {
+            height: 26px;
+            margin: 0 10px 0 10px;
+            border-right: 1px solid #aeaeac;
+        }
+
+        .horSep {
+            height: 1px;
+            margin: 1px 10px 3px 10px;
+            border-top: 1px solid #aeaeac;
+        }
+
+        .listBox {
+            min-width: 100px;
         }
     </ui:style>
 
@@ -67,44 +92,58 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel spacing="0" verticalAlignment="middle" height="30px" width="100%"
+                                   addStyleNames="{style.btnFindPanel}">
 
-                    <g:cell>
-                        <g:Label width="55px" text="Период:"/>
+                    <g:cell width="33%">
+                        <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.paddingRight15}">
+                            <g:cell horizontalAlignment="right">
+                                <g:Label text="Период:" addStyleNames="{style.marginRight3}"/>
+                            </g:cell>
+                            <g:cell width="100%">
+                                <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false"
+                                                             width="100%"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
                     </g:cell>
-                    <g:cell>
-                        <g:FlowPanel>
-                            <rep:PeriodPickerPopupWidget ui:field="periodPickerPopup" multiselect="false" width="200px"/>
-                        </g:FlowPanel>
-                    </g:cell>
+                    <g:cell width="33%">
+                        <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.paddingRight15}">
+                            <g:cell horizontalAlignment="right">
+                                <g:Label text="Подразделение:" addStyleNames="{style.marginRight3}"/>
+                            </g:cell>
+                            <g:cell width="100%">
+                                <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false"
+                                                                    width="100%"/>
+                            </g:cell>
 
-                    <g:cell>
-                        <g:Label width="105px" text="Подразделение:"/>
+                        </g:HorizontalPanel>
                     </g:cell>
-                    <g:cell>
-                        <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="300px" />
-                    </g:cell>
+                    <g:cell width="33%">
+                        <g:HorizontalPanel verticalAlignment="middle" width="100%">
 
-                    <g:cell>
-                        <g:Label width="190px" wordWrap="false" text="Вид бухгалтерской отчётности:"/>
+                            <g:cell horizontalAlignment="right">
+                                <g:Label wordWrap="false" text="Вид бух.отчётности:" addStyleNames="{style.marginRight3}"/>
+                            </g:cell>
+                            <g:cell width="100%">
+                                <g:ListBox ui:field="bookerReportType" width="100%" addStyleNames="{style.listBox}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
                     </g:cell>
-                    <g:cell>
-                        <g:ListBox ui:field="bookerReportType" width="100px"/>
-                    </g:cell>
+                    <g:Label addStyleNames="{style.separator}"/>
 
-                    <g:cell>
-                        <g:Button ui:field="searchButton" text="Найти"/>
-                    </g:cell>
+                    <g:Button ui:field="searchButton" text="Найти"/>
 
-                    <g:cell>
-                        <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="true"
-                                                    addStyleNames="{style.fileUploader}" simpleButton="true"/>
-                        <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
-                    </g:cell>
+                </g:HorizontalPanel>
 
-                    <g:cell>
-                        <g:Button ui:field="deleteButton" text="Удалить"/>
-                    </g:cell>
+                <g:HTML addStyleNames="{style.horSep}"/>
+
+                <g:HorizontalPanel spacing="0" verticalAlignment="middle" height="26px" addStyleNames="{style.btnPanel}">
+
+                    <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="true" height="22px"
+                                                addStyleNames="{style.fileUploader}" simpleButton="true"/>
+                    <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
+
+                    <g:Button ui:field="deleteButton" text="Удалить"/>
                 </g:HorizontalPanel>
 
                 <g:ResizeLayoutPanel addStyleNames="{style.table}">
@@ -113,7 +152,7 @@
 
                 <pager:FlexiblePager ui:field="pager" location="CENTER"
                                      showFastForwardButton="false" fastForwardRows="0"
-                                     showLastPageButton="true" styleName="{style.pager}" type="historyBusiness"/>
+                                     showLastPageButton="true" styleName="{style.pager}" type="BookerStatementsView"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

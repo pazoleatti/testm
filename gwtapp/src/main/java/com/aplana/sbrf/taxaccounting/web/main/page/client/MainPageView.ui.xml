@@ -73,12 +73,12 @@
     </ui:style>
 
     <g:HTMLPanel>
-        <div ui:field="loadingMessage" class="loadingStatusLabel">
+        <g:InlineHTML ui:field="loadingMessage" addStyleNames="loadingStatusLabel">
             <div>
                 <img src="resources/img/load-panel.gif" alt="" width="64px" height="64px"/>
                 <span>Загрузка...</span>
             </div>
-        </div>
+        </g:InlineHTML>
         <g:DockLayoutPanel ui:field="dockPanel" unit="PX" height="100%" width="100%">
             <g:north size="44">
                 <g:HTMLPanel>
