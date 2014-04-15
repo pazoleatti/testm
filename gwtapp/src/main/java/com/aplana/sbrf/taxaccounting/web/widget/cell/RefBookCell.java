@@ -111,7 +111,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 				public void onValueChange(ValueChangeEvent<List<Long>> event) {
 					// Update the cell and value updater.
                     List<Long> values = event.getValue();
-                    System.out.println(values);
                     Long value = (values != null && !values.isEmpty() ? values.get(0) : null);
 
 					@SuppressWarnings("unchecked")

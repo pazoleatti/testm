@@ -108,4 +108,15 @@ public class Logger {
 	public void clear() {
 		entries.clear();
 	}
+
+    /**
+     * Очистить содержимое журнала с определенным уровнем сообщений
+     */
+    public void clear(LogLevel logLevel) {
+        for (LogEntry entry : entries) {
+            if (entry.getLevel().equals(logLevel)) {
+                entries.remove(entry);
+            }
+        }
+    }
 }

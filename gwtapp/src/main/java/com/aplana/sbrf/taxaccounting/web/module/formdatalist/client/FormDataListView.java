@@ -164,20 +164,24 @@ public class FormDataListView extends
 		
 
 		formDataTable.addColumn(formKindColumn, getHeader(FORM_DATA_KIND_TITLE));
+        formDataTable.setColumnWidth(formKindColumn, 8.5, Style.Unit.EM);
 		formDataTable.addColumn(linkColumn, getHeader(FORM_DATA_TYPE_TITLE));
-		formDataTable.setColumnWidth(linkColumn, 40, Style.Unit.EM);
-		
+
 		formDataTable.addColumn(departmentColumn, getHeader(DEPARTMENT_TITLE));
-		
+
         formDataTable.addColumn(periodYearColumn, getHeader(PERIOD_YEAR_TITLE));
-        formDataTable.setColumnWidth(periodYearColumn, 5, Style.Unit.EM);
+        formDataTable.setColumnWidth(periodYearColumn, 3.5, Style.Unit.EM);
         periodYearColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         
         
 		formDataTable.addColumn(reportPeriodColumn, getHeader(REPORT_PERIOD_TITLE));
+        formDataTable.setColumnWidth(reportPeriodColumn, 7, Style.Unit.EM);
 		formDataTable.addColumn(periodMonthColumn, getHeader(PERIOD_MONTH_TITLE));
+        formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
 		formDataTable.addColumn(stateColumn, getHeader(FORM_DATA_STATE_TITLE));
+        formDataTable.setColumnWidth(stateColumn, 6, Style.Unit.EM);
 		formDataTable.addColumn(returnColumn, getHeader(FORM_DATA_RETURN_TITLE));
+        formDataTable.setColumnWidth(returnColumn, 8, Style.Unit.EM);
 
 		pager.setDisplay(formDataTable);
         formDataTable.setPageSize(pager.getPageSize());

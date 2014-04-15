@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRo
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,6 +50,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     LinkButton addRow;
     @UiField
     LinkButton deleteRow;
+    @UiField
+    LinkAnchor backAnchor;
 
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
@@ -147,7 +150,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void setSelected(Long recordId) {
-		selectionModel.clear();
+        System.out.println("setSelected: "+recordId);
+        selectionModel.clear();
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
 
@@ -227,6 +231,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             }
         });
 	}
+
+    @UiHandler("backAnchor")
+    void onPrintButtonClicked(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onBackClicked();
+        }
+    }
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
 		switch (alignment) {
