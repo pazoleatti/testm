@@ -90,4 +90,13 @@ public interface ReportPeriodDao {
 	 * @return список отчетных периодов
 	 */
 	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
+
+    /**
+     * Получить корректирующие периоды
+     * @param taxType тип налога
+     * @param departmentId идентификатор подразделения
+     * @return список корректирующих периодов
+     */
+    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
+
 }

@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -120,7 +119,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
         void updateTable();
         void setTableColumns(final List<RefBookColumn> columns);
-
     }
 
     @Inject
@@ -300,7 +298,6 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         protected void onRangeChanged(HasData<RefBookDataRow> display) {
             if (searchEnabled && isFilterFilled()) {
                 final Range range = display.getVisibleRange();
-
                 GetBookerStatementsAction action = new GetBookerStatementsAction();
                 action.setDepartmentId(getView().getDepartment().getFirst());
                 action.setStatementsKind(getView().getType().getFirst());
@@ -317,7 +314,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                         } else {
                             searchEnabled = false;
                             getView().updateTable();
-                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: <вид бухгалтерской отчётности>!");
+                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: \"" + getView().getType().getSecond() + "\"!");
                         }
                     }
                 }, BookerStatementsPresenter.this));

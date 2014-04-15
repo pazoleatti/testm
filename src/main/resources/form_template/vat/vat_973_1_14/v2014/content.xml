@@ -14,18 +14,28 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <name>fix</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>differences</alias>
         <checking>false</checking>
         <name>Вид расхождений</name>
-        <order>2</order>
+        <order>3</order>
         <width>80</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
         <name>Сумма, руб. (+/-)</name>
-        <order>3</order>
+        <order>4</order>
         <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>

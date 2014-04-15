@@ -52,7 +52,7 @@ public interface PeriodService {
 	 */
     //TODO Слишком много параметров
 	void open(int year, int dictionaryTaxPeriodId, TaxType taxType, TAUserInfo user,
-	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate, boolean isCorrection);
+	          long departmentId, List<LogEntry> logs, boolean isBalance, Date correctionDate);
 
 	/**
 	 * Закрыть период
@@ -62,7 +62,7 @@ public interface PeriodService {
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void close(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+	void close(TaxType taxType, int reportPeriodId, long departmentId, Date correctionDate, List<LogEntry> logs, TAUserInfo user);
 
 	List<DepartmentReportPeriod> listByDepartmentId(long departmentId);
 
@@ -265,4 +265,33 @@ public interface PeriodService {
      * @return предыдущий отчетный период
      */
     ReportPeriod getPrevReportPeriod(int reportPeriodId);
+
+    /**
+     * Получить корректирующие периоды
+     * @param taxType тип налога
+     * @param departmentId идентификатор подразделения
+     * @return список корректирующих периодов
+     */
+    List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
+
+    /**
+     * Открыть корректирующий период
+     * @param taxType тип налога
+     * @param reportPeriod отчетный период
+     * @param departmentId идентификатор подразделения
+     * @param term срок сдачи отчетности
+     * @param user пользователь, который выполняет действие
+     * @param logs логер, при необходимости
+     */
+    void openCorrectionPeriod(TaxType taxType, ReportPeriod reportPeriod, long departmentId, Date term, TAUserInfo user, List<LogEntry> logs);
+
+    /**
+     * проверяет статус периода перед открытием
+     * @param reportPeriod отчетный период
+     * @param departmentId идентификатор подразделения
+     * @param term срок сдачи отчетности
+     * @return статус периода
+     */
+    PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, long departmentId, Date term);
+
 }

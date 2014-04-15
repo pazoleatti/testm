@@ -212,7 +212,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         for (Integer departmentId : list) {
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
                     departmentId.longValue());
-            if (departmentReportPeriod != null && departmentReportPeriod.isActive()) {
+            if (departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId)) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
             }
