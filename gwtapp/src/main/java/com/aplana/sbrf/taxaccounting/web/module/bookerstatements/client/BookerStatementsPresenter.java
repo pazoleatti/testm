@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -119,6 +120,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
 
         void updateTable();
         void setTableColumns(final List<RefBookColumn> columns);
+
     }
 
     @Inject
@@ -184,6 +186,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                                 .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
                                                     @Override
                                                     public void onSuccess(DeleteBookerStatementsResult result) {
+                                                        searchEnabled = false;
+                                                        getView().updateTable();
                                                         Dialog.infoMessage("Удаление бух отчетности выполнено успешно.");
                                                     }
                                                 }, BookerStatementsPresenter.this)
@@ -287,13 +291,16 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         getView().addAccImportValueChangeHandler(accImportValueChangeHandler);
     }
 
-
+    public boolean isSearchEnabled() {
+        return searchEnabled;
+    }
 
     private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
         @Override
         protected void onRangeChanged(HasData<RefBookDataRow> display) {
             if (searchEnabled && isFilterFilled()) {
                 final Range range = display.getVisibleRange();
+
                 GetBookerStatementsAction action = new GetBookerStatementsAction();
                 action.setDepartmentId(getView().getDepartment().getFirst());
                 action.setStatementsKind(getView().getType().getFirst());
@@ -308,6 +315,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                             getView().setTableData(range.getStart(),
                                     result.getTotalCount(), result.getDataRows());
                         } else {
+                            searchEnabled = false;
+                            getView().updateTable();
                             Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: <вид бухгалтерской отчётности>!");
                         }
                     }
