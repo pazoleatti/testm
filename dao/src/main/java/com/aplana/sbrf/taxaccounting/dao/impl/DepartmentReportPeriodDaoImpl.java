@@ -9,8 +9,10 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +40,6 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 			reportPeriod.setActive(rs.getInt("IS_ACTIVE") == 0 ? false : true);
 			reportPeriod.setBalance(rs.getInt("IS_BALANCE_PERIOD") == 0 ? false : true);
             reportPeriod.setCorrectPeriod(rs.getDate("CORRECTION_DATE"));
-            reportPeriod.setHasCorrectPeriod(rs.getInt("IS_CORRECT_PERIOD") == 0 ? false : true);
 			return reportPeriod;
 		}
 	};
@@ -72,15 +73,14 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
         }
 		getJdbcTemplate()
 				.update("insert into DEPARTMENT_REPORT_PERIOD (ID, DEPARTMENT_ID, REPORT_PERIOD_ID, IS_ACTIVE, IS_BALANCE_PERIOD," +
-                        "CORRECTION_DATE, IS_CORRECT_PERIOD)"
-						+ " values (?, ?, ?, ?, ?, ?, ?)",
+                        "CORRECTION_DATE)"
+						+ " values (?, ?, ?, ?, ?, ?)",
                         id,
 						departmentReportPeriod.getDepartmentId(),
 						departmentReportPeriod.getReportPeriod().getId(),
 						departmentReportPeriod.isActive(),
 						departmentReportPeriod.isBalance(),
-                        departmentReportPeriod.getCorrectPeriod(),
-                        departmentReportPeriod.hasCorrectPeriod());
+                        departmentReportPeriod.getCorrectPeriod());
 	}
 
     @Override
@@ -93,22 +93,52 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 
     @Override
 	@Transactional(readOnly=false)
-	public void updateActive(int reportPeriodId, Long departmentId,
+	public void updateActive(int reportPeriodId, Long departmentId, Date correctionDate,
 			boolean active) {
 		getJdbcTemplate()
-				.update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=?",
-						active ? 1 : 0, reportPeriodId, departmentId);
+				.update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? " +
+                                "and (? is null or CORRECTION_DATE = ?)",
+						active ? 1 : 0, reportPeriodId, departmentId, correctionDate, correctionDate);
 	}
+
+    @Override
+    @Transactional(readOnly=false)
+    public void updateActive(long departmentReportPeriodId, boolean active) {
+        getJdbcTemplate()
+                .update("update DEPARTMENT_REPORT_PERIOD set IS_ACTIVE=? where ID=?",
+                        active ? 1 : 0, departmentReportPeriodId);
+    }
 
 	@Override
 	public DepartmentReportPeriod get(int reportPeriodId, Long departmentId) {
 		return DataAccessUtils
 				.singleResult(getJdbcTemplate()
-						.query("select * from DEPARTMENT_REPORT_PERIOD where REPORT_PERIOD_ID=? and DEPARTMENT_ID=?",
+						.query("select * from DEPARTMENT_REPORT_PERIOD where REPORT_PERIOD_ID=? and DEPARTMENT_ID=? and CORRECTION_DATE is null",
 								new Object[] { reportPeriodId, departmentId },
 								new int[] { Types.NUMERIC, Types.NUMERIC },
 								mapper));
 	}
+
+    @Override
+    public DepartmentReportPeriod get(int reportPeriodId, Long departmentId, Date correctionDate) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("reportPeriodId", reportPeriodId);
+            params.addValue("departmentId", departmentId);
+            if (correctionDate != null) {
+                params.addValue("correctionDate", correctionDate);
+            }
+
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from DEPARTMENT_REPORT_PERIOD where REPORT_PERIOD_ID=:reportPeriodId and DEPARTMENT_ID= :departmentId" +
+                            " and " + (correctionDate == null ? " CORRECTION_DATE is null" : " CORRECTION_DATE = :correctionDate"),
+                    params,
+                    mapper
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            return null;
+        }
+    }
 
 	@Override
 	public void delete(int reportPeriodId, Integer departmentId) {
@@ -147,6 +177,26 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
                         "where DEPARTMENT_ID = ? and REPORT_PERIOD_ID = ? and CORRECTION_DATE is not null",
                 new Object[] {departmentId, reportPeriodId},
                 new int[] {Types.NUMERIC, Types.NUMERIC}
+        );
+    }
+
+    @Override
+    public List<DepartmentReportPeriod> getDepartmentCorrectionPeriods(long departmentId, int reportPeriodId) {
+        return getJdbcTemplate().query(
+                "select drp.* from REPORT_PERIOD rp " +
+                        "left join DEPARTMENT_REPORT_PERIOD drp on rp.id = drp.REPORT_PERIOD_ID " +
+                        "where rp.ID=? and drp.DEPARTMENT_ID=? and drp.CORRECTION_DATE is not null",
+                new Object[]{reportPeriodId, departmentId},
+                mapper
+        );
+    }
+
+    @Override
+    public DepartmentReportPeriod getById(long id) {
+        return getJdbcTemplate().queryForObject(
+                "select * from department_report_period where id = ?",
+                new Object[]{id},
+                mapper
         );
     }
 

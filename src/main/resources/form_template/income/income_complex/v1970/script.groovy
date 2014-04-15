@@ -118,7 +118,7 @@ def firstTotalRowAlias = 'R30'
 
 // Алиас для второй строки итогов
 @Field
-def secondTotalRowAlias = 'R85'
+def secondTotalRowAlias = 'R88'
 
 // Алиасы строк 4-5 для расчета контрольных граф Сводной формы начисленных доходов
 @Field
@@ -138,7 +138,7 @@ def rowsAliasesForFirstControlSum = ['R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', '
 def rowsAliasesForSecondControlSum = ['R32', 'R33', 'R34', 'R35', 'R36', 'R37', 'R38', 'R39', 'R40', 'R41', 'R42',
         'R43', 'R44', 'R45', 'R46', 'R47', 'R48', 'R49', 'R50', 'R51', 'R52', 'R53', 'R54', 'R55', 'R56', 'R57',
         'R58', 'R59', 'R60', 'R61', 'R62', 'R63', 'R64', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R71', 'R72',
-        'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84']
+        'R73', 'R74', 'R75', 'R76', 'R77', 'R78', 'R79', 'R80', 'R81', 'R82', 'R83', 'R84', 'R85', 'R86', 'R87']
 
 // Дата окончания отчетного периода
 @Field
@@ -781,7 +781,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = 3
     def int colOffset = 0
-    def int maxRow = 88
+    def int maxRow = 91
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1

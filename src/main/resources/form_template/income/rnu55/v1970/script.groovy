@@ -54,7 +54,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -79,8 +79,8 @@ def editableColumns = ['bill', 'buyDate', 'currency', 'nominal', 'percent', 'imp
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'percent', 'implementationDate',
-        'percentInCurrency', 'percentInRuble', 'sumIncomeinCurrency', 'sumIncomeinRuble']
+def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'percent', 'sumIncomeinCurrency',
+        'sumIncomeinRuble']
 
 // Атрибуты для итогов
 @Field

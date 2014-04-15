@@ -207,19 +207,14 @@ void calc() {
         if (!getBalancePeriod() && !isConsolidated) {
             // строка из предыдущего периода
             def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
-
             // графа 6
             row.lotSizePrev = calc6(row, prevRow, prevDataRows)
             // графа 8
             row.reserveCalcValuePrev = calc8(prevRow)
-
-            if (formDataEvent != FormDataEvent.IMPORT) {
-                // графа 12 курс валют
-                row.rubCourse = calc12(row, reportDate)
-                // графа 13
-                row.marketQuotationInRub = calc13(row)
-            }
-
+            // графа 12 курс валют
+            row.rubCourse = calc12(row, reportDate)
+            // графа 13
+            row.marketQuotationInRub = calc13(row)
             // графа 14
             row.costOnMarketQuotation = calc14(row)
             // графа 15
@@ -520,15 +515,14 @@ def BigDecimal calc8(def prevRow) {
     return roundValue(tmp, 2)
 }
 
-// TODO (Ramil Timerbaev) в чтз пока убрали из расчетов, возможно вернут
-def calc11(def row) {
-    def tmp = row.marketQuotation // на случай ручного ввода
-    def currency = getRefBookValue(84, row.currency)?.CODE_CUR?.value
-    if (currency == '810') {
-        tmp = row.marketQuotationInRub
-    }
-    return roundValue(tmp, 6)
-}
+//def calc11(def row) {
+//    def tmp = row.marketQuotation // на случай ручного ввода
+//    def currency = getRefBookValue(84, row.currency)?.CODE_CUR?.value
+//    if (currency == '810') {
+//        tmp = row.marketQuotationInRub
+//    }
+//    return roundValue(tmp, 6)
+//}
 
 def BigDecimal calc12(def row, def date) {
     return roundValue(getRate(row, date), 4)

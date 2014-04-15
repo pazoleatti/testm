@@ -2,19 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -29,9 +26,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
-import com.ibm.icu.text.SimpleDateFormat;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,7 +62,10 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     HTML separator;
     @UiField
     Label editModeLabel;
+    @UiField
+    TextBox filterText;
 
+    private String searchPattern;
 
     SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -94,7 +92,22 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         refbookDataTable.setPageSize(pager.getPageSize());
         refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
 		pager.setDisplay(refbookDataTable);
-	}
+        filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {}
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER){
+                    search.click();
+                }
+            }
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {}
+        });
+
+    }
 
 	@Override
 	public void setInSlot(Object slot, IsWidget content) {
@@ -234,6 +247,12 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         });
     }
 
+    @UiHandler("search")
+    void searchButtonClicked(ClickEvent event) {
+        searchPattern = filterText.getText();
+        updateTable();
+    }
+
     @UiHandler("edit")
     void editButtonClicked(ClickEvent event) {
         getUiHandlers().onSetEditMode();
@@ -314,5 +333,16 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @Override
     public void setVisibleEditLink(boolean visible){
         edit.setVisible(visible);
+    }
+
+    @Override
+    public String getSearchPattern() {
+        return searchPattern;
+    }
+
+    @Override
+    public void resetSearchInputBox() {
+        filterText.setValue("");
+        searchPattern = "";
     }
 }

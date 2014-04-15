@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -24,10 +23,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("isAuthenticated()")
 public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTableDataAction, GetRefBookTableDataResult> {
 
 	@Autowired
@@ -52,14 +54,23 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		result.setDesc(refBook.getName());
 		if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
             TAUser currentUser = securityService.currentUserInfo().getUser();
-            String regions = null;
+            String filter = null;
             if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
                 List<Department> deps = departmentService.getBADepartments(securityService.currentUserInfo().getUser());
-                regions = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
+                filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
+            }
+
+            String searchPattern = action.getSearchPattern();
+            if (searchPattern != null && !searchPattern.isEmpty()){
+                if (filter != null && filter.length() > 0){
+                    filter += " and ("+buildQuery(refBook, searchPattern)+")";
+                } else{
+                    filter = buildQuery(refBook, searchPattern);
+                }
             }
 
 			PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-					.getRecords(action.getRelevanceDate(), action.getPagingParams(), regions, refBook.getAttributes().get(0));
+					.getRecords(action.getRelevanceDate(), action.getPagingParams(), filter, refBook.getAttributes().get(0));
 			List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
 
 			//кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
@@ -129,6 +140,34 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		}
 		return result;
 	}
+
+    /**
+     * Метод для создания строки фильтра для справочника
+     *
+     * @param refBook
+     * @param searchPattern
+     * @return
+     */
+    private static String buildQuery(RefBook refBook, String searchPattern){
+        StringBuilder resultSearch = new StringBuilder();
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (RefBookAttributeType.STRING.equals(attribute.getAttributeType()) || RefBookAttributeType.DATE.equals(attribute.getAttributeType())) {
+                if (resultSearch.length() > 0) {
+                    resultSearch.append(" or ");
+                }
+                resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
+                        .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+            } else if (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType())) {
+                if (resultSearch.length() > 0) {
+                    resultSearch.append(" or ");
+                }
+                resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
+                        .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+            }
+        }
+
+        return resultSearch.toString();
+    }
 
 	@Override
 	public void undo(GetRefBookTableDataAction getRefBookDataRowAction, GetRefBookTableDataResult getRefBookDataRowResult, ExecutionContext executionContext) throws ActionException {

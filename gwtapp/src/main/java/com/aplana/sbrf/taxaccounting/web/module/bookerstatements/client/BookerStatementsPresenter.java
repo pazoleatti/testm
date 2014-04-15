@@ -184,6 +184,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                                                 .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
                                                     @Override
                                                     public void onSuccess(DeleteBookerStatementsResult result) {
+                                                        searchEnabled = false;
+                                                        getView().updateTable();
                                                         Dialog.infoMessage("Удаление бух отчетности выполнено успешно.");
                                                     }
                                                 }, BookerStatementsPresenter.this)
@@ -214,7 +216,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     /**
      * Проверка заполненности данных фильтра
      */
-    private boolean isFilterFilled() {
+    @Override
+    public boolean isFilterFilled() {
         if (getView().getReportPeriod() == null) {
             Dialog.errorMessage("Не задано значение отчетного периода!");
             return false;
@@ -287,7 +290,9 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
         getView().addAccImportValueChangeHandler(accImportValueChangeHandler);
     }
 
-
+    public boolean isSearchEnabled() {
+        return searchEnabled;
+    }
 
     private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
         @Override
@@ -308,7 +313,9 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                             getView().setTableData(range.getStart(),
                                     result.getTotalCount(), result.getDataRows());
                         } else {
-                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: <вид бухгалтерской отчётности>!");
+                            searchEnabled = false;
+                            getView().updateTable();
+                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: \"" + getView().getType().getSecond() + "\"!");
                         }
                     }
                 }, BookerStatementsPresenter.this));

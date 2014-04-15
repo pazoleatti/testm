@@ -286,7 +286,7 @@ public class PeriodServiceImplTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setIp(LOCAL_IP);
         userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
-        service.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date(), false);
+        service.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date());
 
         ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
         verify(reportPeriodDao, times(1)).save(argument.capture());

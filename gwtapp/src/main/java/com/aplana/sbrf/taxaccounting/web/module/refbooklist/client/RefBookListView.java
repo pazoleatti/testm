@@ -55,7 +55,7 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
         TextColumn<TableModel> typeColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel tableModel) {
-                return tableModel.isReadOnly() ? "Не редактируемый" : "Редактируемый";
+                return tableModel.isReadOnly() ? "Только для чтения" : "Редактируемый";
             }
         };
 

@@ -235,6 +235,13 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		}
 	}
 
+    @UiHandler("openCorrectPeriod")
+    void onOpenCorrectPeriod(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().openCorrectPeriod();
+        }
+    }
+
     @UiHandler("setDeadlineButton")
     void onSetDeadlineClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
