@@ -274,6 +274,12 @@ def buildRow(def srcRow, def matrixRow) {
 
     // Графа 4
     row.f122 = recNoId
+    if (formTypeId == 393 && srcRow.signPhis != null && srcRow.dependence == recNoId && srcRow.signTransaction == recYesId) {
+        def signPhis = getRefBookValue(18, srcRow.signPhis)
+        if (signPhis != null && signPhis.SIGN.stringValue.equals("Физическая поставка")) {
+            row.f122 = recYesId
+        }
+    }
 
     // Графа 5
     // row.f123, заполняется после графы 50
