@@ -138,7 +138,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
                 String key = filterText.getText();
                 String link =
                     "<p style=\"color: #0000CD\">" +
-                        object.getStringFound().replaceAll("(?iu)"+key, "<span style=\"color: #ff0000;\">$0</span>") +
+                        object.getStringFound().replaceAll(getRegex(key), "<span style=\"color: #ff0000;\">$0</span>") +
                     "<p>";
                 sb.appendHtmlConstant(link);
             }
@@ -228,5 +228,31 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public boolean isCaseSensitive(){
         return caseSensitive.getValue();
+    }
+
+    /**
+     * Формирует регистро независимыое рег.выражение с учетом юникода
+     * Совместимо и с java и c js
+     *
+     * Например для 'пред' (или 'Пред' или 'пРед') будет '[\u041f\u043f][\u0420\u0440][\u0415\u0435][\u0414\u0434]'
+     *
+     * @param key строка со словом
+     * @return код регвыражения
+     */
+    private String getRegex(String key){
+        int mod = 0x10000;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (char c : key.toCharArray()) {
+            if(Character.isLetter(c)){
+                stringBuilder.append("[");
+                stringBuilder.append("\\u").append(Integer.toHexString(Character.toUpperCase(c) | mod).substring(1));
+                stringBuilder.append("\\u").append(Integer.toHexString(Character.toLowerCase(c) | mod).substring(1));
+                stringBuilder.append("]");
+            } else {
+                stringBuilder.append(c);
+            }
+        }
+        System.out.println("getRegex " +stringBuilder.toString()  +"");
+        return stringBuilder.toString();
     }
 }
