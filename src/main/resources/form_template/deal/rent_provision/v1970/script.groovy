@@ -213,7 +213,7 @@ void logicCheck() {
         }
 
         // Проверка стоимости
-        if (price == null || count != null && cost != price * count) {
+        if (row.price != calc13(row, bankSum)) {
             logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
@@ -257,19 +257,21 @@ void calc() {
         if (row.outcomeBankSum != null && row.incomeBankSum == null)
             bankSum = row.outcomeBankSum
 
-        count = row.count
-
         // Расчет поля "Цена"
-        if (bankSum != null && count != null && count != 0) {
-            row.price = bankSum / count
-        }
+        row.price = calc13(row, bankSum)
         // Расчет поля "Стоимость"
         row.cost = bankSum
-
         // Расчет полей зависимых от справочников
         row.countryCode = getRefBookValue(9, row.jurName)?.COUNTRY?.referenceValue
     }
     dataRowHelper.update(dataRows)
+}
+
+def BigDecimal calc13(def row, def bankSum) {
+    if (bankSum != null && row.count != null && row.count != 0) {
+        return (bankSum / row.count).setScale(0, RoundingMode.HALF_UP)
+    }
+    return null
 }
 
 // Получение импортируемых данных
@@ -367,7 +369,7 @@ void addData(def xml, int headRowCount) {
             def text = row.cell[xmlIndexCol].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
             }
         }
         xmlIndexCol++
@@ -378,7 +380,7 @@ void addData(def xml, int headRowCount) {
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
             if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
                 logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName()+"»!")
+                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
             }
         }
         xmlIndexCol++
