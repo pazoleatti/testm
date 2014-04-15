@@ -8,35 +8,47 @@
         или возврата соответствующих сумм авансовых платежей
     </fullName>
     <code></code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>1000</maxLength>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <name>fix</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name</alias>
         <checking>false</checking>
         <name>Наименование балансового счета</name>
-        <order>2</order>
+        <order>3</order>
         <width>5</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>Номер балансового счета</name>
-        <order>3</order>
+        <order>4</order>
         <width>5</width>
         <maxLength>22</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
         <name>Сумма</name>
-        <order>4</order>
+        <order>5</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -45,25 +57,48 @@
         <alias>number2</alias>
         <checking>false</checking>
         <name>Номер балансового счета</name>
-        <order>5</order>
+        <order>6</order>
         <width>5</width>
         <maxLength>22</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
         <checking>false</checking>
         <name>Сумма</name>
-        <order>6</order>
+        <order>7</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>псевдоним6</alias>
+        <alias>nds</alias>
         <checking>false</checking>
-        <name>Новый столбец</name>
-        <order>7</order>
+        <name>Ставка НДС</name>
+        <order>8</order>
         <width>5</width>
         <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>
