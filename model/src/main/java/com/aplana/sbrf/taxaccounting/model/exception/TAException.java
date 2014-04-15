@@ -11,7 +11,11 @@ package com.aplana.sbrf.taxaccounting.model.exception;
  */
 public abstract class TAException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
-	
+
+	public TAException() {
+		super();
+	}
+
 	/**
 	 * Создаёт объект исключения с заданным текстом ошибки. Текст может содержать плейсхолдеры,
 	 * которые будут заполнены на основе значений, переданных в последующих опциональных аргументах.

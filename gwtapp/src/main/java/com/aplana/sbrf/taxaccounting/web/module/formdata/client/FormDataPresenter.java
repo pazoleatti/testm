@@ -132,7 +132,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    revealFormData(readOnlyMode, true);
+                                    revealFormData(readOnlyMode, true, null);
                                 }
                             }, FormDataPresenter.this)
                     );
@@ -184,7 +184,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onModeChangeClicked() {
-        revealFormData(readOnlyMode, !formData.isManual());
+        revealFormData(readOnlyMode, !formData.isManual(), null);
     }
 
 	@Override
@@ -195,11 +195,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
                 @Override
                 public void onSuccess(CheckManualResult result) {
-                    revealFormData(readOnlyMode, formData.isManual());
+                    revealFormData(readOnlyMode, formData.isManual(), null);
                 }
             }, this));
         } else {
-            revealFormData(readOnlyMode, formData.isManual());
+            revealFormData(readOnlyMode, formData.isManual(), null);
         }
 	}
 
@@ -237,7 +237,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCancelClicked() {
-		revealFormData(true, formData.isManual());
+		revealFormData(true, formData.isManual(), null);
 	}
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
@@ -374,7 +374,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             @Override
                                             public void onSuccess(
                                                     DeleteFormDataResult result) {
-                                                revealFormData(true, false);
+                                                revealFormData(true, false, null);
                                             }
 
                                         }, FormDataPresenter.this));
@@ -399,6 +399,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
                 @Override
                 public void yes() {
+                    LogCleanEvent.fire(FormDataPresenter.this);
+                    LogShowEvent.fire(FormDataPresenter.this, false);
                     DeleteFormDataAction action = new DeleteFormDataAction();
                     action.setFormDataId(formData.getId());
                     action.setManual(true);
@@ -447,8 +449,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
 	private void goMove(final WorkflowMove wfMove){
-        LogCleanEvent.fire(FormDataPresenter.this);
-        LogShowEvent.fire(FormDataPresenter.this, false);
+		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
@@ -456,7 +457,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
-                        revealFormData(true, formData.isManual());
+                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                        revealFormData(true, formData.isManual(), result.getUuid());
                     }
                 }, this));
 	}

@@ -6,11 +6,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewImpl;
 
@@ -40,7 +36,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	Panel footerPanel;
 
 	@UiField
-	Element loadingMessage;
+    InlineHTML loadingMessage;
 	
 	@UiField
 	Panel projectVersion;
@@ -49,6 +45,7 @@ public class MainPageView extends ViewImpl implements MyView {
 	public MainPageView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 		splitPanel.setWidgetHidden(logAreaPanel, true);
+
 	}
 
 	@Override
@@ -105,7 +102,7 @@ public class MainPageView extends ViewImpl implements MyView {
 
 	@Override
 	public void showLoading(boolean locked) {
-		loadingMessage.getStyle().setVisibility(
+		loadingMessage.getElement().getStyle().setVisibility(
 				locked ? Visibility.VISIBLE : Visibility.HIDDEN);
 	}
 

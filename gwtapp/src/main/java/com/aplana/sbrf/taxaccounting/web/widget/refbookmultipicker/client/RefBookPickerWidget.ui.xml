@@ -5,6 +5,10 @@
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
 
     <ui:style>
+        .minWidthWidget {
+            min-width: 100px;
+        }
+
         .selected {
             color: #000000;
             border-right: 0;
@@ -85,7 +89,7 @@
     </ui:style>
 
 
-    <g:HTMLPanel>
+    <g:HTMLPanel addStyleNames="{style.minWidthWidget}">
         <g:HorizontalPanel ui:field="widgetPanel" verticalAlignment="middle">
             <g:cell width="100%">
                 <g:TextBox ui:field="textBox" readOnly="true" width="100%" addStyleNames="{style.selected}"/>

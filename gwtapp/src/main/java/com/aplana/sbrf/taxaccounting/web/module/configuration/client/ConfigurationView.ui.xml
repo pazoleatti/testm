@@ -12,10 +12,6 @@
         .btnPanel {
             height: 30px;
         }
-
-        .btnPanel td {
-            vertical-align: middle !important;
-        }
     </ui:style>
 
     <fm:MainContainer>
@@ -45,7 +41,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel spacing="5" verticalAlignment="middle" addStyleNames="{style.btnPanel}">
                     <g:Button ui:field="saveButton" text="Сохранить"/>
                     <g:Button ui:field="reloadButton" text="Отменить"/>
                 </g:HorizontalPanel>

@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -85,7 +84,6 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', 'usefulLifeWithUsed',
@@ -126,8 +124,10 @@ def format = new SimpleDateFormat('dd.MM.yyyy')
 def check17 = format.parse('01.01.2006')
 @Field
 def lastDay2001 = format.parse('31.12.2001')
+// Дата начала отчетного периода
 @Field
 def startDate = null
+// Дата окончания отчетного периода
 @Field
 def endDate = null
 
@@ -183,16 +183,6 @@ void calc() {
     if (dataRows.isEmpty()) {
         return
     }
-    // Дата начала отчетного периода
-    def startDate = getMonthStartDate()
-    // Дата окончания отчетного периода
-    def endDate = getMonthEndDate()
-
-    // Отчетная дата
-    def reportDate = getReportDate()
-    def Calendar reportDateC = Calendar.getInstance()
-    reportDateC.setTime(reportDate)
-    def reportMonth = reportDateC.get(Calendar.MONTH)
 
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
@@ -228,16 +218,16 @@ void calc() {
         row.cost10perMonth = calc10(row, map)
 
         // графа 12
-        row.cost10perExploitation = calc12(row, prevRow, startDate, endDate)
+        row.cost10perExploitation = calc12(row, prevRow)
 
         // графа 18
         row.usefullLifeEnd = calc18(row)
 
         // графа 14
-        row.amortMonth = calc14(row, prevRow, endDate)
+        row.amortMonth = calc14(row, prevRow)
 
         // Графа 11, 15, 16
-        def calc11and15and16 = calc11and15and16(reportMonth, row, prevRow)
+        def calc11and15and16 = calc11and15and16(row, prevRow)
         row.cost10perTaxPeriod = calc11and15and16[0]
         row.amortTaxPeriod = calc11and15and16[1]
         row.amortExploitation = calc11and15and16[2]
@@ -279,9 +269,12 @@ BigDecimal calc10(def row, def map) {
 }
 
 // Ресчет граф 11, 15, 16
-BigDecimal[] calc11and15and16(def reportMonth, def row, def prevRow) {
+BigDecimal[] calc11and15and16(def row, def prevRow) {
     def BigDecimal[] values = new BigDecimal[3]
-    if (reportMonth == Calendar.JANUARY) {
+    def reportMonth = formData.periodOrder
+
+    // Calendar.JANUARY == 0, FormData нумерация с 1
+    if (reportMonth == (Calendar.JANUARY + 1)) {
         values[0] = row.cost10perMonth
         values[1] = row.amortMonth
         values[2] = row.amortMonth
@@ -300,9 +293,12 @@ BigDecimal[] calc11and15and16(def reportMonth, def row, def prevRow) {
 }
 
 // Ресчет графы 12
-BigDecimal calc12(def row, def prevRow, def startDate, def endDate) {
+BigDecimal calc12(def row, def prevRow) {
+    def startDate = getReportPeriodStartDate()
+    def endDate = getReportPeriodEndDate()
+
     if (prevRow == null || row.exploitationStart == null) {
-        return null
+        return 0 as BigDecimal
     }
     if (startDate < row.exploitationStart && row.exploitationStart < endDate) {
         return row.cost10perMonth
@@ -310,7 +306,7 @@ BigDecimal calc12(def row, def prevRow, def startDate, def endDate) {
     if (prevRow != null && row.cost10perMonth != null && prevRow.cost10perExploitation != null) {
         return row.cost10perMonth + prevRow.cost10perExploitation
     }
-    return null
+    return 0 as BigDecimal
 }
 
 // Ресчет графы 13
@@ -322,10 +318,11 @@ BigDecimal calc13(def row) {
 }
 
 // Ресчет графы 14
-BigDecimal calc14(def row, def prevRow, def endDate) {
+BigDecimal calc14(def row, def prevRow) {
+    def endDate = getReportPeriodStartDate() - 1
     if (prevRow == null || row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
-            || prevRow.cost == null || prevRow.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
-        return null
+            || prevRow?.cost == null || prevRow?.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
+        return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
         return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
@@ -356,11 +353,6 @@ void logicCheck() {
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
-    // Дата начала отчетного периода
-    def startDate = getMonthStartDate()
-    // Дата окончания отчетного периода
-    def endDate = getMonthEndDate()
-
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
 
@@ -368,12 +360,6 @@ void logicCheck() {
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
         logger.error('Отсутствуют данные за прошлые отчетные периоды!')
     }
-
-    // Отчетная дата
-    def reportDate = getReportDate()
-    def Calendar reportDateC = Calendar.getInstance()
-    reportDateC.setTime(reportDate)
-    def reportMonth = reportDateC.get(Calendar.MONTH)
 
     for (def row : dataRows) {
         def map = null
@@ -433,13 +419,23 @@ void logicCheck() {
             // 8. Арифметические проверки расчета граф 8, 10-16, 18
             needValue['usefulLifeWithUsed'] = calc8(row)
             needValue['cost10perMonth'] = calc10(row, map)
-            needValue['cost10perExploitation'] = calc12(row, prevRow, startDate, endDate)
+            needValue['cost10perExploitation'] = calc12(row, prevRow)
             needValue['amortNorm'] = calc13(row)
-            needValue['amortMonth'] = calc14(row, prevRow, endDate)
-            def calc11and15and16 = calc11and15and16(reportMonth, row, prevRow)
+            needValue['amortMonth'] = calc14(row, prevRow)
+            def calc11and15and16 = calc11and15and16(row, prevRow)
             needValue['cost10perTaxPeriod'] = calc11and15and16[0]
             needValue['amortTaxPeriod'] = calc11and15and16[1]
             needValue['amortExploitation'] = calc11and15and16[2]
+
+            // Для проверок
+            // logger.info("10 = " + needValue['cost10perMonth'] + " : " + row.cost10perMonth)
+            // logger.info("11 = " + needValue['cost10perTaxPeriod'] + " : " + row.cost10perTaxPeriod)
+            // logger.info("12 = " + needValue['cost10perExploitation'] + " : " + row.cost10perExploitation)
+
+            // logger.info("14 = " + needValue['amortMonth'] + " : " + row.amortMonth)
+            // logger.info("15 = " + needValue['amortTaxPeriod'] + " : " + row.amortTaxPeriod)
+            // logger.info("16 = " + needValue['amortExploitation'] + " : " + row.amortExploitation)
+
             checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
 
             if (row.usefullLifeEnd != calc18(row)) {
@@ -451,12 +447,6 @@ void logicCheck() {
 // Округление
 def BigDecimal round(BigDecimal value, def int precision = 2) {
     return value?.setScale(precision, RoundingMode.HALF_UP)
-}
-
-// Получить отчетную дату
-def getReportDate() {
-    def tmp = reportPeriodService.getEndDate(formData.reportPeriodId)
-    return tmp ? tmp.getTime() + 1 : null
 }
 
 // Поиск строки из предыдущей формы с тем же инвентарным номером
@@ -584,7 +574,6 @@ void addData(def xml, int headRowCount) {
         }
 
         // Нет итогов
-
         def xmlIndexCol = 0
 
         def newRow = formData.createDataRow()
@@ -673,14 +662,16 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(rows)
 }
 
-def getMonthStartDate() {
+// Начальная дата отчетного периода (для ежемесячной формы)
+def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder).time
     }
     return startDate
 }
 
-def getMonthEndDate() {
+// Конечная дата отчетного периода (для ежемесячной формы)
+def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getMonthEndDate(formData.reportPeriodId, formData.periodOrder).time
     }

@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 397 - Привлечение корпоративных кредитов и депозитов (20)
+ * 397 - Привлечение ресурсов (20)
  * formTemplateId = 10186
  *
  * @author Stanislav Yasinskiy

@@ -153,7 +153,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     ResizeLayoutPanel tableWrapper;
     @UiField
-    LinkAnchor search;
+    LinkButton search;
 
     @UiField
     LinkButton manualVersionLink;
@@ -288,7 +288,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
 		formDataTable.setRowData(start, rowsData);
-	}
+        if (!fixedRows && getSelectedRow() != null) {
+            formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start).scrollIntoView();
+        }
+    }
 
 	@Override
 	public void addCustomHeader(List<DataRow<HeaderCell>> headers) {

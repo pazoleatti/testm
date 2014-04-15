@@ -364,10 +364,10 @@ public class RefBookDaoTest {
         assertEquals(refBookDao.getValue(1L, 2L).getNumberValue().intValue(), 1113);
     }
 
-    @Test(expected = DaoException.class)
+    @Test
     public void testGetValue2() {
         // Не существующее значение
-        refBookDao.getValue(-1L, 2L);
+        assertNull(refBookDao.getValue(-1L, 2L));
     }
 
     @Test

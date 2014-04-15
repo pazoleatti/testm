@@ -115,10 +115,10 @@
 
                 <pager:FlexiblePager ui:field="formPager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
-                                     fastForwardRows="0" showLastPageButton="true" type="formDataList"/>
+                                     fastForwardRows="0" showLastPageButton="true" type="destinationForm"/>
                 <pager:FlexiblePager ui:field="declarationPager" addStyleNames="{style.pager}"
                                      location="CENTER" showFastForwardButton="false"
-                                     fastForwardRows="0" showLastPageButton="true" type="formDataList"/>
+                                     fastForwardRows="0" showLastPageButton="true" type="destinationDeclaration"/>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

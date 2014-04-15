@@ -32,8 +32,7 @@
 
     <g:HorizontalPanel ui:field="mainPanel" verticalAlignment="middle" addStyleNames="{style.main}">
         <g:cell width="100%">
-            <g:HorizontalPanel ui:field="dateBoxPanel" />
-            <!--<mask:DateMaskBoxAbstract ui:field="dateBox" width="100%" addStyleNames="{style.selected}"/>-->
+            <mask:DateMaskBox ui:field="dateBox" width="100%" addStyleNames="{style.selected}"/>
         </g:cell>
         <g:Image ui:field="clearImage" addStyleNames="{style.clearButton}"
                  url="resources/img/picker-icons/clear-icon-dummy.png"/>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Привлечение корпоративных кредитов и депозитов</name>
-    <fullName>Привлечение корпоративных кредитов и депозитов</fullName>
+    <name>Привлечение ресурсов</name>
+    <fullName>Привлечение ресурсов</fullName>
     <code>TODO</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
@@ -37,7 +37,7 @@
         <checking>false</checking>
         <name>Страна регистрации</name>
         <order>4</order>
-        <width>5</width>
+        <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>
@@ -62,7 +62,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
         <checking>false</checking>
-
         <name>Дата договора</name>
         <order>7</order>
         <width>7</width>
