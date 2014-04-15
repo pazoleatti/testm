@@ -2,14 +2,12 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -55,6 +53,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     Button cancelEdit;
     @UiField
     HTML separator;
+    @UiField
+    Button search;
+    @UiField
+    TextBox filterText;
+
     private PickerState pickerState = new PickerState();
 
     @Inject
@@ -82,6 +85,22 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 getUiHandlers().onSelectionChanged();
             }
         });
+
+        filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
+            @Override
+            public void onKeyDown(KeyDownEvent event) {}
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER){
+                    search.click();
+                }
+            }
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {}
+        });
+
     }
 
     @Override
@@ -175,6 +194,14 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         }
     }
 
+    @UiHandler("search")
+    void searchButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            pickerState.setSearchPattern(filterText.getValue());
+            load();
+        }
+    }
+
     @UiHandler("deleteRow")
     void deleteRowButtonClicked(ClickEvent event) {
         if (getSelectedId() == null) {
@@ -245,5 +272,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         edit.setVisible(visible);
         // для красовы на форме
         separator.setVisible(visible);
+    }
+
+    @Override
+    public void clearFilterInputBox() {
+        pickerState.setSearchPattern("");
+        filterText.setValue("");
     }
 }

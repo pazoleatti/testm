@@ -11,6 +11,7 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	long refBookId;
 	PagingParams pagingParams;
 	Date relevanceDate;
+    private String searchPattern;
 
 	public long getRefBookId() {
 		return refBookId;
@@ -36,7 +37,15 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 		this.relevanceDate = relevanceDate;
 	}
 
-	@Override
+    public String getSearchPattern() {
+        return searchPattern;
+    }
+
+    public void setSearchPattern(String searchPattern) {
+        this.searchPattern = searchPattern;
+    }
+
+    @Override
 	public String getName() {
 		return "Получить строку из справочника";
 	}

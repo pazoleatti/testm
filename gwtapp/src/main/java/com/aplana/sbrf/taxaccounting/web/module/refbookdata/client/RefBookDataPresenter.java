@@ -82,6 +82,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         public void setDefaultMode();
         /** установить видимость кнопки редактирования */
         public void setVisibleEditLink(boolean visible);
+        /** Метод для получения строки с поля фильтрации*/
+        String getSearchPattern();
+        /** Сброс значения поля поиска */
+        void resetSearchInputBox();
     }
 
 	@Inject
@@ -198,6 +202,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
             recordId = null;
             page = null;
             onSetDefaultMode();
+            getView().resetSearchInputBox();
         }
 		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
@@ -244,6 +249,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			action.setRefBookId(refBookDataId);
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			action.setRelevanceDate(getView().getRelevanceDate());
+            action.setSearchPattern(getView().getSearchPattern());
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {

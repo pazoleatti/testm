@@ -90,6 +90,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         public void setDefaultMode();
         /** установить видимость кнопки редактирования */
         public void setVisibleEditLink(boolean visible);
+        /** Очистить */
+        void clearFilterInputBox();
     }
 
     @Inject
@@ -210,6 +212,11 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         onSetDefaultMode();
+
+        /** Очищаем поле поиска если перешли со страницы списка справочников */
+        if(!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)){
+            getView().clearFilterInputBox();
+        }
 
         dispatcher.execute(new GetRefBookAttributesAction(refBookDataId), CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookAttributesResult>() {
