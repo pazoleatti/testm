@@ -15,10 +15,12 @@ import groovy.transform.Field
 // графа -  - fix
 // графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
-// графа 4  - kpp                       атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
+// графа 4  - kpp                       абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
 // графа 5  - avepropertyPricerageCost
 // графа 6  - workersCount
 // графа 7  - subjectTaxCredit
+// графа 8  - decreaseTaxSum
+// графа 9  - taxRate
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -66,11 +68,12 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost',
+        'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -78,7 +81,8 @@ def autoFillColumns = ['regionBank', 'kpp']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost',
+        'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Группируемые атрибуты
 @Field
@@ -86,7 +90,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit']
+def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
 
 // Текущая дата
 @Field
@@ -114,6 +118,11 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
                      boolean required) {
     return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
             day, rowIndex, cellName, logger, required)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, false)
 }
 
 //// Кастомные методы
@@ -189,8 +198,20 @@ void logicCheck() {
         if (rowNumber != row.number) {
             logger.error(errorMsg + "Нарушена уникальность номера по порядку!")
         }
+
+        // Проверки НСИ
+        // 1. Проверка значения графы «КПП» - графа 4 - kpp - абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
+        if (row.regionBankDivision != null && row.kpp != null && row.kpp != '') {
+            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            if (incomeParam?.KPP?.stringValue != row.kpp) {
+                def name = getColumnName(row, 'kpp')
+                logger.error("Значение графы «$name» не соответствует значению на форме Настроек подразделений.")
+            }
+        }
     }
 
+    // 3. Арифметические проверки расчета итоговой строки
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
@@ -212,6 +233,7 @@ void calc() {
         // графа 4 - кпп
         row.kpp = calc4(row)
     }
+
     // Сортировка
     dataRows.sort { a, b ->
         def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
@@ -255,14 +277,11 @@ def calc2(def row) {
 
 // графа 4 - кпп
 def calc4(def row) {
-    def incomeParam
+    def incomeParam = null
     if (row.regionBankDivision != null) {
         incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
     }
-    if (incomeParam == null || incomeParam.isEmpty()) {
-        return null
-    }
-    return incomeParam.get('record_id').getNumberValue()
+    return incomeParam?.KPP?.stringValue
 }
 
 // Расчет итоговой строки
