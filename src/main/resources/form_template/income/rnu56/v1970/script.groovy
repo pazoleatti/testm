@@ -93,7 +93,7 @@ def editableColumns = ['bill', 'buyDate', 'currency', 'nominal', 'price', 'matur
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'bill', 'buyDate', 'currency', 'nominal', 'price', 'maturity', 'termDealBill',
-        'sumIncomeinCurrency', 'sumIncomeinRuble']
+        'implementationDate', 'sum', 'sumIncomeinCurrency', 'sumIncomeinRuble']
 
 // Атрибуты для итогов
 @Field
