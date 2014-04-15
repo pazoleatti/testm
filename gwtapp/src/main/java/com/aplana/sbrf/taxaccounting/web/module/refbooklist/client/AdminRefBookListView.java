@@ -65,7 +65,7 @@ public class AdminRefBookListView extends AbstractRefBookListView implements Adm
         TextColumn<TableModel> editableColumn = new TextColumn<TableModel>() {
             @Override
             public String getValue(TableModel tableModel) {
-                return tableModel.isReadOnly() ? "Только чтение" : "Редактируемый";
+                return tableModel.isReadOnly() ? "Только для чтения" : "Редактируемый";
             }
         };
 
