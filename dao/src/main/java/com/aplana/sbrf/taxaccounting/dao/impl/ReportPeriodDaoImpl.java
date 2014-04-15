@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -160,6 +161,24 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 						"order by tp.year desc, rp.ord",
 				new ReportPeriodMapper(), params);
 	}
+
+    @Override
+    public List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId) {
+        try {
+            return getJdbcTemplate().query(
+                    "select * from REPORT_PERIOD rp " +
+                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
+                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
+                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
+                            "and drp.IS_BALANCE_PERIOD=0 and drp.IS_ACTIVE=0 and CORRECTION_DATE is null",
+                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
+                    new int[] { Types.VARCHAR, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
 
     @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {

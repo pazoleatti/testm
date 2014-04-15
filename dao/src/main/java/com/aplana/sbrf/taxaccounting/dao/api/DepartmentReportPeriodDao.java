@@ -46,7 +46,12 @@ public interface DepartmentReportPeriodDao {
 	 * @param departmentId
 	 * @param active
 	 */
-	void updateActive(int reportPeriodId, Long departmentId, boolean active);
+	void updateActive(int reportPeriodId, Long departmentId, Date correctionDate, boolean active);
+
+    /**
+     * Открыть закрыть период для подразделения
+     */
+    void updateActive(long departmentReportPeriodId, boolean active);
 	
 	/**
 	 * Получить объект
@@ -56,6 +61,8 @@ public interface DepartmentReportPeriodDao {
 	 * @return
 	 */
 	DepartmentReportPeriod get(int reportPeriodId, Long departmentId);
+
+    DepartmentReportPeriod get(int reportPeriodId, Long departmentId, Date correctionDate);
 
 	/**
 	 * Удалить период
@@ -85,4 +92,14 @@ public interface DepartmentReportPeriodDao {
      * @param departmentId идентификатор подразделения
      */
     int getCorrectionPeriodNumber(int reportPeriodId, long departmentId);
+
+    /**
+     * получить корректирующие периоды
+     * @param departmentId идентификатор подразделения
+     * @param reportPeriodId идентификатор отчетного период
+     * @return список корректирующих периодов
+     */
+    List<DepartmentReportPeriod> getDepartmentCorrectionPeriods(long departmentId, int reportPeriodId);
+
+    DepartmentReportPeriod getById(long id);
 }

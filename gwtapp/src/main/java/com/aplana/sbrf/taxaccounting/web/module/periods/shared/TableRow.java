@@ -34,7 +34,7 @@ public class TableRow implements Serializable {
 		this.id = id;
 	}
 
-	public long getReportPeriodId() {
+    public long getReportPeriodId() {
 		return reportPeriodId;
 	}
 

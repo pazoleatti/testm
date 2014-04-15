@@ -18,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.deadlinedialog.DeadlineDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.periods.client.opencorrectdialog.OpenCorrectDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.opendialog.OpenDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
 import com.google.inject.Inject;
@@ -63,16 +64,19 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	private final TaPlaceManager placeManager;
 	private final DispatchAsync dispatcher;
 	protected final OpenDialogPresenter openDialogPresenter;
+    protected final OpenCorrectDialogPresenter openCorrectDialogPresenter;
     protected final DeadlineDialogPresenter deadlineDialogPresenter;
 
 	@Inject
 	public PeriodsPresenter(final EventBus eventBus, final MyView view,
 	                        final MyProxy proxy, PlaceManager placeManager, DispatchAsync dispatcher,
-	                        OpenDialogPresenter openDialogPresenter, DeadlineDialogPresenter deadlineDialogPresenter) {
+	                        OpenDialogPresenter openDialogPresenter, DeadlineDialogPresenter deadlineDialogPresenter,
+                            OpenCorrectDialogPresenter openCorrectDialogPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dispatcher = dispatcher;
 		this.openDialogPresenter = openDialogPresenter;
+        this.openCorrectDialogPresenter = openCorrectDialogPresenter;
         this.deadlineDialogPresenter = deadlineDialogPresenter;
 		getView().setUiHandlers(this);
 	}
@@ -98,6 +102,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                 requestData.setTaxType(taxType);
                 requestData.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
                 requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+                requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
                 dispatcher.execute(requestData, CallbackUtils
                         .defaultCallback(new AbstractCallback<ClosePeriodResult>() {
                             @Override
@@ -123,7 +128,34 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
         addToPopupSlot(openDialogPresenter);
 	}
 
-	@Override
+    @Override
+    public void openCorrectPeriod() {
+        DepartmentPair departmentPair = getView().getDepartmentId();
+        if (departmentPair == null) {
+            MessageEvent.fire(this, "Не выбрано подразделение!");
+            return;
+        }
+
+
+        final GetCorrectPeriodsAction action = new GetCorrectPeriodsAction();
+        action.setTaxType(taxType);
+        final int departmentId = departmentPair.getDepartmentId();
+        action.setDepartmentId(departmentId);
+        dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<GetCorrectPeriodsResult>() {
+                            @Override
+                            public void onSuccess(GetCorrectPeriodsResult result) {
+                                openCorrectDialogPresenter.resetToDefault();
+                                openCorrectDialogPresenter.setSelectedDepartment(departmentId);
+                                openCorrectDialogPresenter.setPeriodsList(result.getReportPeriod());
+                                openCorrectDialogPresenter.setTaxType(taxType);
+                                addToPopupSlot(openCorrectDialogPresenter);
+                            }
+                        }, PeriodsPresenter.this)
+        );
+    }
+
+    @Override
 	public void onFindButton() {
         if (getView().getDepartmentId() == null) {
             Dialog.warningMessage("Не выбрано подразделение!");
@@ -259,7 +291,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                         getView().setCanChangeDepartment(result.canChangeDepartment());
 						getView().setCanEdit(result.isCanEdit());
 						openDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
-						openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+                        openDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
+                        openCorrectDialogPresenter.setDepartments(result.getDepartments(), result.getAvalDepartments(), Arrays.asList(result.getSelectedDepartment()), true);
+                        openCorrectDialogPresenter.setCanChangeDepartment(result.canChangeDepartment());
 						find();
 					}
 				}, PeriodsPresenter.this).addCallback(TaManualRevealCallback.create(this, this.placeManager))
