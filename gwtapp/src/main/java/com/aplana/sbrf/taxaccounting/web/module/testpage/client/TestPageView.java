@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.gwt.client.*;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.gwt.client.mask.ui.DateMaskBox;
 import com.aplana.gwt.client.mask.ui.MonthYearMaskBox;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
@@ -14,8 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -209,7 +207,22 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         showDialog2.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Dialog.errorMessage("Тескт");
+                Dialog.confirmMessage("Тескт", new DialogHandler() {
+                    @Override
+                    public void yes() {
+                        Dialog.infoMessage("kfkfkfk");
+                    }
+
+                    @Override
+                    public void no() {
+                        super.no();
+                    }
+
+                    @Override
+                    public void cancel() {
+                        super.cancel();
+                    }
+                });
             }
         });
     }

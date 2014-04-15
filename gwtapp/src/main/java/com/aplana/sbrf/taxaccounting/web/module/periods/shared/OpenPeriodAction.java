@@ -12,7 +12,6 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 	long departmentId;
 	long dictionaryTaxPeriodId;
 	Date endDate;
-    boolean hasCorrectPeriod;
     Date correctPeriod;
 
 	public TaxType getTaxType() {
@@ -62,14 +61,6 @@ public class OpenPeriodAction extends UnsecuredActionImpl<OpenPeriodResult> {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
-
-    public boolean isHasCorrectPeriod() {
-        return hasCorrectPeriod;
-    }
-
-    public void setHasCorrectPeriod(boolean hasCorrectPeriod) {
-        this.hasCorrectPeriod = hasCorrectPeriod;
-    }
 
     public Date getCorrectPeriod() {
         return correctPeriod;

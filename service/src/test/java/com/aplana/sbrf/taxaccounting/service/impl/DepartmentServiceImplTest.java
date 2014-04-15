@@ -131,6 +131,13 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.get(0, Long.valueOf(departmentGOSB31.getId()))).thenReturn(drpClose);
         when(departmentReportPeriodDao.get(0, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpOpen);
         when(departmentReportPeriodDao.get(1, Long.valueOf(departmentOSB311.getId()))).thenReturn(drpClose);
+
+        when(departmentReportPeriodDao.isPeriodOpen(root.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.isPeriodOpen(departmentTB2.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.isPeriodOpen(departmentTB3.getId(), 0)).thenReturn(false);
+        when(departmentReportPeriodDao.isPeriodOpen(departmentGOSB31.getId(), 0)).thenReturn(false);
+        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 1)).thenReturn(false);
         // Доступность по связям
         when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));

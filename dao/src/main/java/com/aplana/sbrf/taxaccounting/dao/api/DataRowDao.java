@@ -142,10 +142,11 @@ public interface DataRowDao {
      * на форме
      *
      * @param formDataId модель формы
+     * @param formTemplateId идентификатор шаблона формы
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
      * @param isCaseSensitive чувствительность к регистру
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive);
 }

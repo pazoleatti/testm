@@ -8,5 +8,6 @@ public enum PeriodStatusBeforeOpen {
 	OPEN, // Открыт
 	CLOSE, // Закрыт
 	NOT_EXIST, // Не существует
-	BALANCE_STATUS_CHANGED // При создании был изменен статус ввода остатка
+	BALANCE_STATUS_CHANGED, // При создании был изменен статус ввода остатка
+    INVALID
 }

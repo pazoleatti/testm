@@ -5,6 +5,10 @@
         >
 
     <ui:style>
+        .minWidthWidget {
+            min-width: 100px;
+        }
+
         .selected {
             color: #000000;
             border-right: 0;
@@ -95,7 +99,7 @@
 
     </ui:style>
 
-    <g:HTMLPanel ui:field="wrappingPanel">
+    <g:HTMLPanel ui:field="wrappingPanel" addStyleNames="{style.minWidthWidget}">
         <g:HorizontalPanel ui:field="panel" verticalAlignment="middle" borderWidth="0">
             <g:cell width="100%">
                 <g:TextBox ui:field="selected" readOnly="true" width="100%" addStyleNames="{style.selected}"/>

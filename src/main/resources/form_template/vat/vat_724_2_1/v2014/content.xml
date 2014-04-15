@@ -28,6 +28,7 @@
         <order>2</order>
         <width>5</width>
         <maxLength>7</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name</alias>
@@ -35,7 +36,8 @@
         <name>Наименование операции</name>
         <order>3</order>
         <width>30</width>
-        <maxLength>1000</maxLength>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>realizeCost</alias>
@@ -56,13 +58,6 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
@@ -74,6 +69,13 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

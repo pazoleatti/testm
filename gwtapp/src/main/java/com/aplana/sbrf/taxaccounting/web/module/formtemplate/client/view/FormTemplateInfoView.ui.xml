@@ -1,6 +1,6 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:w='urn:import:com.aplana.gwt.client.mask.ui'>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:w="urn:import:com.aplana.gwt.client.mask.ui">
 
     <ui:style>
         .formStyle {
@@ -10,8 +10,21 @@
             color: white;
             border-color: #828282;
         }
-        .margin5{
+
+        .margin5 {
             margin-right: 5px;
+        }
+
+        .lineHeightDown {
+            line-height: 12px;
+        }
+
+        .minWidth {
+            width: 32px;
+        }
+
+        .fix{
+            padding-left: 2px;
         }
     </ui:style>
 
@@ -19,54 +32,40 @@
 
         <g:FlowPanel styleName="{style.formStyle}">
 
-            <g:HorizontalPanel>
-                <g:cell>
-                    <g:Label width="300px">Период актуальности с</g:Label>
-                </g:cell>
-                <g:cell>
-                    <g:HorizontalPanel width="500px">
-                        <g:cell verticalAlignment="middle">
-                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateBegin" mayBeNull="true"/>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.margin5}" width="60px">1 января</g:Label>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.margin5}" width="30px">по</g:Label>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle">
-                            <w:YearMaskBox addStyleNames="{style.margin5}" ui:field="versionDateEnd" mayBeNull="true"/>
-                        </g:cell>
-                        <g:cell verticalAlignment="middle" horizontalAlignment="ALIGN_RIGHT">
-                            <g:Label width="70px">31 декабря</g:Label>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                </g:cell>
+            <g:HorizontalPanel verticalAlignment="middle">
+                <g:Label width="250px" wordWrap="false" text="Период актуальности:"/>
+                <g:HorizontalPanel verticalAlignment="middle">
+                    <g:Label wordWrap="false" text="C 1 января" width="67px" addStyleNames="{style.margin5}"/>
+                    <w:YearMaskBox ui:field="versionDateBegin" mayBeNull="true" width="32" addStyleNames="{style.margin5}, {style.fix}, {style.minWidth}" />
+                    <g:Label wordWrap="false" width="120px" text="года по 31 декабря"/>
+                    <w:YearMaskBox ui:field="versionDateEnd" mayBeNull="true" width="32" addStyleNames="{style.margin5}, {style.fix}, {style.minWidth}" />
+                    <g:Label wordWrap="false" text="года"/>
+                </g:HorizontalPanel>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel>
-                <g:Label width="300px">Фиксированный набор строк</g:Label>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Фиксированный набор строк:" width="250px"/>
                 <g:CheckBox ui:field="fixedRowsCheckBox"/>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel>
-                <g:Label width="300px">Признак ежемесячной формы</g:Label>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Признак ежемесячной формы:" width="250px"/>
                 <g:CheckBox ui:field="monthlyCheckBox" />
             </g:HorizontalPanel>
 
-			<g:HorizontalPanel height="30px">
-				<g:Label width="300px">Наименование формы</g:Label>
-				<g:TextBox width="500px" ui:field="nameBox" />
+			<g:HorizontalPanel verticalAlignment="middle" height="26px">
+				<g:Label text="Наименование формы:" width="250px"/>
+				<g:TextBox width="500px" ui:field="nameBox" addStyleNames="{style.fix}"/>
 			</g:HorizontalPanel>
 
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Полное наименование формы</g:Label>
-                <g:TextBox width="500px" ui:field="fullnameBox"/>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Полное наименование формы:" width="250px"/>
+                <g:TextBox width="500px" ui:field="fullnameBox" addStyleNames="{style.fix}"/>
             </g:HorizontalPanel>
 
-            <g:HorizontalPanel height="30px">
-                <g:Label width="300px">Код формы(идентификатор формы, номер формы)</g:Label>
-                <g:TextBox width="500px" ui:field="codeBox"/>
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Код формы (идентификатор формы, номер формы):" width="250px" addStyleNames="{style.lineHeightDown}"/>
+                <g:TextBox width="500px" ui:field="codeBox" addStyleNames="{style.fix}"/>
             </g:HorizontalPanel>
 
         </g:FlowPanel>

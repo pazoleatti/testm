@@ -1,6 +1,5 @@
 package com.aplana.gwt.client.mask.ui;
 
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
 import com.aplana.gwt.client.mask.parser.DMDateParser;
 
 /**
@@ -8,7 +7,7 @@ import com.aplana.gwt.client.mask.parser.DMDateParser;
  *
  * @author vpetrov
  */
-public class DayMonthMaskBox extends DateMaskBoxAbstract {
+public class DayMonthMaskBox extends DateMaskBox {
 
     public DayMonthMaskBox() {
         super(DMDateParser.formatDM, DMDateParser.instanceDM(), "99.99");

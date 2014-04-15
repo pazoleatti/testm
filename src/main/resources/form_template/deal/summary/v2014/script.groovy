@@ -1002,10 +1002,10 @@ def getRow(def map) {
             case 393: // 18
             case 394: // 19
             case 404: // 26
-                row.count = row.count + srcRow.count
+                row.count = row.count + (srcRow.count ?: 0)
                 break
             case 384: // 9
-                row.count = row.count + srcRow.bondCount
+                row.count = row.count + (srcRow.bondCount ?: 0)
                 break
             default:
                 row.count = 1
@@ -1026,7 +1026,7 @@ def getRow(def map) {
             case 397: // 20
             case 398: // 21
             case 399: // 22
-                row.total = row.total + srcRow.cost
+                row.total = row.total + (srcRow.cost ?: 0)
                 break
             case 383: // 8
                 if (srcRow.percentIncomeSum != null)
@@ -1035,11 +1035,11 @@ def getRow(def map) {
                     row.total = row.total + srcRow.percentConsumptionSum
                 break
             case 384: // 9
-                row.total = row.total + srcRow.transactionSumRub
+                row.total = row.total + (srcRow.transactionSumRub ?: 0)
                 break
             case 385: // 10
             case 404: // 26
-                row.total = row.total + srcRow.totalCost
+                row.total = row.total + (srcRow.totalCost ?: 0)
                 break
             case 386: // 11
             case 388: // 13
@@ -1050,10 +1050,10 @@ def getRow(def map) {
             case 402: // 23
             case 401: // 24
             case 403: // 25
-                row.total = row.total + srcRow.total
+                row.total = row.total + (srcRow.total ?: 0)
                 break
             case 393: // 18
-                row.total = row.total + srcRow.totalNds
+                row.total = row.total + (srcRow.totalNds ?: 0)
                 break
         }
 
@@ -1145,12 +1145,14 @@ def getRow(def map) {
     }
 
     // п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
-    if (row.income > 0) {
-        row.price = row.income / row.count
-    } else if (row.outcome > 0) {
-        row.price = row.outcome / row.count
-    } else {
-        row.price = 0
+    if ((row.count ?: 0) != 0) {
+        if (row.income > 0) {
+            row.price = row.income / row.count
+        } else if (row.outcome > 0) {
+            row.price = row.outcome / row.count
+        } else {
+            row.price = 0
+        }
     }
 
     return row

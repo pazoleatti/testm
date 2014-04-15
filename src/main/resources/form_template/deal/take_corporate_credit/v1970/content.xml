@@ -37,7 +37,7 @@
         <checking>false</checking>
         <name>Страна регистрации</name>
         <order>4</order>
-        <width>5</width>
+        <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>

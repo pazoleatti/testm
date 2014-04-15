@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("isAuthenticated()")
 public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTableDataAction, GetRefBookTableDataResult> {
 
 	@Autowired

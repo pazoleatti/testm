@@ -34,6 +34,7 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     private final DispatchAsync dispatcher;
     private final EventBus eventBus;
     private Long formDataId;
+    private Integer formTemplateId;
     private List<Integer> hiddenColumns;
 
     @Inject
@@ -42,6 +43,11 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
+    }
+
+    @Override
+    public void setFormTemplateId(Integer formTemplateId) {
+        this.formTemplateId = formTemplateId;
     }
 
     @Override
@@ -59,9 +65,10 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     public void onRangeChange(final int start, int count) {
         SearchAction action = new SearchAction();
         action.setKey(getView().getSearchKey());
-        action.setFrom(start+1);
+        action.setFrom(start + 1);
         action.setTo(start + count);
         action.setFormDataId(formDataId);
+        action.setFormTemplateId(formTemplateId);
         action.setCaseSensitive(getView().isCaseSensitive());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
             @Override

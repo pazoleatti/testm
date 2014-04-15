@@ -166,37 +166,43 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 @Override
                 public void onSuccess(final GetBookerStatementsResult result) {
                     if (result.getUniqueRecordIds() != null && !result.getUniqueRecordIds().isEmpty()) {
-                        Dialog.confirmMessage("Подтверждение", "Вы уверены, что хотите удалить данные бухгалтерской отчётности (форма " + getView().getType().getSecond() +
-                                ") для подразделения " + getView().getDepartment().getSecond() +
-                                "в периоде " + getView().getReportPeriod().getSecond() + "?", new DialogHandler() {
-                            @Override
-                            public void yes() {
-                                DeleteBookerStatementsAction action = new DeleteBookerStatementsAction();
-                                action.setStatementsKind(getView().getType().getFirst());
-                                action.setUniqueRecordIds(result.getUniqueRecordIds());
-                                dispatcher.execute(action, CallbackUtils
-                                        .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
-                                            @Override
-                                            public void onSuccess(DeleteBookerStatementsResult result) {
-                                                MessageEvent.fire(BookerStatementsPresenter.this, "Удаление бух отчетности выполнено успешно");
-                                            }
-                                        }, BookerStatementsPresenter.this)
-                                );
-                                Dialog.hideMessage();
-                            }
+                        String departmentName = getView().getDepartment().getSecond().toString();
+                        if (departmentName.toCharArray()[departmentName.length()-1] != '"'){
+                            departmentName = departmentName + "\"";
+                        }
+                        Dialog.confirmMessage("Вы уверены, что хотите удалить данные бухгалтерской отчётности \"" +
+                                getView().getType().getSecond() +"\"" +
+                                " для подразделения \"" + departmentName +
+                                " в периоде \"" + getView().getReportPeriod().getSecond() + "\"?",
+                                new DialogHandler() {
+                                    @Override
+                                    public void yes() {
+                                        DeleteBookerStatementsAction action = new DeleteBookerStatementsAction();
+                                        action.setStatementsKind(getView().getType().getFirst());
+                                        action.setUniqueRecordIds(result.getUniqueRecordIds());
+                                        dispatcher.execute(action, CallbackUtils
+                                                .defaultCallback(new AbstractCallback<DeleteBookerStatementsResult>() {
+                                                    @Override
+                                                    public void onSuccess(DeleteBookerStatementsResult result) {
+                                                        Dialog.infoMessage("Удаление бух отчетности выполнено успешно.");
+                                                    }
+                                                }, BookerStatementsPresenter.this)
+                                        );
+                                        Dialog.hideMessage();
+                                    }
 
-                            @Override
-                            public void no() {
-                                Dialog.hideMessage();
-                            }
+                                    @Override
+                                    public void no() {
+                                        Dialog.hideMessage();
+                                    }
 
-                            @Override
-                            public void close() {
-                                Dialog.hideMessage();
-                            }
-                        });
+                                    @Override
+                                    public void close() {
+                                        Dialog.hideMessage();
+                                    }
+                                });
                     } else {
-                        Dialog.errorMessage("Ошибка", "Данные бухгалтерской отчётности (форма " + getView().getType().getSecond() +
+                        Dialog.errorMessage("Данные бухгалтерской отчётности (форма " + getView().getType().getSecond() +
                                 ") для подразделения " + getView().getDepartment().getSecond() +
                                 " в периоде " + getView().getReportPeriod().getSecond() + " не существуют!");
                     }
@@ -210,15 +216,15 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
      */
     private boolean isFilterFilled() {
         if (getView().getReportPeriod() == null) {
-            Dialog.errorMessage("Ошибка", "Не задано значение отчетного периода!");
+            Dialog.errorMessage("Не задано значение отчетного периода!");
             return false;
         }
         if (getView().getDepartment() == null) {
-            Dialog.errorMessage("Ошибка", "Не задано подразделение!");
+            Dialog.errorMessage("Не задано подразделение!");
             return false;
         }
         if (getView().getType() == null) {
-            Dialog.errorMessage("Ошибка", "Не задан вид бухгалтерской отчетности!");
+            Dialog.errorMessage("Не задан вид бухгалтерской отчетности!");
             return false;
         }
         return true;
@@ -273,7 +279,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                         new AbstractCallback<ImportResult>() {
                             @Override
                             public void onSuccess(ImportResult importResult) {
-                                MessageEvent.fire(BookerStatementsPresenter.this, "Загрузка бух отчетности выполнена успешно");
+                                Dialog.infoMessage("Загрузка бух отчетности выполнена успешно.");
                             }
                         }, BookerStatementsPresenter.this));
             }
@@ -297,9 +303,13 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetBookerStatementsResult>() {
                     @Override
                     public void onSuccess(GetBookerStatementsResult result) {
-                        getView().setTableColumns(result.getColumns());
-                        getView().setTableData(range.getStart(),
-                                result.getTotalCount(), result.getDataRows());
+                        if (result.getTotalCount() != 0) {
+                            getView().setTableColumns(result.getColumns());
+                            getView().setTableData(range.getStart(),
+                                    result.getTotalCount(), result.getDataRows());
+                        } else {
+                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: \"" + getView().getType().getSecond() + "\"!");
+                        }
                     }
                 }, BookerStatementsPresenter.this));
             }

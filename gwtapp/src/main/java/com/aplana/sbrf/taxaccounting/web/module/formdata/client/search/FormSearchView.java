@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -71,6 +72,12 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
+        widget.addAttachHandler(new AttachEvent.Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                filterText.setFocus(true);
+            }
+        });
         init();
     }
 
@@ -183,7 +190,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void setTableData(int start, List<FormDataSearchResult> resultList, int size) {
         searchResultTable.setRowData(start, resultList);
         searchResultTable.setRowCount(size, true);
-        countLabel.setText("Найдено:" + size);
+        countLabel.setText("Найдено: " + size);
     }
 
     @Override
@@ -208,7 +215,9 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public void clearTableData() {
         searchResultTable.setRowCount(0);
-        countLabel.setText("Найдено:");
+        countLabel.setText("Найдено: 0");
+        filterText.setText("");
+        filterText.setFocus(true);
     }
 
     @Override

@@ -38,7 +38,7 @@
             <g:cell>
                 <pager:FlexiblePager ui:field="pager"
                                      location="CENTER" showFastForwardButton="false"
-                                     fastForwardRows="0" showLastPageButton="true" type="declarationList"/>
+                                     fastForwardRows="0" showLastPageButton="true" type="notificationsWindow"/>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT">
                 <g:FlowPanel addStyleNames="{style.footerPanel}">

@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.gwt.client.mask.DateMaskBoxAbstract;
+import com.aplana.gwt.client.mask.ui.YearMaskBox;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
@@ -33,11 +33,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Path("declarationTemplate.version")
-    DateMaskBoxAbstract versionDateBegin;
+    YearMaskBox versionDateBegin;
 
     @UiField
     @Path("endDate")
-    DateMaskBoxAbstract versionDateEnd;
+    YearMaskBox versionDateEnd;
 	
 	@UiField
 	@Editor.Ignore

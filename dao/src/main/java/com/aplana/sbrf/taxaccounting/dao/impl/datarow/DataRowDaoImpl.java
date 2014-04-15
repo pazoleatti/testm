@@ -578,8 +578,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive) {
-        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, key, isCaseSensitive);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
+        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive);
         // get query and params
         String query = sql.getFirst();
         Map<String, Object> params = sql.getSecond();
@@ -599,7 +599,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 result.setIndex(rs.getLong("IDX"));
                 result.setColumnIndex(rs.getLong("column_index"));
                 result.setRowIndex(rs.getLong("row_index"));
-                result.setStringFound(rs.getString("val"));
+                result.setStringFound(rs.getString("true_val"));
 
                 return result;
             }
@@ -614,26 +614,42 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
      * Метод возвращает пару - строку запроса и параметры
      * @return
      */
-    private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, String key, boolean isCaseSensitive){
+    private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive){
 
         StringBuffer sql = new StringBuffer();
         sql.append(
-            "SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, val from \n" +
-                    "(SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, val FROM \n" +
-                    "(SELECT row_id, column_id, TO_CHAR(value) as val \n" +
-                    "                    FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
-                    "                    UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
-                    "                    UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) d\n" +
-                    "                RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id\n" +
-                    "                LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id\n" +
-                    "                ORDER BY dr.ord \n" +
-                    "            ) \n" +
+                "SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, true_val \n" +
+                "from (SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, dc.type, val, dc.attribute_id, dc.attribute_id2, \n" +
+                "       case when dc.type='R' and (select ref_book_id from ref_book_attribute where id=dc.attribute_id)=30 then \n"+
+                "           (case when (select alias from ref_book_attribute where id=dc.attribute_id)='NAME' then (select name from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='PARENT_ID' then (select to_char(parent_id) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='REGION_ID' then (select to_char(region_id) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='SBRF_CODE' then (select to_char(sbrf_code) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='SHORTNAME' then (select to_char(shortname) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='TB_INDEX' then (select to_char(tb_index) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='ID' then (select to_char(id) from department where id=val) \n"+
+                "               when (select alias from ref_book_attribute where id=dc.attribute_id)='TYPE' then (select to_char(type) from department where id=val) \n"+
+                "           else null end ) \n"+
+                "       when dc.type='R' then (select coalesce(string_value, TO_CHAR(number_value), TO_CHAR(date_value)) from ref_book_value where record_id=val and attribute_id=coalesce(dc.attribute_id2, dc.attribute_id)) else val end true_val \n"+
+                "   from(   SELECT row_id, column_id, TO_CHAR(value) as val \n"+
+                "           FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
+                "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
+                "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
+                "           UNION all SELECT row_id, rfc.id as column_id, rsq.val \n" +
+                "           from (  SELECT row_id, column_id, TO_CHAR(value) as val \n" +
+                "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +
+                "                       join FORM_COLUMN rfc on rsq.column_id = rfc.parent_column_id \n" +
+                "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null) d \n" +
+                "    JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
+                "    LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id \n"+
+                "    ORDER BY dr.ord \n" +
+                ") \n" +
 
-                    // check case sensitive
+        // check case sensitive
                     (
                             isCaseSensitive ?
-                    "            WHERE val like :key \n":
-                    "            WHERE LOWER(val) like LOWER(:key) \n"
+                    "            WHERE true_val like :key \n":
+                    "            WHERE LOWER(true_val) like LOWER(:key) \n"
                     )+
 
                     "            ORDER BY row_index, column_index "
@@ -641,6 +657,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("fdId", formDataId);
+        params.put("ftId", formTemplateId);
         params.put("key", "%"+key+"%");
 
         return new Pair<String, Map<String, Object>>(sql.toString(), params);
