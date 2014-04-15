@@ -15,10 +15,6 @@ public class ValidationService {
 public static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
 	
 	public void validate(GenericAccountInfo gai) throws GenericAccountManagementException_Exception{
-		if(gai.getAttributes().getItem().size() < 6){
-			throw new GenericAccountManagementException_Exception("Не все обязательные атрибуты заполнены. " +
-					"Должно быть " + fieldNames.size(), errorCreator(SudirErrorCodes.SUDIR_007));
-		}
 		for (GenericAttribute ga : gai.getAttributes().getItem()) {
 			if(fieldNames.get(ga.getName()) == null)
 				throw new GenericAccountManagementException_Exception("Передаваемая информация содержит лишние данные" + ga.getName(),
@@ -26,7 +22,7 @@ public static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
 			
 			if(fieldNames.get(ga.getName()) == 2){
 				if(ga.getValues().getItem().size() != 1)
-					throw new GenericAccountManagementException_Exception("", errorCreator(SudirErrorCodes.SUDIR_009));
+					throw new GenericAccountManagementException_Exception("Должен содержаться только один аттрибут.", errorCreator(SudirErrorCodes.SUDIR_009));
 			}
 			
 			if(fieldNames.get(ga.getName()) == 5){
