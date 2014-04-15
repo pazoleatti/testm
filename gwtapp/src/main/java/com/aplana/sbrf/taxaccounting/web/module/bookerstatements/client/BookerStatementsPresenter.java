@@ -308,7 +308,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                             getView().setTableData(range.getStart(),
                                     result.getTotalCount(), result.getDataRows());
                         } else {
-                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: <вид бухгалтерской отчётности>!");
+                            Dialog.errorMessage("Невозможно отобразить бухгалтерскую отчетность", "Для выбранного подразделения, в указанном периоде отсутствуют данные по бухгалтерской отчётности вида: \"" + getView().getType().getSecond() + "\"!");
                         }
                     }
                 }, BookerStatementsPresenter.this));
