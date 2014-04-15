@@ -13,9 +13,6 @@ import java.math.RoundingMode
  * Форма "(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»"
  * formTemplateId=354
  *
- * TODO:
- *      - неясность с расчетом графы 8, 16, 17
- *
  * @author bkinzyabulatov
  */
 
@@ -100,11 +97,10 @@ def allColumns = ['rowNumber', 'fix', 'billNumber', 'creationDate', 'nominal', '
 @Field
 def totalColumns = ['sum']
 
-// TODO (Ramil Timerbaev) уточнить у аналитика: графа 7 и 8 в перечне полей могут редактироваться, но в тоже время расчитываемые
 // Редактируемые атрибуты (графа 2..13)
 @Field
-def editableColumns = ['billNumber', 'creationDate', 'nominal', 'sellingPrice', 'currencyCode', 'rateBRBillDate',
-        'rateBROperationDate', 'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'rateWithDiscCoef']
+def editableColumns = ['billNumber', 'creationDate', 'nominal', 'sellingPrice', 'currencyCode',
+        'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'rateWithDiscCoef']
 
 // Автозаполняемые атрибуты
 @Field
@@ -235,8 +231,6 @@ void logicCheck() {
 
             // 6. Арифметическая проверка граф 14-18
             def values = [:]
-            values.rateBRBillDate = calc7(row)
-            values.rateBROperationDate = calc8(row)
             values.sumStartInCurrency = calc14(row, rowPrev)
             values.sumStartInRub = calc15(rowPrev)
             values.sumEndInCurrency = calc16(row, countDaysInYear)
@@ -245,12 +239,12 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAliasWithoutNSI, values, logger, !isBalancePeriod())
         }
 
+        // Проверки НСИ (графа 7, 8)
         if (row.rateBRBillDate != calc7(row)) {
-            logger.warn(errorMsg + "В справочнике \"Курсы валют\" не найдено значение ${row.rateBRBillDate} в поле \"${getColumnName(row, 'rateBRBillDate')}\"!")
+            logger.warn(errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBRBillDate}» в поле «${getColumnName(row, 'rateBRBillDate')}»!")
         }
-
         if (row.rateBROperationDate != calc8(row)) {
-            logger.warn(errorMsg + "В справочнике \"Курсы валют\" не найдено значение ${row.rateBROperationDate} в поле \"${getColumnName(row, 'rateBROperationDate')}\"!")
+            logger.warn(errorMsg + "В справочнике «Курсы валют» не найдено значение «${row.rateBROperationDate}» в поле «${getColumnName(row, 'rateBROperationDate')}»!")
         }
 
         // 7. Проверка итоговых значений по всей форме
@@ -258,9 +252,8 @@ void logicCheck() {
     }
 
     // 7. Проверка итоговых значений по всей форме
-    if (totalRow == null || totalRow.sum != sum) {
-        // TODO Исправить на WRONG_TOTAL
-        loggerError("Итоговые значения рассчитаны неверно!")
+    if (totalRow != null) {
+        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
     }
 }
 
@@ -289,16 +282,15 @@ void calc() {
                 continue
             }
             def rowPrev = getRowPrev(dataRowsPrev, row)
-            row.with {
-                rowNumber = ++index
-                rateBRBillDate = calc7(row)
-                rateBROperationDate = calc8(row)
-                sumStartInCurrency = calc14(row, rowPrev)
-                sumStartInRub = calc15(rowPrev)
-                sumEndInCurrency = calc16(row, countDaysInYear)
-                sumEndInRub = calc17(row)
-                sum = calc18(row)
-            }
+
+            row.rowNumber = ++index
+            row.rateBRBillDate = calc7(row)
+            row.rateBROperationDate = calc8(row)
+            row.sumStartInCurrency = calc14(row, rowPrev)
+            row.sumStartInRub = calc15(rowPrev)
+            row.sumEndInCurrency = calc16(row, countDaysInYear)
+            row.sumEndInRub = calc17(row)
+            row.sum = calc18(row)
         }
     } else {
         for (def row : dataRows) {
@@ -334,8 +326,7 @@ def BigDecimal calc7(def row) {
 }
 
 def BigDecimal calc8(def row) {
-    // TODO (Ramil Timerbaev) уточнить у аналитика: про то что надо брать курс валют для графы 5
-    // курс валюты из графы 5 на дату из графы 12
+    // курс валюты из графы 6 на дату из графы 12
     return round(getCourse(row, row.operationDate))
 }
 
@@ -356,51 +347,52 @@ def BigDecimal calc16(def row, def countDaysInYear) {
     if (row.operationDate != null && row.paymentTermStart != null && row.operationDate < row.paymentTermStart) {
         if (row.nominal != null && row.sellingPrice != null && row.creationDate != null && (row.paymentTermStart - row.creationDate != 0)) {
             tmp = (row.nominal - row.sellingPrice) * (row.operationDate - row.creationDate) / (row.paymentTermStart - row.creationDate)
-        } else {
-            tmp = null
         }
+        return round(tmp)
     }
     if (row.operationDate != null && row.paymentTermStart != null && row.operationDate > row.paymentTermStart) {
         if (row.nominal != null && row.sellingPrice != null) {
             tmp = row.nominal - row.sellingPrice
-        } else {
-            tmp = null
         }
+        return round(tmp)
     }
     if (row.rateWithDiscCoef != null) {
+        if (row.creationDate != null && row.paymentTermEnd != null) {
+            // количество дней в году указаном в 3 графе
+            def countDays3 = getCountDaysInYear(row.creationDate)
+            // количество дней в году указаном в 10 графе
+            def countDays10 = getCountDaysInYear(row.paymentTermEnd)
+            // если количество дней в графе 3 и 10 отличается
+            if (countDays3 != 0 && countDays10 != 0 && (countDays3 != countDays10)) {
+                def d1 = row.creationDate
+                def d2 = row.paymentTermEnd
+                // дата начала года между датами в графе 3 и 10
+                def c = Calendar.getInstance()
+                c.clear()
+                c.set(Calendar.YEAR, (d1 > d2 ? d1 : d2).format('yyyy').toInteger())
+                c.set(Calendar.MONTH, Calendar.JANUARY)
+                c.set(Calendar.DAY_OF_MONTH, 1)
+
+                // количество дней между датами из «Графы 10» и «Графы 3», попавших в первый год и во второй год
+                def t1 = (d1 > d2 ? d1 - c.time + 1 : c.time - d1 - 1)
+                def t2 = (d2 > d1 ? d2 - c.time + 1 : c.time - d2 - 1)
+                tmp = row.nominal + subCalc16(row, t1, countDays3) + subCalc16(row, t2, countDays10)
+                return round(tmp)
+            }
+        }
+
         def tmpForMultiplication = row.rateWithDiscCoef
         if (row.interestRate != null && row.interestRate < row.rateWithDiscCoef) {
             tmpForMultiplication = row.interestRate
         }
         tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * tmpForMultiplication / 100
-    }
-
-    // TODO (Ramil Timerbaev) уточнить у аналитика про эту часть расчета
-    // количество дней в году указаном в 3 графе
-    def countDays3 = (row.creationDate != null ? getCountDaysInYear(row.creationDate) : 0)
-    // количество дней в году указаном в 10 графе
-    def countDays10 = (row.paymentTermEnd != null ? getCountDaysInYear(row.paymentTermEnd) : 0)
-    // если количество дней в графе 3 и 10 отличается
-    if (countDays3 != 0 && countDays10 != 0 && (countDays3 != countDays10)) {
-        def d1 = row.creationDate
-        def d2 = row.paymentTermEnd
-        // дата начала года между датами в графе 3 и 10
-        def c = Calendar.getInstance()
-        c.clear()
-        c.set(Calendar.YEAR, (d1 > d2 ? d1 : d2).format('yyyy').toInteger())
-        c.set(Calendar.MONTH, Calendar.JANUARY)
-        c.set(Calendar.DAY_OF_MONTH, 1)
-
-        // количество дней между датами из «Графы 10» и «Графы 3», попавших в первый год и во второй год
-        def t1 = (d1 > d2 ? d1 - c.time + 1 : c.time - d1 - 1)
-        def t2 = (d2 > d1 ? d2 - c.time + 1 : c.time - d2 - 1)
-        tmp = row.nominal + subCalc16(row, t1, countDays3) + subCalc16(row, t2, countDays10)
+        return round(tmp)
     }
 
     if (row.paymentTermEnd != null && row.operationDate != null && getDiffBetweenYears(row.paymentTermEnd, row.operationDate) >= 3) {
-        tmp = BigDecimal.ZERO
+        return round(BigDecimal.ZERO)
     }
-    // TODO (Ramil Timerbaev) что за погашеный вылютный вексель
+    // погашеный вылютный вексель - это если в графе 6 не рубли
     if (!isRubleCurrency(row.currencyCode)) {
         tmp = null
     }
@@ -425,7 +417,6 @@ def BigDecimal calc17(def row) {
                 tmp = round(row.sellingPrice * (row.rateBROperationDate - row.rateBRBillDate)) + row.sumStartInRub
             }
         }
-        // TODO (Ramil Timerbaev) уточнить у аналитика про это уловие: если заполнена только графа 16 среди всех строк или среди граф 13, 14, 16
     } else if (row.rateWithDiscCoef == null && row.sumStartInCurrency == null && row.sumEndInCurrency != null &&
             row.rateBROperationDate != null) {
         tmp = row.sumEndInCurrency * row.rateBROperationDate

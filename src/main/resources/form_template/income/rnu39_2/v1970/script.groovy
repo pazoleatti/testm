@@ -93,12 +93,11 @@ def editableColumns = ['issuer', 'amount', 'cost', 'shortPositionOpen', 'shortPo
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Обязательно заполняемые атрибуты (графа 2, 4..7, 10..15 - 7 графа необязательная для раздела А)
-// TODO (Ramil Timerbaev) неясности в чтз про графу 8, 9
+// Обязательно заполняемые атрибуты (графа 2, 4..13 - 7 графа необязательная для раздела А)
 @Field
 def nonEmptyColumns = ["issuer", "amount", "cost", "shortPositionOpen",
-        "shortPositionClose", /*"pkdSumOpen", "pkdSumClose",*/ "maturityDatePrev", "maturityDateCurrent",
-        "currentCouponRate", "incomeCurrentCoupon", "couponIncome", "totalPercIncome"]
+        "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
+        "currentCouponRate", "incomeCurrentCoupon"]
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 5, 8, 9, 14, 15)
 @Field
