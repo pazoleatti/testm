@@ -166,10 +166,14 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                 @Override
                 public void onSuccess(final GetBookerStatementsResult result) {
                     if (result.getUniqueRecordIds() != null && !result.getUniqueRecordIds().isEmpty()) {
-                        Dialog.confirmMessage("Вы уверены, что хотите удалить данные бухгалтерской отчётности" +
-                                " (форма " + getView().getType().getSecond() +")" +
-                                " для подразделения" + getView().getDepartment().getSecond() +
-                                " в периоде " + getView().getReportPeriod().getSecond() + "?",
+                        String departmentName = getView().getDepartment().getSecond().toString();
+                        if (departmentName.toCharArray()[departmentName.length()-1] != '"'){
+                            departmentName = departmentName + "\"";
+                        }
+                        Dialog.confirmMessage("Вы уверены, что хотите удалить данные бухгалтерской отчётности \"" +
+                                getView().getType().getSecond() +"\"" +
+                                " для подразделения \"" + departmentName +
+                                " в периоде \"" + getView().getReportPeriod().getSecond() + "\"?",
                                 new DialogHandler() {
                                     @Override
                                     public void yes() {

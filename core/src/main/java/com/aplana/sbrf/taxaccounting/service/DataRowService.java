@@ -62,6 +62,6 @@ public interface DataRowService {
      * @param isCaseSensitive чувствительность к регистру
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, DataRowRange range, String key, boolean isCaseSensitive);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId,DataRowRange range, String key, boolean isCaseSensitive);
 
 }

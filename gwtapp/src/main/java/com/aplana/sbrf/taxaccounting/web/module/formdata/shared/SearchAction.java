@@ -15,6 +15,15 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private int from;
     private int to;
     private boolean caseSensitive;
+    private Integer formTemplateId;
+
+    public Integer getFormTemplateId() {
+        return formTemplateId;
+    }
+
+    public void setFormTemplateId(Integer formTemplateId) {
+        this.formTemplateId = formTemplateId;
+    }
 
     public Long getFormDataId() {
         return formDataId;
