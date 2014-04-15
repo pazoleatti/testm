@@ -16,8 +16,6 @@ public class DepartmentReportPeriod implements Serializable{
 	
 	private boolean active;
 
-    private boolean hasCorrectPeriod;
-
     private Date correctPeriod;
 
     public Long getId() {
@@ -59,14 +57,6 @@ public class DepartmentReportPeriod implements Serializable{
 	public void setReportPeriod(ReportPeriod reportPeriod) {
 		this.reportPeriod = reportPeriod;
 	}
-
-    public boolean hasCorrectPeriod() {
-        return hasCorrectPeriod;
-    }
-
-    public void setHasCorrectPeriod(boolean hasCorrectPeriod) {
-        this.hasCorrectPeriod = hasCorrectPeriod;
-    }
 
     public Date getCorrectPeriod() {
         return correctPeriod;

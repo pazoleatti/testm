@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -81,6 +82,12 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         pager.setDisplay(dataTable);
         dataTable.setVisible(false);
         pager.setVisible(false);
+        fileUploader.setCheckHandler(new CheckHandler() {
+            @Override
+            public boolean onCheck() {
+                return getUiHandlers().isFilterFilled();
+            }
+        });
     }
 
     @Override
@@ -178,6 +185,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         fileUploader.addValueChangeHandler(valueChangeHandler);
     }
 
+
     @Override
     public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
         dataTable.setVisible(true);
@@ -198,7 +206,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public void updateTable() {
         Range range = new Range(pager.getPageStart(), pager.getPageSize());
-        dataTable.setVisibleRangeAndClearData(range, true);
+        if(getUiHandlers().isSearchEnabled())
+            dataTable.setVisibleRangeAndClearData(range, true);
+        else{
+            dataTable.setVisible(false);
+            pager.setVisible(false);
+        }
+
     }
 
     @Override

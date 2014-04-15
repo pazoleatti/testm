@@ -131,7 +131,6 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 		action.setDepartmentId(openFilterData.getDepartmentId());
 		action.setBalancePeriod(openFilterData.isBalancePeriod());
 		action.setDictionaryTaxPeriodId(openFilterData.getDictionaryTaxPeriod());
-		action.setHasCorrectPeriod(openFilterData.isHasCorrectPeriod());
 		action.setCorrectPeriod(openFilterData.getCorrectPeriod());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {

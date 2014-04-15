@@ -13,4 +13,8 @@ public interface BookerStatementsUiHandlers extends UiHandlers {
     void onSearch();
 
     void onDelete();
+
+    boolean isFilterFilled();
+
+    boolean isSearchEnabled();
 }

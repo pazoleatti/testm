@@ -17,11 +17,20 @@
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <name>fix</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>operDate</alias>
         <checking>false</checking>
         <name>Дата операции</name>
-        <order>2</order>
+        <order>3</order>
         <width>5</width>
         <formatId>0</formatId>
     </columns>
@@ -29,23 +38,25 @@
         <alias>contragent</alias>
         <checking>false</checking>
         <name>Контрагент</name>
-        <order>3</order>
-        <width>5</width>
-        <maxLength>255</maxLength>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>view</alias>
-        <checking>false</checking>
-        <name>Вид</name>
         <order>4</order>
         <width>5</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>type</alias>
+        <checking>false</checking>
+        <name>Вид</name>
+        <order>5</order>
+        <width>5</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
         <name>Сумма</name>
-        <order>5</order>
+        <order>6</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -54,15 +65,16 @@
         <alias>number</alias>
         <checking>false</checking>
         <name>Номер мемориального ордера</name>
-        <order>6</order>
+        <order>7</order>
         <width>5</width>
         <maxLength>8</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
         <checking>false</checking>
         <name>Сумма</name>
-        <order>7</order>
+        <order>8</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -71,7 +83,7 @@
         <alias>date</alias>
         <checking>false</checking>
         <name>Дата</name>
-        <order>8</order>
+        <order>9</order>
         <width>5</width>
         <formatId>0</formatId>
     </columns>
@@ -79,8 +91,30 @@
         <alias>number2</alias>
         <checking>false</checking>
         <name>Номер</name>
-        <order>9</order>
+        <order>10</order>
         <width>5</width>
         <maxLength>14</maxLength>
+        <prevLength>0</prevLength>
     </columns>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>
