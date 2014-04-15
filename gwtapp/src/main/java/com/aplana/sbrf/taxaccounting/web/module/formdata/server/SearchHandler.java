@@ -35,7 +35,7 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
         range.setOffset(searchAction.getFrom());
 
         SearchResult searchResult = new SearchResult();
-        PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(), range, searchAction.getKey(), searchAction.isCaseSensitive());
+        PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(), searchAction.getFormTemplateId(), range, searchAction.getKey(), searchAction.isCaseSensitive());
         searchResult.setResults(result);
         searchResult.setSize(result.getTotalCount());
 

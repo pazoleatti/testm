@@ -479,6 +479,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 canCreatedManual = result.canCreatedManual();
                                 isBankSummaryForm = result.isBankSummaryForm();
                                 formSearchPresenter.setFormDataId(formData.getId());
+                                formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
 
                                 /**
                                  * Передаем призентору поиска по форме, данные о скрытых колонках
