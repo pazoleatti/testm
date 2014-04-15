@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -21,6 +22,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -40,6 +42,13 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     LinkButton uploadButton;
     @UiField
     Button justButton;
+
+    private CheckHandler checkHandler = new CheckHandler() {
+        @Override
+        public boolean onCheck() {
+            return true;
+        }
+    };
 
     @Override
     public boolean isEnabled() {
@@ -134,14 +143,11 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         });
     }
 
-    @UiHandler("uploadButton")
-    void onUploadButtonClicked(ClickEvent event){
-        uploaderClick();
-    }
-
-    @UiHandler("justButton")
-    void onJustButtonClicked(ClickEvent event){
-        uploaderClick();
+    @UiHandler(value = {"uploadButton", "justButton"})
+    void onUploadButtonClicked(ClickEvent event) {
+        if (checkHandler != null && checkHandler.onCheck()) {
+            uploaderClick();
+        }
     }
 
     private void uploaderClick(){
@@ -174,5 +180,12 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         justButton.setWidth(width);
     }
 
-
+    /**
+     * Если нужна какая либо проверка перед тем как вызвать окно выбора файла
+     * Вызывается в момент клика на кнопку перед тем как вызвать открытие окна
+     * @param checkHandler хендлер проверки
+     */
+    public void setCheckHandler(CheckHandler checkHandler){
+        this.checkHandler = checkHandler;
+    }
 }

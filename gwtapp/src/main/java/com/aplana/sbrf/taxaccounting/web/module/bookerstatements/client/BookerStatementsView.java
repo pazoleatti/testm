@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -81,6 +82,12 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         pager.setDisplay(dataTable);
         dataTable.setVisible(false);
         pager.setVisible(false);
+        fileUploader.setCheckHandler(new CheckHandler() {
+            @Override
+            public boolean onCheck() {
+                return getUiHandlers().isFilterFilled();
+            }
+        });
     }
 
     @Override

@@ -214,7 +214,8 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
     /**
      * Проверка заполненности данных фильтра
      */
-    private boolean isFilterFilled() {
+    @Override
+    public boolean isFilterFilled() {
         if (getView().getReportPeriod() == null) {
             Dialog.errorMessage("Не задано значение отчетного периода!");
             return false;
