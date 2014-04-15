@@ -51,6 +51,11 @@ public class ReportPeriodDaoTest {
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
 		taxPeriodDao.add(taxPeriod);
 	}
+
+    @Test
+    public void getCorrectPeriods() {
+        reportPeriodDao.getCorrectPeriods(TaxType.DEAL, 1);
+    }
 	
 	@Test
 	public void listByTaxPeriodSuccessfulTest() {

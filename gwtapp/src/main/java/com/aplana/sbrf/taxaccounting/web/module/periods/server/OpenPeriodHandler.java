@@ -36,7 +36,7 @@ public class OpenPeriodHandler extends AbstractActionHandler<OpenPeriodAction, O
 	public OpenPeriodResult execute(OpenPeriodAction action, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
 		reportPeriodService.open(action.getYear(), (int) action.getDictionaryTaxPeriodId(),
-				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), logs, action.isBalancePeriod(), action.getCorrectPeriod(), action.isHasCorrectPeriod());
+				action.getTaxType(), securityService.currentUserInfo(), action.getDepartmentId(), logs, action.isBalancePeriod(), action.getCorrectPeriod());
 		OpenPeriodResult result = new OpenPeriodResult();
         result.setUuid(logEntryService.save(logs));
 		return result;

@@ -185,6 +185,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
         fileUploader.addValueChangeHandler(valueChangeHandler);
     }
 
+
     @Override
     public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
         dataTable.setVisible(true);
@@ -205,7 +206,13 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     @Override
     public void updateTable() {
         Range range = new Range(pager.getPageStart(), pager.getPageSize());
-        dataTable.setVisibleRangeAndClearData(range, true);
+        if(getUiHandlers().isSearchEnabled())
+            dataTable.setVisibleRangeAndClearData(range, true);
+        else{
+            dataTable.setVisible(false);
+            pager.setVisible(false);
+        }
+
     }
 
     @Override

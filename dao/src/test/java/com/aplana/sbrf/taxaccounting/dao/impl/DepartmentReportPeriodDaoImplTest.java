@@ -161,7 +161,7 @@ public class DepartmentReportPeriodDaoImplTest {
 
 		departmentReportPeriodDao.save(departmentReportPeriod);
 		departmentReportPeriodDao.updateActive(departmentReportPeriod
-				.getReportPeriod().getId(), 1l, false);
+				.getReportPeriod().getId(), 1l, null, false);
 		departmentReportPeriod = departmentReportPeriodDao.get(
 				reportPeriod1.getId(), 1l);
 
@@ -171,7 +171,7 @@ public class DepartmentReportPeriodDaoImplTest {
 		assertEquals(9, departmentReportPeriod.getReportPeriod().getOrder());
 
 		departmentReportPeriodDao.updateActive(departmentReportPeriod
-				.getReportPeriod().getId(), 1l, true);
+				.getReportPeriod().getId(), 1l, null, true);
 		departmentReportPeriod = departmentReportPeriodDao.get(
 				reportPeriod1.getId(), 1l);
 
