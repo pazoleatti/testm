@@ -244,7 +244,11 @@ public class FormDataServiceImpl implements FormDataService {
 		// Execute scripts for the form event CREATE
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
         if (prevReportPeriod != null) {
-            FormData formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
+            FormData formDataOld;
+            if (periodOrder==null)
+                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
+            else
+                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(),periodOrder);
             if (formDataOld != null) {
                 List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
                 List<FormDataSigner> signerOld = formDataOld.getSigners();
