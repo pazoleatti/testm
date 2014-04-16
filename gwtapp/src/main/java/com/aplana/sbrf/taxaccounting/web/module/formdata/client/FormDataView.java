@@ -709,6 +709,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             if (pager.getPage() != page.intValue()){
                 this.needScrollToRow = true;
                 pager.setPage(page.intValue());
+            } else {
+                formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - pager.getPageStart()).scrollIntoView();
             }
         }
     }
