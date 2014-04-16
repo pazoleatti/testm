@@ -185,9 +185,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!needEdit) {
-                provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
+                provider.createRecordVersion(logger, period.getCalendarStartDate(), period.getEndDate(), Arrays.asList(record));
             } else {
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), period.getEndDate(), paramsMap);
             }
 
             String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
