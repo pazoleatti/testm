@@ -12,7 +12,7 @@ import java.util.List;
 public class LogSystemAuditFilter implements Serializable {
 
     private List<Long> userIds;
-    private List<Integer> reportPeriodIds;
+    private String reportPeriodName;
     private List<Long> formKind;
     private TaxType taxType;
     private Integer declarationTypeId;
@@ -28,7 +28,7 @@ public class LogSystemAuditFilter implements Serializable {
 
     public LogSystemAuditFilter(LogSystemAuditFilter filter) {
         this.userIds = filter.getUserIds();
-        this.reportPeriodIds = filter.getReportPeriodIds();
+        this.reportPeriodName = filter.getReportPeriodName();
         this.formKind = filter.getFormKind();
         this.taxType = filter.getTaxType();
         this.declarationTypeId = filter.getDeclarationTypeId();
@@ -70,12 +70,12 @@ public class LogSystemAuditFilter implements Serializable {
         this.userIds = userIds;
     }
 
-    public List<Integer> getReportPeriodIds() {
-        return reportPeriodIds;
+    public String getReportPeriodName() {
+        return reportPeriodName;
     }
 
-    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
-        this.reportPeriodIds = reportPeriodIds;
+    public void setReportPeriodName(String reportPeriodName) {
+        this.reportPeriodName = reportPeriodName;
     }
 
     public List<Long> getFormKind() {
@@ -178,7 +178,7 @@ public class LogSystemAuditFilter implements Serializable {
         systemFilter.setFormTypeId(this.getFormTypeIds() != null && !formTypeIds.isEmpty() ? formTypeIds.get(0).intValue() : null);
         systemFilter.setFromSearchDate(this.getFromSearchDate());
         systemFilter.setToSearchDate(this.getToSearchDate());
-        systemFilter.setReportPeriodIds(this.getReportPeriodIds());
+        systemFilter.setReportPeriodName(this.getReportPeriodName());
         systemFilter.setUserIds(this.getUserIds());
         systemFilter.setStartIndex(this.getStartIndex());
         systemFilter.setSearchOrdering(this.getSearchOrdering());

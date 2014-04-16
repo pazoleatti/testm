@@ -89,9 +89,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
         entries.add(SDF.format(item.getLogDate()));
         entries.add(item.getEvent().getTitle());
         entries.add(item.getNote());
-        entries.add(item.getReportPeriod() != null ?
-                item.getReportPeriod().getName() + " " + item.getReportPeriod().getTaxPeriod().getYear() :
-                "");
+        entries.add(item.getReportPeriodName() != null ? item.getReportPeriodName() : "");
         entries.add(item.getDepartmentName());
         entries.add(item.getFormType() != null?"Налоговые формы" :
                 item.getDeclarationType() != null?"Декларации":"");

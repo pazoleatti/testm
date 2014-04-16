@@ -46,8 +46,8 @@ public class PrintingServiceImplTest {
         TaxPeriod taxPeriod = new TaxPeriod();
 		taxPeriod.setYear(Calendar.getInstance().get(Calendar.YEAR));
         rp.setTaxPeriod(taxPeriod);
-        rp.setName("1 квартал");
-        item.setReportPeriod(rp);
+        rp.setName("первый квартал");
+        item.setReportPeriodName(String.valueOf(taxPeriod.getYear()) + " " + rp.getName());
 
         item.setEvent(FormDataEvent.ADD_ROW);
         item.setRoles(USER_ROLE);

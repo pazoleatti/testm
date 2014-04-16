@@ -31,12 +31,12 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         getView().setUiHandlers(this);
     }
 
-    @Override
+    /*@Override
     public void getReportPeriods(TaxType taxType) {
-        if (taxType == null) {
+        *//*if (taxType == null) {
             getView().updateReportPeriodPicker(new ArrayList<ReportPeriod>());
             return;
-        }
+        }*//*
         GetReportPeriodsAction action = new GetReportPeriodsAction();
         action.setTaxType(taxType);
         dispatchAsync.execute(action, new AbstractCallback<GetReportPeriodsResult>() {
@@ -45,14 +45,14 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                 getView().updateReportPeriodPicker(result.getReportPeriods());
             }
         });
-    }
+    }*/
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
         void init();
         void setDepartments(List<Department> list, Set<Integer> availableValues);
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
         void setFormDataTaxType(List<TaxType> taxTypeList);
-        void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);
+        /*void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);*/
         LogSystemAuditFilter getFilterData();
         boolean isChangeFilter();
         void edit(LogSystemAuditFilter auditFilter);
@@ -71,15 +71,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                         LogSystemFilterAvailableValues auditFilterDataAvaliableValues = result.getAvailableValues();
                         getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
                                 convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
-                        /*getView().setFormTypeId(Lists.transform(auditFilterDataAvaliableValues.getFormTypeIds(), new com.google.common.base.Function<Integer, Long>() {
-                            @Override
-                            public Long apply(@Nullable Integer integer) {
-                                System.out.println("Integer ids: " + integer);
-                                if (integer == null)
-                                    return null;
-                                return Long.valueOf(integer);
-                            }
-                        }));*/
                         getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
                         /*getView().setFormDataKind(result.getFormDataKinds());*/
                         getView().setFormDataTaxType(result.getTaxTypes());

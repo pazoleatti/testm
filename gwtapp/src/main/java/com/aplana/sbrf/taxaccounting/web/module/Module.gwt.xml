@@ -21,7 +21,6 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formdatalist.FormDataList" />
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplate.FormTemplate" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.TemplateVersionList"/>
-    <inherits name="com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.HistoryBusinessList"/>
 	<inherits name="com.aplana.sbrf.taxaccounting.web.module.home.HomeModule" />
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.members.Members"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.migration.Migration"/>

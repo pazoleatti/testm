@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.DepartmentConfigTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
-import com.aplana.sbrf.taxaccounting.web.module.historybusinesslist.client.HistoryBusinessToken;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
@@ -187,7 +186,7 @@ public class GetMainMenuActionHandler extends
                 if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
                         && !currentUser.hasRole(TARole.ROLE_ADMIN)){
-                    adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + HistoryBusinessToken.HISTORY_BUSINESS));
+                    adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
                 }
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
                         + MembersTokens.MEMBERS));
