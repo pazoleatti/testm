@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface RefBookHierDataUiHandlers extends UiHandlers {
@@ -7,6 +8,5 @@ public interface RefBookHierDataUiHandlers extends UiHandlers {
 	void onDeleteRowClicked();
 	void onSelectionChanged();
 	void onRelevanceDateChanged();
-    void onSetEditMode();
-    void onSetDefaultMode();
+    void setMode(FormMode mode);
 }

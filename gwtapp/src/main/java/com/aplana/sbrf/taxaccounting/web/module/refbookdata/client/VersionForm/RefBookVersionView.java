@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
@@ -223,9 +224,19 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	}
 
     @Override
-    public void setReadOnlyMode(boolean readOnly) {
-        addRow.setVisible(!readOnly);
-        deleteRow.setVisible(!readOnly);
+    public void updateMode(FormMode mode) {
+        switch (mode){
+            case EDIT:
+                addRow.setVisible(true);
+                deleteRow.setVisible(true);
+
+                break;
+            case READ:
+            case VIEW:
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                break;
+        }
     }
 
 	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {

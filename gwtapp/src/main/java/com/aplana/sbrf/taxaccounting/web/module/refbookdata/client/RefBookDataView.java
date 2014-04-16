@@ -242,7 +242,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
             @Override
             public void yes() {
-                getUiHandlers().onSetDefaultMode();
+                getUiHandlers().setMode(FormMode.VIEW);
             }
         });
     }
@@ -255,7 +255,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("edit")
     void editButtonClicked(ClickEvent event) {
-        getUiHandlers().onSetEditMode();
+        getUiHandlers().setMode(FormMode.EDIT);
     }
 
 	@UiHandler("deleteRow")
@@ -305,34 +305,33 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
     @Override
-    public void setEditMode() {
-        updateView(true);
-    }
-
-    @Override
-    public void setDefaultMode(){
-        updateView(false);
-    }
-
-    /**
-     * Обновляет видимость элементов
-     * в зависимости от режима
-     *
-     * @param isEditMode - режим редактирования true, false в противном случае
-     */
-    private void updateView(boolean isEditMode) {
-        setVisibleEditLink(!isEditMode);
-        addRow.setVisible(isEditMode);
-        deleteRow.setVisible(isEditMode);
-        editModeLabel.setVisible(isEditMode);
-        // для красовы на форме
-        separator.setVisible(isEditMode);
-        cancelEdit.setVisible(isEditMode);
-    }
-
-    @Override
-    public void setVisibleEditLink(boolean visible){
-        edit.setVisible(visible);
+    public void updateMode(FormMode mode) {
+        switch (mode){
+            case EDIT:
+                addRow.setVisible(true);
+                deleteRow.setVisible(true);
+                cancelEdit.setVisible(true);
+                edit.setVisible(false);
+                // для красовы на форме
+                separator.setVisible(false);
+                break;
+            case READ: ;
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                cancelEdit.setVisible(false);
+                edit.setVisible(false);
+                // для красовы на форме
+                separator.setVisible(false);
+                break;
+            case VIEW: ;
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                cancelEdit.setVisible(false);
+                edit.setVisible(true);
+                // для красовы на форме
+                separator.setVisible(true);
+                break;
+        }
     }
 
     @Override
