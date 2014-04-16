@@ -227,7 +227,7 @@ def calc() {
         }
 
         // Графа 14 (Налоговая ставка)
-        row.taxRate = calc14(row, errorMsg)
+        row.taxRate = calc14(row, region, errorMsg)
 
         /*
          * Графа 15 (Сумма исчисления налога) = Расчет суммы исчисления налога
@@ -381,7 +381,9 @@ void logicCheck() {
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
         // приведённой в алгоритме расчёта «графы 14» Табл. 3
         if (needCheckTaxRete) {
-            calc14(row, errorMsg)
+            // получение региона по ОКТМО
+            def region = getRegionByOKTMO(row.okato, errorMsg)
+            calc14(row, region, errorMsg)
         }
     }
 }
@@ -696,7 +698,7 @@ void placeError(DataRow row, String alias, ArrayList<String> errorFields, String
  * Графа 14 (Налоговая ставка)
  * Скрипт для вычисления налоговой ставки
  */
-def calc14(def row, def errorMsg) {
+def calc14(def row, def region, def errorMsg) {
     needCheckTaxRete = false
     def tsTypeCode
     if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
