@@ -87,7 +87,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             provider = rbFactory.getDataProvider(parentRefBookId);
         }
 
-        Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
+        Calendar calendarFrom = reportService.getEndDate(action.getReportPeriodId());
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(

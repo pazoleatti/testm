@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
@@ -172,7 +173,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                             ((RefBookPickerWidget) w).reload();
                         }
                         ((RefBookPickerWidget)w).setDereferenceValue("");
-                        ((RefBookPickerWidget)w).setEnabled(!readOnly);
 					}
 				}
 			}
@@ -290,19 +290,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         this.isHierarchy = isHierarchy;
     }
 
-    @Override
-	public void setSaveButtonEnabled(boolean enabled) {
-		save.setEnabled(enabled);
-	}
-
-	@Override
-	public void setCancelButtonEnabled(boolean enabled) {
-		cancel.setEnabled(enabled);
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-
+	private void updateWidgetsVisibility(boolean enabled) {
         if (widgets != null){
             for (HasValue entry : widgets.values()) {
                 if (entry instanceof HasEnabled) {
@@ -311,11 +299,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             }
         }
 
-        setReadOnlyMode(enabled);
-        versionStart.setEnabled(readOnly);
-        versionEnd.setEnabled(readOnly);
-		save.setEnabled(enabled);
-		cancel.setEnabled(enabled);
 	}
 
     @Override
@@ -323,8 +306,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode);
-        versionStart.setEnabled(isVersionMode && !readOnly);
-        versionEnd.setEnabled(isVersionMode && !readOnly);
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
@@ -336,8 +317,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         allVersion.setVisible(false);
-        versionStart.setEnabled(!readOnly);
-        versionEnd.setEnabled(!readOnly);
     }
 
     @Override
@@ -361,9 +340,24 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
-    public void setReadOnlyMode(boolean readOnly) {
-        this.readOnly = readOnly;
-        buttonBlock.setVisible(readOnly);
+    public void updateMode(FormMode mode) {
+        switch (mode){
+            case EDIT:
+                save.setEnabled(true);
+                cancel.setEnabled(true);
+                updateWidgetsVisibility(true);
+                versionStart.setEnabled(isVersionMode);
+                versionEnd.setEnabled(isVersionMode);
+                break;
+            case READ:
+            case VIEW:
+                save.setEnabled(false);
+                cancel.setEnabled(false);
+                versionStart.setEnabled(false);
+                versionEnd.setEnabled(false);
+                updateWidgetsVisibility(false);
+                break;
+        }
     }
 
     @Override

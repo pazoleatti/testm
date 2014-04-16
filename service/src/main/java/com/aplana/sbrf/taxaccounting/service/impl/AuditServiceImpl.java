@@ -5,8 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +23,12 @@ public class AuditServiceImpl implements AuditService {
 	private DepartmentService departmentService;
     @Autowired
 	private DeclarationTypeDao declarationTypeDao;
+    @Autowired
+    private FormDataSearchService formDataSearchService;
+    @Autowired
+    private DeclarationDataSearchService declarationDataSearchService;
+    @Autowired
+    private PeriodService periodService;
 
 	@Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -51,7 +56,12 @@ public class AuditServiceImpl implements AuditService {
 		log.setRoles(roles.toString());
 
 		log.setDepartmentId(departmentId);
-		log.setReportPeriodId(reportPeriodId);
+        if (reportPeriodId == null)
+            log.setReportPeriodName(null);
+        else {
+            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+            log.setReportPeriodName(String.valueOf(reportPeriod.getTaxPeriod().getYear()) + " " + reportPeriod.getName());
+        }
 		log.setDeclarationTypeId(declarationTypeId);
 		log.setFormTypeId(formTypeId);
 		log.setFormKindId(formKindId);
@@ -100,5 +110,78 @@ public class AuditServiceImpl implements AuditService {
         } catch (DaoException e){
             throw new ServiceException("Ошибка при получении последней даты архивации.", e);
         }
+    }
+
+    @Override
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
+        List<Long> formDataIds;
+        List<Long> declarationDataIds;
+        FormDataFilter formDataFilter = new FormDataFilter();
+        DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
+        LogSystemFilterDao filterDao = new LogSystemFilterDao();
+
+        //Проставляю доступные подразделения для пользователя, подразделение не выбрано в фильтре
+        if (filter.getDepartmentId() != null){
+            formDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
+            declarationDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
+        }
+        //Только для деклараций, потому что в сервисе для НФ уже есть подобная проверка
+        else {
+            declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
+        }
+
+        switch (filter.getAuditFormTypeId() != null ? filter.getAuditFormTypeId() : 0){
+            case 1:
+                formDataFilter.setTaxType(filter.getTaxType());
+                if ((filter.getFormKind() != null)){
+                    formDataFilter.setFormDataKind(Arrays.asList((long) filter.getFormKind().getId()));
+                }
+                if ((filter.getFormTypeId() != null)){
+                    formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));
+                }
+                /*formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
+                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+                if(formDataIds.isEmpty())
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
+                filterDao.setFormDataIds(formDataIds);
+                break;
+            case 2:
+                declarationDataFilter.setTaxType(filter.getTaxType());
+                /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
+                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+                declarationDataIds =
+                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                if(declarationDataIds.isEmpty())
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
+                filterDao.setDeclarationDataIds(declarationDataIds);
+                break;
+            default:
+                formDataFilter.setTaxType(filter.getTaxType());
+                formDataFilter.setFormDataKind(filter.getFormKind() != null ?
+                        Arrays.asList((long)filter.getFormKind().getId()) : null);
+                if ((filter.getFormTypeId() != null)){
+                    formDataFilter.setFormTypeId(Arrays.asList(Long.valueOf(filter.getFormTypeId())));
+                }
+                /*formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
+                formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+
+                declarationDataFilter.setTaxType(filter.getTaxType());
+                /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
+                declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+                declarationDataIds =
+                        declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+                if (formDataIds.isEmpty() && declarationDataIds.isEmpty()){
+                    return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
+                }
+                filterDao.setFormDataIds(formDataIds);
+                filterDao.setDeclarationDataIds(declarationDataIds);
+
+        }
+        filterDao.setFromSearchDate(filter.getFromSearchDate());
+        filterDao.setToSearchDate(filter.getToSearchDate());
+        filterDao.setCountOfRecords(filter.getCountOfRecords());
+
+        return auditDao.getLogsBusiness(filterDao);
     }
 }

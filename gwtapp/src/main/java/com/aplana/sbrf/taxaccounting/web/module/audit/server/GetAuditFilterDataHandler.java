@@ -20,7 +20,7 @@ import java.util.Arrays;
  * Обработчик запроса для заполнения данных фильтра
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetAuditFilterDataHandler extends AbstractActionHandler<GetAuditFilterDataAction, GetAuditFilterDataResult> {
 
     @Autowired

@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.GetAuditDataListResult;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
@@ -17,22 +19,29 @@ import org.springframework.stereotype.Service;
  * User: avanteev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetAuditDataListHandler extends AbstractActionHandler<GetAuditDataListAction, GetAuditDataListResult> {
 
     @Autowired
     AuditService auditService;
+    @Autowired
+    SecurityService securityService;
 
     public GetAuditDataListHandler() {
         super(GetAuditDataListAction.class);
     }
 
     @Override
-    public GetAuditDataListResult execute(GetAuditDataListAction getAuditDataListAction, ExecutionContext executionContext) throws ActionException {
+    public GetAuditDataListResult execute(GetAuditDataListAction action, ExecutionContext executionContext) throws ActionException {
 
         GetAuditDataListResult result = new GetAuditDataListResult();
-        LogSystemAuditFilter auditFilter = getAuditDataListAction.getLogSystemFilter();
-		PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(auditFilter.convertTo());
+        LogSystemAuditFilter auditFilter = action.getLogSystemFilter();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        PagingResult<LogSearchResultItem> records;
+        if (userInfo.getUser().hasRole("ROLE_ADMIN"))
+		    records = auditService.getLogsByFilter(auditFilter.convertTo());
+        else
+            records = auditService.getLogsBusiness(auditFilter.convertTo(), userInfo);
         result.setRecords(records);
 		result.setTotalCountOfRecords(records.getTotalCount());
 

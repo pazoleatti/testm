@@ -16,30 +16,31 @@ import groovy.transform.Field
  * formTemplateId = 312
  *
  * @author rtimerbaev
- *
- * графа 1  - rowNumber
- * графа 2  - firstRecordNumber
- * графа 3  - operationDate
- * графа 4  - reasonNumber
- * графа 5  - reasonDate
- * графа 6  - invNumber
- * графа 7  - name
- * графа 8  - price
- * графа 9  - amort
- * графа 10 - expensesOnSale
- * графа 11 - sum
- * графа 12 - sumInFact
- * графа 13 - costProperty
- * графа 14 - marketPrice
- * графа 15 - sumIncProfit
- * графа 16 - profit
- * графа 17 - loss
- * графа 18 - usefullLifeEnd
- * графа 19 - monthsLoss
- * графа 20 - expensesSum
- * графа 21 - saledPropertyCode
- * графа 22 - saleCode
  */
+
+// графа 1  - rowNumber
+// графа    - tmp
+// графа 2  - firstRecordNumber
+// графа 3  - operationDate
+// графа 4  - reasonNumber
+// графа 5  - reasonDate
+// графа 6  - invNumber
+// графа 7  - name
+// графа 8  - price
+// графа 9  - amort
+// графа 10 - expensesOnSale
+// графа 11 - sum
+// графа 12 - sumInFact
+// графа 13 - costProperty
+// графа 14 - marketPrice
+// графа 15 - sumIncProfit
+// графа 16 - profit
+// графа 17 - loss
+// графа 18 - usefullLifeEnd
+// графа 19 - monthsLoss
+// графа 20 - expensesSum
+// графа 21 - saledPropertyCode     - атрибут 804 - CODE - «Шифр вида реализованного (выбывшего) имущества», справочник 82 «Шифры видов реализованного (выбывшего) имущества»
+// графа 22 - saleCode              - атрибут 806 - CODE - «Шифр вида реализации (выбытия)», справочник 83 «Шифры видов реализации (выбытия)»
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -133,12 +134,22 @@ def currentReportPeriod = null
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, false)
+}
+
+/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, false)
 }
 
 def addNewRow() {
@@ -364,16 +375,18 @@ void logicCheck() {
             logger.error(errorMsg + 'Для реализованных имущественных прав (кроме прав требования, долей паёв) (группа «Е») указан неверный шифр!')
         }
     }
+
     // 9. Проверка итоговых значений формы
     for (def section : groups) {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
-        for (def column : totalColumns) {
-            if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
-                def index = lastRow.getIndex()
-                // TODO Исправить на WRONG_TOTAL
-                logger.error("Строка $index: Итоговые значения рассчитаны неверно!")
-                break
+        for (def alias : totalColumns) {
+            def value = roundValue(lastRow.getCell(alias).value, 2)
+            def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow), 2)
+            if (sum != value) {
+                def name = getColumnName(lastRow, alias)
+                def sectionName = groupsRus.get(groups.indexOf(section))
+                logger.error("Неверно рассчитаны итоговые значения для раздела $sectionName в графе «$name»!")
             }
         }
     }
@@ -383,14 +396,7 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     // удалить нефиксированные строки
-    def deleteRows = []
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            deleteRows += row
-        }
-    }
-    dataRows.removeAll(deleteRows)
-    updateIndexes(dataRows)
+    deleteNotFixedRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
@@ -617,73 +623,61 @@ void updateIndexes(def dataRows) {
 }
 
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 22, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Номер первой записи',
-            (xml.row[0].cell[3]): 'Дата операции',
-            (xml.row[0].cell[4]): 'Основание для совершения операции (первичный документ)',
-            (xml.row[0].cell[6]): 'Инвентарный номер',
-            (xml.row[0].cell[7]): 'Наименование',
-            (xml.row[0].cell[8]): 'Цена приобретения',
-            (xml.row[0].cell[9]): 'Фактически начислено амортизации (отнесено на расходы)',
-            (xml.row[0].cell[10]): 'Расходы при реализации',
-            (xml.row[0].cell[11]): 'Сумма начисленной выручки от реализации',
-            (xml.row[0].cell[12]): 'Сумма фактически поступивших денежных средств',
-            (xml.row[0].cell[13]): 'Стоимость материалов и имущества, полученных при ликвидации основных средств',
-            (xml.row[0].cell[14]): 'Рыночная цена',
-            (xml.row[0].cell[15]): 'Сумма к увеличению прибыли (уменьшению убытка)',
-            (xml.row[0].cell[16]): 'Прибыль от реализации',
-            (xml.row[0].cell[17]): 'Убыток от реализации',
-            (xml.row[0].cell[18]): 'Дата истечения срока полезного использования',
-            (xml.row[0].cell[19]): 'Количество месяцев отнесения убытков на расходы',
-            (xml.row[0].cell[20]): 'Сумма расходов, приходящаяся на каждый месяц',
-            (xml.row[0].cell[21]): 'Шифр вида реализованного (выбывшего) имущества',
-            (xml.row[0].cell[22]): 'Шифр вида реализации (выбытия)',
-            (xml.row[1].cell[4]): 'номер',
-            (xml.row[1].cell[5]): 'дата',
-            (xml.row[2].cell[0]): '1'
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'firstRecordNumber'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'operationDate'),
+            (xml.row[0].cell[4]) : 'Основание для совершения операции (первичный документ)',
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'invNumber'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'name'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'price'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'amort'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'expensesOnSale'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'sum'),
+            (xml.row[0].cell[12]): getColumnName(tmpRow, 'sumInFact'),
+            (xml.row[0].cell[13]): getColumnName(tmpRow, 'costProperty'),
+            (xml.row[0].cell[14]): getColumnName(tmpRow, 'marketPrice'),
+            (xml.row[0].cell[15]): getColumnName(tmpRow, 'sumIncProfit'),
+            (xml.row[0].cell[16]): getColumnName(tmpRow, 'profit'),
+            (xml.row[0].cell[17]): getColumnName(tmpRow, 'loss'),
+            (xml.row[0].cell[18]): getColumnName(tmpRow, 'usefullLifeEnd'),
+            (xml.row[0].cell[19]): getColumnName(tmpRow, 'monthsLoss'),
+            (xml.row[0].cell[20]): getColumnName(tmpRow, 'expensesSum'),
+            (xml.row[0].cell[21]): getColumnName(tmpRow, 'saledPropertyCode'),
+            (xml.row[0].cell[22]): getColumnName(tmpRow, 'saleCode'),
+            (xml.row[1].cell[4]) : 'номер',
+            (xml.row[1].cell[5]) : 'дата',
+            (xml.row[2].cell[0]) : '1'
     ]
     (2..22).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
     def xmlIndexRow = -1 // Строки xml, от 0
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
-    def rows = dataRowHelper.allCached
-    //удаляем все нефиксированные строки
-    def deleteList = []
-    rows.each {
-        if (it.getAlias() == null){
-            deleteList.add(it)
-        }
-    }
-    rows.removeAll(deleteList)
-
-    def int rowIndex = 1  // Строки НФ, от 1
-
-    def section //название секции на английском
+    def section = null //название секции на английском
     def sectionRowsMap = [:]
     for (def row : xml.row) {
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -692,18 +686,21 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        def hiddenName = row.cell[1].text()
-        if (hiddenName != null && hiddenName != '') {
-            if (hiddenName[0] in groupsRus) {
-                section = groups.get(groupsRus.indexOf(hiddenName[0]))
+        def hiddenValue = row.cell[1].text()
+        if (hiddenValue != null && hiddenValue != '' && hiddenValue != 'Итого') {
+            if (hiddenValue[0] in groupsRus) {
+                section = groups.get(groupsRus.indexOf(hiddenValue[0]))
             }
+            sectionRowsMap.put(section, [])
+            continue
+        } else if (hiddenValue == 'Итого') {
             continue
         }
 
         def xmlIndexCol = 0
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -719,13 +716,13 @@ void addData(def xml, int headRowCount) {
         newRow.firstRecordNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 3
-        newRow.operationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.operationDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 4
         newRow.reasonNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 5
-        newRow.reasonDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.reasonDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 6
         newRow.invNumber = row.cell[xmlIndexCol].text()
@@ -734,43 +731,43 @@ void addData(def xml, int headRowCount) {
         newRow.name = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 8
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.price = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 9
-        newRow.amort = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.amort = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 10
-        newRow.expensesOnSale = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.expensesOnSale = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 11
-        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 12
-        newRow.sumInFact = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sumInFact = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 13
-        newRow.costProperty = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.costProperty = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 14
-        newRow.marketPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.marketPrice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 15
-        newRow.sumIncProfit = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sumIncProfit = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 16
-        newRow.profit = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.profit = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 17
-        newRow.loss = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.loss = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 18
-        newRow.usefullLifeEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.usefullLifeEnd = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 19
-        newRow.monthsLoss = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.monthsLoss = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 20
-        newRow.expensesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.expensesSum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 21
         newRow.saledPropertyCode = getRecordIdImport(82, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -781,18 +778,45 @@ void addData(def xml, int headRowCount) {
         if(section == null) {
             throw new ServiceException('Формат файла некорректен')
         } else {
-            if (sectionRowsMap.get(section) != null) {
-                sectionRowsMap.get(section).add(newRow)
-            } else {
-                sectionRowsMap.put(section, Arrays.asList(newRow))
-            }
+            sectionRowsMap.get(section).add(newRow)
         }
     }
+
+    // удаляем все нефиксированные строки
+    deleteNotFixedRows(dataRows)
+
+    // копирование данных по разделам
     sectionRowsMap.keySet().each { sectionKey ->
-        rows.addAll(getDataRow(rows, sectionKey).getIndex(), sectionRowsMap.get(sectionKey))
-        rows.eachWithIndex { row, i ->
-            row.setIndex(i + 1)
+        def copyRows = sectionRowsMap.get(sectionKey)
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, sectionKey).getIndex()
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
         }
     }
-    dataRowHelper.save(rows)
+
+    dataRowHelper.save(dataRows)
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
+    }
+}
+
+def roundValue(def value, int precision) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
+    }
 }

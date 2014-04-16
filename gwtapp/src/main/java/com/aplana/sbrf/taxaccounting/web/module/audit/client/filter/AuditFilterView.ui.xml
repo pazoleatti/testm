@@ -86,7 +86,7 @@
                         <g:cell horizontalAlignment="right" width="135px" >
                             <g:Label text="Период:" addStyleNames="{style.labelBlockMargin}"/>
                         </g:cell>
-                        <rep:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="false" width="100%" enabled="false"/>
+                        <g:TextBox ui:field="reportPeriodName" width="100%"/>
                     </g:HorizontalPanel>
                 </g:cell>
             </g:VerticalPanel>

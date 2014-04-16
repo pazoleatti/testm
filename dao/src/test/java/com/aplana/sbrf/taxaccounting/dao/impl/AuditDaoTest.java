@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
-import com.aplana.sbrf.taxaccounting.test.DepartmentMockUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,9 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -60,25 +54,24 @@ public class AuditDaoTest {
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
         LogSearchResultItem logSystem = records.get(0);
-        assertEquals(Long.valueOf(1), logSystem.getId());
+        assertEquals(Long.valueOf(3), logSystem.getId());
         assertEquals("192.168.72.16", logSystem.getIp());
-        assertEquals(FormDataEvent.getByCode(1), logSystem.getEvent());
+        assertEquals(FormDataEvent.getByCode(601), logSystem.getEvent());
         assertEquals(1, logSystem.getUser().getId());
         assertEquals("operator", logSystem.getRoles());
         assertEquals(1, logSystem.getDepartment().getId());
-        assertEquals(1, logSystem.getReportPeriod().getId().intValue());
-        assertEquals(1, logSystem.getDeclarationType().getId());
+        assertEquals("2013 первый квартал", logSystem.getReportPeriodName());
         assertEquals(1, logSystem.getFormType().getId());
-        assertEquals(1, logSystem.getFormKind().getId());
+        assertEquals(3, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
         assertEquals(1, logSystem.getUserDepartment().getId());
-        assertEquals(1, records.getTotalCount());
+        assertEquals(2, records.getTotalCount());
     }
 
     @Test
     public void testAdd() {
         LogSystem logSystem = new LogSystem();
-        logSystem.setId(3l);
+        logSystem.setId(10l);
         Date date = new Date();
         logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
@@ -86,7 +79,7 @@ public class AuditDaoTest {
         logSystem.setUserId(1);
         logSystem.setRoles("operator");
         logSystem.setDepartmentId(1);
-        logSystem.setReportPeriodId(1);
+        logSystem.setReportPeriodName("2013 первый квартал");
         logSystem.setDeclarationTypeId(1);
         logSystem.setFormTypeId(1);
         logSystem.setFormKindId(2);
@@ -107,20 +100,20 @@ public class AuditDaoTest {
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
         LogSearchResultItem logSearchResultItem = records.get(0);
-        assertEquals(Long.valueOf(3), logSearchResultItem.getId());
+        assertEquals(Long.valueOf(10), logSearchResultItem.getId());
         assertEquals(formatter.format(date), formatter.format(logSearchResultItem.getLogDate()));
         assertEquals("192.168.72.16", logSearchResultItem.getIp());
         assertEquals(3, logSearchResultItem.getEvent().getCode());
         assertEquals(1, logSearchResultItem.getUser().getId());
         assertEquals("operator", logSearchResultItem.getRoles());
         assertEquals(1, logSearchResultItem.getDepartment().getId());
-        assertEquals(1, logSearchResultItem.getReportPeriod().getId().intValue());
+        assertEquals("2013 первый квартал", logSearchResultItem.getReportPeriodName());
         assertEquals(1, logSearchResultItem.getDeclarationType().getId());
         assertEquals(1, logSearchResultItem.getFormType().getId());
         assertEquals(2, logSearchResultItem.getFormKind().getId());
         assertEquals("the best note", logSearchResultItem.getNote());
         assertEquals(1, logSearchResultItem.getUserDepartment().getId());
-        assertEquals(2, records.getTotalCount());
+        assertEquals(3, records.getTotalCount());
     }
 
 	@Test
@@ -140,7 +133,7 @@ public class AuditDaoTest {
     @Test
     public void testRemove(){
         LogSystem logSystem = new LogSystem();
-        logSystem.setId(3l);
+        logSystem.setId(100l);
         Date date = new Date();
         logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
@@ -148,7 +141,7 @@ public class AuditDaoTest {
         logSystem.setUserId(1);
         logSystem.setRoles("operator");
         logSystem.setDepartmentId(1);
-        logSystem.setReportPeriodId(1);
+        logSystem.setReportPeriodName("2014 полугодие");
         logSystem.setDeclarationTypeId(1);
         logSystem.setFormTypeId(1);
         logSystem.setFormKindId(2);
@@ -168,11 +161,27 @@ public class AuditDaoTest {
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date());
 
-        assertEquals(1, auditDao.getLogs(filter).size());
+        PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
+        assertEquals(2, records.size());
     }
 
     @Test
     public void testGetDate(){
         assertNotNull(auditDao.lastArchiveDate());
+    }
+
+    @Test
+    public void testGetLogBusiness(){
+        Calendar calendar = Calendar.getInstance();
+        LogSystemFilterDao filterDao = new LogSystemFilterDao();
+        filterDao.setDeclarationDataIds(Arrays.asList(1l));
+        filterDao.setFormDataIds(Arrays.asList(1l, 11l, 13l));
+        calendar.set(2013, Calendar.JANUARY, 1);
+        filterDao.setFromSearchDate(calendar.getTime());
+        calendar.set(2014, Calendar.DECEMBER, 31);
+        filterDao.setToSearchDate(calendar.getTime());
+        filterDao.setCountOfRecords(5);
+        PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filterDao);
+        assertEquals(0, records.size());
     }
 }

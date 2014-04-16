@@ -388,8 +388,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверяем предыдущую версию до даты начала
                     RefBookRecordVersion previousVersion = refBookDao.getPreviousVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
                     if (previousVersion != null &&
-                            (previousVersion.isVersionEndFake() && versionFrom.before(previousVersion.getVersionEnd()))
-                            || versionFrom.before(previousVersion.getVersionStart())) {
+                            (previousVersion.isVersionEndFake() && versionFrom.before(previousVersion.getVersionEnd())
+                            || versionFrom.before(previousVersion.getVersionStart()))) {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                     //Выполняем стандартную проверку пересечечения

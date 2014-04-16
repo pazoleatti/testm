@@ -18,13 +18,21 @@ public class LogSearchResultItem implements Serializable {
 	private String roles;
 	private Department department;
     private String departmentName;
-	private ReportPeriod reportPeriod;
 	private DeclarationType declarationType;
 	private FormType formType;
 	private FormDataKind formKind;
 	private String note;
 	private Department userDepartment;
     private String userDepartmentHierarchy;
+    private String reportPeriodName;
+
+    public String getReportPeriodName() {
+        return reportPeriodName;
+    }
+
+    public void setReportPeriodName(String reportPeriodName) {
+        this.reportPeriodName = reportPeriodName;
+    }
 
     public String getUserDepartmentHierarchy() {
         return userDepartmentHierarchy;
@@ -98,14 +106,6 @@ public class LogSearchResultItem implements Serializable {
         this.departmentName = departmentName;
     }
 
-    public ReportPeriod getReportPeriod() {
-		return reportPeriod;
-	}
-
-	public void setReportPeriod(ReportPeriod reportPeriod) {
-		this.reportPeriod = reportPeriod;
-	}
-
 	public DeclarationType getDeclarationType() {
 		return declarationType;
 	}
@@ -151,7 +151,7 @@ public class LogSearchResultItem implements Serializable {
         return ("id: " + id) + ", user: " + (user != null ? user.getLogin() : "") + " ip: " + ip +
                 " department: " + (department != null ? department.getName() : "") + " departmentName: " + departmentName +
                 " roles: " + roles + " event: " + (event != null ? event.getTitle() : "") + " logdate: " + logDate +
-                " note: " + note + " reportperiod: " + (reportPeriod != null ? reportPeriod.getName() : "") +
+                " note: " + note + " reportperiod: " +
                 " formKind: " + (formKind != null ? formKind.getName() : "");
     }
 }
