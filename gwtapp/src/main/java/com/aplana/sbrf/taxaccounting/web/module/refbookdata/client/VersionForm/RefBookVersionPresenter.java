@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -46,7 +47,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	private Long refBookId;
     private Long uniqueRecordId;
-    private boolean editMode;
+    private FormMode mode;
 
 	EditFormPresenter editFormPresenter;
 
@@ -68,7 +69,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		RefBookDataRow getSelectedRow();
         void setTitleDetails(String uniqueAttrValues);
         void setBackAction(String url);
-        void setReadOnlyMode(boolean readOnly);
+        void updateMode(FormMode mode);
     }
 
 	@Inject
@@ -128,7 +129,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 LogCleanEvent.fire(RefBookVersionPresenter.this);
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
 								editFormPresenter.show(null);
-								editFormPresenter.setEnabled(false);
+								editFormPresenter.setMode(mode);
                                 if (result.getNextVersion() != null) {
                                     placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookVersion)
@@ -172,7 +173,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
-                                getView().setReadOnlyMode(!(editMode && !result.isReadOnly()));
+                                if (result.isReadOnly()){
+                                    setMode(FormMode.READ);
+                                }
                                 editFormPresenter.init(refBookId, result.isReadOnly());
                                 getProxy().manualReveal(RefBookVersionPresenter.this);
 							}
@@ -237,14 +240,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     }
 
     @Override
-    public void onSetEditMode() {
-        editMode = true;
-        getView().setReadOnlyMode(true);
-    }
-
-    @Override
-    public void onSetDefaultMode() {
-        editMode = false;
-        getView().setReadOnlyMode(false);
+    public void setMode(FormMode mode) {
+        this.mode = mode;
+        getView().updateMode(mode);
     }
 }
