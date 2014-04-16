@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -138,7 +139,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
                 String key = filterText.getText();
                 String link =
                     "<p style=\"color: #0000CD\">" +
-                        object.getStringFound().replaceAll(getRegex(key), "<span style=\"color: #ff0000;\">$0</span>") +
+                            RegExp.compile(key, "gi").replace(object.getStringFound(), "<span style=\"color: #ff0000;\">$&</span>") +
                     "<p>";
                 sb.appendHtmlConstant(link);
             }
