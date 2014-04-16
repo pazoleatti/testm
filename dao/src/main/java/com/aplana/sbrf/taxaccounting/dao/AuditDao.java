@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.LogSystem;
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -35,5 +32,7 @@ public interface AuditDao {
      * @return дата
      */
     Date lastArchiveDate();
+
+    PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilterDao filter);
 
 }

@@ -9,6 +9,7 @@ import java.util.List;
  * Сервис для работы с журналом аудита
  */
 public interface AuditService {
+
 	/**
 	 * Получить информацию из журнала аудита по фильтру
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных
@@ -38,4 +39,11 @@ public interface AuditService {
      * @return дата ахивации
      */
     Date getLastArchiveDate();
+
+    /**
+     * Получить информацию об изменениях в НФ/декларациях из журнала аудита по фильтру
+     * @param filter фильтр
+     * @return записи из ЖА
+     */
+    public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
 }

@@ -118,7 +118,7 @@ public class PeriodServiceImpl implements PeriodService{
 		if (reportPeriods.isEmpty()) {
 			RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
 			RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-			Map<String, RefBookValue> record = provider.getRecordData(Long.valueOf(dictionaryTaxPeriodId));
+			Map<String, RefBookValue> record = provider.getRecordData((long) dictionaryTaxPeriodId);
 			newReportPeriod = new ReportPeriod();
 			newReportPeriod.setTaxPeriod(taxPeriod);
 			newReportPeriod.setDictTaxPeriodId(dictionaryTaxPeriodId);
@@ -170,7 +170,7 @@ public class PeriodServiceImpl implements PeriodService{
 		for (Department dep : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, (int)departmentId)) {
 			DepartmentReportPeriod depRP = new DepartmentReportPeriod();
 			depRP.setReportPeriod(newReportPeriod);
-			depRP.setDepartmentId(Long.valueOf(dep.getId()));
+			depRP.setDepartmentId((long) dep.getId());
 			depRP.setActive(true);
 			depRP.setBalance(isBalance);
 			depRP.setCorrectPeriod(correctionDate);
@@ -434,7 +434,9 @@ public class PeriodServiceImpl implements PeriodService{
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
 		LogSystemFilter logFilter = new LogSystemFilter();
-		logFilter.setReportPeriodIds(Arrays.asList(reportPeriodId));
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+		logFilter.setReportPeriodName(String.format(LogSystemFilter.RP_NAME_PATTERN,
+                String.valueOf(reportPeriod.getTaxPeriod().getYear()), reportPeriod.getName()));
 		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
 			logs.add(new LogEntry(LogLevel.ERROR,
 					"В удаляемом периоде были произведены действия, которые отражены в \"Журнале аудита\". Удаление периода невозможно!"));
@@ -444,8 +446,8 @@ public class PeriodServiceImpl implements PeriodService{
 		Set<Integer> blockedBy = new HashSet<Integer>();
 		for (Integer dep : departments) {
 			DeclarationDataFilter filter = new DeclarationDataFilter();
-			filter.setDepartmentIds(Arrays.asList(new Integer[]{dep}));
-			filter.setReportPeriodIds(Arrays.asList(new Integer[]{reportPeriodId}));
+			filter.setDepartmentIds(Arrays.asList(dep));
+			filter.setReportPeriodIds(Arrays.asList(reportPeriodId));
 			filter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
 			if (!declarationDataSearchService.search(filter).isEmpty()) {
 				blockedBy.add(dep);
@@ -456,8 +458,7 @@ public class PeriodServiceImpl implements PeriodService{
 			if (!formDataDao.find(dep, reportPeriodId).isEmpty()) {
 				blockedBy.add(dep);
 				canRemove = false;
-				continue;
-			}
+            }
 		}
 
 		if (!canRemove) {
