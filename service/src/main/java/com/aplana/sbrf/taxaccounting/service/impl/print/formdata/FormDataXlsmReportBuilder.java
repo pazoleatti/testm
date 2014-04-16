@@ -199,7 +199,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
-
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow()) != null ? sheet.getRow(ar.getFirstCell().getRow())
                 : sheet.createRow(ar.getFirstCell().getRow());
@@ -215,14 +214,19 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, 0);
 
         //Fill code
-        StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
-        int j = 0;
+        int shiftCode = formTemplate.getColumns().size() - 2;
 
-        int shiftCode = formTemplate.getColumns().size() - nullColumnCount - 2;
-        while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, shiftCode);
-            j++;
+        String code = formTemplate.getCode().replace(XlsxReportMetadata.REPORT_DELIMITER, '\n');
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, code, 0, shiftCode - 2);
+
+        AreaReference ar2 = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
+        Row r2 = sheet.getRow(ar2.getFirstCell().getRow()) != null ? sheet.getRow(ar2.getFirstCell().getRow())
+                : sheet.createRow(ar2.getFirstCell().getRow());
+        r2.getCell(shiftCode).setCellStyle(cellStyle);
+        for(int i = shiftCode + 1; i <= shiftCode + 2; i++) {
+            r2.createCell(i).setCellStyle(cellStyle);
         }
+        r2.setHeight((short) -1);
 
         //Fill period
         if (!refBookValue.getStringValue().equals("34"))
