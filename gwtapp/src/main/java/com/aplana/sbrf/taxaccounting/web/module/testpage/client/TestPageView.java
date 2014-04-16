@@ -111,6 +111,8 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
     Button fpSetValueBtn;
     @UiField
     Button showDialog2;
+    @UiField
+    Button showDialog3;
 
 
     @Inject
@@ -119,6 +121,11 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
         multiListBox();
 
         initWidget(uiBinder.createAndBindUi(this));
+
+        Character s = 'а';
+        System.out.println("check " + (int)s +"");
+
+        System.out.println( "\\u" + Integer.toHexString('а' | 0x10000).substring(1) );
 
         List<TestItem> getM = (List<TestItem>) mlistbox.getValue();
         String strCont = "";
@@ -223,6 +230,13 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                         super.cancel();
                     }
                 });
+            }
+        });
+
+        showDialog3.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                getUiHandlers().openMessageDialog();
             }
         });
     }

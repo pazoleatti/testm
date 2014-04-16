@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -63,7 +64,7 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
                     if (((TaActionException) caught).isNeedStackTrace()) {
                         MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
                     } else {
-                        Dialog.errorMessage("Ошибка", caught.getLocalizedMessage());
+                        Dialog.errorMessage(caught.getLocalizedMessage());
                     }
 				}
 			} else {
@@ -72,7 +73,8 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 		} else {
 			MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
 		}
-	}
+        ScreenLockEvent.fire(hasHandlers, false);
+    }
 
 	@Override
 	public void onSuccess(T result) {

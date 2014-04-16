@@ -403,8 +403,8 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                     parent = (MultiSelectTreeItem) parent.getParentItem();
                 }
             } else {
-                item.setVisible(false);
                 item.setState(false);
+                item.setVisible(false);
             }
         }
     }

@@ -1526,8 +1526,8 @@ def getRashVnerealVs(def dataRows, def dataRowsSimple) {
             23220, 23230, 23250, 23260, 23270, 23280 ]
     result += getCalculatedSimpleConsumption(dataRowsSimple, knu)
 
-    // Код вида расхода = 23160, 23170 - графа 9
-    result -= getComplexConsumptionSumRows9(dataRows, [23160, 23170])
+    // Код вида расхода = 23150, 23160, 23170 - графа 9
+    result -= getComplexConsumptionSumRows9(dataRows, [23150, 23160, 23170])
 
     return getLong(result)
 }

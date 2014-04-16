@@ -34,6 +34,10 @@ public class DeclarationListPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void updateTitle(TaxType taxType);
 
         void updatePageSize(TaxType taxType);
+
+        void initTable(TaxType taxType);
+
+        void clearTable();
     }
 
 	protected final DispatchAsync dispatcher;
