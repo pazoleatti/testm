@@ -300,7 +300,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
 	@Override
 	public void uploadDectResponseWithUuid(String uuid) {
-        if (uuid != null && !uuid.isEmpty() && !uuid.equals("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.contains("<pre")){
             LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Форма сохранена");

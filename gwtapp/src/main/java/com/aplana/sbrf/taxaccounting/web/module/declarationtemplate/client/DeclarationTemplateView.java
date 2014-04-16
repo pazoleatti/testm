@@ -98,6 +98,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
@@ -114,12 +116,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
-                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
                     getUiHandlers().uploadDectFail(event.getResults().replaceFirst(ERROR, ""));
-				} else {
-                    getUiHandlers().uploadDectResponseWithUuid(event.getResults().replaceFirst(SUCCESS_RESP, ""));
-				}
+                } else {
+                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
+                }
 			}
 		});
 
@@ -131,7 +135,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 				}
 				else {
                     uploadJrxmlForm.reset();
-					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst("error ", ""));
+					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst(ERROR, ""));
 				}
 			}
 		});
