@@ -71,6 +71,7 @@ public class DeclarationTemplateController {
 			throws FileUploadException, IOException {
         if (declarationTemplateId == 0)
             throw new ServiceException("Сначала сохраните шаблон.");
+        req.setCharacterEncoding("UTF-8");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);
@@ -109,6 +110,7 @@ public class DeclarationTemplateController {
 			throws FileUploadException, UnsupportedEncodingException {
         if (declarationTemplateId == 0)
             throw new ServiceException("Сначала сохраните шаблон.");
+        req.setCharacterEncoding("UTF-8");
         FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		List<FileItem> items = upload.parseRequest(req);

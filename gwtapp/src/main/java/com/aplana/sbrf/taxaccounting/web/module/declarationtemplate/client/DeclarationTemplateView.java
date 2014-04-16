@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -101,9 +102,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+        FormElement.as(uploadJrxmlForm.getElement()).setAcceptCharset("UTF-8");
+        FormElement.as(uploadDectForm.getElement()).setAcceptCharset("UTF-8");
 		driver.initialize(this);
-		
+
 		uploadDectForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
