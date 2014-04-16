@@ -3,8 +3,6 @@ package form_template.income.rnu22.v1970
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -14,10 +12,6 @@ import java.math.RoundingMode
  * formTemplateId=322
  *
  * @version 59
- *
- * TODO:
- * 	- консолидация http://jira.aplana.com/browse/SBRFACCTAX-4455
- * 	- http://conf.aplana.com/pages/viewpage.action?pageId=8790975 период ввода остатков
  *
  * @author rtimerbaev
  *
@@ -43,11 +37,6 @@ import java.math.RoundingMode
  * графа 20 - reportPeriodRub
  */
 
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
 @Field
 def isConsolidated
 isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
@@ -67,7 +56,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        def cols = isBalancePeriod() ? (allColumns - 'rowNumber') : editableColumns
         formDataService.addRow(formData, currentDataRow, cols, null)
         break
     case FormDataEvent.DELETE_ROW:
@@ -83,9 +72,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
-        consolidation()
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
         break
@@ -131,6 +119,10 @@ def arithmeticCheckAlias = ['accruedCommisCurrency', 'accruedCommisRub',
         'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
         'reportPeriodCurrency', 'reportPeriodRub']
 
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod = null
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -152,7 +144,7 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 1. Проверка даты совершения операции и границ отчётного периода (графа 5, 10, 12)
         if (row.transactionDate != null && dFrom > row.transactionDate
@@ -221,7 +213,7 @@ void logicCheck() {
         }
 
         if (formData.kind == FormDataKind.PRIMARY) {
-            def rowPrev
+            def rowPrev = null
             for (def rowOld in dataRowsOld) {
                 if (rowOld.contractNumber == row.contractNumber) {
                     rowPrev = rowOld
@@ -239,10 +231,10 @@ void logicCheck() {
             values.accrualPrevRub = rowPrev?.reportPeriodRub
             values.reportPeriodCurrency = getGraph19(row)
             values.reportPeriodRub = getGraph20(row)
-            checkCalc(row, arithmeticCheckAlias, values, logger, !isBalancePeriod)
+            checkCalc(row, arithmeticCheckAlias, values, logger, !isBalancePeriod())
         }
     }
-    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
 void calc() {
@@ -312,73 +304,6 @@ void calc() {
     dataRowHelper.save(dataRows)
 }
 
-/**
- * Консолидация.
- */
-void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
-
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                formDataService.getDataRowHelper(source).allCached.each { row ->
-                    if (row.getAlias() == null || row.getAlias() == '') {
-                        dataRows.add(row)
-                    }
-                }
-            }
-        }
-    }
-    //TODO http://jira.aplana.com/browse/SBRFACCTAX-4455
-    def ignoredRows = []
-    for (def row : dataRows) {
-        if (!ignoredRows.contains(row)) {
-            for (def rowB : dataRows) {
-                if (row != rowB && isEqualRows(row, rowB) && !ignoredRows.contains(rowB)) {
-                    addRowToRow(row, rowB)
-                    ignoredRows.add(rowB)
-                }
-            }
-        }
-    }
-    dataRows.removeAll(ignoredRows)
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
-    dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
-}
-
-/**
- * Определение идентичности строк(графа 2,3,5)
- * @param rowA
- * @param rowB
- * @return
- */
-def boolean isEqualRows(def DataRow rowA, def DataRow rowB) {
-    return rowA.contractNumber == rowB.contractNumber &&
-            rowA.contractData == rowB.contractData &&
-            rowA.transactionDate == rowB.transactionDate
-}
-
-/**
- * Увеличиваем значения строки А на значения строки B
- * @param rowA
- * @param rowB
- */
-void addRowToRow(def DataRow rowA, def DataRow rowB) {
-    def columns = ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
-            'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub']
-    //суммируем графы 13-20
-    columns.each { col ->
-        def a = rowA[col]
-        def b = rowB[col]
-        rowA[col] = ((a != null) ? (a + (b ?: 0)) : ((b ?: 0)))
-    }
-}
-
 BigDecimal getGraph13_15(def DataRow row) {
     def date1, date2
     if (row.calcPeriodAccountingBeginDate != null && row.calcPeriodAccountingEndDate != null) {
@@ -395,12 +320,14 @@ BigDecimal getGraph14(def DataRow row) {
     if (row.accruedCommisCurrency != null && row.course != null) {
         return (row.accruedCommisCurrency * row.course).setScale(2, RoundingMode.HALF_UP)
     }
+    return null
 }
 
 BigDecimal getGraph16(def DataRow row) {
     if (row.commisInAccountingCurrency != null && row.course != null) {
         return (row.commisInAccountingCurrency * row.course).setScale(2, RoundingMode.HALF_UP)
     }
+    return null
 }
 
 BigDecimal getGraph19(def DataRow row) {
@@ -424,11 +351,12 @@ BigDecimal getGraph20(def DataRow row) {
     if (row.reportPeriodCurrency != null && row.course != null) {
         return (row.reportPeriodCurrency * row.course).setScale(2, RoundingMode.HALF_UP)
     }
+    return null
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 boolean prevPeriodCheck() {
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
         logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
         return false
     }
@@ -437,7 +365,7 @@ boolean prevPeriodCheck() {
 
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
-    if (isBalancePeriod || isConsolidated) {
+    if (isBalancePeriod() || isConsolidated) {
         return null
     }
     def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
@@ -446,7 +374,6 @@ def getPrevDataRows() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
@@ -476,7 +403,7 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
+        def cols = isBalancePeriod() ? (allColumns - 'rowNumber') : editableColumns
         cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -590,9 +517,16 @@ void importData() {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg, Object...args) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod()) {
         logger.warn(msg, args)
     } else {
         logger.error(msg, args)
     }
+}
+
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }
