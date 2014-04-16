@@ -656,7 +656,7 @@ create table log_system (
   user_id             number(9,0),
   roles               varchar2(200),
   department_id       number(9,0) not null,
-  report_period_id    number(9,0),
+  report_period_name  varchar2(50),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
@@ -671,7 +671,7 @@ comment on column log_system.event_id is 'Код события (1 - Созда�
 comment on column log_system.user_id is 'Код пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
 comment on column log_system.department_id is 'Код подразделения НФ\декларации';
-comment on column log_system.report_period_id is 'Код отчетного периода';
+comment on column log_system.report_period_name is 'Имя отчетного периода';
 comment on column log_system.declaration_type_id is 'Код вида декларации';
 comment on column log_system.form_type_id is 'Код вида налоговой формы';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';

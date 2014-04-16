@@ -207,11 +207,10 @@ alter table log_business add constraint log_business_fk_usr_departm_id foreign k
 
 alter table log_system add constraint log_system_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401, 501, 502, 503, 601));
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 501, 502, 503, 601) or declaration_type_id is not null or (form_type_id is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_id is not null);
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
 alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
-alter table log_system add constraint log_system_fk_report_period_id foreign key (report_period_id) references report_period(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
 alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department(id);

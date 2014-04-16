@@ -11,8 +11,11 @@ import java.util.List;
 public class LogSystemFilter implements Serializable {
     private static final long serialVersionUID = 1L;
 
+
+    public static final String RP_NAME_PATTERN = "%s %s";
+
     private List<Long> userIds;
-    private List<Integer> reportPeriodIds;
+    private String reportPeriodName;
     private FormDataKind formKind;
     private TaxType taxType;
     private Integer declarationTypeId;
@@ -49,12 +52,12 @@ public class LogSystemFilter implements Serializable {
         this.userIds = userIds;
     }
 
-    public List<Integer> getReportPeriodIds() {
-        return reportPeriodIds;
+    public String getReportPeriodName() {
+        return reportPeriodName;
     }
 
-    public void setReportPeriodIds(List<Integer> reportPeriodIds) {
-        this.reportPeriodIds = reportPeriodIds;
+    public void setReportPeriodName(String reportPeriodName) {
+        this.reportPeriodName = reportPeriodName;
     }
 
     public FormDataKind getFormKind() {

@@ -87,6 +87,7 @@ public class DeclarationListPresenter extends
 			LogShowEvent.fire(this, false);
 			super.prepareFromRequest(request);
 			TaxType taxType = TaxType.valueOf(request.getParameter("nType", ""));
+            getView().initTable(taxType);
 			filterPresenter.initFilter(taxType, filterStates.get(taxType));
 			getView().updateTitle(taxType);
             filterPresenter.getView().updateFilter(taxType);

@@ -43,7 +43,6 @@ public class DeclarationListView extends
 
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String PERIOD_TITLE = "Период";
-    public static final String PERIOD_YEAR_TITLE = "Год";
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
 	}
@@ -52,11 +51,10 @@ public class DeclarationListView extends
     private TextColumn<DeclarationDataSearchResultItem> declarationTypeColumn;
     private GenericDataGrid.DataGridResizableHeader reportPeriodHeader;
     private Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem> reportPeriodColumn;
-    private GenericDataGrid.DataGridResizableHeader reportPeriodYearHeader;
-    private TextColumn<DeclarationDataSearchResultItem> reportPeriodYearColumn;
 
 	private DeclarationDataSearchOrdering sortByColumn;
 
+    private TaxType taxType;
 	private boolean isAscSorting;
 
     private Map<Integer, String> departmentFullNames;
@@ -92,20 +90,57 @@ public class DeclarationListView extends
 	public DeclarationListView(final MyBinder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
+        pager.setDisplay(declarationTable);
+        declarationTable.setPageSize(pager.getPageSize());
+        dataProvider.addDataDisplay(declarationTable);
+	}
 
-		TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return departmentFullNames.get(object.getDepartmentId());
-			}
-		};
 
-        reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+
+    @Override
+    public void initTable(TaxType taxType) {
+        clearTable();
+
+        TextColumn<DeclarationDataSearchResultItem> departmentColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
             public String getValue(DeclarationDataSearchResultItem object) {
-                return String.valueOf(object.getReportPeriodYear());
+                return departmentFullNames.get(object.getDepartmentId());
             }
         };
+
+        Column reportPeriodYearColumn = null;
+        if (taxType == TaxType.DEAL) {
+            reportPeriodYearColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+                    new AbstractCell<DeclarationDataSearchResultItem>() {
+
+                        @Override
+                        public void render(Context context,
+                                           DeclarationDataSearchResultItem declaration,
+                                           SafeHtmlBuilder sb) {
+                            if (declaration == null) {
+                                return;
+                            }
+                            sb.appendHtmlConstant("<a href=\"#"
+                                    + DeclarationDataTokens.declarationData + ";"
+                                    + DeclarationDataTokens.declarationId + "="
+                                    + declaration.getDeclarationDataId() + "\">"
+                                    + declaration.getReportPeriodName() + "</a>");
+                        }
+                    }) {
+                @Override
+                public DeclarationDataSearchResultItem getValue(
+                        DeclarationDataSearchResultItem object) {
+                    return object;
+                }
+            };
+        } else {
+            reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+                @Override
+                public String getValue(DeclarationDataSearchResultItem object) {
+                    return String.valueOf(object.getReportPeriodYear());
+                }
+            };
+        }
 
         reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                 new AbstractCell<DeclarationDataSearchResultItem>() {
@@ -129,7 +164,7 @@ public class DeclarationListView extends
                     DeclarationDataSearchResultItem object) {
                 return object;
             }
-		};
+        };
 
         declarationTypeColumn = new TextColumn<DeclarationDataSearchResultItem>() {
             @Override
@@ -138,34 +173,33 @@ public class DeclarationListView extends
             }
         };
 
-		TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-			@Override
-			public String getValue(DeclarationDataSearchResultItem object) {
-				return object.isAccepted() ? "Принята" : "Создана";
-			}
-		};
+        TextColumn<DeclarationDataSearchResultItem> stateColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+            @Override
+            public String getValue(DeclarationDataSearchResultItem object) {
+                return object.isAccepted() ? "Принята" : "Создана";
+            }
+        };
 
         declarationTypeHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
         reportPeriodHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(PERIOD_TITLE, reportPeriodColumn);
-        reportPeriodYearHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(PERIOD_YEAR_TITLE, reportPeriodYearColumn);
 
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
-		declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
-		declarationTable.addColumn(reportPeriodYearColumn, reportPeriodYearHeader);
-        declarationTable.setColumnWidth(reportPeriodYearColumn, 0, Style.Unit.EM);
-		declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
+        declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
+        declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
+        declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
         declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
-		declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
+        declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
+    }
 
-        pager.setDisplay(declarationTable);
+    @Override
+    public void clearTable() {
+        while (declarationTable.getColumnCount() > 0) {
+            declarationTable.removeColumn(0);
+        }
+    }
 
-        declarationTable.setPageSize(pager.getPageSize());
-        dataProvider.addDataDisplay(declarationTable);
-	}
-	
-
-	@Override
+    @Override
 	public void setInSlot(Object slot, IsWidget content) {
 		if (slot == DeclarationListPresenter.TYPE_filterPresenter) {
 			filterContentPanel.clear();
@@ -217,22 +251,18 @@ public class DeclarationListView extends
         if (!taxType.equals(TaxType.DEAL)) {
             declarationHeader.setText(DECLARATION_HEADER);
             declarationTable.clearColumnWidth(declarationTypeColumn);
-            declarationTable.clearColumnWidth(reportPeriodYearColumn);
             declarationTable.clearColumnWidth(reportPeriodColumn);
             create.setText(DECLARATION_CREATE);
             create.setTitle(DECLARATION_CREATE_TITLE);
             declarationTypeHeader.setTitle(DECLARATION_TYPE_TITLE);
-            reportPeriodYearHeader.setTitle(PERIOD_YEAR_TITLE);
             reportPeriodHeader.setTitle(PERIOD_TITLE);
             declarationHeader.setText(DECLARATION_HEADER);
         } else {
             declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
-            declarationTable.setColumnWidth(reportPeriodYearColumn, 0, Style.Unit.EM);
             declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
             create.setText(DECLARATION_CREATE_D);
             create.setTitle(DECLARATION_CREATE_TITLE_D);
             declarationTypeHeader.setTitle("");
-            reportPeriodYearHeader.setTitle("");
             reportPeriodHeader.setTitle("");
             declarationHeader.setText(DECLARATION_HEADER_D);
         }

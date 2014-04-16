@@ -30,7 +30,7 @@ public class LogSystemReportBuilderTest {
         user.setName("Пользователь");
         user.setLogin("controlBank");
         ReportPeriod reportPeriod = new ReportPeriod();
-        reportPeriod.setName("1 квартал");
+        reportPeriod.setName("первый квартал");
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setYear(2014);
         reportPeriod.setTaxPeriod(taxPeriod);
@@ -45,7 +45,7 @@ public class LogSystemReportBuilderTest {
         item.setRoles("Контролер");
         item.setEvent(FormDataEvent.ADD_ROW);
         item.setUser(user);
-        item.setReportPeriod(reportPeriod);
+        item.setReportPeriodName(String.valueOf(taxPeriod.getYear()) + " " + reportPeriod.getName());
 
         for (int i = 0; i < 130; i++)
             items.add(item);
