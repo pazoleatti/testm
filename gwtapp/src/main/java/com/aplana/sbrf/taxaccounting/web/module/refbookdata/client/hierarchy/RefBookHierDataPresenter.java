@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.VersionForm.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -51,7 +52,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     private Long recordId;
 
-    Boolean editMode;
+    private FormMode mode;
 
     EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
@@ -81,15 +82,10 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         Date getRelevanceDate();
 
-        void setReadOnlyMode(boolean readOnly);
-
         void setAttributeId(Long attrId);
-        /** Показ формы в режиме редактирования */
-        public void setEditMode();
-        /** Показ формы в режиме просмотра */
-        public void setDefaultMode();
-        /** установить видимость кнопки редактирования */
-        public void setVisibleEditLink(boolean visible);
+
+        /** Обновление вьюшки для определенного состояния */
+        void updateMode(FormMode mode);
         /** Очистить */
         void clearFilterInputBox();
     }
@@ -102,6 +98,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         this.placeManager = (TaPlaceManager) placeManager;
         this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
+        this.mode = FormMode.VIEW;
         getView().setUiHandlers(this);
     }
 
@@ -177,7 +174,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                     "Обнаружены фатальные ошибки!");
                         } else {
                             editFormPresenter.show(null);
-                            editFormPresenter.setEnabled(false);
                             editFormPresenter.setNeedToReload();
                             getView().deleteItem(selected);
                         }
@@ -198,7 +194,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
         editFormPresenter.show(null);
         editFormPresenter.setNeedToReload();
-        editFormPresenter.setEnabled(false);
         getView().load();
     }
 
@@ -210,19 +205,23 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         editFormPresenter.setCurrentUniqueRecordId(null);
         editFormPresenter.setRecordId(null);
 
+        if (!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+            if (mode == FormMode.EDIT) mode = FormMode.VIEW;
+            updateMode();
+            getView().clearFilterInputBox();
+        }
+
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        onSetDefaultMode();
 
         /** Очищаем поле поиска если перешли со страницы списка справочников */
         if(!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)){
-            getView().clearFilterInputBox();
+            
         }
 
         dispatcher.execute(new GetRefBookAttributesAction(refBookDataId), CallbackUtils.defaultCallback(
                 new AbstractCallback<GetRefBookAttributesResult>() {
                     @Override
                     public void onSuccess(GetRefBookAttributesResult result) {
-                        getView().setReadOnlyMode(result.isReadOnly());
                         Long attrId = null;
                         for (RefBookColumn refBookColumn : result.getColumns()) {
                             if(refBookColumn.getAlias().toLowerCase().equals("name")){
@@ -230,11 +229,13 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                             }
                         }
                         getView().setAttributeId(attrId);
-                        getView().setVisibleEditLink(!result.isReadOnly() && !editMode);
-                        getView().setReadOnlyMode(!(editMode && !result.isReadOnly()));
                         editFormPresenter.init(refBookDataId, result.isReadOnly());
                         getView().loadAndSelect();
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
+                        if (result.isReadOnly()){
+                            mode = FormMode.READ;
+                            updateMode();
+                        }
                     }
                 }, this));
 
@@ -253,19 +254,16 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         return true;
     }
 
-    @Override
-    public void onSetEditMode(){
-        editMode = true;
-        getView().setEditMode();
-        editFormPresenter.onSetEditMode();
-        versionPresenter.onSetEditMode();
+
+    private void updateMode(){
+        getView().updateMode(mode);
+        editFormPresenter.setMode(mode);
+        versionPresenter.setMode(mode);
     }
 
     @Override
-    public void onSetDefaultMode(){
-        editMode = false;
-        getView().setDefaultMode();
-        editFormPresenter.onSetDefaultMode();
-        versionPresenter.onSetDefaultMode();
+    public void setMode(FormMode mode){
+        this.mode = mode;
+        updateMode();
     }
 }

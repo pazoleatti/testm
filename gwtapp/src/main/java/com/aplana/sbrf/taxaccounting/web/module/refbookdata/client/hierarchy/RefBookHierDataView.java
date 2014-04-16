@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
@@ -21,6 +22,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode.*;
 
 /**
  * Представление формы редактирования иерархического справочника
@@ -176,12 +179,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
-    public void setReadOnlyMode(boolean readOnly) {
-        addRow.setVisible(!readOnly);
-        deleteRow.setVisible(!readOnly);
-    }
-
-    @Override
     public void setAttributeId(Long attrId) {
         pickerState.setRefBookAttrId(attrId);
     }
@@ -228,50 +225,44 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                     }
                 });
     }
+
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
         Dialog.confirmMessage("Отмена изменений", "Вы подтверждаете отмену изменений?", new DialogHandler() {
             @Override
             public void yes() {
-                getUiHandlers().onSetDefaultMode();
+                getUiHandlers().setMode(VIEW);
             }
         });
     }
 
     @UiHandler("edit")
     void editButtonClicked(ClickEvent event) {
-        getUiHandlers().onSetEditMode();
-    }
-
-
-    @Override
-    public void setEditMode() {
-        updateView(true);
+        getUiHandlers().setMode(EDIT);
     }
 
     @Override
-    public void setDefaultMode(){
-        updateView(false);
-    }
-
-    /**
-     * Обновляет видимость элементов
-     * в зависимости от режима
-     *
-     * @param isEditMode - режим редактирования true, false в противном случае
-     */
-    private void updateView(boolean isEditMode) {
-        setVisibleEditLink(!isEditMode);
-        addRow.setVisible(isEditMode);
-        deleteRow.setVisible(isEditMode);
-        cancelEdit.setVisible(isEditMode);
-    }
-
-    @Override
-    public void setVisibleEditLink(boolean visible){
-        edit.setVisible(visible);
-        // для красовы на форме
-        separator.setVisible(visible);
+    public void updateMode(FormMode mode) {
+        switch (mode){
+            case EDIT:
+                addRow.setVisible(true);
+                deleteRow.setVisible(true);
+                edit.setVisible(false);
+                cancelEdit.setVisible(true);
+                break;
+            case READ: ;
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                edit.setVisible(false);
+                cancelEdit.setVisible(false);
+                break;
+            case VIEW: ;
+                edit.setVisible(true);
+                cancelEdit.setVisible(false);
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                break;
+        }
     }
 
     @Override
