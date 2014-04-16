@@ -1,13 +1,12 @@
-package form_template.vat.vat_724_6.v2014
+package form_template.vat.vat_724_7.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
 /**
- *  6.5	(724.6)  Отчёт о суммах НДС начисленных налоговым агентом с сумм дохода иностранных юридических лиц
- *  (балансовый счёт 60309.02)
+ *  (724.7)  Отчёт о суммах НДС начисленных налоговым агентом по договорам аренды имущества (балансовый счёт 60309.03)
  *
- *  formTemplateId=604
+ *  formTemplateId=605
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -43,7 +42,7 @@ switch (formDataEvent) {
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['operDate', 'contragent', 'type', 'sum', 'number', 'sum2', 'date', 'number2']
+def editableColumns = ['operDate', 'name', 'inn', 'kpp', 'balanceNumber', 'sum', 'orderNumber', 'ndsSum', 'sfDate', 'sfNumber']
 
 // Автозаполняемые атрибуты
 @Field
@@ -55,7 +54,7 @@ def nonEmptyColumns = autoFillColumns + editableColumns
 
 // Сумируемые колонки в фиксированной строке
 @Field
-def totalColumns = ['sum', 'sum2']
+def totalColumns = ['sum', 'ndsSum']
 
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -68,8 +67,8 @@ void logicCheck() {
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
         // 2. Проверка суммы НДС
-        if (row.sum != null && row.sum2 != null &&
-                !(row.sum2 > row.sum * 0.15 && row.sum2 < row.sum * 0.21)) {
+        if (row.sum != null && row.ndsSum != null &&
+                !(row.ndsSum > row.sum * 0.15 && row.ndsSum < row.sum * 0.21)) {
             logger.warn("Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!")
         }
     }
