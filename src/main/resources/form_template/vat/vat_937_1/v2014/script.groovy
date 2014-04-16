@@ -126,11 +126,11 @@ void logicCheck() {
     checkNonEmptyColumns(totalA, totalA.getIndex(), totalAEditableColumns, logger, true)
     checkNonEmptyColumns(totalPeriod, totalPeriod.getIndex(), calcColumns, logger, true)
     checkNonEmptyColumns(totalAnnul, totalAnnul.getIndex(), calcColumns, logger, true)
-    // 2-4. По строкам 2, 6:
+    // 2-4. По строкам 2, 4, 5:
     // «Графа 5» = «Графа 4» * 20 / 100
     // «Графа 7» = «Графа 6» * 18 / 100
     // «Графа 9» = «Графа 8» * 10 / 100
-    for (def row in [totalA, totalB]) {
+    for (def row in [totalA, totalPeriod, totalAnnul]) {
         def errorMsg = "Строка ${row.getIndex()}: "
         if (row.deal_20_Nds != row.deal_20 * 0.2) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%% неверная!")
