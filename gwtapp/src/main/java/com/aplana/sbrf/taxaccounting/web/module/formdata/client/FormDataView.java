@@ -53,6 +53,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private TaxType taxType;
     private boolean fixedRows;
+    // флаг что нужно заскролить к выделенной строке, используется для формы поиска
+    private boolean needScrollToRow = false;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -288,7 +290,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
 		formDataTable.setRowData(start, rowsData);
-        if (!fixedRows && getSelectedRow() != null) {
+        if (needScrollToRow && !fixedRows && getSelectedRow() != null) {
+            this.needScrollToRow = false;
             formDataTable.getRowElement(singleSelectionModel.getSelectedObject().getIndex() - start).scrollIntoView();
         }
     }
@@ -704,6 +707,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             // go to essential page
             Long page = rowIndex / pager.getPageSize() + (rowIndex % pager.getPageSize() > 0 ? 1:0) - 1;
             if (pager.getPage() != page.intValue()){
+                this.needScrollToRow = true;
                 pager.setPage(page.intValue());
             }
         }

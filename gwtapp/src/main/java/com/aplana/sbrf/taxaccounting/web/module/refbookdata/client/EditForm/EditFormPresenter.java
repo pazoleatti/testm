@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
@@ -24,7 +25,10 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 	private final PlaceManager placeManager;
@@ -41,8 +45,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
-    private boolean readOnly;
-    private boolean editMode;
+    /** Режим показа формы */
+    private FormMode mode;
 
     public void setNeedToReload() {
         getView().setNeedToReload(true);
@@ -55,18 +59,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
         void setHierarchy(boolean isHierarchy);
 
-        void setSaveButtonEnabled(boolean enabled);
-		void setCancelButtonEnabled(boolean enabled);
-		void setEnabled(boolean enabled);
-        void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
+		void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
         void setVersionMode(boolean versionMode);
         Date getVersionFrom();
         Date getVersionTo();
         void setVersionFrom(Date value);
         void setVersionTo(Date value);
-        void setReadOnlyMode(boolean readOnly);
-
         void setNeedToReload(boolean b);
+        /** Обновление вьюшки для определенного состояния */
+        void updateMode(FormMode mode);
     }
 
 	@Inject
@@ -87,12 +88,13 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         new AbstractCallback<GetRefBookAttributesResult>() {
                             @Override
                             public void onSuccess(GetRefBookAttributesResult result) {
-                                EditFormPresenter.this.readOnly = readOnly;
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
-                                getView().setReadOnlyMode(!(editMode && !readOnly));
-								getView().createInputFields(result.getColumns());
+
+                                getView().createInputFields(result.getColumns());
                                 setIsFormModified(false);
-                                setEnabled(false);
+                                if (readOnly) {
+                                    setMode(FormMode.READ);
+                                }
                             }
                         }, this));
 	}
@@ -144,7 +146,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId == null) {
 			currentUniqueRecordId = null;
 			getView().fillInputFields(null);
-			setEnabled(true);
+			setMode(FormMode.VIEW);
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
 			return;
@@ -160,7 +162,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
 								getView().fillInputFields(result.getRecord());
 								currentUniqueRecordId = refBookRecordId;
-								setEnabled(!readOnly);
+                                updateMode();
 							}
 						}, this));
 	}
@@ -256,7 +258,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     public void clearAndDisableForm(){
         getView().fillInputFields(null);
-        setEnabled(false);
+        setMode(FormMode.READ);
     }
 
     private RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {
@@ -291,12 +293,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void no() {
                     setIsFormModified(false);
                     showRecord(currentUniqueRecordId);
-                    if (currentUniqueRecordId == null) setEnabled(false);
+                    if (currentUniqueRecordId == null) setMode(FormMode.READ);
                 }
             });
         } else {
             showRecord(currentUniqueRecordId);
-            if (currentUniqueRecordId == null) setEnabled(false);
+            if (currentUniqueRecordId == null) setMode(FormMode.READ);
         }
 	}
 
@@ -314,14 +316,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         }
     }
 
-    public void setEnabled(boolean enabled) {
-		getView().setEnabled(editMode && enabled);
-	}
-
-    public boolean isVersionMode() {
-        return isVersionMode;
-    }
-
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         getView().setVersionMode(versionMode);
@@ -336,14 +330,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
     @Override
-    public void onSetEditMode() {
-        editMode = true;
-        setEnabled(editMode);
+    public void setMode(FormMode mode){
+        this.mode = mode;
+        getView().updateMode(mode);
     }
 
-    @Override
-    public void onSetDefaultMode() {
-        editMode = false;
-        setEnabled(editMode);
+    private void updateMode() {
+        getView().updateMode(mode);
     }
 }

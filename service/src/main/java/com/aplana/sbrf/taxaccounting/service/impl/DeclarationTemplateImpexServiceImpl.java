@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -99,7 +100,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             		IOUtils.copy(zis, baos);
             		version = new String(baos.toByteArray());
             	} else {
-            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+            		ByteArrayOutputStream baos = new ByteArrayOutputStream();
             		IOUtils.copy(zis, baos);
             		files.put(entry.getName(), baos.toByteArray());
             	}
@@ -118,7 +119,8 @@ public class DeclarationTemplateImpexServiceImpl implements
 					//dt.setVersion(dtc.getVersion());
 				}*/
 				if (files.get("script.groovy").length != 0) {
-					dt.setCreateScript(new String(files.get("script.groovy")));
+                    byte[] bytes = files.get("script.groovy");
+					dt.setCreateScript(new String(bytes, 0, bytes.length, Charset.forName("UTF-8")));
 				}
             	declarationTemplateDao.save(dt);
 				if (files.get("report.jrxml").length != 0) {

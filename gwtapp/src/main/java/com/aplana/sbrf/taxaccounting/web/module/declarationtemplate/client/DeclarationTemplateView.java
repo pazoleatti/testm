@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -97,13 +98,16 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
 
+    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
+
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+        FormElement.as(uploadJrxmlForm.getElement()).setAcceptCharset("UTF-8");
+        FormElement.as(uploadDectForm.getElement()).setAcceptCharset("UTF-8");
 		driver.initialize(this);
-		
+
 		uploadDectForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 			@Override
 			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
@@ -112,12 +116,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     return;
                 }
                 if (event.getResults().contains(ERROR_RESP)) {
-                    getUiHandlers().uploadDectResponseWithErrorUuid(event.getResults().replaceFirst(ERROR_RESP, ""));
+                    String errorUuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
                 }else if (event.getResults().toLowerCase().contains(ERROR)) {
                     getUiHandlers().uploadDectFail(event.getResults().replaceFirst(ERROR, ""));
-				} else {
-                    getUiHandlers().uploadDectResponseWithUuid(event.getResults().replaceFirst(SUCCESS_RESP, ""));
-				}
+                } else {
+                    String uuid = event.getResults().replaceAll(respPattern, "$2");
+                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
+                }
 			}
 		});
 
@@ -129,7 +135,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 				}
 				else {
                     uploadJrxmlForm.reset();
-					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst("error ", ""));
+					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst(ERROR, ""));
 				}
 			}
 		});

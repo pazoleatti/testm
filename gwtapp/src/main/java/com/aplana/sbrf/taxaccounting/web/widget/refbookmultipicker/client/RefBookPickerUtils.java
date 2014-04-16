@@ -101,14 +101,17 @@ public class RefBookPickerUtils {
 
         String attrAlias = refBook.getRegionAttribute().getAlias();
         StringBuilder regions = new StringBuilder("(");
+        boolean haveRegion = false;
         for (Department dep : departments) {
             if (dep.getRegionId() != null) {
                 regions.append(attrAlias + " = " + dep.getRegionId() + " or ");
+                haveRegion = true;
             }
         }
-        if (departments.size() > 0) {
-            regions.delete(regions.length() - 4, regions.length() - 1);
+        if (!haveRegion) {
+            return "";
         }
+        regions.delete(regions.length() - 4, regions.length() - 1);
         regions.append(")");
         return regions.toString();
     }
