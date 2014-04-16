@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,5 +43,18 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
+    }
+
+    @Override
+    public void openMessageDialog(){
+        ScreenLockEvent.fire(this, true);
+        TaActionException ffffffff = new TaActionException("ffffffff");
+        ffffffff.setNeedStackTrace(true);
+        ffffffff.setTrace(",efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf, " +
+                "\n efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf," +
+                "\n efufufufufufufdsfsdfsdfsdf," +
+                "\n efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf," +
+                "\n efufufufufufufdsfsdfsdfsdf");
+        MessageEvent.fire(this, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ",ffffffff);
     }
 }

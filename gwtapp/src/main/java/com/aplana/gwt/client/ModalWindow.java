@@ -287,12 +287,12 @@ public class ModalWindow extends DialogBox implements CanHide {
                         Integer minHeight = Integer.valueOf(getCellElement(1, 1).getStyle().getProperty("minHeight").replace("px", ""));
                         Integer minWidth = Integer.valueOf(getCellElement(1, 1).getStyle().getProperty("minWidth").replace("px", ""));
 
-                        if (height >= minHeight) {
+                        if (height >= minHeight && height!= getCellElement(1, 1).getOffsetHeight()) {
                             setMainInnerElementProperty("height", height);
                             isChange = true;
                         }
 
-                        if (width >= minWidth) {
+                        if (width >= minWidth && width!= getCellElement(1, 1).getOffsetWidth()) {
                             setMainInnerElementProperty("width", width);
                             isChange = true;
                         }
