@@ -23,7 +23,7 @@ public final class XlsxReportMetadata {
     public static final String RANGE_SUBDIVISION_SIGN = "subdivision_sign";
     public static final String RANGE_FIO = "fio";
 	
-	public static final String REPORT_DELIMITER = "|";
+	public static final char REPORT_DELIMITER = '|';
 	
 	public static final int CELL_POS = 0; //cell for naming position of signer
 
