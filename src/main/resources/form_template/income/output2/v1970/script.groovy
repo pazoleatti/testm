@@ -1,4 +1,4 @@
-package form_template.income.output2
+package form_template.income.output2.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -9,29 +9,36 @@ import groovy.transform.Field
  *
  * formTemplateId=307
  */
-// графа 1  - title
-// графа 2  - zipCode
-// графа 3  - subdivisionRF
-// графа 4  - area
-// графа 5  - city
-// графа 6  - region
-// графа 7  - street
-// графа 8  - homeNumber
-// графа 9  - corpNumber
-// графа 10 - apartment
-// графа 11 - surname
-// графа 12 - name
-// графа 13 - patronymic
-// графа 14 - phone
-// графа 15 - dividendDate
+// графа 1  - rowNumber
+// графа 2  - title
+// графа 3  - zipCode
+// графа 4  - subdivisionRF
+// графа 5  - area
+// графа 6  - city
+// графа 7  - region
+// графа 8  - street
+// графа 9  - homeNumber
+// графа 10  - corpNumber
+// графа 11 - apartment
+// графа 12 - surname
+// графа 13 - name
+// графа 14 - patronymic
+// графа 15 - phone
 // графа 16 - sumDividend
-// графа 17 - sumTax
+// графа 17 - dividendDate
+// графа 18 - dividendNum
+// графа 19 - dividendSum
+// графа 20 - taxDate
+// графа 21 - taxNum
+// графа 22 - sumTax
+// графа 23 - reportYear
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         checkCreation()
         break
     case FormDataEvent.CALCULATE:
+        calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
@@ -64,25 +71,21 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-// Редактируемые атрибуты
+// Редактируемые атрибуты 2-18, 20-23
 @Field
 def editableColumns = ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber',
-        'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'dividendDate', 'sumDividend', 'sumTax']
+                       'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'sumDividend', 'dividendDate',
+                       'dividendNum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
 
-// Проверяемые на пустые значения атрибуты
+// Проверяемые на пустые значения атрибуты 1, 2, 4, 12, 13, 16, 17, 22
 @Field
-def nonEmptyColumns = ['title', 'subdivisionRF', 'surname', 'name', 'dividendDate', 'sumDividend', 'sumTax']
+def nonEmptyColumns = ['rowNumber', 'title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'sumTax']
 
 // Дата окончания отчетного периода
 @Field
 def reportPeriodEndDate = null
 
 //// Обертки методов
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -98,6 +101,19 @@ void checkCreation() {
     formDataService.checkUnique(formData, logger)
 }
 
+void calc(){
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    if (!dataRows.isEmpty()) {
+        def number = 0
+        for (def row in dataRows) {
+            row.rowNumber = ++number
+            row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -111,9 +127,6 @@ void logicCheck() {
         if (zipCode != null && (zipCode.length() != 6 || !zipCode.matches('[0-9]*'))) {
             logger.error("Строка $rowNum: Неправильно указан почтовый индекс!")
         }
-
-        // Проверки соответствия НСИ
-        checkNSI(4, row, "subdivisionRF")
     }
 }
 
