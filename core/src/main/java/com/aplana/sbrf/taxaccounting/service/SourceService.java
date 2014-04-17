@@ -40,8 +40,28 @@ public interface SourceService {
      *         {@link com.aplana.sbrf.taxaccounting.model.DepartmentFormType}
      */
     List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType);
-    
-    
+
+    /**
+     * Возвращает типы НФ назначения для подразделения с заданным исполнителем
+     *
+     * @param performerDepId    идентификатор подразделения исполнителя
+     * @param taxType           вид налога
+     * @return список типов НФ
+     */
+    List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
+
+    /**
+     * Возвращает типы НФ:
+     * 1) типы НФ, для которых подразделение узазано в качестве исполнителя;
+     * 2) типы НФ, которые назначены формам из 1) в качестве источников;
+     * 3) типы НФ, которые назначены формам из 2) в качестве источников.
+     * (из http://conf.aplana.com/pages/viewpage.action?pageId=11382061 пункт 3.b.iii, 3.b.iv, 3.b.v)
+     *
+     * @param performerDepId    идентификатор подразделения исполнителя
+     * @param taxType           вид налога
+     * @return список типов НФ
+     */
+    List<Long> getDFTFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
 	/**
 	 * Возвращает информацию о назначенных подразделению декларациях по заданному виду налога
 	 * 
