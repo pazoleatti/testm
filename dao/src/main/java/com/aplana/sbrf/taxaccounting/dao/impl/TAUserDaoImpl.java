@@ -57,7 +57,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	};
 
 	@Override
-	@Cacheable(value = "User", key = "'id_'+#userId")
+	@Cacheable(value = "User", key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -273,7 +273,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 						return rs.getInt("id");
 					}
 				});
-		 return list.size()!=0 ? list.get(0).intValue() : 0;
+		 return list.size()!=0 ? list.get(0) : 0;
 	}
 
 	@Override
@@ -284,19 +284,19 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		StringBuilder sql = new StringBuilder("select id from ( select id, rownum r from (select u.id, u.is_active, u.name, u.department_id " +
 				"from sec_user u where 1=1 ");
 		if (filter.getActive() != null) {
-			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+			sql.append(" and is_active = ").append(filter.getActive() ? "1" : "0");
 		}
 		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
-			sql.append(" and lower(name) like " + "\'%" + filter.getUserName().toLowerCase() +"%\'") ;
+			sql.append(" and lower(name) like " + "\'%").append(filter.getUserName().toLowerCase()).append("%\'");
 		}
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+			sql.append(" and department_id in ").append(SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds())));
 		}
 		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty()) {
-			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id in " + SqlUtils.transformToSqlInStatement(filter.getRoleIds()) +")") ;
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id in ").append(SqlUtils.transformToSqlInStatement(filter.getRoleIds())).append(")");
 		}
 		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
-			sql.append(" order by name)) where r between " + (filter.getStartIndex()+1) + " and " + (filter.getStartIndex()+1 + filter.getCountOfRecords()) );
+			sql.append(" order by name)) where r between ").append(filter.getStartIndex() + 1).append(" and ").append(filter.getStartIndex() + 1 + filter.getCountOfRecords());
 		} else {
 			sql.append(" order by name))");
 		}
@@ -314,16 +314,16 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 		StringBuilder sql = new StringBuilder("select count(*) from (select  u.*, rownum r from sec_user u where 1=1 ");
 		if (filter.getActive() != null) {
-			sql.append(" and is_active = " + (filter.getActive() ? "1" : "0")) ;
+			sql.append(" and is_active = ").append(filter.getActive() ? "1" : "0");
 		}
 		if (filter.getUserName() != null && !filter.getUserName().isEmpty()) {
-			sql.append(" and name like " + "\'%" + filter.getUserName() +"%\'") ;
+			sql.append(" and name like " + "\'%").append(filter.getUserName()).append("%\'");
 		}
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" and department_id in " + SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds()))) ;
+			sql.append(" and department_id in ").append(SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds())));
 		}
 		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
-			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = " + filter.getRoleIds().get(0) +")") ;
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = ").append(filter.getRoleIds().get(0)).append(")");
 		}
 		sql.append(")");
 		try {

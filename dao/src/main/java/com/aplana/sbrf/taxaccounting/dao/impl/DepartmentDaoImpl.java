@@ -401,4 +401,22 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             return new ArrayList<Integer>(0);
         }
     }
+
+    @Override
+    public List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes) {
+        String sql = "select distinct department_id from department_form_type dft " +
+                "left join form_type ft on dft.form_type_id = ft.id " +
+                "where " +
+                "ft.tax_type in (:tt) " +
+                "and performer_dep_id in (:ids)";
+
+        MapSqlParameterSource parameterMap = new MapSqlParameterSource();
+        parameterMap.addValue("ids", departments);
+        List<String> types = new ArrayList<String>();
+        for (TaxType type : taxTypes) {
+            types.add(String.valueOf(type.getCode()));
+        }
+        parameterMap.addValue("tt", types);
+        return getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
+    }
 }

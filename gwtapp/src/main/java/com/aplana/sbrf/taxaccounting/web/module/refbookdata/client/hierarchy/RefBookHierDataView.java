@@ -247,20 +247,23 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
             case EDIT:
                 addRow.setVisible(true);
                 deleteRow.setVisible(true);
+                separator.setVisible(true);
                 edit.setVisible(false);
                 cancelEdit.setVisible(true);
                 break;
-            case READ: ;
+            case READ:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
+                separator.setVisible(false);
                 edit.setVisible(false);
                 cancelEdit.setVisible(false);
                 break;
-            case VIEW: ;
+            case VIEW:
                 edit.setVisible(true);
                 cancelEdit.setVisible(false);
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
+                separator.setVisible(false);
                 break;
         }
     }

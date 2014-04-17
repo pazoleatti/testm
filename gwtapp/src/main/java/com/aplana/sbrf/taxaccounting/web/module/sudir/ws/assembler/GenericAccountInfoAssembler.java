@@ -16,21 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.FieldNames.LOGIN;
+
 public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 
     @Autowired
     private DepartmentService departmentService;
 	
-	private static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
+	private static Map<String, FieldNames> fieldNames = FieldNames.getFieldNamesMap();
 	
 	public TAUser assembleUser(GenericAccountInfo gai){
 		TAUser user = new TAUser();
 		for (GenericAttribute item : gai.getAttributes().getItem()) {
 			switch (fieldNames.get(item.getName())) {
-			case 0:
+			case LOGIN:
 				user.setLogin(item.getValues().getItem().get(0).toLowerCase());
 				break;
-			case 1:
+			case NAME:
 				StringBuilder sb = new StringBuilder();
 				for (String value : item.getValues().getItem()){
 					sb.append(value);
@@ -38,19 +40,19 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 				}
 				user.setName(sb.toString().trim());
 				break;
-			case 2:
+			case DEPARTAMENT_ID:
 				user.setDepartmentId(Integer.valueOf(item.getValues().getItem().get(0)));
 				
 				break;
-			case 3:
+			case IS_ACTIVE:
 				user.setActive(Boolean.valueOf(item.getValues().getItem().get(0)));
 				
 				break;
-			case 4:
+			case EMAIL:
 				user.setEmail(item.getValues().getItem().get(0));
 				
 				break;
-			case 5:
+			case ROLE_CODE:
 				List<TARole> listRoles = new ArrayList<TARole>();
 				for (String value : item.getValues().getItem()){
 					TARole role = new TARole();
@@ -97,7 +99,7 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 			//LOGIN
 			ga = new GenericAttribute();
 			aOfxs = new ArrayOfXsdString();
-			ga.setName(FieldNames.LOGIN.nameField());
+			ga.setName(LOGIN.nameField());
 			aOfxs.getItem().add(taUser.getLogin());
 			ga.setValues(aOfxs);
 			aOfga.getItem().add(ga);
