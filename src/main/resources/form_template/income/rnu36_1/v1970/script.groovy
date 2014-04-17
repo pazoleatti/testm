@@ -203,7 +203,6 @@ void logicCheck() {
     // 5. Проверка итоговых значений по всей форме
     def total = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
     if (getDataRow(dataRows, 'total').percIncome != total) {
-        // TODO Исправить на WRONG_TOTAL
         logger.error('Итоговые значения рассчитаны неверно!')
     }
 }
@@ -417,13 +416,6 @@ void addData(def xml, int headRowCount) {
         rowIndex++
     }
 
-    // переход к следующей строке xml'ки
-    i++
-    if (xml.row[i].cell[0].text() != "Итого - процентный доход за вычетом процентного расхода"){
-        logger.error('Не верный шаблон налоговой формы. Последняя строка должна соответствовать строке "Итого - процентный доход за вычетом процентного расхода" ')
-        return;
-    }
-
     dataRowHelper.save(rows)
 }
 
@@ -492,7 +484,7 @@ void importData() {
             (xml.row[1].cell[5]): '6',
             (xml.row[1].cell[6]): '7',
             (xml.row[1].cell[7]): '8'
-   ]
+    ]
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
