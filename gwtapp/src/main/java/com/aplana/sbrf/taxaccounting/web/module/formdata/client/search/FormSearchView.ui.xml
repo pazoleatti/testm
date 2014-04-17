@@ -7,7 +7,6 @@
 
     <ui:style field="modal">
         .mainPanel {
-            background-color: #ffffff;
             position: absolute !important;
             padding-top: 5px;
             top: 27px;
@@ -77,7 +76,7 @@
                 <g:cell horizontalAlignment="left" width="100%">
                     <g:CheckBox text="Учитывать регистр" ui:field="caseSensitive"/>
                 </g:cell>
-                <g:Label ui:field="countLabel" wordWrap="false" text="Найдено: 0" width="70px"/>
+                <g:Label ui:field="countLabel" wordWrap="false" text="Найдено: 0" width="100px"/>
             </g:HorizontalPanel>
 
             <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{modal.widgetWrapper}">
