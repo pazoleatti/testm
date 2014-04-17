@@ -227,7 +227,8 @@ void consolidation() {
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 copyRows(sourceDataRows, dataRows, 'A', 'totalA')

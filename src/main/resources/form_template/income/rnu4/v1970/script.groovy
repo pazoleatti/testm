@@ -262,7 +262,8 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 formDataService.getDataRowHelper(source).allCached.each { sRow ->
                     if (sRow.getAlias() == null || sRow.getAlias() == '') {
