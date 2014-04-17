@@ -313,9 +313,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 cancelEdit.setVisible(true);
                 edit.setVisible(false);
                 // для красовы на форме
-                separator.setVisible(false);
+                separator.setVisible(true);
                 break;
-            case READ: ;
+            case READ:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 cancelEdit.setVisible(false);
@@ -323,13 +323,13 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 // для красовы на форме
                 separator.setVisible(false);
                 break;
-            case VIEW: ;
+            case VIEW:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 cancelEdit.setVisible(false);
                 edit.setVisible(true);
                 // для красовы на форме
-                separator.setVisible(true);
+                separator.setVisible(false);
                 break;
         }
     }
