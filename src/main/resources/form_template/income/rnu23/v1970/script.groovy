@@ -2,17 +2,12 @@ package form_template.income.rnu23.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
  * Форма "(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям"
  * formTemplateId=323
- *
- * TODO:
- *      - неясности с консолидацией. Пока убрал расчеты и проверки после консолидации http://jira.aplana.com/browse/SBRFACCTAX-4455.
  *
  * @author rtimerbaev
  */
@@ -68,10 +63,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        consolidation()
-        // TODO (Ramil Timerbaev) http://jira.aplana.com/browse/SBRFACCTAX-4455
-        // calc()
-        // logicCheck()
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
+        calc()
+        logicCheck()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -320,60 +314,6 @@ void logicCheck() {
 
     // 18. Проверка итогового значений по всей форме (графа 13..20)
     checkTotalSum(dataRows, totalSumColumns, logger, true)
-}
-
-void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    // удалить все строки и собрать из источников их строки
-    // Итоговая строка
-    def totalRow = getDataRow(dataRows, 'total')
-    // Очистка итогов
-    totalSumColumns.each { alias ->
-        totalRow.getCell(alias).setValue(null, null)
-    }
-    dataRows.clear()
-
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
-        if (it.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRowHelper = formDataService.getDataRowHelper(source)
-                def sourceDataRows = sourceDataRowHelper.allCached
-                // строки источника
-                for (def sRow : sourceDataRows) {
-                    if (sRow.getAlias() != null) {
-                        continue
-                    }
-                    def isFind = false
-                    // строки приемника - искать совпадения, если совпадения есть, то суммировать графы 13..20
-                    for (def row : dataRows) {
-                        if (sRow.contract == row.contract && sRow.contractDate == row.contractDate &&
-                                sRow.dateOfTransaction == row.dateOfTransaction) {
-                            isFind = true
-                            totalSumColumns.each { alias ->
-                                def tmp = (row.getCell(alias).value ?: 0) + (sRow.getCell(alias).value ?: 0)
-                                row.getCell(alias).setValue(tmp, null)
-                            }
-                            break
-                        }
-                    }
-                    // если совпадений нет, то просто добавить строку
-                    if (!isFind) {
-                        dataRows.add(sRow)
-                    }
-                }
-            }
-        }
-    }
-
-    // Расчет итогов
-    calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-    dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
-    logger.info('Формирование консолидированной формы прошло успешно.')
 }
 
 /** Получение импортируемых данных. */
@@ -638,30 +578,6 @@ def roundValue(def value, int precision) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
     } else {
         return null
-    }
-}
-
-/**
- * Cравнить итоги.
- *
- * @param totalRow итоговая строка из транспортного файла
- */
-void checkTotalRow(def totalRow) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def totalCalc = getTotalRow(dataRows)
-    def errorColums = []
-    if (totalCalc != null) {
-        totalSumColumns.each { columnAlias ->
-            if (totalRow[columnAlias] != null && totalCalc[columnAlias] != totalRow[columnAlias]) {
-                errorColums.add(totalCalc.getCell(columnAlias).column.order)
-            }
-        }
-    }
-    if (!errorColums.isEmpty()) {
-        def columns = errorColums.join(', ')
-        logger.error("Итоговая сумма в графе $columns в транспортном файле некорректна")
     }
 }
 
