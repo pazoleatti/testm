@@ -133,8 +133,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    MessageEvent.fire(FormDataPresenter.this, "Для налоговой формы успешно создана версия ручного ввода");
-                                    revealFormData(readOnlyMode, true, null);
+                                    revealFormData(false, true, null);
                                 }
                             }, FormDataPresenter.this)
                     );
