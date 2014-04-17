@@ -30,7 +30,7 @@ import groovy.transform.Field
 // графа 19 - dividendSum
 // графа 20 - taxDate
 // графа 21 - taxNum
-// графа 22 - taxSum
+// графа 22 - sumTax
 // графа 23 - reportYear
 
 switch (formDataEvent) {
@@ -75,11 +75,11 @@ def refBookCache = [:]
 @Field
 def editableColumns = ['title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region', 'street', 'homeNumber',
         'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone', 'sumDividend', 'dividendDate',
-        'dividendNum', 'taxDate', 'taxNum', 'taxSum', 'reportYear']
+        'dividendNum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
 
 // Проверяемые на пустые значения атрибуты 1, 2, 4, 12, 13, 16, 17, 22
 @Field
-def nonEmptyColumns = ['rowNumber', 'title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'taxSum']
+def nonEmptyColumns = ['rowNumber', 'title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'sumTax']
 
 // Дата окончания отчетного периода
 @Field
@@ -113,7 +113,7 @@ void calc(){
         def number = 0
         for (def row in dataRows) {
             row.rowNumber = ++number
-            row.dividendSum = (row.sumDividend ?: 0) - (row.taxSum ?: 0)
+            row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
         }
     }
     dataRowHelper.save(dataRows)
