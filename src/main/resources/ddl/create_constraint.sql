@@ -217,7 +217,6 @@ alter table log_system add constraint log_system_fk_user_dep_id foreign key (use
 
 alter table department_report_period add constraint dep_rep_per_chk_is_active check (is_active in (0, 1));
 alter table department_report_period add constraint dep_rep_per_chk_is_balance_per check (is_balance_period in (0, 1));
-alter table department_report_period add constraint dep_rep_per_chk_is_correct_per check (is_correct_period in (0, 1));
 alter table department_report_period add constraint dep_rep_per_fk_department_id foreign key (department_id) references department(id) on delete cascade;
 alter table department_report_period add constraint dep_rep_per_fk_rep_period_id foreign key (report_period_id) references report_period(id) on delete cascade;
 

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
@@ -138,4 +137,9 @@ public interface DepartmentDao {
 	 * @return писок id'шников подразделений (исполнителей)
 	 */
 	List<Integer> getPerformers(List<Integer> departments, List<TaxType> taxTypes);
+
+    /**
+     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
+     */
+    List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes);
 }

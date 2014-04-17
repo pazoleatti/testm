@@ -686,7 +686,6 @@ create table department_report_period (
   report_period_id    number(9) not null,
   is_active           number(1) not null,
   is_balance_period   number(1) default 0 not null,
-  is_correct_period   number(1) default 0 not null,
   correction_date     date
 );
 comment on table department_report_period is  'Привязка отчетных периодов к подразделениям';
@@ -695,7 +694,6 @@ comment on column department_report_period.department_id is 'Код подраз
 comment on column department_report_period.report_period_id is 'Код отчетного периода';
 comment on column department_report_period.is_active is 'Признак активности (0 - период закрыт, 1 - период открыт)';
 comment on column department_report_period.is_balance_period is 'Признак того, что период является периодом ввода остатков (0 - обычный период, 1 - период ввода остатков)';
-comment on column department_report_period.is_correct_period is 'Признак корректирующего периода (0 - обычный период, 1 - корректирующий период)';
 comment on column department_report_period.correction_date is 'Период сдачи корректировки';
 
 create sequence seq_department_report_period start with 1000;

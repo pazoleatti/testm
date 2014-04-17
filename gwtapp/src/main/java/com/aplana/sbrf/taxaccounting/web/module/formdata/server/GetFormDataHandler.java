@@ -159,7 +159,7 @@ public class GetFormDataHandler extends
 
         //Является ли форма последней перед декларацией
         List<DepartmentDeclarationType> declarationDestinations = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind());
-        result.setCanCreatedManual(formData.getState() == WorkflowState.ACCEPTED && (formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY)) && !declarationDestinations.isEmpty());
+        result.setCanCreatedManual((formData.getKind().equals(FormDataKind.CONSOLIDATED) || formData.getKind().equals(FormDataKind.SUMMARY)) && !declarationDestinations.isEmpty());
 	}
 
 	/**

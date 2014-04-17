@@ -2,9 +2,9 @@ package form_template.income.rnu36_1.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 
 /**
  * Форма "(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1".
@@ -23,33 +23,33 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 // графа 8  - percIncome
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
@@ -107,13 +107,13 @@ def addRow() {
     } else {
         index = getDataRow(dataRows, 'totalA').getIndex()
         switch (currentDataRow.getAlias()) {
-            case 'A' :
-            case 'totalA' :
+            case 'A':
+            case 'totalA':
                 index = getDataRow(dataRows, 'totalA').getIndex()
                 break
-            case 'B' :
-            case 'totalB' :
-            case 'total' :
+            case 'B':
+            case 'totalB':
+            case 'total':
                 index = getDataRow(dataRows, 'totalB').getIndex()
                 break
         }
@@ -203,7 +203,6 @@ void logicCheck() {
     // 5. Проверка итоговых значений по всей форме
     def total = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
     if (getDataRow(dataRows, 'total').percIncome != total) {
-        // TODO Исправить на WRONG_TOTAL
         logger.error('Итоговые значения рассчитаны неверно!')
     }
 }
@@ -228,7 +227,8 @@ void consolidation() {
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
+            def source = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, taxPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 copyRows(sourceDataRows, dataRows, 'A', 'totalA')
@@ -364,23 +364,23 @@ void addData(def xml, int headRowCount) {
     def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
     // получить все строки
     def rows = dataRowHelper.allCached
-    rows = rows.grep{it.getAlias() != null}
+    rows = rows.grep { it.getAlias() != null }
 
     int rowIndex = 0  // Строки НФ, от 1
     // индекс для перебора, с учетом пропуска шапки + отсутпа
     def i = headRowCount
 
     // проверим что первая строка соответствует шаблону формы
-    if (xml.row[++i].cell[0].text() != "А. Облигации в портфеле банка"){
+    if (xml.row[++i].cell[0].text() != "А. Облигации в портфеле банка") {
         logger.error('Не верный шаблон налоговой формы. Первая строка должна соответствовать строке "А. Облигации в портфеле банка" ')
         return;
-    } else{
+    } else {
         // переход к следующей строке
         rowIndex++
     }
 
     // добавить спроки для группы А
-    while( i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "А"'){
+    while (i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "А"') {
         def newRow = createNewRow(rowIndex)
         rows.add(rowIndex, newRow)
         filForm(newRow, xml.row[i], i, colOffset)
@@ -389,10 +389,10 @@ void addData(def xml, int headRowCount) {
     }
 
     // Итого «А»
-    if (i >= xml.row.size()){
+    if (i >= xml.row.size()) {
         logger.error('Не верный шаблон налоговой формы. Не найдены итоги для части А')
         return;
-    } else{
+    } else {
         // переход к следующей строке формы
         rowIndex++
         // переход к следующей строке xml'ки
@@ -400,28 +400,21 @@ void addData(def xml, int headRowCount) {
     }
 
     // проверим что первая строка соответствует шаблону формы
-    if (xml.row[i].cell[0].text() != "Б. Облигации, по которым открыта короткая позиция"){
+    if (xml.row[i].cell[0].text() != "Б. Облигации, по которым открыта короткая позиция") {
         logger.error('Не верный шаблон налоговой формы. Не найдена часть Б. Облигации, по которым открыта короткая позиция')
         return;
-    } else{
+    } else {
         // переход к следующей строке формы
         rowIndex++
     }
 
     // добавим строки в часть Б
-    while( i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "Б"'){
+    while (i < xml.row.size() && xml.row[++i].cell[0].text() != 'Итого "Б"') {
         def newRow = createNewRow(rowIndex)
         rows.add(rowIndex, newRow)
         filForm(newRow, xml.row[i], i, colOffset)
         // переход к следующей строке формы
         rowIndex++
-    }
-
-    // переход к следующей строке xml'ки
-    i++
-    if (xml.row[i].cell[0].text() != "Итого - процентный доход за вычетом процентного расхода"){
-        logger.error('Не верный шаблон налоговой формы. Последняя строка должна соответствовать строке "Итого - процентный доход за вычетом процентного расхода" ')
-        return;
     }
 
     dataRowHelper.save(rows)
@@ -432,7 +425,7 @@ void addData(def xml, int headRowCount) {
  * @param rowIndex
  * @return
  */
-def createNewRow(def rowIndex){
+def createNewRow(def rowIndex) {
     def newRow = formData.createDataRow()
     newRow.setIndex(rowIndex)
     editableColumns.each {
@@ -449,7 +442,7 @@ def createNewRow(def rowIndex){
 /**
  * Считать данные в форму
  */
-def filForm(def newRow, def row, int i, int colOffset){
+def filForm(def newRow, def row, int i, int colOffset) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     // графа 1
     newRow.series = row.cell[0].text()
@@ -492,7 +485,7 @@ void importData() {
             (xml.row[1].cell[5]): '6',
             (xml.row[1].cell[6]): '7',
             (xml.row[1].cell[7]): '8'
-   ]
+    ]
     checkHeaderEquals(headerMapping)
 
     addData(xml, 1)
