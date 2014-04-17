@@ -182,4 +182,17 @@ public class DepartmentDaoTest {
 		Assert.assertTrue("Department(id=2) has 1 performer", performers.size() == 1);
 		Assert.assertTrue("Department(id=2) has 1 performer with id = 1", performers.get(0) == 1);
 	}
+
+    @Test
+    public void getDepartmentIdsByExcutorsTest() {
+        List<Integer> result = departmentDao.getDepartmentIdsByExcutors(asList(1, 2, 3, 4, 5, 6),
+                asList(TaxType.INCOME, TaxType.VAT, TaxType.TRANSPORT));
+        Assert.assertEquals(result.size(), 2);
+        Assert.assertTrue(result.containsAll(asList(2, 3)));
+
+        result = departmentDao.getDepartmentIdsByExcutors(asList(2),
+                asList(TaxType.TRANSPORT));
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertTrue(result.containsAll(asList(3)));
+    }
 }
