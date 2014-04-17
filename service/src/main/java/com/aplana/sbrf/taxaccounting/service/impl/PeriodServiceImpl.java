@@ -435,7 +435,7 @@ public class PeriodServiceImpl implements PeriodService{
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
 		LogSystemFilter logFilter = new LogSystemFilter();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		logFilter.setReportPeriodName(String.format(LogSystemFilter.RP_NAME_PATTERN,
+		logFilter.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN,
                 String.valueOf(reportPeriod.getTaxPeriod().getYear()), reportPeriod.getName()));
 		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
 			logs.add(new LogEntry(LogLevel.ERROR,
@@ -469,7 +469,7 @@ public class PeriodServiceImpl implements PeriodService{
 			);
 			for (Integer dep : blockedBy) {
                 //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-				msg.append(departmentService.getDepartment(dep).getName() + "; ");
+				msg.append(departmentService.getDepartment(dep).getName()).append("; ");
 			}
 			logs.add(new LogEntry(LogLevel.ERROR, msg.toString()));
 		}
@@ -613,7 +613,7 @@ public class PeriodServiceImpl implements PeriodService{
         List<Months> monthsList = new ArrayList<Months>();
         monthsList.add(null);
 
-        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(Long.valueOf(reportPeriod.getDictTaxPeriodId()));
+        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) reportPeriod.getDictTaxPeriodId());
         // Код налогового периода
         String code = refBookValueMap.get("CODE").getStringValue();
 
@@ -722,7 +722,7 @@ public class PeriodServiceImpl implements PeriodService{
                 for (Iterator<ReportPeriod> it = correctPeriods.iterator(); it.hasNext(); ) {
                     ReportPeriod rp = it.next();
 
-                    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(Long.valueOf(rp.getDictTaxPeriodId()));
+                    Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData((long) rp.getDictTaxPeriodId());
                     // Код налогового периода
                     String code = refBookValueMap.get("CODE").getStringValue();
                     if (!code.equals("34")) {

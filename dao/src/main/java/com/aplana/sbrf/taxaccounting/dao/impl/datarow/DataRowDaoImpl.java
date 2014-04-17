@@ -640,7 +640,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +
                 "                       join FORM_COLUMN rfc on rsq.column_id = rfc.parent_column_id \n" +
                 "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null) d \n" +
-                "    JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
+                "    RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
                 "    LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id \n"+
                 "    ORDER BY dr.ord \n" +
                 ") \n" +
