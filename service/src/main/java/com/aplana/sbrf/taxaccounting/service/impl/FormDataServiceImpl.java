@@ -133,6 +133,8 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setManual(true);
         dataRowDao.saveRows(formData, rows);
         dataRowDao.commit(formData.getId());
+
+        logger.info("Для налоговой формы успешно создана версия ручного ввода");
     }
 
     @Override
