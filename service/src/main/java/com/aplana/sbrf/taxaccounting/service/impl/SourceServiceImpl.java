@@ -59,6 +59,16 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
+        return departmentFormTypeDao.getByPerformerId(performerDepId, taxType, kinds);
+    }
+
+    @Override
+    public List<Long> getDFTFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
+        return departmentFormTypeDao.getFormTypeBySource(performerDepId, taxType, kinds);
+    }
+
+    @Override
     public List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind) {
         return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind);
     }

@@ -146,22 +146,27 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Integer> getTaxFormDepartments(TAUser tAUser, List<TaxType> taxTypes) {
         List<Integer> retList = new ArrayList<Integer>();
         if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // все подразделения из справочника подразделений
+            // Все подразделения из справочника подразделений
             for (Department dep : departmentDao.listDepartments()) {
                 retList.add(dep.getId());
             }
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            // 1, 2
             retList.addAll(departmentDao.getDepartmentsBySourceControlNs(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList, taxTypes));
+            // 3
+            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL)) {
+            // 1, 2
             retList.addAll(departmentDao.getDepartmentsBySourceControl(tAUser.getDepartmentId(), taxTypes));
-            retList.addAll(getExecutorsDepartments(retList, taxTypes));
+            // 3
+            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
         } else if (tAUser.hasRole(TARole.ROLE_OPER)) {
-            // все дочерние подразделения для подразделения пользователя (включая его)
+            // 1
             for (Department dep : departmentDao.getAllChildren(tAUser.getDepartmentId())) {
                 retList.add(dep.getId());
             }
-            retList.addAll(getExecutorsDepartments(retList, taxTypes));
+            // 2
+            retList.addAll(getDepartmentIdsByExcutors(retList, taxTypes));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
@@ -270,7 +275,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getPerformers(departments, formType);
     }
 
-	private List<Integer> getExecutorsDepartments(List<Integer> departments, List<TaxType> taxTypes) {
-		return departmentDao.getPerformers(departments, taxTypes);
-	}
+    /**
+     * Все подразделения, для форм которых, подразделения departments назначены исполнителями
+     */
+    private List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes) {
+        return departmentDao.getDepartmentIdsByExcutors(departments, taxTypes);
+    }
 }
