@@ -610,9 +610,29 @@ void addData(def xml, int headRowCount) {
         xlsIndexCol = 12
         newRow.operationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
-        // графа 12
+        // графа 13
         xlsIndexCol = 13
         newRow.rateWithDiscCoef = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+
+        // графа 14
+        xlsIndexCol = 14
+        newRow.sumStartInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+
+        // графа 15
+        xlsIndexCol = 15
+        newRow.sumStartInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+
+        // графа 16
+        xlsIndexCol = 16
+        newRow.sumEndInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+
+        // графа 17
+        xlsIndexCol = 17
+        newRow.sumEndInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+
+        // графа 18
+        xlsIndexCol = 18
+        newRow.sum = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }
