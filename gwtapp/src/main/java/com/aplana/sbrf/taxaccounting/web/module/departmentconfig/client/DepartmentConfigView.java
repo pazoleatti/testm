@@ -15,7 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicke
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -156,7 +156,11 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    HorizontalPanel findButtonPanel;
+    HorizontalPanel findButtonPanel, reorgCodePanel, reorgInnPanel, reorgKppPanel;
+
+    @UiField
+    @Ignore
+    LabelSeparator reorgLabel;
 
     @Inject
 	@UiConstructor
@@ -198,13 +202,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		// Подразделение
 		departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
 
-			@Override
-			public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-				Integer selDepartmentId = null;
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                Integer selDepartmentId = null;
 
-				if (event != null && !event.getValue().isEmpty()) {
-					selDepartmentId = event.getValue().iterator().next();
-				}
+                if (event != null && !event.getValue().isEmpty()) {
+                    selDepartmentId = event.getValue().iterator().next();
+                }
 
                 // Проверка совпадения выбранного подразделения с текущим
                 if (DepartmentConfigView.this.currentDepartmentId != null
@@ -216,8 +220,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 editButton.setEnabled(false);
                 clear();
                 updateVisibility();
-			}
-		});
+            }
+        });
 	}
 
 	@Override
@@ -282,6 +286,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		sumDividendsPanel.setVisible(currentDepartmentId != null && isUnp && currentTaxType == TaxType.INCOME);
 		// Обязанность по уплате налога и Признак расчёта
 		boolean isPayPanelVisible = currentDepartmentId != null && !isUnp && currentTaxType == TaxType.INCOME;
+        // Сведения о реорганизации
+        reorgCodePanel.setVisible(currentTaxType != TaxType.VAT);
+        reorgInnPanel.setVisible(currentTaxType != TaxType.VAT);
+        reorgKppPanel.setVisible(currentTaxType != TaxType.VAT);
+        reorgLabel.setVisible(currentTaxType != TaxType.VAT);
+
 		payPanelObligation.setVisible(isPayPanelVisible);
 		payPanelType.setVisible(isPayPanelVisible);
         payPanelPrepayment.setVisible(currentTaxType == TaxType.TRANSPORT);

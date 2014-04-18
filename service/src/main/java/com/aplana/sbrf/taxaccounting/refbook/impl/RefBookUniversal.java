@@ -144,8 +144,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
 
             if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROFIT) &&
-                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_UKS)) {
+                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
+                    !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL)) {
 
                 //Проверка корректности
                 checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);

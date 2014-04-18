@@ -70,16 +70,24 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         switch (action.getTaxType()) {
             case INCOME:
-                parentRefBookId = 33L;
-                provider = rbFactory.getDataProvider(33L);
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
+                provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
             case TRANSPORT:
-                parentRefBookId = 31L;
-                provider = rbFactory.getDataProvider(31L);
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
+                provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
             case DEAL:
-                parentRefBookId = 37L;
-                provider = rbFactory.getDataProvider(37L);
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
+                provider = rbFactory.getDataProvider(parentRefBookId);
+                break;
+            case VAT:
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_VAT;
+                provider = rbFactory.getDataProvider(parentRefBookId);
+                break;
+            case PROPERTY:
+                parentRefBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
+                provider = rbFactory.getDataProvider(parentRefBookId);
                 break;
         }
 
@@ -114,9 +122,11 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             depCombined.setTaxOrganCode(paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE.name()).getStringValue());
             depCombined.setOkvedCode(getList(paramsMap.get(DepartmentParamAliases.OKVED_CODE.name()).getReferenceValue()));
             depCombined.setPhone(paramsMap.get(DepartmentParamAliases.PHONE.name()).getStringValue());
-            depCombined.setReorgFormCode(getList(paramsMap.get(DepartmentParamAliases.REORG_FORM_CODE.name()).getReferenceValue()));
-            depCombined.setReorgInn(paramsMap.get(DepartmentParamAliases.REORG_INN.name()).getStringValue());
-            depCombined.setReorgKpp(paramsMap.get(DepartmentParamAliases.REORG_KPP.name()).getStringValue());
+            if (action.getTaxType() != TaxType.VAT) {
+                depCombined.setReorgFormCode(getList(paramsMap.get(DepartmentParamAliases.REORG_FORM_CODE.name()).getReferenceValue()));
+                depCombined.setReorgInn(paramsMap.get(DepartmentParamAliases.REORG_INN.name()).getStringValue());
+                depCombined.setReorgKpp(paramsMap.get(DepartmentParamAliases.REORG_KPP.name()).getStringValue());
+            }
             depCombined.setName(paramsMap.get(DepartmentParamAliases.NAME.name()).getStringValue());
 
             // Общая частная часть

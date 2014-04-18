@@ -91,13 +91,19 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             Long refBookId = null;
             switch (action.getTaxType()) {
                 case INCOME:
-                    refBookId = 33L;
+                    refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
                     break;
                 case TRANSPORT:
-                    refBookId = 31L;
+                    refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
                     break;
                 case DEAL:
-                    refBookId = 37L;
+                    refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
+                    break;
+                case VAT:
+                    refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
+                    break;
+                case PROPERTY:
+                    refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
                     break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
@@ -117,9 +123,12 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCode()));
             paramsMap.put(DepartmentParamAliases.OKVED_CODE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getOkvedCode())));
             paramsMap.put(DepartmentParamAliases.PHONE.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getPhone()));
-            paramsMap.put(DepartmentParamAliases.REORG_FORM_CODE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getReorgFormCode())));
-            paramsMap.put(DepartmentParamAliases.REORG_INN.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getReorgInn()));
-            paramsMap.put(DepartmentParamAliases.REORG_KPP.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getReorgKpp()));
+
+            if (action.getTaxType() != TaxType.VAT) {
+                paramsMap.put(DepartmentParamAliases.REORG_FORM_CODE.name(), new RefBookValue(RefBookAttributeType.REFERENCE, getFirstLong(depCombined.getReorgFormCode())));
+                paramsMap.put(DepartmentParamAliases.REORG_INN.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getReorgInn()));
+                paramsMap.put(DepartmentParamAliases.REORG_KPP.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getReorgKpp()));
+            }
             paramsMap.put(DepartmentParamAliases.NAME.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getName()));
 
             // Общая частная часть

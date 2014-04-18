@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -42,9 +43,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     // Тип налога -> ID справочника с параметрами подразделения
     private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
         {
-            put(TaxType.INCOME, 33L);
-            put(TaxType.TRANSPORT, 31L);
-            put(TaxType.DEAL, 37L);
+            put(TaxType.INCOME, RefBook.DEPARTMENT_CONFIG_INCOME);
+            put(TaxType.TRANSPORT, RefBook.DEPARTMENT_CONFIG_TRANSPORT);
+            put(TaxType.DEAL, RefBook.DEPARTMENT_CONFIG_DEAL);
+            put(TaxType.VAT, RefBook.DEPARTMENT_CONFIG_VAT);
         }
     };
 
@@ -165,5 +167,4 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	public void setScriptComponentContext(ScriptComponentContext context) {
 		this.context = context;
 	}
-
 }
