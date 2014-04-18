@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
@@ -139,6 +138,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 		void setFormId(int formId);
 		void setTitle(String title);
         void activateVersionName(String s);
+        void activateVersion(boolean isVisible);
 	}
 
 	@RequestTabs
@@ -270,7 +270,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                                     with(AdminConstants.NameTokens.formTemplateId, String.valueOf(formId)).build());
 						}
 					}, this));
-		}
+		} else {
+            getView().activateVersion(false);
+        }
 	}
 
 	@SuppressWarnings("unchecked")
@@ -308,6 +310,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     formTemplate.setType(result.getFormType());
+                    getView().activateVersion(true);
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
@@ -328,6 +331,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                             with(AdminConstants.NameTokens.formTemplateId, String.valueOf(result.getFormTemplateId())).build());
                     Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
+                    getView().activateVersion(true);
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());

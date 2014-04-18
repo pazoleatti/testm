@@ -173,6 +173,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         activateVersion.setText(name);
     }
 
+    @Override
+    public void activateButton(boolean isVisible) {
+        activateVersion.setVisible(isVisible);
+    }
+
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
 		driver.flush();

@@ -248,8 +248,8 @@ void calculationControlGraphs(def dataRows) {
     def formDataComplex = getFormDataComplex()
     def dataRowsComplex = formDataComplex != null ? formDataService.getDataRowHelper(formDataComplex)?.allCached : null
     for (def row : dataRows) {
-        // исключить итоговые строки и пять конечных
-        if (row.getAlias() in [row50001alias, row50002alias, 'R1', 'R109', 'R214', 'R215', 'R216', 'R217', 'R218']) {
+        // исключить итоговые строки и пять конечных и 36-ую
+        if (row.getAlias() in [row50001alias, row50002alias, 'R1', 'R36', 'R109', 'R214', 'R215', 'R216', 'R217', 'R218']) {
             continue
         }
         if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
@@ -264,13 +264,13 @@ void calculationControlGraphs(def dataRows) {
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
         // графа 12
         if (row.getAlias() in ['R106', 'R210']) {
-            tmp = calcSum6(dataRows, ['R106', 'R210'])
+            tmp = calcSum8(dataRows, ['R106', 'R210'])
         } else if (row.getAlias() in ['R107', 'R212']) {
-            tmp = calcSum6(dataRows, ['R107', 'R212'])
+            tmp = calcSum8(dataRows, ['R107', 'R212'])
         } else if (row.getAlias() in ['R105', 'R209']) {
-            tmp = calcSum6(dataRows, ['R105', 'R209'])
+            tmp = calcSum8(dataRows, ['R105', 'R209'])
         } else if (row.getAlias() in ['R35', 'R36']) {
-            tmp = calcSum6(dataRows, ['R35', 'R36'])
+            tmp = calcSum8(dataRows, ['R35', 'R36'])
         } else {
             tmp = row.rnu5Field5Accepted
         }
@@ -481,13 +481,13 @@ def getSumFromComplex(dataRowsComplex, columnAliasCheck, columnAliasSum, value) 
 }
 
 /**
- * Получить значение для графы 12. Сумма значении графы 6 указанных строк
+ * Получить значение для графы 12. Сумма значении графы 8 указанных строк
  * @param dataRows строки НФ
  * @param aliasRows список алиасов значения которых надо просуммировать
  */
-def calcSum6(def dataRows, def aliasRows) {
+def calcSum8(def dataRows, def aliasRows) {
     return aliasRows.sum { alias ->
-        (getDataRow(dataRows, alias).rnu7Field12Accepted)?:0
+        (getDataRow(dataRows, alias).rnu5Field5Accepted)?:0
     }
 }
 

@@ -94,6 +94,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
         void activateButtonName(String name);
+        void activateButton(boolean isVisible);
 	}
 
 	private final DispatchAsync dispatcher;
@@ -165,6 +166,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
                     getView().setDeclarationTemplate(declarationTemplateExt);
+                    getView().activateButton(true);
                 }
             }, this));
         } else if (declarationTemplate.getId() == null && declarationTemplate.getType().getId() != 0){
@@ -179,6 +181,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                     placeManager.revealPlace(new PlaceRequest.Builder().nameToken(DeclarationTemplateTokens.declarationTemplate).
                             with(DeclarationTemplateTokens.declarationTemplateId, String.valueOf(result.getDeclarationTemplateId())).build());
                     getView().setDeclarationTemplate(declarationTemplateExt);
+                    getView().activateButton(true);
                 }
             }, this));
         } else {
@@ -287,6 +290,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 							TitleUpdateEvent.fire(DeclarationTemplatePresenter.this, "Шаблон декларации", declarationTemplate.getType().getName());
 						}
 					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
+        } else {
+            getView().activateButton(false);
         }
 	}
 
