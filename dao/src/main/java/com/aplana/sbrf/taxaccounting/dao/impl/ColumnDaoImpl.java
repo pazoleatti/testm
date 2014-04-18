@@ -119,7 +119,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		int order = 0;
 		for (Column col: columns) {
 			col.setOrder(++order);
-			if (col.getId() == null || col.getId().intValue() < 0) {
+			if (col.getId() == null || col.getId() < 0) {
 				newColumns.add(col);
 			} else {
 				oldColumns.add(col);
@@ -153,7 +153,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
             int counter = 0;
             for (Column column : newColumns) {
-                if (column.getId() == null || column.getId().intValue() < 0) {
+                if (column.getId() == null || column.getId() < 0) {
                     if (column.getId() != null) {
                         idsMapping.put(column.getId(), genKeys.get(counter).intValue());
                     }
@@ -166,7 +166,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 if (column instanceof ReferenceColumn) {
                     ReferenceColumn referenceColumn = ((ReferenceColumn)column);
                     // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
-                    if((referenceColumn.getParentId()==0)&&(referenceColumn.getParentAlias()!=null)){
+                    if(referenceColumn.getParentId()==0 && referenceColumn.getParentAlias()!=null){
                         referenceColumn.setParentId(
                                 formTemplate.getColumn(
                                         referenceColumn.getParentAlias()).getId());
@@ -355,15 +355,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         if (attributeId == null) {
             return null;
         }
-        StringBuilder query = new StringBuilder("SELECT DISTINCT ATTRIBUTE_ID2" +
+        String query = "SELECT DISTINCT ATTRIBUTE_ID2" +
                 " FROM FORM_COLUMN" +
                 " WHERE ATTRIBUTE_ID=" + attributeId +
                 " AND ATTRIBUTE_ID2 is not null" +
-                " AND ATTRIBUTE_ID2<>0"
-        );
+                " AND ATTRIBUTE_ID2<>0";
 
         List<Long> result = getJdbcTemplate().queryForList(
-                query.toString(),
+                query,
                 Long.class
         );
         if (result.isEmpty()) {
