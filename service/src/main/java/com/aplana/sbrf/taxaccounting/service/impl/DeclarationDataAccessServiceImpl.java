@@ -51,31 +51,22 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 	 *            идентификатор подразделения, к которому относится декларация
 	 * @param reportPeriodId
 	 *            идентификатор отчетного периода
-	 * @return true - права есть, false - прав нет
+     * @param checkedSet
+     *            необязательный параметр — набор проверенных наборов параметров, используется для оптимизации
 	 */
 	private void checkRolesForReading(TAUserInfo userInfo,
-			int declarationDepartmentId, int reportPeriodId) {
-		Department declarationDepartment = departmentService.getDepartment(declarationDepartmentId);
-		checkRolesForReading(userInfo, declarationDepartment, reportPeriodId);
-	}
+			int declarationDepartmentId, int reportPeriodId, Set<String> checkedSet) {
 
-	/**
-	 * Перегруженный вариант {@link #checkRolesForReading(TAUserInfo, int, int)},
-	 * принимающий объекты вместо идентификаторов
-	 * 
-	 * В сущности функция проверка проверяет наличие прав на просмотр
-	 * декларации, логика вынесена в отдельный метод, так как используется в
-	 * нескольких местах данного сервиса
-	 * 
-	 * @param userInfo
-	 *            информация о пользователе
-	 *
-	 * @param declarationDepartment
-	 *            подразделение, к которому относится декларация
-	 * @param reportPeriodId
-	 *            код отчетного периода
-	 */
-	private void checkRolesForReading(TAUserInfo userInfo, Department declarationDepartment, int reportPeriodId) {
+        if (checkedSet != null) {
+            String key = userInfo.getUser().getId() + "_" + declarationDepartmentId + "_" + reportPeriodId;
+            if (checkedSet.contains(key)) {
+                return;
+            }
+            checkedSet.add(key);
+        }
+
+		Department declarationDepartment = departmentService.getDepartment(declarationDepartmentId);
+
 		// Нельзя работать с декларациями в отчетном периоде вида "ввод остатков"
 		if (reportPeriodService.isBalancePeriod(reportPeriodId, Long.valueOf(declarationDepartment.getId()))) {
 			throw new AccessDeniedException("Декларация в отчетном периоде вида для ввода остатков");
@@ -102,16 +93,16 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         throw new AccessDeniedException("Нет прав на доступ к декларации");
 	}
 
-	private void canRead(TAUserInfo userInfo, long declarationDataId) {
+	private void canRead(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Просматривать декларацию может только контролёр УНП и контролёр
 		// текущего уровня для обособленных подразделений
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+				declaration.getReportPeriodId(), checkedSet);
 	}
 
 	private void canCreate(TAUserInfo userInfo, int declarationTemplateId,
-			int departmentId, int reportPeriodId) {
+			int departmentId, int reportPeriodId, Set<String> checkedSet) {
 		// Для начала проверяем, что в данном подразделении вообще можно
 		// работать с декларациями данного вида
 		if (!reportPeriodService.isActivePeriod(reportPeriodId, departmentId)) {
@@ -135,106 +126,112 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 		}
 		// Создавать декларацию могут только контролёры УНП и контролёры
 		// текущего уровня обособленного подразделения
-		checkRolesForReading(userInfo, departmentId, reportPeriodId);
+		checkRolesForReading(userInfo, departmentId, reportPeriodId, checkedSet);
 	}
 
-	private void canAccept(TAUserInfo userInfo, long declarationDataId) {
+	private void canAccept(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Принять декларацию можно только если она еще не принята
 		if (declaration.isAccepted()) {
-			throw new AccessDeniedException("Декларация не должна быть принята");
+			throw new AccessDeniedException("Декларация уже принята");
 		}
 		// Принять декларацию могут только контолёр текущего уровня
 		// обособленного подразделения и контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+				declaration.getReportPeriodId(), checkedSet);
 	}
 
-	private void canReject(TAUserInfo userInfo, long declarationDataId) {
+	private void canReject(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Отменить принятие декларации можно только если она принята
 		if (!declaration.isAccepted()) {
-			throw new AccessDeniedException("Декларация должна быть принята");
+			throw new AccessDeniedException("Декларация не принята");
 		}
 		// Отменить принятие декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+				declaration.getReportPeriodId(), checkedSet);
 	}
 
-	private void canDelete(TAUserInfo userInfo, long declarationDataId) {
+	private void canDelete(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Удалять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
-			throw new AccessDeniedException("Декларация не должна быть принята");
+			throw new AccessDeniedException("Декларация принята");
 		}
 		// Удалять могут только контолёр текущего уровня и контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-				declaration.getReportPeriodId());
+				declaration.getReportPeriodId(), checkedSet);
 	}
 
-	private void canRefresh(TAUserInfo userInfo, long declarationDataId) {
+	private void canRefresh(TAUserInfo userInfo, long declarationDataId, Set<String> checkedSet) {
 		DeclarationData declaration = declarationDataDao.get(declarationDataId);
 		// Обновлять декларацию можно только если она не принята
 		if (declaration.isAccepted()) {
-			throw new AccessDeniedException("Декларация не должна быть принята");
+			throw new AccessDeniedException("Декларация принята");
 		}
 
         // Обновлять декларацию могут только контолёр текущего уровня и
 		// контролёр УНП
 		checkRolesForReading(userInfo, declaration.getDepartmentId(),
-                declaration.getReportPeriodId());
+                declaration.getReportPeriodId(), checkedSet);
 	}
 
-	@Override
-	public void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent... scriptEvents) {
-        // TODO Оптимизировать http://jira.aplana.com/browse/SBRFACCTAX-5412
-		for (FormDataEvent scriptEvent : scriptEvents) {
-			switch (scriptEvent) {
-			case MOVE_CREATED_TO_ACCEPTED:
-				canAccept(userInfo, declarationDataId);
-				break;
-			case MOVE_ACCEPTED_TO_CREATED:
-				canReject(userInfo, declarationDataId);
-				break;
-			case GET_LEVEL0:
+    @Override
+    public void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent) {
+        checkEvents(userInfo, declarationDataId, scriptEvent, null);
+    }
+
+    private void checkEvents(TAUserInfo userInfo, Long declarationDataId, FormDataEvent scriptEvent, Set<String> checkedSet) {
+        switch (scriptEvent) {
+            case MOVE_CREATED_TO_ACCEPTED:
+                canAccept(userInfo, declarationDataId, checkedSet);
+                break;
+            case MOVE_ACCEPTED_TO_CREATED:
+                canReject(userInfo, declarationDataId, checkedSet);
+                break;
+            case GET_LEVEL0:
             case GET_LEVEL1:
-				canRead(userInfo, declarationDataId);
-				break;
-			case DELETE:
-				canDelete(userInfo, declarationDataId);
-				break;
-			case CALCULATE:
-				canRefresh(userInfo, declarationDataId);
-				break;
-			default:
-				throw new AccessDeniedException("Операция не предусмотрена в системе");
-			}
-		}
-	}
+                canRead(userInfo, declarationDataId, checkedSet);
+                break;
+            case DELETE:
+                canDelete(userInfo, declarationDataId, checkedSet);
+                break;
+            case CALCULATE:
+                canRefresh(userInfo, declarationDataId, checkedSet);
+                break;
+            default:
+                throw new AccessDeniedException("Операция не предусмотрена в системе");
+        }
+    }
 
-	@Override
-	public void checkEvents(TAUserInfo userInfo,
-			Integer declarationTemplateId, Integer departmentId,
-			Integer reportPeriodId, FormDataEvent... scriptEvents) {
-		for (FormDataEvent scriptEvent : scriptEvents) {
-			switch (scriptEvent) {
-			case CREATE:
-				canCreate(userInfo, declarationTemplateId, departmentId, reportPeriodId);
-				break;
-			default:
-				throw new AccessDeniedException("Операция не предусмотрена в системе");
-			}
-		}
-	}
+    @Override
+    public void checkEvents(TAUserInfo userInfo,
+                            Integer declarationTemplateId, Integer departmentId,
+                            Integer reportPeriodId, FormDataEvent scriptEvent) {
+        checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, scriptEvent, null);
+    }
+
+    private void checkEvents(TAUserInfo userInfo,
+                            Integer declarationTemplateId, Integer departmentId,
+                            Integer reportPeriodId, FormDataEvent scriptEvent, Set<String> checkedSet) {
+        switch (scriptEvent) {
+            case CREATE:
+                canCreate(userInfo, declarationTemplateId, departmentId, reportPeriodId, checkedSet);
+                break;
+            default:
+                throw new AccessDeniedException("Операция не предусмотрена в системе");
+        }
+    }
 
 	@Override
 	public Set<FormDataEvent> getPermittedEvents(TAUserInfo userInfo,
 			Long declarationDataId) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
+        Set<String> checkedSet = new HashSet<String>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
 			try{
-				checkEvents(userInfo, declarationDataId, new FormDataEvent[]{scriptEvent});
+				checkEvents(userInfo, declarationDataId, scriptEvent, checkedSet);
 				result.add(scriptEvent);
 			} catch (Exception e) {
 				// Nothink
@@ -248,9 +245,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			Integer declarationTemplateId, Integer departmentId,
 			Integer reportPeriodId) {
 		Set<FormDataEvent> result = new HashSet<FormDataEvent>();
+        Set<String> checkedSet = new HashSet<String>();
 		for (FormDataEvent scriptEvent : FormDataEvent.values()) {
 			try{
-				checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, new FormDataEvent[]{scriptEvent});
+				checkEvents(userInfo, declarationTemplateId, departmentId, reportPeriodId, scriptEvent, checkedSet);
 				result.add(scriptEvent);
 			} catch (Exception e) {
 				// Nothink
