@@ -170,7 +170,7 @@ void importData() {
         return
     }
 
-    checkHeaderSize(xml.row.size(), xml.row[0].cell.size(), 3, 23)
+    checkHeaderSize(xml.row.size(), xml.row[0].cell.size(), 23, 3)
 
     def headerMapping = [
             (xml.row[0].cell[0]) : '№ пп.',
@@ -201,6 +201,9 @@ void importData() {
             (xml.row[1].cell[20]): 'Номер платёжного поручения',
             (xml.row[1].cell[21]): 'Сумма'
     ]
+    (0..22).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
@@ -214,12 +217,8 @@ void addData(def xml, headRowCount) {
 
     // количество графов в таблице
     def columnCount = 23
-
-    def tmp
     def rows = []
-
     def indexRow = 0
-
     def int rowIndex = 1
 
     for (def row : xml.row) {
@@ -227,12 +226,6 @@ void addData(def xml, headRowCount) {
 
         // пропустить шапку таблицы
         if (indexRow <= headRowCount) {
-            continue
-        }
-
-        // проверить по грн итоговая ли это строка
-        tmp = (row.cell[0] != null ? row.cell[0].text() : null)
-        if (tmp != null && tmp.contains('Итог')) {
             continue
         }
 
@@ -258,7 +251,7 @@ void addData(def xml, headRowCount) {
             colIndex++
 
             // графа 4 - справочник "Коды субъектов Российской Федерации"
-            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[colIndex].text(), indexRow, colIndex, true)
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[colIndex].text(), indexRow, colIndex, false)
             colIndex++
 
             // графа 5
