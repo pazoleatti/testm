@@ -13,32 +13,6 @@ import groovy.transform.Field
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
- 1.     dividendType                    Вид дивидендов
- 2.     taxPeriod                       Налоговый (отчетный) период
- 3. 	financialYear                   Отчетный год
- 4. 	dividendSumRaspredPeriod        Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Всего
- 5. 	dividendForgeinOrgAll           Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России. Дивиденды, начисленные иностранным организациям, всего
- 6. 	dividendForgeinPersonalAll      Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России. Дивиденды, начисленные физическим лицам, не являющимся резидентами России, всего
- 7. 	dividendTotalRaspredPeriod      Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Итого
- 8. 	dividendStavka0                 Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России, дивиденды, налоги с которых исчислены по ставке, 0%
- 9. 	dividendStavkaLess5             Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России, дивиденды, налоги с которых исчислены по ставке, до 5% включительно
- 10. 	dividendStavkaMore5             Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России, дивиденды, налоги с которых исчислены по ставке, свыше 5% и до 10% включительно
- 11. 	dividendStavkaMore10            Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, начисленные иностранным организациям и физическим лицам, не являющимся резидентами России, дивиденды, налоги с которых исчислены по ставке, свыше 10%
- 12. 	dividendRussianMembersAll       Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам), всего
- 13. 	dividendRussianMembersTotal     Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам). Итого
- 14. 	dividendRussianOrgStavka9       Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам), в том числе в пользу, российских организаций (налоговая ставка), 9%
- 15. 	dividendRussianOrgStavka0       Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам), в том числе в пользу, российских организаций (налоговая ставка), 0%
- 16. 	dividendPersonRussia            Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам), в том числе в пользу, физических лиц - резидентов России
- 17. 	dividendMembersNotRussianTax    Сумма дивидендов, подлежащих распределению между акционерами (участниками) в текущем налоговом периоде. Дивиденды, подлежащие распределению российским акционерам (участникам), в том числе в пользу акционеров (участников), не являющихся налогоплательщиками
- 18. 	dividendAgentAll                Дивиденды, полученные самим налоговым агентом в предыдущем и в текущем налоговом периоде до распределения дивидендов между акционерами (участниками). Всего
- 19. 	dividendAgentWithStavka0        Дивиденды, полученные самим налоговым агентом в предыдущем и в текущем налоговом периоде до распределения дивидендов между акционерами (участниками). В т. ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%
- 20. 	dividendSumForTaxAll            Сумма дивидендов, используемых для исчисления налога. Всего
- 21. 	dividendSumForTaxStavka9        Сумма дивидендов, используемых для исчисления налога. В том числе по российским организациям (по налоговой ставке), 9%
- 22. 	dividendSumForTaxStavka0        Сумма дивидендов, используемых для исчисления налога. В том числе по российским организациям (по налоговой ставке), 0%
- 23. 	taxSum                          Исчисленная сумма налога, подлежащая уплате в бюджет
- 24. 	taxSumFromPeriod                Сумма налога, начисленная с дивидендов, выплаченных в предыдущие отчетные (налоговые) периоды
- 25. 	taxSumFromPeriodAll             Сумма налога, начисленная с дивидендов, выплаченных в последнем квартале (месяце) отчетного (налогового) периода - всего
- *
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -77,20 +51,20 @@ switch (formDataEvent) {
 @Field
 def refBookCache = [:]
 
-// 3, 5, 6, 8-12, 14-19, 25
 @Field
 def editableColumns = ['financialYear', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll',
-                       'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendRussianMembersAll',
-                       'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
-                       'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriodAll']
+        'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendRussianMembersAll',
+        'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
+        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriodAll']
 
-// Проверяемые на пустые значения атрибуты 1 – 11, 14 – 19, 24, 25
+// Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['dividendType', 'taxPeriod', 'financialYear', 'dividendSumRaspredPeriod', 'dividendForgeinOrgAll',
-                       'dividendForgeinPersonalAll', 'dividendTotalRaspredPeriod', 'dividendStavka0', 'dividendStavkaLess5',
-                       'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0',
-                       'dividendPersonRussia', 'dividendMembersNotRussianTax', 'dividendAgentAll', 'dividendAgentWithStavka0',
-                       'taxSumFromPeriod', 'taxSumFromPeriodAll']
+        'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5',
+        'dividendStavkaMore10', 'dividendRussianMembersAll', 'dividendRussianOrgStavka9', 'dividendRussianOrgStavka0',
+        'dividendPersonRussia', 'dividendMembersNotRussianTax', 'dividendAgentAll', 'dividendAgentWithStavka0',
+        'dividendSumForTaxAll', 'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod',
+        'taxSumFromPeriodAll']
 
 //// Обертки методов
 
@@ -114,20 +88,16 @@ void calc() {
             row.taxPeriod = '34'
             // графа 4
             row.dividendSumRaspredPeriod = checkOverpower(calc4(row), row, "dividendSumRaspredPeriod")
-            // графа 7
-            row.dividendTotalRaspredPeriod = checkOverpower(calc7(row), row, "dividendTotalRaspredPeriod")
-            // графа 13
-            row.dividendRussianMembersTotal = roundValue(row.dividendRussianMembersAll, 0)
+            // графа 18
+            row.dividendSumForTaxAll = checkOverpower(calc18(row), row, "dividendSumForTaxAll")
+            // графа 19
+            row.dividendSumForTaxStavka9 = checkOverpower(calc19(row), row, "dividendSumForTaxStavka9")
             // графа 20
-            row.dividendSumForTaxAll = checkOverpower(calc20(row), row, "dividendSumForTaxAll")
+            row.dividendSumForTaxStavka0 = checkOverpower(calc20(row), row, "dividendSumForTaxStavka0")
             // графа 21
-            row.dividendSumForTaxStavka9 = checkOverpower(calc21(row), row, "dividendSumForTaxStavka9")
+            row.taxSum = checkOverpower(calc21(row), row, "taxSum")
             // графа 22
-            row.dividendSumForTaxStavka0 = checkOverpower(calc22(row), row, "dividendSumForTaxStavka0")
-            // графа 23
-            row.taxSum = checkOverpower(calc23(row), row, "taxSum")
-            // графа 24
-            row.taxSumFromPeriod = checkOverpower(calc24(row), row, "taxSumFromPeriod")
+            row.taxSumFromPeriod = checkOverpower(calc22(row), row, "taxSumFromPeriod")
         }
         dataRowHelper.update(dataRows);
     }
@@ -140,42 +110,35 @@ def BigDecimal calc4(def row) {
     return roundValue(row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendRussianMembersAll, 0)
 }
 
-def BigDecimal calc7(def row) {
-    if (row.dividendForgeinOrgAll == null || row.dividendForgeinPersonalAll == null) {
-        return null
-    }
-    return roundValue(row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll, 0)
-}
-
-def BigDecimal calc20(def row) {
+def BigDecimal calc18(def row) {
     if (row.dividendRussianMembersAll == null || row.dividendAgentWithStavka0 == null) {
         return null
     }
     return roundValue((row.dividendRussianMembersAll ?: 0) - (row.dividendAgentWithStavka0 ?: 0), 0)
 }
 
-def BigDecimal calc21(def row) {
+def BigDecimal calc19(def row) {
     if (row.dividendRussianOrgStavka9 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
         return null
     }
     return roundValue(row.dividendRussianOrgStavka9 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
 }
 
-def BigDecimal calc22(def row) {
+def BigDecimal calc20(def row) {
     if (row.dividendRussianOrgStavka0 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
         return null
     }
     return roundValue(row.dividendRussianOrgStavka0 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
 }
 
-def BigDecimal calc23(def row) {
+def BigDecimal calc21(def row) {
     if (row.dividendSumForTaxStavka9 == null) {
         return null
     }
     return roundValue(row.dividendSumForTaxStavka9 * 0.09, 0)
 }
 
-def BigDecimal calc24(def row) {
+def BigDecimal calc22(def row) {
     // TODO сумма или одна строка? если одна строка - то закоментаренный вариант
     // [15:10:41] Sariya Mustafina: в прошлом периоде должна быть одна строка
     // [15:10:55] Sariya Mustafina: но это нигде не проверяется
@@ -201,22 +164,21 @@ def logicCheck() {
 
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['dividendSumRaspredPeriod', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
-                                'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod']
+            'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod']
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
     for (def row in dataRows) {
-
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // Арифметические проверки расчета граф 4, 18, 19, 20, 22
         needValue['dividendSumRaspredPeriod'] = calc4(row)
-        needValue['dividendSumForTaxAll'] = calc20(row)
-        needValue['dividendSumForTaxStavka9'] = calc21(row)
-        needValue['dividendSumForTaxStavka0'] = calc22(row)
-        needValue['taxSum'] = calc23(row)
-        needValue['taxSumFromPeriod'] = calc24(row)
+        needValue['dividendSumForTaxAll'] = calc18(row)
+        needValue['dividendSumForTaxStavka9'] = calc19(row)
+        needValue['dividendSumForTaxStavka0'] = calc20(row)
+        needValue['taxSum'] = calc21(row)
+        needValue['taxSumFromPeriod'] = calc22(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 2. Проверка наличия формы за предыдущий отчётный период

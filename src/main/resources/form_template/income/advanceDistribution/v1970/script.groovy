@@ -766,30 +766,26 @@ def getTaxBase() {
                 group5 -= consumptionTaxSumS
             }
             //k34
-            if (khy in ['23150']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k35
             if (khy in ['23160']) {
                 group5 -= consumptionTaxSumS
             }
-            //k36
+            //k35
             if (khy in ['23170']) {
                 group5 -= consumptionTaxSumS
             }
-            //k37
+            //k36
             if (khy in ['21760']) {
                 taxBase -= roundValue(consumptionTaxSumS, 0)
             }
-            //k38
+            //k37
             if (khy in ['21460']) {
                 taxBase -= roundValue(consumptionTaxSumS, 0)
             }
-            //k39
+            //k38
             if (khy in ['21470']) {
                 taxBase -= roundValue(consumptionTaxSumS, 0)
             }
-            //k40
+            //k39
             if (khy in ['21385']) {
                 taxBase -= roundValue(consumptionTaxSumS, 0)
             }
