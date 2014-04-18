@@ -20,6 +20,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.PeriodService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SourceService"/>
+    </bean>
 
     <bean id="formDataSearchService" class="com.aplana.sbrf.taxaccounting.service.impl.FormDataSearchServiceImpl" />
 </beans>

@@ -33,7 +33,8 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	
 	@Override
 	public void revealErrorPlace(String invalidHistoryToken) {
-		revealDefaultPlace();
+		//revealDefaultPlace();
+        revealPlace(new PlaceRequest(ErrorNameTokens.ERROR));
 	}
 	
 	

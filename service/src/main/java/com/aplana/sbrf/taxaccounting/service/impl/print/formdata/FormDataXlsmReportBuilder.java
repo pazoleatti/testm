@@ -154,10 +154,12 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         int nullColumnCount = 0;
         //Необходимо чтобы определять нулевые столбцы для Excel, по идее в конце должно делаться
-        for (int i = 0; i < formTemplate.getColumns().size(); i++ ){
+        for (int i = formTemplate.getColumns().size() - 1, j = 0; i >= 0 && j <= 2; i-- ){
             if (formTemplate.getColumns().get(i).getWidth() == 0){
                 sheet.setColumnWidth(i, 0);
                 nullColumnCount++;
+            } else {
+                j++;
             }
         }
 
@@ -199,7 +201,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
-
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_NAME).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow()) != null ? sheet.getRow(ar.getFirstCell().getRow())
                 : sheet.createRow(ar.getFirstCell().getRow());
@@ -215,14 +216,23 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, 0);
 
         //Fill code
-        StringTokenizer sToK = new StringTokenizer(formTemplate.getCode(), XlsxReportMetadata.REPORT_DELIMITER);//This needed because we can have not only one delimiter
-        int j = 0;
-
-        int shiftCode = formTemplate.getColumns().size() - nullColumnCount - 2;
-        while(sToK.hasMoreTokens()){
-            createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, sToK.nextToken(), j, shiftCode);
-            j++;
+        AreaReference ar2 = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
+        Row r2 = sheet.getRow(ar2.getFirstCell().getRow()) != null ? sheet.getRow(ar2.getFirstCell().getRow())
+                : sheet.createRow(ar2.getFirstCell().getRow());
+        int shiftCode = formTemplate.getColumns().size() - ar2.getFirstCell().getCol() - 2 - nullColumnCount;
+        int countColumnsCode = 1;
+        if (shiftCode < 0) {
+            countColumnsCode = shiftCode >= -1 ? -shiftCode : 0;
+            shiftCode = 0;
         }
+        countColumnsCode += nullColumnCount;
+
+        String code = formTemplate.getCode().replace(XlsxReportMetadata.REPORT_DELIMITER, '\n');
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_CODE, code, 0, shiftCode);
+        for(int i = shiftCode; i <= shiftCode + countColumnsCode; i++) {
+            createNotHiddenCell(ar2.getFirstCell().getCol() + i, r2).setCellStyle(cellStyle);
+        }
+        r2.setHeight((short) -1);
 
         //Fill period
         if (!refBookValue.getStringValue().equals("34"))

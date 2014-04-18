@@ -258,9 +258,9 @@ BigDecimal calc8(def row) {
 // Ресчет графы 10
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
-    if ([1, 2, 8..10].contains(group) && row.cost != null) {
+    if ([1, 2, 8, 9, 10].contains(group) && row.cost != null) {
         return round(row.cost * 0.1)
-    } else if ([3..7].contains(row.amortGroup) && row.cost != null) {
+    } else if ((3..7).contains(group) && row.cost != null) {
         return round(row.cost * 0.3)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
         return 0

@@ -5,55 +5,63 @@ import java.util.Map;
 
 public enum FieldNames {
 	
-	LOGIN(0) {
+	LOGIN() {
 		@Override
 		public String nameField() {
 			return "LOGIN";
 		}
 	},
-	NAME(1) {
+	NAME() {
 		@Override
 		public String nameField() {
 			return "NAME";
 		}
 	},
-	DEPARTAMENT_ID(2) {
+	DEPARTAMENT_ID() {
 		@Override
 		public String nameField() {
 			return "DEPARTAMENT_ID";
 		}
 	},
-	IS_ACTIVE(3) {
+	IS_ACTIVE() {
 		@Override
 		public String nameField() {
 			return "IS_ACTIVE";
 		}
 	},
-	EMAIL(4) {
+	EMAIL() {
 		@Override
 		public String nameField() {
 			return "EMAIL";
 		}
 	},
-	ROLE_CODE(5) {
+	ROLE_CODE() {
 		@Override
 		public String nameField() {
 			return "ROLE_CODE";
 		}
 	};
-	
-	private int id;
-	FieldNames(int id){this.id = id;}
+
 	public abstract String nameField();
-	private int getId(){
-		return id;
-	}
-	
-	public static Map<String, Integer> getFieldNamesMap(){
-		Map<String, Integer> fieldNames = new HashMap<String, Integer>();
+
+	public static Map<String, FieldNames> getFieldNamesMap(){
+		Map<String, FieldNames> fieldNames = new HashMap<String, FieldNames>(FieldNames.values().length);
 		for (int i = 0; i < FieldNames.values().length; i++)
-			fieldNames.put(FieldNames.values()[i].nameField(), FieldNames.values()[i].getId());
+			fieldNames.put(FieldNames.values()[i].nameField(), FieldNames.values()[i]);
 		return fieldNames;
 	}
 
+    public static boolean containsName(String attrName){
+        for (int i = 0; i < FieldNames.values().length; i++)
+            if (FieldNames.values()[i].nameField().equals(attrName))
+                return true;
+        return false;
+    }
+
+    public static FieldNames getByName(String attrName){
+        for (int i = 0; i < FieldNames.values().length; i++)
+            if (FieldNames.values()[i].nameField().equals(attrName))
+                return FieldNames.values()[i];
+        return null;
+    }
 }

@@ -11,25 +11,31 @@ import com.aplana.sbrf.taxaccounting.web.module.sudir.ws.assembler.FieldNames;
 import java.util.Map;
 
 public class ValidationService {
-	
-public static Map<String, Integer> fieldNames = FieldNames.getFieldNamesMap();
+
 	
 	public void validate(GenericAccountInfo gai) throws GenericAccountManagementException_Exception{
-		if(gai.getAttributes().getItem().size() < 6){
-			throw new GenericAccountManagementException_Exception("Не все обязательные атрибуты заполнены. " +
-					"Должно быть " + fieldNames.size(), errorCreator(SudirErrorCodes.SUDIR_007));
-		}
+        if(gai.getAttributes().getItem().size() <= 5){
+            Map<String, FieldNames> copy = FieldNames.getFieldNamesMap();
+            for (GenericAttribute ga : gai.getAttributes().getItem()) {
+                if (copy.containsKey(ga.getName()))
+                    copy.remove((ga.getName()));
+            }
+            if (copy.size() == 1 && !copy.containsKey(FieldNames.EMAIL.nameField()))
+                throw new GenericAccountManagementException_Exception(
+                        String.format("Не все обязательные атрибуты заполнены. Не заполнен атрибут: %s ", copy.keySet().toArray()[0]),
+                        errorCreator(SudirErrorCodes.SUDIR_007));
+        }
 		for (GenericAttribute ga : gai.getAttributes().getItem()) {
-			if(fieldNames.get(ga.getName()) == null)
-				throw new GenericAccountManagementException_Exception("Передаваемая информация содержит лишние данные" + ga.getName(),
+			if(!FieldNames.containsName(ga.getName()))
+				throw new GenericAccountManagementException_Exception("Передаваемая информация содержит лишние данные " + ga.getName(),
 						errorCreator(SudirErrorCodes.SUDIR_010));
 			
-			if(fieldNames.get(ga.getName()) == 2){
+			if(FieldNames.getByName(ga.getName()) == FieldNames.DEPARTAMENT_ID){
 				if(ga.getValues().getItem().size() != 1)
-					throw new GenericAccountManagementException_Exception("", errorCreator(SudirErrorCodes.SUDIR_009));
+					throw new GenericAccountManagementException_Exception("Должен содержаться только один аттрибут.", errorCreator(SudirErrorCodes.SUDIR_009));
 			}
 			
-			if(fieldNames.get(ga.getName()) == 5){
+			if(FieldNames.getByName(ga.getName()) == FieldNames.ROLE_CODE){
 				if(ga.getValues().getItem().size() == 0)
 					throw new GenericAccountManagementException_Exception("Не заполнены роли пользователя. ", errorCreator(SudirErrorCodes.SUDIR_007));
 			}

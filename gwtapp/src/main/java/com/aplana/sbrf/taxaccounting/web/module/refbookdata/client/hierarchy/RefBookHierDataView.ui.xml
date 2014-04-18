@@ -31,10 +31,15 @@
             right: 0;
             left: 0;
             top: 34px;
+            border-top: 1px solid #aeaeac;
         }
 
         .marginRight5 {
             margin-right: 5px;
+        }
+
+        .marginRight2{
+            margin-right: 2px;
         }
 
         .horSep {
@@ -74,16 +79,20 @@
         <fm:body>
             <fm:BodyContainer>
 
-                <g:HorizontalPanel spacing="4" addStyleNames="{style.btnPanel}">
-                    <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit" addStyleNames="{style.marginRight5}"/>
-                    <style:LinkButton title="Добавить строку" text="Добавить строку" ui:field="addRow"
-                                      img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
-                    <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
-                                      img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
-                    <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
-                    <g:Button title="Завершить редактирование" width="100%" text="Завершить редактирование" ui:field="cancelEdit"/>
-                    <g:Label wordWrap="false" text="Дата актуальности: "/>
-                    <d:DateMaskBoxPicker ui:field="relevanceDate"/>
+                <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.btnPanel}">
+                    <g:HorizontalPanel verticalAlignment="middle">
+                        <style:LinkButton title="Добавить строку" text="Добавить строку" ui:field="addRow"
+                                          img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
+                        <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
+                                          img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
+                        <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel verticalAlignment="middle">
+                        <g:Label wordWrap="false" text="Дата актуальности: " addStyleNames="{style.marginRight2}"/>
+                        <d:DateMaskBoxPicker ui:field="relevanceDate" width="110px"/>
+                    </g:HorizontalPanel>
+
                     <g:cell width="99%">
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                             <g:HTML addStyleNames="{style.verSep}"/>
@@ -91,9 +100,14 @@
                             <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                         </g:HorizontalPanel>
                     </g:cell>
-                </g:HorizontalPanel>
 
-                <g:Label addStyleNames="{style.horSep}"/>
+                    <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
+                        <g:Button title="Завершить редактирование" text="Завершить редактирование"
+                                  ui:field="cancelEdit"/>
+                        <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit"/>
+                    </g:HorizontalPanel>
+
+                </g:HorizontalPanel>
 
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
@@ -14,6 +13,8 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 public class GetRowsDataHandler extends
@@ -56,6 +57,15 @@ public class GetRowsDataHandler extends
 
 		result.setDataRows(dataRowService.getDataRows(userInfo,
 				action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual()));
+
+        if (action.isManual() && result.getDataRows() != null && !result.getDataRows().isEmpty()) {
+            Set<String> aliases = result.getDataRows().get(0).keySet();
+            for (DataRow<Cell> row : result.getDataRows()) {
+                for (String alias : aliases) {
+                    row.getCell(alias).setEditable(true);
+                }
+            }
+        }
 
         refBookHelper.dataRowsDereference(result.getDataRows(),
                 formTemplate.getColumns());

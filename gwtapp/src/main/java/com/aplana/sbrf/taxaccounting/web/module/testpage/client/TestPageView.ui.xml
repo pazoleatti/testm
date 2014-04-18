@@ -139,9 +139,10 @@
                     <g:cell>
                         <g:HTMLPanel>
                             <g:Label text="Модальное окно" addStyleNames="{style.labelName}"/>
-                            <g:VerticalPanel addStyleNames="{style.borderr}">
-                                <g:Button ui:field="showDialog">Показать окно</g:Button>
-                                <g:Button ui:field="showDialog2">Показать диалоговое</g:Button>
+                            <g:VerticalPanel spacing="2" addStyleNames="{style.borderr}">
+                                <g:Button ui:field="showDialog" text="Показать окно"/>
+                                <g:Button ui:field="showDialog2" text="Показать диалоговое окно"/>
+                                <g:Button ui:field="showDialog3" text="Показать диалоговое окно2"/>
                             </g:VerticalPanel>
                         </g:HTMLPanel>
                     </g:cell>

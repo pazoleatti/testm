@@ -634,13 +634,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "   from(   SELECT row_id, column_id, TO_CHAR(value) as val \n"+
                 "           FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
                 "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
-                "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
+                "           UNION all SELECT nv.row_id, nv.column_id, \n" +
+                "                case when fc.precision is null or fc.precision = 0 then \n" +
+                "                    TO_CHAR(nv.value) \n" +
+                "                else \n" +
+                "                    ltrim(TO_CHAR(nv.value,substr('99999999999999999D0000000000',1,18+fc.precision))) \n" +
+                "                end as val \n" +
+                "            FROM NUMERIC_VALUE nv join form_column fc on fc.id = nv.column_id WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
                 "           UNION all SELECT row_id, rfc.id as column_id, rsq.val \n" +
                 "           from (  SELECT row_id, column_id, TO_CHAR(value) as val \n" +
                 "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +
                 "                       join FORM_COLUMN rfc on rsq.column_id = rfc.parent_column_id \n" +
                 "                   where rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null) d \n" +
-                "    JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
+                "    RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n"+
                 "    LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id \n"+
                 "    ORDER BY dr.ord \n" +
                 ") \n" +

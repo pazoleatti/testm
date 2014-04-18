@@ -3,12 +3,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -282,6 +285,59 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 },
                 DFT_MAPPER
         );
+    }
+
+    @Override
+    public List<Long> getByPerformerId(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
+        Object[] sqlParams = new Object[kinds.size()  + 1];
+        int cnt = 0;
+        for (FormDataKind kind : kinds) {
+            sqlParams[cnt] = kind.getId();
+            cnt++;
+        }
+        sqlParams[cnt] = performerDepId;
+        return getJdbcTemplate().queryForList(
+                "select dft.form_type_id from department_form_type dft where performer_dep_id = ? " +
+                " and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +")" +
+                " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)",
+                Long.class,
+                sqlParams
+        );
+    }
+
+
+    @Override
+    public List<Long> getFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds){
+        Object[] sqlParams = new Object[kinds.size() * 2 + 2];
+        int cnt = 2;
+        sqlParams[0] = performerDepId;
+        sqlParams[1] = String.valueOf(taxType.getCode());
+        for (FormDataKind kind : kinds) {
+            sqlParams[cnt] = kind.getId();
+            cnt++;
+        }
+        try {
+            return getJdbcTemplate().queryForList("with l1 (dep_id, type, kind) as (select dft.department_id, dft.form_type_id, dft.kind from department_form_type dft where performer_dep_id = ? " +
+                    " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)), " +
+                    "l2 (dep_id, type, kind) as (select distinct dft.department_id, dft.form_type_id, dft.kind " +
+                    "  from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
+                    "  where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                    "  and ft.id = dft.form_type_id and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +") " +
+                    "  and (dfts.department_id, dfts.form_type_id, dfts.kind) in (select * from l1)), " +
+                    "l3 (dep_id, type, kind) as (select distinct dft.department_id, dft.form_type_id, dft.kind " +
+                    "  from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
+                    "  where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
+                    "  and ft.id = dft.form_type_id and dfts.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +") " +
+                    "  and (dfts.department_id, dfts.form_type_id, dfts.kind) in (select * from l2)) " +
+                    "select type from l1 " +
+                    "union " +
+                    "select type from l2 " +
+                    "union " +
+                    "select type from l3 ",
+                    Long.class, sqlParams);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>(0);
+        }
     }
 
     @Override

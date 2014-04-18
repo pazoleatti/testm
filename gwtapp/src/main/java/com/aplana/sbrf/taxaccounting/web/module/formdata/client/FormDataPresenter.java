@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -132,7 +133,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    revealFormData(readOnlyMode, true, null);
+                                    revealFormData(false, true, null);
                                 }
                             }, FormDataPresenter.this)
                     );
