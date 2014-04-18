@@ -93,11 +93,6 @@ void generateXML() {
         formDataRecordsMap.put(formData.formType.id, formData)
     }
 
-    // Заполнение кэша
-//    if (!formDataRecords.isEmpty()) {
-//        formDataService.fillRefBookCache(matrixRecords.get(0).getId(), refBookCache)
-//    }
-
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(declarationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: departmentParam?.APP_VERSION?.stringValue,
@@ -119,7 +114,6 @@ void generateXML() {
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
-                    // ОКАТО: okato,
                     ОКВЭД: okvedCode,
                     Тлф: departmentParam?.PHONE?.stringValue
             ) {
@@ -144,11 +138,12 @@ void generateXML() {
                                 [Имя: firstname] +
                                 (lastname != null && !lastname.isEmpty() ? [Отчество: lastname] : [:])
                 )
-                if (prPodp == 2)
+                if (prPodp == 2) {
                     СвПред(
                             НаимДок: departmentParam?.APPROVE_DOC_NAME?.stringValue,
                             НаимОрг: departmentParam?.APPROVE_ORG_NAME?.stringValue
                     )
+                }
             }
 
             НДС() {
@@ -243,11 +238,33 @@ void generateXML() {
                         )
                     }
                 }
+
                 // РАЗДЕЛ 4
                 НалПодтв0(
-                    //
+                        СумУменИтог: 0
                 ) {
-                    //
+                    СумОпер4(
+                            КодОпер: null, // TODO Вычисление из 724.2.2
+                            НалБаза: null, // TODO Вычисление из 724.2.2
+                            НалВычПод: 0,
+                            НалНеПод: 0,
+                            НалВосст: 0
+                    )
+                }
+
+                // РАЗДЕЛ 7
+                ОперНеНал(
+                        ОплПостСв6Мес: 0
+                ) {
+                    rows = [] // TODO Строки 724.2.1
+                    for (def row : rows) {
+                        СумОпер7(
+                                КодОпер: null, // TODO Вычисление из row
+                                СтРеалТов: null, // TODO Вычисление из row
+                                СтПриобТов: null, // TODO Вычисление из row
+                                НалНеВыч: 0
+                        )
+                    }
                 }
             }
         }
