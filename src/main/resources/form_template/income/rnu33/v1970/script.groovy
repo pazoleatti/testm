@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 // графа    - fix
 // графа 2  - code                              атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
 // графа 3  - valuablePaper                     атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
-// графа 4  - issue                             атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги»
+// графа 4  - issue                             атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текст
 // графа 5  - purchaseDate
 // графа 6  - implementationDate
 // графа 7  - bondsCount
@@ -219,6 +219,7 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def dataProvider = refBookFactory.getDataProvider(84)
     def rowsRnu64 = getRnuRowsById(355)
     def codesFromRnu54 = []
     rowsRnu64.each { row ->
@@ -289,6 +290,10 @@ void logicCheck() {
             needValue['excessOfTheSellingPrice'] = calc27(row, code)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
+        def record = dataProvider.getRecords(reportPeriodEndDate, null, "ISSUE = ${row.issue}", null)
+        if (record.size() == 0) {
+            logger.error(errorMsg + "Значение графы «Выпуск» отсутствует в справочнике «Ценные бумаги»")
+        }
     }
 
     // 10. Проверка итоговых значений за текущий месяц
@@ -322,8 +327,8 @@ void sort(def dataRows) {
             return codeA <=> codeB
         }
         if (a.valuablePaper == b.valuablePaper) {
-            def codeA = getRefBookValue(84, a.issue)?.ISSUE?.value
-            def codeB = getRefBookValue(84, b.issue)?.ISSUE?.value
+            def codeA = a.issue
+            def codeB = b.issue
             return codeA <=> codeB
         }
         def codeA = getRefBookValue(62, a.valuablePaper)?.CODE?.value
@@ -644,9 +649,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 3
         newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги»
+        // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
         xmlIndexCol = 4
-        newRow.issue = getRecordIdImport(84, 'ISSUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.issue = row.cell[xmlIndexCol].text()
 
         // графа 5
         xmlIndexCol = 5
