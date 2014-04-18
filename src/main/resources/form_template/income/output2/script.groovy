@@ -246,7 +246,7 @@ void addData(def xml, headRowCount) {
 
             // графа 1
             def colIndex = 0
-            row.rowNumber = parseNumber(row.cell[colIndex].text(), indexRow, colIndex, logger, false)
+            newRow.rowNumber = parseNumber(row.cell[colIndex].text(), indexRow, colIndex, logger, false)
             colIndex++
 
             // графа 2
