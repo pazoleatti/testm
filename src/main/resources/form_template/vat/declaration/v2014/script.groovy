@@ -1,6 +1,5 @@
 package form_template.vat.declaration.v2014
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -13,62 +12,134 @@ import groovy.xml.MarkupBuilder
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        //checkDeparmentParams(LogLevel.WARNING)
+        checkDeparmentParams(LogLevel.WARNING)
         generateXML()
         break
     case FormDataEvent.CHECK:
-        //checkDeparmentParams(LogLevel.ERROR)
+        checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        //checkDeparmentParams(LogLevel.ERROR)
+        checkDeparmentParams(LogLevel.ERROR)
         break
     default:
         return
 }
 
-//// Кэш провайдеров
-//@Field
-//def providerCache = [:]
-//// Кэш значений справочника
-//@Field
-//def refBookCache = [:]
+// Кэш провайдеров
+@Field
+def providerCache = [:]
+// Кэш значений справочника
+@Field
+def refBookCache = [:]
 
-//void checkDeparmentParams(LogLevel logLevel) {
-//    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-//
-//    def departmentId = declarationData.departmentId
-//
-//    // Параметры подразделения
-//    def departmentParamList = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
-//
-//    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-//    }
-//
-//    def departmentParam = departmentParamList?.get(0)
-//
-//    // Проверки подразделения
-//    def List<String> errorList = getErrorDepartment(departmentParam)
-//    for (String error : errorList) {
-//        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
-//    }
-//    errorList = getErrorVersion(departmentParam)
-//    for (String error : errorList) {
-//        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
-//    }
-//}
+/**
+ * Получение провайдера с использованием кеширования
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Разыменование с использованием кеширования
+ * @param refBookId
+ * @param recordId
+ * @return
+ */
+def getRefBookValue(def long refBookId, def long recordId) {
+    if (!refBookCache.containsKey(recordId)) {
+        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
+    }
+    return refBookCache.get(recordId)
+}
+
+void checkDeparmentParams(LogLevel logLevel) {
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+
+    def departmentId = declarationData.departmentId
+
+    // Параметры подразделения
+    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
+
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+    }
+
+    def departmentParam = departmentParamList?.get(0)
+
+    // Проверки подразделения
+    def List<String> errorList = getErrorDepartment(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
+    }
+    errorList = getErrorVersion(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
+    }
+}
+
+List<String> getErrorDepartment(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование подразделения»")
+    }
+    if (record.OKTMO?.referenceValue == null) {
+        errorList.add("«Код по ОКТМО»")
+    }
+    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+        errorList.add("«ИНН»")
+    }
+    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП»")
+    }
+    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+        errorList.add("«Код налогового органа»")
+    }
+    if (record.OKVED_CODE?.referenceValue == null) {
+        errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
+    }
+    if (record.SIGNATORY_ID?.referenceValue == null) {
+        errorList.add("«Признак лица подписавшего документ»")
+    }
+    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+        errorList.add("«Фамилия подписанта»")
+    }
+    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+        errorList.add("«Имя подписанта»")
+    }
+    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    }
+    if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
+        errorList.add("«Код места, по которому представляется документ»")
+    }
+    errorList
+}
+
+List<String> getErrorVersion(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+        errorList.add("«Версия формата»")
+    }
+    if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_03')) {
+        errorList.add("«Версия программы, с помощью которой сформирован файл»")
+    }
+    errorList
+}
 
 /**
  * Запуск генерации XML
  */
 void generateXML() {
-    // def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    // TODO Пока настроек нет
-    def departmentParam = null//getProvider(-1).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    def departmentParam = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -80,11 +151,11 @@ void generateXML() {
     def String KND = '1151001'
 
     // ОКАТО
-    def okato = departmentParam?.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue).CODE.stringValue : null
+    def okato = departmentParam?.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue)?.CODE?.stringValue : null
     // ОКВЭД
-    def okvedCode = departmentParam?.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam?.OKVED_CODE?.referenceValue).CODE.stringValue : null
+    def okvedCode = departmentParam?.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam?.OKVED_CODE?.referenceValue)?.CODE?.stringValue : null
     // По месту
-    def taxPlaceTypeCode = departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue).CODE.stringValue : null
+    def taxPlaceTypeCode = departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue : null
     // Список данных форм-источников
     def formDataList = formDataCollection.getRecords()
     // Тип формы → Данные формы
