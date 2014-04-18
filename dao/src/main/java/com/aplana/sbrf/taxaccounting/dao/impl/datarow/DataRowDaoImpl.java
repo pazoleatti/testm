@@ -634,7 +634,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 "   from(   SELECT row_id, column_id, TO_CHAR(value) as val \n"+
                 "           FROM DATE_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
                 "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM STRING_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
-                "           UNION all SELECT row_id, column_id, TO_CHAR(value) as val FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) \n"+
+                "           UNION all SELECT nv.row_id, nv.column_id, \n" +
+                "                case when fc.precision is null or fc.precision = 0 then \n" +
+                "                    TO_CHAR(nv.value) \n" +
+                "                else \n" +
+                "                    ltrim(TO_CHAR(nv.value,substr('99999999999999999D0000000000',1,18+fc.precision))) \n" +
+                "                end as val \n" +
+                "            FROM NUMERIC_VALUE nv join form_column fc on fc.id = nv.column_id WHERE row_id in (select id from data_row where form_data_id=:fdId) \n" +
                 "           UNION all SELECT row_id, rfc.id as column_id, rsq.val \n" +
                 "           from (  SELECT row_id, column_id, TO_CHAR(value) as val \n" +
                 "                   FROM NUMERIC_VALUE WHERE row_id in (select id from data_row where form_data_id=:fdId) ) rsq \n" +

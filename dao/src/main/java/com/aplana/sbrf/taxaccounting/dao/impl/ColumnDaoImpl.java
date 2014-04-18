@@ -47,6 +47,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			} else if ("R".equals(type)) {
                 long attributeId = rs.getLong("attribute_id");
                 Long attributeId2 = rs.getLong("attribute_id2");
+                if (rs.wasNull()) {
+                    attributeId2 = null;
+                }
                 int parentColumnId = rs.getInt("parent_column_id");
                 String filter = rs.getString("filter");
                 if (parentColumnId == 0) {
@@ -317,7 +320,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
                                 ps.setNull(11, Types.CHAR);
                                 ps.setLong(12, ((ReferenceColumn) col).getParentId());
-                                ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
+                                if (((ReferenceColumn) col).getRefBookAttributeId2() != null) {
+                                    ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
+                                } else {
+                                    ps.setNull(13, Types.NULL);
+                                }
                             } else {
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(9, Types.INTEGER);

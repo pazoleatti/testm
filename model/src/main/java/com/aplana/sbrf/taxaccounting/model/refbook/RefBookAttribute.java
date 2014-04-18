@@ -318,7 +318,7 @@ public class RefBookAttribute implements Serializable {
 		sb.append(", required=").append(required);
         sb.append(", unique=").append(unique);
 		sb.append(", sortOrder=").append(sortOrder);
-        sb.append(", format=").append(format.getFormat());
+        sb.append(", format=").append(format != null ? format.getFormat() : null);
 		sb.append('}');
 		return sb.toString();
 	}

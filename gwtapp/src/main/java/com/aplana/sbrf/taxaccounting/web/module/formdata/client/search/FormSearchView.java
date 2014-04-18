@@ -8,6 +8,8 @@ import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -44,7 +46,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     private AsyncDataProvider<FormDataSearchResult> dataProvider = new  AsyncDataProvider<FormDataSearchResult>() {
         @Override
         protected void onRangeChanged(HasData<FormDataSearchResult> display) {
-            if (getUiHandlers() != null){
+            if (getUiHandlers() != null && !filterText.getText().isEmpty()){
                 Range range = display.getVisibleRange();
                 getUiHandlers().onRangeChange(range.getStart(), range.getLength());
             }
@@ -83,15 +85,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     }
 
     private void init(){
-        dataProvider = new AsyncDataProvider() {
-            @Override
-            protected void onRangeChanged(HasData display) {
-                if (getUiHandlers() != null){
-                    final Range range = display.getVisibleRange();
-                    getUiHandlers().onRangeChange(range.getStart(), range.getLength());
-                }
-            }
-        };
 
         pager.setDisplay(searchResultTable);
         searchResultTable.setPageSize(pager.getPageSize());
@@ -174,6 +167,16 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void onSearchClicked(ClickEvent event){
         if (!filterText.getText().isEmpty()){
             getUiHandlers().onRangeChange(0, pager.getPageSize());
+        }
+    }
+
+    @SuppressWarnings("GwtUiHandlerErrors")
+    @UiHandler("filterText")
+    void onFilterPressClicked(KeyPressEvent event) {
+        if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode()) {
+            if (!filterText.getText().isEmpty()){
+                getUiHandlers().onRangeChange(0, pager.getPageSize());
+            }
         }
     }
 

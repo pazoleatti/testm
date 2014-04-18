@@ -32,33 +32,33 @@ import groovy.transform.Field
 // графа 15 - totalPercIncome
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
@@ -137,9 +137,6 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    if (value == null) {
-        return null
-    }
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
 }
 
@@ -185,7 +182,7 @@ void calc() {
     sort(dataRows)
 
     def dateStart = getReportPeriodStartDate()
-    def dateEnd =  getReportPeriodEndDate()
+    def dateEnd = getReportPeriodEndDate()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -358,7 +355,7 @@ def getNewRow() {
 def calc14(def row, def dateStart, def dateEnd, def isA) {
     if (row.amount == null || row.cost == null || row.shortPositionOpen == null ||
             (!isA && row.shortPositionClose == null) || row.maturityDatePrev == null ||
-            row.maturityDateCurrent == null || row.currentCouponRate == null || row.incomeCurrentCoupon == null ) {
+            row.maturityDateCurrent == null || row.currentCouponRate == null || row.incomeCurrentCoupon == null) {
         return null
     }
     def tmp = 0
@@ -467,15 +464,15 @@ void importData() {
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 2)
     def headerMapping = [
-            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'currencyCode'),
-            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'issuer'),
-            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'regNumber'),
-            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'amount'),
-            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'cost'),
-            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'shortPositionOpen'),
-            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'shortPositionClose'),
-            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'pkdSumOpen'),
-            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'pkdSumClose'),
+            (xml.row[0].cell[0]): getColumnName(tmpRow, 'currencyCode'),
+            (xml.row[0].cell[2]): getColumnName(tmpRow, 'issuer'),
+            (xml.row[0].cell[3]): getColumnName(tmpRow, 'regNumber'),
+            (xml.row[0].cell[4]): getColumnName(tmpRow, 'amount'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[6]): getColumnName(tmpRow, 'shortPositionOpen'),
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'shortPositionClose'),
+            (xml.row[0].cell[8]): getColumnName(tmpRow, 'pkdSumOpen'),
+            (xml.row[0].cell[9]): getColumnName(tmpRow, 'pkdSumClose'),
             (xml.row[0].cell[10]): getColumnName(tmpRow, 'maturityDatePrev'),
             (xml.row[0].cell[11]): getColumnName(tmpRow, 'maturityDateCurrent'),
             (xml.row[0].cell[12]): getColumnName(tmpRow, 'currentCouponRate'),
@@ -497,15 +494,15 @@ def addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def groupsMap = [
-            'А. Открытые короткие позиции':'A',
-            'Б. Закрытые короткие позиции':'B'
+            'А. Открытые короткие позиции': 'A',
+            'Б. Закрытые короткие позиции': 'B'
     ]
     def subGroupsMap = [
-            '1. Ипотечные облигации, выпущенные до 1 января 2007 года':'1',
-            '2. Ипотечные облигации, выпущенные после 1 января 2007 года':'2',
-            '3. Корпоративные облигации':'3',
-            '4. ОВГВЗ':'4',
-            '5. Прочие еврооблигации':'5'
+            '1. Ипотечные облигации, выпущенные до 1 января 2007 года': '1',
+            '2. Ипотечные облигации, выпущенные после 1 января 2007 года': '2',
+            '3. Корпоративные облигации': '3',
+            '4. ОВГВЗ': '4',
+            '5. Прочие еврооблигации': '5'
     ]
 
     def xmlIndexRow = -1 // Строки xml, от 0
