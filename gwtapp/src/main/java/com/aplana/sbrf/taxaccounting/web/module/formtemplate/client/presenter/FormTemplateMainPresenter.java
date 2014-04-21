@@ -311,6 +311,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     formTemplate.setId(result.getFormTemplateId());
                     formTemplate.setType(result.getFormType());
                     getView().activateVersion(true);
+                    getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
@@ -332,6 +333,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     Dialog.infoMessage("Форма сохранена");
                     formTemplate.setId(result.getFormTemplateId());
                     getView().activateVersion(true);
+                    getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
