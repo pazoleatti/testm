@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.RootLoadedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookTreeItem;
@@ -91,20 +92,41 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void loadRoot(List<RefBookTreeItem> values) {
+    public void loadRoot(List<RefBookTreeItem> values, boolean openOnLoad) {
         tree.clear();
         for (RefBookTreeItem value : values) {
-            tree.addTreeItem(new RefBookUiTreeItem(value, multiSelect));
+            RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
+            tree.addTreeItem(uiTreeItem);
+            if (openOnLoad) {
+                uiTreeItem.setState(true);
+            }
+        }
+        RootLoadedEvent.fire(this);
+    }
+
+    /**
+     * Открыть каскадно все дочерние ветки из веток рута
+     */
+    public void cascadeOpen() {
+        List<RefBookUiTreeItem> refBookUiTreeItems = new ArrayList<RefBookUiTreeItem>();
+        tree.findAllChild(refBookUiTreeItems, null);
+        for (RefBookUiTreeItem uiTreeItem : refBookUiTreeItems) {
+            uiTreeItem.setState(true);
         }
     }
 
     @Override
-    public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values) {
+    public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
             tree.addTreeItem(uiTreeItem, item);
+            if (openOnLoad) {
+                item.setState(true);
+            }
         }
-        tryOpen();
+        if (!openOnLoad) {
+            tryOpen();
+        }
     }
 
     @Override
@@ -458,6 +480,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Set<Long>> handler) {
         return asWidget().addHandler(handler, ValueChangeEvent.getType());
+    }
+
+    public HandlerRegistration addRootLoadedHandler(RootLoadedEvent.RootLoadedHandler handler) {
+        return asWidget().addHandler(handler, RootLoadedEvent.getType());
     }
 
     @Override

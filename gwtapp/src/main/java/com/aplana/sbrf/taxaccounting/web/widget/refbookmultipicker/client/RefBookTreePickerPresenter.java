@@ -27,9 +27,9 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
 
-        void loadRoot(List<RefBookTreeItem> values);
+        void loadRoot(List<RefBookTreeItem> values, boolean openOnLoad);
 
-        void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values);
+        void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad);
 
         List<RefBookTreeItem> getSelectionValues();
 
@@ -93,7 +93,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
-                getView().loadRoot(result.getPage());
+                getView().loadRoot(result.getPage(), ps.getSearchPattern()!= null && !ps.getSearchPattern().trim().isEmpty());
                 if(isNeedSelectFirstItem && !result.getPage().isEmpty()){
                     isNeedSelectFirstItem = false;
                     ps.getSetIds().clear();
@@ -197,7 +197,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                         // очищаем чилдов, так как там лежит чилд с надписью "Загрузка..."
                         uiTreeItem.removeItems();
                         if (!result.getPage().isEmpty()) {
-                            getView().insertChildrens(uiTreeItem, result.getPage());
+                            // если у нас searchPattern не пуст то будет загрузка каскадная так как результаты будут фильтровать по нему
+                            getView().insertChildrens(uiTreeItem, result.getPage(), ps.getSearchPattern()!= null && !ps.getSearchPattern().trim().isEmpty());
                         }
                     }
                 }, this));
