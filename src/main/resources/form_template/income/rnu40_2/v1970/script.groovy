@@ -97,6 +97,7 @@ void calc() {
 
     if (isConsolidated) {
         sort(dataRows)
+        calcTotal(dataRows)
         dataRowHelper.save(dataRows)
         return
     }
@@ -126,6 +127,11 @@ void calc() {
     sort(dataRows)
 
     // посчитать итоги по разделам
+    calcTotal(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+void calcTotal(def dataRows) {
     sections.each { section ->
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
@@ -133,7 +139,6 @@ void calc() {
             lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow), null)
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {

@@ -183,7 +183,9 @@ void logicCheck() {
         def lastRow = getDataRow(dataRows, 'total' + section)
         def columnNames = []
         for (def column : totalColumns) {
-            if (lastRow[column] != getSum(dataRows, column, firstRow, lastRow)) {
+            def value = lastRow[column]
+            def sum = getSum(dataRows, column, firstRow, lastRow)
+            if (value != sum) {
                 columnNames.add(getColumnName(lastRow, column))
             }
         }
@@ -303,7 +305,7 @@ BigDecimal calc14(def dataRows, def row, def period) {
         condition = true
     }
     if (!condition) {
-        return round(0)
+        return roundValue(0)
     }
 
     def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
@@ -311,7 +313,7 @@ BigDecimal calc14(def dataRows, def row, def period) {
         if (row.amount == null || row.incomeCurrentCoupon == null) {
             return null
         }
-        return round(row.amount * row.incomeCurrentCoupon)
+        return roundValue(row.amount * row.incomeCurrentCoupon)
     } else {
         if (row.currentCouponRate == null || row.cost == null || row.maturityDateCurrent == null ||
                 row.maturityDatePrev == null || currencyCode == null) {
@@ -326,7 +328,7 @@ BigDecimal calc14(def dataRows, def row, def period) {
         if (rate == null) {
             return null
         }
-        return round(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 * rate)
+        return roundValue(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 * rate)
     }
 }
 
@@ -337,7 +339,7 @@ BigDecimal calc15(def dataRows, def row) {
     } else if (row.pkdSumClose != null && row.couponIncome != null && row.pkdSumOpen != null) {
         tmp =  row.pkdSumClose + row.couponIncome - row.pkdSumOpen
     }
-    return round(tmp)
+    return roundValue(tmp)
 }
 
 boolean isInASector(def dataRows, def row) {
@@ -346,18 +348,18 @@ boolean isInASector(def dataRows, def row) {
 }
 
 // Округление
-BigDecimal round(BigDecimal value, int precision = 2) {
+BigDecimal roundValue(BigDecimal value, int precision = 2) {
     return value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
 // Получить сумму столбца
-def getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
+def BigDecimal getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
     def from = rowStart.getIndex()
     def to = rowEnd.getIndex() - 2
     if (from > to) {
         return 0
     }
-    return summ(formData, rows, new ColumnRange(columnAlias, from, to))
+    return roundValue((BigDecimal)summ(formData, rows, new ColumnRange(columnAlias, from, to)), 4)
 }
 
 def getReportPeriodStartDate() {
