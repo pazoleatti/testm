@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
@@ -62,10 +63,11 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 					.defaultCallback(new AbstractCallback<GoMoveResult>() {
 						@Override
 						public void onSuccess(GoMoveResult result) {
+                            LogAddEvent.fire(DialogPresenter.this, result.getUuid());
 							placeManager.revealPlace(new PlaceRequest.Builder().nameToken(FormDataPresenterBase.NAME_TOKEN)
 									.with(FormDataPresenterBase.READ_ONLY, READ_ONLY).with(
 											FormDataPresenterBase.FORM_DATA_ID,
-											String.valueOf(formData.getId())).build());
+											String.valueOf(formData.getId())).build().with(FormDataPresenterBase.UUID, result.getUuid()));
 						}
 					}, this));
 		}
