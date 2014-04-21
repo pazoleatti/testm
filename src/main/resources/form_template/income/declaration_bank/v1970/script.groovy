@@ -482,7 +482,7 @@ void generateXML() {
     /** АвНачислСуб. Код строки декларации 230. 200 - 260 + 310. */
     def avNachislSub = getLong(nalIschislSubOld - nalVipl311SubOld + avPlatMesSubOld)
     /** АвНачисл. Код строки декларации 210. */
-    def avNachisl = avNachislFB + avNachislSubOld
+    def avNachisl = avNachislFB + avNachislSub
     /** НалДоплФБ. Код строки декларации 270. */
     def nalDoplFB = getNalDopl(nalIschislFB, avNachislFB, nalVipl311FB)
     /** НалДоплСуб. Код строки декларации 271. */
