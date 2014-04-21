@@ -64,7 +64,7 @@
         <checking>false</checking>
         <name>Стоимость права требования</name>
         <order>7</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -89,7 +89,7 @@
         <checking>false</checking>
         <name>Доход (выручка) от уступки права требования</name>
         <order>10</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -98,7 +98,7 @@
         <checking>false</checking>
         <name>Финансовый результат уступки права требования</name>
         <order>11</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -117,7 +117,7 @@
         <checking>false</checking>
         <name>Ставка Банка России</name>
         <order>13</order>
-        <width>6</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -126,7 +126,7 @@
         <checking>false</checking>
         <name>Ставка процента, установленная соглашением сторон</name>
         <order>14</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -137,7 +137,7 @@
             требования до даты платежа по договору
         </name>
         <order>15</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -148,7 +148,7 @@
             даты уступки права требования до даты платежа по договору
         </name>
         <order>16</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -157,7 +157,7 @@
         <checking>false</checking>
         <name>Рыночная цена прав требования для целей налогообложения</name>
         <order>17</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -166,7 +166,7 @@
         <checking>false</checking>
         <name>Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения</name>
         <order>18</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -175,7 +175,7 @@
         <checking>false</checking>
         <name>Максимальная сумма убытка, рассчитанного исходя из рыночной цены для целей налогообложения</name>
         <order>19</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -184,7 +184,7 @@
         <checking>false</checking>
         <name>Корректировка финансового результата</name>
         <order>20</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
