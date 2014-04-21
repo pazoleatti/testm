@@ -46,4 +46,10 @@ public interface TaxPeriodDao {
 	 *  @param taxType вид налога
 	 */
 	TaxPeriod getLast(TaxType taxType);
+
+    /**
+     * Удалить налоговый период
+     * @param taxPeriodId идентификатор налогового периода
+     */
+    void delete(int taxPeriodId);
 }

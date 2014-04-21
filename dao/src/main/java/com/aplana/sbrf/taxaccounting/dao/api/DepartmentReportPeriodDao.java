@@ -71,6 +71,8 @@ public interface DepartmentReportPeriodDao {
 	 */
 	void delete(int reportPeriodId, Integer departmentId);
 
+    void delete(long departmentReportPeriodId);
+
 	/**
 	 * Проверяет существование периода для подразделения
 	 * @param departmentId подразделение, для которого осуществляется проверка существования периода

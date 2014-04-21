@@ -19,9 +19,7 @@ import org.springframework.util.StringUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -253,13 +251,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
 	@Override
-	public List<FormData> find(int departmentId, int reportPeriodId) {
-		List<Long> formsId = getJdbcTemplate().queryForList(
-			"select id from form_data where department_id = ? and report_period_id = ?",
-			new Object[] {departmentId, reportPeriodId},
-			new int[] {Types.NUMERIC, Types.NUMERIC},
-			Long.class
-		);
+	public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
+        Map paramMap = new HashMap();
+        paramMap.put("rp", reportPeriodId);
+        paramMap.put("ids", departmentIds);
+        List<Long> formsId = getNamedParameterJdbcTemplate().queryForList(
+            "select id from form_data where department_id in (:ids) and report_period_id = :rp",
+            paramMap,
+            Long.class
+        );
+
 		List<FormData> forms = new ArrayList<FormData>();
 		for (Long id : formsId) {
 			forms.add(getWithoutRows(id));

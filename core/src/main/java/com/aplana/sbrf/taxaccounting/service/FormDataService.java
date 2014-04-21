@@ -223,4 +223,12 @@ public interface FormDataService {
      * @return форма - сводная банка?
      */
     boolean isBankSummaryForm(long formDataId);
+
+    /**
+     * Поиск налоговой формы
+     * @param departmentIds подразделения
+     * @param reportPeriodId отчетный период
+     * @return список налоговых форм, удовлетворяющих критерию
+     */
+    List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 }

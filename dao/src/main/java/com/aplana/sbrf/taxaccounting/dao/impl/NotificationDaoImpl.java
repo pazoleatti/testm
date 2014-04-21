@@ -223,4 +223,11 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 			return 0;
 		}
 	}
+
+    @Override
+    public void deleteByReportPeriod(int reportPeriodId) {
+        getJdbcTemplate().update("delete from notification where REPORT_PERIOD_ID = ?",
+                new Object[]{reportPeriodId},
+                new int[]{Types.NUMERIC});
+    }
 }

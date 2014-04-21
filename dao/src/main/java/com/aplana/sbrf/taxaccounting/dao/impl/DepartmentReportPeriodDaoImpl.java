@@ -149,6 +149,15 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		);
 	}
 
+    @Override
+    public void delete(long departmentReportPeriodId) {
+        getJdbcTemplate().update(
+                "delete from department_report_period where id = ?",
+                new Object[] {departmentReportPeriodId},
+                new int[] {Types.NUMERIC}
+        );
+    }
+
 	@Override
 	public boolean existForDepartment(Integer departmentId, long reportPeriodId) {
 		Integer count = getJdbcTemplate().queryForInt(

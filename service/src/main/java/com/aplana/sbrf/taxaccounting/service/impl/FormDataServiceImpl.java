@@ -722,4 +722,9 @@ public class FormDataServiceImpl implements FormDataService {
         //TODO
         return true;
     }
+
+    @Override
+    public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
+        return formDataDao.find(departmentIds, reportPeriodId);
+    }
 }

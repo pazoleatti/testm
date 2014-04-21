@@ -64,4 +64,10 @@ public interface NotificationService {
 	 * @return количество оповещений
 	 */
 	int getCount(int receiverDepartmentId);
+
+    /**
+     * Удалить оповещения для отчетного периода
+     * @param reportPeriodId отчетный период
+     */
+    public void deleteByReportPeriod(int reportPeriodId);
 }
