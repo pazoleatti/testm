@@ -736,12 +736,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String INSERT_REF_BOOK_RECORD_SQL = "insert into ref_book_record (id, record_id, ref_book_id, version," +
-            "status) values (?, ?, %d, to_date('%s', 'DD.MM.YYYY'), %d)";
+            "status) values (?, ?, ?, ?, ?)";
     private static final String INSERT_REF_BOOK_VALUE = "insert into ref_book_value (record_id, attribute_id," +
             "string_value, number_value, date_value, reference_value) values (?, ?, ?, ?, ?, ?)";
 
     @Override
-    public List<Long> createRecordVersion(@NotNull Long refBookId, @NotNull Date version, @NotNull VersionedObjectStatus status,
+    public List<Long> createRecordVersion(@NotNull final Long refBookId, @NotNull final Date version, @NotNull final VersionedObjectStatus status,
 			final List<RefBookRecord> records) {
         List<Object[]> listValues = new ArrayList<Object[]>();
 
@@ -757,6 +757,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, refBookRecordIds.get(i));
                 ps.setLong(2, records.get(i).getRecordId());
+                ps.setLong(3, refBookId);
+                ps.setDate(4, new java.sql.Date(version.getTime()));
+                ps.setInt(5, status.getId());
             }
 
             @Override
@@ -809,11 +812,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
         JdbcTemplate jt = getJdbcTemplate();
-        jt.batchUpdate(String.format(INSERT_REF_BOOK_RECORD_SQL,
-                refBookId,
-                sdf.format(version),
-                status.getId()
-        ), batchRefBookRecordsPS);
+        jt.batchUpdate(INSERT_REF_BOOK_RECORD_SQL, batchRefBookRecordsPS);
         jt.batchUpdate(INSERT_REF_BOOK_VALUE, listValues);
         return refBookRecordIds;
     }
