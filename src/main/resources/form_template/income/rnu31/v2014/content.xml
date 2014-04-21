@@ -93,7 +93,7 @@
         <checking>false</checking>
         <name>Ставка налога на прибыль 20%. Еврооблигации РФ</name>
         <order>10</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -102,7 +102,7 @@
         <checking>false</checking>
         <name>Ставка налога на прибыль 20%. Прочие еврооблигации</name>
         <order>11</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -111,7 +111,7 @@
         <checking>false</checking>
         <name>Ставка налога на прибыль 20%. Корпоративные облигации</name>
         <order>12</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
