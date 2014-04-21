@@ -658,7 +658,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Override
     public List<FormDataKind> getAvailableFormDataKind(TAUserInfo userInfo, List<TaxType> taxTypes) {
         List<FormDataKind> formDataKindList = new ArrayList<FormDataKind>(FormDataKind.values().length);
-
         // http://conf.aplana.com/pages/viewpage.action?pageId=11386069
         formDataKindList.add(FormDataKind.PRIMARY);
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
@@ -666,7 +665,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             formDataKindList.add(FormDataKind.CONSOLIDATED);
-            formDataKindList.add(FormDataKind.SUMMARY);
+            if (!taxTypes.contains(TaxType.VAT))
+                formDataKindList.add(FormDataKind.SUMMARY);
         }
         if (taxTypes.contains(TaxType.INCOME)) {
             formDataKindList.add(FormDataKind.ADDITIONAL);
