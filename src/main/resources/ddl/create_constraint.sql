@@ -180,6 +180,7 @@ alter table form_data_source add constraint form_data_source_fk_src_dep_id forei
 alter table sec_user add constraint sec_user_pk primary key (id);
 alter table sec_user add constraint sec_user_fk_dep_id foreign key (department_id) references department(id);
 alter table sec_user add constraint sec_user_uniq_login_active unique (login);
+alter table sec_user add constraint sec_user_chk_is_active check (is_active in (0, 1));
 
 alter table object_lock add constraint object_lock_pk primary key (object_id, class);
 alter table object_lock add constraint object_lock_fk_user_id foreign key (user_id) references sec_user(id) on delete cascade;
