@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.main.entry.client;
 
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
-import com.aplana.sbrf.taxaccounting.web.module.error.client.ErrorNameTokens;
+import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 import com.google.inject.Inject;
@@ -33,8 +35,12 @@ public class TaPlaceManagerImpl extends PlaceManagerImpl implements TaPlaceManag
 	
 	@Override
 	public void revealErrorPlace(String invalidHistoryToken) {
-		//revealDefaultPlace();
-        revealPlace(new PlaceRequest(ErrorNameTokens.ERROR));
+        Dialog.errorMessage("Ошибка 404. Введен не корректный адрес. Вы будете перенаправлены на главную страницу", new DialogHandler() {
+            @Override
+            public void close() {
+                revealPlace(new PlaceRequest(HomeNameTokens.homePage));
+            }
+        });
 	}
 	
 	
