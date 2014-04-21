@@ -344,6 +344,9 @@ def calc12(def row) {
 def calc13(def row) {
     def temp = 0
     if (row.baseTaxOfRub > 0) {
+        if(row.minimizeTaxSum == null){
+            return null
+        }
         if (row.minimizeTaxSum == 0) {
             temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
