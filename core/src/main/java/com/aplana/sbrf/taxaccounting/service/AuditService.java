@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface AuditService {
 
+    public static final String RP_NAME_PATTERN = "%s %s";
+
 	/**
 	 * Получить информацию из журнала аудита по фильтру
 	 * @param logSystemFilter фильтр по которому происходит поиск необходимых данных

@@ -54,10 +54,6 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
             // Не контролер, далее не загружаем
             return result;
         }
-        if (!Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT, TaxType.DEAL).contains(action.getTaxType())) {
-            // Не соответствующий тип налога, далее не загружаем
-            return result;
-        }
 
         // Подразделения доступные пользователю
         Set<Integer> avSet = new HashSet<Integer>();

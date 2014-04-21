@@ -101,12 +101,8 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_CONTROL)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    if (menu.getMeta().equals(TaxType.INCOME.name()) ||
-                            menu.getMeta().equals(TaxType.TRANSPORT.name()) ||
-                            menu.getMeta().equals(TaxType.DEAL.name())) {
-                        menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
-                                + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
-                    }
+                    menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
+                            + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                 }
 
                 // настройки форм и подразделений, назначение источников-приемников

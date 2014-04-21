@@ -1428,12 +1428,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "with checkRecords as (select * from ref_book_record r where r.id in %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37,98,99) and id not in (170,192,180)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
             "select distinct d.name as departmentName, pn.string_value as periodName, t.number_value as isT, i.number_value as isI, d.number_value as isD,\n" +
             "case\n" +
             "\twhen u.ref_book_id = 31 then 'T'\n" +        //Транспортный налог
             "\twhen u.ref_book_id = 33 then 'I'\n" +        //Налог на прибыль
             "\twhen u.ref_book_id = 37 then 'D'\n" +        //Учет контролируемых сделок
+            "\twhen u.ref_book_id = 98 then 'V'\n" +        //НДС
+            "\twhen u.ref_book_id = 99 then 'P'\n" +        //Налог на имущество
             "\telse null\n" +
             "end as taxCode\n" +
             "from usages u\n" +
@@ -1442,6 +1444,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join (select string_value, record_id from periodCodes where alias='NAME') pn on pn.record_id=p.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='T') t on t.record_id=p.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='I') i on i.record_id=p.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='V') v on v.record_id=p.record_id\n" +
+            "join (select number_value, record_id from periodCodes where alias='P') pr on pr.record_id=p.record_id\n" +
             "join (select number_value, record_id from periodCodes where alias='D') d on d.record_id=p.record_id";
 
     public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {

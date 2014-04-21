@@ -1,6 +1,5 @@
 package form_template.vat.declaration.v2014
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -13,62 +12,134 @@ import groovy.xml.MarkupBuilder
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        //checkDeparmentParams(LogLevel.WARNING)
+        checkDeparmentParams(LogLevel.WARNING)
         generateXML()
         break
     case FormDataEvent.CHECK:
-        //checkDeparmentParams(LogLevel.ERROR)
+        checkDeparmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        //checkDeparmentParams(LogLevel.ERROR)
+        checkDeparmentParams(LogLevel.ERROR)
         break
     default:
         return
 }
 
-//// Кэш провайдеров
-//@Field
-//def providerCache = [:]
-//// Кэш значений справочника
-//@Field
-//def refBookCache = [:]
+// Кэш провайдеров
+@Field
+def providerCache = [:]
+// Кэш значений справочника
+@Field
+def refBookCache = [:]
 
-//void checkDeparmentParams(LogLevel logLevel) {
-//    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-//
-//    def departmentId = declarationData.departmentId
-//
-//    // Параметры подразделения
-//    def departmentParamList = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
-//
-//    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-//        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-//    }
-//
-//    def departmentParam = departmentParamList?.get(0)
-//
-//    // Проверки подразделения
-//    def List<String> errorList = getErrorDepartment(departmentParam)
-//    for (String error : errorList) {
-//        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
-//    }
-//    errorList = getErrorVersion(departmentParam)
-//    for (String error : errorList) {
-//        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений для %s", error, departmentParam.NAME.stringValue))
-//    }
-//}
+/**
+ * Получение провайдера с использованием кеширования
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+/**
+ * Разыменование с использованием кеширования
+ * @param refBookId
+ * @param recordId
+ * @return
+ */
+def getRefBookValue(def long refBookId, def long recordId) {
+    if (!refBookCache.containsKey(recordId)) {
+        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
+    }
+    return refBookCache.get(recordId)
+}
+
+void checkDeparmentParams(LogLevel logLevel) {
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
+
+    def departmentId = declarationData.departmentId
+
+    // Параметры подразделения
+    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null)
+
+    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+    }
+
+    def departmentParam = departmentParamList?.get(0)
+
+    // Проверки подразделения
+    def List<String> errorList = getErrorDepartment(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
+    }
+    errorList = getErrorVersion(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
+    }
+}
+
+List<String> getErrorDepartment(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование подразделения»")
+    }
+    if (record.OKTMO?.referenceValue == null) {
+        errorList.add("«Код по ОКТМО»")
+    }
+    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+        errorList.add("«ИНН»")
+    }
+    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП»")
+    }
+    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+        errorList.add("«Код налогового органа»")
+    }
+    if (record.OKVED_CODE?.referenceValue == null) {
+        errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
+    }
+    if (record.SIGNATORY_ID?.referenceValue == null) {
+        errorList.add("«Признак лица подписавшего документ»")
+    }
+    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+        errorList.add("«Фамилия подписанта»")
+    }
+    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+        errorList.add("«Имя подписанта»")
+    }
+    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    }
+    if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
+        errorList.add("«Код места, по которому представляется документ»")
+    }
+    errorList
+}
+
+List<String> getErrorVersion(record) {
+    List<String> errorList = new ArrayList<String>()
+    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
+        errorList.add("«Версия формата»")
+    }
+    if (record.APP_VERSION.stringValue == null || !record.APP_VERSION.stringValue.equals('XLR_FNP_TAXCOM_5_03')) {
+        errorList.add("«Версия программы, с помощью которой сформирован файл»")
+    }
+    errorList
+}
 
 /**
  * Запуск генерации XML
  */
 void generateXML() {
-    // def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
-
+    def date = reportPeriodService.getStartDate(declarationData.reportPeriodId).getTime()
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    // TODO Пока настроек нет
-    def departmentParam = null//getProvider(-1).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    def departmentParam = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(date, null, "DEPARTMENT_ID = $departmentId", null).get(0)
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -80,11 +151,11 @@ void generateXML() {
     def String KND = '1151001'
 
     // ОКАТО
-    def okato = departmentParam?.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue).CODE.stringValue : null
+    def okato = departmentParam?.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue)?.CODE?.stringValue : null
     // ОКВЭД
-    def okvedCode = departmentParam?.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam?.OKVED_CODE?.referenceValue).CODE.stringValue : null
+    def okvedCode = departmentParam?.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam?.OKVED_CODE?.referenceValue)?.CODE?.stringValue : null
     // По месту
-    def taxPlaceTypeCode = departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue).CODE.stringValue : null
+    def taxPlaceTypeCode = departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue : null
     // Список данных форм-источников
     def formDataList = formDataCollection.getRecords()
     // Тип формы → Данные формы
@@ -93,17 +164,12 @@ void generateXML() {
         formDataRecordsMap.put(formData.formType.id, formData)
     }
 
-    // Заполнение кэша
-//    if (!formDataRecords.isEmpty()) {
-//        formDataService.fillRefBookCache(matrixRecords.get(0).getId(), refBookCache)
-//    }
-
     builder.Файл(
             ИдФайл: declarationService.generateXmlFileId(declarationType, departmentId, declarationData.reportPeriodId),
             ВерсПрог: departmentParam?.APP_VERSION?.stringValue,
             ВерсФорм: departmentParam?.FORMAT_VERSION?.stringValue) {
         Документ(
-                // Общие атрибуты для всех листов уведомления (титульный лист)
+                // ТИТУЛЬНЫЙ ЛИСТ
                 // Код формы отчетности по КНД
                 КНД: KND,
                 // Дата формирования документа
@@ -117,9 +183,8 @@ void generateXML() {
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode
         ) {
-            // Общие атрибуты для всех листов декларации
+            // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
-                    // ОКАТО: okato,
                     ОКВЭД: okvedCode,
                     Тлф: departmentParam?.PHONE?.stringValue
             ) {
@@ -144,231 +209,135 @@ void generateXML() {
                                 [Имя: firstname] +
                                 (lastname != null && !lastname.isEmpty() ? [Отчество: lastname] : [:])
                 )
-                if (prPodp == 2)
+                if (prPodp == 2) {
                     СвПред(
                             НаимДок: departmentParam?.APPROVE_DOC_NAME?.stringValue,
                             НаимОрг: departmentParam?.APPROVE_ORG_NAME?.stringValue
                     )
+                }
             }
 
-//            // По строкам матрицы
-//            НДС() {
-//                if (!matrixRecords.isEmpty()) {
-//                    def dataRowHelper = formDataService.getDataRowHelper(matrixRecords.get(0))
-//                    // "Да"
-//                    def Long recYesId = null
-//                    // "Нет"
-//                    def Long recNoId = null
-//                    def valYes = getProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-//                    def valNo = getProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
-//                    if (valYes != null && valYes.size() == 1)
-//                        recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-//                    if (valNo != null && valNo.size() == 1)
-//                        recNoId = valNo.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-//                    Map<Long, String> mapYesNo = new HashMap<Long, String>()
-//                    mapYesNo.put(recYesId, '1')
-//                    mapYesNo.put(recNoId, '0')
-//
-//                    for (row in dataRowHelper.getAllSaved()) {
-//                        if (row.getAlias() != null) {
-//                            continue
-//                        }
-//
-//                        // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
-//                        СвКонтрСд(
-//                                НомПорСд: row.dealNum1
-//                        ) {
-//                            def String interdependenceSing = row.interdependenceSing != null ? getRefBookValue(69, row.interdependenceSing).CODE.numberValue : null
-//                            ОснКонтрСд(
-//                                    ВзЗавис: interdependenceSing
-//                            ) {
-//                                'Осн105.14'(
-//                                        Осн121: mapYesNo.get(row.f121),
-//                                        Осн122: mapYesNo.get(row.f122),
-//                                        Осн123: mapYesNo.get(row.f123),
-//                                        Осн124: mapYesNo.get(row.f124)
-//                                )
-//                                'ОснРФ105.14'(
-//                                        Осн131: mapYesNo.get(row.f131),
-//                                        Осн132: mapYesNo.get(row.f132),
-//                                        Осн133: mapYesNo.get(row.f133),
-//                                        Осн134: mapYesNo.get(row.f134),
-//                                        Осн135: mapYesNo.get(row.f135)
-//                                )
-//                            }
-//                            def String dealNameCode = row.dealNameCode != null ? getRefBookValue(67, row.dealNameCode).CODE.stringValue : null
-//                            def String taxpayerSideCode = row.taxpayerSideCode != null ? getRefBookValue(65, row.taxpayerSideCode).CODE.stringValue : ''
-//                            while (taxpayerSideCode.length() < 3)
-//                                taxpayerSideCode = '0' + taxpayerSideCode
-//                            def String dealPriceCode = row.dealPriceCode != null ? getRefBookValue(66, row.dealPriceCode).CODE.numberValue : null
-//                            КонтрСд(
-//                                    [ГрупОС: mapYesNo.get(row.similarDealGroup)] +
-//                                            [КодНаимСд: dealNameCode] +
-//                                            [КодСторСд: taxpayerSideCode] +
-//                                            [ПрОпрЦен: mapYesNo.get(row.dealPriceSign)] +
-//                                            [КодОпрЦен: dealPriceCode] +
-//                                            [КолУчСд: row.dealMemberCount]
-//                            )
-//                            ДохРасхСд(
-//                                    [СумДохСд: row.income != null ? row.income : 0] +
-//                                            (row.incomeIncludingRegulation != null ? [СумДохСдРег: row.incomeIncludingRegulation] : [:]) +
-//                                            [СумРасхСд: row.outcome] +
-//                                            (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
-//                            )
-//                            def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType).CODE.numberValue : null
-//
-//                            // Раздел 1Б. Сведения о предмете сделки (группы однородных сделок)
-//                            СвПредмСд(
-//                                    ТипПредСд: dealType
-//                            ) {
-//                                def String dealSubjectCode2 = row.dealSubjectCode2 != null ? getRefBookValue(68, row.dealSubjectCode2).CODE.numberValue : null
-//                                def String dealSubjectCode3 = row.dealSubjectCode3 != null ? getRefBookValue(34, row.dealSubjectCode3).CODE.stringValue : null
-//                                def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode).CODE.stringValue : null
-//                                def String deliveryCode = row.deliveryCode != null ? getRefBookValue(63, row.deliveryCode).STRCODE.stringValue : null
-//                                def String okeiCode = row.okeiCode != null ? getRefBookValue(12, row.okeiCode).CODE.stringValue : null
-//                                ПерПредСд(
-//                                        [НаимПредСд: row.dealSubjectName] +
-//                                                (dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
-//                                                (dealSubjectCode3 != null ? [ОКВЭД: dealSubjectCode3] : [:]) +
-//                                                [НомУчСд: row.otherNum] +
-//                                                [НомДог: row.contractNum] +
-//                                                (row.contractDate != null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")] : [:]) +
-//                                                (countryCode != null ? [ОКСМ: countryCode] : [:]) +
-//                                                (deliveryCode != null ? [КодУсловПост: deliveryCode] : [:]) +
-//                                                [ОКЕИ: okeiCode] +
-//                                                [Количество: row.count] +
-//                                                [ЦенаЕдин: row.price] +
-//                                                [СтоимИтог: row.total] +
-//                                                (row.dealDoneDate != null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
-//                                ) {
-//                                    def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1).CODE.stringValue : null
-//                                    def String region1 = row.region1 != null ? getRefBookValue(4, row.region1).CODE.stringValue : null
-//
-//                                    if (countryCode1 != null || region1 != null || row.city1 != null || row.locality1 != null) {
-//                                        МестОтпрТов(
-//                                                (countryCode1 != null ? [ОКСМ: countryCode1] : [:]) +
-//                                                        (region1 != null ? [КодРегион: region1] : [:]) +
-//                                                        (row.city1 != null ? [Город: row.city1] : [:]) +
-//                                                        (row.locality1 != null ? [НаселПункт: row.locality1] : [:])
-//                                        )
-//                                    }
-//                                    def String countryCode2 = row.countryCode2 != null ? getRefBookValue(10, row.countryCode2).CODE.stringValue : null
-//                                    def String region2 = row.region2 != null ? getRefBookValue(4, row.region2).CODE.stringValue : null
-//                                    if (countryCode2 != null || region2 != null || row.city2 != null || row.locality2 != null) {
-//                                        МестСовСд(
-//                                                (countryCode2 != null ? [ОКСМ: countryCode2] : [:]) +
-//                                                        (region2 != null ? [КодРегион: region2] : [:]) +
-//                                                        (row.city2 != null ? [Город: row.city2] : [:]) +
-//                                                        (row.locality2 != null ? [НаселПункт: row.locality2] : [:])
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                            def String countryCode3 = row.countryCode3 != null ? getRefBookValue(10, row.countryCode3).CODE.stringValue : null
-//                            def String organInfo, organName, organINN, organKPP, organRegNum, taxpayerCode, address
-//                            if (row.organName != null) {
-//                                def map = getRefBookValue(9, row.organName)
-//                                organInfo = getRefBookValue(70, map.ORGANIZATION.referenceValue)?.CODE?.numberValue
-//                                organName = map.NAME.stringValue
-//                                organINN = map.INN_KIO.stringValue
-//                                organKPP = map.KPP.numberValue
-//                                organRegNum = map.REG_NUM.stringValue
-//                                taxpayerCode = map.TAXPAYER_CODE.stringValue
-//                                address = map.ADDRESS.stringValue
-//                            }
-//
-//                            // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
-//                            СвОргУчаст(
-//                                    [НомПорСд: row.dealMemberNum] +
-//                                            [ПрОрг: organInfo] +
-//                                            [ОКСМ: countryCode3] +
-//                                            [НаимОрг: organName] +
-//                                            (organINN != null ? [ИННЮЛ: organINN] : [:]) +
-//                                            (organKPP != null ? [КПП: organKPP] : [:]) +
-//                                            (organRegNum != null ? [РегНомИн: organRegNum] : [:]) +
-//                                            (taxpayerCode != null ? [КодНПРег: taxpayerCode] : [:]) +
-//                                            (address != null ? [АдрИнТекст: address] : [:])
-//                            )
-//                        }
-//                    }
-//                }
-//            }
+            НДС() {
+                // РАЗДЕЛ 1
+                СумУплНП(
+                        ОКАТО: okato,
+                        КБК: '18210301000011000110',
+                        'СумПУ_173.5': 0,
+                        'СумПУ_173.1': '' // TODO Вычисление
+                )
+
+                // РАЗДЕЛ 2
+                def rows = [] // TODO Строки 724.6, 724.7
+                for (def row : rows) {
+                    СумУплНА(
+                            // КППИно: '',
+                            КБК: '18210301000011000110',
+                            ОКАТО: okato,
+                            СумИсчисл: '', // TODO Вычисление из row
+                            КодОпер: '', // TODO Вычисление из row
+                            СумИсчислОтгр: 0,
+                            СумИсчислОпл: 0,
+                            СумИсчислНА: 0
+                    ) {
+                        СведПродЮЛ(
+                                НаимПрод: '', // TODO Вычисление из row
+                                ИННЮЛПрод: '', // TODO Вычисление из row
+                        )
+                    }
+                }
+
+                // РАЗДЕЛ 3
+                СумУпл164(
+                        НалПУ164: null // TODO Не описан в ТЗ
+                ) {
+                    СумНалОб(
+                            НалВосстОбщ: null // TODO Вычисление
+                    ) {
+                        РеалТов18(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        РеалТов10(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        РеалТов118(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        РеалТов110(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        РеалПредИК(
+                                НалБаза: 0,
+                                СумНал: 0
+                        )
+                        ВыпСМРСоб(
+                                НалБаза: 0,
+                                СумНал: 0
+                        )
+                        ОплПредПост(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        ОплНОТовар(
+                                НалБаза: null, // TODO Вычисление из 724.1
+                                СумНал: null // TODO Вычисление из 724.1
+                        )
+                        СумНалВосст(
+                                СумНалВс: 0,
+                                СумНалСтав0: 0,
+                                СумНал170: 0
+                        )
+                    }
+                    СумНалВыч(
+                            НалВычОбщ: null, // TODO Вычисление из 724.1
+                            НалПредНППок: 0,
+                            НалИсчСМР: null, // Нет в ТЗ
+                            НалИсчПрод: null, // TODO Вычисление из 724.1
+                            НалУплПокНА: null // TODO Вычисление из 724.1
+                    ) {
+                        НалВыч171(
+                                НалВыч171Общ: null, // TODO Вычисление из 724.4
+                                НалВычКапСтр: 0
+                        )
+                        НалВычТамож(
+                                НалВычВс: 0,
+                                НалУплТО: 0,
+                                НалУплНО: 0
+                        )
+                    }
+                }
+
+                // РАЗДЕЛ 4
+                НалПодтв0(
+                        СумУменИтог: 0
+                ) {
+                    СумОпер4(
+                            КодОпер: null, // TODO Вычисление из 724.2.2
+                            НалБаза: null, // TODO Вычисление из 724.2.2
+                            НалВычПод: 0,
+                            НалНеПод: 0,
+                            НалВосст: 0
+                    )
+                }
+
+                // РАЗДЕЛ 7
+                ОперНеНал(
+                        ОплПостСв6Мес: 0
+                ) {
+                    rows = [] // TODO Строки 724.2.1
+                    for (def row : rows) {
+                        СумОпер7(
+                                КодОпер: null, // TODO Вычисление из row
+                                СтРеалТов: null, // TODO Вычисление из row
+                                СтПриобТов: null, // TODO Вычисление из row
+                                НалНеВыч: 0
+                        )
+                    }
+                }
+            }
         }
     }
 }
-
-//List<String> getErrorDepartment(record) {
-//    List<String> errorList = new ArrayList<String>()
-//    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
-//        errorList.add("«Наименование подразделения»")
-//    }
-//    if (record.OKTMO?.referenceValue == null) {
-//        errorList.add("«Код по ОКАТО»")
-//    }
-//    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
-//        errorList.add("«ИНН»")
-//    }
-//    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
-//        errorList.add("«КПП»")
-//    }
-//    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
-//        errorList.add("«Код налогового органа»")
-//    }
-//    if (record.OKVED_CODE?.referenceValue == null) {
-//        errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
-//    }
-//    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
-//        errorList.add("«ИНН реорганизованного обособленного подразделения»")
-//    }
-//    if (record.SIGNATORY_ID?.referenceValue == null) {
-//        errorList.add("«Признак лица подписавшего документ»")
-//    }
-//    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
-//        errorList.add("«Фамилия подписанта»")
-//    }
-//    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
-//        errorList.add("«Имя подписанта»")
-//    }
-//    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
-//        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
-//    }
-//    if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
-//        errorList.add("«Код места, по которому представляется документ»")
-//    }
-//
-//    errorList
-//}
-//
-//List<String> getErrorVersion(record) {
-//    List<String> errorList = new ArrayList<String>()
-//    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.01')) {
-//        errorList.add("«Версия формата»")
-//    }
-//
-//    errorList
-//}
-//
-///**
-// * Получение провайдера с использованием кеширования
-// * @param providerId
-// * @return
-// */
-//def getProvider(def long providerId) {
-//    if (!providerCache.containsKey(providerId)) {
-//        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
-//    }
-//    return providerCache.get(providerId)
-//}
-//
-///**
-// * Разыменование с использованием кеширования
-// * @param refBookId
-// * @param recordId
-// * @return
-// */
-//def getRefBookValue(def long refBookId, def long recordId) {
-//    if (!refBookCache.containsKey(recordId)) {
-//        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
-//    }
-//    return refBookCache.get(recordId)
-//}

@@ -156,6 +156,11 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
         activateVersion.setText(s);
     }
 
+    @Override
+    public void activateVersion(boolean isVisible) {
+        activateVersion.setVisible(isVisible);
+    }
+
     @UiHandler("returnAnchor")
     void onReturnAnchor(ClickEvent event){
         if (getUiHandlers() != null){

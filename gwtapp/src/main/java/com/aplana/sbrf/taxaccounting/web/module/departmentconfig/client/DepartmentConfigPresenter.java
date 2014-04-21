@@ -163,7 +163,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         if (result.getUuid() != null) {
                             LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
                         }
-                        if(!result.isHasError()){
+                        if (!result.isHasError()) {
                             //MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
                             if (result.isDeclarationFormFound()) {
                                 Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
@@ -274,7 +274,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     getView().setDepartment(userDepartment);
                                 }
                                 // Список отчетных периодов
-                                getView().setReportPeriods(result.getReportPeriods());
+                                getView().setReportPeriods(result.getReportPeriods() == null
+                                        ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
 
                                 // По-умолчанию последний
                                 if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {

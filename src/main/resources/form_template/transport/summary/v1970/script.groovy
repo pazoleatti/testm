@@ -89,7 +89,7 @@ def sortColumns = ["okato", "tsTypeCode"]
 
 // Проверяемые на пустые значения атрибуты (графа 1..9, 11..15, 21)
 @Field
-def nonEmptyColumns = ['rowNumber', 'okato', 'tsTypeCode', 'tsType', 'vi', 'model', 'regNumber', 'taxBase',
+def nonEmptyColumns = ['rowNumber', 'okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBase',
         'taxBaseOkeiUnit', 'years', 'ownMonths', 'coef362', 'taxRate', 'calculatedTaxSum', 'taxSumToPay']
 
 @Field

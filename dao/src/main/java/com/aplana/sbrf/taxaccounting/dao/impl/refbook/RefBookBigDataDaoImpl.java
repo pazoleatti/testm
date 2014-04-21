@@ -400,7 +400,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             "nve.version - interval '1' day as versionEnd, \n" +
             "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
             "from currentVersion cv \n" +
-            "left join nextVersionEnd nve on (nve.record_id= cv.record_id and nve.ref_book_id= cv.ref_book_id)";
+            "left join nextVersionEnd nve on nve.record_id= cv.record_id";
 
     @Override
     public RefBookRecordVersion getRecordVersionInfo(String tableName, Long uniqueRecordId) {

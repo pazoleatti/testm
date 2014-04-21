@@ -60,7 +60,7 @@ public class AuditServiceImpl implements AuditService {
             log.setReportPeriodName(null);
         else {
             ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-            log.setReportPeriodName(String.valueOf(reportPeriod.getTaxPeriod().getYear()) + " " + reportPeriod.getName());
+            log.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
         }
 		log.setDeclarationTypeId(declarationTypeId);
 		log.setFormTypeId(formTypeId);
@@ -114,8 +114,8 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
-        List<Long> formDataIds;
-        List<Long> declarationDataIds;
+        List<Long> formDataIds = new ArrayList<Long>(0);
+        List<Long> declarationDataIds = new ArrayList<Long>(0);
         FormDataFilter formDataFilter = new FormDataFilter();
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
@@ -144,7 +144,6 @@ public class AuditServiceImpl implements AuditService {
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
                 if(formDataIds.isEmpty())
                     return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
-                filterDao.setFormDataIds(formDataIds);
                 break;
             case 2:
                 declarationDataFilter.setTaxType(filter.getTaxType());
@@ -154,7 +153,6 @@ public class AuditServiceImpl implements AuditService {
                         declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
                 if(declarationDataIds.isEmpty())
                     return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
-                filterDao.setDeclarationDataIds(declarationDataIds);
                 break;
             default:
                 formDataFilter.setTaxType(filter.getTaxType());
@@ -174,14 +172,22 @@ public class AuditServiceImpl implements AuditService {
                 if (formDataIds.isEmpty() && declarationDataIds.isEmpty()){
                     return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
                 }
-                filterDao.setFormDataIds(formDataIds);
-                filterDao.setDeclarationDataIds(declarationDataIds);
+
 
         }
+        filterDao.setFormDataIds(formDataIds);
+        filterDao.setDeclarationDataIds(declarationDataIds);
         filterDao.setFromSearchDate(filter.getFromSearchDate());
         filterDao.setToSearchDate(filter.getToSearchDate());
         filterDao.setCountOfRecords(filter.getCountOfRecords());
-
-        return auditDao.getLogsBusiness(filterDao);
+        filterDao.setReportPeriodName(filter.getReportPeriodName());
+        filterDao.setSearchOrdering(filter.getSearchOrdering());
+        filterDao.setAscSorting(filter.isAscSorting());
+        filterDao.setStartIndex(filter.getStartIndex());
+        try {
+            return auditDao.getLogsBusiness(filterDao);
+        } catch (DaoException e){
+            throw new ServiceException("Поиск по НФ/декларациям.", e);
+        }
     }
 }

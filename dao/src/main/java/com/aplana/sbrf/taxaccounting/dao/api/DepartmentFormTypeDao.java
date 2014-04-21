@@ -29,6 +29,28 @@ public interface DepartmentFormTypeDao {
     List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType);
 
     /**
+     * Возвращает информацию о формах по заданному виду налога и исполнителю
+     *
+     * @param performerDepId    идентификатор подразделения исполнителя
+     * @param taxType           вид налога
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    List<Long> getByPerformerId(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
+
+    /**
+     * Возвращает типы НФ:
+     * 1) типы НФ, для которых подразделение узазано в качестве исполнителя;
+     * 2) типы НФ, которые назначены формам из 1) в качестве источников;
+     * 3) типы НФ, которые назначены формам из 2) в качестве источников.
+     * (из http://conf.aplana.com/pages/viewpage.action?pageId=11382061 пункты 3.b.iii, 3.b.iv, 3.b.v)
+     *
+     * @param performerDepId    идентификатор подразделения исполнителя
+     * @param taxType           вид налога
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    List<Long> getFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
+
+    /**
      * Возвращает информацию об источниках, которые должны использоваться при
      * формировании налоговой формы назначения с заданными параметрами
      *

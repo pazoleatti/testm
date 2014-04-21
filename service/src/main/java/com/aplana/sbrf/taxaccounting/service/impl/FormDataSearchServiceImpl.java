@@ -28,6 +28,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
     @Autowired
     private FormDataAccessService formDataAccessService;
 
+    @Autowired
+    private SourceService sourceService;
+
 	@Override
 	public PagingResult<FormDataSearchResultItem> findDataByUserIdAndFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
         return formDataSearchDao.findPage(createFormDataDaoFilter(userInfo, formDataFilter), formDataFilter.getSearchOrdering(),
@@ -122,8 +125,36 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         } else {
             formDataDaoFilter.setFormDataKind(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
         }
-        // Вид форм
-        formDataDaoFilter.setFormTypeIds(formDataFilter.getFormTypeId());
+        // Виды форм
+        TAUser tAUser = userInfo.getUser();
+        List<Long> formTypes = formDataFilter.getFormTypeId();
+        if (formTypes == null || formTypes.isEmpty()) {
+            if (!tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
+                    formTypes = sourceService.getDFTFormTypeBySource(tAUser.getDepartmentId(), formDataFilter.getTaxType(), formDataDaoFilter.getFormDataKinds());
+                } else {
+                    formTypes = sourceService.getDFTByPerformerDep(tAUser.getDepartmentId(), formDataFilter.getTaxType(), formDataDaoFilter.getFormDataKinds());
+                }
+                List<Department> departments10 = new ArrayList<Department>();
+                if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+                    departments10 = departmentService.getBADepartments(tAUser);
+                } else {
+                    departments10.addAll(departmentService.getAllChildren(tAUser.getDepartmentId()));
+                }
+                List<DepartmentFormType> departmentFormTypeList = new ArrayList<DepartmentFormType>();
+                for (Department department : departments10) {
+                    departmentFormTypeList.addAll(sourceService.getDFTByDepartment(department.getId(), formDataFilter.getTaxType()));
+                }
+                for(DepartmentFormType departmentFormType : departmentFormTypeList) {
+                    formTypes.add((long)departmentFormType.getFormTypeId());
+                }
+                Set<Long> tFormTypes =  new HashSet<Long>(formTypes);
+                formTypes.clear();
+                formTypes.addAll(tFormTypes);
+            }
+        }
+        formDataDaoFilter.setFormTypeIds(formTypes);
+
         // Состояние
         if (formDataFilter.getFormState() != null) {
             formDataDaoFilter.setStates(asList(formDataFilter.getFormState()));

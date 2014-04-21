@@ -1,26 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.junit.Before;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -31,16 +24,6 @@ public class LogBusinessDaoTest {
 
 	@Autowired
 	private LogBusinessDao logBusinessDao;
-
-    @Before
-    public void init() {
-        Department dep = new Department();
-        dep.setId(1);
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
-        when(departmentDao.getDepartment(1)).thenReturn(dep);
-        ReflectionTestUtils.setField(logBusinessDao, "departmentDao", departmentDao);
-    }
 
 	@Test
 	public void testDeclarationGet() {
@@ -117,61 +100,6 @@ public class LogBusinessDaoTest {
 		assertEquals(new Date(14253454568000l).getTime(), acceptanceDate.getTime());
 		assertEquals(new Date(13253454568000l).getTime(), creationDate.getTime());
 	}
-
-    @Test
-    public void testGetLogsBusiness() {
-        LogBusinessFilterValuesDao filterValuesDao = new LogBusinessFilterValuesDao();
-        filterValuesDao.setDepartmentId(1);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2013, Calendar.JANUARY, 0);
-        filterValuesDao.setFromSearchDate(calendar.getTime());
-        calendar.set(2013, Calendar.JANUARY, 1);
-        filterValuesDao.setToSearchDate(calendar.getTime());
-        filterValuesDao.setStartIndex(0);
-        filterValuesDao.setCountOfRecords(1);
-        filterValuesDao.setDepartmentId(1);
-        List<Long> userList = new ArrayList<Long>();
-        userList.add(1l);
-        filterValuesDao.setUserIds(userList);
-        List<Long> formDataIds = new ArrayList<Long>();
-        formDataIds.add(1l);
-        List<Long> declarationIds = new ArrayList<Long>();
-        declarationIds.add(1l);
-        declarationIds.add(2l);
-
-        PagingResult<LogSearchResultItem> resultItems = logBusinessDao.getLogsBusiness(formDataIds, declarationIds, filterValuesDao);
-        assertEquals(1, resultItems.getTotalCount());
-        assertEquals(1, resultItems.size());
-        assertEquals("Подразделение", resultItems.get(0).getDepartmentName());
-        /*assertEquals("Банк", resultItems.get(0).getDepartment().getName());*/
-    }
-
-    @Test
-    public void testRemoveRecords(){
-        LogBusiness logSystem = createFormLogBusiness(FormDataEvent.CREATE.getCode(), 3l, new Date());
-
-        List<Long> listIds = new ArrayList<Long>();
-        listIds.add(1l);
-        listIds.add(3l);
-
-        assertEquals(1, logBusinessDao.getFormLogsBusiness(1).size());
-
-        logBusinessDao.add(logSystem);
-        assertEquals(2, logBusinessDao.getFormLogsBusiness(1).size());
-
-        logBusinessDao.removeRecords(listIds);
-
-        LogBusinessFilterValuesDao filter = new LogBusinessFilterValuesDao();
-        filter.setCountOfRecords(10);
-        filter.setStartIndex(0);
-        filter.setFromSearchDate(new Date(1304247365000l));
-        filter.setToSearchDate(new Date());
-
-        List<Long> formDataIds = new ArrayList<Long>();
-        formDataIds.add(1l);
-
-        assertEquals(1, logBusinessDao.getLogsBusiness(formDataIds, null, filter).size());
-    }
 
 	private LogBusiness createFormLogBusiness(int event_id, long id, Date date) {
 		LogBusiness logBusiness = new LogBusiness();
