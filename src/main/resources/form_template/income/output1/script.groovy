@@ -227,7 +227,7 @@ def logicCheck() {
 }
 
 def roundValue(BigDecimal value, def precision) {
-    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+    value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
 def checkOverpower(def value, def row, def alias) {
