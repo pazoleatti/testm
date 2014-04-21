@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="forLabel" colSpan="2" rowSpan="2" value="№ пп"/>
-        <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="number" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="forLabel" colSpan="1" rowSpan="2" value=""/>
         <cell alias="debtor" colSpan="1" rowSpan="2" value="Наименование дебитора"/>
         <cell alias="provision" colSpan="1" rowSpan="2" value="Обеспечение"/>
         <cell alias="nameBalanceAccount" colSpan="1" rowSpan="2" value="Наименование балансового счёта"/>
@@ -20,8 +20,8 @@
         <cell alias="useReserve" colSpan="1" rowSpan="1" value="Изменение фактического резерва"/>
     </row>
     <row alias="">
-        <cell alias="forLabel" colSpan="1" rowSpan="1" value="№ пп"/>
         <cell alias="number" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="forLabel" colSpan="1" rowSpan="1" value=""/>
         <cell alias="debtor" colSpan="1" rowSpan="1" value="Наименование дебитора"/>
         <cell alias="provision" colSpan="1" rowSpan="1" value="Обеспечение"/>
         <cell alias="nameBalanceAccount" colSpan="1" rowSpan="1" value="Наименование балансового счёта"/>
@@ -41,8 +41,8 @@
               value="использование резерва на погашение процентов по безнадежным долгам в отчетном периоде"/>
     </row>
     <row alias="">
-        <cell alias="forLabel" colSpan="1" rowSpan="1" value=""/>
         <cell alias="number" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="forLabel" colSpan="1" rowSpan="1" value=""/>
         <cell alias="debtor" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="provision" colSpan="1" rowSpan="1" value="3"/>
         <cell alias="nameBalanceAccount" colSpan="1" rowSpan="1" value="4"/>
