@@ -197,10 +197,7 @@ void calculationBasicSum(def dataRows) {
     def dataRowsRNU14 = (formDataRNU14 ? formDataService.getDataRowHelper(formDataRNU14)?.allCached : null)
     ['R214', 'R215', 'R216', 'R217', 'R218'].each { alias ->
         def row = getDataRow(dataRows, alias)
-        if (!isBank()) {
-            //при консолидации из первичных
-            row.rnu5Field5Accepted = 0
-        } else {
+        if (isBank()) {
             //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
             if (formDataRNU14 != null) {
                 for (def rowRNU14 : dataRowsRNU14) {
@@ -208,8 +205,6 @@ void calculationBasicSum(def dataRows) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
-            } else {
-                row.rnu5Field5Accepted = 0
             }
         }
     }
