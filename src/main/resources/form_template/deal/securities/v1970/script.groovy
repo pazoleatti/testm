@@ -182,7 +182,7 @@ void logicCheck() {
             def countCell = row.getCell('count')
             def priceCell = row.getCell('price')
             if (okei == '796' && countCell.value != null && countCell.value != 0
-                    && priceCell.value != (sumCell.value / countCell.value).setScale(2, RoundingMode.HALF_UP)) {
+                    && priceCell.value != (sumCell.value / countCell.value).setScale(0, RoundingMode.HALF_UP)) {
                 def msg1 = priceCell.column.name
                 def msg2 = sumCell.column.name
                 def msg3 = countCell.column.name

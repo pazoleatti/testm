@@ -8,23 +8,23 @@
         задолженности и безнадежных долгов.
     </fullName>
     <code>РНУ-30</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>forLabel</alias>
-        <checking>false</checking>
-        <name></name>
-        <order>1</order>
-        <width>0</width>
-        <maxLength>255</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
-        <order>2</order>
+        <order>1</order>
         <width>5</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>forLabel</alias>
+        <checking>false</checking>
+        <name>forLabel</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>debtor</alias>
