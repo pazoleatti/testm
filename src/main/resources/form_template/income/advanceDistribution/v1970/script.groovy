@@ -344,6 +344,9 @@ def calc12(def row) {
 def calc13(def row) {
     def temp = 0
     if (row.baseTaxOfRub > 0) {
+        if(row.minimizeTaxSum == null){
+            return null
+        }
         if (row.minimizeTaxSum == 0) {
             temp = roundValue(row.baseTaxOfRub * row.subjectTaxStavka / 100, 0)
         } else {
@@ -444,10 +447,9 @@ void logicalCheckBeforeCalc() {
     summaryMap.each { key, value ->
         def formDataSummary = getFormDataSummary(key)
         if (formDataSummary == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
-        }
-        if (getData(formDataSummary) == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+        } else if (getData(formDataSummary) == null) {
+            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
         }
     }
 }
