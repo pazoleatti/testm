@@ -42,6 +42,10 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 
 		TAUser user = userService.getUser(userName.toLowerCase());
 
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("Пользователь не активен!");
+        }
+
 		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
 		for (TARole role : user.getRoles()) {
 			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
@@ -54,8 +58,6 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 		);
 		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
 
-		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
-		// возможно в будущем задействуем и их
 		return new UserAuthenticationToken(info, grantedAuthorities);
 	}
 }
