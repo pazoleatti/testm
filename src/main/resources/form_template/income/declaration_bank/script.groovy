@@ -455,12 +455,12 @@ void generateXML() {
     def nalIschislSub = getTotalFromForm(dataRowsAdvance, 'taxSum')
     /** НалИсчисл. Код строки декларации 180. */
     def nalIschisl = nalIschislFB + nalIschislSub
-    /** НалВыпл311. */
-    def nalVipl311 = getLong(sumTax)
+    /** НалВыпл311. Код строки декларации 240. */
+    def nalVipl311 = getLong(sumTax + nalVipl311FBOld + nalVipl311SubOld)
     /** НалВыпл311ФБ. Код строки декларации 250. */
-    def nalVipl311FB = getLong(sumTax * 2 / 20)
+    def nalVipl311FB = getLong(nalVipl311 * 2 / 20)
     /** НалВыпл311Суб. Код строки декларации 260. */
-    def nalVipl311Sub = getLong(sumTax - nalVipl311FB)
+    def nalVipl311Sub = getLong(nalVipl311 - nalVipl311FB)
 
     /** АвПлатМесФБ. Код строки декларации 300. */
     def avPlatMesFB = nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0)
@@ -504,8 +504,8 @@ void generateXML() {
     def vneRealDohVRash = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10910]))
     /** ВнеРеалДохРынЦБДД. Код строки декларации 106. Код вида дохода = 13940, 13950, 13960, 13970, 13980, 13990. */
     def vneRealDohRinCBDD = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [13940, 13950, 13960, 13970, 13980, 13990]))
-    /** ВнеРеалДохКор. Код строки декларации 107. Код вида дохода = 14170, 14180, 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290. */
-    def vneRealDohCor = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [14170, 14180, 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290]))
+    /** ВнеРеалДохКор. Код строки декларации 107. Код вида дохода = 14170, 14180, 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290, 14300, 14310, 14320. */
+    def vneRealDohCor = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [14170, 14180, 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290, 14300, 14310, 14320]))
     /** Налоги. Код строки декларации 041. */
     def nalogi = getNalogi(dataRowsSimpleConsumption)
     /** РасхКапВл10. Код строки декларации 042. Код вида расхода = 20760. */
@@ -538,7 +538,7 @@ void generateXML() {
 
     // Приложение к налоговой декларации
     /** СвЦелСред - блок. Табл. 34. Алгоритмы заполнения отдельных атрибутов «Приложение к налоговой декларации»  декларации Банка по налогу на прибыль. */
-    svCelSred = new HashMap()
+    def svCelSred = new HashMap()
     if (dataRowsComplexConsumption != null) {
         // 700, 770, 890
         [700:[20750], 770:[20321], 890:[21280]].each { id, codes ->
@@ -547,9 +547,16 @@ void generateXML() {
                 svCelSred[id] = result
             }
         }
-        // 780, 790, 811, 812, 813, 940, 950
-        [780:[20530], 790:[20500], 811:[20700], 812:[20698], 813:[20690], 940:[23040], 950:[23050]].each { id, codes ->
+        // 780, 811, 812, 813, 940, 950
+        [780:[20530], 811:[20700], 812:[20698], 813:[20690], 940:[23040], 950:[23050]].each { id, codes ->
             def result = getLong(getCalculatedSimpleConsumption(dataRowsSimpleConsumption, codes))
+            if (result != 0) {
+                svCelSred[id] = result
+            }
+        }
+        // 790
+        [790:[20501]].each { id, codes ->
+            def result = getSimpleConsumptionSumRows8(dataRowsSimpleConsumption, codes)
             if (result != 0) {
                 svCelSred[id] = result
             }
@@ -1426,19 +1433,20 @@ def getDohVnereal(def dataRows, def dataRowsSimple) {
     // 13070, 13090, 13100, 13110, 13120, 13250, 13650, 13655, 13660, 13665, 13670,
     // 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
     // 13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180,
-    // 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290
+    // 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290,
+    // 14300, 14310, 14320
     result += getComplexIncomeSumRows9(dataRows, [11405, 11410, 11415, 13040, 13045, 13050, 13055,
             13060, 13065, 13070, 13090, 13100, 13110, 13120, 13250, 13650, 13655, 13660, 13665,
             13670, 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
             13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180, 14190,
-            14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290])
+            14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290, 14300, 14310, 14320])
 
     // Код вида дохода = 11380, 11385, 11390, 11395, 11400, 11420, 11430, 11840, 11850, 11855,
     // 11860, 11870, 11880, 11930, 11970, 12000, 12010, 12030, 12050, 12070, 12090, 12110, 12130,
     // 12150, 12170, 12190, 12210, 12230, 12250, 12270, 12290, 12320, 12340, 12360, 12390, 12400,
     // 12410, 12420, 12430, 12830, 12840, 12850, 12860, 12870, 12880, 12890, 12900, 12910, 12920,
     // 12930, 12940, 12950, 12960, 12970, 12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035,
-    // 13080, 13150, 13160, 13170, 13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330,
+    // 13080, 13130, 13140, 13150, 13160, 13170, 13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330,
     // 13340, 13400, 13410, 13725, 13730, 13920, 13925, 13930, 14000, 14010, 14020, 14030, 14040,
     // 14050, 14060, 14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160
     result += getSimpleIncomeSumRows8(dataRowsSimple, [11380, 11385, 11390, 11395, 11400, 11420,
@@ -1446,7 +1454,7 @@ def getDohVnereal(def dataRows, def dataRowsSimple) {
             12050, 12070, 12090, 12110, 12130, 12150, 12170, 12190, 12210, 12230, 12250, 12270,
             12290, 12320, 12340, 12360, 12390, 12400, 12410, 12420, 12430, 12830, 12840, 12850,
             12860, 12870, 12880, 12890, 12900, 12910, 12920, 12930, 12940, 12950, 12960, 12970,
-            12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035, 13080, 13150, 13160, 13170,
+            12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035, 13080, 13130, 13140, 13150, 13160, 13170,
             13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330, 13340, 13400, 13410,
             13725, 13730, 13920, 13925, 13930, 14000, 14010, 14020, 14030, 14040, 14050, 14060,
             14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160])
@@ -1459,9 +1467,6 @@ def getDohVnereal(def dataRows, def dataRowsSimple) {
     result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
     // графа 6
     result -= getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
-
-    // Код вида дохода = 13130, 13140
-    result -= getSimpleIncomeSumRows8(dataRowsSimple, [13130, 13140])
 
     return getLong(result)
 }
@@ -1497,9 +1502,9 @@ def getDohIsklPrib(def dataRowsComplex, def dataRowsSimple) {
 def getRashVnerealVs(def dataRows, def dataRowsSimple) {
     def result = 0.0
 
-    // Код вида расхода = 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    // Код вида расхода = 22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
     // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
-    result += getComplexConsumptionSumRows9(dataRows, [22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    result += getComplexConsumptionSumRows9(dataRows, [22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
             22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240])
 
     // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
@@ -1521,8 +1526,8 @@ def getRashVnerealVs(def dataRows, def dataRowsSimple) {
             23220, 23230, 23250, 23260, 23270, 23280 ]
     result += getCalculatedSimpleConsumption(dataRowsSimple, knu)
 
-    // Код вида расхода = 22492, 23150, 23160, 23170 - графа 9
-    result -= getComplexConsumptionSumRows9(dataRows, [22492, 23150, 23160, 23170])
+    // Код вида расхода = 23150, 23160, 23170 - графа 9
+    result -= getComplexConsumptionSumRows9(dataRows, [23150, 23160, 23170])
 
     return getLong(result)
 }
@@ -1833,10 +1838,10 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.04')) {
+    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.05')) {
         errorList.add("«Версия формата»")
     }
-    if (record.APP_VERSION == null || record.APP_VERSION.value == null || !record.APP_VERSION.value.equals('XLR_FNP_TAXCOM_5_04')) {
+    if (record.APP_VERSION == null || record.APP_VERSION.value == null || !record.APP_VERSION.value.equals('XLR_FNP_TAXCOM_5_05')) {
         errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList

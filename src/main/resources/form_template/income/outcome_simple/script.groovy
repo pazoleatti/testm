@@ -96,6 +96,11 @@ def endDate = null
 @Field
 def rbIncome102 = null
 
+@Field
+def row50001alias = 'R108'
+@Field
+def row50002alias = 'R213'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -167,35 +172,32 @@ void logicCheck() {
         }
     }
 
-    def row50001 = getDataRow(dataRows, 'R107')
-    def row50002 = getDataRow(dataRows, 'R212')
+    def row50001 = getDataRow(dataRows, row50001alias)
+    def row50002 = getDataRow(dataRows, row50002alias)
     def need50001 = [:]
     def need50002 = [:]
     totalColumns.each{ alias ->
-        need50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
-        need50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
+        need50001[alias] = getSum(dataRows, alias, 'R2', 'R107')
+        need50002[alias] = getSum(dataRows, alias, 'R110', 'R212')
     }
     checkTotalSum(row50001, need50001)
     checkTotalSum(row50002, need50002)
 }
 
 void calculationBasicSum(def dataRows) {
-    def row50001 = getDataRow(dataRows, 'R107')
-    def row50002 = getDataRow(dataRows, 'R212')
+    def row50001 = getDataRow(dataRows, row50001alias)
+    def row50002 = getDataRow(dataRows, row50002alias)
 
     // суммы для графы 5..8
     totalColumns.each { alias ->
-        row50001[alias] = getSum(dataRows, alias, 'R2', 'R106')
-        row50002[alias] = getSum(dataRows, alias, 'R109', 'R211')
+        row50001[alias] = getSum(dataRows, alias, 'R2', 'R107')
+        row50002[alias] = getSum(dataRows, alias, 'R110', 'R212')
     }
     def formDataRNU14 = getFormDataRNU14()
     def dataRowsRNU14 = (formDataRNU14 ? formDataService.getDataRowHelper(formDataRNU14)?.allCached : null)
-    ['R213', 'R214', 'R215', 'R216', 'R217'].each { alias ->
+    ['R214', 'R215', 'R216', 'R217', 'R218'].each { alias ->
         def row = getDataRow(dataRows, alias)
-        if (!isBank()) {
-            //при консолидации из первичных
-            row.rnu5Field5Accepted = 0
-        } else {
+        if (isBank()) {
             //Строки 213-217 расчет 8-й графы (при консолидации из сводных)
             if (formDataRNU14 != null) {
                 for (def rowRNU14 : dataRowsRNU14) {
@@ -203,8 +205,6 @@ void calculationBasicSum(def dataRows) {
                         row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
                     }
                 }
-            } else {
-                row.rnu5Field5Accepted = 0
             }
         }
     }
@@ -221,8 +221,8 @@ void calculationControlGraphs(def dataRows) {
     def formDataComplex = getFormDataComplex()
     def dataRowsComplex = formDataComplex != null ? formDataService.getDataRowHelper(formDataComplex)?.allCached : null
     for (def row : dataRows) {
-        // исключить итоговые строки и пять конечных
-        if (row.getAlias() in ['R107', 'R212', 'R1', 'R108', 'R213', 'R214', 'R215', 'R216', 'R217']) {
+        // исключить итоговые строки и пять конечных и 36-ую
+        if (row.getAlias() in [row50001alias, row50002alias, 'R1', 'R36', 'R109', 'R214', 'R215', 'R216', 'R217', 'R218']) {
             continue
         }
         if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
@@ -236,12 +236,14 @@ void calculationControlGraphs(def dataRows) {
         row.opuSumByEnclosure2 = getSumFromComplex(dataRowsComplex,
                 'consumptionBuhSumAccountNumber', 'consumptionBuhSumAccepted', row.consumptionAccountNumber)
         // графа 12
-        if (row.getAlias() in ['R105', 'R209']) {
-            tmp = calcSum6(dataRows, ['R105', 'R209'])
-        } else if (row.getAlias() in ['R106', 'R211']) {
-            tmp = calcSum6(dataRows, ['R106', 'R211'])
-        } else if (row.getAlias() in ['R104', 'R208']) {
-            tmp = calcSum6(dataRows, ['R104', 'R208'])
+        if (row.getAlias() in ['R106', 'R210']) {
+            tmp = calcSum8(dataRows, ['R106', 'R210'])
+        } else if (row.getAlias() in ['R107', 'R212']) {
+            tmp = calcSum8(dataRows, ['R107', 'R212'])
+        } else if (row.getAlias() in ['R105', 'R209']) {
+            tmp = calcSum8(dataRows, ['R105', 'R209'])
+        } else if (row.getAlias() in ['R35', 'R36']) {
+            tmp = calcSum8(dataRows, ['R35', 'R36'])
         } else {
             tmp = row.rnu5Field5Accepted
         }
@@ -267,7 +269,7 @@ def consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
                 row.getCell(alias).setValue(0, row.getIndex())
             }
         }
@@ -304,7 +306,7 @@ void consolidationSummary(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in ['R107', 'R212']) {
+            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
                 row[alias] = 0
             }
         }
@@ -325,8 +327,8 @@ void consolidationSummary(def dataRows) {
             dataRowsOld = (formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
-                ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
-                        (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
+                ([3, 12] + (15..35) + (39..50) + (52..55) + (57..59) + (63..79) + (92..96) + (99..102) +
+                        (104..107) + (182..184) + (191..195) + [200, 205, 206] + (208..212)).each {
                     def alias = 'R' + it
                     def row = getDataRow(dataRows, alias)
                     def rowOld = getDataRow(dataRowsOld, alias)
@@ -338,7 +340,7 @@ void consolidationSummary(def dataRows) {
                     row.rnu7Field12PrevTaxPeriod = rowOld.rnu7Field12PrevTaxPeriod
                 }
                 // данные за предыдущий отчетный период рну-5
-                ((2..106) + (109..211)).each {
+                ((2..107) + (110..212)).each {
                     def alias = 'R' + it
                     def row = getDataRow(dataRows, alias)
                     // графа 8
@@ -357,8 +359,8 @@ void consolidationSummary(def dataRows) {
             switch (child.formType.id) {
             // рну 7
                 case 311:
-                    ([3, 12] + (15..35) + (38..49) + (51..54) + (56..58) + (62..78) + (91..95) + (98..101) +
-                            (103..106) + (181..183) + (190..194) + [199, 204, 205] + (207..211)).each {
+                    ([3, 12] + (15..35) + (39..50) + (52..55) + (57..59) + (63..79) + (92..96) + (99..102) +
+                            (104..107) + (182..184) + (191..195) + [200, 205, 206] + (208..212)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
 
@@ -388,7 +390,7 @@ void consolidationSummary(def dataRows) {
 
             // рну 5
                 case 317:
-                    ((2..106) + (109..211)).each {
+                    ((2..107) + (110..212)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
                         // TODO Оптимизировать. Не все требуется и можно грузить сразу все.
@@ -450,13 +452,13 @@ def getSumFromComplex(dataRowsComplex, columnAliasCheck, columnAliasSum, value) 
 }
 
 /**
- * Получить значение для графы 12. Сумма значении графы 6 указанных строк
+ * Получить значение для графы 12. Сумма значении графы 8 указанных строк
  * @param dataRows строки НФ
  * @param aliasRows список алиасов значения которых надо просуммировать
  */
-def calcSum6(def dataRows, def aliasRows) {
+def calcSum8(def dataRows, def aliasRows) {
     return aliasRows.sum { alias ->
-        (getDataRow(dataRows, alias).rnu7Field12Accepted)?:0
+        (getDataRow(dataRows, alias).rnu5Field5Accepted)?:0
     }
 }
 
@@ -584,7 +586,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = 3
     def int colOffset = 0
-    def int maxRow = 212
+    def int maxRow = 213
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
