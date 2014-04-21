@@ -444,10 +444,9 @@ void logicalCheckBeforeCalc() {
     summaryMap.each { key, value ->
         def formDataSummary = getFormDataSummary(key)
         if (formDataSummary == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
-        }
-        if (getData(formDataSummary) == null) {
-            throw new ServiceException("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+        } else if (getData(formDataSummary) == null) {
+            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
         }
     }
 }
