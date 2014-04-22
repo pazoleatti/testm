@@ -2,7 +2,6 @@ package form_template.income.rnu26.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -601,8 +600,8 @@ void loggerError(def msg) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!getBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+    if (!isConsolidated && !getBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
 
