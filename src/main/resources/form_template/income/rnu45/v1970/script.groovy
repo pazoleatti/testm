@@ -122,7 +122,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
         formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }
