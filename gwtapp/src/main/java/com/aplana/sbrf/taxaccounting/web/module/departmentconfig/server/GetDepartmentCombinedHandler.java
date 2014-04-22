@@ -91,7 +91,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendarFrom.getTime(), null, filter, null);
+                addDayToDate(calendarFrom.getTime(), -1), null, filter, null);
 
         if (params.size() != 0) {
             Map<String, RefBookValue> paramsMap = params.get(0);
@@ -246,5 +246,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             list.add(value);
         }
         return list;
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 }
