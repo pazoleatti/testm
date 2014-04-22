@@ -160,7 +160,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                         .defaultCallback(new AbstractCallback<OpenCorrectPeriodResult>() {
                             @Override
                             public void onSuccess(OpenCorrectPeriodResult result) {
-                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear());
+                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear()+1900);
                                 LogAddEvent.fire(OpenCorrectDialogPresenter.this, result.getUuid());
                                 getView().hide();
                             }
