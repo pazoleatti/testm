@@ -1,11 +1,6 @@
 package form_template.income.f7_8.v1970
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -141,16 +136,16 @@ def totalColumns = ['amount', 'costWithoutNKD', 'loss', 'marketPriceInRub', 'cos
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
-        'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
-        'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
+        'securityKind', 'signSecurity', 'currencyCode', 'nominal', 'amount', 'acquisitionDate',
+        'tradeDate', 'currencyCodeTrade', 'costWithoutNKD', 'loss', 'marketPriceInPerc',
         'marketPriceInRub', 'realizationDate', 'tradeDate2', 'repaymentWithoutNKD', 'realizationPriceInPerc',
         'realizationPriceInRub', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'lossRealization']
 
 // Обязательно заполняемые атрибуты
 @Field
 def nonEmptyColumns = ['balanceNumber', 'operationType', 'signContractor', 'contractorName', 'securityName', 'series',
-        'securityKind', 'signSecurity', 'currencyCode', 'currencyName', 'nominal', 'amount', 'acquisitionDate',
-        'tradeDate', 'currencyCodeTrade', 'currencyNameTrade', 'costWithoutNKD', 'loss', 'realizationDate',
+        'securityKind', 'signSecurity', 'currencyCode', 'nominal', 'amount', 'acquisitionDate',
+        'tradeDate', 'currencyCodeTrade', 'costWithoutNKD', 'loss', 'realizationDate',
         'tradeDate2', 'marketPriceRealizationInPerc', 'marketPriceRealizationInRub', 'costRealization', 'realizationResult',
         'excessSellingPrice']
 
@@ -234,7 +229,7 @@ void calc() {
             for (def aD : aList) {
                 bD = bList.get(aList.indexOf(aD))
                 if (aD != bD) {
-                    return aD<=>bD
+                    return aD <=> bD
                 }
             }
         }
@@ -405,7 +400,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, values, logger, true)
 
         def record = dataProvider29.getRecords(reportPeriodEndDate, null, "BALANCE_ACCOUNT = '$row.balanceNumber'", null)
-        if (record.size()==0) {
+        if (record.size() == 0) {
             logger.error(errorMsg + "Значение графы «Номер балансового счета» отсутствует в справочнике «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»")
         }
 
@@ -579,8 +574,8 @@ BigDecimal getGraph36(def row) {
 }
 
 BigDecimal getGraph37(def row) {
-    if (isDiscountBond(row)&& row.costRealization != null && row.totalLoss != null && row.interestIncomeInRub != null) {
-            return row.costRealization - row.totalLoss - row.interestIncomeInRub
+    if (isDiscountBond(row) && row.costRealization != null && row.totalLoss != null && row.interestIncomeInRub != null) {
+        return row.costRealization - row.totalLoss - row.interestIncomeInRub
     }
     if (isCouponBound(row) && row.costRealization != null && row.totalLoss != null) {
         return row.costRealization - row.totalLoss
@@ -637,7 +632,7 @@ def getSignSecurity(def id) {
 
 def getCompareList(DataRow row) {
     return [row.balanceNumber,
-            getSignSecurity(row.signSecurity) ,
+            getSignSecurity(row.signSecurity),
             getSecurityKind(row.securityKind),
             getSignContractor(row.signContractor),
             getOperationType(row.operationType)]
@@ -753,24 +748,24 @@ void addData(def xml, int headRowCount) {
     def int rowIndex = 1  // Строки НФ, от 1
 
     def aliasR = ['1. Еврооблигации 2018 года погашения, полученные в результате реструктуризации ГКО': [getDataRow(dataRows, 'R1')],
-                'R1': [getDataRow(dataRows, 'R1-total')],
-                '2. Прочие еврооблигации и ОВГВЗ': [getDataRow(dataRows, 'R2')],
-                'R2': [getDataRow(dataRows, 'R2-total')],
-                '3. Акции: ОАО «АК Сбербанк России»': [getDataRow(dataRows, 'R3')],
-                'R3': [getDataRow(dataRows, 'R3-total')],
-                '4. Акции: ОАО «ГМК Норильский никель», РАО «ЕЭС России», ОАО «Газпром», ОАО «Мосэнерго», ОАО «НК Роснефть», ОАО «Сургутнефтегаз», ОАО «НК ЛУКойл», ОАО «Ростелеком», ОАО «Татнефть», ОАО «Газпром нефть»': [getDataRow(dataRows, 'R4')],
-                'R4': [getDataRow(dataRows, 'R4-total')],
-                '5. Другие акции и облигации акционерных обществ, включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R5')],
-                'R5': [getDataRow(dataRows, 'R5-total')],
-                '6. Прочие акции и облигации акционерных обществ, не включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R6')],
-                'R6': [getDataRow(dataRows, 'R6-total')],
-                '7. Субфедеральные и муниципальные ценные бумаги, кроме муниципальных ценных бумаг, эмитированных до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R7')],
-                'R7': [getDataRow(dataRows, 'R7-total')],
-                '8. Муниципальные ценные бумаги, эмитированные до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R8')],
-                'R8': [getDataRow(dataRows, 'R8-total')],
-                '9. Прочие ценные бумаги': [getDataRow(dataRows, 'R9')],
-                'R9': [getDataRow(dataRows, 'R9-total')],
-                'R10-11': [getDataRow(dataRows, 'R10'), getDataRow(dataRows, 'R11')]
+            'R1': [getDataRow(dataRows, 'R1-total')],
+            '2. Прочие еврооблигации и ОВГВЗ': [getDataRow(dataRows, 'R2')],
+            'R2': [getDataRow(dataRows, 'R2-total')],
+            '3. Акции: ОАО «АК Сбербанк России»': [getDataRow(dataRows, 'R3')],
+            'R3': [getDataRow(dataRows, 'R3-total')],
+            '4. Акции: ОАО «ГМК Норильский никель», РАО «ЕЭС России», ОАО «Газпром», ОАО «Мосэнерго», ОАО «НК Роснефть», ОАО «Сургутнефтегаз», ОАО «НК ЛУКойл», ОАО «Ростелеком», ОАО «Татнефть», ОАО «Газпром нефть»': [getDataRow(dataRows, 'R4')],
+            'R4': [getDataRow(dataRows, 'R4-total')],
+            '5. Другие акции и облигации акционерных обществ, включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R5')],
+            'R5': [getDataRow(dataRows, 'R5-total')],
+            '6. Прочие акции и облигации акционерных обществ, не включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R6')],
+            'R6': [getDataRow(dataRows, 'R6-total')],
+            '7. Субфедеральные и муниципальные ценные бумаги, кроме муниципальных ценных бумаг, эмитированных до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R7')],
+            'R7': [getDataRow(dataRows, 'R7-total')],
+            '8. Муниципальные ценные бумаги, эмитированные до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R8')],
+            'R8': [getDataRow(dataRows, 'R8-total')],
+            '9. Прочие ценные бумаги': [getDataRow(dataRows, 'R9')],
+            'R9': [getDataRow(dataRows, 'R9-total')],
+            'R10-11': [getDataRow(dataRows, 'R10'), getDataRow(dataRows, 'R11')]
     ]
 
     for (def row : xml.row) {
@@ -837,7 +832,7 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 10
-        newRow.currencyName = getRecordIdImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        // зависимая
         indexCell++
 
         // графа 11
@@ -853,7 +848,7 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 14
-        newRow.tradeDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.tradeDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
         indexCell++
 
         // графа 15
@@ -861,7 +856,7 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 16
-        newRow.currencyNameTrade = getRecordIdImport(15, 'NAME', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        // зависимая
         indexCell++
 
         // графа 17
@@ -920,7 +915,7 @@ void addData(def xml, int headRowCount) {
 
         aliasR[title].add(newRow)
     }
-    aliasR.each{k, v ->
+    aliasR.each { k, v ->
         rows.addAll(v)
     }
     dataRowHelper.save(rows)
