@@ -3,25 +3,18 @@ package form_template.income.rnu55.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
 
 /**
- * Скрипт для РНУ-55 (rnu55.groovy).
  * Форма "(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов".
  * formTemplateId=348
  *
  * @author rtimerbaev
  * @author Stanislav Yasinskiy
  */
-/** Признак периода ввода остатков. */
-
-@Field
-def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -33,11 +26,12 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = isBalancePeriod ? (allColumns - 'number') : editableColumns
-        def autoColumns = isBalancePeriod ? ['number'] : autoFillColumns
+        def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
         formDataService.addRow(formData, currentDataRow, cols, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -51,6 +45,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
@@ -100,6 +95,10 @@ def startDate = null
 @Field
 def endDate = null
 
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -124,12 +123,8 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
     // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
 
@@ -263,9 +258,6 @@ void logicCheck() {
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
-    def cell
-    def hasError
-
     for (def row in dataRowHelper.getAllCached()) {
         if (row.getAlias() != null) {
             continue
@@ -275,7 +267,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля 1..11
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 2. Проверка даты приобретения и границ отчетного периода (графа 3)
         if (row.buyDate > endDate) {
@@ -336,7 +328,7 @@ void logicCheck() {
 
         // 8. Проверка на неотрицательные значения
         ['percentInCurrency', 'percentInRuble'].each {
-            cell = row.getCell(it)
+            def cell = row.getCell(it)
             if (cell.getValue() != null && cell.getValue() < 0) {
                 def name = cell.getColumn().getName()
                 loggerError(errorMsg + "Значение графы \"$name\" отрицательное!")
@@ -348,12 +340,12 @@ void logicCheck() {
             needValue['percentInRuble'] = calc9(row)
             needValue['sumIncomeinCurrency'] = calc10(row, startDate, reportDate, daysInYear)
             needValue['sumIncomeinRuble'] = calc11(row, reportDate, startDate)
-            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod)
+            checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
         }
     }
 
     //10. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
-    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
 // Проверка валюты на рубли
@@ -507,8 +499,8 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def cols = isBalancePeriod ? (allColumns - 'number') : editableColumns
-        def autoColumns = isBalancePeriod ? ['number'] : autoFillColumns
+        def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
         cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -560,9 +552,16 @@ void addData(def xml, int headRowCount) {
 
 // Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными
 void loggerError(def msg, Object...args) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod()) {
         logger.warn(msg, args)
     } else {
         logger.error(msg, args)
     }
+}
+
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }

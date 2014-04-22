@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -151,7 +150,7 @@ void logicCheck() {
     def dTo = getReportPeriodEndDate()
 
     def dataRowsPrev = null
-    if (!isBalancePeriod() && !isConsolidated) {
+    if (!isConsolidated && !isBalancePeriod()) {
         dataRowsPrev = getDataRowsPrev()
     }
 
@@ -516,8 +515,8 @@ def getReportPeriodEndDate() {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException('Форма предыдущего периода не существует, или не находится в статусе «Принята»')
+    if (!isConsolidated && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
 

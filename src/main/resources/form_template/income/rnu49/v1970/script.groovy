@@ -47,9 +47,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
+        checkRNU()
         calc()
         logicCheck()
         break
@@ -67,6 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
@@ -609,7 +612,7 @@ def getDataRowsByFormTemplateId(def formTemplateId, def reportPeriod, def start,
 
 def List<FormData> getFormDataList(def formTemplateId, def reportPeriod, def start, def end){
     def formList = []
-    for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH]; periodOrder++) {
+    for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH] + 1; periodOrder++) {
         formList += formDataService.findMonth(formTemplateId, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
     }
     return formList
@@ -818,5 +821,15 @@ def roundValue(def value, int precision) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
     } else {
         return null
+    }
+}
+
+void checkRNU() {
+    // проверить рну 45 (id = 341) и 46 (id = 342)
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def end = getEndDate()
+        def month = end[Calendar.MONTH] + 1
+        formDataService.checkMonthlyFormExistAndAccepted(341, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)
     }
 }

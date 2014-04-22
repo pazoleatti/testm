@@ -3,7 +3,6 @@ package form_template.income.rnu38_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -108,10 +107,12 @@ void logicCheck() {
         return
     }
 
-    // . Арифметическая проверка графы 1..4
+    // 1. Проверка соответствия значениям формы РНУ-38.1
     def dataRowsFromSource = getDataRowsFromSource()
     def totalRowSource = getDataRow(dataRowsFromSource, 'total')
-    checkCalc(totalRow, allColumns, totalRowSource, logger, true)
+    if (isDiffRow(totalRow, totalRowSource, allColumns)) {
+        logger.error('Значения не соответствуют данным РНУ-38.1')
+    }
 }
 
 void consolidation() {
@@ -162,12 +163,8 @@ def getFormDataSource() {
 }
 
 void checkSourceAccepted() {
-    if (isConsolidated) {
-        return
-    }
-    def form = getFormDataSource()
-    if (form == null || form.state != WorkflowState.ACCEPTED) {
-        throw new ServiceException('Не найдены экземпляры РНУ-38.1 за текущий отчетный период!')
+    if (!isConsolidated) {
+        formDataService.checkMonthlyFormExistAndAccepted(334, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
     }
 }
 
