@@ -650,11 +650,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                     return;
                 }
                 taxPeriod = taxPeriodList.get(currentIndex - 1);
+                reportPeriod = reportPeriodService.getPrevReportPeriod(currentReportPeriodId);
             } else {
                 month = currentPeriodOrder - 1;
             }
             taxPeriodId = taxPeriod.getId();
-            reportPeriod = reportPeriodService.getPrevReportPeriod(currentReportPeriodId);
         } else {
             taxPeriodId = reportPeriod.getTaxPeriod().getId();
         }

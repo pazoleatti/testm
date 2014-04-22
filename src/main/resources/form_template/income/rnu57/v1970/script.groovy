@@ -3,7 +3,6 @@ package form_template.income.rnu57.v1970
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -14,17 +13,18 @@ import java.math.RoundingMode
  *
  * @author Stanislav Yasinskiy
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
+        checkRNU()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        prevPeriodCheck()
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -42,12 +42,12 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        prevPeriodCheck()
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
-        prevPeriodCheck()
+        checkRNU()
         calc()
         logicCheck()
         break
@@ -118,17 +118,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 //// Кастомные методы
 
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    if (getRNU(348) == null) {
-        throw new ServiceException(" Не найдены экземпляры «РНУ-55» за текущий отчетный период!")
-    }
-    if (getRNU(349) == null) {
-        throw new ServiceException(" Не найдены экземпляры «РНУ-56» за текущий отчетный период!")
+void checkRNU() {
+    // проверить рну 55 (id = 348) и 56 (id = 349)
+    if (formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkFormExistAndAccepted(348, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
+        formDataService.checkFormExistAndAccepted(349, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
     }
 }
 
