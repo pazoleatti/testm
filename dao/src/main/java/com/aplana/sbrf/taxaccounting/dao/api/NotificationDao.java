@@ -83,4 +83,10 @@ public interface NotificationDao {
 	 * @return количество оповещений
 	 */
 	int getCountByFilter(NotificationsFilterData filter);
+
+    /**
+     * Удалить оповещения для отчетного периода
+     * @param reportPeriodId отчетный период
+     */
+    void deleteByReportPeriod(int reportPeriodId);
 }

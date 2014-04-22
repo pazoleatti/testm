@@ -143,7 +143,7 @@ void logicCheck() {
 void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп.', null, 23, 3)
 
-    checkHeaderSize(xml.row.size(), xml.row[0].cell.size(), 23, 3)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 23, 3)
 
     def headerMapping = [
             (xml.row[0].cell[0]) : '№ пп.',

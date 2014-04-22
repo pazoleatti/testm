@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -10,10 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -52,6 +50,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private static final String REF_BOOK_DEREFERENCE_ERROR = "Строка %d, графа «%s»: В справочнике «%s» не найден элемент с id = %d»!";
     private static final String CHECK_UNIQ_ERROR = "Налоговая форма с заданными параметрами уже существует!";
     private static final String CHECK_BALANCE_PERIOD_ERROR = "Налоговая форма не может создаваться в периоде ввода остатков!";
+    private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». " +
+            "Расчеты не могут быть выполнены.";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -75,6 +75,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Autowired
     private TaxPeriodService taxPeriodService;
+
+    @Autowired
+    private FormTypeDao formTypeDao;
 
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
@@ -583,6 +586,100 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             throw new ServiceException("%s", msg);
         } else {
             logger.warn("%s", msg);
+        }
+    }
+
+    @Override
+    public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+                                          int currentReportPeriodId, Boolean prevPeriod,
+                                          Logger logger, boolean required) throws ServiceException {
+        // определение периода формы
+        ReportPeriod reportPeriod;
+        if (prevPeriod) {
+            reportPeriod = reportPeriodService.getPrevReportPeriod(currentReportPeriodId);
+        } else {
+            reportPeriod = reportPeriodService.get(currentReportPeriodId);
+        }
+
+        // получение данных формы
+        FormData formData = find(formTypeId, kind, departmentId, reportPeriod.getId());
+
+        // проверка существования, принятости и наличия данных
+        boolean accepted = false;
+        if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
+            DataRowHelper dataRowHelper = getDataRowHelper(formData);
+            List<DataRow<Cell>> dataRows = dataRowHelper.getAllCached();
+            accepted = !CollectionUtils.isEmpty(dataRows);
+        }
+
+        // выводить ли сообщение
+        if (!accepted) {
+            String formName = (formData == null ? formTypeDao.get(formTypeId).getName() : formData.getFormType().getName());
+            String periodName = reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear();
+            String msg = String.format(WRONG_FORM_IS_NOT_ACCEPTED, formName, periodName);
+            if (required) {
+                throw new ServiceException("%s", msg);
+            } else {
+                logger.warn("%s", msg);
+            }
+        }
+    }
+
+    @Override
+    public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+                                          int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
+                                          Logger logger, boolean required) {
+        // определение периода формы
+        ReportPeriod reportPeriod = reportPeriodService.get(currentReportPeriodId);
+        int month = currentPeriodOrder;
+        int taxPeriodId;
+        if (prevPeriod) {
+            TaxPeriod taxPeriod = reportPeriod.getTaxPeriod();
+            if (currentPeriodOrder == 1) {
+                // Переход через год
+                month = 12;
+                List<TaxPeriod> taxPeriodList = taxPeriodService.listByTaxType(taxPeriod.getTaxType());
+                int currentIndex = -1;
+                for (int i = 0; i < taxPeriodList.size(); i++) {
+                    if (taxPeriodList.get(i).getId().equals(taxPeriod.getId())) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex == 0 || currentIndex == -1) {
+                    return;
+                }
+                taxPeriod = taxPeriodList.get(currentIndex - 1);
+            } else {
+                month = currentPeriodOrder - 1;
+            }
+            taxPeriodId = taxPeriod.getId();
+            reportPeriod = reportPeriodService.getPrevReportPeriod(currentReportPeriodId);
+        } else {
+            taxPeriodId = reportPeriod.getTaxPeriod().getId();
+        }
+
+        // получение данных формы
+        FormData formData = findMonth(formTypeId, kind, departmentId, taxPeriodId, month);
+
+        // проверка существования, принятости и наличия данных
+        boolean accepted = false;
+        if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
+            DataRowHelper dataRowHelper = getDataRowHelper(formData);
+            List<DataRow<Cell>> dataRows = dataRowHelper.getAllCached();
+            accepted = !CollectionUtils.isEmpty(dataRows);
+        }
+
+        // выводить ли сообщение
+        if (!accepted) {
+            String formName = (formData == null ? formTypeDao.get(formTypeId).getName() : formData.getFormType().getName());
+            String monthPeriod = Formats.getRussianMonthNameWithTier(month) + " " + reportPeriod.getTaxPeriod().getYear();
+            String msg = String.format(WRONG_FORM_IS_NOT_ACCEPTED, formName, monthPeriod);
+            if (required) {
+                throw new ServiceException("%s", msg);
+            } else {
+                logger.warn("%s", msg);
+            }
         }
     }
 }

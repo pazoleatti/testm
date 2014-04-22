@@ -382,7 +382,6 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-    @Transactional(noRollbackFor = ServiceLoggerException.class)
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
@@ -550,6 +549,8 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 
         dataRowDao.commit(formData.getId());
+
+        logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName()+"\"");
 
 		logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
 		auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -721,5 +722,10 @@ public class FormDataServiceImpl implements FormDataService {
     public boolean isBankSummaryForm(long formDataId) {
         //TODO
         return true;
+    }
+
+    @Override
+    public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
+        return formDataDao.find(departmentIds, reportPeriodId);
     }
 }

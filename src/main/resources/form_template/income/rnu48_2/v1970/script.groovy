@@ -113,14 +113,9 @@ BigDecimal calcTotal(def dataRows) {
 def checkRNU48_1() {
     // идентификатор формы рну-48.1
     def rnuId = 343
-    if (formData.kind == FormDataKind.PRIMARY && getFormDataById(rnuId) == null) {
-        logger.warn("Не найдены экземпляры «${formTypeService.get(rnuId).name}» за текущий отчетный период!")
+    if (formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkFormExistAndAccepted(rnuId, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
     }
-}
-
-def getFormDataById(def formId) {
-    def form = formDataService.find(formId, formData.kind, formDataDepartment.id, formData.reportPeriodId)
-    return (form != null && form.state == WorkflowState.ACCEPTED ? form : null)
 }
 
 // Получение импортируемых данных

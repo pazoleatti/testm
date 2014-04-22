@@ -138,6 +138,14 @@ public class DepartmentServiceImplTest {
         when(departmentReportPeriodDao.isPeriodOpen(departmentGOSB31.getId(), 0)).thenReturn(false);
         when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 0)).thenReturn(true);
         when(departmentReportPeriodDao.isPeriodOpen(departmentOSB311.getId(), 1)).thenReturn(false);
+
+        when(departmentReportPeriodDao.existForDepartment(root.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.existForDepartment(departmentTB2.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.existForDepartment(departmentTB3.getId(), 0)).thenReturn(false);
+        when(departmentReportPeriodDao.existForDepartment(departmentGOSB31.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 0)).thenReturn(true);
+        when(departmentReportPeriodDao.existForDepartment(departmentOSB311.getId(), 1)).thenReturn(true);
+
         // Доступность по связям
         when(departmentDao.getDepartmentsBySourceControl(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
         when(departmentDao.getDepartmentsBySourceControlNs(anyInt(), anyListOf(TaxType.class))).thenReturn(asList(departmentTB2.getId(), departmentTB3.getId()));
