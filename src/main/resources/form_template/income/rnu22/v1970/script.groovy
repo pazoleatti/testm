@@ -46,13 +46,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (!prevPeriodCheck()) {
-            return
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -70,6 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -355,12 +355,10 @@ BigDecimal getGraph20(def DataRow row) {
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
-boolean prevPeriodCheck() {
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        logger.error("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
-        return false
+void prevPeriodCheck() {
+    if (!isConsolidated && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
-    return true
 }
 
 /** Получить строки за предыдущий отчетный период. */

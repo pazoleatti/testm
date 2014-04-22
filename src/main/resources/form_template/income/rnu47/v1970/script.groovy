@@ -1,6 +1,6 @@
 package form_template.income.rnu47.v1970
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -39,28 +39,12 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.CALCULATE:
-        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-            def rnu46FormData = getRnu46DataRowHelper()
-            if (rnu46FormData == null) {
-                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-                return
-            }
-            if (!formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id) && formData.periodOrder != 1) {
-                logger.error("Не найдены экземпляры РНУ-47 за прошлый отчетный период!!")
-                return
-            }
-        }
+        checkRNU()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-            def rnu46FormData = getRnu46DataRowHelper()
-            if (rnu46FormData == null) {
-                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-                return
-            }
-        }
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -73,6 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -500,4 +485,14 @@ void addData(def xml, int headRowCount) {
     }
 
     dataRowHelper.update(dataRows)
+}
+
+void checkRNU() {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        // проверить рну-47 за прошлый период
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+
+        // проверить рну-46 за текущий период
+        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
+    }
 }

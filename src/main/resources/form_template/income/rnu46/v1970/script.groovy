@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
+
 // графа 1  - rowNumber
 // графа 2  - invNumber
 // графа 3  - name
@@ -37,14 +38,17 @@ import java.text.SimpleDateFormat
 // графа 17 - exploitationStart
 // графа 18 - usefullLifeEnd
 // графа 19 - rentEnd
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -62,6 +66,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -187,11 +192,7 @@ void calc() {
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        if (getDataRowHelperPrev() == null) {
-            logger.error("Не найдены экземпляры \"${formTypeService.get(342).name}\" за прошлый отчетный период!")
-        } else {
-            dataPrev = getDataRowHelperPrev()
-        }
+        dataPrev = getDataRowHelperPrev()
     }
 
     // Сквозная нумерация с начала года
@@ -684,5 +685,11 @@ def loggerError(def msg) {
         logger.warn(msg)
     } else {
         logger.error(msg)
+    }
+}
+
+void prevPeriodCheck() {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }
