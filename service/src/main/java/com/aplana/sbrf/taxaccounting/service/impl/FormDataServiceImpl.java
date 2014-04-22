@@ -382,7 +382,6 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-    @Transactional(noRollbackFor = ServiceLoggerException.class)
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		lockCoreService.checkNoLockedAnother(FormData.class, formData.getId(), userInfo);
