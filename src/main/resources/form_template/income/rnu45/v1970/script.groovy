@@ -229,7 +229,7 @@ def BigDecimal calc9(def row) {
     if (row.startCost == null || row.depreciationRate == null) {
         return null
     }
-    return (row.startCost * row.depreciationRate).setScale(2, RoundingMode.HALF_UP)
+    return (row.startCost * row.depreciationRate / 100).setScale(2, RoundingMode.HALF_UP)
 }
 
 // Ресчет графы 10
