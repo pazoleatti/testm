@@ -185,6 +185,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             retList.addAll(departmentDao.listDepartments());
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             retList.addAll(departmentDao.getDepartmenTBChildren(tAUser.getDepartmentId()));
+            if (retList.isEmpty()) {
+                // Если такого подразделения (с типом 2) не найдено, то включить в выборку только подразделение пользователя.
+                retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
+            }
             // подразделения с типом 3
             retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
         }
@@ -215,8 +219,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes);
         for (Integer departmentId : list) {
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
-                    departmentId.longValue());
             if (departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId)) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);

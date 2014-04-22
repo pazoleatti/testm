@@ -350,8 +350,8 @@ public class DepartmentServiceImplTest {
 
             switch (departmentID[i]) {
                 case 0:
-                    Assert.assertEquals(1, result.size());
-                    Assert.assertTrue(result.contains(departmentGOSB31));
+                    Assert.assertEquals(2, result.size());
+                    Assert.assertTrue(result.containsAll(asList(root, departmentGOSB31)));
                     break;
                 case 2:
                     Assert.assertEquals(2, result.size());
