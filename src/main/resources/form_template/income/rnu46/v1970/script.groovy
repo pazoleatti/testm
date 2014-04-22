@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
+
 // графа 1  - rowNumber
 // графа 2  - invNumber
 // графа 3  - name
@@ -37,14 +38,17 @@ import java.text.SimpleDateFormat
 // графа 17 - exploitationStart
 // графа 18 - usefullLifeEnd
 // графа 19 - rentEnd
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -62,6 +66,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -187,11 +192,7 @@ void calc() {
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        if (getDataRowHelperPrev() == null) {
-            logger.error("Не найдены экземпляры \"${formTypeService.get(342).name}\" за прошлый отчетный период!")
-        } else {
-            dataPrev = getDataRowHelperPrev()
-        }
+        dataPrev = getDataRowHelperPrev()
     }
 
     // Сквозная нумерация с начала года
@@ -258,14 +259,15 @@ BigDecimal calc8(def row) {
 // Ресчет графы 10
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
+    def result = null
     if ([1, 2, 8, 9, 10].contains(group) && row.cost != null) {
-        return round(row.cost * 0.1)
+        result = round(row.cost * 0.1)
     } else if ((3..7).contains(group) && row.cost != null) {
-        return round(row.cost * 0.3)
+        result = round(row.cost * 0.3)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
-        return 0
+        result = 0
     }
-    return null
+    return result
 }
 
 // Ресчет граф 11, 15, 16
@@ -683,5 +685,11 @@ def loggerError(def msg) {
         logger.warn(msg)
     } else {
         logger.error(msg)
+    }
+}
+
+void prevPeriodCheck() {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }

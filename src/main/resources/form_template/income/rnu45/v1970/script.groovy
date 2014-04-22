@@ -2,7 +2,6 @@ package form_template.income.rnu45.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -33,13 +32,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (formData.kind == FormDataKind.PRIMARY) {
-            prevPeriodCheck()
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -58,6 +56,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
@@ -123,9 +122,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    if (!isMonthBalance() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }
 
@@ -231,7 +229,7 @@ def BigDecimal calc9(def row) {
     if (row.startCost == null || row.depreciationRate == null) {
         return null
     }
-    return (row.startCost * row.depreciationRate).setScale(2, RoundingMode.HALF_UP)
+    return (row.startCost * row.depreciationRate / 100).setScale(2, RoundingMode.HALF_UP)
 }
 
 // Ресчет графы 10

@@ -3,7 +3,6 @@ package form_template.income.rnu36_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -125,7 +124,7 @@ void logicCheck() {
         return
     }
 
-    // . Арифметическая проверка графы 1, 2
+    // 1. Проверка соответствия значениям формы РНУ-36.1
     def dataRowsFromSource = getDataRowsFromSource()
 
     def currentFixedRowsMap = getFixedRows(dataRows)
@@ -138,11 +137,12 @@ void logicCheck() {
     def totalRowBSource = sourceFixedRowsMap['totalB']
     def totalRowSource = sourceFixedRowsMap['total']
 
-    // раздел А, Б
-    checkValues(totalRowA, totalRowASource, allColumns)
-    checkValues(totalRowB, totalRowBSource, allColumns)
-    // итого
-    checkValues(totalRow, totalRowSource, ['percIncome'])
+    // раздел А, Б и итого
+    if (!checkValues(totalRowA, totalRowASource, allColumns) ||
+            !checkValues(totalRowB, totalRowBSource, allColumns) ||
+            !checkValues(totalRow, totalRowSource, ['percIncome'])) {
+        logger.error('Значения не соответствуют данным РНУ-36.1')
+    }
 }
 
 // Получить мапу с итоговыми и подитоговыми строками (доступ по алиасу)
@@ -160,18 +160,13 @@ def getFixedRows(def dataRows) {
     return map
 }
 
-void checkValues(def totalRow, totalRowSource, def columnAliases) {
-    def msg = []
-    columnAliases.each { alias ->
+def checkValues(def totalRow, totalRowSource, def columnAliases) {
+    for (def alias : columnAliases) {
         if (totalRowSource[alias] != totalRow[alias]) {
-            msg.add('«' + getColumnName(totalRow, alias) + '»')
+            return false
         }
     }
-    if (!msg.isEmpty()) {
-        def index = totalRow.getIndex()
-        def columns = msg.join(', ')
-        logger.error("Строка $index: Неверное значение граф: $columns")
-    }
+    return true
 }
 
 void consolidation() {
@@ -239,12 +234,8 @@ def getFormDataSource() {
 }
 
 void checkSourceAccepted() {
-    if (isConsolidated) {
-        return
-    }
-    def form = getFormDataSource()
-    if (form == null || form.state != WorkflowState.ACCEPTED) {
-        throw new ServiceException('Не найдены экземпляры РНУ-36.1 за текущий отчетный период!')
+    if (!isConsolidated) {
+        formDataService.checkMonthlyFormExistAndAccepted(333, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
     }
 }
 
