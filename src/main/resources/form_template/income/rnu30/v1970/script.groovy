@@ -16,7 +16,7 @@ import groovy.transform.Field
 // графа    - fix - для вывода надписей
 // графа 2  - debtor
 // графа 3  - provision                             атрибут 822 - CODE - "Код обеспечения", справочник 86 "Обеспечение"
-// графа 4  - nameBalanceAccount                    хранит абсолютное значение - атрибут 151 - NAME - «Наименование Балансового счёта» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
+// графа 4  - nameBalanceAccount                    хранит абсолютное значение - атрибут 151 - NAME - «Наименование вида дохода/расхода» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
 // графа 5  - debt45_90DaysSum
 // графа 6  - debt45_90DaysNormAllocation50per
 // графа 7  - debt45_90DaysReserve
@@ -283,7 +283,7 @@ void logicCheck() {
 
         // проверки НСИ
         // 1. Проверка значения графы «Наименование балансового счёта» (графа 4)
-        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "BALANCE_ACCOUNT = '$row.nameBalanceAccount'", null)
+        def record = dataProvider.getRecords(getReportPeriodEndDate(), null, "NAME = '$row.nameBalanceAccount'", null)
         if (record == null || record.isEmpty()) {
             def name = getColumnName(row, 'nameBalanceAccount')
             def ref = refBookFactory.get(29).name
