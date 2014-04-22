@@ -116,18 +116,12 @@ public class RefBookDaoTest {
 	public void testGetData3() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 3, 2013), null, null, null);
         // проверяем кол-во строк
-        assertEquals(2, data.size());
+        assertEquals(1, data.size());
         Map<String, RefBookValue> record1 = data.get(0);
-        assertEquals(2, record1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-        assertEquals("Алиса в стране", record1.get(ATTRIBUTE_NAME).getStringValue());
-        assertEquals(1213, record1.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
-        assertEquals(7L, record1.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
-
-        Map<String, RefBookValue> record2 = data.get(1);
-        assertEquals(4, record2.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-        assertEquals("Вий", record2.get(ATTRIBUTE_NAME).getStringValue());
-        assertEquals(425, record2.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
-        assertEquals(6L, record2.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
+        assertEquals(4, record1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
+        assertEquals("Вий", record1.get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(425, record1.get(ATTRIBUTE_PAGECOUNT).getNumberValue().doubleValue(), 1e-5);
+        assertEquals(6L, record1.get(ATTRIBUTE_AUTHOR).getReferenceValue().intValue());
 	}
 
 	@Test
@@ -141,7 +135,7 @@ public class RefBookDaoTest {
 	public void testGetData5() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
 		// проверяем кол-во строк
-		assertEquals(2, data.size());
+		assertEquals(1, data.size());
 	}
 
 	/**
@@ -456,7 +450,7 @@ public class RefBookDaoTest {
     @Test
     public void deleteAllRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
-        assertEquals(2, records.size());
+        assertEquals(1, records.size());
         refBookDao.deleteAllRecordVersions(1L, Arrays.asList(2L, 4L));
         records = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
         assertEquals(0, records.size());
