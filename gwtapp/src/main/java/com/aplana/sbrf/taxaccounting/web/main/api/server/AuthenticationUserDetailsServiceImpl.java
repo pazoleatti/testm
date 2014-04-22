@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
@@ -42,6 +43,10 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 
 		TAUser user = userService.getUser(userName.toLowerCase());
 
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("Пользователь не активен!");
+        }
+
 		Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>(user.getRoles().size());
 		for (TARole role : user.getRoles()) {
 			grantedAuthorities.add(new SimpleGrantedAuthority(role.getAlias()));
@@ -53,9 +58,6 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 				((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
 		);
 		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null);
-
-		// TODO: у User есть дополнительные флаги: expired, enabled и т.д.
-		// возможно в будущем задействуем и их
 		return new UserAuthenticationToken(info, grantedAuthorities);
 	}
 }

@@ -195,6 +195,7 @@
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
+            <url-pattern>/cache/clear-cache</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>
 			<url-pattern>/TaxAccountingSupportingData</url-pattern>
