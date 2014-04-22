@@ -34,7 +34,7 @@ insert into ref_book_record(id, record_id, ref_book_id, version, status) values
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (2, 1, 1, date '2013-02-01', 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
-  (3, 1, 1, date '2013-03-01', -1);
+  (3, 1, 1, date '2013-03-01', 2);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (4, 2, 1, date '2013-01-01', 0);
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values

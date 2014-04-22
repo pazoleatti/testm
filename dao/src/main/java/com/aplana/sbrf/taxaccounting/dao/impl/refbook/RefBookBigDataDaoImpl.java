@@ -105,7 +105,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
     }
 
     private static final String WITH_STATEMENT =
-            "with t as (select max(version) version, record_id from %s r where status = 0 and version <= ?  and\n" +
+            "with t as (select max(version) version, record_id from %s where status = 0 and version <= ?  and\n" +
                     "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by record_id)\n";
 
