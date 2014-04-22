@@ -2,8 +2,6 @@ package form_template.income.rnu50.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -133,36 +131,30 @@ void logicCheck() {
         // 1. Обязательность заполнения полей (графа 1..5)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 2. Проверка на нулевые значения
+        // 2. Проверка на уникальность поля «№ пп» (графа 1)
+        if (++rowNumber != row.rowNumber) {
+            logger.warn(errorMsg + 'Нарушена уникальность номера по порядку!')
+        }
+
+        // 3. Проверка на нулевые значения
         if (row.lossReportPeriod == 0 && row.lossTaxPeriod == 0) {
             logger.error(errorMsg + "Все суммы по операции нулевые!")
         }
 
-        // 3. Проверка формата номера записи в РНУ-49 (графа 2)
+        // 4. Проверка формата номера записи в РНУ-49 (графа 2)
         if (!row.rnu49rowNumber.matches('\\w{2}-\\w{6}')) {
             logger.error(errorMsg + "Неправильно указан номер записи в РНУ-49 (формат: ГГ-НННННН, см. №852-р в актуальной редакции)!")
         }
-
-        // . Проверка на уникальность поля «№ пп» (графа 1)
-        if (++rowNumber != row.rowNumber) {
-            logger.warn(errorMsg + 'Нарушена уникальность номера по порядку!')
-        }
     }
 
-    // 5. Проверка итоговых значений формы	Заполняется автоматически
+    // 8. Проверка итоговых значений формы	Заполняется автоматически
     checkTotalSum(dataRows, totalColumns, logger, true)
 
     if (isConsolidated) {
         return
     }
 
-    // 4. Проверки существования необходимых экземпляров форм
-    def dataRowsFromSource = getDataRowsFromSource()
-    if (!dataRowsFromSource) {
-        logger.error('Отсутствуют данные РНУ-49!')
-    }
-
-    // . Арифметическая проверка графы 1..5
+    // 5, 6, 7. Проверка соответствия данным формы РНУ-49. Арифметическая проверка графы 1..5
     def currentRows = dataRows.findAll { row -> row.getAlias() == null }
     def tmpRows = getCalcDataRows()
     if ((!currentRows && tmpRows) || (currentRows && !tmpRows)) {
@@ -241,12 +233,8 @@ def getFormDataSource() {
 }
 
 void checkSourceAccepted() {
-    if (isConsolidated) {
-        return
-    }
-    def form = getFormDataSource()
-    if (form == null || form.state != WorkflowState.ACCEPTED) {
-        throw new ServiceException('Не найдены экземпляры РНУ-49 за текущий отчетный период!')
+    if (!isConsolidated) {
+        formDataService.checkFormExistAndAccepted(312, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
     }
 }
 
