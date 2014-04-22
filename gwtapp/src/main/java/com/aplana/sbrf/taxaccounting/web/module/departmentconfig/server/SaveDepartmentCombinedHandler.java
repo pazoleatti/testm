@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -82,7 +83,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
 
-            Calendar calendarFrom = reportService.getStartDate(action.getReportPeriodId());
+            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
 
             Map<String, RefBookValue> paramsMap = new HashMap<String, RefBookValue>();
             // Id записи
@@ -154,7 +155,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
-            recordPairs = provider.checkRecordExistence(calendarFrom.getTime(), filter);
+            recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
             if (recordPairs.size() != 0) {
                 needEdit = true;
                 // Запись нашлась
@@ -165,9 +166,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!needEdit) {
-                provider.createRecordVersion(logger, calendarFrom.getTime(), null, Arrays.asList(record));
+                provider.createRecordVersion(logger, period.getCalendarStartDate(), addDayToDate(period.getEndDate(), -1), Arrays.asList(record));
             } else {
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), calendarFrom.getTime(), null, paramsMap);
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), addDayToDate(period.getEndDate(), -1), paramsMap);
             }
 
             // Запись ошибок в лог при наличии
@@ -179,6 +180,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
         }
         return result;
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 
     @Override
