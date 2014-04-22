@@ -177,6 +177,12 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		tr.endTR();
 		// После билда всех строк очищаем список спанов
 		int curPage = (int)Math.ceil(absRowIndex/cellTable.getPageSize());
+
+        // если это механизм перевыделения то очищаем список
+        if(cellTable.getKeyboardSelectedRow()!= 0){
+            globalSpans.clear();
+        }
+
 		if (cellTable.getVisibleItems().size() == (absRowIndex+1 - (cellTable.getPageSize()*curPage))) {
 			globalSpans.clear();
 		}
