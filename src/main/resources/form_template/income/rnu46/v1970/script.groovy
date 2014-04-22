@@ -258,14 +258,15 @@ BigDecimal calc8(def row) {
 // Ресчет графы 10
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
+    def result = null
     if ([1, 2, 8, 9, 10].contains(group) && row.cost != null) {
-        return round(row.cost * 0.1)
+        result = round(row.cost * 0.1)
     } else if ((3..7).contains(group) && row.cost != null) {
-        return round(row.cost * 0.3)
+        result = round(row.cost * 0.3)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
-        return 0
+        result = 0
     }
-    return null
+    return result
 }
 
 // Ресчет граф 11, 15, 16
