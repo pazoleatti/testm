@@ -154,16 +154,10 @@ public class RefBookUtils extends AbstractDao {
         ps.appendQuery(" FROM ");
         ps.appendQuery(tableName);
 
-        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR id = PARENT_ID ");
-        ps.appendQuery(" START WITH ");
-        ps.appendQuery(parentId == null ? " PARENT_ID is null ":" PARENT_ID = "+parentId);
-
         PreparedStatementData filterPS = new PreparedStatementData();
         SimpleFilterTreeListener simpleFilterTreeListener =  applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
         simpleFilterTreeListener.setRefBook(refBook);
         simpleFilterTreeListener.setPs(filterPS);
-
-        ps.appendQuery(")");
 
         Filter.getFilterQuery(filter, simpleFilterTreeListener);
         if (filterPS.getQuery().length() > 0) {
@@ -179,6 +173,12 @@ public class RefBookUtils extends AbstractDao {
                 ps.appendQuery(")");
             }
         }
+
+        ps.appendQuery(" CONNECT BY NOCYCLE PRIOR id = PARENT_ID ");
+        ps.appendQuery(" START WITH ");
+        ps.appendQuery(parentId == null ? " PARENT_ID is null ":" PARENT_ID = "+parentId);
+
+        ps.appendQuery(")");
 
         if (pagingParams != null) {
 			ps.appendQuery(" WHERE ");
