@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.RefBookExternalService;
@@ -22,6 +23,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -159,5 +161,12 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         } finally {
             IOUtils.closeQuietly(reader);
         }
+    }
+
+    @Override
+    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, TAUserInfo userInfo, Logger logger) {
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        additionalParameters.put("checkRecords", checkRecords);
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.CHECK, logger, additionalParameters);
     }
 }

@@ -110,7 +110,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Импорт данных справочника «" + refBook.getName() + "»"));
+        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" +event.name() +"» для справочника «" + refBook.getName() + "»"));
         executeScript(bindings, script, scriptLogger);
         scriptLogger.setMessageDecorator(null);
 
@@ -119,7 +119,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Произошли ошибки в скрипте импорта справочника.");
+            throw new ServiceException("Произошли ошибки при выполнении скрипта справочника.");
         }
     }
 
