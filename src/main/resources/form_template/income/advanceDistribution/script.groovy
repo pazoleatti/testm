@@ -183,10 +183,11 @@ void calc() {
     def taxBase = roundValue(getTaxBase(), 0)
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def departmentParamsDate = getReportPeriodEndDate() - 1
 
     /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
     def sumNal = 0
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
         sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
     }
@@ -198,7 +199,7 @@ void calc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", departmentParamsDate, -1, null, false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
             continue
@@ -377,12 +378,13 @@ void logicalCheckBeforeCalc() {
     def dataRows = dataRowHelper.allCached
     def Department department = departmentService.get(formData.departmentId)
 
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), getReportPeriodEndDate(), -1, null, false)
+    def departmentParamsDate = getReportPeriodEndDate() - 1
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), departmentParamsDate, -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
         logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
-    def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", getReportPeriodEndDate(), -1, null, false)
+    def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxUnpRecords == null || sumTaxUnpRecords.isEmpty() || getValue(sumTaxUnpRecords, 'SUM_TAX') == null) {
         logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
@@ -417,7 +419,7 @@ void logicalCheckBeforeCalc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", departmentParamsDate, -1, null, false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
             logger.error(errorMsg + "Не найдены настройки подразделения!")

@@ -161,7 +161,7 @@ void logicCheckBeforeCalc() {
         // 2. Проверка наличия значения «КПП» в форме настроек подразделения
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1,
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
@@ -202,7 +202,7 @@ void logicCheck() {
         // Проверки НСИ
         // 1. Проверка значения графы «КПП» - графа 4 - kpp - абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
         if (row.regionBankDivision != null && row.kpp != null && row.kpp != '') {
-            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1,
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
             if (incomeParam?.KPP?.stringValue != row.kpp) {
                 def name = getColumnName(row, 'kpp')
@@ -279,7 +279,7 @@ def calc2(def row) {
 def calc4(def row) {
     def incomeParam = null
     if (row.regionBankDivision != null) {
-        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1, -1, null, false)
     }
     return incomeParam?.KPP?.stringValue
 }
