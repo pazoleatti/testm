@@ -447,7 +447,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 " LEFT JOIN ddSelection dds ON ls.department_id  = dds.department_id AND ls.declaration_type_id = dds.declaration_type_id" : "");
         sql.append(!filterDao.getFormDataIds().isEmpty() && !filterDao.getDeclarationDataIds().isEmpty()?
                 " LEFT JOIN report_period rp ON rp.id = fds.report_period_id OR rp.id = dds.report_period_id" :
-                !filterDao.getFormDataIds().isEmpty() ? "LEFT JOIN report_period rp ON rp.id = fds.report_period_id" :
+                !filterDao.getFormDataIds().isEmpty() ? " LEFT JOIN report_period rp ON rp.id = fds.report_period_id" :
                         " LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
         sql.append(" LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id");
         sql.append(" WHERE (ls.report_period_name = CAST(tp.year AS VARCHAR(4)) || ' ' || rp.name) ");

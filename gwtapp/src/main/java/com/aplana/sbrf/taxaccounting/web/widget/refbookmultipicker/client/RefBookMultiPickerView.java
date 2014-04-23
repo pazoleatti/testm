@@ -219,7 +219,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void find(String searchPattern) {
         getUiHandlers().find(searchPattern);
-        refresh();
+        refresh(true);
     }
 
     @Override
@@ -279,14 +279,17 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void refresh() {
+    public void refresh(boolean force) {
         if (asWidget().getElement().getOffsetWidth() > 0) {
             // когда вьха уже разместилась в дереве DOM у она получает физическую ширину
             // по ней и определем что таблица отображается на странице
             if (pager.getPage() != 0) {
                 pager.firstPage();
             } else {
-                cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
+                // Если данные еще не грузились или игнорим если "силой" грузим
+                if (cellTable.getVisibleItemCount() < 1 || force) {
+                    cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
+                }
             }
         }
     }

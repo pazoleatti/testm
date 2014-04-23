@@ -270,6 +270,11 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
         return sortByColumn;
     }
 
+    @Override
+    public void setVisibleArchiveButton(boolean isVisible) {
+        archive.setVisible(isVisible);
+    }
+
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event){
         if (getUiHandlers() != null){
