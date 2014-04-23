@@ -107,7 +107,13 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 			}
             // Устанавливаем старое значение
             if (nvalue != null) {
-                refBookPiker.setValue(Arrays.asList(nvalue), false);
+                if(refBookPiker.getValue()!= null && !refBookPiker.getValue().isEmpty()){
+                    if(!nvalue.equals(refBookPiker.getValue().get(0))){
+                        refBookPiker.setValue(Arrays.asList(nvalue), false);
+                    }
+                } else {
+                    refBookPiker.setValue(Arrays.asList(nvalue), false);
+                }
             }
 
             // Регистрируем событие изменения значени
@@ -148,7 +154,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					}
 				}
 			});
-			
+
 			// Устанавливаем позицию и отображаем справочник
 			refBookPiker.open();
 			
