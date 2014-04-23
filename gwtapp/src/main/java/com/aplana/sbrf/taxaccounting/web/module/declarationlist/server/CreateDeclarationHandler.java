@@ -46,7 +46,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
         Integer declarationTypeId = command.getDeclarationTypeId();
         try {
-            periodService.getTaxPeriod(command.getReportPeriodId());
+            periodService.getTaxPeriod(periodService.getReportPeriod(command.getReportPeriodId()).getTaxPeriod().getId());
         } catch (Exception e) {
             throw new ActionException("Не удалось определить налоговый период.", e);
         }
