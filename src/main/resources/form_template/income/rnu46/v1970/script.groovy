@@ -323,12 +323,15 @@ BigDecimal calc13(def row) {
 BigDecimal calc14(def row, def prevRow) {
     def endDate = getReportPeriodStartDate() - 1
     if (prevRow == null || row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
-            || prevRow?.cost == null || prevRow?.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
+            || prevRow?.cost == null || prevRow?.amortExploitation == null) {
         return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
         def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) +  Long.valueOf(row.usefullLifeEnd.format("yyyy"))*12
         def date2 = Long.valueOf(endDate.format("MM")) +  Long.valueOf(endDate.format("yyyy"))*12
+        if ((date1 - date2) == 0) {
+            return 0 as BigDecimal
+        }
         return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (date1 - date2))
     }
     return round(row.cost / 84)
@@ -359,10 +362,15 @@ void logicCheck() {
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
-
-    // Отчет за предыдущий месяц
-    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
-        logger.error('Отсутствуют данные за прошлые отчетные периоды!')
+    def inventoryNumbersOld = []
+    def dataRowHelperOld = null
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        dataRowHelperOld = getDataRowHelperPrev()
+        if (dataRowHelperOld) {
+            dataRowHelperOld.allCached.each { row ->
+                inventoryNumbersOld.add(row.invNumber)
+            }
+        }
     }
 
     for (def row : dataRows) {
@@ -396,7 +404,7 @@ void logicCheck() {
 
         if (formData.kind == FormDataKind.PRIMARY) {
 
-            def prevRow = getPrevRow(getDataRowHelperPrev(), row)
+            def prevRow = getPrevRow(dataRowHelperOld, row)
             def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row)
 
             // 6. Проверка суммы расходов в виде капитальных вложений с начала года
@@ -444,6 +452,16 @@ void logicCheck() {
 
             if (row.usefullLifeEnd != calc18(row)) {
                 loggerError(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+            }
+        }
+    }
+
+    // 10. Проверки существования необходимых экземпляров форм
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        for (def inv in invSet) {
+            if (!inventoryNumbersOld.contains(inv)) {
+                logger.warn('Отсутствуют данные за прошлые отчетные периоды!')
+                break
             }
         }
     }
