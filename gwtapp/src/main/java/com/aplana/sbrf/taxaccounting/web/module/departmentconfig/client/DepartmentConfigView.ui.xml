@@ -209,7 +209,7 @@
                                             <g:Label text="КПП:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <aplana:TextBox ui:field="kpp" width="150px"/>
+                                            <aplana:TextBox ui:field="kpp" width="150px" maxLength="9"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" addStyleNames="{style.withMiddleChild}">

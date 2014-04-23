@@ -1,8 +1,7 @@
 package form_template.income.rnu44.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 /**
@@ -52,25 +51,18 @@ import groovy.transform.Field
  * 22   saleCode                Шифр вида реализации (выбытия)
  * 23   propertyType            Тип имущества
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
-        def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData == null) {
-            logger.error("Не найдены экземпляры РНУ-49 за текущий отчетный период")
-            return
-        }
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
-        def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData == null) {
-            logger.error("Не найдены экземпляры РНУ-49 за текущий отчетный период")
-            return
-        }
-        calc(rnu49FormData)
+        checkRNU()
+        calc()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW :
@@ -87,22 +79,17 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
-        def rnu49FormData = getRnu49FormData()
-        if (rnu49FormData == null) {
-            logger.error("Отсутствуют данные РНУ-49!")
-            return
-        }
+        checkRNU()
         logicCheck()
         break
-// обобщить
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
-        calc(null)
+        calc()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc(null)
+        calc()
         logicCheck()
         break
 }
@@ -149,13 +136,11 @@ String rnu49TotalAIndex = 'totalA'
 //// Обертки методов
 
 // заполняем ячейки, вычисляемые автоматически
-def calc(def rnu49FormData) {
-    if (!rnu49FormData){
-        rnu49FormData = getRnu49FormData()
-    }
+def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
+    def rnu49FormData = getRnu49FormData()
     def rnu49Rows = rnu49FormData?.getAllCached()
     if (rnu49Rows == null || rnu49Rows.isEmpty()) return
 
@@ -255,7 +240,7 @@ boolean logicCheck(){
     def rnu49Rows = getRnu49FormData()?.getAllCached()
     if (rnu49Rows == null) return
 
-    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'rowNumber')
+    def rowNumber = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -406,4 +391,11 @@ void addData(def xml, int headRowCount) {
     }
     rows.add(totalRow)
     dataRowHelper.save(rows)
+}
+
+// проверить наличие рну 49
+void checkRNU() {
+    if (formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkFormExistAndAccepted(312, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
+    }
 }

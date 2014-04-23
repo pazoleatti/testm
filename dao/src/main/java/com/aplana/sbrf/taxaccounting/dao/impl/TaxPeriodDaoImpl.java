@@ -111,4 +111,13 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 			return null;
 		}
 	}
+
+    @Override
+    public void delete(int taxPeriodId) {
+        getJdbcTemplate().update(
+          "delete from tax_period where id = ?",
+          new Object[]{taxPeriodId},
+          new int[]{Types.NUMERIC}
+        );
+    }
 }

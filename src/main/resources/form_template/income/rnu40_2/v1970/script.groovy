@@ -3,7 +3,6 @@ package form_template.income.rnu40_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -97,6 +96,7 @@ void calc() {
 
     if (isConsolidated) {
         sort(dataRows)
+        calcTotal(dataRows)
         dataRowHelper.save(dataRows)
         return
     }
@@ -126,6 +126,11 @@ void calc() {
     sort(dataRows)
 
     // посчитать итоги по разделам
+    calcTotal(dataRows)
+    dataRowHelper.save(dataRows)
+}
+
+void calcTotal(def dataRows) {
     sections.each { section ->
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
@@ -133,7 +138,6 @@ void calc() {
             lastRow.getCell(alias).setValue(getSum(dataRows, alias, firstRow, lastRow), null)
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -143,7 +147,7 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
-        // 1. Обязательность заполнения поля графы 1..6
+        // . Обязательность заполнения поля графы 1..6
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
 
@@ -153,10 +157,12 @@ void logicCheck() {
 
     def dataRows40_1 = getDataRowsFromSource()
 
+    // 1. Проверка соответствия значениям формы РНУ-40.1
+
     // алиасы графов для арифметической проверки (графа 1..6)
     def arithmeticCheckAlias = nonEmptyColumns
 
-    // 2. Арифметическая проверка графы 1..6
+    // 1.1. Арифметическая проверка графы 1..6
     // подразделы, собрать список списков строк каждого раздела
     for (def section : sections) {
         def rows40_1 = getRowsBySection(dataRows40_1, section)
@@ -164,9 +170,8 @@ void logicCheck() {
         // если в разделе рну 40.1 есть данные, а в аналогичном разделе рну 40.2 нет данных, то ошибка или наоборот, то тоже ошибка
         if (rows40_1.isEmpty() && !rows40_2.isEmpty() ||
                 !rows40_1.isEmpty() && rows40_2.isEmpty()) {
-            def number = section
-            logger.error("Неверно рассчитаны значения графов для раздела $number")
-            continue
+            logger.error('Значения не соответствуют данным РНУ-40.1')
+            return
         }
         if (rows40_1.isEmpty() && rows40_2.isEmpty()) {
             continue
@@ -174,37 +179,28 @@ void logicCheck() {
         // сравнить значения строк
         for (def row : rows40_2) {
             def tmpRow = getCalcRowFromRNU_40_1(row.name, row.code, rows40_1)
-            def msg = []
-            arithmeticCheckAlias.each { alias ->
+            for (def alias: arithmeticCheckAlias) {
                 def value1 = row.getCell(alias).value
                 def value2 = tmpRow.getCell(alias).value
                 if (value1 != value2) {
-                    msg.add('«' + getColumnName(row, alias) + '»')
+                    logger.error('Значения не соответствуют данным РНУ-40.1')
+                    return
                 }
-            }
-            if (!msg.isEmpty()) {
-                def columns = msg.join(', ')
-                def index = row.getIndex()
-                logger.error("Строка $index: Неверное значение граф: $columns")
             }
         }
     }
 
-    // 3. Арифметическая проверка строк промежуточных итогов (графа 5, 6)
-    sections.each { section ->
+    // 1.2. Арифметическая проверка строк промежуточных итогов (графа 5, 6)
+    for (def section : sections) {
         def firstRow = getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, 'total' + section)
-        def msg = []
         for (def col : totalColumns) {
             def value = roundValue(lastRow.getCell(col).value ?: 0, 6)
             def sum = roundValue(getSum(dataRows, col, firstRow, lastRow), 6)
             if (value != sum) {
-                msg.add('«' + getColumnName(lastRow, col) + '»')
+                logger.error('Значения не соответствуют данным РНУ-40.1')
+                return
             }
-        }
-        if (!msg.isEmpty()) {
-            def columns = msg.join(', ')
-            logger.error("Неверно рассчитаны итоговые значения для раздела $section в графе: $columns!")
         }
     }
 }
@@ -414,12 +410,8 @@ def getFormDataSource() {
 }
 
 void checkSourceAccepted() {
-    if (isConsolidated) {
-        return
-    }
-    def form = getFormDataSource()
-    if (form == null || form.state != WorkflowState.ACCEPTED) {
-        throw new ServiceException('Не найдены экземпляры РНУ-40.1 за текущий отчетный период!')
+    if (!isConsolidated) {
+        formDataService.checkMonthlyFormExistAndAccepted(338, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
     }
 }
 

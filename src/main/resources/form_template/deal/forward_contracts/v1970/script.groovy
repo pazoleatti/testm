@@ -189,7 +189,7 @@ void logicCheck() {
         // Проверка доходов/расходов и стоимости
         def msgPrice = row.getCell('price').column.name
         if (incomeSumCell.value != null && outcomeSumCell.value != null) {
-            if (row.price.abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
+            if ((row.price ?: 0).abs() != (incomeSumCell.value - outcomeSumCell.value).abs())
                 logger.warn("Строка $rowNum: Графа «$msgPrice» должна быть равна разнице графы «$msgIn» и «$msgOut» по модулю!")
         } else if (incomeSumCell.value != null) {
             if (row.price != incomeSumCell.value)

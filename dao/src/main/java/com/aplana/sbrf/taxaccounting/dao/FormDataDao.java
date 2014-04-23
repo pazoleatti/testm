@@ -85,11 +85,11 @@ public interface FormDataDao {
 
 	/**
 	 * Поиск налоговой формы
-	 * @param departmentId подразделение
+	 * @param departmentIds подразделения
 	 * @param reportPeriodId отчетный период
 	 * @return список налоговых форм, удовлетворяющих критерию
 	 */
-	List<FormData> find(int departmentId, int reportPeriodId);
+	List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
     /**
      * Поиск ежемесячной налоговой формы

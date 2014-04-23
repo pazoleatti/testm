@@ -3,8 +3,6 @@ package form_template.income.rnu61.v1970
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.time.TimeCategory
 import groovy.transform.Field
 
@@ -34,16 +32,11 @@ import java.math.RoundingMode
  * @author Stanislav Yasinskiy
  */
 
-@Field
-def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -51,8 +44,8 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
-        def autoColumns = isBalancePeriod ? ['rowNumber'] : autoFillColumns
+        def cols = isBalancePeriod() ? (allColumns - 'rowNumber') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['rowNumber'] : autoFillColumns
         formDataService.addRow(formData, currentDataRow, cols, autoColumns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -116,6 +109,9 @@ def totalColumns = ['percAdjustment']
 @Field
 def reportPeriodEndDate = null
 
+@Field
+def isBalancePeriod = null
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -137,18 +133,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
-void prevPeriodCheck() {
-    // Проверка только для первичных
-    if (formData.kind != FormDataKind.PRIMARY) {
-        return
-    }
-    if (!isBalancePeriod && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-    }
-}
-
 //// Кастомные методы
 
 // Алгоритмы заполнения полей формы
@@ -156,8 +140,6 @@ def calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
-    // Отчетная дата
-    def reportDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     // Начальная дата отчетного периода
     def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
     def daysOfYear = getCountDays(reportDateStart)
@@ -338,7 +320,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         // Проверка на уникальность поля «№ пп»
         if (++i != row.rowNumber) {
@@ -367,11 +349,11 @@ void logicCheck() {
         needValue['rateBROperation'] = calc6and7(row.currencyCode, row.operationDate)
         needValue['sumLimit'] = calc13(row, daysOfYear)
         needValue['percAdjustment'] = calc14(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod)
+        checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
     }
 
     // 5. Арифметические проверки расчета итоговой строки
-    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
 // Проверка валюты на рубли
@@ -455,8 +437,8 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        def cols = isBalancePeriod ? (allColumns - 'rowNumber') : editableColumns
-        def autoColumns = isBalancePeriod ? ['rowNumber'] : autoFillColumns
+        def cols = isBalancePeriod() ? (allColumns - 'rowNumber') : editableColumns
+        def autoColumns = isBalancePeriod() ? ['rowNumber'] : autoFillColumns
         cols.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -499,9 +481,16 @@ void addData(def xml, int headRowCount) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg, Object...args) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod()) {
         logger.warn(msg, args)
     } else {
         logger.error(msg, args)
     }
+}
+
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }

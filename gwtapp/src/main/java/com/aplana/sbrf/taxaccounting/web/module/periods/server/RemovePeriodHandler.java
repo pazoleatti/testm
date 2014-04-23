@@ -35,7 +35,7 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
 	public RemovePeriodResult execute(RemovePeriodAction removePeriodAction, ExecutionContext executionContext) throws ActionException {
 		List<LogEntry> logs = new ArrayList<LogEntry>();
 		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getReportPeriodId(),
-				removePeriodAction.getDepartmentId(), logs, securityService.currentUserInfo());
+				removePeriodAction.getCorrectionDate(), removePeriodAction.getDepartmentId(), logs, securityService.currentUserInfo());
 		RemovePeriodResult result = new RemovePeriodResult();
 		result.setUuid(logEntryService.save(logs));
 		return result;

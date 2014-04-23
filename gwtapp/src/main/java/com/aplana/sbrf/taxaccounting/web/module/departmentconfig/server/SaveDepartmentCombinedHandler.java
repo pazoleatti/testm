@@ -194,9 +194,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!needEdit) {
-                provider.createRecordVersion(logger, period.getCalendarStartDate(), period.getEndDate(), Arrays.asList(record));
+                provider.createRecordVersion(logger, period.getCalendarStartDate(), addDayToDate(period.getEndDate(), -1), Arrays.asList(record));
             } else {
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), period.getEndDate(), paramsMap);
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), addDayToDate(period.getEndDate(), -1), paramsMap);
             }
 
             String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
@@ -251,6 +251,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
         }
         return result;
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 
     @Override

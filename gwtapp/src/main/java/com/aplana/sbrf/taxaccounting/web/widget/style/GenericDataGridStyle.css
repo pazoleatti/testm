@@ -125,6 +125,10 @@
 	background-color: #FFFFCC;
 }
 
+/*.dataGridKeyboardSelectedRowCell .order {*/
+    /*background-color: #444444 !important;*/
+/*}*/
+
 .dataGridSelectedRow {
 	background-color: #FFFFCC;
 	border: none;
@@ -138,6 +142,6 @@
  * The keyboard selected cell is visible over selection.
  */
 .dataGridKeyboardSelectedCell {
-	background-color: #9A9CFF;
+	background-color: #E4E4FF;
 	border-color: #373AD7;
 }

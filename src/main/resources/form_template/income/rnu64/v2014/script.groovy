@@ -3,8 +3,6 @@ package form_template.income.rnu64.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
@@ -53,6 +51,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -214,7 +213,7 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
         prevQuarterTotalRow = getDataRow(dataRowsPrev, "total")
     }
     if (prevQuarterTotalRow != null) {
-        return (quarterRow.costs ?: 0) + prevQuarterTotalRow.costs ?: 0
+        return (quarterRow.costs ?: 0) + (prevQuarterTotalRow.costs ?: 0)
     } else {
         return quarterRow.costs ?: 0
     }
@@ -362,11 +361,11 @@ void consolidation() {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
+    if (isConsolidated || isBalancePeriod()) {
+        return
+    }
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    if (reportPeriod && reportPeriod.order != 1 && !isBalancePeriod() && !isConsolidated && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.formType.name
-        // http://jira.aplana.com/browse/SBRFACCTAX-6015
-        //throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
-        logger.warn("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    if (reportPeriod && reportPeriod.order != 1) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }

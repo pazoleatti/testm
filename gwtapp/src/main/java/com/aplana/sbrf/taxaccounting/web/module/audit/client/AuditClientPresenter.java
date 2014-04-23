@@ -134,6 +134,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         void updateArchiveDateLbl(String archiveDate);
         boolean isAscSorting();
         HistoryBusinessSearchOrdering getSearchOrdering();
+        void setVisibleArchiveButton(boolean isVisible);
 
     }
 
@@ -175,6 +176,13 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         super.prepareFromRequest(request);
         this.auditFilterPresenter.initFilterData();
         getView().updateData(0);
+        SetArchiveVisibleAction action = new SetArchiveVisibleAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SetArchiveVisibleResult>() {
+            @Override
+            public void onSuccess(SetArchiveVisibleResult result) {
+                getView().setVisibleArchiveButton(result.isVisible());
+            }
+        }, this));
     }
 
     @Override

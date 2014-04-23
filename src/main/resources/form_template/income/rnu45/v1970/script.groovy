@@ -2,7 +2,6 @@ package form_template.income.rnu45.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -33,13 +32,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
-        if (formData.kind == FormDataKind.PRIMARY) {
-            prevPeriodCheck()
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -58,6 +56,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE: // Консолидация
@@ -123,9 +122,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
 void prevPeriodCheck() {
-    if (!isMonthBalance() && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        def formName = formData.getFormType().getName()
-        throw new ServiceException("Не найдены экземпляры «$formName» за прошлый отчетный период!")
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }
 
@@ -187,7 +185,7 @@ void calc() {
     def dateStart = getMonthStartDate()
 
     def dataOld = null
-    if (formData.kind != FormDataKind.PRIMARY) {
+    if (formData.kind == FormDataKind.PRIMARY) {
         dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
     }
 
@@ -231,7 +229,7 @@ def BigDecimal calc9(def row) {
     if (row.startCost == null || row.depreciationRate == null) {
         return null
     }
-    return (row.startCost * row.depreciationRate).setScale(2, RoundingMode.HALF_UP)
+    return (row.startCost * row.depreciationRate / 100).setScale(2, RoundingMode.HALF_UP)
 }
 
 // Ресчет графы 10
@@ -267,9 +265,15 @@ def logicCheck() {
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
         def Set<String> invSet = new HashSet<String>()
-        def dataOld = null
-        if (formData.kind != FormDataKind.PRIMARY) {
-            dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+        def inventoryNumbersOld = []
+        def dataRowHelperOld = null
+        if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+            dataRowHelperOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+            if (dataRowHelperOld) {
+                dataRowHelperOld.allCached.each { row ->
+                    inventoryNumbersOld.add(row.inventoryNumber)
+                }
+            }
         }
 
         def dateEnd = getMonthEndDate()
@@ -303,18 +307,29 @@ def logicCheck() {
                 loggerError(errorMsg + "Все суммы по операции нулевые!")
             }
 
+            // 5. Арифметические проверки расчета неитоговых граф
             if (formData.kind == FormDataKind.PRIMARY) {
-                // 4. Арифметические проверки расчета неитоговых граф
                 needValue['depreciationRate'] = calc8(row)
                 needValue['amortizationMonth'] = calc9(row)
-                prevValues = getPrev10and11(dataOld, row)
+                prevValues = getPrev10and11(dataRowHelperOld, row)
                 needValue['amortizationSinceYear'] = calc10(row, dateStart, dateEnd, prevValues[0])
                 needValue['amortizationSinceUsed'] = calc11(row, dateStart, dateEnd, prevValues[1])
                 checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
             }
         }
-        // 5. Арифметические проверки расчета итоговой строки
+
+        // 6. Арифметические проверки расчета итоговой строки
         checkTotalSum(dataRows, totalColumns, logger, !isMonthBalance())
+
+        // 4. Проверки существования необходимых экземпляров форм
+        if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+            for (def inv in invSet) {
+                if (!inventoryNumbersOld.contains(inv)) {
+                    logger.warn('Отсутствуют данные за прошлые отчетные периоды!')
+                    break
+                }
+            }
+        }
     }
 }
 

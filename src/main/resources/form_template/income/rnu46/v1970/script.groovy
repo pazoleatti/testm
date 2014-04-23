@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  * @author Dmitriy Levykin
  */
+
 // графа 1  - rowNumber
 // графа 2  - invNumber
 // графа 3  - name
@@ -37,14 +38,17 @@ import java.text.SimpleDateFormat
 // графа 17 - exploitationStart
 // графа 18 - usefullLifeEnd
 // графа 19 - rentEnd
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -62,6 +66,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -187,11 +192,7 @@ void calc() {
     // Принятый отчет за предыдущий месяц
     def dataPrev = null
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        if (getDataRowHelperPrev() == null) {
-            logger.error("Не найдены экземпляры \"${formTypeService.get(342).name}\" за прошлый отчетный период!")
-        } else {
-            dataPrev = getDataRowHelperPrev()
-        }
+        dataPrev = getDataRowHelperPrev()
     }
 
     // Сквозная нумерация с начала года
@@ -258,14 +259,15 @@ BigDecimal calc8(def row) {
 // Ресчет графы 10
 BigDecimal calc10(def row, def map) {
     def Integer group = map?.GROUP?.numberValue
+    def result = null
     if ([1, 2, 8, 9, 10].contains(group) && row.cost != null) {
-        return round(row.cost * 0.1)
+        result = round(row.cost * 0.1)
     } else if ((3..7).contains(group) && row.cost != null) {
-        return round(row.cost * 0.3)
+        result = round(row.cost * 0.3)
     } else if (row.exploitationStart != null && row.exploitationStart < check17) {
-        return 0
+        result = 0
     }
-    return null
+    return result
 }
 
 // Ресчет граф 11, 15, 16
@@ -321,11 +323,16 @@ BigDecimal calc13(def row) {
 BigDecimal calc14(def row, def prevRow) {
     def endDate = getReportPeriodStartDate() - 1
     if (prevRow == null || row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
-            || prevRow?.cost == null || prevRow?.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
+            || prevRow?.cost == null || prevRow?.amortExploitation == null) {
         return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
-        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
+        def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) +  Long.valueOf(row.usefullLifeEnd.format("yyyy"))*12
+        def date2 = Long.valueOf(endDate.format("MM")) +  Long.valueOf(endDate.format("yyyy"))*12
+        if ((date1 - date2) == 0) {
+            return 0 as BigDecimal
+        }
+        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (date1 - date2))
     }
     return round(row.cost / 84)
 }
@@ -355,10 +362,15 @@ void logicCheck() {
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
-
-    // Отчет за предыдущий месяц
-    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
-        logger.error('Отсутствуют данные за прошлые отчетные периоды!')
+    def inventoryNumbersOld = []
+    def dataRowHelperOld = null
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        dataRowHelperOld = getDataRowHelperPrev()
+        if (dataRowHelperOld) {
+            dataRowHelperOld.allCached.each { row ->
+                inventoryNumbersOld.add(row.invNumber)
+            }
+        }
     }
 
     for (def row : dataRows) {
@@ -392,7 +404,7 @@ void logicCheck() {
 
         if (formData.kind == FormDataKind.PRIMARY) {
 
-            def prevRow = getPrevRow(getDataRowHelperPrev(), row)
+            def prevRow = getPrevRow(dataRowHelperOld, row)
             def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row)
 
             // 6. Проверка суммы расходов в виде капитальных вложений с начала года
@@ -440,6 +452,16 @@ void logicCheck() {
 
             if (row.usefullLifeEnd != calc18(row)) {
                 loggerError(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+            }
+        }
+    }
+
+    // 10. Проверки существования необходимых экземпляров форм
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        for (def inv in invSet) {
+            if (!inventoryNumbersOld.contains(inv)) {
+                logger.warn('Отсутствуют данные за прошлые отчетные периоды!')
+                break
             }
         }
     }
@@ -683,5 +705,11 @@ def loggerError(def msg) {
         logger.warn(msg)
     } else {
         logger.error(msg)
+    }
+}
+
+void prevPeriodCheck() {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
 }

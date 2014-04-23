@@ -16,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -147,6 +145,15 @@ public class DepartmentFormTypeDaoImplTest {
 		assertTrue(sourceIds.contains(6l));
 		assertTrue(sourceIds.contains(22l));
 	}
+
+    @Test
+    public void testGetFormTypeBySource() {
+        ArrayList<FormDataKind> formDataKinds = new ArrayList<FormDataKind>(3);
+        formDataKinds.add(FormDataKind.ADDITIONAL);
+        formDataKinds.add(FormDataKind.CONSOLIDATED);
+        formDataKinds.add(FormDataKind.PRIMARY);
+        /*Assert.assertEquals(1, departmentFormTypeDao.getFormTypeBySource(1, TaxType.INCOME, formDataKinds).size());*/
+    }
 
     /**
      * Существование форм назначений

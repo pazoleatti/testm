@@ -3,10 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.*;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -42,9 +39,17 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private PeriodService periodService;
+
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
         Integer declarationTypeId = command.getDeclarationTypeId();
+        try {
+            periodService.getTaxPeriod(command.getReportPeriodId());
+        } catch (Exception e) {
+            throw new ActionException("Не удалось определить налоговый период.", e);
+        }
         if (command.getTaxType().equals(TaxType.DEAL)) {
             List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(command.getDepartmentId(), command.getReportPeriodId(), TaxType.DEAL);
             if (declarationTypeList.size() == 1) {
@@ -55,6 +60,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         }
         CreateDeclarationResult result = new CreateDeclarationResult();
         Logger logger = new Logger();
+
 		result.setDeclarationId(declarationDataService.create(logger, declarationTemplateService
 				.getActiveDeclarationTemplateId(declarationTypeId, command.getReportPeriodId()), command.getDepartmentId(),
 				securityService.currentUserInfo(), command.getReportPeriodId()));

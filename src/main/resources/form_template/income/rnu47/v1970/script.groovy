@@ -1,11 +1,9 @@
 package form_template.income.rnu47.v1970
 
-import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам,
@@ -22,22 +20,6 @@ import java.text.SimpleDateFormat
  * 5    amortPeriod              -   За отчётный месяц
  * 6    amortTaxPeriod           -   С начала налогового периода
  */
-
-/** Признак периода ввода остатков. */
-@Field
-def isBalancePeriod
-
-// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
-def isMonthBalance() {
-    if (isBalancePeriod == null) {
-        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
-            isBalancePeriod = false
-        } else {
-            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
-        }
-    }
-    return isBalancePeriod
-}
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -57,28 +39,12 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.CALCULATE:
-        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-            def rnu46FormData = getRnu46DataRowHelper()
-            if (rnu46FormData == null) {
-                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-                return
-            }
-            if (!formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id) && formData.periodOrder != 1) {
-                logger.error("Не найдены экземпляры РНУ-47 за прошлый отчетный период!!")
-                return
-            }
-        }
+        checkRNU()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
-        if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-            def rnu46FormData = getRnu46DataRowHelper()
-            if (rnu46FormData == null) {
-                logger.error("Не найдены экземпляры РНУ-46 за текущий отчетный период!")
-                return
-            }
-        }
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -91,6 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        checkRNU()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -114,7 +81,23 @@ def allColumns = ["amortGroup", "sumCurrentPeriodTotal", "sumTaxPeriodTotal", "a
 def arithmeticCheckAlias = ["sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
 
 @Field
-def dateFormat = new SimpleDateFormat("dd.MM.yyyy")
+def dateFormat = 'dd.MM.yyyy'
+
+/** Признак периода ввода остатков. */
+@Field
+def isBalancePeriod
+
+// Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
+def isMonthBalance() {
+    if (isBalancePeriod == null) {
+        if (!reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId) || formData.periodOrder == null) {
+            isBalancePeriod = false
+        } else {
+            isBalancePeriod = formData.periodOrder - 1 % 3 == 0
+        }
+    }
+    return isBalancePeriod
+}
 
 // Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
@@ -245,6 +228,11 @@ void logicCheck() {
             } else {
                 continue
             }
+
+            if (isMonthBalance()) {
+                // Оставшиеся проверки не для периода ввода остатков
+                continue;
+            }
             //2.		Проверка суммы расходов в виде капитальных вложений с начала года
             //2.1	графа 4 ? графа 3;
             def invalidCapitalForm = errorMsg + "Неверная сумма расходов в виде капитальных вложений с начала года!"
@@ -255,7 +243,7 @@ void logicCheck() {
                 //2.2	графа 4 = графа 3 + графа 4 за предыдущий месяц;
                 // (если текущий отчетный период – январь, то слагаемое «по графе 4 за предыдущий месяц» в формуле считается равным «0.00»)
                 if (row.sumTaxPeriodTotal != (row.sumCurrentPeriodTotal + getFieldFromPreviousMonth(dataRowsOld, row.getAlias(), "sumTaxPeriodTotal"))) {
-                    invalidCapitalForm += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
+                    invalidCapitalForm += " Экземпляр за период ${formatDate(startOld, dateFormat)} - ${formatDate(endOld, dateFormat)} не существует (отсутствуют первичные данные для расчёта)"
                     loggerError(invalidCapitalForm)
                 } else
                 //2.3	графа 4 = (сумма)графа 3 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
@@ -269,7 +257,7 @@ void logicCheck() {
                             }
                             def start = reportPeriodService.getMonthStartDate(formData.reportPeriodId, periodOrder).time
                             def end = reportPeriodService.getMonthEndDate(formData.reportPeriodId, periodOrder).time
-                            invalidCapitalForm += "${getDateString(start)} - ${getDateString(end)}"
+                            invalidCapitalForm += "${formatDate(start, dateFormat)} - ${formatDate(end, dateFormat)}"
                         }
                         invalidCapitalForm += " не существует (отсутствуют первичные данные для расчёта)"
                         loggerError(invalidCapitalForm)
@@ -287,7 +275,7 @@ void logicCheck() {
                 //3.2   графа 6 = графа 5 + графа 6 за предыдущий месяц;
                 //  (если текущий отчетный период – январь, то слагаемое «по графе 6 за предыдущий месяц» в формуле считается равным «0.00»)
                 if (row.amortTaxPeriod != (row.amortPeriod + getFieldFromPreviousMonth(dataRowsOld, row.getAlias(), "amortTaxPeriod"))) {
-                    invalidAmortSumms += " Экземпляр за период ${getDateString(startOld)} - ${getDateString(endOld)} не существует (отсутствуют первичные данные для расчёта)"
+                    invalidAmortSumms += " Экземпляр за период ${formatDate(startOld, dateFormat)} - ${formatDate(endOld, dateFormat)} не существует (отсутствуют первичные данные для расчёта)"
                     loggerError(invalidAmortSumms)
                 } else
                 //3.3   графа 6 = (сумма)графа 5 за все месяцы текущего года, начиная с января и включая текущий отчетный период.
@@ -301,7 +289,7 @@ void logicCheck() {
                             }
                             def start = reportPeriodService.getMonthStartDate(formData.reportPeriodId, periodOrder).time
                             def end = reportPeriodService.getMonthEndDate(formData.reportPeriodId, periodOrder).time
-                            invalidAmortSumms += "${getDateString(start)} - ${getDateString(end)}"
+                            invalidAmortSumms += "${formatDate(start, dateFormat)} - ${formatDate(end, dateFormat)}"
                         }
                         invalidAmortSumms += " не существует (отсутствуют первичные данные для расчёта)"
                         loggerError(invalidAmortSumms)
@@ -420,16 +408,12 @@ void addRowsToRows(def rows, def addRows) {
     }
 }
 
-def String getDateString(Date date) {
-    return dateFormat.format(date)
-}
-
 BigDecimal round(BigDecimal value, int newScale = 2) {
     return value?.setScale(newScale, RoundingMode.HALF_UP)
 }
 
 def loggerError(def msg) {
-    if (isBalancePeriod) {
+    if (isMonthBalance()) {
         logger.warn(msg)
     } else {
         logger.error(msg)
@@ -501,4 +485,14 @@ void addData(def xml, int headRowCount) {
     }
 
     dataRowHelper.update(dataRows)
+}
+
+void checkRNU() {
+    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
+        // проверить рну-47 за прошлый период
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+
+        // проверить рну-46 за текущий период
+        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
+    }
 }

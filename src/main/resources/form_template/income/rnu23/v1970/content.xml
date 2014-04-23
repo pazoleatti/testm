@@ -42,7 +42,7 @@
         <checking>false</checking>
         <name>Сумма гарантии</name>
         <order>5</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -68,7 +68,7 @@
         <checking>false</checking>
         <name>Процентная ставка</name>
         <order>8</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -118,7 +118,7 @@
         <checking>false</checking>
         <name>Сумма в налоговом учёте. Валюта</name>
         <order>14</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -127,7 +127,7 @@
         <checking>false</checking>
         <name>Сумма в налоговом учёте. Рубли</name>
         <order>15</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -136,7 +136,7 @@
         <checking>false</checking>
         <name>Сумма в бухгалтерском учёте. Валюта</name>
         <order>16</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -145,7 +145,7 @@
         <checking>false</checking>
         <name>Сумма в бухгалтерском учёте. Рубли</name>
         <order>17</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -154,7 +154,7 @@
         <checking>false</checking>
         <name>Сумма доначисления. Предыдущий период. Валюта</name>
         <order>18</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -163,7 +163,7 @@
         <checking>false</checking>
         <name>Сумма доначисления. Предыдущий период. Рубли</name>
         <order>19</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -172,7 +172,7 @@
         <checking>false</checking>
         <name>Сумма доначисления. Отчётный период. Валюта</name>
         <order>20</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -181,7 +181,7 @@
         <checking>false</checking>
         <name>Сумма доначисления. Отчётный период. Рубли</name>
         <order>21</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

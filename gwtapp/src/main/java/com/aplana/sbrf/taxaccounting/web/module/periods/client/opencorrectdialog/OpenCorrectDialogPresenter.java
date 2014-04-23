@@ -10,8 +10,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.event.PeriodCreated;
-import com.aplana.sbrf.taxaccounting.web.module.periods.shared.*;
-import com.google.gwt.i18n.client.DateTimeFormat;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckCorrectionPeriodStatusResult;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenCorrectPeriodAction;
+import com.aplana.sbrf.taxaccounting.web.module.periods.shared.OpenCorrectPeriodResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -76,13 +78,25 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 	public void onContinue() {
         StringBuilder missedFields = new StringBuilder();
         if (getView().getSelectedDepartments().isEmpty()) {
-            missedFields.append(" подразделение;");
+            missedFields.append(" \"Подразделение\"");
+            if (getView().getSelectedPeriod() != null || getView().getTerm() != null) {
+                missedFields.append(".");
+            }
         }
         if (getView().getSelectedPeriod() == null) {
-            missedFields.append(" период корректировки;");
+            if (missedFields.length() != 0) {
+                missedFields.append(",");
+            }
+            missedFields.append(" \"Период корректировки\"");
+            if (getView().getTerm() != null) {
+                missedFields.append(".");
+            }
         }
         if (getView().getTerm() == null) {
-            missedFields.append(" период сдачи корректировки;");
+            if (missedFields.length() != 0) {
+                missedFields.append(",");
+            }
+            missedFields.append(" \"Период сдачи корректировки\".");
         }
 
         if (missedFields.length() != 0) {
@@ -125,6 +139,10 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                                 }
                                         );
                                         break;
+                                    case OPEN:
+                                        Dialog.errorMessage("Корректирование периода",
+                                                "Корректирующий период уже открыт!");
+                                        break;
                                     case INVALID:
                                         Dialog.errorMessage("Указанный период корректировки должен быть больше " +
                                                 "последнего корректирующего периода для указанного отчётного периода!");
@@ -146,7 +164,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                         .defaultCallback(new AbstractCallback<OpenCorrectPeriodResult>() {
                             @Override
                             public void onSuccess(OpenCorrectPeriodResult result) {
-                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear());
+                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear()+1900);
                                 LogAddEvent.fire(OpenCorrectDialogPresenter.this, result.getUuid());
                                 getView().hide();
                             }

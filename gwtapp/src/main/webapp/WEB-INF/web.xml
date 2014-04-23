@@ -78,6 +78,12 @@
 		<location>/WEB-INF/jsp/forbidden.jsp</location>
 	</error-page>
 
+    <!-- Error 404. Page not found. -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/jsp/404.jsp</location>
+    </error-page>
+
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>Main.jsp</welcome-file>
@@ -195,6 +201,7 @@
 			<web-resource-name>Unsecured</web-resource-name>
 			<url-pattern>/login</url-pattern>
 			<url-pattern>/j_security_check</url-pattern>
+            <url-pattern>/cache/clear-cache</url-pattern>
 			<url-pattern>/GenericAccountManagementService</url-pattern>
 			<url-pattern>/GenericAccountManagementService/*</url-pattern>
 			<url-pattern>/TaxAccountingSupportingData</url-pattern>
