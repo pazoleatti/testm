@@ -21,6 +21,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Repository
@@ -80,7 +82,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public void saveFormSources(final Long departmentFormTypeId, final List<Long> sourceDepartmentFormTypeIds) {
         JdbcTemplate jt = getJdbcTemplate();
         jt.update("delete from form_data_source where department_form_type_id = ?",
-                new Object[]{departmentFormTypeId});
+                departmentFormTypeId);
 
         BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
             @Override
@@ -149,7 +151,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public void saveDeclarationSources(final Long declarationTypeId, final List<Long> sourceDepartmentFormTypeIds) {
         JdbcTemplate jt = getJdbcTemplate();
         jt.update("delete from declaration_source where department_declaration_type_id = ?",
-                new Object[]{declarationTypeId});
+                declarationTypeId);
 
         BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
             @Override
@@ -273,15 +275,16 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_form_type dft where department_id = ?" +
-            " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)";
+            " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type in ";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType) {
         return getJdbcTemplate().query(
-                GET_SQL_BY_TAX_TYPE_SQL,
+                GET_SQL_BY_TAX_TYPE_SQL +
+                        (taxType != null ? SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values())))
+                + ")",
                 new Object[]{
-                        departmentId,
-                        String.valueOf(taxType.getCode())
+                        departmentId
                 },
                 DFT_MAPPER
         );
@@ -308,33 +311,41 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<Long> getFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds){
-        Object[] sqlParams = new Object[kinds.size() * 2 + 2];
-        int cnt = 2;
-        sqlParams[0] = performerDepId;
-        sqlParams[1] = String.valueOf(taxType.getCode());
-        for (FormDataKind kind : kinds) {
-            sqlParams[cnt] = kind.getId();
-            cnt++;
+        HashMap<String, Object> values = new HashMap<String, Object>(3);
+        values.put("performerDepId", performerDepId);
+
+        ArrayList<Integer> ids = new ArrayList<Integer>();
+        if (kinds.isEmpty()){
+            for (FormDataKind kind : FormDataKind.values())
+                ids.add(kind.getId());
+        } else {
+            for (FormDataKind kind : kinds)
+                ids.add(kind.getId());
         }
+        values.put("kinds", ids);
+
         try {
-            return getJdbcTemplate().queryForList("with l1 (dep_id, type, kind) as (select dft.department_id, dft.form_type_id, dft.kind from department_form_type dft where performer_dep_id = ? " +
-                    " and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type = ?)), " +
+            return getNamedParameterJdbcTemplate().queryForList("with " +
+                    "l1 (dep_id, type, kind) as (select dft.department_id, dft.form_type_id, dft.kind from department_form_type dft where performer_dep_id = :performerDepId " +
+                    "  and exists (select 1 from form_type ft where ft.id = dft.form_type_id and ft.tax_type in "
+                    + (taxType != null ? SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) :
+                                            SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(TaxType.values()))) + ")), " +
                     "l2 (dep_id, type, kind) as (select distinct dft.department_id, dft.form_type_id, dft.kind " +
                     "  from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                     "  where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "  and ft.id = dft.form_type_id and dft.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +") " +
+                    "  and ft.id = dft.form_type_id and dft.kind in (:kinds) " +
                     "  and (dfts.department_id, dfts.form_type_id, dfts.kind) in (select * from l1)), " +
                     "l3 (dep_id, type, kind) as (select distinct dft.department_id, dft.form_type_id, dft.kind " +
                     "  from form_data_source fds, department_form_type dft, department_form_type dfts, form_type ft " +
                     "  where fds.department_form_type_id = dft.id and fds.src_department_form_type_id = dfts.id " +
-                    "  and ft.id = dft.form_type_id and dfts.kind in (" + SqlUtils.preparePlaceHolders(kinds.size()) +") " +
+                    "  and ft.id = dft.form_type_id and dfts.kind in (:kinds) " +
                     "  and (dfts.department_id, dfts.form_type_id, dfts.kind) in (select * from l2)) " +
                     "select type from l1 " +
                     "union " +
                     "select type from l2 " +
                     "union " +
                     "select type from l3 ",
-                    Long.class, sqlParams);
+                    values, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>(0);
         }
@@ -346,10 +357,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     	try{
 	        getJdbcTemplate().update(
 	                "delete from department_form_type where id = ?",
-	                new Object[]{
-	                        id
-	                }
-	        );
+                    id);
     	} catch (DataIntegrityViolationException e){
 			logger.error(e.getMessage(), e);
     		throw new DaoException("Назначение является источником или приемником данных", e);
@@ -363,7 +371,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	        getJdbcTemplate().update(
 	                "insert into department_form_type (department_id, form_type_id, id, kind) " +
 	                        " values (?, ?, seq_department_form_type.nextval, ?)",
-	                new Object[]{ departmentId, formTypeId, formKindId });
+                    departmentId, formTypeId, formKindId);
     	} catch (DataIntegrityViolationException e){
 			logger.error(e.getMessage(), e);
     		throw new DaoException(DUPLICATE_ERROR, e);
@@ -377,7 +385,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             getJdbcTemplate().update(
                     "insert into department_form_type (department_id, form_type_id, id, kind, performer_dep_id) " +
                             " values (?, ?, seq_department_form_type.nextval, ?, ?)",
-                    new Object[]{ departmentId, typeId, kindId, performerId });
+                    departmentId, typeId, kindId, performerId);
         } catch (DataIntegrityViolationException e){
 			logger.error(e.getMessage(), e);
             throw new DaoException(DUPLICATE_ERROR, e);
@@ -421,6 +429,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public void updatePerformer(int id, Integer performerId){
         getJdbcTemplate().update(
             "update department_form_type set performer_dep_id = ? where id = ?",
-            new Object[]{performerId, id});
+                performerId, id);
     }
 }

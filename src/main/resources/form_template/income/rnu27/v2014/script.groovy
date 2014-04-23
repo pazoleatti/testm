@@ -1,7 +1,6 @@
 package form_template.income.rnu27.v2014
 
 import com.aplana.sbrf.taxaccounting.model.*
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -34,11 +33,6 @@ import groovy.transform.Field
  * @author lhaziev
  */
 
-// Признак периода ввода остатков
-@Field
-def isBalancePeriod
-isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
-
 // Признак консолидированной формы
 @Field
 def isConsolidated
@@ -58,7 +52,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        if (isBalancePeriod) {
+        if (isBalancePeriod()) {
             columns = allColumns - ['number', 'regNumber', 'currency']
         } else {
             columns = editableColumns
@@ -144,6 +138,10 @@ def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCours
 @Field
 def endDate = null
 
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod = null
+
 /**
  * Обертки методов
  */
@@ -170,9 +168,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
  * Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
  */
 void prevPeriodCheck() {
-    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod && !isConsolidated
-            && !formDataService.existAcceptedFormDataPrev(formData, formDataDepartment.id)) {
-        throw new ServiceException("Форма предыдущего периода не существует, или не находится в статусе «Принята»")
+    if (!isConsolidated && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
 
@@ -214,7 +211,7 @@ void calc() {
 
     for (row in dataRows) {
         row.number = ++number
-        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
+        if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
             row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)
@@ -344,7 +341,7 @@ def logicCheck() {
             }
 
             // 1. LC Проверка на заполнение поля «<Наименование поля>»
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod)
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
             // 2. Проверка на уникальность поля «№ пп»
             if (number != row.number) {
@@ -362,7 +359,7 @@ def logicCheck() {
                 }
             }
 
-            if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod) {
+            if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
                 // 19. Арифметические проверки граф 5, 8, 11, 12, 13, 14, 15, 16, 17
                 def calcValues = [
                         reserveCalcValuePrev: calc8(row, dataPrevRows),
@@ -418,7 +415,7 @@ def logicCheck() {
     }
 
     // 22. Проверка итоговых значений по всей форме
-    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+    checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 
     /** 3. LC Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде (выполняется один раз для всего экземпляра)
      * http://jira.aplana.com/browse/SBRFACCTAX-2609
@@ -865,7 +862,7 @@ BigDecimal roundValue(BigDecimal value, int newScale) {
 }
 
 FormData getFormPrev() {
-    if (isBalancePeriod || isConsolidated) {
+    if (isBalancePeriod() || isConsolidated) {
         return null
     }
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -1027,7 +1024,7 @@ def getCalcTotalRow(def dataRows) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def msg) {
-    if (isBalancePeriod) {
+    if (isBalancePeriod()) {
         logger.warn(msg)
     } else {
         logger.error(msg)
@@ -1050,4 +1047,12 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Признак периода ввода остатков.
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
+    }
+    return isBalancePeriod
 }

@@ -182,8 +182,9 @@ void logicCheck() {
     def rowA = getDataRow(dataRows, 'A')
     def totalRowA = getDataRow(dataRows, 'totalA')
     for (def alias : totalColumns) {
-        def tmpA = getSum(dataRows, rowA, totalRowA, alias)
-        if (totalRowA.getCell(alias).value != tmpA) {
+        def value = roundValue(totalRowA.getCell(alias).value, 6)
+        def tmpValue = roundValue(getSum(dataRows, rowA, totalRowA, alias), 6)
+        if (value != tmpValue) {
             logger.error("Итоговые значений для раздела A рассчитаны неверно!")
             break
         }

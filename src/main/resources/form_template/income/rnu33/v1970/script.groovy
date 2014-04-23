@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Форма "(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО"
  * formTemplateId=332
@@ -48,15 +46,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
-        if (!prevPeriodCheck()) {
-            return
-        }
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE:
-        if (!prevPeriodCheck()) {
-            return
-        }
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -75,9 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
-        if (!prevPeriodCheck()) {
-            return
-        }
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -512,38 +504,11 @@ def isMonthBalance() {
     return isBalancePeriod
 }
 
-def prevPeriodCheck() {
+void prevPeriodCheck() {
     // Проверка наличия данных предыдущих месяцев
     if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
-        def taxPeriodId = reportPeriodService.get(formData.reportPeriodId)?.taxPeriod?.id
-        def monthDates = []
-        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-        Calendar monthDate = reportPeriodService.getMonthStartDate(formData.reportPeriodId, formData.periodOrder)
-
-        (1..formData.periodOrder - 1).each { monthNumber ->
-            def form = formDataService.findMonth(formData.formType.id, formData.kind, formDataDepartment.id, taxPeriodId, monthNumber)
-            // если нет формы за какой то месяц, то получить даты начала и окончания месяца
-            if (form == null) {
-                // дата начала месяца
-                monthDate.set(Calendar.MONTH, monthNumber - 1)
-                monthDate.set(Calendar.DAY_OF_MONTH, 1)
-                def from = format.format(monthDate.time)
-
-                // дата окончания месяца
-                monthDate.set(Calendar.MONTH, monthNumber)
-                monthDate.set(Calendar.DAY_OF_MONTH, monthDate.get(Calendar.DAY_OF_MONTH) - 1)
-                def to = format.format(monthDate.time)
-
-                monthDates.add("$from - $to")
-            }
-        }
-        if (!monthDates.isEmpty()) {
-            def periods = monthDates.join(', ')
-            logger.error("Экземпляр за период(ы) $periods не существует (отсутствуют первичные данные для расчёта)")
-            return false
-        }
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
-    return true
 }
 
 // Получение импортируемых данных

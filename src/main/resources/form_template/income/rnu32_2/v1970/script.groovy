@@ -3,7 +3,6 @@ package form_template.income.rnu32_2.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
@@ -145,7 +144,7 @@ void logicCheck() {
         return
     }
 
-    // . Арифметическая проверка графы 1..6
+    // 1. Проверка соответствия данным формы РНУ-32.1
     def dataRowsFromSource = getDataRowsFromSource()
     for (def section : sections) {
         def rows32_1 = getRowsBySection32_1(dataRowsFromSource, section)
@@ -153,9 +152,8 @@ void logicCheck() {
         // если в разделе рну 32.1 есть данные, а в аналогичном разделе рну 32.2 нет данных, то ошибка или наоборот, то тоже ошибка
         if (rows32_1.isEmpty() && !rows32_2.isEmpty() ||
                 !rows32_1.isEmpty() && rows32_2.isEmpty()) {
-            def number = section
-            logger.error("Неверно рассчитаны значения графов для раздела $number")
-            continue
+            logger.error('Значения не соответствуют данным РНУ-32.1')
+            return
         }
         if (rows32_1.isEmpty() && rows32_2.isEmpty()) {
             continue
@@ -163,18 +161,13 @@ void logicCheck() {
         // сравнить значения строк
         for (def row : rows32_2) {
             def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
-            def msg = []
-            allColumns.each { alias ->
+            for (def alias : allColumns) {
                 def value1 = row.getCell(alias).value
                 def value2 = tmpRow.getCell(alias).value
                 if (value1 != value2) {
-                    msg.add('«' + getColumnName(row, alias) + '»')
+                    logger.error('Значения не соответствуют данным РНУ-32.1')
+                    return
                 }
-            }
-            if (!msg.isEmpty()) {
-                def columns = msg.join(', ')
-                def index = row.getIndex()
-                logger.error("Строка $index: Неверное значение граф: $columns")
             }
         }
     }
@@ -426,12 +419,8 @@ def getFormDataSource() {
 }
 
 void checkSourceAccepted() {
-    if (isConsolidated) {
-        return
-    }
-    def form = getFormDataSource()
-    if (form == null || form.state != WorkflowState.ACCEPTED) {
-        throw new ServiceException('Не найдены экземпляры РНУ-32.1 за текущий отчетный период!')
+    if (!isConsolidated) {
+        formDataService.checkMonthlyFormExistAndAccepted(330, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
     }
 }
 
