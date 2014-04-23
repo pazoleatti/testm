@@ -359,10 +359,15 @@ void logicCheck() {
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
-
-    // Отчет за предыдущий месяц
-    if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY && getDataRowHelperPrev() == null) {
-        logger.error('Отсутствуют данные за прошлые отчетные периоды!')
+    def inventoryNumbersOld = []
+    def dataRowHelperOld = null
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        dataRowHelperOld = getDataRowHelperPrev()
+        if (dataRowHelperOld) {
+            dataRowHelperOld.allCached.each { row ->
+                inventoryNumbersOld.add(row.invNumber)
+            }
+        }
     }
 
     for (def row : dataRows) {
@@ -396,7 +401,7 @@ void logicCheck() {
 
         if (formData.kind == FormDataKind.PRIMARY) {
 
-            def prevRow = getPrevRow(getDataRowHelperPrev(), row)
+            def prevRow = getPrevRow(dataRowHelperOld, row)
             def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row)
 
             // 6. Проверка суммы расходов в виде капитальных вложений с начала года
@@ -444,6 +449,16 @@ void logicCheck() {
 
             if (row.usefullLifeEnd != calc18(row)) {
                 loggerError(errorMsg + "Неверное значение графы: ${getColumnName(row, 'usefullLifeEnd')}!")
+            }
+        }
+    }
+
+    // 10. Проверки существования необходимых экземпляров форм
+    if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+        for (def inv in invSet) {
+            if (!inventoryNumbersOld.contains(inv)) {
+                logger.warn('Отсутствуют данные за прошлые отчетные периоды!')
+                break
             }
         }
     }
