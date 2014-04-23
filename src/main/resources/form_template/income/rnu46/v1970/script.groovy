@@ -327,7 +327,9 @@ BigDecimal calc14(def row, def prevRow) {
         return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
-        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (row.usefullLifeEnd - endDate))
+        def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) +  Long.valueOf(row.usefullLifeEnd.format("yyyy"))*12
+        def date2 = Long.valueOf(endDate.format("MM")) +  Long.valueOf(endDate.format("yyyy"))*12
+        return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (date1 - date2))
     }
     return round(row.cost / 84)
 }
