@@ -90,8 +90,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         Calendar calendarFrom = reportService.getEndDate(action.getReportPeriodId());
 
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
+        //Берем -1 день, чтобы исключить возможность пересечения периодов актуальности для периодов 9 мес и год.
+        //Т.к 9 мес имеет период 01.07-30.09 а год 01.10-31.12 и в api справочников при создании новой версии выполняется инкремент даты окончания + 1 день,
+        //то возникает ошибка дубликата ключевых полей таблицы ref_book_record, т.к уже существует версия с полем version = 01.10.xxxx для 9 мес (фактически это фиктивная версия),
+        //а сейчас мы пытаемся добавить запись с такой же датой начала для настроек на год
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
-                calendarFrom.getTime(), null, filter, null);
+                addDayToDate(calendarFrom.getTime(), -1), null, filter, null);
 
         if (params.size() != 0) {
             Map<String, RefBookValue> paramsMap = params.get(0);
@@ -246,5 +250,12 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             list.add(value);
         }
         return list;
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 }
