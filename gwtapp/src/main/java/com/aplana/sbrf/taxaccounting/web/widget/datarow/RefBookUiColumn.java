@@ -24,7 +24,7 @@ public class RefBookUiColumn extends DataRowColumn<Long> {
                 dataRow.put(getAlias(), value);
                 // Если у справочной графы есть заисисимые графы, то обновляется вся строка в таблице
                 List<Cell> linkedCells = dataRow.getLinkedCells(column.getId());
-                CellModifiedEvent event = new CellModifiedEvent(dataRow, linkedCells != null && !linkedCells.isEmpty());
+                CellModifiedEvent event = new CellModifiedEvent(dataRow, linkedCells != null && !linkedCells.isEmpty() || getCell() instanceof RefBookCell);
                 fireEvent(event);
             }
         });

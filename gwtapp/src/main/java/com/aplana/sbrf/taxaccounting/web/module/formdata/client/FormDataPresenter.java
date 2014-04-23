@@ -133,7 +133,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
-                                    revealFormData(false, true, null);
+                                    revealFormData(false, true, result.getUuid());
                                 }
                             }, FormDataPresenter.this)
                     );

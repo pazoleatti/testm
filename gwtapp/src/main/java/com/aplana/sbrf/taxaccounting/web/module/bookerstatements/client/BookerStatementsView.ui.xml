@@ -37,7 +37,7 @@
             bottom: 30px;
             right: 0;
             left: 0;
-            top: 66px;
+            top: 40px;
         }
 
         .paddingRight15 {
@@ -79,13 +79,17 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar childValign="middle" height="100%">
+                            <fileuplod:FileUploadWidget text="Загрузить" title="Загрузить файл с отчетностью" ui:field="fileUploader" uploadAsTemporal="true" height="22px"
+                                                        addStyleNames="{style.fileUploader}"/>
+                            <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
 
+                            <style:LinkButton ui:field="deleteButton" text="Удалить" title="Удалить выбранную отчетность" img="resources/img/row-delete.png"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Загрузка бухгалтерской отчётности"/>
+                        <g:Label text="Бухгалтерская отчётность"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>
@@ -136,15 +140,6 @@
                 </g:HorizontalPanel>
 
                 <g:HTML addStyleNames="{style.horSep}"/>
-
-                <g:HorizontalPanel spacing="0" verticalAlignment="middle" height="26px" addStyleNames="{style.btnPanel}">
-
-                    <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="true" height="22px"
-                                                addStyleNames="{style.fileUploader}" simpleButton="true"/>
-                    <!--Инициализируем параметры внутри View uploadHandler actionUrl смотри объевление (магия Дмитрия Л.)-->
-
-                    <g:Button ui:field="deleteButton" text="Удалить"/>
-                </g:HorizontalPanel>
 
                 <g:ResizeLayoutPanel addStyleNames="{style.table}">
                     <style:GenericDataGrid ui:field="dataTable" height="100%" width="100%"/>

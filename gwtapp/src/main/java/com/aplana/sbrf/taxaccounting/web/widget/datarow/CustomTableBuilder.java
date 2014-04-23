@@ -177,6 +177,12 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		tr.endTR();
 		// После билда всех строк очищаем список спанов
 		int curPage = (int)Math.ceil(absRowIndex/cellTable.getPageSize());
+
+        // если это механизм перевыделения то очищаем список
+        if(cellTable.getKeyboardSelectedRow()!= 0){
+            globalSpans.clear();
+        }
+
 		if (cellTable.getVisibleItems().size() == (absRowIndex+1 - (cellTable.getPageSize()*curPage))) {
 			globalSpans.clear();
 		}
@@ -223,7 +229,15 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	}
 
 	private void applyOurCustomStyles(TableCellBuilder out, FormStyle ourStyle) {
-		out.style()
+//        out.style().fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
+//                   .fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL);
+//        if (Color.WHITE != ourStyle.getBackColor()) {
+//            out.style().trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()));
+//        }
+//        out.style().trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
+//                   .endStyle();
+
+        out.style()
 //
 				.fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
 				.fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)

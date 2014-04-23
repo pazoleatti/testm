@@ -59,7 +59,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParam = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -203,7 +203,7 @@ void generateXML() {
     def reportPeriodId = declarationData.reportPeriodId
 
     // справочник "Параметры подразделения по налогу на прибыль" - начало
-    def incomeParams = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
+    def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения.')
     }

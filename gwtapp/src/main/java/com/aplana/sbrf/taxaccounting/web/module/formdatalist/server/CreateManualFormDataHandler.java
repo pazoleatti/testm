@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
@@ -24,6 +25,8 @@ public class CreateManualFormDataHandler extends AbstractActionHandler<CreateMan
 
     @Autowired
     private FormDataService formDataService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     public CreateManualFormDataHandler() {
         super(CreateManualFormData.class);
@@ -33,7 +36,9 @@ public class CreateManualFormDataHandler extends AbstractActionHandler<CreateMan
     public CreateManualFormDataResult execute(CreateManualFormData action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         CreateManualFormDataResult result = new CreateManualFormDataResult();
-        formDataService.createManualFormData(new Logger(), userInfo, action.getFormDataId());
+        Logger logger = new Logger();
+        formDataService.createManualFormData(logger, userInfo, action.getFormDataId());
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
