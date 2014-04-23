@@ -58,7 +58,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParamList = getProvider(31).getRecords(getReportPeriodEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParamList = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -90,7 +90,7 @@ def checkAndbildXml() {
         logger.error("Ошибка определения даты конца отчетного периода")
     }
 
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = " + declarationData.departmentId, getReportPeriodEndDate())
+    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = " + declarationData.departmentId, getReportPeriodEndDate() - 1)
     bildXml(departmentParamTransport, formDataCollection, declarationData.departmentId)
 }
 
