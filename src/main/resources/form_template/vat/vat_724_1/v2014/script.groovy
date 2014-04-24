@@ -1,33 +1,51 @@
-package form_template.vat.vat_724_1.v2014.v2014
+package form_template.vat.vat_724_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
  * Отчёт о суммах начисленного НДС по операциям Банка
  * formTemplateId=600
+ *
+ * TODO:
+ *      - графа 2, 3, 5, 7 - непонятно графа строковая или спавочная
+ *      - графа 2 пока сделана редактируемой потому что непонятности со справочными типами
+ *      - не сделано: для графы 5 и графы 7 в чтз в перечне полей есть огрничения значении по разделам
+ *      - не сделано: для графы 5 в чтз в перечне полей есть комментарий:
+ *              После выбора значения в «Графе 5» значение «Графы 2» и «Графы 3» очищается
+ *              это делать в коде?
+ *      - логическая проверка 3 - не выполняется потому что графа 7 имеет тип строка
  */
-// 1 rowNum
-// 2 baseAccName
-// 3 baseAccNum
-// 4 baseSum
-// 5 ndsNum
-// 6 ndsSum
-// 7 ndsRate
-// 8 ndsBookSum
+
+// графа 1 - rowNum
+// графа   - fix
+// графа 2 - baseAccName    - зависит от графы 3 - атрибут 000 - NAME - «Наименование балансового счета», справочник 00 «Балансовые счета»
+// графа 3 - baseAccNum     - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «Балансовые счета»
+// графа 4 - baseSum
+// графа 5 - ndsNum         - атрибут 000 - NAME - «Номер балансового счета», справочник 00 «Балансовые счета»
+// графа 6 - ndsSum
+// графа 7 - ndsRate        - атрибут 000 - NAME - «Ставка», справочник 00 «Ставки НДС»
+// графа 8 - ndsBookSum
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        calc()
+        logicCheck()
         break
     case FormDataEvent.CHECK:
+        logicCheck()
         break
     case FormDataEvent.ADD_ROW:
         addRow()
         break
     case FormDataEvent.DELETE_ROW:
-        if (currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -35,38 +53,63 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        logicCheck()
         break
     case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
         break
 }
 
-// Редактируемые атрибуты
 @Field
-def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
+def allColumns = ['rowNum', 'baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
+
+// Редактируемые атрибуты (графа 2, 3..8) // TODO (Ramil Timerbaev) графу 2 потом возможно надо будет убрать
+@Field
+def editableColumns = ['baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNum', 'baseAccName']
+def autoFillColumns = allColumns - editableColumns
+
+// Проверяемые на пустые значения атрибуты (1..8)
+@Field
+def nonEmptyColumns = allColumns
+
+// Сортируемые атрибуты (графа 3, 5)
+@Field
+def sortColumns = ['baseAccNum', 'ndsNum']
+
+// Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6, 8)
+@Field
+def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum']
+
+// список алиасов подразделов
+@Field
+sections = ['1', '2', '3', '4', '5', '6', '7']
 
 // Добавить новую строку (строки между заглавными строками и строками итогов)
 def addRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def newRow = getNewRow()
-    def index = 0
+    def index = 1
     if (currentDataRow != null) {
         def alias = currentDataRow.getAlias()
-        index = currentDataRow.getIndex() - 1
+        index = currentDataRow.getIndex()
         if (alias == null || alias.startsWith('head_')) {
             index++
         }
     } else {
         def lastRow = getDataRow(dataRows, 'total_7')
         if (lastRow != null) {
-            index = dataRows.indexOf(lastRow)
+            index = lastRow.getIndex()
         }
     }
-    dataRowHelper.insert(newRow, index + 1)
+    dataRowHelper.insert(getNewRow(), index)
 }
 
 // Получить новую строку с заданными стилями
@@ -80,4 +123,149 @@ def getNewRow() {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return row
+}
+
+void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'head_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+
+        // отсортировать/группировать
+        def rowsFofSort = (from <= to ? dataRows[from..(to - 1)] : [])
+        sortRows(rowsFofSort, sortColumns)
+
+        // посчитать итоги по разделам
+        def rows = (from <= to ? dataRows[from..to] : [])
+        calcTotalSum(rows, lastRow, totalColumns)
+    }
+    updateIndexes(dataRows)
+
+    // подсчет номера по порядку
+    def number = 0
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        // графа 1
+        row.rowNum = ++number
+    }
+
+    dataRowHelper.save(dataRows)
+}
+
+void logicCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    def isSection1or2 = false
+    def isSection5or6 = false
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
+            isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
+            continue
+        }
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
+
+        // 1. Обязательность заполнения полей
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+        // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
+        if (row.ndsSum != row.ndsBookSum &&
+                (isSection1or2 && row.ndsNum == '60309.01' || isSection5or6)) {
+            logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
+        }
+
+        // TODO (Ramil Timerbaev) пока исключил эту проверку потому что графа 7 имеет тип строка
+        // 3. Проверка суммы НДС
+        if (false && row.baseSum != null && row.ndsRate != null) {
+            def tmp = row.baseSum * row.ndsRate
+            def tmp1 = tmp + (tmp * 3) / 100
+            def tmp2 = tmp - (tmp * 3) / 100
+            if (tmp1 > tmp2) {
+                logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!')
+            }
+        }
+    }
+
+    // 4. Проверка итоговых значений по разделам 1-7
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'head_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def rows = (from <= to ? dataRows[from..to] : [])
+        checkTotalSum(rows, totalColumns, logger, true)
+    }
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // удалить нефиксированные строки
+    deleteNotFixedRows(dataRows)
+
+    // собрать из источников строки и разместить соответствующим разделам
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
+        if (it.formTypeId == formData.formType.id) {
+            def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                // копирование данных по разделам
+                sections.each { section ->
+                    copyRows(sourceDataRows, dataRows, 'head_' + section, 'total_' + section)
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+    logger.info('Формирование консолидированной формы прошло успешно.')
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
+    }
+}
+
+/** Поправить индексы. */
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
+}
+
+/**
+ * Копировать заданный диапозон строк из источника в приемник.
+ *
+ * @param sourceDataRows строки источника
+ * @param destinationDataRows строки приемника
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
+ *      в приемник строки вставляются перед строкой с этим псевдонимом
+ */
+void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
+    def from = getDataRow(sourceDataRows, fromAlias).getIndex()
+    def to = getDataRow(sourceDataRows, toAlias).getIndex() - 1
+    if (from >= to) {
+        return
+    }
+    def copyRows = sourceDataRows.subList(from, to)
+    destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
+    // поправить индексы, потому что они после вставки не пересчитываются
+    updateIndexes(destinationDataRows)
 }
