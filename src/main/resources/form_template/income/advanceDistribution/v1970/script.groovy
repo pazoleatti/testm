@@ -505,18 +505,20 @@ void consolidation() {
                         newRow = dataRows.find {
                             it.regionBankDivision == row.regionBankDivision
                         }
+                        def isNew = (newRow == null)
                         newRow = newRow ?: formData.createDataRow()
 
-                        // TODO проверить консолидацию
                         newRow.regionBank = row.regionBank
                         newRow.regionBankDivision = row.regionBankDivision
                         newRow.kpp = row.kpp
-                        newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.propertyPrice) : row.propertyPrice
+                        newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.avepropertyPricerageCost) : row.avepropertyPricerageCost
                         newRow.workersCount = newRow.workersCount ? (newRow.workersCount + row.workersCount) : row.workersCount
                         newRow.subjectTaxCredit = newRow.subjectTaxCredit ? (newRow.subjectTaxCredit + row.subjectTaxCredit) : row.subjectTaxCredit
-                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.minimizeTaxSum) : row.minimizeTaxSum
-                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.amountTax) : row.amountTax
-                        dataRows.add(newRow)
+                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.decreaseTaxSum) : row.decreaseTaxSum
+                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.taxRate) : row.taxRate
+                        if (isNew) {
+                            dataRows.add(newRow)
+                        }
                     }
                 }
             }

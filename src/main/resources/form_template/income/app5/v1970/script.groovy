@@ -16,7 +16,7 @@ import groovy.transform.Field
 // графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 4  - kpp                       абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
-// графа 5  - propertyPrice
+// графа 5  - avepropertyPricerageCost
 // графа 6  - workersCount
 // графа 7  - subjectTaxCredit
 // графа 8  - decreaseTaxSum
@@ -71,12 +71,12 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice',
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost',
         'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
+def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -84,7 +84,7 @@ def autoFillColumns = ['regionBank', 'kpp']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount',
+def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount',
         'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Группируемые атрибуты
@@ -93,7 +93,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
+def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
 
 @Field
 def endDate = null
@@ -351,7 +351,7 @@ void importData() {
             (xml.row[0].cell[2]): getColumnName(tmpRow, 'regionBank'),
             (xml.row[0].cell[3]): getColumnName(tmpRow, 'regionBankDivision'),
             (xml.row[0].cell[4]): getColumnName(tmpRow, 'kpp'),
-            (xml.row[0].cell[5]): getColumnName(tmpRow, 'propertyPrice'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'avepropertyPricerageCost'),
             (xml.row[0].cell[6]): getColumnName(tmpRow, 'workersCount'),
             (xml.row[0].cell[7]): getColumnName(tmpRow, 'subjectTaxCredit'),
             (xml.row[0].cell[8]): 'Льготы по налогу в бюджет субъекта (руб.)',
@@ -408,7 +408,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         indexCol = 5
-        newRow.propertyPrice = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+        newRow.avepropertyPricerageCost = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         // графа 6
         indexCol = 6
