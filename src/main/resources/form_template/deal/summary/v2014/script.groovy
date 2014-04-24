@@ -487,7 +487,6 @@ def buildRow(def srcRow, def matrixRow) {
             }
             break
     }
-
     row.dealPriceCode = getRecordId(66, 'CODE', "$val16")
 
     // Графа 17
@@ -516,7 +515,6 @@ def buildRow(def srcRow, def matrixRow) {
             val23 = 1
             break
     }
-
     row.dealType = getRecordId(64, 'CODE', "$val23")
 
     // Графа 24
@@ -689,7 +687,6 @@ def buildRow(def srcRow, def matrixRow) {
             val27 = '74'
             break
     }
-
     if (val27 != null) {
         row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
     }
@@ -872,7 +869,6 @@ def buildRow(def srcRow, def matrixRow) {
 
     // Графа 48, 51, 52, 53, 54, 55
     // зависимые в конфигураторе
-
 
     return row
 }
@@ -1546,7 +1542,6 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
             row.organName = srcRow.fullName
             break
     }
-
     return row
 }
 

@@ -64,6 +64,9 @@ public class PeriodServiceImpl implements PeriodService{
 	@Autowired
 	private AuditService auditService;
 
+    @Autowired
+    private NotificationService notificationService;
+
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
 		return reportPeriodDao.listByTaxPeriod(taxPeriodId);
@@ -196,21 +199,18 @@ public class PeriodServiceImpl implements PeriodService{
 
 	private boolean checkBeforeClose(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
 		boolean allGood = true;
-		for (Integer id : departments) {
-			for (FormData formData : formDataDao.find(id, reportPeriodId)) {
-                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-				ObjectLock<Long> lock = objectLockDao.getObjectLock(formData.getId(), FormData.class);
-				if (lock != null) {
-					logs.add(new LogEntry(LogLevel.WARNING,
-							"Форма " + formData.getFormType().getName() +
-							" " + formData.getKind().getName() +
-							" в подразделение " + departmentService.getDepartment(id).getName() +
-							" редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
-					allGood = false;
-				}
-			}
-
-		}
+        List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
+        for (FormData fd : formDataList) {
+            ObjectLock<Long> lock = objectLockDao.getObjectLock(fd.getId(), FormData.class);
+            if (lock != null) {
+                logs.add(new LogEntry(LogLevel.WARNING,
+                        "Форма " + fd.getFormType().getName() +
+                                " " + fd.getKind().getName() +
+                                " в подразделение " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
+                                " редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
+                allGood = false;
+            }
+        }
 		return allGood;
 	}
 
@@ -411,16 +411,16 @@ public class PeriodServiceImpl implements PeriodService{
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)
 				|| user.hasRole(TARole.ROLE_CONTROL)
 				) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false, true));
 		} else if (user.hasRole(TARole.ROLE_OPER)) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true, true));
 		} else {
 			return Collections.EMPTY_SET;
 		}
 	}
 
 	@Override
-	public void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user) {
+	public void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, long departmentId, List<LogEntry> logs, TAUserInfo user) {
 		List<Integer> departments = new ArrayList<Integer>();
 		List<Department> avalDeps = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, (int) departmentId);
 		for (Department dep : avalDeps) {
@@ -428,7 +428,7 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 
 		if (checkBeforeRemove(departments, reportPeriodId, logs)) {
-			removePeriodWithLog(reportPeriodId, departments, taxType, logs);
+			removePeriodWithLog(reportPeriodId, correctionDate, departments, taxType, logs);
 		}
 	}
 
@@ -444,6 +444,13 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
+        List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
+        if (!formDataList.isEmpty()) {
+            for (FormData fd : formDataList) {
+                blockedBy.add(fd.getDepartmentId());
+            }
+            canRemove = false;
+        }
 		for (Integer dep : departments) {
 			DeclarationDataFilter filter = new DeclarationDataFilter();
 			filter.setDepartmentIds(Arrays.asList(dep));
@@ -454,11 +461,6 @@ public class PeriodServiceImpl implements PeriodService{
 				canRemove = false;
 				continue;
 			}
-
-			if (!formDataDao.find(dep, reportPeriodId).isEmpty()) {
-				blockedBy.add(dep);
-				canRemove = false;
-            }
 		}
 
 		if (!canRemove) {
@@ -477,14 +479,17 @@ public class PeriodServiceImpl implements PeriodService{
 		return canRemove;
 	}
 
-	private void removePeriodWithLog(int reportPeriodId, List<Integer> departmentId, TaxType taxType, List<LogEntry> logs) {
+	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
-			departmentReportPeriodDao.delete(reportPeriodId, id);
+            long drpId = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate).getId();
+			departmentReportPeriodDao.delete(drpId);
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
 			logs.add(new LogEntry(LogLevel.INFO,
-					rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для подразделения " + departmentService.getDepartment(id).getName()));
+					rp.getName() + " " + rp.getTaxPeriod().getYear() + " удалён для " + departmentService.getDepartment(id).getName()));
 		}
+
+        notificationService.deleteByReportPeriod(reportPeriodId);
 
 		boolean canRemoveReportPeriod = true;
 		for (Department dep : departmentService.listAll()) {
@@ -495,29 +500,13 @@ public class PeriodServiceImpl implements PeriodService{
 		}
 
 		if (canRemoveReportPeriod) {
-			if (taxType == TaxType.INCOME) { // Бух.отчетность существует только для INCOME
-				RefBookDataProvider dataProvider = rbFactory.getDataProvider(REF_BOOK_101);
-				Date endDate = getEndDate(reportPeriodId).getTime();
-				PagingResult<Map<String, RefBookValue>> result101 =  dataProvider.getRecords(endDate, null, null, null);
-				List<Long> ids101 = new ArrayList<Long>();
-				for (Map<String, RefBookValue> r : result101) {
-					ids101.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-				}
-				if (!ids101.isEmpty()) {
-					dataProvider.deleteRecordVersions(null, ids101);
-				}
 
-				dataProvider = rbFactory.getDataProvider(REF_BOOK_102);
-				PagingResult<Map<String, RefBookValue>> result102 =  dataProvider.getRecords(endDate, null, null, null);
-				List<Long> ids102 = new ArrayList<Long>();
-				for (Map<String, RefBookValue> r : result102) {
-					ids102.add(r.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
-				}
-				if (!ids102.isEmpty()) {
-					dataProvider.deleteRecordVersions(null, ids102);
-				}
-			}
-			reportPeriodDao.remove(reportPeriodId);
+            TaxPeriod tp = reportPeriodDao.get(reportPeriodId).getTaxPeriod();
+            if (reportPeriodDao.listByTaxPeriod(tp.getId()).isEmpty()) {
+                taxPeriodDao.delete(tp.getId());
+            }
+
+            reportPeriodDao.remove(reportPeriodId);
 		}
 
 	}
@@ -665,8 +654,9 @@ public class PeriodServiceImpl implements PeriodService{
     }
 
 	@Override
-	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
-		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                                    boolean withoutBalance, boolean withoutCorrect) {
+		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance, withoutCorrect);
 	}
 
 	@Override

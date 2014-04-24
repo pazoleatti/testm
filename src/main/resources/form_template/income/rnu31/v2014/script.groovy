@@ -1,6 +1,7 @@
 package form_template.income.rnu31.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
@@ -30,9 +31,11 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK :
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.CALCULATE :
+        prevPeriodCheck()
         calc()
         logicCheck()
         break
@@ -48,6 +51,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+        prevPeriodCheck()
         logicCheck()
         break
     // обобщить
@@ -78,15 +82,6 @@ def getNumber(def value, def indexRow, def indexCol) {
 }
 
 void calc() {
-    // Проверка наличия формы за предыдущий период начиная с отчета за 2-й отчетный период,
-    // т.е. проверка отчёта за январь не осуществляется
-    if (formData.periodOrder != 1) {
-        def prevFormData = formDataService.getFormDataPrev(formData, formData.departmentId)
-        if (prevFormData == null || prevFormData.state != WorkflowState.ACCEPTED) {
-            logger.error("Отсутствует предыдущий экземпляр отчета!")
-            return
-        }
-    }
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper?.allCached
     def row = getDataRow(dataRows, 'total')
@@ -257,4 +252,12 @@ def getPrevMonthTotalRow() {
         return getDataRow(prevDataRows, 'total')
     }
     return null
+}
+
+void prevPeriodCheck() {
+    // Проверка наличия формы за предыдущий период начиная с отчета за 2-й отчетный период,
+    // т.е. проверка отчёта за январь не осуществляется
+    if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+    }
 }

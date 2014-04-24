@@ -189,10 +189,11 @@ public interface PeriodService {
 	 * @param taxType тип налога
 	 * @param reportPeriodId идентификатор отчетного периода
 	 * @param departmentId идентификатор подразделения, для которого удаляется период
+     * @param correctionDate дата корректировки (может быть пустой)
 	 * @param logs логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
-	void removeReportPeriod(TaxType taxType, int reportPeriodId, long departmentId, List<LogEntry> logs, TAUserInfo user);
+	void removeReportPeriod(TaxType taxType, int reportPeriodId, Date correctionDate, long departmentId, List<LogEntry> logs, TAUserInfo user);
 
     /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
@@ -243,9 +244,11 @@ public interface PeriodService {
      * @param taxType тип налога
      * @param departmentList подразделения
      * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
+     * @param withoutCorrect true - без корректирующих периодов false - с корректирующими периодами
      * @return список отчетных периодов
      */
-    List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
+    List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                             boolean withoutBalance, boolean withoutCorrect);
 
 	/**
 	 * Получить признак активности периода для подразделения

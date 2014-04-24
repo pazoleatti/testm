@@ -118,7 +118,7 @@ public class RefBookDaoTest {
 	public void testGetData3() throws Exception {
 		PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(1L, getDate(1, 3, 2013), null, null, null);
         // проверяем кол-во строк
-		assertEquals(1, data.size());
+        assertEquals(1, data.size());
         Map<String, RefBookValue> record1 = data.get(0);
         assertEquals(4, record1.get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
         assertEquals("Вий", record1.get(ATTRIBUTE_NAME).getStringValue());

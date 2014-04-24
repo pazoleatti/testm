@@ -256,7 +256,7 @@
                     </g:HorizontalPanel>
 
                     <g:cell width="100%">
-                        <style:LinkButton title="Поиск" ui:field="search" width="70px" text="Поиск"/>
+                        <style:LinkButton title="Поиск" ui:field="search" img="resources/img/search.png" width="70px" text="Поиск"/>
                     </g:cell>
 
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"

@@ -37,7 +37,12 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
         Set<Long> getSelectedIds();
 
-        void refresh();
+        /**
+         * Перезагрузка данных если таблица уже отображается
+         * и если данные еще не были загружены
+          * @param force флаг нужна ли силовая перезагрузка если даже данные уже загружены
+         */
+        void refresh(boolean force);
     }
 
     public RefBookMultiPickerPresenter(MyView view) {
@@ -63,7 +68,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                         @Override
                         public void onSuccess(InitRefBookMultiResult result) {
                             getView().setHeaders(result.getHeaders());
-                            getView().refresh();
+                            getView().refresh(true);
 
                             trySelect(newState);
                         }
@@ -73,7 +78,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
             //иначе просто сеттим
             ps.setValues(newState);
             trySelect(newState);
-            getView().refresh();
+            getView().refresh(false);
         }
     }
 
@@ -156,7 +161,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     public void onSort(Integer columnIndex, boolean isSortAscending) {
         sortColumnIndex = columnIndex;
         this.isSortAscending = isSortAscending;
-        getView().refresh();
+        getView().refresh(true);
     }
 
     @Override

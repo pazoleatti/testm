@@ -6,11 +6,13 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -46,6 +48,9 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Autowired
     private RefBookDao refBookDao;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -119,7 +124,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Произошли ошибки при выполнении скрипта справочника.");
+            throw new ServiceLoggerException("Произошли ошибки при выполнении скрипта справочника.", logEntryService.save(logger.getEntries()));
         }
     }
 

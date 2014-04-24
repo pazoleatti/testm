@@ -225,14 +225,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 						if (result.isCanRemove()) {
 							removeReportPeriod();
 						} else {
-							Dialog.confirmMessage("При удалении периода будут удалены все данные по бухгалтерской отчётности, " +
-									"относящиеся к удаляемому периоду. Вы уверены, что хотите удалить период?",
-									new DialogHandler() {
-										@Override
-										public void yes() {
-											removeReportPeriod();
-										}
-									});
+                            LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
 						}
 					}
 				}, PeriodsPresenter.this));
@@ -241,6 +234,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	private void removeReportPeriod() {
 		RemovePeriodAction requestData = new RemovePeriodAction();
 		requestData.setReportPeriodId((int)getView().getSelectedRow().getReportPeriodId());
+        requestData.setCorrectionDate(getView().getSelectedRow().getCorrectPeriod());
 		requestData.setTaxType(taxType);
 		requestData.setDepartmentId(getView().getSelectedRow().getDepartmentId());
 		dispatcher.execute(requestData, CallbackUtils

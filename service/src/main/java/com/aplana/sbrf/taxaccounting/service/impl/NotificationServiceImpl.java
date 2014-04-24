@@ -77,4 +77,9 @@ public class NotificationServiceImpl implements NotificationService {
 		filter.setSenderDepartmentId(receiverDepartmentId);
 		return notificationDao.getCountByFilter(filter);
 	}
+
+    @Override
+    public void deleteByReportPeriod(int reportPeriodId) {
+        notificationDao.deleteByReportPeriod(reportPeriodId);
+    }
 }

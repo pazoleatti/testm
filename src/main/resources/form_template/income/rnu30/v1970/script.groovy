@@ -12,11 +12,11 @@ import groovy.transform.Field
  * @author rtimerbaev
  */
 
-// графа    - fix - для вывода надписей
 // графа 1  - number
+// графа    - fix - для вывода надписей
 // графа 2  - debtor
 // графа 3  - provision                             атрибут 822 - CODE - "Код обеспечения", справочник 86 "Обеспечение"
-// графа 4  - nameBalanceAccount                    хранит абсолютное значение - атрибут 151 - NAME - «Наименование Балансового счёта» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
+// графа 4  - nameBalanceAccount                    хранит абсолютное значение - атрибут 151 - NAME - «Наименование вида дохода/расхода» справочника 29 «Классификатор соответствия счетов бухгалтерского учёта кодам налогового учёта»
 // графа 5  - debt45_90DaysSum
 // графа 6  - debt45_90DaysNormAllocation50per
 // графа 7  - debt45_90DaysReserve
@@ -31,42 +31,42 @@ import groovy.transform.Field
 // графа 16 - useReserve
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED : // проверка при "вернуть из принята в подготовлена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED: // проверка при "вернуть из принята в подготовлена"
         break
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED : // после принятия из подготовлена
+    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         importData()
         calc()
         logicCheck()
@@ -255,7 +255,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        def nonEmptyColumns = (isFirst ? requiredColumns1 :  requiredColumnsAB)
+        def nonEmptyColumns = (isFirst ? requiredColumns1 : requiredColumnsAB)
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на уникальность поля "№ пп" (графа 1)
@@ -294,7 +294,9 @@ void logicCheck() {
     // 4. Проверка итоговых значений по строкам, не входящим в состав раздел А и Б (графа 5, 7, 8, 10..16)
     def totalRow = getDataRow(dataRows, 'total')
     for (def alias : totalColumnsAll) {
-        if (totalRow.getCell(alias).value != getSum(dataRows, alias, totalRow)) {
+        def value = roundValue(totalRow.getCell(alias).value, 2)
+        def tmpValue = roundValue(getSum(dataRows, alias, totalRow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalRow, alias)
             logger.error("Итоговые значения для \"$name\" рассчитаны неверно!")
         }
@@ -309,11 +311,15 @@ void logicCheck() {
 
     //  раздел А и Б (графа 12, 13, 16)
     for (def alias : totalColumnsAB) {
-        if (totalARow.getCell(alias).value != getSum(dataRows, alias, aRow, totalARow)) {
+        def value = roundValue(totalARow.getCell(alias).value, 2)
+        def tmpValue = roundValue(getSum(dataRows, alias, aRow, totalARow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalARow, alias)
             logger.error("Итоговые значения для \"$name\" раздела А рассчитаны неверно!")
         }
-        if (totalBRow.getCell(alias).value != getSum(dataRows, alias, bRow, totalBRow)) {
+        value = roundValue(totalBRow.getCell(alias).value, 2)
+        tmpValue = roundValue(getSum(dataRows, alias, bRow, totalBRow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalBRow, alias)
             logger.error("Итоговые значения для \"$name\" раздела Б рассчитаны неверно!")
         }
@@ -436,7 +442,7 @@ void importData() {
             (xml.row[0].cell[5]): 'Задолженность от 45 до 90 дней',
             (xml.row[0].cell[8]): 'Задолженность более 90 дней',
             (xml.row[0].cell[11]): 'Итого расчётный резерв',
-            (xml.row[0].cell[12]): 'Резерв на отчётную дату',
+            (xml.row[0].cell[12]): 'Резерв',
             (xml.row[0].cell[14]): 'Изменение фактического резерва',
             (xml.row[1].cell[5]): 'Сумма долга',
             (xml.row[1].cell[6]): 'Норматив отчислений 50%',
@@ -444,13 +450,14 @@ void importData() {
             (xml.row[1].cell[8]): 'Сумма долга',
             (xml.row[1].cell[9]): 'Норматив отчислений 100%',
             (xml.row[1].cell[10]): 'Расчётный резерв',
-            (xml.row[1].cell[12]): 'Предыдущую',
-            (xml.row[1].cell[13]): 'Текущую',
+            (xml.row[1].cell[12]): 'на предыдущую отчётную дату',
+            (xml.row[1].cell[13]): 'на отчетную дату',
             (xml.row[1].cell[14]): 'Доначисление резерва с отнесением на расходы код 22670',
             (xml.row[1].cell[15]): 'Восстановление резерва на доходах код 13091',
-            (xml.row[1].cell[16]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде'
+            (xml.row[1].cell[16]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде',
+            (xml.row[2].cell[0]): '1'
     ]
-    (1..16).each { index ->
+    (2..16).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
     checkHeaderEquals(headerMapping)
@@ -464,8 +471,8 @@ def addData(def xml, int headRowCount) {
     def dataRows = dataRowHelper.allCached
 
     def groupsMap = [
-            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва подразделения ЦА (ТБ, ОСБ)':'A',
-            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва Сбербанка России':'B'
+            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва подразделения ЦА (ТБ, ОСБ)': 'A',
+            'Списание дебиторской задолженности, по которой резерв не создан, за счет общей суммы резерва Сбербанка России': 'B'
     ]
 
     def xmlIndexRow = -1 // Строки xml, от 0
@@ -485,16 +492,20 @@ def addData(def xml, int headRowCount) {
             continue
         }
 
-        if (!isFirstRow && groupsMap.get(row.cell[0].text()) != null) {
-            section = groupsMap.get(row.cell[0].text())
+        if (!isFirstRow && groupsMap.get(row.cell[1].text()) != null) {
+            section = groupsMap.get(row.cell[1].text())
             mapRows[section] = []
             continue
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() != null && row.cell[0].text() != "") {
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
             isFirstRow = false
             continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
         }
 
         def xmlIndexCol
@@ -514,7 +525,7 @@ def addData(def xml, int headRowCount) {
         if (isFirstRow) {
             // графа 3
             xmlIndexCol = 3
-            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(),  xlsIndexRow, xmlIndexCol + colOffset)
+            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
             // графа 5
             xmlIndexCol = 5
@@ -582,8 +593,8 @@ void sort(def dataRows) {
 
     sortRows.each {
         it.sort {
-            // графа 3  - provision
-            // графа 2  - debtor
+                // графа 3  - provision
+                // графа 2  - debtor
             def a, def b ->
                 if (a.provision == b.provision) {
                     return a.debtor <=> b.debtor

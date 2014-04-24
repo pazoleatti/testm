@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -263,4 +264,35 @@ public interface FormDataService {
      */
     void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                              Logger logger, boolean required);
+
+    /**
+     * Проверить существование и принятость квартальной формы, а также наличие данных в ней.
+     *
+     * @param formTypeId идентификатор типа формы
+     * @param kind вид формы
+     * @param departmentId идентификатор подразделения
+     * @param currentReportPeriodId идентификатор текущего периода
+     * @param prevPeriod проверять в предыдущем периоде
+     * @param logger логгер
+     * @param required фатальность
+     */
+    public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+                                          int currentReportPeriodId, Boolean prevPeriod,
+                                          Logger logger, boolean required) throws ServiceException;
+
+    /**
+     * Проверить существование и принятость ежемесячной формы, а также наличие данных в ней.
+     *
+     * @param formTypeId идентификатор типа формы
+     * @param kind вид формы
+     * @param departmentId идентификатор подразделения
+     * @param currentReportPeriodId идентификатор текущего периода
+     * @param currentPeriodOrder очередность налоговой формы в рамках налогового периода
+     * @param prevPeriod проверять в предыдущем периоде
+     * @param logger логгер
+     * @param required фатальность
+     */
+    public void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
+                                                 int currentReportPeriodId, Integer currentPeriodOrder, Boolean prevPeriod,
+                                                 Logger logger, boolean required);
 }
