@@ -89,7 +89,8 @@ public interface ReportPeriodDao {
 	 * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
 	 * @return список отчетных периодов
 	 */
-	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
+	List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                             boolean withoutBalance, boolean withoutCorrect);
 
     /**
      * Получить корректирующие периоды

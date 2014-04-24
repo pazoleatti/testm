@@ -411,9 +411,9 @@ public class PeriodServiceImpl implements PeriodService{
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)
 				|| user.hasRole(TARole.ROLE_CONTROL)
 				) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false, true));
 		} else if (user.hasRole(TARole.ROLE_OPER)) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true, true));
 		} else {
 			return Collections.EMPTY_SET;
 		}
@@ -654,8 +654,9 @@ public class PeriodServiceImpl implements PeriodService{
     }
 
 	@Override
-	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
-		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                                    boolean withoutBalance, boolean withoutCorrect) {
+		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance, withoutCorrect);
 	}
 
 	@Override
