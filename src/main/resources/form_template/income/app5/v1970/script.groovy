@@ -35,7 +35,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        addRow()
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -132,6 +132,26 @@ def getNumber(def value, def indexRow, def indexCol) {
 }
 
 //// Кастомные методы
+
+void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def newRow = getNewRow()
+
+    def index = 0
+    if (currentDataRow != null && currentDataRow.getAlias() != null) {
+        // выбрана итоговая - вставить перед итоговой
+        index = currentDataRow.getIndex()
+    } else if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        // выбрана фиксированная строка - после выбранной нефиксированной
+        index = currentDataRow.getIndex() + 1
+    } else {
+        // невыбрана строка - вставить перед итоговой
+        def dataRows = dataRowHelper.allCached
+        index = getDataRow(dataRows, 'total').getIndex()
+    }
+
+    dataRowHelper.insert(newRow, index)
+}
 
 // Логические проверки
 void logicCheckBeforeCalc() {
@@ -238,6 +258,16 @@ void calc() {
 
         // графа 4 - кпп
         row.kpp = calc4(row)
+
+        // графа 8  - decreaseTaxSum
+        if (row.decreaseTaxSum == null) {
+            row.decreaseTaxSum = 0
+        }
+
+        // графа 9  - taxRate
+        if (row.taxRate == null) {
+            row.taxRate = 0
+        }
     }
     // Сортировка
     dataRows.sort { a, b ->
@@ -369,15 +399,8 @@ void addData(def xml, int headRowCount) {
 
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        def newRow = formData.createDataRow()
+        def newRow = getNewRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
 
         // графа 3
         def indexCol = 3
@@ -406,4 +429,21 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    // графа 8
+    newRow.decreaseTaxSum = 0
+    // графа 9
+    newRow.taxRate = 0
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    return newRow
 }
