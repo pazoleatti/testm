@@ -50,14 +50,14 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
 
 
         List<RefBookRecord> records = new ArrayList<RefBookRecord>();
-        List<Map<String, RefBookValue>> checkRecords = new ArrayList<Map<String, RefBookValue>>();
+        List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
         for (Map<String, RefBookValueSerializable> map : action.getRecords()) {
             Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
             for(Map.Entry<String, RefBookValueSerializable> v : map.entrySet()) {
                 RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
                 values.put(v.getKey(), value);
             }
-            checkRecords.add(values);
+            saveRecords.add(values);
             RefBookRecord record = new RefBookRecord();
             record.setValues(values);
             record.setRecordId(action.getRecordId());
@@ -67,7 +67,7 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         Logger logger = new Logger();
 
         // проверка новых значений по БЛ
-        refBookExternalService.checkRefBook(action.getRefBookId(), checkRecords, action.getVersionFrom(),
+        refBookExternalService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
                 action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();

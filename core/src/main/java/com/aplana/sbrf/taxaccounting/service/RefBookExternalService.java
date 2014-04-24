@@ -20,14 +20,14 @@ public interface RefBookExternalService {
 	public void importRefBook(TAUserInfo userInfo, Logger logger);
 
     /**
-     * Вызов события FormDataEvent.CHECK для скрипта справочника
+     * Вызов события FormDataEvent.SAVE для скрипта справочника
      * http://jira.aplana.com/browse/SBRFACCTAX-6780
      *
-     * @param checkRecords новые значения для проверки по БЛ
+     * @param saveRecords новые значения для проверки по БЛ
      * @param validDateFrom действует с
      * @param validDateTo действует по
      * @param isNewRecords признак новой записи
      */
-    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, Date validDateFrom,
-                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+    public void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
+                                   Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
 }

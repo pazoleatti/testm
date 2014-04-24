@@ -51,9 +51,9 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         Logger logger = new Logger();
 
         // проверка новых значений по БЛ
-        List<Map<String, RefBookValue>> checkRecords = new ArrayList<Map<String, RefBookValue>>();
-        checkRecords.add(valueToSave);
-        refBookExternalService.checkRefBook(action.getRefBookId(), checkRecords, action.getVersionFrom(),
+        List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
+        saveRecords.add(valueToSave);
+        refBookExternalService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
                 action.getVersionTo(), false, securityService.currentUserInfo(), logger);
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());

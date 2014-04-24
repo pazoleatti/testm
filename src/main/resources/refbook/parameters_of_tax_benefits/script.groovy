@@ -11,8 +11,8 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
-    case FormDataEvent.CHECK:
-        check()
+    case FormDataEvent.SAVE:
+        save()
         break
 }
 
@@ -27,15 +27,15 @@ def refBookCache = [:]
 @Field
 def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
-void check() {
-    checkRecords.each {
+void save() {
+    saveRecords.each {
         // 1. проверка обязательности заполнения атрибутов в справочнике "Параметры налоговых льгот"
         def String tax = getRefBookValue(6, it.TAX_BENEFIT_ID.referenceValue)?.CODE?.stringValue
         if (tax in ['20220', '20230']) {
             def String section = it.SECTION?.stringValue
             def String item = it.ITEM?.stringValue
             def String subitem = it.SUBITEM?.stringValue
-            def String errorStr = "Для налоговой льготы ${tax} поле «%s» является обязательным!"
+            def String errorStr = "Для налоговой льготы «${tax}» поле «%s» является обязательным!"
             if (section == null || section == '') {
                 logger.error(errorStr, 'Основание - статья')
             }

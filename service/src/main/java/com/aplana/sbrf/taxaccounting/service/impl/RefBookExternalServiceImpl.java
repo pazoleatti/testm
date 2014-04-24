@@ -165,13 +165,13 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     }
 
     @Override
-    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, Date validDateFrom,
-                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
+    public void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
+                                   Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
-        additionalParameters.put("checkRecords", checkRecords);
+        additionalParameters.put("saveRecords", saveRecords);
         additionalParameters.put("validDateFrom", validDateFrom);
         additionalParameters.put("validDateTo", validDateTo);
         additionalParameters.put("isNewRecords", isNewRecords);
-        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.CHECK, logger, additionalParameters);
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, additionalParameters);
     }
 }
