@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,9 +165,13 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
     }
 
     @Override
-    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, TAUserInfo userInfo, Logger logger) {
+    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, Date validDateFrom,
+                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         additionalParameters.put("checkRecords", checkRecords);
+        additionalParameters.put("validDateFrom", validDateFrom);
+        additionalParameters.put("validDateTo", validDateTo);
+        additionalParameters.put("isNewRecords", isNewRecords);
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.CHECK, logger, additionalParameters);
     }
 }

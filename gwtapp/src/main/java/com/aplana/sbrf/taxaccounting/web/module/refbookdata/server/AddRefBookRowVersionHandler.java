@@ -67,7 +67,8 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         Logger logger = new Logger();
 
         // проверка новых значений по БЛ
-        refBookExternalService.checkRefBook(action.getRefBookId(), checkRecords, securityService.currentUserInfo(), logger);
+        refBookExternalService.checkRefBook(action.getRefBookId(), checkRecords, action.getVersionFrom(),
+                action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records));

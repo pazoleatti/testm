@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,10 @@ public interface RefBookExternalService {
      * http://jira.aplana.com/browse/SBRFACCTAX-6780
      *
      * @param checkRecords новые значения для проверки по БЛ
+     * @param validDateFrom действует с
+     * @param validDateTo действует по
+     * @param isNewRecords признак новой записи
      */
-	public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, TAUserInfo userInfo, Logger logger);
+    public void checkRefBook(long refBookId, List<Map<String, RefBookValue>> checkRecords, Date validDateFrom,
+                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
 }
