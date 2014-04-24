@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
@@ -13,7 +14,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -28,6 +28,7 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -55,6 +56,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     private boolean fixedRows;
     // флаг что нужно заскролить к выделенной строке, используется для формы поиска
     private boolean needScrollToRow = false;
+    // содержит ссылку на предыдуще выделенную строку при использовании NoSelectionModel
+    private DataRow<Cell> prevSelectedRow = null;
 
     interface Binder extends UiBinder<Widget, FormDataView> {
 	}
@@ -230,9 +233,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			public Integer getValue(DataRow<Cell> object) {
 				return object.getIndex();
 			}
-		};
 
-		indexColumn.setCellStyleNames("order");
+            @Override
+            public String getCellStyleNames(com.google.gwt.cell.client.Cell.Context context, DataRow<Cell> object) {
+                // этот метод не вызывается при выделении строк при работе с NoSelectionModel
+                DataRow<Cell> selectedRow = getSelectedRow();
+                return selectedRow != null && selectedRow.equals(object) ? "orderSelected" : "order";
+            }
+        };
 		formDataTable.addColumn(indexColumn, "№");
 		formDataTable.setColumnWidth(indexColumn, 3, Style.Unit.EM);
 
@@ -720,7 +728,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         this.fixedRows = fixedRows;
         if (fixedRows){
             noSelectionModel = new NoSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
-
+            formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.BOUND_TO_SELECTION);
             noSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
@@ -728,14 +736,23 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     if (handlers != null) {
                         handlers.onSelectRow();
                     }
+                    if (prevSelectedRow != null) {
+                        TableCellElement item = formDataTable.getRowElement(prevSelectedRow.getIndex() - 1).getCells().getItem(0);
+                        item.removeAttribute("style");
+                    }
+                    DataRow<Cell> selectedRow = getSelectedRow();
+                    if (selectedRow != null) {
+                        prevSelectedRow = selectedRow;
+                        TableCellElement item = formDataTable.getRowElement(getSelectedRow().getIndex() - 1).getCells().getItem(0);
+                        item.setAttribute("style", "background-color: #5a5a5a !important;");
+                    }
                 }
             });
 
             formDataTable.setSelectionModel(noSelectionModel);
-
         } else {
             singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>(KEY_PROVIDER);
-
+            formDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
             singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
