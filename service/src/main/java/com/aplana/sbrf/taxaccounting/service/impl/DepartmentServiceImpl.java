@@ -215,8 +215,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         // Подразделения согласно выборке 40 - Выборка для доступа к экземплярам НФ/деклараций
         List<Integer> list = getTaxFormDepartments(tAUser, taxTypes);
         for (Integer departmentId : list) {
-            if (departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId)
-                && departmentReportPeriodDao.isPeriodOpen(departmentId, reportPeriodId)) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(reportPeriodId,
+                    departmentId.longValue());
+            if ((departmentReportPeriod != null) && departmentReportPeriod.isActive()) {
                 // Подразделения, для которых открыт указанный период
                 retList.add(departmentId);
             }
