@@ -164,7 +164,6 @@ a, a:visited, a:hover {
 
 .gwt-DialogBox {
     border: 1px solid #646464;
-    z-index: 10;
 }
 
 .gwt-DialogBox .Caption {
@@ -430,7 +429,6 @@ a, a:visited, a:hover {
     border: 2px solid #00940C;
     padding: 3px;
     background: white;
-    z-index: 15;
 }
 
 .gwt-DecoratedPopupPanel .popupContent {

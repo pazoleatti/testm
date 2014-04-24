@@ -276,6 +276,8 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
             i++;
         }
+        System.out.println("" +sortColumns.size() +"");
+        System.out.println("" +cellTable.getColumnSortList().size() +"");
     }
 
     @Override

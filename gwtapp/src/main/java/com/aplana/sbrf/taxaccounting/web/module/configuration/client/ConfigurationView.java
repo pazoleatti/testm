@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.client;
 
+import java.util.Comparator;
 import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
@@ -12,10 +13,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -28,7 +32,8 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	
 	interface Binder extends UiBinder<Widget, ConfigurationView> {
 	}
-
+    ListDataProvider<ConfigTuple> dataProvider = new ListDataProvider<ConfigTuple>();
+    ColumnSortEvent.ListHandler<ConfigTuple> configTupleListHandler;
 	@Inject
 	public ConfigurationView(final Binder binder) {
 		
@@ -40,6 +45,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 				return object.getParam().getCaption();
 			}
 		};
+        captionColumn.setSortable(true);
 		
 	    Column<ConfigTuple, String> valueColumn = new Column<ConfigTuple, String>(new EditTextCell()) {
 			@Override
@@ -55,11 +61,21 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 				object.setValue(value);
 			}
 		});
+        valueColumn.setSortable(true);
 		
 		configTable.addResizableColumn(captionColumn, "Наименование свойства");
 		configTable.addResizableColumn(valueColumn, "Значение свойства");
-		configTable.setSelectionModel(new NoSelectionModel<Object>());
+		configTable.setSelectionModel(new NoSelectionModel<ConfigTuple>());
+        configTupleListHandler = new ColumnSortEvent.ListHandler<ConfigTuple>(dataProvider.getList());
+        configTupleListHandler.setComparator(captionColumn, new Comparator<ConfigTuple>() {
+            @Override
+            public int compare(ConfigTuple o1, ConfigTuple o2) {
+                return o1.getParam().getCaption().compareTo(o2.getParam().getCaption());
+            }
+        });
+        configTable.addColumnSortHandler(configTupleListHandler);
 
+        dataProvider.addDataDisplay(configTable);
 	}
 	
 	@UiHandler("saveButton")
@@ -76,7 +92,8 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	@Override
 	public void setConfigData(List<ConfigTuple> data) {
 		this.configData = data;
-		configTable.setRowData(data);
+        dataProvider.setList(data);
+        configTupleListHandler.setList(dataProvider.getList());
 	}
 
 	@Override
