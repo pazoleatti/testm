@@ -18,7 +18,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -75,6 +74,9 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
 
+    @UiField
+    Label reportDepartmentName;
+
     private final PopupPanel widget;
     private List<FormDataSigner> signers;
     private List<FormDataSigner> clonedSigners;
@@ -102,9 +104,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         if (performer != null) {
             name.setText(performer.getName());
             phone.setText(performer.getPhone());
+            reportDepartmentName.setText(performer.getReportDepartmentName());
         } else {
             name.setText("");
             phone.setText("");
+            reportDepartmentName.setText("");
         }
     }
 
@@ -116,6 +120,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     @Override
     public void setDepartment(Integer department) {
         departmentPicker.setValue(Arrays.asList(department));
+    }
+
+    @Override
+    public void setReportDepartmentName(String department) {
+        reportDepartmentName.setText(department);
     }
 
     @Override
@@ -241,6 +250,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         performer.setName(name.getText());
         performer.setPhone(phone.getText());
         performer.setPrintDepartmentId(departmentPicker.getValue().get(0));
+        performer.setReportDepartmentName(reportDepartmentName.getText());
 
         if (validateSigners()) {
             if (signers == null) {

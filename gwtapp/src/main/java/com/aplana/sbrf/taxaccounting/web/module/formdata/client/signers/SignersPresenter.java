@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
-import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetDepartmentTreeAction;
@@ -34,6 +31,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 		void setReadOnlyMode(boolean readOnlyMode);
         void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
         void setDepartment(Integer department);
+        void setReportDepartmentName(String department);
     }
 
 	@Inject
@@ -57,8 +55,12 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                     @Override
                     public void onSuccess(GetDepartmentTreeResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        getView().setDepartment(formData.getPerformer() != null && formData.getPerformer().getPrintDepartmentId() != null ?
-                                formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId());
+                        Integer department = formData.getPerformer() != null && formData.getPerformer().getPrintDepartmentId() != null ?
+                                formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId();
+                        getView().setDepartment(department);
+                        String reportDepartmentName = formData.getPerformer() != null && formData.getPerformer().getReportDepartmentName() != null ?
+                                formData.getPerformer().getReportDepartmentName() : getReportDepartmentName(result.getDepartments(), department);
+                        getView().setReportDepartmentName(reportDepartmentName);
                     }
                 }, this));
 	}
@@ -77,4 +79,40 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 	public void setReadOnlyMode(boolean readOnlyMode) {
 		this.readOnlyMode = readOnlyMode;
 	}
+
+    private String getReportDepartmentName(List<Department> departments, Integer department) {
+        Department reportDepartment = null;
+        // ищем подразделение по id
+        for (Department dep : departments) {
+            if (dep.getId() == department){
+                reportDepartment = dep;
+                break;
+            }
+        }
+        if (reportDepartment != null) {
+            // рекурсивно проходим по родителям пока не упремся в корень, ТБ или никуда
+            Integer parentId = reportDepartment.getParentId();
+            Department parentDepartment = reportDepartment;
+            while (parentDepartment != null && parentDepartment.getType() != DepartmentType.ROOT_BANK && parentDepartment.getType() != DepartmentType.TERR_BANK) {
+                parentDepartment = null;
+                for (Department dep : departments) {
+                    if (dep.getId() == parentId){
+                        parentDepartment = dep;
+                        break;
+                    }
+                }
+                if (parentDepartment != null) {
+                    parentId = parentDepartment.getParentId();
+                }
+            }
+            // если уперлись в ТБ, то выводим составное имя
+            if (parentDepartment != null && reportDepartment.getType() != DepartmentType.TERR_BANK && parentDepartment.getType() == DepartmentType.TERR_BANK) {
+                return parentDepartment.getName() + "/" + reportDepartment.getName();
+            } else {
+                // иначе только конец
+                return reportDepartment.getName();
+            }
+        }
+        return null;
+    }
 }

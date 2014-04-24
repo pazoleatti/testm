@@ -43,12 +43,13 @@ public class FormPerformerDaoTest {
 		performer.setName("MyNameUpdate");
 		performer.setPhone("MyPhoneUpdate");
         performer.setPrintDepartmentId(1);
+        performer.setReportDepartmentName("MyReportDepartmentNameUpdate");
 		formPerformerDao.save(1,false, performer);
 		performer = formPerformerDao.get(1);
 		assertEquals("MyNameUpdate", performer.getName());
 		assertEquals("MyPhoneUpdate", performer.getPhone());
         assertEquals(Integer.valueOf(1), performer.getPrintDepartmentId());
-
+        assertEquals("MyReportDepartmentNameUpdate", performer.getReportDepartmentName());
 	}
 
 	@Test
@@ -57,11 +58,13 @@ public class FormPerformerDaoTest {
 		performer.setName("MyNameInsert");
 		performer.setPhone("MyPhoneInsert");
         performer.setPrintDepartmentId(1);
+        performer.setReportDepartmentName("MyReportDepartmentNameInsert");
 		assertNull(formPerformerDao.get(2));
 		formPerformerDao.save(2, false, performer);
 		assertEquals("MyNameInsert", performer.getName());
 		assertEquals("MyPhoneInsert", performer.getPhone());
         assertEquals(Integer.valueOf(1), performer.getPrintDepartmentId());
+        assertEquals("MyReportDepartmentNameInsert", performer.getReportDepartmentName());
 
 
 	}
