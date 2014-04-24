@@ -401,8 +401,6 @@ create table declaration_data (
   jasper_print            varchar2(36) 
 );
 
-
-
 comment on table declaration_data is 'Налоговые декларации';
 comment on column declaration_data.id is 'Идентификатор (первичный ключ)';
 comment on column declaration_data.declaration_template_id is 'Ссылка на шаблон декларации';
@@ -458,13 +456,15 @@ create table form_data_performer (
   form_data_id number(18) not null,
   name varchar2(200) not null,
   phone varchar2(40),
-  print_department_id number(9)
+  print_department_id number(9),
+  report_department_name varchar2(510)
 );
 comment on table form_data_performer is 'Исполнитель налоговой формы';
 comment on column form_data_performer.form_data_id is 'Первичный ключ';
 comment on column form_data_performer.name is 'ФИО исполнителя';
 comment on column form_data_performer.phone is 'Телефон';
 comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
+comment on column form_data_performer.report_department_name is 'Наименование подразделения, которое должно быть использовано в печатной форме';
 --------------------------------------------------------------------------------------------------
 create table data_row (
   id number(18) not null,
