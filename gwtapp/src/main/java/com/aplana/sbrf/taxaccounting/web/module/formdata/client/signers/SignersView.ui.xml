@@ -41,6 +41,10 @@
                         <picker:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" labelWordWrap="false" width="300px"/>
                     </g:HorizontalPanel>
                     <g:HorizontalPanel height="30px" verticalAlignment="middle">
+                        <g:Label width="200px" text="Используемое наименование:"/>
+                        <g:Label width="200px" ui:field="reportDepartmentName"/>
+                    </g:HorizontalPanel>
+                    <g:HorizontalPanel height="30px" verticalAlignment="middle">
                         <g:Label width="100px" text="Исполнитель:"/>
                         <g:TextBox maxLength="100" width="300px" ui:field="name"/>
                     </g:HorizontalPanel>

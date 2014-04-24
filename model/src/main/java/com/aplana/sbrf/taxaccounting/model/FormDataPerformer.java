@@ -12,7 +12,8 @@ public class FormDataPerformer implements Serializable {
 	private String name;
 	private String phone;
     private Integer printDepartmentId;
-	
+    private String reportDepartmentName;
+
 	/**
 	 * Получить ФИО исполнителя
 	 * @return ФИО исполнителя
@@ -53,12 +54,21 @@ public class FormDataPerformer implements Serializable {
         this.printDepartmentId = printDepartmentId;
     }
 
+    public String getReportDepartmentName() {
+        return reportDepartmentName;
+    }
+
+    public void setReportDepartmentName(String reportDepartmentName) {
+        this.reportDepartmentName = reportDepartmentName;
+    }
+
     @Override
     public String toString() {
         return "FormDataPerformer{" +
                 "name='" + name + '\'' +
                 ", phone='" + phone + '\'' +
                 ", printDepartmentId=" + printDepartmentId +
+                ", reportDepartmentName='" + reportDepartmentName + '\'' +
                 '}';
     }
 }

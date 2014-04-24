@@ -31,6 +31,7 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 			res.setName(rs.getString("name"));
 			res.setPhone(rs.getString("phone"));
             res.setPrintDepartmentId(rs.getInt("print_department_id"));
+            res.setReportDepartmentName(rs.getString("report_department_name"));
 			return res;
 		}
 	}
@@ -40,27 +41,30 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 		if (formDataDao.get(formDataId, manual) != null) {
 			if (this.get(formDataId) != null) {
 				getJdbcTemplate().update(
-					"update form_data_performer set name = ?, phone = ?, print_department_id = ? where form_data_id = ?",
+					"update form_data_performer set name = ?, phone = ?, print_department_id = ?, report_department_name = ? where form_data_id = ?",
 					new Object[] {
 							performer.getName(),
 							performer.getPhone(),
                             performer.getPrintDepartmentId(),
+                            performer.getReportDepartmentName(),
 							formDataId
 					},
 					new int[] {
 							Types.VARCHAR,
 							Types.VARCHAR,
                             Types.NUMERIC,
+                            Types.VARCHAR,
                             Types.NUMERIC
 					}
 				);
 			} else {
 				getJdbcTemplate().update(
-						"insert into form_data_performer(form_data_id, name, phone, print_department_id) values (?, ?, ?, ?)",
+						"insert into form_data_performer(form_data_id, name, phone, print_department_id, report_department_name) values (?, ?, ?, ?, ?)",
 						formDataId,
 						performer.getName(),
 						performer.getPhone(),
-                        performer.getPrintDepartmentId()
+                        performer.getPrintDepartmentId(),
+                        performer.getReportDepartmentName()
 				);
 			}
 		}
