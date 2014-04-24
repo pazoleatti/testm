@@ -104,9 +104,11 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
         if (performer != null) {
             name.setText(performer.getName());
             phone.setText(performer.getPhone());
+            reportDepartmentName.setText(performer.getReportDepartmentName());
         } else {
             name.setText("");
             phone.setText("");
+            reportDepartmentName.setText("");
         }
     }
 

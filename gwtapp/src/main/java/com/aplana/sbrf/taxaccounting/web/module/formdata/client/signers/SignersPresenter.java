@@ -58,7 +58,9 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                         Integer department = formData.getPerformer() != null && formData.getPerformer().getPrintDepartmentId() != null ?
                                 formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId();
                         getView().setDepartment(department);
-                        getView().setReportDepartmentName(getReportDepartmentName(result.getDepartments(), department));
+                        String reportDepartmentName = formData.getPerformer() != null && formData.getPerformer().getReportDepartmentName() != null ?
+                                formData.getPerformer().getReportDepartmentName() : getReportDepartmentName(result.getDepartments(), department);
+                        getView().setReportDepartmentName(reportDepartmentName);
                     }
                 }, this));
 	}
@@ -104,7 +106,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                 }
             }
             // если уперлись в ТБ, то выводим составное имя
-            if (parentDepartment != null && parentDepartment.getType() == DepartmentType.TERR_BANK) {
+            if (parentDepartment != null && reportDepartment.getType() != DepartmentType.TERR_BANK && parentDepartment.getType() == DepartmentType.TERR_BANK) {
                 return parentDepartment.getName() + "/" + reportDepartment.getName();
             } else {
                 // иначе только конец
