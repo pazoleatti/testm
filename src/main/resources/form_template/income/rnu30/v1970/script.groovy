@@ -294,7 +294,9 @@ void logicCheck() {
     // 4. Проверка итоговых значений по строкам, не входящим в состав раздел А и Б (графа 5, 7, 8, 10..16)
     def totalRow = getDataRow(dataRows, 'total')
     for (def alias : totalColumnsAll) {
-        if (totalRow.getCell(alias).value != getSum(dataRows, alias, totalRow)) {
+        def value = roundValue(totalRow.getCell(alias).value, 2)
+        def tmpValue = roundValue(getSum(dataRows, alias, totalRow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalRow, alias)
             logger.error("Итоговые значения для \"$name\" рассчитаны неверно!")
         }
@@ -309,11 +311,15 @@ void logicCheck() {
 
     //  раздел А и Б (графа 12, 13, 16)
     for (def alias : totalColumnsAB) {
-        if (totalARow.getCell(alias).value != getSum(dataRows, alias, aRow, totalARow)) {
+        def value = roundValue(totalARow.getCell(alias).value, 2)
+        def tmpValue = roundValue(getSum(dataRows, alias, aRow, totalARow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalARow, alias)
             logger.error("Итоговые значения для \"$name\" раздела А рассчитаны неверно!")
         }
-        if (totalBRow.getCell(alias).value != getSum(dataRows, alias, bRow, totalBRow)) {
+        value = roundValue(totalBRow.getCell(alias).value, 2)
+        tmpValue = roundValue(getSum(dataRows, alias, bRow, totalBRow), 2)
+        if (value != tmpValue) {
             def name = getColumnName(totalBRow, alias)
             logger.error("Итоговые значения для \"$name\" раздела Б рассчитаны неверно!")
         }
