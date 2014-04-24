@@ -244,9 +244,11 @@ public interface PeriodService {
      * @param taxType тип налога
      * @param departmentList подразделения
      * @param withoutBalance true - без периодов ввода остатков, false - с периодами ввода остатков
+     * @param withoutCorrect true - без корректирующих периодов false - с корректирующими периодами
      * @return список отчетных периодов
      */
-    List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance);
+    List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                             boolean withoutBalance, boolean withoutCorrect);
 
 	/**
 	 * Получить признак активности периода для подразделения

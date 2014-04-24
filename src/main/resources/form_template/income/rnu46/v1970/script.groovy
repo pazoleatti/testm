@@ -323,12 +323,15 @@ BigDecimal calc13(def row) {
 BigDecimal calc14(def row, def prevRow) {
     def endDate = getReportPeriodStartDate() - 1
     if (prevRow == null || row.usefullLifeEnd == null || row.cost10perExploitation == null || row.cost == null
-            || prevRow?.cost == null || prevRow?.amortExploitation == null || (row.usefullLifeEnd - endDate) == 0) {
+            || prevRow?.cost == null || prevRow?.amortExploitation == null) {
         return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
         def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) +  Long.valueOf(row.usefullLifeEnd.format("yyyy"))*12
         def date2 = Long.valueOf(endDate.format("MM")) +  Long.valueOf(endDate.format("yyyy"))*12
+        if ((date1 - date2) == 0) {
+            return 0 as BigDecimal
+        }
         return round((prevRow.cost - row.cost10perExploitation - prevRow.amortExploitation) / (date1 - date2))
     }
     return round(row.cost / 84)

@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,7 +65,7 @@ public class BookerStatementsView extends ViewWithUiHandlers<BookerStatementsUiH
     Button searchButton;
 
     @UiField
-    Button deleteButton;
+    LinkButton deleteButton;
 
     @UiField
     GenericDataGrid<RefBookDataRow> dataTable;
