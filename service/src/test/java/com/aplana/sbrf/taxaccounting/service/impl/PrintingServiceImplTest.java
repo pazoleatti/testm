@@ -60,9 +60,7 @@ public class PrintingServiceImplTest {
         type.setName("Сводная");
         item.setFormType(type);
 
-        Department department = new Department();
-        department.setName("Начальный");
-        item.setDepartment(department);
+        item.setDepartmentName("Начальный");
         item.setLogDate(new Date());
 
         items.add(item);

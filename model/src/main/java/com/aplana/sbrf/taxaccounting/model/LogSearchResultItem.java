@@ -16,15 +16,16 @@ public class LogSearchResultItem implements Serializable {
 	private FormDataEvent event;
 	private TAUser user;
 	private String roles;
-	private Department department;
     private String departmentName;
 	private DeclarationType declarationType;
 	private FormType formType;
 	private FormDataKind formKind;
 	private String note;
 	private Department userDepartment;
-    private String userDepartmentHierarchy;
     private String reportPeriodName;
+
+    public LogSearchResultItem() {
+    }
 
     public String getReportPeriodName() {
         return reportPeriodName;
@@ -32,14 +33,6 @@ public class LogSearchResultItem implements Serializable {
 
     public void setReportPeriodName(String reportPeriodName) {
         this.reportPeriodName = reportPeriodName;
-    }
-
-    public String getUserDepartmentHierarchy() {
-        return userDepartmentHierarchy;
-    }
-
-    public void setUserDepartmentHierarchy(String userDepartmentHierarchy) {
-        this.userDepartmentHierarchy = userDepartmentHierarchy;
     }
 
     public Long getId() {
@@ -88,14 +81,6 @@ public class LogSearchResultItem implements Serializable {
 
 	public void setRoles(String roles) {
 		this.roles = roles;
-	}
-
-	public Department getDepartment() {
-		return department;
-	}
-
-	public void setDepartment(Department department) {
-		this.department = department;
 	}
 
     public String getDepartmentName() {
@@ -149,7 +134,7 @@ public class LogSearchResultItem implements Serializable {
     @Override
     public String toString() {
         return ("id: " + id) + ", user: " + (user != null ? user.getLogin() : "") + " ip: " + ip +
-                " department: " + (department != null ? department.getName() : "") + " departmentName: " + departmentName +
+                " department: " + " departmentName: " + departmentName +
                 " roles: " + roles + " event: " + (event != null ? event.getTitle() : "") + " logdate: " + logDate +
                 " note: " + note + " reportperiod: " +
                 " formKind: " + (formKind != null ? formKind.getName() : "");

@@ -49,7 +49,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
 
     public interface MyView extends View, HasUiHandlers<AuditFilterUIHandlers> {
         void init();
-        void setDepartments(List<Department> list, Set<Integer> availableValues);
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
         void setFormDataTaxType(List<TaxType> taxTypeList);
         /*void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);*/
@@ -69,8 +68,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
                     @Override
                     public void onSuccess(GetAuditFilterDataResult result) {
                         LogSystemFilterAvailableValues auditFilterDataAvaliableValues = result.getAvailableValues();
-                        getView().setDepartments(auditFilterDataAvaliableValues.getDepartments(),
-                                convertDepartmentsToIds(auditFilterDataAvaliableValues.getDepartments()));
                         getView().setDeclarationType(fillDeclarationTypeMap(auditFilterDataAvaliableValues.getDeclarationTypes()));
                         /*getView().setFormDataKind(result.getFormDataKinds());*/
                         getView().setFormDataTaxType(result.getTaxTypes());

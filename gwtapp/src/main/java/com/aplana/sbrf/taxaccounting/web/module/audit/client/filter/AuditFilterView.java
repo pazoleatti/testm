@@ -3,11 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client.filter;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.AuditFormType;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -25,7 +23,6 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: avanteev
@@ -50,9 +47,8 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     @UiField
     DateMaskBoxPicker toSearchDate;
 
-    @Path("departmentIds")
     @UiField
-    DepartmentPickerPopupWidget departmentSelectionTree;
+    TextBox departmentName;
 
     @Path("formTypeIds")
     @UiField
@@ -88,11 +84,6 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
     Label formTypeLabel;
 
     private Map<Integer, String> declarationTypesMap;
-
-    @Override
-    public void setDepartments(List<Department> list, Set<Integer> availableValues) {
-        departmentSelectionTree.setAvalibleValues(list, availableValues);
-    }
 
     @Override
     public void setDeclarationType(Map<Integer, String> declarationTypesMap) {

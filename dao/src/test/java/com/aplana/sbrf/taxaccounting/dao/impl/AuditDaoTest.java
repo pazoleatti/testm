@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"AuditDaoTest.xml"})
-@Transactional
+@Transactional(readOnly = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AuditDaoTest {
 
@@ -36,9 +36,11 @@ public class AuditDaoTest {
     public void init() {
         Department dep = new Department();
         dep.setId(1);
+        dep.setName("ТБ1");
         DepartmentDao departmentDao = mock(DepartmentDao.class);
         when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
         when(departmentDao.getDepartment(1)).thenReturn(dep);
+        when(departmentDao.getDepartmentByName("ТБ1")).thenReturn(dep);
         ReflectionTestUtils.setField(auditDao, "departmentDao", departmentDao);
     }
 
@@ -59,7 +61,6 @@ public class AuditDaoTest {
         assertEquals(FormDataEvent.getByCode(601), logSystem.getEvent());
         assertEquals(1, logSystem.getUser().getId());
         assertEquals("operator", logSystem.getRoles());
-        assertEquals(1, logSystem.getDepartment().getId());
         assertEquals("2013 первый квартал", logSystem.getReportPeriodName());
         assertEquals(1, logSystem.getFormType().getId());
         assertEquals(3, logSystem.getFormKind().getId());
@@ -69,6 +70,7 @@ public class AuditDaoTest {
     }
 
     @Test
+    @Transactional(readOnly = false)
     public void testAdd() {
         LogSystem logSystem = new LogSystem();
         logSystem.setId(10l);
@@ -78,7 +80,7 @@ public class AuditDaoTest {
         logSystem.setEventId(3);
         logSystem.setUserId(1);
         logSystem.setRoles("operator");
-        logSystem.setDepartmentId(1);
+        logSystem.setDepartmentName("Подразделение");
         logSystem.setReportPeriodName("2013 первый квартал");
         logSystem.setDeclarationTypeId(1);
         logSystem.setFormTypeId(1);
@@ -106,7 +108,6 @@ public class AuditDaoTest {
         assertEquals(3, logSearchResultItem.getEvent().getCode());
         assertEquals(1, logSearchResultItem.getUser().getId());
         assertEquals("operator", logSearchResultItem.getRoles());
-        assertEquals(1, logSearchResultItem.getDepartment().getId());
         assertEquals("2013 первый квартал", logSearchResultItem.getReportPeriodName());
         assertEquals(1, logSearchResultItem.getDeclarationType().getId());
         assertEquals(1, logSearchResultItem.getFormType().getId());
@@ -131,6 +132,7 @@ public class AuditDaoTest {
 	}
 
     @Test
+    @Transactional(readOnly = false)
     public void testRemove(){
         LogSystem logSystem = new LogSystem();
         logSystem.setId(100l);
@@ -140,7 +142,7 @@ public class AuditDaoTest {
         logSystem.setEventId(3);
         logSystem.setUserId(1);
         logSystem.setRoles("operator");
-        logSystem.setDepartmentId(1);
+        logSystem.setDepartmentName("ТБ1");
         logSystem.setReportPeriodName("2014 полугодие");
         logSystem.setDeclarationTypeId(1);
         logSystem.setFormTypeId(1);

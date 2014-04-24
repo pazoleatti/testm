@@ -21,8 +21,6 @@ public class LogSystemReportBuilderTest {
     public void init(){
         LogSearchResultItem item = new LogSearchResultItem();
         FormType type = new FormType();
-        Department department = new Department();
-        department.setName("Начальный");
         DeclarationType declarationType = new DeclarationType();
         declarationType.setName("РНУ");
         type.setName("Сводная");
@@ -39,7 +37,7 @@ public class LogSystemReportBuilderTest {
         item.setNote("Проверочка!");
         item.setFormKind(FormDataKind.ADDITIONAL);
         item.setFormType(type);
-        item.setDepartment(department);
+        item.setDepartmentName("Начальный");
         item.setDepartmentName("Подразделение");
         item.setDeclarationType(declarationType);
         item.setRoles("Контролер");

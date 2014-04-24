@@ -17,7 +17,7 @@ public class LogSystem implements Serializable {
 	private int eventId;
 	private int userId;
 	private String roles;
-	private int departmentId;
+	private String departmentName;
     private String reportPeriodName;
 	private Integer declarationTypeId;
 	private Integer formTypeId;
@@ -81,15 +81,15 @@ public class LogSystem implements Serializable {
 		this.roles = roles;
 	}
 
-	public int getDepartmentId() {
-		return departmentId;
-	}
+    public String getDepartmentName() {
+        return departmentName;
+    }
 
-	public void setDepartmentId(int departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
 
-	public Integer getDeclarationTypeId() {
+    public Integer getDeclarationTypeId() {
 		return declarationTypeId;
 	}
 

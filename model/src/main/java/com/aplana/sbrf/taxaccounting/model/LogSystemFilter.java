@@ -18,7 +18,7 @@ public class LogSystemFilter implements Serializable {
     private Integer declarationTypeId;
     private Integer auditFormTypeId;
     private Integer formTypeId;
-    private Integer departmentId;
+    private String departmentName;
     private Date fromSearchDate;
     private Date toSearchDate;
 
@@ -81,12 +81,12 @@ public class LogSystemFilter implements Serializable {
         this.formTypeId = formTypeId;
     }
 
-    public Integer getDepartmentId() {
-        return departmentId;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public Date getFromSearchDate() {

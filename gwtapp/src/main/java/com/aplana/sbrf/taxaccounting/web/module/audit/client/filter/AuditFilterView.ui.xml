@@ -3,9 +3,8 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:n="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client">
+        >
 
     <ui:style>
         .separator {
@@ -69,9 +68,7 @@
                     <g:cell horizontalAlignment="right" width="135px">
                         <g:Label  text="Подразделение:" addStyleNames="{style.labelBlockMargin}"/>
                     </g:cell>
-
-                    <n:DepartmentPickerPopupWidget ui:field="departmentSelectionTree" width="100%"
-                                                   multiselection="false"/>
+                    <g:TextBox ui:field="departmentName" width="100%"/>
                 </g:HorizontalPanel>
                 <g:HorizontalPanel spacing="2" verticalAlignment="middle" width="100%">
                     <g:cell horizontalAlignment="right" width="135px">

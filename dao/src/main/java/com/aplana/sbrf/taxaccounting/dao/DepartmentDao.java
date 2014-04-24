@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+
+import java.util.List;
 
 /**
  * DAO для работы с информацией по подразделениям банка 
@@ -142,4 +142,6 @@ public interface DepartmentDao {
      * Все подразделения, для форм которых, подразделения departments назначены исполнителями
      */
     List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes);
+
+    List<Integer> getDepartmentsByName(String departmentName);
 }

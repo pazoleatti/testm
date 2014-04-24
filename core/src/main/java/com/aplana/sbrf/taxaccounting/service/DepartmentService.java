@@ -153,6 +153,13 @@ public interface DepartmentService {
 	Map<Integer, Department> getDepartments(List<Integer> departmentId);
 
     /**
+     * Получает набор идентификаторов по имени департамента
+     * @param departmentName наименование демартамента
+     * @return коллекция идентификаторов департаментов
+     */
+    List<Integer> getDepartmentsByName(String departmentName);
+
+    /**
      * Список подразделений передаваемых в СУДИР
      * @return подразделения с типом {@link DepartmentType.MANAGEMENT} и {@link DepartmentType.MANAGEMENT}
      */
@@ -178,4 +185,6 @@ public interface DepartmentService {
      * @return подразделение создавшее форму
      */
     Department getFormDepartment(Long formDataId);
+
+
 }

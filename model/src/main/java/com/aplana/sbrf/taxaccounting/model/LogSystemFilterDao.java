@@ -11,6 +11,7 @@ public class LogSystemFilterDao {
     List<Long> declarationDataIds;
     private Date fromSearchDate;
     private Date toSearchDate;
+    private String departmentName;
     private String reportPeriodName;
     private int countOfRecords;
     private HistoryBusinessSearchOrdering searchOrdering;
@@ -89,5 +90,13 @@ public class LogSystemFilterDao {
 
     public void setToSearchDate(Date toSearchDate) {
         this.toSearchDate = toSearchDate;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }

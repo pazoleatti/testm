@@ -8,12 +8,10 @@ import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -418,5 +416,18 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
         }
         parameterMap.addValue("tt", types);
         return getNamedParameterJdbcTemplate().queryForList(sql, parameterMap, Integer.class);
+    }
+
+    @Override
+    public List<Integer> getDepartmentsByName(String departmentName) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select id from department where lower(name) like lower(\'%" + departmentName + "%\')",
+                    Integer.class
+            );
+        } catch (DataAccessException e){
+            logger.error("Ошибка при поиске подразделений по имени.", e);
+            throw new DaoException("Ошибка при поиске подразделений по имени.", e);
+        }
     }
 }

@@ -18,7 +18,7 @@ public class LogSystemAuditFilter implements Serializable {
     private Integer declarationTypeId;
     private AuditFormType auditFormTypeId;
     private List<Long> formTypeIds;
-    private List<Integer> departmentIds;
+    private String departmentName;
     private Date fromSearchDate;
     private Date toSearchDate;
 
@@ -34,7 +34,7 @@ public class LogSystemAuditFilter implements Serializable {
         this.declarationTypeId = filter.getDeclarationTypeId();
         this.auditFormTypeId = filter.getAuditFormTypeId();
         this.formTypeIds = filter.getFormTypeIds();
-        this.departmentIds = filter.getDepartmentIds();
+        this.departmentName = filter.getDepartmentName();
         this.fromSearchDate = filter.getFromSearchDate();
         this.toSearchDate = filter.getToSearchDate();
         this.startIndex = filter.getStartIndex();
@@ -102,12 +102,12 @@ public class LogSystemAuditFilter implements Serializable {
         this.formTypeIds = formTypeIds;
     }
 
-    public List<Integer> getDepartmentIds() {
-        return departmentIds;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public void setDepartmentIds(List<Integer> departmentIds) {
-        this.departmentIds = departmentIds;
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public Date getFromSearchDate() {
@@ -170,7 +170,7 @@ public class LogSystemAuditFilter implements Serializable {
         LogSystemFilter systemFilter = new LogSystemFilter();
         systemFilter.setCountOfRecords(this.getCountOfRecords());
         systemFilter.setFormKind(formKind != null && !formKind.isEmpty()? FormDataKind.fromId(Integer.valueOf(String.valueOf(formKind.get(0)))) : null);
-        systemFilter.setDepartmentId(departmentIds != null && !departmentIds.isEmpty() ? departmentIds.get(0) : null);
+        systemFilter.setDepartmentName(this.departmentName);
         systemFilter.setTaxType(this.getTaxType());
         systemFilter.setAscSorting(this.isAscSorting());
         systemFilter.setAuditFormTypeId(auditFormTypeId != null? auditFormTypeId.getId() : null);

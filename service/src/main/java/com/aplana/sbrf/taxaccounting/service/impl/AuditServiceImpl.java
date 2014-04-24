@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -36,7 +35,7 @@ public class AuditServiceImpl implements AuditService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+	@Transactional(readOnly = false)
 	public void add(FormDataEvent event, TAUserInfo userInfo, int departmentId, Integer reportPeriodId,
 					Integer declarationTypeId, Integer formTypeId, Integer formKindId, String note) {
 		LogSystem log = new LogSystem();
@@ -55,7 +54,7 @@ public class AuditServiceImpl implements AuditService {
         }
 		log.setRoles(roles.toString());
 
-		log.setDepartmentId(departmentId);
+		log.setDepartmentName(departmentService.getDepartment(departmentId).getName());
         if (reportPeriodId == null)
             log.setReportPeriodName(null);
         else {
@@ -121,9 +120,10 @@ public class AuditServiceImpl implements AuditService {
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
 
         //Проставляю доступные подразделения для пользователя, подразделение не выбрано в фильтре
-        if (filter.getDepartmentId() != null){
-            formDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
-            declarationDataFilter.setDepartmentIds(Arrays.asList(filter.getDepartmentId()));
+        if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()){
+            List<Integer> ids = departmentService.getDepartmentsByName(filter.getDepartmentName());
+            formDataFilter.setDepartmentIds(ids);
+            declarationDataFilter.setDepartmentIds(ids);
         }
         //Только для деклараций, потому что в сервисе для НФ уже есть подобная проверка
         else {
@@ -184,6 +184,7 @@ public class AuditServiceImpl implements AuditService {
         filterDao.setSearchOrdering(filter.getSearchOrdering());
         filterDao.setAscSorting(filter.isAscSorting());
         filterDao.setStartIndex(filter.getStartIndex());
+        filterDao.setDepartmentName(filter.getDepartmentName());
         try {
             return auditDao.getLogsBusiness(filterDao);
         } catch (DaoException e){

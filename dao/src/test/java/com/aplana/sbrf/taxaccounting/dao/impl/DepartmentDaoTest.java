@@ -195,4 +195,9 @@ public class DepartmentDaoTest {
         Assert.assertEquals(result.size(), 1);
         Assert.assertTrue(result.containsAll(asList(3)));
     }
+
+    @Test
+    public void getDepartmentByNameTest() {
+        Assert.assertEquals(2, departmentDao.getDepartmentsByName("ТБ").size());
+    }
 }

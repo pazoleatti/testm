@@ -655,7 +655,7 @@ create table log_system (
   event_id            number(3,0) not null,
   user_id             number(9,0),
   roles               varchar2(200),
-  department_id       number(9,0) not null,
+  department_name     varchar2(500) not null,
   report_period_name  varchar2(50),
   declaration_type_id number(9,0),
   form_type_id        number(9,0),
@@ -670,7 +670,7 @@ comment on column log_system.ip is 'IP-адрес пользователя';
 comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
 comment on column log_system.user_id is 'Код пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_id is 'Код подразделения НФ\декларации';
+comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
 comment on column log_system.report_period_name is 'Имя отчетного периода';
 comment on column log_system.declaration_type_id is 'Код вида декларации';
 comment on column log_system.form_type_id is 'Код вида налоговой формы';

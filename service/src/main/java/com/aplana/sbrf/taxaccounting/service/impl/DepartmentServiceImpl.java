@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -243,6 +245,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 		}
 		return result;
 	}
+
+    @Override
+    public List<Integer> getDepartmentsByName(String departmentName) {
+        try {
+            return departmentDao.getDepartmentsByName(departmentName);
+        } catch (DaoException e){
+            throw new ServiceException("Получение списка подразделений по имени.", e);
+        }
+    }
 
     @Override
     public List<Department> getDepartmentForSudir() {

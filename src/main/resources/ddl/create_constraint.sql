@@ -210,7 +210,6 @@ alter table log_system add constraint log_system_chk_dcl_form check (event_id in
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 501, 502, 503, 601) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_id foreign key (user_id) references sec_user(id);
-alter table log_system add constraint log_system_fk_department_id foreign key (department_id) references department(id);
 alter table log_system add constraint log_system_fk_decl_type_id foreign key (declaration_type_id) references declaration_type(id);
 alter table log_system add constraint log_system_fk_form_type_id foreign key (form_type_id) references form_type(id);
 alter table log_system add constraint log_system_fk_user_dep_id foreign key (user_department_id) references department(id);
