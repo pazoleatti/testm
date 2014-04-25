@@ -1,1 +1,104 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent><type><id>202</id><name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name><status>NORMAL</status><taxType>TRANSPORT</taxType></type><fixedRows>false</fixedRows><name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name><fullName>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</fullName><code> </code><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>rowNumber</alias><checking>false</checking><id>18660</id><name>№ пп</name><order>1</order><width>5</width><maxLength>5</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>codeOKATO</alias><checking>false</checking><id>18661</id><name>Код ОКТМО</name><order>2</order><width>7</width><refBookAttributeId>840</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>identNumber</alias><checking>false</checking><id>18662</id><name>Идентификационный номер</name><order>3</order><width>5</width><maxLength>17</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>regNumber</alias><checking>false</checking><id>18663</id><name>Регистрационный знак</name><order>4</order><width>9</width><maxLength>9</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>powerVal</alias><checking>false</checking><id>19444</id><name>Мощность (величина)</name><order>5</order><width>8</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>baseUnit</alias><checking>false</checking><id>19445</id><name>Мощность (ед. измерения)</name><order>6</order><width>8</width><refBookAttributeId>57</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>taxBenefitCode</alias><checking>false</checking><id>18664</id><name>Код налоговой льготы</name><order>7</order><width>5</width><filter>CODE = '30200' OR CODE = '20210' OR CODE = '20220' OR CODE = '20230'</filter><refBookAttributeId>15</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn"><alias>benefitStartDate</alias><checking>false</checking><id>18665</id><name>Дата начала</name><order>8</order><width>7</width><formatId>0</formatId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn"><alias>benefitEndDate</alias><checking>false</checking><id>18666</id><name>Дата окончания</name><order>9</order><width>7</width><formatId>0</formatId></columns><styles><alias>Редактируемая</alias><backColor>LIGHT_BLUE</backColor><bold>false</bold><fontColor>BLACK</fontColor><id>10800</id><italic>false</italic></styles></formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</name>
+    <fullName>Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог</fullName>
+    <code></code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>5</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>codeOKATO</alias>
+        <checking>false</checking>
+        <name>Код ОКТМО</name>
+        <order>2</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>841</nameAttributeId>
+        <refBookAttributeId>840</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>identNumber</alias>
+        <checking>false</checking>
+        <name>Идентификационный номер</name>
+        <order>3</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>regNumber</alias>
+        <checking>false</checking>
+        <name>Регистрационный знак</name>
+        <order>4</order>
+        <width>9</width>
+        <maxLength>9</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>powerVal</alias>
+        <checking>false</checking>
+        <name>Мощность (величина)</name>
+        <order>5</order>
+        <width>8</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>baseUnit</alias>
+        <checking>false</checking>
+        <name>Мощность (ед. измерения)</name>
+        <order>6</order>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>58</nameAttributeId>
+        <refBookAttributeId>57</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>taxBenefitCode</alias>
+        <checking>false</checking>
+        <name>Код налоговой льготы</name>
+        <order>7</order>
+        <width>5</width>
+        <filter>CODE = '30200' OR CODE = '20210' OR CODE = '20220' OR CODE = '20230'</filter>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>16</nameAttributeId>
+        <refBookAttributeId>15</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>benefitStartDate</alias>
+        <checking>false</checking>
+        <name>Дата начала</name>
+        <order>8</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>benefitEndDate</alias>
+        <checking>false</checking>
+        <name>Дата окончания</name>
+        <order>9</order>
+        <width>7</width>
+        <formatId>0</formatId>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
