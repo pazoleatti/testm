@@ -110,7 +110,7 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.getAllCached()
 
-    def periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+    def periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     def periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     def reportPeriodRange = periodStartDate..periodEndDate
 

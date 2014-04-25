@@ -576,7 +576,7 @@ def DataRow getRow45(DataRow row49, def dataRows45) {
 
 def getStartDate() {
     if (reportPeriodStartDate == null) {
-        reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     }
     return reportPeriodStartDate
 }

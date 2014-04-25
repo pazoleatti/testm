@@ -150,7 +150,7 @@ void calc() {
         // Отчетная дата
         def reportDate = getReportDate()
         // Дата начала отчетного периода
-        def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+        def startDate = getStartDate()
         def index = formDataService.getPrevRowNumber(formData, formDataDepartment.id, 'number')
 
         for (def row in dataRows) {
@@ -249,7 +249,7 @@ void logicCheck() {
     // Количество дней в году
     def daysInYear = getCountDaysInYear(new Date())
     // Дата начала отчетного периода
-    def startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    def startDate = getStartDate()
     // Дата окончания отчетного периода
     def endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
@@ -400,7 +400,7 @@ def getCountDaysInYear(def date) {
 
 def getStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
