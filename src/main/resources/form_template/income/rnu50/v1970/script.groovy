@@ -277,7 +277,7 @@ def calc4(def row49, def startDate, def endDate) {
 
     if (startDate <= column3 && column3 <= endDate) {
         if (column18 > column3) {
-            result = column20 * (endDate[Calendar.MONTH] - row49.operationDate[Calendar.MONTH])
+            result = column20 * (endDate[Calendar.MONTH] - column3[Calendar.MONTH])
         } else {
             result = column20
         }
@@ -292,7 +292,7 @@ def calc5(def row49, def startDate, def endDate) {
 
     if (column18 < startDate) {
         result = column20 * 3
-    } else if (startDate <= column18&& column18 <= endDate) {
+    } else if (startDate <= column18 && column18 <= endDate) {
         result = column20 * (endDate[Calendar.MONTH] - column18[Calendar.MONTH])
     }
     return result?.setScale(2, RoundingMode.HALF_UP)

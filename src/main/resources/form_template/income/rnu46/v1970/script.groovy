@@ -344,8 +344,8 @@ Date calc18(def row) {
     }
     def Calendar tmpCal = Calendar.getInstance()
     tmpCal.setTime(row.exploitationStart)
-    tmpCal.add(Calendar.MONTH, row.usefulLifeWithUsed.intValue())
-    tmpCal.set(Calendar.DAY_OF_MONTH, tmpCal.getMaximum(Calendar.DAY_OF_MONTH))
+    tmpCal.add(Calendar.MONTH, row.usefulLifeWithUsed.intValue() + 1)
+    tmpCal.set(Calendar.DAY_OF_MONTH, 0)
     return tmpCal.getTime()
 }
 
