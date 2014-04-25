@@ -71,6 +71,7 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
     @Override
     protected void onReveal() {
         super.onReveal();
+        LogCleanEvent.fire(this);
         getView().setFilter("");
         onFindClicked();
     }

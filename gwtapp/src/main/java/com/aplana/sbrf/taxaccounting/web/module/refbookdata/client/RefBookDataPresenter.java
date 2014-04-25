@@ -105,6 +105,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	protected void onReveal() {
 		super.onReveal();
+        LogCleanEvent.fire(this);
         if (recordId != null) getView().setPage(page);
 		setInSlot(TYPE_editFormPresenter, editFormPresenter);
 	}
