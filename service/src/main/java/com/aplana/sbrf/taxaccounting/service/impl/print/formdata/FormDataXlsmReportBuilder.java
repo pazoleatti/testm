@@ -253,7 +253,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             if(0 == rowBreakes)
                 sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
             else
-                sheet.shiftRows(r.getRowNum(), r.getRowNum(), rowBreakes);
+                sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, rowBreakes);
         }
         for (DataRow<HeaderCell> headerCellDataRow : formTemplate.getHeaders()){
             Row row = sheet.createRow(rowNumber);
