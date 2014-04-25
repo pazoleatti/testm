@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import groovy.transform.Field
+
 /**
  * Cкрипт справочника «Организации - участники контролируемых сделок»
  *
@@ -16,6 +18,29 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXLS()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
+}
+
+//// Кэши и константы
+@Field
+def refBookCache = [:]
+
+
+void save() {
+    saveRecords.each {
+        def String inn = it.INN_KIO?.stringValue
+        def Long organization = getRefBookValue(70, it.ORGANIZATION?.referenceValue)?.CODE?.numberValue
+        if (organization == 1 && (inn == null || inn == '')) {
+            logger.error('Для организаций РФ атрибут «ИНН» является обязательным')
+        }
+    }
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 void importFromXLS() {
