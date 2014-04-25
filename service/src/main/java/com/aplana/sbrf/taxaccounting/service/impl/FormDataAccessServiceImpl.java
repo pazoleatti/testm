@@ -216,7 +216,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         //Период формы - открыт?
-        if (!reportPeriodService.isPeriodOpen(formData.getDepartmentId(), formData.getReportPeriodId())) {
+        if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
             logger.error("Период формы закрыт!");
         }
 
@@ -392,7 +392,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         //Период формы - открыт?
-        if (!reportPeriodService.isPeriodOpen(formData.getDepartmentId(), formData.getReportPeriodId())) {
+        if (!reportPeriodService.isActivePeriod(formData.getReportPeriodId(), formData.getDepartmentId())) {
             logger.error("Период формы закрыт!");
         }
 

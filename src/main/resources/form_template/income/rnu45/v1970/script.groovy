@@ -185,7 +185,7 @@ void calc() {
     def dateStart = getMonthStartDate()
 
     def dataOld = null
-    if (formData.kind != FormDataKind.PRIMARY) {
+    if (formData.kind == FormDataKind.PRIMARY) {
         dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
     }
 
@@ -265,9 +265,15 @@ def logicCheck() {
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
         def Set<String> invSet = new HashSet<String>()
-        def dataOld = null
-        if (formData.kind != FormDataKind.PRIMARY) {
-            dataOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+        def inventoryNumbersOld = []
+        def dataRowHelperOld = null
+        if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+            dataRowHelperOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
+            if (dataRowHelperOld) {
+                dataRowHelperOld.allCached.each { row ->
+                    inventoryNumbersOld.add(row.inventoryNumber)
+                }
+            }
         }
 
         def dateEnd = getMonthEndDate()
@@ -301,18 +307,29 @@ def logicCheck() {
                 loggerError(errorMsg + "Все суммы по операции нулевые!")
             }
 
+            // 5. Арифметические проверки расчета неитоговых граф
             if (formData.kind == FormDataKind.PRIMARY) {
-                // 4. Арифметические проверки расчета неитоговых граф
                 needValue['depreciationRate'] = calc8(row)
                 needValue['amortizationMonth'] = calc9(row)
-                prevValues = getPrev10and11(dataOld, row)
+                prevValues = getPrev10and11(dataRowHelperOld, row)
                 needValue['amortizationSinceYear'] = calc10(row, dateStart, dateEnd, prevValues[0])
                 needValue['amortizationSinceUsed'] = calc11(row, dateStart, dateEnd, prevValues[1])
                 checkCalc(row, arithmeticCheckAlias, needValue, logger, !isMonthBalance())
             }
         }
-        // 5. Арифметические проверки расчета итоговой строки
+
+        // 6. Арифметические проверки расчета итоговой строки
         checkTotalSum(dataRows, totalColumns, logger, !isMonthBalance())
+
+        // 4. Проверки существования необходимых экземпляров форм
+        if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
+            for (def inv in invSet) {
+                if (!inventoryNumbersOld.contains(inv)) {
+                    logger.warn('Отсутствуют данные за прошлые отчетные периоды!')
+                    break
+                }
+            }
+        }
     }
 }
 

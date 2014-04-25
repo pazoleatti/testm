@@ -382,7 +382,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "  ref_book_record r\n" +
                     "where\n" +
                     "  r.ref_book_id = ? and r.status = 0 and r.version <= ? and\n" +
-                    "  not exists (select 1 from ref_book_record r2 where r2.status = 0 and r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
+                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by\n" +
                     "  record_id)\n";
 

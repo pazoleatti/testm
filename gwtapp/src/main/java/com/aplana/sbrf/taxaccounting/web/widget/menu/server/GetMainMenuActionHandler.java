@@ -33,6 +33,7 @@ import java.util.List;
 
 /**
  * Класс, реализующий логику определения доступности пунктов меню навигации
+ * http://conf.aplana.com/pages/viewpage.action?pageId=11382816
  */
 @Component
 public class GetMainMenuActionHandler extends
@@ -202,7 +203,7 @@ public class GetMainMenuActionHandler extends
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {
-                MenuItem templateMenu = new MenuItem("Настройка макетов", "", null);
+                MenuItem templateMenu = new MenuItem("Настройки", "", null);
                 adminMenuItem.getSubMenu().add(templateMenu);
                 templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
                         + AdminConstants.NameTokens.adminPage));
@@ -212,7 +213,6 @@ public class GetMainMenuActionHandler extends
                         + RefBookListTokens.REFBOOK_LIST_ADMIN)));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
             }
-
             menuItems.add(adminMenuItem);
         }
 
@@ -227,7 +227,6 @@ public class GetMainMenuActionHandler extends
 
 		return result;
 	}
-
 
 	@Override
 	public void undo(GetMainMenuAction action, GetMainMenuResult result,

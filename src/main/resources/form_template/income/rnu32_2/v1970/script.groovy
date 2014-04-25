@@ -59,6 +59,10 @@ switch (formDataEvent) {
 //// Кэши и константы
 @Field
 def refBookCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def providerCache = [:]
 
 // Проверяемые на пустые значения атрибуты (графа 1..6)
 @Field
@@ -83,6 +87,13 @@ def sourceFormData = null
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 void calc() {
@@ -111,7 +122,7 @@ void calc() {
         def rows32_2 = getRowsBySection(dataRows, section)
         def newRows = []
         for (def row : rows32_1) {
-            def code = getCode(row, getReportPeriodEndDate())
+            def code = getCode(row)
             if (hasCalcRow(row.name, code, rows32_2)) {
                 continue
             }
@@ -330,7 +341,7 @@ def getCalcRowFromRNU_32_1(def name, def code, def rows32_1) {
     }
     def calcRow = null
     for (def row : rows32_1) {
-        def code32_1 = getCode(row, getReportPeriodEndDate())
+        def code32_1 = getCode(row)
         if (row.name == name && code32_1 == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
@@ -382,17 +393,16 @@ def roundValue(def value, int precision) {
  * Получить код валюты номинала по id записи из справочнкиа ценной бумаги (84).
  *
  * @param row строку из рну-32.1
- * @param lastDay последний день отчетного месяца
  * @return id записи справочника 15
  */
-def getCode(def row, def lastDay) {
+def getCode(def row) {
     if (row.issuer == null) {
         return null
     }
     // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
     def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
     // получить id записи из справочника валют (15) по цифровому коду валюты
-    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'))
     return recordId
 }
 

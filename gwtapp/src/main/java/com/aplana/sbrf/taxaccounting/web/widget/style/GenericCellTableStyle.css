@@ -131,7 +131,7 @@ a, a:visited, a:hover {
  * The keyboard selected cell is visible over selection.
  */
 .cellTableKeyboardSelectedCell {
-	background-color: #9A9CFF;
+	background-color: #E4E4FF;
 	border-color: #373AD7;
 }
 

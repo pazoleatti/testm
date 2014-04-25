@@ -229,7 +229,15 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	}
 
 	private void applyOurCustomStyles(TableCellBuilder out, FormStyle ourStyle) {
-		out.style()
+//        out.style().fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
+//                   .fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL);
+//        if (Color.WHITE != ourStyle.getBackColor()) {
+//            out.style().trustedBackgroundColor(convertColorToRGBString(ourStyle.getBackColor()));
+//        }
+//        out.style().trustedColor(convertColorToRGBString(ourStyle.getFontColor()))
+//                   .endStyle();
+
+        out.style()
 //
 				.fontStyle(ourStyle.isItalic() ? Style.FontStyle.ITALIC : Style.FontStyle.NORMAL)
 				.fontWeight(ourStyle.isBold() ? Style.FontWeight.BOLD : Style.FontWeight.NORMAL)

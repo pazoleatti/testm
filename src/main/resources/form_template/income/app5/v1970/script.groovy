@@ -16,7 +16,7 @@ import groovy.transform.Field
 // графа 2  - regionBank                атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 4  - kpp                       абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
-// графа 5  - propertyPrice
+// графа 5  - avepropertyPricerageCost
 // графа 6  - workersCount
 // графа 7  - subjectTaxCredit
 // графа 8  - decreaseTaxSum
@@ -35,7 +35,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        addRow()
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -71,12 +71,12 @@ def refBookCache = [:]
 
 // Все атрибуты
 @Field
-def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'propertyPrice',
+def allColumns = ['number', 'fix', 'regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost',
         'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
+def editableColumns = ['regionBankDivision', 'avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -84,7 +84,7 @@ def autoFillColumns = ['regionBank', 'kpp']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount',
+def nonEmptyColumns = ['regionBank', 'regionBankDivision', 'kpp', 'avepropertyPricerageCost', 'workersCount',
         'subjectTaxCredit', 'decreaseTaxSum', 'taxRate']
 
 // Группируемые атрибуты
@@ -93,7 +93,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
+def totalColumns = ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum']
 
 @Field
 def endDate = null
@@ -133,6 +133,26 @@ def getNumber(def value, def indexRow, def indexCol) {
 
 //// Кастомные методы
 
+void addRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def newRow = getNewRow()
+
+    def index = 0
+    if (currentDataRow != null && currentDataRow.getAlias() != null) {
+        // выбрана итоговая - вставить перед итоговой
+        index = currentDataRow.getIndex()
+    } else if (currentDataRow != null && currentDataRow.getAlias() == null) {
+        // выбрана фиксированная строка - после выбранной нефиксированной
+        index = currentDataRow.getIndex() + 1
+    } else {
+        // невыбрана строка - вставить перед итоговой
+        def dataRows = dataRowHelper.allCached
+        index = getDataRow(dataRows, 'total').getIndex()
+    }
+
+    dataRowHelper.insert(newRow, index)
+}
+
 // Логические проверки
 void logicCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -167,7 +187,7 @@ void logicCheckBeforeCalc() {
         // 2. Проверка наличия значения «КПП» в форме настроек подразделения
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1,
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
@@ -188,7 +208,6 @@ void logicCheck() {
         return
     }
 
-    def dataProvider = refBookFactory.getDataProvider(33)
     def rowNumber = 0
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -209,7 +228,7 @@ void logicCheck() {
         // Проверки НСИ
         // 1. Проверка значения графы «КПП» - графа 4 - kpp - абсолютное значение - атрибут 234 KPP "КПП" - справочник 33 "Параметры подразделения по налогу на прибыль"
         if (row.regionBankDivision != null && row.kpp != null && row.kpp != '') {
-            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(),
+            def incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1,
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
             if (incomeParam?.KPP?.stringValue != row.kpp) {
                 def name = getColumnName(row, 'kpp')
@@ -239,6 +258,16 @@ void calc() {
 
         // графа 4 - кпп
         row.kpp = calc4(row)
+
+        // графа 8  - decreaseTaxSum
+        if (row.decreaseTaxSum == null) {
+            row.decreaseTaxSum = 0
+        }
+
+        // графа 9  - taxRate
+        if (row.taxRate == null) {
+            row.taxRate = 0
+        }
     }
     // Сортировка
     dataRows.sort { a, b ->
@@ -285,7 +314,7 @@ def calc2(def row) {
 def calc4(def row) {
     def incomeParam = null
     if (row.regionBankDivision != null) {
-        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", getReportPeriodEndDate() - 1, -1, null, false)
     }
     return incomeParam?.KPP?.stringValue
 }
@@ -322,7 +351,7 @@ void importData() {
             (xml.row[0].cell[2]): getColumnName(tmpRow, 'regionBank'),
             (xml.row[0].cell[3]): getColumnName(tmpRow, 'regionBankDivision'),
             (xml.row[0].cell[4]): getColumnName(tmpRow, 'kpp'),
-            (xml.row[0].cell[5]): getColumnName(tmpRow, 'propertyPrice'),
+            (xml.row[0].cell[5]): getColumnName(tmpRow, 'avepropertyPricerageCost'),
             (xml.row[0].cell[6]): getColumnName(tmpRow, 'workersCount'),
             (xml.row[0].cell[7]): getColumnName(tmpRow, 'subjectTaxCredit'),
             (xml.row[0].cell[8]): 'Льготы по налогу в бюджет субъекта (руб.)',
@@ -370,15 +399,8 @@ void addData(def xml, int headRowCount) {
 
         def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        def newRow = formData.createDataRow()
+        def newRow = getNewRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
 
         // графа 3
         def indexCol = 3
@@ -386,7 +408,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         indexCol = 5
-        newRow.propertyPrice = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+        newRow.avepropertyPricerageCost = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
 
         // графа 6
         indexCol = 6
@@ -407,4 +429,21 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    // графа 8
+    newRow.decreaseTaxSum = 0
+    // графа 9
+    newRow.taxRate = 0
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    return newRow
 }

@@ -411,9 +411,9 @@ public class PeriodServiceImpl implements PeriodService{
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)
 				|| user.hasRole(TARole.ROLE_CONTROL)
 				) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, false, true));
 		} else if (user.hasRole(TARole.ROLE_OPER)) {
-			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true));
+			return new LinkedHashSet<ReportPeriod>(getOpenPeriodsByTaxTypeAndDepartments(taxType, departments, true, true));
 		} else {
 			return Collections.EMPTY_SET;
 		}
@@ -433,15 +433,6 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
-		LogSystemFilter logFilter = new LogSystemFilter();
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		logFilter.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN,
-                String.valueOf(reportPeriod.getTaxPeriod().getYear()), reportPeriod.getName()));
-		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
-			logs.add(new LogEntry(LogLevel.ERROR,
-					"В удаляемом периоде были произведены действия, которые отражены в \"Журнале аудита\". Удаление периода невозможно!"));
-			return false;
-		}
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
         List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
@@ -654,8 +645,9 @@ public class PeriodServiceImpl implements PeriodService{
     }
 
 	@Override
-	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList, boolean withoutBalance) {
-		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance);
+	public List<ReportPeriod> getOpenPeriodsByTaxTypeAndDepartments(TaxType taxType, List<Integer> departmentList,
+                                                                    boolean withoutBalance, boolean withoutCorrect) {
+		return reportPeriodDao.getOpenPeriodsByTaxTypeAndDepartments(taxType, departmentList, withoutBalance, withoutCorrect);
 	}
 
 	@Override

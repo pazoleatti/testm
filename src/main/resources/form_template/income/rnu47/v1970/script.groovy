@@ -1,6 +1,11 @@
 package form_template.income.rnu47.v1970
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -10,33 +15,22 @@ import java.math.RoundingMode
  * а также расходов в виде капитальных вложений»"
  * formTemplateId=344
  *
- *
  * @author vsergeev
- *
- * Графы:
- * 2    amortGroup               -   Амортизационные группы
- * 3    sumCurrentPeriodTotal    -   За отчётный месяц
- * 4    sumTaxPeriodTotal        -   С начала налогового периода
- * 5    amortPeriod              -   За отчётный месяц
- * 6    amortTaxPeriod           -   С начала налогового периода
  */
+
+// графа 1 - number                 Строка
+// графа 2 - amortGroup             Амортизационные группы
+// графа 3 - sumCurrentPeriodTotal  За отчётный месяц
+// графа 4 - sumTaxPeriodTotal      С начала налогового периода
+// графа 5 - amortPeriod            За отчётный месяц
+// графа 6 - amortTaxPeriod         С начала налогового периода
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.AFTER_CREATE:
-        if (isMonthBalance()) {
-            def dataRowHelper = formDataService.getDataRowHelper(formData)
-            def dataRows = dataRowHelper.getAllCached()
-            dataRows.each(){
-                row -> arithmeticCheckAlias.each() {
-                    row.getCell(it).editable = true
-                    row.getCell(it).styleAlias = 'Редактируемая'
-                }
-            }
-            dataRowHelper.save(dataRows)
-        }
+        afterCreate()
         break
     case FormDataEvent.CALCULATE:
         checkRNU()
@@ -74,9 +68,9 @@ switch (formDataEvent) {
 
 // Все аттрибуты
 @Field
-def allColumns = ["amortGroup", "sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
+def allColumns = ["number", "amortGroup", "sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
 
-// Автозаполняемые атрибуты
+// Автозаполняемые атрибуты (графа 3..6)
 @Field
 def arithmeticCheckAlias = ["sumCurrentPeriodTotal", "sumTaxPeriodTotal", "amortPeriod", "amortTaxPeriod"]
 
@@ -85,7 +79,12 @@ def dateFormat = 'dd.MM.yyyy'
 
 /** Признак периода ввода остатков. */
 @Field
-def isBalancePeriod
+def isBalancePeriod = null
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, false)
+}
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.
 def isMonthBalance() {
@@ -427,25 +426,25 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): 'Амортизационные группы',
-            (xml.row[0].cell[1]): 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ',
-            (xml.row[0].cell[3]): 'Сумма начисленной амортизации',
-            (xml.row[1].cell[1]): 'За отчётный месяц',
-            (xml.row[1].cell[2]): 'С начала налогового периода',
-            (xml.row[1].cell[3]): 'За отчётный месяц',
-            (xml.row[1].cell[4]): 'С начала налогового периода',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[3].cell[0]): '0 Группа',
-            (xml.row[4].cell[0]): '1 Группа',
-            (xml.row[5].cell[0]): '2 Группа',
-            (xml.row[6].cell[0]): '3 Группа',
-            (xml.row[7].cell[0]): '4 Группа',
-            (xml.row[8].cell[0]): '5 Группа',
-            (xml.row[9].cell[0]): '6 Группа',
+            (xml.row[0].cell[0]) : 'Амортизационные группы',
+            (xml.row[0].cell[1]) : 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ',
+            (xml.row[0].cell[3]) : 'Сумма начисленной амортизации',
+            (xml.row[1].cell[1]) : 'За отчётный месяц',
+            (xml.row[1].cell[2]) : 'С начала налогового периода',
+            (xml.row[1].cell[3]) : 'За отчётный месяц',
+            (xml.row[1].cell[4]) : 'С начала налогового периода',
+            (xml.row[2].cell[0]) : '2',
+            (xml.row[2].cell[1]) : '3',
+            (xml.row[2].cell[2]) : '4',
+            (xml.row[2].cell[3]) : '5',
+            (xml.row[2].cell[4]) : '6',
+            (xml.row[3].cell[0]) : '0 Группа',
+            (xml.row[4].cell[0]) : '1 Группа',
+            (xml.row[5].cell[0]) : '2 Группа',
+            (xml.row[6].cell[0]) : '3 Группа',
+            (xml.row[7].cell[0]) : '4 Группа',
+            (xml.row[8].cell[0]) : '5 Группа',
+            (xml.row[9].cell[0]) : '6 Группа',
             (xml.row[10].cell[0]): '7 Группа',
             (xml.row[11].cell[0]): '8 Группа',
             (xml.row[12].cell[0]): '9 Группа',
@@ -467,21 +466,28 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
-    def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
-    for(int i=1; i<=17; i++) {
-        if (xml.row[headRowCount + i] != null) {
-            dataRows[i - 1].sumCurrentPeriodTotal = parseNumber(xml.row[headRowCount + i].cell[1].text(), rowOffset + headRowCount + i, 1 + colOffset, logger, false)
-            dataRows[i - 1].sumTaxPeriodTotal = parseNumber(xml.row[headRowCount + i].cell[2].text(), rowOffset + headRowCount + i, 2 + colOffset, logger, false)
-            dataRows[i - 1].amortPeriod = parseNumber(xml.row[headRowCount + i].cell[3].text(), rowOffset + headRowCount + i, 3 + colOffset, logger, false)
-            dataRows[i - 1].amortTaxPeriod = parseNumber(xml.row[headRowCount + i].cell[4].text(), rowOffset + headRowCount + i, 4 + colOffset, logger, false)
-        } else {
-            dataRows[i - 1].sumCurrentPeriodTotal = null
-            dataRows[i - 1].sumTaxPeriodTotal = null
-            dataRows[i - 1].amortPeriod = null
-            dataRows[i - 1].amortTaxPeriod = null
-        }
+    for (int i = 1; i <= 17; i++) {
+        def row = xml.row[headRowCount + i]
+        def int xlsIndexRow = rowOffset + headRowCount + i
+
+        // графа 3
+        def xmlIndexCol = 1
+        dataRows[i - 1].sumCurrentPeriodTotal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 4
+        xmlIndexCol = 2
+        dataRows[i - 1].sumTaxPeriodTotal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 5
+        xmlIndexCol = 3
+        dataRows[i - 1].amortPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 4
+        dataRows[i - 1].amortTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
     }
 
     dataRowHelper.update(dataRows)
@@ -494,5 +500,27 @@ void checkRNU() {
 
         // проверить рну-46 за текущий период
         formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
+    }
+}
+
+def afterCreate() {
+    // для периода ввода остатков сделать редактируемыми ячейки, в которых могут быть данные.
+    // В графах 12..17 не все ячейки могут/должны содержать значения, поэтому редактировать их не надо
+    if (isMonthBalance()) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.allCached
+        for (def row : dataRows) {
+            def columns = arithmeticCheckAlias
+            if (row.number == 12 || row.number == 13) {
+                continue
+            } else if (row.number > 13) {
+                columns = ['amortTaxPeriod']
+            }
+            columns.each {
+                row.getCell(it).editable = true
+                row.getCell(it).styleAlias = 'Редактируемая'
+            }
+        }
+        dataRowHelper.save(dataRows)
     }
 }

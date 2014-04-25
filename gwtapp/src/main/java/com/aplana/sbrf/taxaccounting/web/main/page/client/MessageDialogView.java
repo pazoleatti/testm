@@ -17,24 +17,20 @@
 package com.aplana.sbrf.taxaccounting.web.main.page.client;
 
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.widget.log.ThrowableWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewImpl;
 
 /**
  * The view implementation for
- * {@link com.gwtplatform.samples.tab.client.presenter.GlobalDialogPresenterWidget}
- * .
- * 
+ *
  * @author Philippe Beaudoin
  */
 public class MessageDialogView extends PopupViewImpl implements
@@ -55,12 +51,16 @@ public class MessageDialogView extends PopupViewImpl implements
 	@UiField
 	ThrowableWidget throwableView;
 
-	private final PopupPanel widget;
+    @UiField
+    Image image;
+
+    private final PopupPanel widget;
 
 	@Inject
 	public MessageDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
+        image.setUrl(Dialog.infoImage.getUrl());
 	}
 
 	@Override
@@ -83,11 +83,14 @@ public class MessageDialogView extends PopupViewImpl implements
 		asPopupPanel().setModal(true);
 	}
 
-	@Override
+    @Override
+    public void setErrorImage(boolean showErrorImage) {
+        image.setUrl(showErrorImage ? Dialog.errorImage.getUrl() : Dialog.infoImage.getUrl());
+        dialogBox.setTitle(showErrorImage ? Dialog.ERROR_MESSAGE : Dialog.INFO_MESSAGE);
+    }
+
+    @Override
 	public void setStackTrace(Throwable throwable) {
 		throwableView.setThrowable(throwable);
-		
 	}
-
-
 }
