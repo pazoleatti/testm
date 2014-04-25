@@ -433,15 +433,6 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
-		LogSystemFilter logFilter = new LogSystemFilter();
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		logFilter.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN,
-                String.valueOf(reportPeriod.getTaxPeriod().getYear()), reportPeriod.getName()));
-		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
-			logs.add(new LogEntry(LogLevel.ERROR,
-					"В удаляемом периоде были произведены действия, которые отражены в \"Журнале аудита\". Удаление периода невозможно!"));
-			return false;
-		}
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
         List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
