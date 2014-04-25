@@ -2,17 +2,21 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -37,6 +41,8 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
     Panel filterContentPanel;
 
     private NoSelectionModel<DeclarationTypeTemplate> selectionModel;
+    private ListDataProvider<DeclarationTypeTemplate> dataProvider = new ListDataProvider<DeclarationTypeTemplate>();
+    private ColumnSortEvent.ListHandler<DeclarationTypeTemplate> dataSortHandler;
 
     @Inject
 	public DeclarationTemplateListView(Binder binder) {
@@ -66,20 +72,46 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 				return object;
 			}
 		};
-		declarationTemplateTable.addResizableColumn(linkColumn, "Наименование");
 
-		declarationTemplateTable.addResizableColumn(new TextColumn<DeclarationTypeTemplate>() {
-			@Override
-			public String getValue(DeclarationTypeTemplate declarationTypeTemplate) {
-				return String.valueOf(declarationTypeTemplate.getVersionCount());
-			}
-		}, "Версий");
+        TextColumn<DeclarationTypeTemplate> versionColumn = new TextColumn<DeclarationTypeTemplate>() {
+            @Override
+            public String getValue(DeclarationTypeTemplate declarationTypeTemplate) {
+                return String.valueOf(declarationTypeTemplate.getVersionCount());
+            }
+        };
+        linkColumn.setSortable(true);
+
+        versionColumn.setSortable(true);
+
+		declarationTemplateTable.addResizableColumn(linkColumn, "Наименование");
+		declarationTemplateTable.addResizableColumn(versionColumn, "Количество версий");
+
         declarationTemplateTable.setSelectionModel(selectionModel);
+        dataProvider.addDataDisplay(declarationTemplateTable);
+
+        declarationTemplateTable.setColumnWidth(linkColumn, 70, Style.Unit.PCT);
+        // Настройке сортировки для таблицы
+        declarationTemplateTable.getColumnSortList().push(linkColumn);
+        dataSortHandler = new ColumnSortEvent.ListHandler<DeclarationTypeTemplate>(dataProvider.getList());
+        dataSortHandler.setComparator(linkColumn, new ComparatorWithNull<DeclarationTypeTemplate, String>() {
+            @Override
+            public int compare(DeclarationTypeTemplate o1, DeclarationTypeTemplate o2) {
+                return compareWithNull(o1.getTypeName(), o2.getTypeName());
+            }
+        });
+        dataSortHandler.setComparator(versionColumn, new ComparatorWithNull<DeclarationTypeTemplate, Integer>() {
+            @Override
+            public int compare(DeclarationTypeTemplate o1, DeclarationTypeTemplate o2) {
+                return compareWithNull(o1.getVersionCount(), o2.getVersionCount());
+            }
+        });
+        declarationTemplateTable.addColumnSortHandler(dataSortHandler);
 	}
 
 	@Override
 	public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result) {
-		declarationTemplateTable.setRowData(result);
+        dataProvider.setList(result);
+        dataSortHandler.setList(dataProvider.getList());
 	}
 
     @Override
