@@ -661,7 +661,7 @@ create table log_system (
   form_type_id        number(9,0),
   form_kind_id        number(9,0),
   note                varchar2(510),
-  user_department_id  number(9,0)
+  user_department_name varchar2(500)
 );
 comment on table log_system is  'Системный журнал';
 comment on column log_system.id is 'Код записи';
@@ -676,7 +676,7 @@ comment on column log_system.declaration_type_id is 'Код вида декла�
 comment on column log_system.form_type_id is 'Код вида налоговой формы';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
-comment on column log_system.user_department_id is 'Код подразделения пользователя';
+comment on column log_system.user_department_name is 'Наименование подразделения пользователя';
 
 create sequence seq_log_system start with 10000;
 ------------------------------------------------------------------------------------------------------

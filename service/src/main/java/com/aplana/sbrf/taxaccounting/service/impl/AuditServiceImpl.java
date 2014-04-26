@@ -54,7 +54,7 @@ public class AuditServiceImpl implements AuditService {
         }
 		log.setRoles(roles.toString());
 
-		log.setDepartmentName(departmentService.getDepartment(departmentId).getName());
+		log.setDepartmentName(departmentService.getParentsHierarchy(departmentId));
         if (reportPeriodId == null)
             log.setReportPeriodName(null);
         else {
@@ -65,7 +65,7 @@ public class AuditServiceImpl implements AuditService {
 		log.setFormTypeId(formTypeId);
 		log.setFormKindId(formKindId);
 		log.setNote(note);
-		log.setUserDepartmentId(userInfo.getUser().getDepartmentId());
+		log.setUserDepartmentName(departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId()));
 
 		auditDao.add(log);
 	}
@@ -119,18 +119,6 @@ public class AuditServiceImpl implements AuditService {
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
 
-        //Проставляю доступные подразделения для пользователя, подразделение не выбрано в фильтре
-        if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()){
-            List<Integer> ids = departmentService.getDepartmentsByName(filter.getDepartmentName());
-            formDataFilter.setDepartmentIds(ids);
-            declarationDataFilter.setDepartmentIds(ids);
-        }
-        //Только для деклараций, потому что в сервисе для НФ уже есть подобная проверка
-        else {
-            declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
-        }
-
         switch (filter.getAuditFormTypeId() != null ? filter.getAuditFormTypeId() : 0){
             case 1:
                 formDataFilter.setTaxType(filter.getTaxType());
@@ -146,6 +134,8 @@ public class AuditServiceImpl implements AuditService {
                     return new PagingResult<LogSearchResultItem>(new ArrayList<LogSearchResultItem>(), 0);
                 break;
             case 2:
+                declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
                 declarationDataFilter.setTaxType(filter.getTaxType());
                 /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
@@ -164,8 +154,12 @@ public class AuditServiceImpl implements AuditService {
                 /*formDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
                 formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
 
+                //Проставляю доступные подразделения для пользователя, подразделение не выбрано в фильтре
+                //Т.к. перешли на хранение полного имени подразделения, то поиск по имени конкретного подразделению
+                //уже в ЖА.
+                declarationDataFilter.setDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        filter.getTaxType() != null ? Arrays.asList(filter.getTaxType()) : Arrays.asList(TaxType.values())));
                 declarationDataFilter.setTaxType(filter.getTaxType());
-                /*declarationDataFilter.setReportPeriodIds(filter.getReportPeriodIds());*/
                 declarationDataFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
                 declarationDataIds =
                         declarationDataSearchService.getDeclarationIds(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);

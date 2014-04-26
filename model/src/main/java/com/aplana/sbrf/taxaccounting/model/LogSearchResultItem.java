@@ -21,7 +21,7 @@ public class LogSearchResultItem implements Serializable {
 	private FormType formType;
 	private FormDataKind formKind;
 	private String note;
-	private Department userDepartment;
+	private String userDepartmentName;
     private String reportPeriodName;
 
     public LogSearchResultItem() {
@@ -123,13 +123,13 @@ public class LogSearchResultItem implements Serializable {
 		this.note = note;
 	}
 
-	public Department getUserDepartment() {
-		return userDepartment;
-	}
+    public String getUserDepartmentName() {
+        return userDepartmentName;
+    }
 
-	public void setUserDepartment(Department userDepartment) {
-		this.userDepartment = userDepartment;
-	}
+    public void setUserDepartmentName(String userDepartmentName) {
+        this.userDepartmentName = userDepartmentName;
+    }
 
     @Override
     public String toString() {
