@@ -275,7 +275,7 @@ void addData(def xml, int headRowCount) {
 
     // графа 4 строки 5
     if (xml.row[headRowCount + 5] != null) {
-        dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, false)
+        dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, true)
     } else {
         dataRows[4].normBase = null
     }
