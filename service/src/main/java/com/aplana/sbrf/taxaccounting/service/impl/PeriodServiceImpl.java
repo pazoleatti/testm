@@ -472,7 +472,11 @@ public class PeriodServiceImpl implements PeriodService{
 
 	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
-            long drpId = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate).getId();
+            DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate);
+            if (drp == null) {
+                continue;
+            }
+            Long drpId = drp.getId();
 			departmentReportPeriodDao.delete(drpId);
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);

@@ -129,7 +129,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
             return;
         }
 
-        if (getView().getSelectedPeriod().getCalendarStartDate().before(getView().getTerm())) {
+        if (getView().getSelectedPeriod().getCalendarStartDate().after(getView().getTerm())) {
             Dialog.errorMessage("Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
             return;
         }
@@ -188,7 +188,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                         .defaultCallback(new AbstractCallback<OpenCorrectPeriodResult>() {
                             @Override
                             public void onSuccess(OpenCorrectPeriodResult result) {
-                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear()+1900);
+                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getSelectedPeriod().getStartDate().getYear()+1900);
                                 LogAddEvent.fire(OpenCorrectDialogPresenter.this, result.getUuid());
                                 getView().hide();
                             }
