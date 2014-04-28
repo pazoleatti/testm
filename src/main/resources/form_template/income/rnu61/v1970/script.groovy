@@ -11,7 +11,7 @@ import java.math.RoundingMode
 /**
  * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России»,
  * учёт которых требует применения метода начисления"
- * formTemplateId=352
+ * formTypeId=352
  *
  * графа 1  - rowNumber
  * графа 2  - billNumber
@@ -116,7 +116,7 @@ def isBalancePeriod = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -451,28 +451,28 @@ void addData(def xml, int headRowCount) {
         newRow.billNumber = row.cell[2].text()
 
         // графа 3
-        newRow.creationDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+        newRow.creationDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
 
         // графа 4
-        newRow.nominal = parseNumber(row.cell[4].text(), xlsIndexRow, 3 + colOffset, logger, false)
+        newRow.nominal = parseNumber(row.cell[4].text(), xlsIndexRow, 3 + colOffset, logger, true)
 
         // графа 5
         newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[5].text(), xlsIndexRow, 4 + colOffset)
 
         // графа 8
-        newRow.paymentStart = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.paymentStart = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, true)
 
         // графа 9
-        newRow.paymentEnd = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.paymentEnd = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 10
-        newRow.interestRate = parseNumber(row.cell[10].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[10].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 11
-        newRow.operationDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.operationDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, true)
 
         // графа 12
-        newRow.sum70606 = parseNumber(row.cell[12].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.sum70606 = parseNumber(row.cell[12].text(), xlsIndexRow, 11 + colOffset, logger, true)
 
         rows.add(newRow)
     }

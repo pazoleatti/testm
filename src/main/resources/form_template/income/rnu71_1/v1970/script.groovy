@@ -10,7 +10,7 @@ import java.math.RoundingMode
 
 /**
  * (РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
- * formTemplateId=356
+ * formTypeId=356
  *
  * @author bkinzyabulatov
  */
@@ -134,12 +134,12 @@ def dataRowsOld = null
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
+    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 /** Получить дату по строковому представлению (формата дд.ММ.гггг) */
 def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, false)
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 //// Кастомные методы

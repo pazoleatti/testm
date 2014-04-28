@@ -1,7 +1,6 @@
 package form_template.income.rnu70_1.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.text.DateFormat
@@ -10,7 +9,7 @@ import java.text.SimpleDateFormat
 /**
  * (РНУ-70.1) Регистр налогового учёта уступки права требования до наступления предусмотренного кредитным договором
  * срока погашения основного долга
- * formTemplateId=504
+ * formTypeId=504
  *
  * @author Stanislav Yasinskiy
  * @author Lenar Haziev
@@ -127,7 +126,7 @@ def reportDate
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -580,19 +579,19 @@ void addData(def xml, int headRowCount) {
         newRow.number = row.cell[4].text()
 
         // графа 5
-        newRow.date = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
-        newRow.cost = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.cost = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.repaymentDate = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, true)
 
         // графа 8
-        newRow.concessionsDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.concessionsDate = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 9
-        newRow.income = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.income = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 10
 
@@ -606,7 +605,7 @@ void addData(def xml, int headRowCount) {
         // графа 12
 
         // графа 13
-        newRow.interestRate = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, true)
 
         rows.add(newRow)
     }

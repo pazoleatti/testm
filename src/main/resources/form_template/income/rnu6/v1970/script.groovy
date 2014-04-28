@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat
 /**
  * (РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4,
  *                      учёт которых требует применения метода начисления
- * formTemplateId=318
+ * formTypeId=318
  *
  * графа 1  Число/15/                       number
  * helper   Строка/1000                     helper
@@ -119,7 +119,7 @@ def endDate = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -548,16 +548,16 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
 
         // графа 2
-        def record = getRecordImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset, false)
+        def record = getRecordImport(28, 'NUMBER', row.cell[4].text(), xlsIndexRow, 4 + colOffset, true)
         if (record != null) {
-            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // графа 3
-        newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, true)
 
         // графа 4
         newRow.code = record?.record_id?.value
@@ -566,25 +566,25 @@ void addData(def xml, int headRowCount) {
         newRow.docNumber = row.cell[5].text()
 
         // графа 6
-        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
         newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), xlsIndexRow, 7 + colOffset)
 
         // графа 8
-        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 9
-        newRow.taxAccountingCurrency = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.taxAccountingCurrency = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 10
-        newRow.taxAccountingRuble = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.taxAccountingRuble = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, true)
 
         // графа 11
-        newRow.accountingCurrency = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.accountingCurrency = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
 
         // графа 12
-        newRow.ruble = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.ruble = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
 
         rows.add(newRow)
     }

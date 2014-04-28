@@ -11,7 +11,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»"
- * formTemplateId=354
+ * formTypeId=354
  *
  * @author bkinzyabulatov
  */
@@ -134,7 +134,7 @@ def endDate = null
 //// Некастомные методы
 
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -572,15 +572,15 @@ void addData(def xml, int headRowCount) {
 
         // графа 3
         def xlsIndexCol = 3
-        newRow.creationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.creationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 4
         xlsIndexCol = 4
-        newRow.nominal = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.nominal = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 5
         xlsIndexCol = 5
-        newRow.sellingPrice = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sellingPrice = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 6
         xlsIndexCol = 6
@@ -588,51 +588,51 @@ void addData(def xml, int headRowCount) {
 
         // графа 7
         xlsIndexCol = 7
-        newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 8
         xlsIndexCol = 8
-        newRow.rateBROperationDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.rateBROperationDate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 9
         xlsIndexCol = 9
-        newRow.paymentTermStart = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.paymentTermStart = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 10
         xlsIndexCol = 10
-        newRow.paymentTermEnd = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.paymentTermEnd = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 11
         xlsIndexCol = 11
-        newRow.interestRate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 12
         xlsIndexCol = 12
-        newRow.operationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.operationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 13
         xlsIndexCol = 13
-        newRow.rateWithDiscCoef = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.rateWithDiscCoef = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 14
         xlsIndexCol = 14
-        newRow.sumStartInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sumStartInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 15
         xlsIndexCol = 15
-        newRow.sumStartInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sumStartInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 16
         xlsIndexCol = 16
-        newRow.sumEndInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sumEndInCurrency = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 17
         xlsIndexCol = 17
-        newRow.sumEndInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sumEndInRub = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         // графа 18
         xlsIndexCol = 18
-        newRow.sum = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, false)
+        newRow.sum = parseNumber(row.cell[xlsIndexCol].text(), xlsIndexRow, xlsIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
