@@ -309,7 +309,8 @@ public class RefBookUtils extends AbstractDao {
                 Map<String, RefBookValue> values = record.getValues();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
-                            values.get(attribute.getAlias()) != null) {
+                            values.get(attribute.getAlias()) != null && !values.get(attribute.getAlias()).isEmpty() &&
+                            !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
                         in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
                     }
                 }
