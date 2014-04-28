@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -102,6 +103,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
     }
 
+    @CacheEvict("FormType")
     @Override
     public void delete(int formTypeId) {
         try {
