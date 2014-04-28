@@ -505,20 +505,22 @@ void checkRNU() {
 
 def afterCreate() {
     // для периода ввода остатков сделать редактируемыми ячейки, в которых могут быть данные.
-    // В графах 12..17 не все ячейки могут/должны содержать значения, поэтому редактировать их не надо
     if (isMonthBalance()) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         def dataRows = dataRowHelper.allCached
         for (def row : dataRows) {
             def columns = arithmeticCheckAlias
-            if (row.number == 12 || row.number == 13) {
-                continue
+            def isTotal = row.number == 12 || row.number == 13
+            if (isTotal) {
+                columns = ['sumCurrentPeriodTotal', 'sumTaxPeriodTotal']
             } else if (row.number > 13) {
                 columns = ['amortTaxPeriod']
             }
             columns.each {
                 row.getCell(it).editable = true
-                row.getCell(it).styleAlias = 'Редактируемая'
+                if (!isTotal) {
+                    row.getCell(it).styleAlias = 'Редактируемая'
+                }
             }
         }
         dataRowHelper.save(dataRows)
