@@ -876,14 +876,14 @@ void addData(def xml, int headRowCount) {
         // графа 6
         val = row.cell[xmlIndexCol].text().trim()
         if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 7
         val = row.cell[xmlIndexCol].text().trim()
         if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -893,7 +893,7 @@ void addData(def xml, int headRowCount) {
         // графа 9
         val = row.cell[xmlIndexCol].text().trim()
         if (!notImportSum.contains(alias) && val.isBigDecimal()) {
-            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
     }

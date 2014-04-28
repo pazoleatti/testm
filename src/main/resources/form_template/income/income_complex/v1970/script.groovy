@@ -839,13 +839,13 @@ void addData(def xml, int headRowCount) {
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 7
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -854,7 +854,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 9
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
     }

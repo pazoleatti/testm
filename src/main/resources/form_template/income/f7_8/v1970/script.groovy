@@ -1,6 +1,5 @@
 package form_template.income.f7_8.v1970
 
-import com.aplana.sbrf.taxaccounting.model.*
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -164,14 +163,9 @@ def reportPeriodEndDate
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias, def required) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, required)
 }
 
 // Разыменование записи справочника
@@ -796,7 +790,7 @@ void addData(def xml, int headRowCount) {
 
         def indexCell = 1
 
-        newRow.balanceNumber = row.cell[indexCell].text()//getRecordIdImport(29, 'BALANCE_ACCOUNT', row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset)
+        newRow.balanceNumber = row.cell[indexCell].text()
         indexCell++
 
         // графа 2
@@ -836,19 +830,19 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 11
-        newRow.nominal = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.nominal = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 12
-        newRow.amount = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.amount = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 13
-        newRow.acquisitionDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.acquisitionDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 14
-        newRow.tradeDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.tradeDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 15
@@ -860,57 +854,57 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 17
-        newRow.costWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.costWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 18
-        newRow.loss = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.loss = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 19
-        newRow.marketPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.marketPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 20
-        newRow.marketPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.marketPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 21
         indexCell++
 
         // графа 22
-        newRow.realizationDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.realizationDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 23
-        newRow.tradeDate2 = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.tradeDate2 = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 24
-        newRow.repaymentWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.repaymentWithoutNKD = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 25
-        newRow.realizationPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.realizationPriceInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 26
-        newRow.realizationPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.realizationPriceInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 27
-        newRow.marketPriceRealizationInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.marketPriceRealizationInPerc = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 28
-        newRow.marketPriceRealizationInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.marketPriceRealizationInRub = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 29
         indexCell++
 
         // графа 30
-        newRow.lossRealization = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, false)
+        newRow.lossRealization = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         aliasR[title].add(newRow)

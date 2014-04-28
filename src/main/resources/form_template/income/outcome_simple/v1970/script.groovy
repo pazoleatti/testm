@@ -1,6 +1,5 @@
 package form_template.income.outcome_simple.v1970
 
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -682,13 +681,13 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -699,7 +698,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
-        curRow.rnu5Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        curRow.rnu5Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
     }
     if (rowIndex < maxRow) {

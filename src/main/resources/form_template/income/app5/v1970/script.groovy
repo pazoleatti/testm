@@ -102,7 +102,7 @@ def endDate = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -128,7 +128,7 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
+    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 //// Кастомные методы
