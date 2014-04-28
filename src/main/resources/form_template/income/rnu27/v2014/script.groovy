@@ -1,13 +1,12 @@
 package form_template.income.rnu27.v2014
 
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
  * (РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных
  *              и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
- * formTemplateId=326
+ * formTemplateId=1326
  *
  * ЧТЗ http://conf.aplana.com/pages/viewpage.action?pageId=8588102 ЧТЗ_сводные_НФ_Ф2_Э1_т2.doc
  *
@@ -147,7 +146,7 @@ def isBalancePeriod = null
  */
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -542,52 +541,52 @@ void addData(def xml, int headRowCount) {
         }
 
         /* Графа 1 */
-        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.number = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
 
         /* Графа 2 */
-        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[2].text(), xlsIndexRow, 2 + colOffset, false)
+        newRow.issuer = getRecordIdImport(84, 'ISSUER', row.cell[2].text(), xlsIndexRow, 2 + colOffset)
 
         /* Графа 3 */
-        getRecordIdImport(84, 'REG_NUM', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        getRecordIdImport(84, 'REG_NUM', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
 
         /* Графа 4 */
         newRow.tradeNumber = row.cell[4].text()
 
         /* Графа 5 */
-        getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset, false)
+        getRecordIdImport(15, 'CODE_2', row.cell[5].text(), xlsIndexRow, 5 + colOffset)
 
         /* Графа 6 */
-        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.prev = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         /* Графа 7 */
-        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.current = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
 
         /* Графа 8 */
-        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.reserveCalcValuePrev = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
         /* Графа 9 */
-        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.cost = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         /* Графа 10 */
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset, false)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[10].text(), xlsIndexRow, 10 + colOffset)
 
         /* Графа 11 */
-        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.marketQuotation = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
 
         /* Графа 12 */
-        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.rubCourse = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
 
         /* Графа 14 */
-        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, false)
+        newRow.costOnMarketQuotation = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
 
         /* Графа 15 */
-        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
+        newRow.reserveCalcValue = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, true)
 
         /* Графа 16 */
-        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, false)
+        newRow.reserveCreation = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, true)
 
         /* Графа 17 */
-        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, false)
+        newRow.recovery = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, true)
 
         rows.add(newRow)
     }

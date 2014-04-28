@@ -90,7 +90,7 @@ def currentDate = new Date()
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -365,7 +365,7 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[2].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.CODE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${2 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
@@ -373,12 +373,12 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             def text = row.cell[4].text()
             if ((text != null && !text.isEmpty() && !text.equals(map.TYPE_INCOME?.stringValue)) || ((text == null || text.isEmpty()) && map.TYPE_INCOME?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
+                logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${4 + colOffset} содержит значение, отсутствующее в справочнике «" + refBookFactory.get(28).getName() + "»!")
             }
         }
 
         // графа 5
-        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
