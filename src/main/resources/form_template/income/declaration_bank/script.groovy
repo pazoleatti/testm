@@ -48,7 +48,7 @@ def getEndDate() {
 }
 
 // Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
+def getRefBookValue(def long refBookId, def recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
@@ -956,11 +956,11 @@ void generateXML() {
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
                                 naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
-                                kppop = getRefBookValue(33, row.kpp)?.KPP?.value
+                                kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
                                 nalBazaDola = row.baseTaxOfRub
-                                stavNalSubRF = getRefBookValue(33, row.subjectTaxStavka)?.TAX_RATE?.value
+                                stavNalSubRF = row.subjectTaxStavka
                                 sumNal = row.taxSum
                                 nalNachislSubRF = row.subjectTaxCredit
                                 sumNalP = row.taxSumToPay
