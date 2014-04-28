@@ -8,7 +8,7 @@ import groovy.transform.Field
 
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог
- * formTemplateId=201
+ * formTypeId=201
  *
  * @author ivildanov
  * @author Stanislav Yasinskiy
@@ -106,7 +106,7 @@ def endDate = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -118,7 +118,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
+                    def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -177,7 +177,7 @@ def logicCheck() {
         checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
-        if (!(row.regDateEnd == null || row.regDateEnd.compareTo(row.regDate) > 0)) {
+        if (!(row.regDateEnd == null || (row.regDate != null && row.regDateEnd.compareTo(row.regDate) >= 0))) {
             logger.error(errorMsg + 'Дата постановки (снятия) с учёта неверная!')
         }
 
@@ -425,24 +425,24 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 2
-        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         newRow.codeOKATO = record?.record_id?.value
         xmlIndexCol++
 
         // графа 3
         if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 4
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5
         if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -463,7 +463,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 10
-        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 11
@@ -471,23 +471,23 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 12
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 13
-        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 14
-        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 15
-        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 16
-        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }

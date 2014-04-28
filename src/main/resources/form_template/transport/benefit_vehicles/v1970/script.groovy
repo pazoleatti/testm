@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 
 /**
  * Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
- * formTemplateId=202
+ * formTypeId=202
  *
  * @author Stanislav Yasinskiy
  */
@@ -110,7 +110,7 @@ def reportDay = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -506,7 +506,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 5
-        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.powerVal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 6
@@ -518,11 +518,11 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
-        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 9
-        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
