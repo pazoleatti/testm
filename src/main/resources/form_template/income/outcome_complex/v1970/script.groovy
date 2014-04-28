@@ -572,16 +572,14 @@ void consolidationSummary(def dataRows) {
     }
     logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
-/*
- * Вспомогательные методы.
- */
 
-/**
- * Проверка на банк.
- */
+// Проверка на банк
 def isBank() {
     boolean isBank = true
-    departmentFormTypeService.getDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    // получаем список приемников
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    // если есть приемники в других подразделениях, то это не банк, а ОП
+    list.each {
         if (it.departmentId != formData.departmentId) {
             isBank = false
         }

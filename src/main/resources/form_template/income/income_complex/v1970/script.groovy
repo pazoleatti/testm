@@ -681,10 +681,12 @@ def getSum(def dataRows, def colName, def rowsAliases) {
 // Проверка на банк
 def isBank() {
     boolean isBank = true
-    for (def form : departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY)) {
-        if (form.departmentId != formData.departmentId) {
+    // получаем список приемников
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    // если есть приемники в других подразделениях, то это не банк, а ОП
+    list.each {
+        if (it.departmentId != formData.departmentId) {
             isBank = false
-            break
         }
     }
     return isBank
