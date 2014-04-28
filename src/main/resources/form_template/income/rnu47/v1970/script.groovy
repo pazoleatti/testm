@@ -13,7 +13,7 @@ import java.math.RoundingMode
 /**
  * Форма "(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам,
  * а также расходов в виде капитальных вложений»"
- * formTemplateId=344
+ * formTypeId=344
  *
  * @author vsergeev
  */
@@ -83,7 +83,7 @@ def isBalancePeriod = null
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
+    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 // Признак периода ввода остатков. Отчетный период является периодом ввода остатков и месяц первый в периоде.

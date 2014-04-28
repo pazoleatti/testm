@@ -2,12 +2,11 @@ package form_template.income.rnu5.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * (РНУ-5) Простой регистр налогового учёта «расходы»
- * formTemplateId=317
+ * formTypeId=317
  *
  * @author Stanislav Yasinskiy
  */
@@ -62,7 +61,6 @@ def refBookCache = [:]
 @Field
 def editableColumns = ['number', 'sum']
 
-
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['rowNumber', 'number', 'sum']
@@ -79,7 +77,7 @@ def totalColumns = ['sum']
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
+                    def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -342,20 +340,20 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, false)
+        newRow.rowNumber = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
 
-        def record27 = getRecordImport(27, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        def record27 = getRecordImport(27, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
         if (record27 != null) {
             // графа 2 Зависимая
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record27?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            formDataService.checkReferenceValue(27, row.cell[2].text(), record27?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
             // графа 3
             newRow.number = record27?.record_id?.value
             // графа 4 Зависимая
-            formDataService.checkReferenceValue(27, row.cell[4].text(), record27?.TYPE_EXP?.value, xlsIndexRow, 4 + colOffset, logger, false)
+            formDataService.checkReferenceValue(27, row.cell[4].text(), record27?.TYPE_EXP?.value, xlsIndexRow, 4 + colOffset, logger, true)
         }
 
         // графа 5
-        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
         rows.add(newRow)
     }
     dataRowHelper.save(rows)

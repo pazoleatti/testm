@@ -9,7 +9,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов"
- * formTemplateId=349
+ * formTypeId=349
  *
  * @author rtimerbaev
  * @author Stanislav Yasinskiy
@@ -125,9 +125,19 @@ def getRecord(def Long refBookId, def String alias, def String value, def int ro
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+// Получить дату по строковому представлению (формата дд.ММ.гггг)
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 // Разыменование записи справочника
@@ -141,16 +151,6 @@ void prevPeriodCheck() {
     if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
-}
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
-}
-
-/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
-def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, false)
 }
 
 //// Кастомные методы

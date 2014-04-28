@@ -8,7 +8,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»"
- * formTemplateId=365
+ * formTypeId=365
  *
  * @author rtimerbaev
  */
@@ -377,10 +377,10 @@ void addData(def xml, int headRowCount) {
         newRow.invNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 4
-        newRow.lossReportPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.lossReportPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 5
-        newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
