@@ -59,6 +59,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     LinkButton closePeriod;
 
     @UiField
+    LinkButton openCorrectPeriod;
+
+    @UiField
     Button setDeadlineButton;
 
 	@UiField
@@ -264,5 +267,6 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		closePeriod.setVisible(canEdit);
 		openPeriod.setVisible(canEdit);
 		removePeriod.setVisible(canEdit);
+        openCorrectPeriod.setVisible(canEdit);
 	}
 }
