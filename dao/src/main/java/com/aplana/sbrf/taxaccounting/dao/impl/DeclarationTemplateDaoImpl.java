@@ -325,14 +325,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         valueMap.put("templateId", templateId);
 
         StringBuilder builder = new StringBuilder(INTERSECTION_VERSION_SQL);
-        builder.append(" (versionFrom <= :actualStartVersion and versionTo >= :actualEndVersion)");
+        builder.append(" ((versionFrom <= :actualStartVersion and versionTo >= :actualStartVersion)");
         if (actualEndVersion != null)
             builder.append(" OR versionFrom BETWEEN :actualStartVersion AND :actualEndVersion + interval '1' day OR versionTo BETWEEN :actualStartVersion AND :actualEndVersion");
         else
             builder.append(" OR ID = (select id from (select id, row_number() ").
                     append(isSupportOver() ? " over(partition by DECLARATION_TYPE_ID order by version)" : " over()").
                     append(" rn FROM DECLARATION_TEMPLATE where TRUNC(version, 'DD') > :actualStartVersion AND STATUS in (0,1,2) AND DECLARATION_TYPE_ID = :typeId AND id <> :templateId) WHERE rn = 1)");
-        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null)");
+        builder.append(" OR (versionFrom <= :actualStartVersion AND versionTo is null))");
         if (templateId != 0)
             builder.append(" and ID <> :templateId");
         try {
