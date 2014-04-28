@@ -48,7 +48,7 @@ def getEndDate() {
 }
 
 // Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
+def getRefBookValue(def long refBookId, def recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
@@ -56,7 +56,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParam = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -200,7 +200,7 @@ void generateXML() {
     def reportPeriodId = declarationData.reportPeriodId
 
     // справочник "Параметры подразделения по налогу на прибыль" - начало
-    def incomeParams = getProvider(33).getRecords(getEndDate(), null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
+    def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения.')
     }
@@ -956,11 +956,11 @@ void generateXML() {
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
                                 naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
-                                kppop = getRefBookValue(33, row.kpp)?.KPP?.value
+                                kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
                                 nalBazaDola = row.baseTaxOfRub
-                                stavNalSubRF = getRefBookValue(33, row.subjectTaxStavka)?.TAX_RATE?.value
+                                stavNalSubRF = row.subjectTaxStavka
                                 sumNal = row.taxSum
                                 nalNachislSubRF = row.subjectTaxCredit
                                 sumNalP = row.taxSumToPay
