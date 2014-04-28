@@ -53,16 +53,12 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
             decTemplateVersion.setTypeName(declarationTemplate.getName());
             decTemplateVersion.setVersionNumber(String.valueOf(declarationTemplate.getEdition()));
             decTemplateVersion.setActualBeginVersionDate(SDF.format(declarationTemplate.getVersion()));
+            decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
+                    SDF.format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime() - 86400000)) : "");
 
             if (declarationTemplateList.get(i + 1).getStatus() == VersionedObjectStatus.FAKE){
-                decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
-                        SDF.format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime())) : "");
                 i++;
-            }else {
-                decTemplateVersion.setActualEndVersionDate(declarationTemplateList.get(i + 1).getVersion() != null ?
-                        SDF.format(new Date(declarationTemplateList.get(i + 1).getVersion().getTime() - 86400000)) : "");
             }
-
             declarationTemplateVersions.add(decTemplateVersion);
 
         }
