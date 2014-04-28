@@ -6,7 +6,7 @@ import groovy.transform.Field
 
 /**
  * (РНУ-8) Простой регистр налогового учёта «Требования»
- * formTemplateId=320
+ * formTypeId=320
  *
  * графа 1  - number
  * графа 2  - code
@@ -88,7 +88,7 @@ def currentDate = new Date()
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -370,9 +370,9 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2
-        def record = getRecordImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        def record = getRecordImport(28, 'NUMBER', row.cell[3].text(), xlsIndexRow, 3 + colOffset, true)
         if (record != null) {
-            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            formDataService.checkReferenceValue(28, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // графа 3
@@ -380,14 +380,14 @@ void addData(def xml, int headRowCount) {
 
         // графа 4
         if (record != null) {
-            formDataService.checkReferenceValue(28, row.cell[4].text(), record?.TYPE_INCOME?.value, xlsIndexRow, 4 + colOffset, logger, false)
+            formDataService.checkReferenceValue(28, row.cell[4].text(), record?.TYPE_INCOME?.value, xlsIndexRow, 4 + colOffset, logger, true)
         }
 
         // графа 5
-        newRow.income = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.income = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
-        newRow.outcome = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.outcome = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
         rows.add(newRow)
     }
     dataRowHelper.save(rows)

@@ -61,6 +61,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @UiField
     Label archiveDateLbl;
 
+    @UiField
+    Label archiveLbl;
+
     private final AsyncDataProvider<LogSearchResultItem> dataProvider = new AsyncDataProvider<LogSearchResultItem>() {
         @Override
         protected void onRangeChanged(HasData<LogSearchResultItem> display) {
@@ -273,6 +276,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler> im
     @Override
     public void setVisibleArchiveButton(boolean isVisible) {
         archive.setVisible(isVisible);
+        archiveLbl.setVisible(isVisible);
     }
 
     @UiHandler("printButton")

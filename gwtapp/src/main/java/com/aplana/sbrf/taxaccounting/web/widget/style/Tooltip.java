@@ -5,6 +5,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.HasAttachHandlers;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.Timer;
@@ -178,6 +179,19 @@ public class Tooltip extends Composite {
      * @param widget для виджета
      */
     public void addHandlersFor(HasAllMouseHandlers widget) {
+        if (widget instanceof HasAttachHandlers) {
+            ((HasAttachHandlers) widget).addAttachHandler(new AttachEvent.Handler() {
+                @Override
+                public void onAttachOrDetach(AttachEvent event) {
+                    if (!event.isAttached()) {
+                        // При детаче скрываем тултип
+                        isOnPopup = false;
+                        showTimer.cancel();
+                        tooltip.hide();
+                    }
+                }
+            });
+        }
         widget.addMouseOverHandler(mouseEvents);
         widget.addMouseOutHandler(mouseEvents);
     }

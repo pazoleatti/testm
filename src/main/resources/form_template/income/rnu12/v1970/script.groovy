@@ -122,7 +122,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
+                    def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -390,9 +390,9 @@ void addData(def xml, int headRowCount) {
         // графа 1
 
         // графа 2
-        def record = getRecordImport(27, 'OPU', row.cell[4].text(), xlsIndexRow, 4 + colOffset, false)
+        def record = getRecordImport(27, 'OPU', row.cell[4].text(), xlsIndexRow, 4 + colOffset)
         if (record != null) {
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // графа 3
@@ -402,7 +402,7 @@ void addData(def xml, int headRowCount) {
         newRow.opy = record?.record_id?.value
 
         // графа 5
-        newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
         newRow.name = row.cell[6].text()
@@ -411,19 +411,19 @@ void addData(def xml, int headRowCount) {
         newRow.documentNumber = row.cell[7].text()
 
         // графа 8
-        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 9
-        newRow.periodCounts = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.periodCounts = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 10
-        newRow.advancePayment = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.advancePayment = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, true)
 
         // графа 11
-        newRow.outcomeInNalog = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.outcomeInNalog = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
 
         // графа 12
-        newRow.outcomeInBuh = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.outcomeInBuh = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
 
         rows.add(newRow)
     }

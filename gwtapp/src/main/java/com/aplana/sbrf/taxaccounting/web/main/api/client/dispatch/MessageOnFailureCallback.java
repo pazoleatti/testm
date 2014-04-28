@@ -62,16 +62,16 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 				// отобразить диалог.
 				if (!showLogOnly) {
                     if (((TaActionException) caught).isNeedStackTrace()) {
-                        MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
+                        MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
                     } else {
                         Dialog.errorMessage(caught.getLocalizedMessage());
                     }
 				}
 			} else {
-				MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
+				MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
 			}
 		} else {
-			MessageEvent.fire(hasHandlers, caught.getLocalizedMessage(), caught);
+			MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
 		}
         ScreenLockEvent.fire(hasHandlers, false);
     }

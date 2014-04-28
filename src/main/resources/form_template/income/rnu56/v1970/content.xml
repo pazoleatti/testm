@@ -20,6 +20,7 @@
         <order>2</order>
         <width>0</width>
         <maxLength>1000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>bill</alias>
@@ -28,13 +29,14 @@
         <order>3</order>
         <width>5</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>buyDate</alias>
         <checking>false</checking>
         <name>Дата приобретения</name>
         <order>4</order>
-        <width>5</width>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -50,7 +52,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>nominal</alias>
         <checking>false</checking>
-        <name>Номинал, ед. валюты</name>
+        <name>Номинал (ед. валюты)</name>
         <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -59,7 +61,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
-        <name>Цена приобретения, ед. валюты</name>
+        <name>Цена приобретения (ед. валюты)</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -70,7 +72,7 @@
         <checking>false</checking>
         <name>Срок платежа</name>
         <order>8</order>
-        <width>5</width>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -78,7 +80,7 @@
         <checking>false</checking>
         <name>Возможный срок обращения векселя, дней</name>
         <order>9</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -96,7 +98,7 @@
         <checking>false</checking>
         <name>Дата реализации (погашения)</name>
         <order>11</order>
-        <width>5</width>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -111,7 +113,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>discountInCurrency</alias>
         <checking>false</checking>
-        <name>в валюте</name>
+        <name>Фактически поступившая сумма дисконта в валюте</name>
         <order>13</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -120,7 +122,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>discountInRub</alias>
         <checking>false</checking>
-        <name>в рублях по курсу Банка России</name>
+        <name>Фактически поступившая сумма дисконта в рублях по курсу Банка России</name>
         <order>14</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -129,7 +131,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumIncomeinCurrency</alias>
         <checking>false</checking>
-        <name>в валюте</name>
+        <name>Сумма начисленного процентного дохода за отчётный период в валюте</name>
         <order>15</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -138,7 +140,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumIncomeinRuble</alias>
         <checking>false</checking>
-        <name>в рублях по курсу Банка России</name>
+        <name>Сумма начисленного процентного дохода за отчётный период в рублях по курсу Банка России</name>
         <order>16</order>
         <width>10</width>
         <maxLength>17</maxLength>

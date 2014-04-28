@@ -55,6 +55,6 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
                 "\n efufufufufufufdsfsdfsdfsdf," +
                 "\n efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf," +
                 "\n efufufufufufufdsfsdfsdfsdf");
-        MessageEvent.fire(this, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ",ffffffff);
+        MessageEvent.fire(this,true, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ",ffffffff);
     }
 }

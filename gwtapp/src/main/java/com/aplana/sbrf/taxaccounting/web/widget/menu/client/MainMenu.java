@@ -101,7 +101,8 @@ public class MainMenu extends ViewImpl implements MainMenuPresenter.MyView {
 			} else {
 				com.google.gwt.user.client.ui.MenuItem subMenuItem =
 						new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), template.div(item.getName())));
-				subMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
+				// Спрятать меню после выбора элемента
+                subMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
 					@Override
 					public void execute() {
                         getMenu().selectItem(null);
