@@ -1,14 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -43,7 +41,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     @UiField
     @Path("departmentIds")
-    DepartmentPicker departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
 
     @UiField
     @Ignore
@@ -143,6 +141,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         declarationTypeLabel.setVisible(!isTaxTypeDeal);
         reportPeriodIds.setVisible(!isTaxTypeDeal);
         reportPeriodIdsLabel.setVisible(!isTaxTypeDeal);
+
+        declarationTypeId.getElement().getParentElement().setAttribute("width", isTaxTypeDeal ? "0" : "24%");
+        reportPeriodIds.getElement().getParentElement().setAttribute("width", isTaxTypeDeal ? "0" : "24%");
+        departmentPicker.getElement().getParentElement().setAttribute("width", isTaxTypeDeal ? "49%" : "24%");
+        formState.getElement().getParentElement().setAttribute("width", isTaxTypeDeal ? "49%" : "24%");
     }
 
     @Override

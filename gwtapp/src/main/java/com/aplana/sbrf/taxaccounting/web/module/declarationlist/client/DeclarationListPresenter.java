@@ -113,11 +113,6 @@ public class DeclarationListPresenter extends
 		}
 	}
 
-	@Override
-	public void onSortingChanged(){
-        getView().updateData();
-	}
-
     @Override
     public void onRangeChange(final int start, final int length) {
         DeclarationDataFilter filter = filterPresenter.getFilterData();

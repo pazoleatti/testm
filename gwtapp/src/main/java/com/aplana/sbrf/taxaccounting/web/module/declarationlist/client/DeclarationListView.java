@@ -42,6 +42,9 @@ public class DeclarationListView extends
     public static final String DECLARATION_CREATE_TITLE_D = "Создание уведомления";
 
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
+    public static final String DEPARTMENT_TITLE = "Подразделение";
+    public static final String PERIOD_YEAR_TITLE = "Год";
+    public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
 
 	interface MyBinder extends UiBinder<Widget, DeclarationListView> {
@@ -80,6 +83,11 @@ public class DeclarationListView extends
         @Override
         protected void onRangeChanged(HasData<DeclarationDataSearchResultItem> display) {
             if (getUiHandlers() != null){
+                // заполенине параметров по какой сортировать
+                if (declarationTable.getColumnSortList().size() > 0) {
+                    isAscSorting = declarationTable.getColumnSortList().get(0).isAscending();
+                    setSortByColumn((String) declarationTable.getHeader(declarationTable.getColumnIndex((Column<DeclarationDataSearchResultItem, ?>) declarationTable.getColumnSortList().get(0).getColumn())).getValue());
+                }
                 final Range range = display.getVisibleRange();
                 getUiHandlers().onRangeChange(range.getStart(), range.getLength());
             }
@@ -93,9 +101,10 @@ public class DeclarationListView extends
         pager.setDisplay(declarationTable);
         declarationTable.setPageSize(pager.getPageSize());
         dataProvider.addDataDisplay(declarationTable);
+        declarationTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(declarationTable));
+
+        declarationTable.getColumnSortList().setLimit(1);       // сортировка только по одной колонке
 	}
-
-
 
     @Override
     public void initTable(TaxType taxType) {
@@ -180,16 +189,22 @@ public class DeclarationListView extends
             }
         };
 
-        declarationTypeHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
-        reportPeriodHeader = (GenericDataGrid.DataGridResizableHeader) getHeader(PERIOD_TITLE, reportPeriodColumn);
+        departmentColumn.setSortable(true);
+        reportPeriodYearColumn.setSortable(true);
+        reportPeriodColumn.setSortable(true);
+        declarationTypeColumn.setSortable(true);
+        stateColumn.setSortable(true);
+
+        declarationTypeHeader = declarationTable.createResizableHeader(DECLARATION_TYPE_TITLE, declarationTypeColumn);
+        reportPeriodHeader = declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodColumn);
 
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
-        declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
-        declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
+        declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
+        declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_YEAR_TITLE, reportPeriodYearColumn));
         declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
         declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
-        declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
+        declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
     }
 
     @Override
@@ -275,39 +290,38 @@ public class DeclarationListView extends
             getUiHandlers().onCreateClicked();
         }
     }
-
-    private Header<String> getHeader(final String columnName, Column<DeclarationDataSearchResultItem, ?> returnColumn) {
-        GenericDataGrid.DataGridResizableHeader resizableHeader;
-        final SortingHeaderCell headerCell = new SortingHeaderCell();
-        resizableHeader = declarationTable.createResizableHeader(columnName, returnColumn, headerCell);
-
-        resizableHeader.setUpdater(new ValueUpdater<String>() {
-            @Override
-            public void update(String value) {
-                setAscSorting(headerCell.isAscSort());
-                setSortByColumn(columnName);
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onSortingChanged();
-                }
-            }
-        });
-        return resizableHeader;
-    }
+//    убрать если в будущем сортировка работает нормально
+//    private Header<String> getHeader(final String columnName, Column<DeclarationDataSearchResultItem, ?> returnColumn) {
+//        GenericDataGrid.DataGridResizableHeader resizableHeader;
+//        final SortingHeaderCell headerCell = new SortingHeaderCell();
+//        resizableHeader = declarationTable.createResizableHeader(columnName, returnColumn, headerCell);
+//
+//        resizableHeader.setUpdater(new ValueUpdater<String>() {
+//            @Override
+//            public void update(String value) {
+//
+//                if (getUiHandlers() != null) {
+//                    getUiHandlers().onSortingChanged();
+//                }
+//            }
+//        });
+//        return resizableHeader;
+//    }
 
 	private void setSortByColumn(String sortByColumn){
-		if ("Подразделение".equals(sortByColumn)){
+		if (DEPARTMENT_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DEPARTMENT_NAME;
-		} else if ("Период".equals(sortByColumn)){
+		} else if (PERIOD_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
-		} else if("Вид декларации".equals(sortByColumn)){
+		} else if(DECLARATION_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
-		} else {
+		} else if(PERIOD_YEAR_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_YEAR;
+        } else if(STATE_TITLE.equals(sortByColumn)){
+            this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_ACCEPTED;
+        } else {
 			this.sortByColumn = DeclarationDataSearchOrdering.ID;
 		}
-	}
-
-	private void setAscSorting(boolean ascSorting){
-		this.isAscSorting = ascSorting;
 	}
 
     @Override
