@@ -554,7 +554,7 @@ def getSaleCode(def id) {
 
 def DataRow getRow46(DataRow row49, def dataRows46) {
     if (dataRows46 != null && getSaledPropertyCode(row49.saledPropertyCode) == 1) {
-        for (def row46 : dataRows46) {
+        for (def row46 : dataRows46.reverse()) {
             if (row46.invNumber == row49.invNumber) {
                 return row46
             }
@@ -565,7 +565,7 @@ def DataRow getRow46(DataRow row49, def dataRows46) {
 
 def DataRow getRow45(DataRow row49, def dataRows45) {
     if (dataRows45 != null && getSaledPropertyCode(row49.saledPropertyCode) == 2) {
-        for (def row45 : dataRows45) {
+        for (def row45 : dataRows45.reverse()) {
             if (row45.inventoryNumber == row49.invNumber) {
                 return row45
             }
