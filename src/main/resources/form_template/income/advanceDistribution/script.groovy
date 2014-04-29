@@ -78,9 +78,6 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            logicalCheckAfterCalc()
-        }
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
