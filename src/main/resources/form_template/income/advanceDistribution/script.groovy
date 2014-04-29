@@ -173,22 +173,25 @@ void calc() {
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
+    def departmentParamsDate = getReportPeriodEndDate() - 1
 
     def propertyPriceSumm = getSumAll(dataRows, "propertyPrice")
     def workersCountSumm = getSumAll(dataRows, "workersCount")
 
-    /** Распределяемая налоговая база за отчетный период. */
-    def taxBase = roundValue(getTaxBase(), 0)
-    /** Отчётный период. */
-    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def departmentParamsDate = getReportPeriodEndDate() - 1
-
-    /** Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде. */
-    def sumNal = 0
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
-    if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
-        sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
+    // Распределяемая налоговая база за отчетный период
+    def taxBase
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        taxBase = roundValue(getTaxBase(), 0)
     }
+    // Отчётный период
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+
+     // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде
+     def sumNal = 0
+     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
+     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
+         sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
+     }
 
     // расчет графы 2..4, 8..21
     for (row in dataRows) {
@@ -215,7 +218,9 @@ void calc() {
         row.baseTaxOf = calc10(row, propertyPriceSumm, workersCountSumm)
 
         // графа 11
-        row.baseTaxOfRub = calc11(row, taxBase)
+        if (formDataEvent != FormDataEvent.COMPOSE) {
+            row.baseTaxOfRub = calc11(row, taxBase)
+        }
 
         // графа 12
         row.subjectTaxStavka = calc12(row)
