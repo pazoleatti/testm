@@ -98,7 +98,13 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()), ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
+        builder.Файл(ИдФайл: declarationService.generateXmlFileId(1, departmentId, declarationData.getReportPeriodId()),
+                ВерсПрог: departmentParamTransport.APP_VERSION, ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
+
+            def taxPlaceTypeCode = getRefBookValue(2, departmentParamTransport?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+            def okvedCode = getRefBookValue(34, departmentParamTransport?.OKVED_CODE?.value)?.CODE?.value
+            def signatoryId = getRefBookValue(35, departmentParamTransport?.SIGNATORY_ID?.value)?.CODE?.value
+
             Документ(
                     КНД: "1152004",
                     ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
@@ -107,11 +113,11 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     // TODO учесть что потом будут корректирующие периоды
                     НомКорр: "0",
-                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE.CODE
+                    ПоМесту: taxPlaceTypeCode
             ) {
                 Integer formReorg = departmentParamTransport.REORG_FORM_CODE.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue) : 0;
-                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE.CODE]
-                if (departmentParamTransport.OKVED_CODE) {
+                def svnp = [ОКВЭД: okvedCode]
+                if (okvedCode != null) {
                     svnp.Тлф = departmentParamTransport.PHONE
                 }
                 СвНП(svnp) {
@@ -130,14 +136,14 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     }
                 }
 
-                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID.CODE) {
+                Подписант(ПрПодп: signatoryId) {
                     ФИО(
                             "Фамилия": departmentParamTransport.SIGNATORY_SURNAME,
                             "Имя": departmentParamTransport.SIGNATORY_FIRSTNAME,
                             "Отчество": departmentParamTransport.SIGNATORY_LASTNAME
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParamTransport.SIGNATORY_ID.CODE.getNumberValue() == 2) {
+                    if (signatoryId == 2) {
                         def svPred = ["НаимДок": departmentParamTransport.APPROVE_DOC_NAME]
                         if (departmentParamTransport.APPROVE_ORG_NAME)
                             svPred.НаимОрг = departmentParamTransport.APPROVE_ORG_NAME
@@ -560,13 +566,11 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-/**
- * Разыменование с использованием кеширования
- * @param refBookId
- * @param recordId
- * @return
- */
-def getRefBookValue(def long refBookId, def long recordId) {
+// Разыменование с использованием кеширования
+def getRefBookValue(def refBookId, def recordId) {
+    if (refBookId == null || recordId == null) {
+        return null
+    }
     if (!refBookCache.containsKey(recordId)) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
