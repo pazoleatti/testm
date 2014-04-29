@@ -90,11 +90,20 @@ def checkAndbildXml() {
         logger.error("Ошибка определения даты конца отчетного периода")
     }
 
-    departmentParamTransport = getModRefBookValue(31, "DEPARTMENT_ID = " + declarationData.departmentId, getReportPeriodEndDate() - 1)
-    bildXml(departmentParamTransport, formDataCollection, declarationData.departmentId)
+    def departmentId = declarationData.departmentId
+
+    departmentParamTransport = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+
+    bildXml(departmentParamTransport, formDataCollection, departmentId)
 }
 
 def bildXml(def departmentParamTransport, def formDataCollection, def departmentId) {
+
+    def reorgFormCode = getRefBookValue(5, departmentParamTransport?.REORG_FORM_CODE?.referenceValue)?.CODE?.stringValue
+    def okvedCode = getRefBookValue(34, departmentParamTransport?.OKVED_CODE?.referenceValue)?.CODE?.stringValue
+    def signatoryId = getRefBookValue(35, departmentParamTransport?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+    def taxPlaceTypeCode = getRefBookValue(2, departmentParamTransport?.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue
+
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
@@ -106,10 +115,9 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: departmentParamTransport.TAX_ORGAN_CODE,
                     НомКорр: reportPeriodService.getCorrectionPeriodNumber(declarationData.getReportPeriodId(), departmentId),
-                    ПоМесту: departmentParamTransport.TAX_PLACE_TYPE_CODE?.CODE
+                    ПоМесту: taxPlaceTypeCode
             ) {
-                Integer formReorg = departmentParamTransport.REORG_FORM_CODE?.stringValue != null ? Integer.parseInt(departmentParamTransport.REORG_FORM_CODE.stringValue) : 0;
-                def svnp = [ОКВЭД: departmentParamTransport.OKVED_CODE?.CODE]
+                def svnp = [ОКВЭД: okvedCode]
                 if (departmentParamTransport.OKVED_CODE) {
                     svnp.Тлф = departmentParamTransport.PHONE
                 }
@@ -119,24 +127,24 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                             ИННЮЛ: (departmentParamTransport.INN),
                             КПП: (departmentParamTransport.KPP)) {
 
-                        if (!departmentParamTransport.REORG_FORM_CODE.toString().equals("")) {
+                        if (reorgFormCode != null && !reorgFormCode.equals("")) {
                             СвРеоргЮЛ(
-                                    ФормРеорг: departmentParamTransport.REORG_FORM_CODE?.CODE,
-                                    ИННЮЛ: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN : 0),
-                                    КПП: (formReorg in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_KPP : 0)
+                                    ФормРеорг: reorgFormCode,
+                                    ИННЮЛ: (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_INN : 0),
+                                    КПП: (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ? departmentParamTransport.REORG_KPP : 0)
                             )
                         }
                     }
                 }
 
-                Подписант(ПрПодп: departmentParamTransport.SIGNATORY_ID?.CODE) {
+                Подписант(ПрПодп: signatoryId) {
                     ФИО(
                             "Фамилия": departmentParamTransport.SIGNATORY_SURNAME,
                             "Имя": departmentParamTransport.SIGNATORY_FIRSTNAME,
                             "Отчество": departmentParamTransport.SIGNATORY_LASTNAME
                     )
                     // СвПред - Сведения о представителе налогоплательщика
-                    if (departmentParamTransport.SIGNATORY_ID?.CODE?.getNumberValue() == 2) {
+                    if (signatoryId == 2) {
                         def svPred = ["НаимДок": departmentParamTransport.APPROVE_DOC_NAME]
                         if (departmentParamTransport.APPROVE_ORG_NAME)
                             svPred.НаимОрг = departmentParamTransport.APPROVE_ORG_NAME
@@ -204,7 +212,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                                     // вспомогательный taxBase
                                     resultMap[row.okato].taxBase += row.taxBase ?: 0 as BigDecimal
-                                    def taxRate = getRefBookValue(41, row.taxRate, 'VALUE')?.value
+                                    def taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
                                     // вспомогательный taxRate
                                     resultMap[row.okato].taxRate += taxRate ?: 0 as BigDecimal
 
@@ -246,7 +254,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
 
                         resultMap.each { okato, row ->
                             СумПУ(
-                                    ОКТМО: getRefBookValue(96, okato, "CODE"),
+                                    ОКТМО: getRefBookValue(96, okato)?.CODE?.stringValue,
                                     НалИсчисл: row.taxSumToPay,
                                     АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                                     АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
@@ -254,23 +262,23 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                     НалПУ: row.amountOfTaxPayable.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                             ) {
                                 row.rowData.each { tRow ->
-                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode, "CODE").stringValue : null
+                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode, "CODE")?.VALUE?.stringValue : null
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
-                                                    КодВидТС: getRefBookValue(42, tRow.tsTypeCode, "CODE"),
+                                                    КодВидТС: getRefBookValue(42, tRow.tsTypeCode)?.CODE?.stringValue,
                                                     ИдНомТС: tRow.vi, //
                                                     МаркаТС: tRow.model, //
                                                     РегЗнакТС: tRow.regNumber,
                                                     НалБаза: tRow.taxBase,
-                                                    ОКЕИНалБаза: getRefBookValue(12, tRow.taxBaseOkeiUnit, "CODE"),
+                                                    ОКЕИНалБаза: getRefBookValue(12, tRow.taxBaseOkeiUnit)?.CODE?.stringValue,
                                             ]
-                                                    + (tRow.ecoClass ? [ЭкологКл: getRefBookValue(40, tRow.ecoClass, "CODE")] : []) + //
+                                                    + (tRow.ecoClass ? [ЭкологКл: getRefBookValue(40, tRow.ecoClass)?.CODE?.numberValue] : []) + //
                                                     [
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
-                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, 'VALUE')?.value,
+                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, 'VALUE')?.VALUE?.numberValue,
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
                                                     + (taxBenefitCode && tRow.benefitStartDate ? [ЛьготМесТС: getBenefitMonths(tRow)] : []) +
@@ -428,40 +436,6 @@ def getRecord(def refBookId, def filter, Date date) {
     return null
 }
 
-/** Получение полного справочника */
-def getModRefBookValue(refBookId, filter, date = getReportPeriodEndDate()) {
-    // провайдер для справочника
-    def refBook = refBookFactory.get(refBookId);
-    def refBookProvider = refBookFactory.getDataProvider(refBookId)
-    // записи
-    def records = refBookProvider.getRecords(date, null, filter, null).getRecords();
-    if (records == null || records.size() == 0) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
-    // значение справочника в виде мапы
-    def record = records[0]
-
-    // получение связанных данных
-    refBook.attributes.each() { RefBookAttribute attr ->
-        def ref = record[attr.alias]?.referenceValue;
-        if (attr.attributeType == RefBookAttributeType.REFERENCE && ref != null) {
-            def attrProvider = refBookFactory.getDataProvider(attr.refBookId)
-            record[attr.alias] = attrProvider.getRecordData(ref);
-        } else if (attr.attributeType == RefBookAttributeType.REFERENCE && ref == null) {
-            record[attr.alias] = null
-        }
-    }
-    record
-}
-
-/** Получение значения (разменовываение) */
-def getRefBookValue(refBookID, recordId, alias) {
-    def refDataProvider = refBookFactory.getDataProvider(refBookID)
-    def records = refDataProvider.getRecordData(recordId)
-
-    return records != null ? records.get(alias) : null;
-}
-
 /*
 * 2.2. Получить в справочнике «Параметры налоговых льгот» запись,
 * соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
@@ -499,40 +473,40 @@ def getBenefitMonths(def row) {
 
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
-    if (record.OKTMO == null || record.OKTMO?.referenceValue == null) {
+    if (record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКТМО»")
     }
-    if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.KPP == null || record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
         errorList.add("«КПП»")
     }
-    if (record.TAX_ORGAN_CODE == null || record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE?.referenceValue == null) {
+    if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    if (record.NAME == null || record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID?.referenceValue == null) {
+    if (record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME == null || record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
-    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
+    if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
     errorList
@@ -561,13 +535,11 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-/**
- * Разыменование с использованием кеширования
- * @param refBookId
- * @param recordId
- * @return
- */
-def getRefBookValue(def long refBookId, def long recordId) {
+// Разыменование с использованием кеширования
+def getRefBookValue(def refBookId, def recordId) {
+    if(refBookId == null || recordId == null){
+        return null
+    }
     if (!refBookCache.containsKey(recordId)) {
         refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
     }
