@@ -79,7 +79,6 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        logicalCheckAfterCalc()
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -144,7 +143,7 @@ def helperCache = [:]
 
 @Field
 def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+        303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def endDate = null
@@ -445,13 +444,14 @@ void logicalCheckBeforeCalc() {
             }
         }
     }
-
-    summaryMap.each { key, value ->
-        def formDataSummary = getFormDataSummary(key)
-        if (formDataSummary == null) {
-            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
-        } else if (getData(formDataSummary) == null) {
-            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        summaryMap.each { key, value ->
+            def formDataSummary = getFormDataSummary(key)
+            if (formDataSummary == null) {
+                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+            } else if (getData(formDataSummary) == null) {
+                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+            }
         }
     }
 }
@@ -870,7 +870,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.taxSumToPay = 0
     } else {
         row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
-                row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+            row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
     }
 
     // графа 16
@@ -878,7 +878,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.taxSumToReduction = 0
     } else {
         row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
-                (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+            (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
     }
 
     // графа 19
@@ -896,7 +896,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-                (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+            (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
     }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
