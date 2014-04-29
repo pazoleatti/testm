@@ -52,6 +52,13 @@
 
         .selected {
             color: #000000;
+            display: inline-block;
+            vertical-align: middle;
+            height: 16px;
+        }
+        .ib {
+            display: inline-block;
+            vertical-align: middle;
         }
 
     </ui:style>
@@ -62,10 +69,10 @@
                 <g:TextBox readOnly="true" addStyleNames="{style.selected}" ui:field="selected" width="100%"/>
             </g:cell>
             <g:cell>
-                <g:Button ui:field="selectButton" text="..." width="25px"/>
+                <g:Button ui:field="selectButton" text="..." width="25px" addStyleNames="{style.ib}"/>
             </g:cell>
             <g:cell>
-                <g:Button text="X" ui:field="clearButton" width="25px"/>
+                <g:Button text="X" ui:field="clearButton" width="25px" addStyleNames="{style.ib}"/>
             </g:cell>
         </g:HorizontalPanel>
         <g:FlowPanel visible="false">

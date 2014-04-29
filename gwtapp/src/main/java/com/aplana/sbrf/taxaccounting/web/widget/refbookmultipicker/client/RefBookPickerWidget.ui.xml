@@ -11,11 +11,14 @@
             border-width: 1px;
             vertical-align: middle;
             cursor: pointer;
-            display: block;
+            display: inline-block;
         }
 
         .selected {
             color: #000000;
+            display: inline-block;
+            vertical-align: middle;
+            height: 16px;
         }
     </ui:style>
 
