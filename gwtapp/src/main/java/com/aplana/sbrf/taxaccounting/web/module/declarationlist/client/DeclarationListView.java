@@ -156,7 +156,7 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + declaration.getReportPeriodName() + "</a>");
+                                + declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName() + "</a>");
                     }
                 }) {
             @Override
@@ -186,7 +186,6 @@ public class DeclarationListView extends
         declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
         declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
         declarationTable.addColumn(departmentColumn, getHeader("Подразделение", departmentColumn));
-        declarationTable.addColumn(reportPeriodYearColumn, getHeader("Год", reportPeriodYearColumn));
         declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
         declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
         declarationTable.addColumn(stateColumn, getHeader("Состояние", stateColumn));
@@ -265,6 +264,8 @@ public class DeclarationListView extends
             declarationTypeHeader.setTitle("");
             reportPeriodHeader.setTitle("");
             declarationHeader.setText(DECLARATION_HEADER_D);
+            reportPeriodHeader.setTitle(PERIOD_TITLE);
+            declarationTable.clearColumnWidth(reportPeriodColumn);
         }
         declarationTable.redrawHeaders();
 	}

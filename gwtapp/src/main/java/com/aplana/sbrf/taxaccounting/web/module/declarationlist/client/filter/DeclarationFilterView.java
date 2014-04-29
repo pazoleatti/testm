@@ -1,22 +1,20 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -141,8 +139,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
         declarationTypeId.setVisible(!isTaxTypeDeal);
         declarationTypeLabel.setVisible(!isTaxTypeDeal);
-        reportPeriodIds.setVisible(!isTaxTypeDeal);
-        reportPeriodIdsLabel.setVisible(!isTaxTypeDeal);
     }
 
     @Override
