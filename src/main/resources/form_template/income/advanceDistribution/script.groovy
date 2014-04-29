@@ -491,14 +491,10 @@ void logicalCheckAfterCalc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    // удалить все строки и собрать из источников их строки
-    dataRowHelper.clear()
+    def dataRows = []
 
     /** Идентификатор шаблона источников (Приложение 5). */
     def id = 372
-    def newRow
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
         if (it.formTypeId == id) {
@@ -507,11 +503,16 @@ void consolidation() {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 sourceDataRows.each { row ->
                     if ((row.getAlias() == null || row.getAlias() == '') && row.regionBankDivision != null) {
-                        newRow = dataRows.find {
-                            it.regionBankDivision == row.regionBankDivision
+                        def newRow = null
+                        if(!dataRows.isEmpty()){
+                            newRow = dataRows.find {
+                                it.regionBankDivision == row.regionBankDivision
+                            }
                         }
-                        newRow = formData.createDataRow()
-
+                        if(newRow == null){
+                            newRow = formData.createDataRow()
+                            dataRows.add(newRow)
+                        }
                         newRow.regionBank = row.regionBank
                         newRow.regionBankDivision = row.regionBankDivision
                         newRow.kpp = row.kpp
@@ -520,7 +521,6 @@ void consolidation() {
                         newRow.subjectTaxCredit = newRow.subjectTaxCredit ? (newRow.subjectTaxCredit + row.subjectTaxCredit) : row.subjectTaxCredit
                         newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.decreaseTaxSum) : row.decreaseTaxSum
                         newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.taxRate) : row.taxRate
-                        dataRows.add(newRow)
                     }
                 }
             }
