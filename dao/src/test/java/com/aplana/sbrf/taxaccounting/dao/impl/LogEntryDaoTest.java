@@ -57,7 +57,11 @@ public class LogEntryDaoTest {
     @Test
     public void testGetEmpty1() {
         Assert.assertNull(logEntryDao.get(""));
-        Assert.assertNull(logEntryDao.get(null));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testGetNull(){
+        logEntryDao.get(null);
     }
 
     @Test(expected = DaoException.class)
