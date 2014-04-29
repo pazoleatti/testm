@@ -8,7 +8,7 @@ import java.math.RoundingMode
 
 /**
  * 6.5	(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
- * formTemplateId=345
+ * formTypeId=345
  *
  * @author Dmitriy Levykin
  */

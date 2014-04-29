@@ -504,7 +504,10 @@ void checkCreation() {
 // Проверка на банк
 def isBank() {
     boolean isBank = true
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    // получаем список приемников
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    // если есть приемники в других подразделениях, то это не банк, а ОП
+    list.each {
         if (it.departmentId != formData.departmentId) {
             isBank = false
         }
@@ -545,7 +548,7 @@ void importData() {
     def headerMapping = [
             (xml.row[0].cell[0]): 'КНУ',
             (xml.row[0].cell[1]): 'Группа дохода',
-            (xml.row[0].cell[2]): 'Вид дохода по операциям',
+            (xml.row[0].cell[2]): 'Вид дохода по операции',
             (xml.row[0].cell[3]): 'Балансовый счёт по учёту дохода',
             (xml.row[0].cell[4]): 'РНУ-6 (графа 10) сумма',
             (xml.row[0].cell[5]): 'РНУ-6 (графа 12)',
@@ -636,19 +639,19 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 7
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 

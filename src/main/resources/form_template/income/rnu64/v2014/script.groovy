@@ -7,7 +7,7 @@ import groovy.transform.Field
 
 /**
  * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
- * formTemplateId=355
+ * formTypeId=355
  *
  * @author auldanov
  * @author bkinzyabulatov
@@ -100,14 +100,11 @@ def nonEmptyColumns = ['number', 'date', 'part', 'dealingNumber', 'costs']
 @Field
 def reportPeriodEndDate = null
 
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol + 1, logger, true)
-}
-
-/** Получить дату по строковому представлению (формата дд.ММ.гггг) */
-def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getEndDate(), rowIndex, colIndex, logger, required)
 }
 
 void calc() {
@@ -219,13 +216,6 @@ def getTotalValue(def dataRows, def dataRowsPrev) {
     }
 }
 
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getEndDate(), rowIndex, colIndex, logger, required)
-}
-
 // Получение импортируемых данных
 void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
@@ -288,7 +278,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2 - Дата сделки
-        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
 
         // графа 3 - Часть сделки
         newRow.part = getRecordIdImport(60, 'CODE', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
@@ -297,7 +287,7 @@ void addData(def xml, int headRowCount) {
         newRow.dealingNumber = row.cell[4].text()
 
         // графа 6 - Затраты (руб.коп.)
-        newRow.costs = parseNumber(row.cell[5].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.costs = parseNumber(row.cell[5].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         rows.add(newRow)
     }

@@ -577,7 +577,7 @@ comment on column sec_user.id is 'Первичный ключ';
 comment on column sec_user.login is 'Логин пользователя';
 comment on column sec_user.name is 'Полное имя пользователя';
 comment on column sec_user.department_id is 'Идентификатор подразделения';
-comment on column sec_user.is_active is 'Признак активности пользователя';
+comment on column sec_user.is_active is 'Признак активности пользователя (0 - заблокирован; 1 - активен)';
 comment on column sec_user.email is 'Адрес электронной почты';
 
 create sequence seq_sec_user start with 10000;

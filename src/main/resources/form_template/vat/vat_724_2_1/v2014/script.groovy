@@ -1,6 +1,8 @@
 package form_template.vat.vat_724_2_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
@@ -12,8 +14,12 @@ import groovy.transform.Field
  *
  * formTemplateId=601
  *
+ * TODO:
+ *      - расчет графов 4 и 5 не доделан (по чтз много вопросов к заказчику)
+ *
  * @author Stanislav Yasinskiy
  */
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -24,6 +30,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkIncome102()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -32,6 +39,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkIncome102()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -42,11 +50,11 @@ switch (formDataEvent) {
         break
 }
 
-// 1 № пп  -  rowNum
-// 2 Код операции  -  code
-// 3 Наименование операции  -  name
-// 4 Стоимость реализованных (переданных) товаров (работ, услуг) без НДС  -  realizeCost
-// 5 Стоимость приобретенных товаров  (работа, услуг), не облагаемых НДС  -  obtainCost
+// графа 1 - rowNum         № пп
+// графа 2 - code           Код операции
+// графа 3 - name           Наименование операции  -
+// графа 4 - realizeCost    Стоимость реализованных (переданных) товаров (работ, услуг) без НДС
+// графа 5 - obtainCost     Стоимость приобретенных товаров  (работа, услуг), не облагаемых НДС
 
 //// Кэши и константы
 @Field
@@ -56,17 +64,17 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
-// Редактируемые атрибуты
-@Field
-def editableColumns = []
-
-// Автозаполняемые атрибуты
+// Автозаполняемые атрибуты (графа 4, 5)
 @Field
 def autoFillColumns = ['realizeCost', 'obtainCost']
 
-// Проверяемые на пустые значения атрибуты
+// Проверяемые на пустые значения атрибуты (группа 1..4)
 @Field
 def nonEmptyColumns = ['rowNum', 'code', 'name', 'realizeCost']
+
+// Поля, для которых подсчитываются итоговые значения (графа 4, 5)
+@Field
+def totalColumns = ['realizeCost', 'obtainCost']
 
 // Дата начала отчетного периода
 @Field
@@ -103,20 +111,28 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def i4 = 0, i5 = 0
 
     for (def row in dataRows) {
+        if (row.getAlias() == 'itog') {
+            continue
+        }
         // TODO посчитать графы 4 и 5 из "форма 102 бухгалтерской отчетности"
         // TODO Нужны соответствия кодов ОПУ о кодов операций
         // getIncome102DataByOPU()
         // income102Row.TOTAL_SUM.numberValue
-
-        i4 += row.realizeCost
-        i5 += row.obtainCost
+        def values = calc4_5(row)
+        // графа 4
+        row.realizeCost = values.realizeCost
+        // графа 5
+        row.obtainCost = values.obtainCost
     }
-    def itog = dataRowHelper.getDataRow(dataRows, 'itog')
-    itog.realizeCost = i4
-    itog.obtainCost = i5
+
+    // подсчет итогов
+    def itogValues = calcItog(dataRows)
+    def itog = getDataRow(dataRows, 'itog')
+    totalColumns.each { alias ->
+        itog.getCell(alias).setValue(itogValues[alias], itog.getIndex())
+    }
     dataRowHelper.save(dataRows);
 }
 
@@ -124,37 +140,32 @@ void calc() {
 def getIncome102DataByOPU(def String opuCode) {
     def retVal = []
     for (def income102Row : getIncome102Data()) {
-        if (income102Row.OPU_CODE.numberValue == opuCode) {
+        if (income102Row.OPU_CODE.value == opuCode) {
             retVal.add(income102Row)
         }
     }
+    return retVal
 }
 
 def logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def i4 = 0, i5 = 0
-    def f4 = 0, f5 = 0
+
     for (def row in dataRows) {
-        if (row.getAlias().equals('itog')) {
-            i4 = row.realizeCost
-            i5 = row.obtainCost
-        } else {
-            def index = row.getIndex()
-
-            // 1. Проверка заполнения граф
-            checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
-
-            f4 += row.realizeCost ?: 0
-            f5 += row.obtainCost ?: 0
+        if (row.getAlias() == 'itog') {
+            continue
         }
+        // 1. Проверка заполнения граф
+        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
 
     // 2. Проверка итоговых значений
-    if (i4 != f4 || i5 != f5) {
-        // TODO Исправить на WRONG_TOTAL
-        logger.error("Итоговые значения рассчитаны неверно!")
+    def itogValues = calcItog(dataRows)
+    def itog = getDataRow(dataRows, 'itog')
+    totalColumns.each { alias ->
+        if (itog.getCell(alias).value != itogValues[alias]) {
+            logger.error(WRONG_TOTAL, getColumnName(itog, alias))
+        }
     }
-
 }
 
 def getReportPeriodStartDate() {
@@ -174,8 +185,8 @@ def getReportPeriodEndDate() {
 // Получение данных из справочника «Отчет о прибылях и убытках» для текужего подразделения и отчетного периода
 def getIncome102Data() {
     if (income102Data == null) {
-        income102Data = refBookFactory.getDataProvider(52L)?.getRecords(getReportPeriodEndDate(), null,
-                "REPORT_PERIOD_ID = '${formData.reportPeriodId}' AND DEPARTMENT_ID = ${formData.departmentId}", null)
+        def filter = "REPORT_PERIOD_ID = ${formData.reportPeriodId} AND DEPARTMENT_ID = ${formData.departmentId}"
+        income102Data = refBookFactory.getDataProvider(52L)?.getRecords(getReportPeriodEndDate(), null, filter, null)
     }
     return income102Data
 }
@@ -193,12 +204,12 @@ void checkIncome102() {
 // Консолидация
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind()).each {
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
         def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
-        if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
-            formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
+        if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {
+            formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() != null && !srcRow.getAlias().equals('itog')) {
                     def row = dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
                     row.realizeCost = (row.realizeCost ?: 0) + (srcRow.realizeCost ?: 0)
@@ -209,4 +220,97 @@ void consolidation() {
     }
 
     dataRowHelper.update(dataRows)
+}
+
+// TODO (Ramil Timerbaev) дополнить по чтз, много вопросов к заказчику
+// расчитать значения графы 4 и 5, вернуть в мапе
+def calc4_5(row) {
+    def for4 = null
+    def for5 = null
+    switch (row.code) {
+        case '1010201' :
+            for4 = getIncome102DataByOPU('16301') + getIncome102DataByOPU('17306.17')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010239' :
+            for4 = getIncome102DataByOPU('17306.17')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010242' :
+            for4 = getIncome102DataByOPU('12403.03')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010243' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010275' :
+            for4 = getIncome102DataByOPU('26404')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010276' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010277' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010285' :
+            for4 = getIncome102DataByOPU('12403.01')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010288' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010298' :
+            for4 = getIncome102DataByOPU('16302.01')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010801' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010802' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010805' :
+            for4 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+        case '1010806' :
+            for4 = getIncome102DataByOPU('16302.01')
+            for5 = getIncome102DataByOPU('') // TODO (Ramil Timerbaev)
+            break
+    }
+    def result = [:]
+    result.realizeCost = roundValue(for4 ? for4.sum { it -> it.TOTAL_SUM.value } : 0)
+    result.obtainCost = roundValue(for5 ? for5.sum { it -> it.TOTAL_SUM.value } : 0)
+    return result
+}
+
+def calcItog(def dataRows) {
+    def itogValues = [:]
+    totalColumns.each {alias ->
+        itogValues[alias] = roundValue(0)
+    }
+    for (def row in dataRows) {
+        if (row.getAlias() == 'itog') {
+            continue
+        }
+        totalColumns.each { alias ->
+            itogValues[alias] += roundValue(row.getCell(alias).value ?: 0)
+        }
+    }
+    return itogValues
+}
+
+def roundValue(def value, int precision = 2) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
+    }
 }

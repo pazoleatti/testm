@@ -62,6 +62,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
+        logicCheck()
         break
 }
 
@@ -89,14 +90,9 @@ def reportPeriodEndDate = null
 
 //// Обертки методов
 
-// Проверка НСИ
-boolean checkNSI(def refBookId, def row, def alias) {
-    return formDataService.checkNSI(refBookId, refBookCache, row, alias, logger, false)
-}
-
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -136,7 +132,7 @@ void logicCheck() {
         }
 
         // Проверки соответствия НСИ
-        checkNSI(4, row, "subdivisionRF")
+        // checkNSI(4, row, "subdivisionRF")
     }
 }
 
@@ -220,7 +216,7 @@ void addData(def xml, headRowCount) {
 
             // графа 1
             def xmlIndexCol = 0
-            newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 2
@@ -232,7 +228,7 @@ void addData(def xml, headRowCount) {
             xmlIndexCol++
 
             // графа 4 - справочник "Коды субъектов Российской Федерации"
-            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
             xmlIndexCol++
 
             // графа 5
@@ -280,11 +276,11 @@ void addData(def xml, headRowCount) {
             xmlIndexCol++
 
             // графа 16
-            newRow.sumDividend = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.sumDividend = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 17
-            newRow.dividendDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.dividendDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 18
@@ -292,11 +288,11 @@ void addData(def xml, headRowCount) {
             xmlIndexCol++
 
             // графа 19
-            newRow.dividendSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.dividendSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 20
-            newRow.taxDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.taxDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 21
@@ -304,11 +300,11 @@ void addData(def xml, headRowCount) {
             xmlIndexCol++
 
             // графа 22
-            newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
 
             // графа 23
-            newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
             rows.add(newRow)
         }

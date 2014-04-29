@@ -681,10 +681,12 @@ def getSum(def dataRows, def colName, def rowsAliases) {
 // Проверка на банк
 def isBank() {
     boolean isBank = true
-    for (def form : departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY)) {
-        if (form.departmentId != formData.departmentId) {
+    // получаем список приемников
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    // если есть приемники в других подразделениях, то это не банк, а ОП
+    list.each {
+        if (it.departmentId != formData.departmentId) {
             isBank = false
-            break
         }
     }
     return isBank
@@ -839,13 +841,13 @@ void addData(def xml, int headRowCount) {
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 7
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -854,7 +856,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 9
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
     }

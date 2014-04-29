@@ -13,7 +13,9 @@
             border-right: 0;
             margin-top: 0;
             margin-bottom: 0;
-
+            display: inline-block;
+            vertical-align: middle;
+            height: 16px;
             /*многоточие*/
             overflow: hidden;
             white-space: nowrap;
@@ -27,7 +29,7 @@
             border-left-width: 0;
             vertical-align: middle;
             cursor: pointer;
-            display: block;
+            display: inline-block;
             margin-left: -14px;
         }
 
@@ -35,7 +37,7 @@
             border: 1px solid #009900;
             vertical-align: middle;
             cursor: pointer;
-            display: block;
+            display: inline-block;
         }
 
         .footerPanel {

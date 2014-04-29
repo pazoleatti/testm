@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -9,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -35,6 +37,7 @@ public class FormTemplateDaoTest {
 	@Autowired
 	private FormTemplateDao formTemplateDao;
 
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true)
 	@Test
 	public void testGet(){
 		FormTemplate ft1 = formTemplateDao.get(1);
@@ -55,7 +58,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("fullname_2", ft2.getFullName());
 		Assert.assertEquals("code_2", ft2.getCode());
 	}
-	
+
 	@Test(expected=DaoException.class)
 	public void testNotexistingGet() {
 		formTemplateDao.get(-1000);
@@ -82,7 +85,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals(0, formTemplate.getRows().size());
 		Assert.assertEquals(0, formTemplate.getHeaders().size());
 	}
-	
+
 	@Test
 	public void testSaveDataRows() {
 		FormTemplate formTemplate = formTemplateDao.get(1);

@@ -1,6 +1,5 @@
 package form_template.income.outcome_simple.v1970
 
-import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -435,10 +434,13 @@ void consolidationSummary(def dataRows) {
     logger.info('Формирование сводной формы уровня обособленного подразделения прошло успешно.')
 }
 
-/** Проверка на банк. */
+// Проверка на банк
 def isBank() {
     boolean isBank = true
-    departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formTemplateId, FormDataKind.SUMMARY).each {
+    // получаем список приемников
+    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY)
+    // если есть приемники в других подразделениях, то это не банк, а ОП
+    list.each {
         if (it.departmentId != formData.departmentId) {
             isBank = false
         }
@@ -682,13 +684,13 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 6
         if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -699,7 +701,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
-        curRow.rnu5Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        curRow.rnu5Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
     }
     if (rowIndex < maxRow) {

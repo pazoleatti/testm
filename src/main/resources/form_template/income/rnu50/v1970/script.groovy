@@ -8,7 +8,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»"
- * formTemplateId=365
+ * formTypeId=365
  *
  * @author rtimerbaev
  */
@@ -277,7 +277,7 @@ def calc4(def row49, def startDate, def endDate) {
 
     if (startDate <= column3 && column3 <= endDate) {
         if (column18 > column3) {
-            result = column20 * (endDate[Calendar.MONTH] - row49.operationDate[Calendar.MONTH])
+            result = column20 * (endDate[Calendar.MONTH] - column3[Calendar.MONTH])
         } else {
             result = column20
         }
@@ -292,7 +292,7 @@ def calc5(def row49, def startDate, def endDate) {
 
     if (column18 < startDate) {
         result = column20 * 3
-    } else if (startDate <= column18&& column18 <= endDate) {
+    } else if (startDate <= column18 && column18 <= endDate) {
         result = column20 * (endDate[Calendar.MONTH] - column18[Calendar.MONTH])
     }
     return result?.setScale(2, RoundingMode.HALF_UP)
@@ -377,10 +377,10 @@ void addData(def xml, int headRowCount) {
         newRow.invNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 4
-        newRow.lossReportPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.lossReportPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 5
-        newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.lossTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
