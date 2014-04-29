@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -79,7 +78,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        logicalCheckAfterCalc()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            logicalCheckAfterCalc()
+        }
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -97,12 +98,12 @@ def refBookCache = [:]
 // Все атрибуты
 @Field
 def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'propertyPrice',
-                  'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-                  'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
-                  'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-                  'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                  'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-                  'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
+        'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
+        'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+        'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
 
 // Редактируемые атрибуты
 @Field
@@ -115,13 +116,13 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
-                       'kpp', 'propertyPrice', 'workersCount',
-                       'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-                       'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-                       'taxSum', 'taxSumOutside', 'taxSumToPay',
-                       'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                       'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-                       'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax'
+        'kpp', 'propertyPrice', 'workersCount',
+        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+        'taxSum', 'taxSumOutside', 'taxSumToPay',
+        'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax'
 ]
 
 // Группируемые атрибуты
@@ -131,11 +132,11 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
-                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-                    'everyMonthForThirdKvartalNextPeriod',
-                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+        'everyMonthForThirdKvartalNextPeriod',
+        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
 
 @Field
 def formDataCache = [:]
@@ -143,8 +144,8 @@ def formDataCache = [:]
 def helperCache = [:]
 
 @Field
-def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+def summaryMap = [301: "Доходы, учитываемые в простых РНУ", 302: "Сводная форма начисленных доходов",
+        303: "Сводная форма начисленных расходов", 304: "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def endDate = null
@@ -271,10 +272,10 @@ void calc() {
         // расчеты для строки ЦА (скорректированный) графы 1, 3..21
         // графа 1, 3..10, 12, 13, 15-21
         ['number', 'regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
-         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-         'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-         'everyMonthForFourthKvartalNextPeriod'].each { alias ->
+                'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
+                'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                'everyMonthForFourthKvartalNextPeriod'].each { alias ->
             caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
         }
 
@@ -345,7 +346,7 @@ def calc12(def row) {
 def calc13(def row) {
     def temp = 0
     if (row.baseTaxOfRub > 0) {
-        if(row.minimizeTaxSum == null){
+        if (row.minimizeTaxSum == null) {
             return null
         }
         if (row.minimizeTaxSum == 0) {
@@ -396,7 +397,7 @@ void logicalCheckBeforeCalc() {
             return
         }
         fieldNumber++
-        def index = row.getIndex()
+        def index = row.getIndex() ?: fieldNumber
         def errorMsg = "Строка ${index}: "
 
         def departmentParam
@@ -446,12 +447,14 @@ void logicalCheckBeforeCalc() {
         }
     }
 
-    summaryMap.each { key, value ->
-        def formDataSummary = getFormDataSummary(key)
-        if (formDataSummary == null) {
-            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
-        } else if (getData(formDataSummary) == null) {
-            logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        summaryMap.each { key, value ->
+            def formDataSummary = getFormDataSummary(key)
+            if (formDataSummary == null) {
+                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+            } else if (getData(formDataSummary) == null) {
+                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+            }
         }
     }
 }
@@ -511,11 +514,11 @@ void consolidation() {
                         newRow.regionBank = row.regionBank
                         newRow.regionBankDivision = row.regionBankDivision
                         newRow.kpp = row.kpp
-                        newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.propertyPrice) : row.propertyPrice
+                        newRow.propertyPrice = newRow.propertyPrice ? (newRow.propertyPrice + row.avepropertyPricerageCost) : row.avepropertyPricerageCost
                         newRow.workersCount = newRow.workersCount ? (newRow.workersCount + row.workersCount) : row.workersCount
                         newRow.subjectTaxCredit = newRow.subjectTaxCredit ? (newRow.subjectTaxCredit + row.subjectTaxCredit) : row.subjectTaxCredit
-                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.minimizeTaxSum) : row.minimizeTaxSum
-                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.amountTax) : row.amountTax
+                        newRow.minimizeTaxSum = newRow.minimizeTaxSum ? (newRow.minimizeTaxSum + row.decreaseTaxSum) : row.decreaseTaxSum
+                        newRow.amountTax = newRow.amountTax ? (newRow.amountTax + row.taxRate) : row.taxRate
                         dataRows.add(newRow)
                     }
                 }
@@ -868,7 +871,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.taxSumToPay = 0
     } else {
         row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
-                row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+            row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
     }
 
     // графа 16
@@ -876,7 +879,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.taxSumToReduction = 0
     } else {
         row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
-                (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+            (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
     }
 
     // графа 19
@@ -894,7 +897,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-                (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+            (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
     }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
