@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -148,13 +147,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         Integer id = declarationTemplateExt.getDeclarationTemplate().getId();
 		uploadDectForm.setAction(GWT.getHostPageBaseURL() + "download/declarationTemplate/uploadDect/" + (id != null?id:0));
 		uploadJrxmlForm.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + (id != null?id:0));
-		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-			@Override
-			public void execute() {
-				title.setText(declarationTemplateExt.getDeclarationTemplate().getType().getName());
-				driver.edit(declarationTemplateExt);
-			}
-		});
+        title.setText(declarationTemplateExt.getDeclarationTemplate().getType().getName());
+        driver.edit(declarationTemplateExt);
 
         downloadDectButton.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
         uploadJrxml.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);

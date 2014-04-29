@@ -97,12 +97,19 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                             if (logger.containsLevel(LogLevel.ERROR)){
                                 logger.error("Обнаружено пересечение указанного срока актуальности с существующей версией");
                                 return;
-                            } else
+                            } else {
                                 logger.info("Установлена дата окончания актуальности версии %td.%tm.%tY для предыдущей версии с датой начала %td.%tm.%tY",
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         createActualizationDates(Calendar.DAY_OF_YEAR, -1, newIntersection.getBeginDate().getTime()),
                                         intersection.getBeginDate(), intersection.getBeginDate(), intersection.getBeginDate());
+                                if (versionActualDateEnd != null){
+                                    cleanVersions(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
+                                    Date date = createActualizationDates(Calendar.DAY_OF_YEAR, 1, versionActualDateEnd.getTime());
+                                    FormTemplate formTemplate =  createFakeTemplate(date, typeId);
+                                    formTemplateService.save(formTemplate);
+                                }
+                            }
                         }
                         break;
                     case FAKE:
