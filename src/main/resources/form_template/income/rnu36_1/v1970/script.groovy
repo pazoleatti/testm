@@ -448,19 +448,19 @@ def filForm(def newRow, def row, int i, int colOffset) {
     // графа 1
     newRow.series = row.cell[0].text()
     // графа 2
-    newRow.amount = parseNumber(row.cell[1].text(), i, colOffset, logger, false)
+    newRow.amount = parseNumber(row.cell[1].text(), i, colOffset, logger, true)
     // графа 3
-    newRow.nominal = parseNumber(row.cell[2].text(), i, colOffset, logger, false)
+    newRow.nominal = parseNumber(row.cell[2].text(), i, colOffset, logger, true)
     // графа 4
-    newRow.shortPositionDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", i, colOffset, logger, false)
+    newRow.shortPositionDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", i, colOffset, logger, true)
     //  графа 5
     newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[4].text(), reportPeriodEndDate, newRow.getIndex(), 5, logger, true)
     // графа 6
-    newRow.averageWeightedPrice = parseNumber(row.cell[5].text(), i, colOffset, logger, false)
+    newRow.averageWeightedPrice = parseNumber(row.cell[5].text(), i, colOffset, logger, true)
     // графа 7
-    newRow.termBondsIssued = parseNumber(row.cell[6].text(), i, colOffset, logger, false)
+    newRow.termBondsIssued = parseNumber(row.cell[6].text(), i, colOffset, logger, true)
     // графа 8
-    newRow.percIncome = parseNumber(row.cell[7].text(), i, colOffset, logger, false)
+    newRow.percIncome = parseNumber(row.cell[7].text(), i, colOffset, logger, true)
 }
 
 // Получение импортируемых данных

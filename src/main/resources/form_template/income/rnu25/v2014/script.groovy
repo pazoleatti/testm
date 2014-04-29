@@ -124,7 +124,7 @@ def isBalancePeriod
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -704,19 +704,19 @@ void addData(def xml, int headRowCount) {
         newRow.tradeNumber = row.cell[3].text()
 
         /* Графа 4 */
-        newRow.lotSizePrev = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.lotSizePrev = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
 
         /* Графа 5 */
-        newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
 
         /* Графа 7 */
-        newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
 
         /* Графа 8 */
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset, false)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
 
         /* Графа 9 */
-        newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
         rows.add(newRow)
     }

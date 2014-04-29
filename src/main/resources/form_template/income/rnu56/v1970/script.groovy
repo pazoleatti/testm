@@ -9,7 +9,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов"
- * formTemplateId=349
+ * formTypeId=349
  *
  * @author rtimerbaev
  * @author Stanislav Yasinskiy
@@ -125,9 +125,19 @@ def getRecord(def Long refBookId, def String alias, def String value, def int ro
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
+
+// Получить дату по строковому представлению (формата дд.ММ.гггг)
+def getDate(def value, def indexRow, def indexCol) {
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 // Разыменование записи справочника
@@ -355,8 +365,7 @@ void logicCheck() {
         if (row.buyDate != null) {
             def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
             for (reportPeriod in reportPeriods) {
-                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId,
-                        reportPeriod.id)
+                findFormData = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id)
                 if (findFormData != null) {
                     isFind = false
                     for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
@@ -448,48 +457,38 @@ def BigDecimal getCalcPrevColumn(def row, def sumColumnName, def startDate) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 15, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Вексель',
-            (xml.row[0].cell[3]): 'Дата приобретения',
-            (xml.row[0].cell[4]): 'Код валюты',
-            (xml.row[0].cell[5]): 'Номинал, ед. валюты',
-            (xml.row[0].cell[6]): 'Цена приобретения, ед. валюты',
-            (xml.row[0].cell[7]): 'Срок платежа',
-            (xml.row[0].cell[8]): 'Возможный срок обращения векселя, дней',
-            (xml.row[0].cell[9]): 'Заявленный процентный доход (дисконт), ед. валюты',
-            (xml.row[0].cell[10]): 'Дата реализации (погашения)',
-            (xml.row[0].cell[11]): 'Сумма, фактически поступившая в оплату, ед. валюты',
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'number'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'bill'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'buyDate'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'currency'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'nominal'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'price'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'maturity'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'termDealBill'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'percIncome'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'implementationDate'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'sum'),
             (xml.row[0].cell[12]): 'Фактически поступившая сумма дисконта',
             (xml.row[0].cell[14]): 'Сумма начисленного процентного дохода за отчётный период',
             (xml.row[1].cell[12]): 'в валюте',
             (xml.row[1].cell[13]): 'в рублях по курсу Банка России',
             (xml.row[1].cell[14]): 'в валюте',
             (xml.row[1].cell[15]): 'в рублях по курсу Банка России',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15'
+            (xml.row[2].cell[0]) : '1'
     ]
+    (2..15).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 2)
+    addData(xml, 3)
 }
 
 // Заполнить форму данными
@@ -514,10 +513,9 @@ void addData(def xml, int headRowCount) {
 
     for (def row : xml.row) {
         xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
+        if (xmlIndexRow <= headRowCount - 1) {
             continue
         }
 
@@ -531,6 +529,7 @@ void addData(def xml, int headRowCount) {
         }
 
         def xmlIndexCol = 0
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
@@ -545,7 +544,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.number = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // fix
         xmlIndexCol++
@@ -553,43 +552,43 @@ void addData(def xml, int headRowCount) {
         newRow.bill = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 3
-        newRow.buyDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.buyDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 4
         newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 5
-        newRow.nominal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.nominal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 6
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.price = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 7
-        newRow.maturity = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.maturity = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 8
-        newRow.termDealBill = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.termDealBill = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 9
-        newRow.percIncome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.percIncome = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 10
-        newRow.implementationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.implementationDate = getDate(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 11
-        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 12
-        newRow.discountInCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.discountInCurrency = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 13
-        newRow.discountInRub = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.discountInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 14
-        newRow.sumIncomeinCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sumIncomeinCurrency = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
         // графа 15
-        newRow.sumIncomeinRuble = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.sumIncomeinRuble = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
     }
@@ -608,7 +607,7 @@ void loggerError(def msg, Object...args) {
 
 def getStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }

@@ -138,7 +138,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
+                    def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -148,7 +148,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -579,7 +579,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
         xmlIndexCol = 2
-        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         newRow.name = record30?.record_id?.value
 
         // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
@@ -590,7 +590,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 4 - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
         xmlIndexCol = 4
-        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         newRow.issuer = record84?.record_id?.value
 
         if (record84 != null) {
@@ -605,39 +605,39 @@ void addData(def xml, int headRowCount) {
 
         /* Графа 6 */
         xmlIndexCol = 6
-        newRow.shortPositionData = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.shortPositionData = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 7 */
         xmlIndexCol = 7
-        newRow.faceValue = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.faceValue = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 8 */
         xmlIndexCol = 8
-        newRow.countsBonds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.countsBonds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 9*/
         xmlIndexCol = 9
-        newRow.averageWeightedPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.averageWeightedPrice = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 10 */
         xmlIndexCol = 10
-        newRow.termBondsIssued = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.termBondsIssued = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 11 */
         xmlIndexCol = 11
-        newRow.maturityDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.maturityDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 12 */
         xmlIndexCol = 12
-        newRow.currentPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.currentPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 13 */
         xmlIndexCol = 13
-        newRow.currentCouponRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.currentCouponRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         /* Графа 14 */
         xmlIndexCol = 14
-        newRow.incomeCurrentCoupon = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.incomeCurrentCoupon = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         mapRows[sectionIndex].add(newRow)
     }

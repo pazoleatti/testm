@@ -1,12 +1,11 @@
 package form_template.income.rnu75.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * (РНУ-75) Регистр налогового учёта доходов по операциям депозитария
- * formTemplateId=366
+ * formTypeId=366
  *
  * 1  - number
  * 2  - date
@@ -245,7 +244,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2
-        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
 
         // графа 3
         newRow.depo = row.cell[3].text()
@@ -254,13 +253,13 @@ void addData(def xml, int headRowCount) {
         newRow.reasonNumber = row.cell[4].text()
 
         // графа 5
-        newRow.reasonDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.reasonDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
-        newRow.taxSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.taxSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.factSum = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.factSum = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
 
         rows.add(newRow)
     }

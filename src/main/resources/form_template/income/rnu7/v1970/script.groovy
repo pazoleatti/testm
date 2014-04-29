@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat
 /**
  * (РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5,
  *                                  учёт которых требует применения метода начисления
- * formTemplateId=311
+ * formTypeId=311
  *
  * графа 1  Число/15/                       number
  * helper   Строка/1000                     helper
@@ -104,6 +104,13 @@ def start = null
 def endDate = null
 
 //// Обертки методов
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -557,7 +564,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 3
-        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 2
@@ -580,7 +587,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 6
-        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
@@ -591,24 +598,17 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 9
-        newRow.taxAccountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.taxAccountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 10
         xmlIndexCol++
 
         // графа 11
-        newRow.accountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.accountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
 
     dataRowHelper.save(rows)
-}
-
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }

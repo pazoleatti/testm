@@ -103,7 +103,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required) {
+                    def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -242,16 +242,16 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 2
-        def record = getRecordImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
+        def record = getRecordImport(27, 'TYPE_EXP', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
         if (record != null) {
-            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, false)
+            formDataService.checkReferenceValue(27, row.cell[2].text(), record?.CODE?.value, xlsIndexRow, 2 + colOffset, logger, true)
         }
 
         // графа 3
         newRow.incomeType = record?.record_id?.value
 
         // графа 4
-        newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.sum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
 
         rows.add(newRow)
     }

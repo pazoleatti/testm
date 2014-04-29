@@ -132,6 +132,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onOpen(OpenModalWindowEvent event) {
                 refBookView.load(state);
+                refBookView.find(searchTextBox.getText());
             }
         });
 

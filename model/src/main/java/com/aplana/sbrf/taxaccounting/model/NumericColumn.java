@@ -108,8 +108,8 @@ public class NumericColumn extends Column implements Serializable {
 		return new ValidationStrategy() {
 			@Override
 			public boolean matches(String valueToCheck) {
-				if (valueToCheck.contains("d")
-						|| valueToCheck.contains("f")
+				if (valueToCheck.contains("d") || valueToCheck.contains("D")
+						|| valueToCheck.contains("f") || valueToCheck.contains("F")
 						|| valueToCheck.contains(" ")) {
 					return false;
 				}

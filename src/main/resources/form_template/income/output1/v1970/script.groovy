@@ -231,25 +231,30 @@ def roundValue(BigDecimal value, def precision) {
 }
 
 def checkOverpower(def value, def row, def alias) {
-    def checksMap = [
-            'dividendSumRaspredPeriod' : "ОКРУГЛ («графа 5» + «графа 6» + «графа 11»; 0)",
-            'dividendSumForTaxAll'     : "ОКРУГЛ ( «графа 11» – «графа 17» ; 0)",
-            'dividendSumForTaxStavka9' : "ОКРУГЛ ( «графа 12» / «графа 11» * «графа 18» ; 0) ",
-            'dividendSumForTaxStavka0' : "ОКРУГЛ ( «графа 13» / «графа 11» * «графа 18» ; 0) ",
-            'taxSum'                   : "ОКРУГЛ ( «графа 19» / 100 * 9; 0)",
-            'taxSumFromPeriod'         : "«графа 22» предыдущего отчётного периода + «графа 23» предыдущего отчётного периода.\n Значения граф текущей формы и формы предудущего отчётного периода берутся для строк с одинаковым годом , т. е. «графа 3» в текущем отчётном периоде = «графе 3» в предыдущем отчётном периоде.\n" +
-                    "Если отчёт по году («графа 3») впервые, то «графа 22» принимает значение «0»"
-    ]
-    def aliasMap = [
-            'dividendSumRaspredPeriod' : '4',
-            'dividendSumForTaxAll' : '18',
-            'dividendSumForTaxStavka9' : '19',
-            'dividendSumForTaxStavka0' : '20',
-            'taxSum' : '21',
-            'taxSumFromPeriod' : '22'
-    ]
     if (value?.abs() >= 1e15) {
-        throw new ServiceException("Строка ${row.getIndex()}: значение «Графы ${aliasMap[alias]}» превышает допустимую разрядность (15 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
+        def checksMap = [
+                'dividendSumRaspredPeriod'      : "ОКРУГЛ («графа 5» + «графа 6» + «графа 12»; 0)",
+                'dividendTotalRaspredPeriod'    : "ОКРУГЛ («графа 5» + «графа 6»; 0)",
+                'dividendSumForTaxAll'          : "ОКРУГЛ («графа 12» – «графа 19» ; 0)",
+                'dividendSumForTaxStavka9'      : "ОКРУГЛ («графа 14» / «графа 13» * «графа 20» ; 0) ",
+                'dividendSumForTaxStavka0'      : "ОКРУГЛ («графа 15» / «графа 13» * «графа 20» ; 0) ",
+                'taxSum'                        : "ОКРУГЛ («графа 21» / 100 * 9; 0)",
+                'taxSumFromPeriod'              : "«графа 24» предыдущего отчётного периода + «графа 25» предыдущего отчётного периода." +
+                        "\n Значения граф текущей формы и формы предудущего отчётного периода берутся для строк с одинаковым годом ," +
+                        " т. е. «графа 3» в текущем отчётном периоде = «графе 3» в предыдущем отчётном периоде.\n" +
+                        "Если отчёт по году («графа 3») впервые, то «графа 24» принимает значение «0»"
+        ]
+        def aliasMap = [
+                'dividendSumRaspredPeriod'      : '4',
+                'dividendTotalRaspredPeriod'    : '7',
+                'dividendSumForTaxAll'          : '20',
+                'dividendSumForTaxStavka9'      : '21',
+                'dividendSumForTaxStavka0'      : '22',
+                'taxSum'                        : '23',
+                'taxSumFromPeriod'              : '24'
+        ]
+        throw new ServiceException("Строка ${row.getIndex()}: значение «Графы ${aliasMap[alias]}» превышает допустимую " +
+                "разрядность (15 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
     }
     return value
 }

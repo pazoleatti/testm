@@ -83,7 +83,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationTotal(formData, formDataDepartment.id, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -365,12 +365,12 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // fix
         xmlIndexCol++
         // графа 2
-        newRow.operationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.operationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 3
         newRow.name = row.cell[xmlIndexCol].text()
@@ -382,10 +382,10 @@ void addData(def xml, int headRowCount) {
         newRow.baseNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 6
-        newRow.baseDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.baseDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 7
-        newRow.summ = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.summ = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }

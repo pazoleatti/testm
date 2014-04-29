@@ -185,6 +185,17 @@ h3{
     text-align: center !important;
 }
 
+.orderSelected {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    height: 1em !important;
+    padding: 0 1px !important;
+    text-shadow: none !important;
+    color: white !important;
+    background-color: #5a5a5a !important;
+    text-align: center !important;
+}
+
 .rbbtn {
     margin: 2px 0px 2px 0px !important;
     width: 19px;
