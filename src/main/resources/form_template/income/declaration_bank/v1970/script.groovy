@@ -51,7 +51,7 @@ def getEndDate() {
 }
 
 // Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
+def getRefBookValue(def long refBookId, def recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 

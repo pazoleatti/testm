@@ -97,6 +97,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
         Date startDate = periodService.getEndDate(reportPeriodId).getTime();
         List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(addDayToDate(startDate, -1), null, String.format("DEPARTMENT_ID = %d", departmentId), null);
+
         if (departmentParams != null && !departmentParams.isEmpty()) {
             Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
