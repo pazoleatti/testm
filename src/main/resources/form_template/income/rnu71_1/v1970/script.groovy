@@ -535,24 +535,27 @@ void prevPeriodCheck() {
 def getCalc11_15(def row, def rowPrev, def startDate, def endDate) {
     def values = [:]
 
+    row.each { key, value ->
+        values[key] = value
+    }
     // графа 11
     def tmp = null
-    if (row.income != null && row.amount != null && row.amountForReserve != null) {
-         tmp = (row.income - (row.amount - row.amountForReserve))
+    if (values.income != null && values.amount != null && values.amountForReserve != null) {
+         tmp = (values.income - (values.amount - values.amountForReserve))
     }
     values.result = tmp?.setScale(2, RoundingMode.HALF_UP)
 
     // графа 12
-    values.part2Date = (row.dateOfAssignment ? row.dateOfAssignment + 45 : null) //не заполняется
+    values.part2Date = (values.dateOfAssignment ? values.dateOfAssignment + 45 : null) //не заполняется
 
     // графа 13
     tmp = null
-    if (row.result != null && row.result < 0) {
-        if (row.part2Date != null && endDate != null) {
-            if (row.part2Date <= endDate) {
-                tmp = row.result
+    if (values.result != null && values.result < 0) {
+        if (values.part2Date != null && endDate != null) {
+            if (values.part2Date <= endDate) {
+                tmp = values.result
             } else {
-                tmp = row.result * 0.5
+                tmp = values.result * 0.5
             }
         }
     }
@@ -560,20 +563,20 @@ def getCalc11_15(def row, def rowPrev, def startDate, def endDate) {
 
     // графа 14
     tmp = null
-    if (row.result != null && row.result < 0 && row.part2Date != null && endDate != null) {
-        if (row.part2Date <= endDate) {
+    if (values.result != null && values.result < 0 && values.part2Date != null && endDate != null) {
+        if (values.part2Date <= endDate) {
             tmp = BigDecimal.ZERO
         } else {
-            tmp = row.result * 0.5
+            tmp = values.result * 0.5
         }
     }
     values.lossNextQuarter = tmp?.setScale(2, RoundingMode.HALF_UP)
 
     // графа 15
     tmp = null
-    if (startDate != null && endDate != null && row.dateOfAssignment != null && row.part2Date != null) {
+    if (startDate != null && endDate != null && values.dateOfAssignment != null && values.part2Date != null) {
         def period = (startDate..endDate)
-        if (!(row.dateOfAssignment in period) && (row.part2Date in period)) {
+        if (!(values.dateOfAssignment in period) && (values.part2Date in period)) {
             tmp = rowPrev?.lossNextQuarter
         }
     }
