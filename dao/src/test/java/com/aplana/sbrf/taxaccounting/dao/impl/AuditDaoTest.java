@@ -1,24 +1,19 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -32,21 +27,10 @@ public class AuditDaoTest {
     @Autowired
     private AuditDao auditDao;
 
-    @Before
-    public void init() {
-        Department dep = new Department();
-        dep.setId(1);
-        dep.setName("ТБ1");
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        when(departmentDao.getParentsHierarchy(1)).thenReturn("Подразделение");
-        when(departmentDao.getDepartment(1)).thenReturn(dep);
-        when(departmentDao.getDepartmentByName("ТБ1")).thenReturn(dep);
-        ReflectionTestUtils.setField(auditDao, "departmentDao", departmentDao);
-    }
-
     @Test
     public void testGet() {
         LogSystemFilter filter = new LogSystemFilter();
+        filter.setDepartmentName("Б");
         filter.setCountOfRecords(10);
         filter.setStartIndex(0);
         filter.setFormTypeId(1);
@@ -65,7 +49,7 @@ public class AuditDaoTest {
         assertEquals(1, logSystem.getFormType().getId());
         assertEquals(3, logSystem.getFormKind().getId());
         assertEquals("the best note", logSystem.getNote());
-        assertEquals(1, logSystem.getUserDepartment().getId());
+        assertEquals("Подразделение", logSystem.getUserDepartmentName());
         assertEquals(2, records.getTotalCount());
     }
 
@@ -86,7 +70,7 @@ public class AuditDaoTest {
         logSystem.setFormTypeId(1);
         logSystem.setFormKindId(2);
         logSystem.setNote("the best note");
-        logSystem.setUserDepartmentId(1);
+        logSystem.setUserDepartmentName("Подразделение");
 
         auditDao.add(logSystem);
 
@@ -113,7 +97,7 @@ public class AuditDaoTest {
         assertEquals(1, logSearchResultItem.getFormType().getId());
         assertEquals(2, logSearchResultItem.getFormKind().getId());
         assertEquals("the best note", logSearchResultItem.getNote());
-        assertEquals(1, logSearchResultItem.getUserDepartment().getId());
+        assertEquals("Подразделение", logSearchResultItem.getUserDepartmentName());
         assertEquals(3, records.getTotalCount());
     }
 
@@ -148,7 +132,7 @@ public class AuditDaoTest {
         logSystem.setFormTypeId(1);
         logSystem.setFormKindId(2);
         logSystem.setNote("the best note");
-        logSystem.setUserDepartmentId(1);
+        logSystem.setUserDepartmentName("Подразделение");
 
         List<Long> listIds = new ArrayList<Long>();
         listIds.add(1l);
@@ -176,9 +160,10 @@ public class AuditDaoTest {
     public void testGetLogBusiness(){
         Calendar calendar = Calendar.getInstance();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
+        filterDao.setDepartmentName("ТБ");
         filterDao.setDeclarationDataIds(Arrays.asList(1l));
         filterDao.setFormDataIds(Arrays.asList(1l, 11l, 13l));
-        calendar.set(2013, Calendar.JANUARY, 1);
+        calendar.set(2012, Calendar.JANUARY, 1);
         filterDao.setFromSearchDate(calendar.getTime());
         calendar.set(2014, Calendar.DECEMBER, 31);
         filterDao.setToSearchDate(calendar.getTime());

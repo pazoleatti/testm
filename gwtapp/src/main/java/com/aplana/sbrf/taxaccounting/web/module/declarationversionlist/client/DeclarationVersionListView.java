@@ -6,16 +6,21 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.Decla
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.shared.DeclarationTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -27,6 +32,9 @@ import java.util.List;
  * User: avanteev
  */
 public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionListUIHandlers> implements DeclarationVersionListPresenter.MyView{
+
+    private static final DateTimeFormat SDF = DateTimeFormat.getFormat("dd.MM.yyyy");
+
     interface Binder extends UiBinder<Widget, DeclarationVersionListView> {
     }
 
@@ -41,6 +49,9 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     @UiField
     LinkButton deleteVersion;
 
+    private ListDataProvider<DeclarationTemplateVersion> dataProvider = new ListDataProvider<DeclarationTemplateVersion>();
+    private ColumnSortEvent.ListHandler<DeclarationTemplateVersion> dataSortHandler;
+
     @Inject
     public DeclarationVersionListView(Binder binder) {
         initWidget(binder.createAndBindUi(this));
@@ -52,13 +63,13 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
             }
         });
         dtVersionCellTable.setSelectionModel(selectionModel);
+        dataProvider.addDataDisplay(dtVersionCellTable);
 
         // колонка Наименование декларации
         Column<DeclarationTemplateVersion, DeclarationTemplateVersion> linkColumn = new Column<DeclarationTemplateVersion, DeclarationTemplateVersion>(
                 new AbstractCell<DeclarationTemplateVersion>() {
                     @Override
-                    public void render(Context context,
-                                       DeclarationTemplateVersion declarationTemplateVersion,
+                    public void render(Context context,DeclarationTemplateVersion declarationTemplateVersion,
                                        SafeHtmlBuilder sb) {
                         if (declarationTemplateVersion == null) {
                             return;
@@ -75,29 +86,66 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
                 return object;
             }
         };
-
-        dtVersionCellTable.addResizableColumn(linkColumn, "Наименование");
-
-        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
+        TextColumn<DeclarationTemplateVersion> versionColumn = new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return String.valueOf(object.getVersionNumber());
             }
-        }, "Версия");
-
-        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
+        };
+        TextColumn<DeclarationTemplateVersion> startColumn = new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return object.getActualBeginVersionDate();
             }
-        }, "Начало актуального периода");
-
-        dtVersionCellTable.addResizableColumn(new TextColumn<DeclarationTemplateVersion>() {
+        };
+        TextColumn<DeclarationTemplateVersion> endColumn = new TextColumn<DeclarationTemplateVersion>() {
             @Override
             public String getValue(DeclarationTemplateVersion object) {
                 return object.getActualEndVersionDate();
             }
-        }, "Окончание актуальности периода");
+        };
+        linkColumn.setSortable(true);
+        versionColumn.setSortable(true);
+        startColumn.setSortable(true);
+        endColumn.setSortable(true);
+
+        dtVersionCellTable.addResizableColumn(linkColumn, "Наименование");
+        dtVersionCellTable.addResizableColumn(versionColumn, "Версия");
+        dtVersionCellTable.addResizableColumn(startColumn, "Начало актуального периода");
+        dtVersionCellTable.addResizableColumn(endColumn, "Окончание актуальности периода");
+
+        dtVersionCellTable.setColumnWidth(linkColumn, 50, Style.Unit.PCT);
+        dtVersionCellTable.setColumnWidth(versionColumn, 10, Style.Unit.PCT);
+        dtVersionCellTable.setColumnWidth(startColumn, 20, Style.Unit.PCT);
+        dtVersionCellTable.setColumnWidth(endColumn, 20, Style.Unit.PCT);
+
+        dataSortHandler = new ColumnSortEvent.ListHandler<DeclarationTemplateVersion>(dataProvider.getList());
+        dataSortHandler.setComparator(linkColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {
+            @Override
+            public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
+                return compareWithNull(o1.getTypeName(), o2.getTypeName());
+            }
+        });
+        dataSortHandler.setComparator(versionColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {
+            @Override
+            public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
+                return compareWithNull(o1.getVersionNumber(), o2.getVersionNumber());
+            }
+        });
+        dataSortHandler.setComparator(startColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {
+            @Override
+            public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
+                return compareWithNull(o1.getActualBeginVersionDate(), o2.getActualBeginVersionDate());
+            }
+        });
+        dataSortHandler.setComparator(endColumn, new ComparatorWithNull<DeclarationTemplateVersion, String>() {
+            @Override
+            public int compare(DeclarationTemplateVersion o1, DeclarationTemplateVersion o2) {
+                return compareWithNull(o1.getActualEndVersionDate(), o2.getActualEndVersionDate());
+            }
+        });
+
+        dtVersionCellTable.addColumnSortHandler(dataSortHandler);
     }
 
     @UiHandler("returnAnchor")
@@ -107,12 +155,12 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
             event.preventDefault();
             event.stopPropagation();
         }
-
     }
 
     @Override
     public void setDTVersionTable(List<DeclarationTemplateVersion> fullList) {
-        dtVersionCellTable.setRowData(fullList);
+        dataProvider.setList(fullList);
+        dataSortHandler.setList(dataProvider.getList());
     }
 
     @Override

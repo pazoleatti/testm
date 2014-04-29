@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
@@ -27,8 +26,6 @@ import java.util.*;
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	@Autowired
 	private TAUserDao userDao;
-	@Autowired
-	private DepartmentDao departmentDao;
     @Autowired
 	private DeclarationTypeDao declarationTypeDao;
 	@Autowired
@@ -64,7 +61,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         if (isEventColumn) {
             sql.append("em.event_title, ");
         }
-        sql.append("ls.user_department_id ");
+        sql.append("ls.user_department_name ");
         sql.append(" from log_system ls ");
 
         sql.append("left join form_type ft on ls.form_type_id=ft.\"ID\" ");
@@ -131,14 +128,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         names.put("declarationDataIds", filter.getDeclarationDataIds());
         names.put("number", filter.getCountOfRecords());
         names.put("rpName", filter.getReportPeriodName());
-        names.put("departmentName", filter.getDepartmentName());
         names.put("startIdx", filter.getStartIndex() + 1);
         names.put("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
 
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
         sql.append("select ordDat.* from ( ");
-        sql.append("select ls.id, ls.log_date, ls.ip, ls.event_id, ls.user_id, ls.roles, ls.department_name, ls.declaration_type_id, ls.form_type_id, ls.form_kind_id, ls.note, ls.user_department_id, ls.report_period_name, ");
+        sql.append("select ls.id, ls.log_date, ls.ip, ls.event_id, ls.user_id, ls.roles, ls.department_name, ls.declaration_type_id, ls.form_type_id, ls.form_kind_id, ls.note, ls.user_department_name, ls.report_period_name, ");
         sql.append("rownum as rn FROM log_system ls ");
         appendJoinWhereClause(sql, filter);
         sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
@@ -173,7 +169,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
             jt.update(
                     "insert into log_system (id, log_date, ip, event_id, user_id, roles, department_name, report_period_name, " +
-                            "declaration_type_id, form_type_id, form_kind_id, note, user_department_id)" +
+                            "declaration_type_id, form_type_id, form_kind_id, note, user_department_name)" +
                             " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
                     logSystem.getLogDate(),
@@ -187,7 +183,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getFormTypeId(),
                     logSystem.getFormKindId(),
                     logSystem.getNote(),
-                    logSystem.getUserDepartmentId()
+                    logSystem.getUserDepartmentName()
             );
         } catch (DataAccessException e){
             logger.error("Ошибки при логировании.", e);
@@ -280,7 +276,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
 		if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()) {
-            sql.append(String.format(" AND %sdepartment_name = ", prefix)).append(filter.getDepartmentName());
+            sql.append(String.format(" AND lower(%sdepartment_name) LIKE lower(", prefix)).append("'%").
+                    append(filter.getDepartmentName()).append("%')");
 		}
 	}
 
@@ -294,8 +291,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
 			log.setUser(userDao.getUser(rs.getInt("user_id")));
 			log.setRoles(rs.getString("roles"));
-            Department dep = departmentDao.getDepartmentByName(rs.getString("department_name"));
-            log.setDepartmentName(dep != null ? departmentDao.getParentsHierarchy(dep.getId()) : "");
+            log.setDepartmentName(rs.getString("department_name"));
 			log.setReportPeriodName(rs.getString("report_period_name"));
             if(rs.getInt("declaration_type_id") != 0)
 			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
@@ -305,7 +301,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 				log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
 			}
 			log.setNote(rs.getString("note"));
-			log.setUserDepartment(departmentDao.getDepartment(rs.getInt("user_department_id")));
+			log.setUserDepartmentName(rs.getString("user_department_name"));
 			return log;
 		}
 	}
@@ -363,14 +359,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.note";
                 break;
             case REPORT_PERIOD:
-                column = "tp.year";
-                if (!ascSorting) {
-                    column = column + " DESC";
-                }
-                column = column + ", rp.name";
+                column = "ls.report_period_name";
                 break;
             case DEPARTMENT:
-                column = "dep.name";
+                column = "ls.department_name";
                 break;
             case TYPE:
                 column = "CASE WHEN ls.declaration_type_id != NULL THEN ls.declaration_type_id ELSE ls.form_type_id END";
@@ -452,7 +444,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append(" LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id");
         sql.append(" WHERE (ls.report_period_name = CAST(tp.year AS VARCHAR(4)) || ' ' || rp.name) ");
         sql.append(filterDao.getDepartmentName() != null && !filterDao.getDepartmentName().isEmpty() ?
-                " AND ls.department_name = :departmentName" : "");
+                " AND lower(ls.department_name) LIKE lower(\'%" + filterDao.getDepartmentName() + "%\')" : "");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
                 " AND ls.report_period_name = :rpName ":"");
         sql.append(filterDao.getFromSearchDate() != null && filterDao.getToSearchDate() != null ?

@@ -23,7 +23,7 @@ public class LogSystem implements Serializable {
 	private Integer formTypeId;
 	private Integer formKindId;
 	private String note;
-	private int userDepartmentId;
+    private String userDepartmentName;
 
     public String getReportPeriodName() {
         return reportPeriodName;
@@ -121,11 +121,11 @@ public class LogSystem implements Serializable {
 		this.note = note;
 	}
 
-	public int getUserDepartmentId() {
-		return userDepartmentId;
-	}
+    public String getUserDepartmentName() {
+        return userDepartmentName;
+    }
 
-	public void setUserDepartmentId(int userDepartmentId) {
-		this.userDepartmentId = userDepartmentId;
-	}
+    public void setUserDepartmentName(String userDepartmentName) {
+        this.userDepartmentName = userDepartmentName;
+    }
 }

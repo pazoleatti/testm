@@ -51,7 +51,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         void init();
         void setDeclarationType(Map<Integer, String> declarationTypesMap);
         void setFormDataTaxType(List<TaxType> taxTypeList);
-        /*void updateReportPeriodPicker(List<ReportPeriod> reportPeriods);*/
         LogSystemAuditFilter getFilterData();
         boolean isChangeFilter();
         void edit(LogSystemAuditFilter auditFilter);
@@ -81,14 +80,6 @@ public class AuditFilterPresenter extends PresenterWidget<AuditFilterPresenter.M
         previousLogSystemAuditFilter = getView().getFilterData();
         getView().edit(previousLogSystemAuditFilter);
         AuditClientSearchEvent.fire(this);
-    }
-
-    private Set<Integer> convertDepartmentsToIds(List<Department> source) {
-        Set<Integer> result = new HashSet<Integer>();
-        for (Department department : source) {
-            result.add(department.getId());
-        }
-        return result;
     }
 
     private Map<Integer, String> fillDeclarationTypeMap(List<DeclarationType> source) {

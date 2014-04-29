@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class GetConfigurationHandler extends
 			configTuple.setValue(entry.getValue());
 			tuples.add(configTuple);
 		}
+        Collections.sort(tuples);
 		GetConfigurationResult result = new GetConfigurationResult();
 		result.setData(tuples);
 		return result;

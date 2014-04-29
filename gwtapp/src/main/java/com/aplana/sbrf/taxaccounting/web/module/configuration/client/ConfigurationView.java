@@ -6,6 +6,7 @@ import java.util.List;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.client.ConfigurationPresenter.MyView;
 import com.aplana.sbrf.taxaccounting.web.module.configuration.shared.ConfigTuple;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,12 +15,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -45,8 +44,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 				return object.getParam().getCaption();
 			}
 		};
-        captionColumn.setSortable(true);
-		
+
 	    Column<ConfigTuple, String> valueColumn = new Column<ConfigTuple, String>(new EditTextCell()) {
 			@Override
 			public String getValue(ConfigTuple object) {
@@ -55,16 +53,18 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 		};
 	
 		valueColumn.setFieldUpdater(new FieldUpdater<ConfigTuple, String>() {
-			@Override
-			public void update(int index, ConfigTuple object,
-					String value) {
-				object.setValue(value);
-			}
-		});
+            @Override
+            public void update(int index, ConfigTuple object, String value) {
+                object.setValue(value);
+            }
+        });
+
+        captionColumn.setSortable(true);
         valueColumn.setSortable(true);
 		
 		configTable.addResizableColumn(captionColumn, "Наименование свойства");
 		configTable.addResizableColumn(valueColumn, "Значение свойства");
+
 		configTable.setSelectionModel(new NoSelectionModel<ConfigTuple>());
         configTupleListHandler = new ColumnSortEvent.ListHandler<ConfigTuple>(dataProvider.getList());
         configTupleListHandler.setComparator(captionColumn, new Comparator<ConfigTuple>() {
@@ -73,8 +73,14 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
                 return o1.getParam().getCaption().compareTo(o2.getParam().getCaption());
             }
         });
+        configTupleListHandler.setComparator(valueColumn, new ComparatorWithNull<ConfigTuple, String>() {
+            @Override
+            public int compare(final ConfigTuple o1, final ConfigTuple o2) {
+                return compareWithNull(o1.getValue(), o2.getValue());
+            }
+        });
         configTable.addColumnSortHandler(configTupleListHandler);
-
+        configTable.getColumnSortList().push(captionColumn);
         dataProvider.addDataDisplay(configTable);
 	}
 	
