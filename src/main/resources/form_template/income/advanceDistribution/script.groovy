@@ -510,9 +510,8 @@ void consolidation() {
                         newRow = dataRows.find {
                             it.regionBankDivision == row.regionBankDivision
                         }
-                        newRow = newRow ?: formData.createDataRow()
+                        newRow = formData.createDataRow()
 
-                        // TODO проверить консолидацию
                         newRow.regionBank = row.regionBank
                         newRow.regionBankDivision = row.regionBankDivision
                         newRow.kpp = row.kpp
