@@ -1,6 +1,6 @@
 package form_template.income.outcome_simple.v1970
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
 
 /**
  * Форма "Расходы, учитываемые в простых РНУ (расходы простые)"
- * formTemplateId=304
+ * formTypeId=304
  *
  * графа  1 - consumptionTypeId
  * графа  2 - consumptionGroup
@@ -102,6 +102,9 @@ def row50001alias = 'R108'
 @Field
 def row50002alias = 'R213'
 
+@Field
+def editableStyle = 'Редактирование (светло-голубой)'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -135,30 +138,6 @@ void fillRecordsMap(def ref_id, String alias, List<String> values, Date date) {
         }
         recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
     }
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
 }
 
 void calc() {
@@ -246,8 +225,9 @@ void calculationControlGraphs(def dataRows) {
         if (row.getAlias() in [row50001alias, row50002alias, 'R1', 'R36', 'R109', 'R214', 'R215', 'R216', 'R217', 'R218']) {
             continue
         }
-        if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
-                && row.getCell('rnu7Field12PrevTaxPeriod').isEditable()) {
+        if (row.getCell('rnu7Field10Sum')?.style?.alias == editableStyle
+                && row.getCell('rnu7Field12Accepted')?.style?.alias == editableStyle
+                && row.getCell('rnu7Field12PrevTaxPeriod')?.style?.alias == editableStyle) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
             tmp = round((row.rnu7Field10Sum ?: 0) - ((row.rnu7Field12Accepted ?: 0) - (row.rnu7Field12PrevTaxPeriod ?: 0)), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -289,7 +269,7 @@ def consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in [row50001alias, row50002alias]) {
                 row.getCell(alias).setValue(0, row.getIndex())
             }
         }
@@ -325,7 +305,7 @@ void consolidationSummary(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in [row50001alias, row50002alias]) {
                 row[alias] = 0
             }
         }
@@ -572,7 +552,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each {
         def cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row[it] == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row[it] == '')) {
             colNames.add('"' + getColumnName(row, it) + '"')
         }
     }
@@ -585,7 +565,7 @@ void checkRequiredColumns(def row, def columns) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('КНУ', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 3)
 
@@ -598,17 +578,11 @@ void importData() {
             (xml.row[0].cell[5]): 'РНУ-7 (графа 12)',
             (xml.row[0].cell[7]): 'РНУ-5 (графа 5) сумма',
             (xml.row[1].cell[5]): 'сумма',
-            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
+            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10'
     ]
-
+    (0..7).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -619,8 +593,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
     def int maxRow = 213
 
     def rows = dataRowHelper.allCached
@@ -683,21 +657,15 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 4
 
         // графа 5
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.rnu7Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 6
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.rnu7Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu7Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        }
+        curRow.rnu7Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8

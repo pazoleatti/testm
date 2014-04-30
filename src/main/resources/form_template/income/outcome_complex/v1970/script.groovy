@@ -3,13 +3,12 @@ package form_template.income.outcome_complex.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
  * Форма "Сводная форма начисленных расходов (расходы сложные)"
- * formTemplateId=303
+ * formTypeId=303
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
@@ -95,29 +94,8 @@ def endDate = null
 @Field
 def rbIncome102 = null
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
-}
+@Field
+def editableStyle = 'Редактирование (светло-голубой)'
 
 //// Кастомные методы
 
@@ -141,7 +119,8 @@ void calc() {
             sum6 = 0
             sum7 = 0
             for (rowSum in dataRows) {
-                if (!rowSum.getCell('consumptionBuhSumAccepted').isEditable() || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
+                if (rowSum.getCell('consumptionBuhSumAccepted')?.style?.alias != editableStyle
+                        || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
                     continue
                 }
                 String knySum
@@ -258,7 +237,7 @@ void consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -297,10 +276,9 @@ void consolidationSummary(def dataRows) {
         return
     }
     // очистить форму
-    // очистить форму
     dataRows.each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias != editableStyle) {
                 row[alias] = 0
             }
         }
@@ -664,7 +642,7 @@ def checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each {
         def cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
             def name = getColumnName(row, it)
             colNames.add('«' + name + '»')
         }
@@ -768,7 +746,7 @@ def getRnu12AddValue(def dataRowsChild, String knu, String columnChild) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('КНУ', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
 
@@ -784,19 +762,11 @@ void importData() {
             (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах',
             (xml.row[1].cell[7]): 'источник информации в РНУ',
             (xml.row[1].cell[8]): 'сумма',
-            (xml.row[1].cell[9]): 'форма РНУ',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10'
+            (xml.row[1].cell[9]): 'форма РНУ'
     ]
-
+    (0..9).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -807,8 +777,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
     def int maxRow = 90
 
     def rows = dataRowHelper.allCached
@@ -872,26 +842,19 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 5
 
         // графа 6
-        val = row.cell[xmlIndexCol].text().trim()
-        if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumAccepted = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.consumptionBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        val = row.cell[xmlIndexCol].text().trim()
-        if (val.isBigDecimal()) {
-            curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.consumptionBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8
         xmlIndexCol++
 
         // графа 9
-        val = row.cell[xmlIndexCol].text().trim()
-        if (!notImportSum.contains(alias) && val.isBigDecimal()) {
-            curRow.consumptionTaxSumS = parseNumber(val, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if (!notImportSum.contains(alias)) {
+            curRow.consumptionTaxSumS = parseNumber(row.cell[xmlIndexCol].text().trim(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
     }

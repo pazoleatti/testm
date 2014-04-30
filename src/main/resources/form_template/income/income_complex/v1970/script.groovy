@@ -3,7 +3,6 @@ package form_template.income.income_complex.v1970
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -12,7 +11,7 @@ import java.math.RoundingMode
 
 /**
  * Форма "6.1.1	Сводная форма начисленных доходов (доходы сложные)".
- * formTemplateId=302
+ * formTypeId=302
  *
  * TODO:
  *      - непонятно что делать при отсутствии простых доходов в getIncomeSimpleDataRows().
@@ -150,6 +149,9 @@ def rbIncome101 = null
 @Field
 def rbIncome102 = null
 
+@Field
+def editableStyle = 'Числовое значение'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -167,30 +169,6 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
         return recordCache[ref_id][filter]
     }
     return null
-}
-
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
 }
 
 void calc() {
@@ -263,7 +241,7 @@ void consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         editableColumns.each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -302,7 +280,7 @@ void consolidationSummary(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         editableColumns.each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -512,7 +490,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each { column ->
         def cell = row.getCell(column)
-        if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || cell.getValue() == '')) {
             def name = getColumnName(row, column)
             colNames.add('«' + name + '»')
         }
@@ -742,7 +720,7 @@ def getRow(def dataRows, def knu) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('КНУ', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
 
@@ -758,19 +736,11 @@ void importData() {
             (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах',
             (xml.row[1].cell[7]): 'источник информации в РНУ',
             (xml.row[1].cell[8]): 'сумма',
-            (xml.row[1].cell[9]): 'форма РНУ',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10'
+            (xml.row[1].cell[9]): 'форма РНУ'
     ]
-
+    (0..9).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -781,8 +751,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
     def int maxRow = 91
 
     def rows = dataRowHelper.allCached
@@ -840,24 +810,18 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 5
 
         // графа 6
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8
         xmlIndexCol++
 
         // графа 9
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
     }
     if (rowIndex < maxRow) {

@@ -98,11 +98,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             if (!(cell.getColumn() instanceof ReferenceColumn)) {
                                                 cell.setEditable(true);
                                                 if (cell.getStyle() == null) {
-                                                    cell.setColor("manual_editable_cell", Color.BLACK, Color.LIGHT_BLUE);
+                                                    cell.setClientStyle("manual_editable_cell", Color.BLACK, Color.LIGHT_BLUE);
                                                 }
                                             }  else {
                                                 if (cell.getStyle() == null) {
-                                                    cell.setColor("manual_non_editable_cell", Color.BLACK, Color.WHITE);
+                                                    cell.setClientStyle("manual_non_editable_cell", Color.BLACK, Color.WHITE);
                                                 }
                                             }
                                         }

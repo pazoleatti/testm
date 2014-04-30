@@ -34,7 +34,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionBuhSumAccountNumber</alias>
         <checking>false</checking>
-        <name>номер счёта учёта</name>
+        <name>Расход по данным бухгалтерского учёта. Номер счёта учёта</name>
         <order>4</order>
         <width>7</width>
         <maxLength>15</maxLength>
@@ -43,7 +43,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionBuhSumRnuSource</alias>
         <checking>false</checking>
-        <name>источник информации в РНУ</name>
+        <name>Расход по данным бухгалтерского учёта. Источник информации в РНУ</name>
         <order>5</order>
         <width>7</width>
         <maxLength>255</maxLength>
@@ -52,7 +52,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionBuhSumAccepted</alias>
         <checking>false</checking>
-        <name>сумма</name>
+        <name>Расход по данным бухгалтерского учёта. Сумма</name>
         <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -61,7 +61,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionBuhSumPrevTaxPeriod</alias>
         <checking>false</checking>
-        <name>в т.ч. учтено в предыдущих налоговых периодах</name>
+        <name>Расход по данным бухгалтерского учёта. В т.ч. учтено в предыдущих налоговых периодах</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -70,7 +70,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionTaxSumRnuSource</alias>
         <checking>false</checking>
-        <name>источник информации в РНУ</name>
+        <name>Расход по данным налогового учёта. Источник информации в РНУ</name>
         <order>8</order>
         <width>7</width>
         <maxLength>255</maxLength>
@@ -79,7 +79,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>consumptionTaxSumS</alias>
         <checking>false</checking>
-        <name>сумма</name>
+        <name>Расход по данным налогового учёта. Сумма</name>
         <order>9</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -88,7 +88,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>rnuNo</alias>
         <checking>false</checking>
-        <name>Форма РНУ</name>
+        <name>Расход по данным налогового учёта. Форма РНУ</name>
         <order>10</order>
         <width>5</width>
         <maxLength>50</maxLength>
@@ -115,7 +115,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByEnclosure3</alias>
         <checking>true</checking>
-        <name>в Приложении №6</name>
+        <name>Сумма по бухгалтерскому учёту в Приложении №6</name>
         <order>13</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -124,7 +124,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByTableP</alias>
         <checking>true</checking>
-        <name>в Таблице &quot;Р&quot;</name>
+        <name>Сумма по бухгалтерскому учёту в Таблице "Р"</name>
         <order>14</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -133,7 +133,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumTotal</alias>
         <checking>true</checking>
-        <name>в бухгалтерской отчётности</name>
+        <name>Сумма по бухгалтерскому учёту в бухгалтерской отчётности</name>
         <order>15</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -191,14 +191,14 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Значение в столбце &quot;Логическая проверка&quot;</alias>
+        <alias>Значение в столбце "Логическая проверка"</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Спец. в столбце &quot;Логическая проверка&quot;</alias>
+        <alias>Спец. в столбце "Логическая проверка"</alias>
         <backColor>RED</backColor>
         <bold>true</bold>
         <fontColor>WHITE</fontColor>
@@ -219,7 +219,7 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Значение в столбце &quot;Расхождение&quot;</alias>
+        <alias>Значение в столбце "Расхождение"</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_BLUE</fontColor>
