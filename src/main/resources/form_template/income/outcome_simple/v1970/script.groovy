@@ -102,6 +102,9 @@ def row50001alias = 'R108'
 @Field
 def row50002alias = 'R213'
 
+@Field
+def editableStyle = 'Редактирование (светло-голубой)'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -222,8 +225,9 @@ void calculationControlGraphs(def dataRows) {
         if (row.getAlias() in [row50001alias, row50002alias, 'R1', 'R36', 'R109', 'R214', 'R215', 'R216', 'R217', 'R218']) {
             continue
         }
-        if (row.getCell('rnu7Field10Sum').isEditable() && row.getCell('rnu7Field12Accepted').isEditable()
-                && row.getCell('rnu7Field12PrevTaxPeriod').isEditable()) {
+        if (row.getCell('rnu7Field10Sum')?.style?.alias == editableStyle
+                && row.getCell('rnu7Field12Accepted')?.style?.alias == editableStyle
+                && row.getCell('rnu7Field12PrevTaxPeriod')?.style?.alias == editableStyle) {
             // графы 9 = ОКРУГЛ(«графа 5» - («графа 6» - «графа 7»); 2)
             tmp = round((row.rnu7Field10Sum ?: 0) - ((row.rnu7Field12Accepted ?: 0) - (row.rnu7Field12PrevTaxPeriod ?: 0)), 2)
             value = ((BigDecimal) tmp).setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -265,7 +269,7 @@ def consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in [row50001alias, row50002alias]) {
                 row.getCell(alias).setValue(0, row.getIndex())
             }
         }
@@ -301,7 +305,7 @@ void consolidationSummary(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in [row50001alias, row50002alias]) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in [row50001alias, row50002alias]) {
                 row[alias] = 0
             }
         }
@@ -548,7 +552,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each {
         def cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row[it] == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row[it] == '')) {
             colNames.add('"' + getColumnName(row, it) + '"')
         }
     }
