@@ -142,9 +142,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("rownum as rn FROM log_system ls ");
         appendJoinWhereClause(sql, filter);
         sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
-        sql.append(")");
+        sql.append(") ordDat");
         if(filter.getCountOfRecords() != 0){
-            sql.append("ordDat where ordDat.rn between :startIdx and :endIdx");
+            sql.append(" where ordDat.rn between :startIdx and :endIdx");
         }
 
         try {
