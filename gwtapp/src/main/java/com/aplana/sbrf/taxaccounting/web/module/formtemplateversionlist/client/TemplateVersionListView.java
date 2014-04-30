@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstan
 import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.shared.FormTemplateVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -13,10 +14,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -32,11 +36,6 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     interface Binder extends UiBinder<Widget, TemplateVersionListView> {
     }
-    private SingleSelectionModel<FormTemplateVersion> selectionModel;
-
-
-    @UiField
-    GenericCellTable<FormTemplateVersion> ftVersionCellTable;
 
     @UiField
     Anchor returnAnchor;
@@ -50,10 +49,20 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
     @UiField
     LinkButton deleteVersion;
 
+    @UiField
+    GenericCellTable<FormTemplateVersion> ftVersionCellTable;
+
+    private SingleSelectionModel<FormTemplateVersion> selectionModel;
+    private ListDataProvider<FormTemplateVersion> dataProvider;
+    private ColumnSortEvent.ListHandler<FormTemplateVersion> sortHandler;
+
     @Inject
     public TemplateVersionListView(Binder binder) {
         initWidget(binder.createAndBindUi(this));
         selectionModel = new SingleSelectionModel<FormTemplateVersion>();
+        dataProvider = new ListDataProvider<FormTemplateVersion>();
+        sortHandler = new ColumnSortEvent.ListHandler<FormTemplateVersion>(dataProvider.getList());
+
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -85,33 +94,71 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
             }
         };
 
-        ftVersionCellTable.addResizableColumn(linkColumn, "Наименование");
-
-        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
+        TextColumn<FormTemplateVersion> versionColumn = new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return String.valueOf(object.getVersionNumber());
             }
-        }, "Версия");
+        };
 
-        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
+        TextColumn<FormTemplateVersion> startColumn = new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualBeginVersionDate();
             }
-        }, "Начало актуального периода");
+        };
 
-        ftVersionCellTable.addResizableColumn(new TextColumn<FormTemplateVersion>() {
+        TextColumn<FormTemplateVersion> endColumn = new TextColumn<FormTemplateVersion>() {
             @Override
             public String getValue(FormTemplateVersion object) {
                 return object.getActualEndVersionDate();
             }
-        }, "Окончание актуальности периода");
+        };
+        linkColumn.setSortable(true);
+        versionColumn.setSortable(true);
+        startColumn.setSortable(true);
+        endColumn.setSortable(true);
+
+        sortHandler.setComparator(linkColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
+            @Override
+            public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
+                return compareWithNull(o1.getTypeName(), o2.getTypeName());
+            }
+        });
+        sortHandler.setComparator(versionColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
+            @Override
+            public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
+                return compareWithNull(o1.getVersionNumber(), o2.getVersionNumber());
+            }
+        });
+        sortHandler.setComparator(startColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
+            @Override
+            public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
+                return compareWithNull(o1.getActualBeginVersionDate(), o2.getActualBeginVersionDate());
+            }
+        });
+        sortHandler.setComparator(endColumn, new ComparatorWithNull<FormTemplateVersion, String>() {
+            @Override
+            public int compare(FormTemplateVersion o1, FormTemplateVersion o2) {
+                return compareWithNull(o1.getActualEndVersionDate(), o2.getActualEndVersionDate());
+            }
+        });
+
+        ftVersionCellTable.addResizableColumn(linkColumn, "Наименование");
+        ftVersionCellTable.addResizableColumn(versionColumn, "Версия");
+        ftVersionCellTable.addResizableColumn(startColumn, "Начало актуального периода");
+        ftVersionCellTable.addResizableColumn(endColumn, "Окончание актуальности периода");
+
+        dataProvider.addDataDisplay(ftVersionCellTable);
+
+        ftVersionCellTable.addColumnSortHandler(sortHandler);
     }
 
     @Override
     public void setFTVersionTable(List<FormTemplateVersion> userFullList) {
-        ftVersionCellTable.setRowData(userFullList);
+        dataProvider.setList(userFullList);
+        ftVersionCellTable.setVisibleRange(new Range(0, userFullList.size()));
+        sortHandler.setList(dataProvider.getList());
     }
 
     @Override

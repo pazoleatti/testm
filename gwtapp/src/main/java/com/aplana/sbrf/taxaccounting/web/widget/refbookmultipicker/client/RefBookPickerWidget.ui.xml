@@ -14,7 +14,9 @@
             border-right: 0;
             margin-top: 0;
             margin-bottom: 0;
-
+            display: inline-block;
+            vertical-align: middle;
+            height: 16px;
             /*многоточие*/
             overflow: hidden;
             white-space: nowrap;
@@ -26,16 +28,16 @@
             border: 1px solid #009900;
             border-right-width: 0;
             border-left-width: 0;
+            display: inline-block;
             vertical-align: middle;
-            display: block;
             margin-left: -14px;
         }
 
         .selectButton {
             border: 1px solid #009900;
-            vertical-align: middle;
             cursor: pointer;
-            display: block;
+            display: inline-block;
+            vertical-align: middle;
         }
     </ui:style>
 

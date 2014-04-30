@@ -20,7 +20,9 @@ public class MessageDialogPresenter extends
 		void setStackTrace(Throwable throwable);
 
 		void setModal(boolean modal);
-	}
+
+        void setErrorImage(boolean showErrorImage);
+    }
 
 	@Inject
 	public MessageDialogPresenter(final EventBus eventBus, final MyView view) {
@@ -32,6 +34,7 @@ public class MessageDialogPresenter extends
 		getView().setMessage(messageEvent.getMessage());
 		getView().setModal(true);
 		getView().setStackTrace(messageEvent.getThrowable());
+        getView().setErrorImage(messageEvent.isError());
 		DialogBoxChangeVisibilityEvent.fire(this, true);
 		super.onReveal();
 	}

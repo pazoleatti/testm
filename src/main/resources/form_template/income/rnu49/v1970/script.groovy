@@ -13,7 +13,7 @@ import groovy.transform.Field
 
 /**
  * Форма "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»".
- * formTemplateId = 312
+ * formTypeId = 312
  *
  * @author rtimerbaev
  */
@@ -135,7 +135,7 @@ def currentReportPeriod = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
+                      def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getEndDate(), rowIndex, colIndex, logger, required)
 }
@@ -147,12 +147,12 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
+    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 /** Получить дату по строковому представлению (формата дд.ММ.гггг) */
 def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, false)
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 def addNewRow() {
@@ -554,7 +554,7 @@ def getSaleCode(def id) {
 
 def DataRow getRow46(DataRow row49, def dataRows46) {
     if (dataRows46 != null && getSaledPropertyCode(row49.saledPropertyCode) == 1) {
-        for (def row46 : dataRows46) {
+        for (def row46 : dataRows46.reverse()) {
             if (row46.invNumber == row49.invNumber) {
                 return row46
             }
@@ -565,7 +565,7 @@ def DataRow getRow46(DataRow row49, def dataRows46) {
 
 def DataRow getRow45(DataRow row49, def dataRows45) {
     if (dataRows45 != null && getSaledPropertyCode(row49.saledPropertyCode) == 2) {
-        for (def row45 : dataRows45) {
+        for (def row45 : dataRows45.reverse()) {
             if (row45.inventoryNumber == row49.invNumber) {
                 return row45
             }
@@ -576,7 +576,7 @@ def DataRow getRow45(DataRow row49, def dataRows45) {
 
 def getStartDate() {
     if (reportPeriodStartDate == null) {
-        reportPeriodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+        reportPeriodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     }
     return reportPeriodStartDate
 }

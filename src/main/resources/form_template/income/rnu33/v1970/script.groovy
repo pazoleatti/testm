@@ -136,7 +136,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required) {
+                      def boolean required = true) {
     if (value == null || value == '') {
         return null
     }
@@ -146,12 +146,12 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 // Получение числа из строки при импорте
 def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, false)
+    return parseNumber(value, indexRow, indexCol, logger, true)
 }
 
 /** Получить дату по строковому представлению (формата дд.ММ.гггг) */
 def getDate(def value, def indexRow, def indexCol) {
-    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, false)
+    return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
 void calc() {
@@ -608,11 +608,11 @@ void addData(def xml, int headRowCount) {
 
         // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
         def xmlIndexCol = 2
-        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 3 - атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
         xmlIndexCol = 3
-        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 4 - атрибут 814 - ISSUE - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
         xmlIndexCol = 4

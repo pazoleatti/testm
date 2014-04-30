@@ -46,10 +46,10 @@ public final class Dialog extends ModalWindow {
         ImageResource warningImage();
     }
 
-    private static Image infoImage = new Image(mwRes.infoImage());
-    private static Image errorImage = new Image(mwRes.errorImage());
-    private static Image questionImage = new Image(mwRes.questionImage());
-    private static Image warningImage = new Image(mwRes.warningImage());
+    public static Image infoImage = new Image(mwRes.infoImage());
+    public static Image errorImage = new Image(mwRes.errorImage());
+    public static Image questionImage = new Image(mwRes.questionImage());
+    public static Image warningImage = new Image(mwRes.warningImage());
 
     private boolean initDialog = false;
 

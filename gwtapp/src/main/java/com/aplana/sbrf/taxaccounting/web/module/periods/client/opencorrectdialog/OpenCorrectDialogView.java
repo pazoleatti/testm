@@ -21,10 +21,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDialogUiHandlers>
@@ -72,6 +69,7 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
 	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable) {
 		departmentPicker.setAvalibleValues(departments, avalDepartments);
 		departmentPicker.setEnabled(enable);
+        setSelectedDepartment(selectedDepartments.get(0).getDepartmentId());
 	}
 
 	@Override
@@ -129,5 +127,10 @@ public class OpenCorrectDialogView extends PopupViewWithUiHandlers<OpenCorrectDi
     @Override
     public ReportPeriod getSelectedPeriod() {
         return periodList.getValue();
+    }
+
+    @Override
+    public boolean canChangeDepartment() {
+        return  departmentPicker.isEnabled();
     }
 }

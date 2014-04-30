@@ -433,15 +433,6 @@ public class PeriodServiceImpl implements PeriodService{
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
-		LogSystemFilter logFilter = new LogSystemFilter();
-        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-		logFilter.setReportPeriodName(String.format(AuditService.RP_NAME_PATTERN,
-                String.valueOf(reportPeriod.getTaxPeriod().getYear()), reportPeriod.getName()));
-		if (!auditService.getLogsByFilter(logFilter).isEmpty()) {
-			logs.add(new LogEntry(LogLevel.ERROR,
-					"В удаляемом периоде были произведены действия, которые отражены в \"Журнале аудита\". Удаление периода невозможно!"));
-			return false;
-		}
 		boolean canRemove = true;
 		Set<Integer> blockedBy = new HashSet<Integer>();
         List<FormData> formDataList = formDataDao.find(departments, reportPeriodId);
@@ -481,7 +472,11 @@ public class PeriodServiceImpl implements PeriodService{
 
 	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs) {
 		for (Integer id : departmentId) {
-            long drpId = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate).getId();
+            DepartmentReportPeriod drp = departmentReportPeriodDao.get(reportPeriodId, id.longValue(), correctionDate);
+            if (drp == null) {
+                continue;
+            }
+            Long drpId = drp.getId();
 			departmentReportPeriodDao.delete(drpId);
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
 			ReportPeriod rp = reportPeriodDao.get(reportPeriodId);

@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -111,6 +112,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 	@Override
 	public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result) {
         dataProvider.setList(result);
+        declarationTemplateTable.setVisibleRange(new Range(0, result.size()));
         dataSortHandler.setList(dataProvider.getList());
 	}
 

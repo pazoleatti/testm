@@ -117,7 +117,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		appendOrderByClause(sql, ordering, ascSorting);
 		sql.append(") dat) ordDat where ordDat.rn between ? and ?")
 				.append(" order by ordDat.rn");
-		List<DeclarationDataSearchResultItem> records = getJdbcTemplate().query(
+        List<DeclarationDataSearchResultItem> records = getJdbcTemplate().query(
 				sql.toString(),
 				new Object[] {
 						pageParams.getStartIndex() + 1,	// В java нумерация с 0, в БД row_number() нумерует с 1
@@ -254,6 +254,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 			case DECLARATION_TYPE_NAME:
 				column = "dectype.name";
 				break;
+            case DECLARATION_ACCEPTED:
+                column = "dec.is_accepted";
+                break;
+            case REPORT_PERIOD_YEAR:
+                column = "tp.year";
+                break;
 		}
 
 		if (column != null) {

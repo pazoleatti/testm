@@ -34,11 +34,7 @@
             margin-right: 5px;
         }
 
-        .marginRight10 {
-            margin-right: 10px;
-        }
-
-        .lableStyle{
+        .lableStyle {
             font-weight: bold;
         }
 
@@ -60,7 +56,7 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
-                            <g:Label text="Дата последней архивации: "/>
+                            <g:Label text="Дата последней архивации: " ui:field="archiveLbl"/>
                             <g:Label ui:field="archiveDateLbl" styleName="{style.lableStyle}" />
                             <style:LinkAnchor text="Архивировать" ui:field="archive" img="resources/img/starfish-16.png"
                                               title="Архивировать"/>

@@ -93,10 +93,10 @@ public class DeclarationServiceTest {
 
         RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
         PeriodService reportPeriodService = mock(PeriodService.class);
-        when(reportPeriodService.getStartDate(48)).thenReturn(currentCalendar);
+        when(reportPeriodService.getEndDate(48)).thenReturn(currentCalendar);
         PagingResult<Map<String, RefBookValue>> list = new PagingResult<Map<String, RefBookValue>>();
         list.add(departmentParam);
-        when(dataProvider.getRecords(currentCalendar.getTime(), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
+        when(dataProvider.getRecords(addDayToDate(currentCalendar.getTime(), -1), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
 
         RefBookFactory factory = mock(RefBookFactory.class);
         when(factory.getDataProvider(31L)).thenReturn(dataProvider);
@@ -117,5 +117,12 @@ public class DeclarationServiceTest {
         //В свзязи с изменениями в DECLARATION_DATA (http://jira.aplana.com/browse/SBRFACCTAX-4544)
         //зкомментил тест, слишком громозко для изменения.
         /*assertTrue(service.getXmlData(1) != null);*/
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 }

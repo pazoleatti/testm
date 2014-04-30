@@ -22,9 +22,7 @@ import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -43,6 +41,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
         List<Integer> getSelectedDepartments();
         Date getTerm();
         ReportPeriod getSelectedPeriod();
+        boolean canChangeDepartment();
 	}
 
 	private DispatchAsync dispatcher;
@@ -62,7 +61,32 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 	}
 
 	public void setDepartments(List<Department> departments, Set<Integer> avalDepartments, List<DepartmentPair> selectedDepartments, boolean enable) {
-		getView().setDepartments(departments, avalDepartments, selectedDepartments, enable);
+        List<DepartmentPair> selDep = new ArrayList<DepartmentPair>();
+        if (selectedDepartments != null) {
+            selDep.addAll(selectedDepartments);
+        }
+        if (enable) { // Убираем возможность выбирать банк
+            if (avalDepartments.remove(0)) {
+
+                for (Iterator<DepartmentPair> it = selDep.iterator(); it.hasNext(); ) {
+                    if (it.next().getDepartmentId() == 0) {
+                        it.remove();
+                    }
+                }
+
+                Department firstDep = departments.get(0);
+                for (Department dep : departments) {
+                    if (dep.getId() != 0) {
+                        firstDep = dep;
+                        break;
+                    }
+                }
+                DepartmentPair selectedDep = new DepartmentPair(firstDep.getId(), firstDep.getParentId(), firstDep.getName());
+                selDep.add(selectedDep);
+            }
+        }
+
+        getView().setDepartments(departments, avalDepartments, selDep, enable);
 	}
 
 	public void setCanChangeDepartment(boolean canChange) {
@@ -105,7 +129,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
             return;
         }
 
-        if (getView().getSelectedPeriod().getCalendarStartDate().before(getView().getTerm())) {
+        if (getView().getSelectedPeriod().getCalendarStartDate().after(getView().getTerm())) {
             Dialog.errorMessage("Календарный год периода сдачи корректировки не должен быть меньше календарного года корректируемого периода!");
             return;
         }
@@ -164,7 +188,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                         .defaultCallback(new AbstractCallback<OpenCorrectPeriodResult>() {
                             @Override
                             public void onSuccess(OpenCorrectPeriodResult result) {
-                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getTerm().getYear()+1900);
+                                PeriodCreated.fire(OpenCorrectDialogPresenter.this, true, getView().getSelectedPeriod().getStartDate().getYear()+1900);
                                 LogAddEvent.fire(OpenCorrectDialogPresenter.this, result.getUuid());
                                 getView().hide();
                             }
@@ -178,7 +202,9 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
 	}
 
     public void setSelectedDepartment(Integer departmentId){
-        getView().setSelectedDepartment(departmentId);
+        if (departmentId != 0 && getView().canChangeDepartment()) {
+            getView().setSelectedDepartment(departmentId);
+        }
     }
 
 	public void resetToDefault() {
