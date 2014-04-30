@@ -31,9 +31,6 @@ public class FilterDeclarationTemplateView extends ViewWithUiHandlers<FilterDecl
     ValueListBox<TaxType> taxType;
 
     @UiField
-    CheckBox active;
-
-    @UiField
     TextBox searchText;
 
 	@Ignore

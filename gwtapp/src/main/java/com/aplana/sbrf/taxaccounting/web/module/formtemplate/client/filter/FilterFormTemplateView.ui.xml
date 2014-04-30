@@ -18,10 +18,6 @@
         </g:cell>
 
         <g:cell verticalAlignment="middle">
-            <g:CheckBox width="150px" ui:field="active" text="Признак активности"/>
-        </g:cell>
-
-        <g:cell verticalAlignment="middle">
             <g:TextBox width="150px" ui:field="searchText" />
         </g:cell>
 

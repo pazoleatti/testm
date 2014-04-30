@@ -165,7 +165,6 @@ public class FormTemplateDaoTest {
     public void testGetByFilter() {
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.TRANSPORT);
-        filter.setActive(true);
         Assert.assertEquals(1, formTemplateDao.getByFilter(filter).size());
     }
 
