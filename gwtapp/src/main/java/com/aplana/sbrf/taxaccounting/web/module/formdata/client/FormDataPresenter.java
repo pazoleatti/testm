@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -82,12 +84,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			action.setReadOnly(readOnlyMode);
             action.setManual(formData.isManual());
 			action.setFormDataTemplateId(formData.getFormTemplateId());
-			dispatcher.execute(action, CallbackUtils
+            action.setInnerLogUuid(innerLogUuid);
+            System.out.println("innerLogUuid1 : "+innerLogUuid);
+            dispatcher.execute(action, CallbackUtils
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
+                            System.out.println("innerLogUuid2 : "+innerLogUuid);
                             if (result != null) {
                                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                                innerLogUuid = null;
                             }
                             if (result == null || result.getDataRows().getTotalCount() == 0) {
                                 getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
@@ -264,19 +270,23 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		revealFormData(true, formData.isManual(), null);
 	}
 	
-	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){ 
+	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){
 			LogCleanEvent.fire(this);
 			AbstractCallback<DataRowResult> callback = new AbstractCallback<DataRowResult>() {
 				@Override
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
+                    innerLogUuid = result.getUuid();
 					getView().updateData();
-					LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+					//LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().setSelectedRow(result.getCurrentRow(), true);
 				}
 				
 				@Override
 				public void onFailure(Throwable caught) {
+                    if (caught instanceof TaActionException) {
+                        innerLogUuid = ((TaActionException) caught).getUuid();
+                    }
                     getView().updateData();
 				}
 
@@ -494,7 +504,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(GetFormDataResult result) {
 
-                                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                                //LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
@@ -574,6 +584,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                         : "Редактирование налоговой формы",
                                                 formData.getFormType()
                                                         .getName());
+                                innerLogUuid = result.getUuid();
 	                            getView().updateData(0);
 
                                 getView().updatePageSize(result.getFormData().getFormType().getTaxType());

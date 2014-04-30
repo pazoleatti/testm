@@ -66,7 +66,11 @@ public class GetRowsDataHandler extends
         Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),
                 formTemplate.getColumns());
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        if (action.getInnerLogUuid() != null && !action.getInnerLogUuid().isEmpty()) {
+            result.setUuid(logEntryService.update(logger.getEntries(), action.getInnerLogUuid()));
+        } else {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
 
 		return result;
 	}

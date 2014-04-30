@@ -148,6 +148,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	
 	protected boolean fixedRows;
 
+    /** Идентификатор сообщений в лог. Используется в случаях, когда не нужна перезагрузка страницы */
+    protected String innerLogUuid;
+
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
 
