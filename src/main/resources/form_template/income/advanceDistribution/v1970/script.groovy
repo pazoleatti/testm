@@ -460,24 +460,14 @@ void logicalCheckAfterCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def departmentRefDataProvider = refBookFactory.getDataProvider(30)
-
     for (def row : dataRows) {
         if (isFixedRow(row)) {
             continue
         }
         def index = row.getIndex()
-        def errorMsg = "Строка ${index}: "
 
         // 1. Обязательность заполнения поля графы 1..21
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // Проверки соответствия НСИ
-        def departmentRecord = departmentRefDataProvider.getRecordData(row.regionBankDivision);
-        // 1. Проверка совпадения наименования подразделения со справочным
-        if (departmentRecord.isEmpty()) {
-            logger.error(errorMsg + 'Неверное наименование подразделения!')
-        }
     }
 }
 
