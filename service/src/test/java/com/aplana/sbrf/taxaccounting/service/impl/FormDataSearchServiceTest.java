@@ -61,7 +61,6 @@ public class FormDataSearchServiceTest {
 	public void tearUp() {
 
         TemplateFilter filter = new TemplateFilter();
-        filter.setActive(true);
         filter.setTaxType(TaxType.TRANSPORT);
         when(formTypeService.getByFilter(filter)).thenReturn(FORM_TYPES_BY_TAX_TYPE);
         filter.setTaxType(TaxType.INCOME);

@@ -96,8 +96,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
-        StringBuilder query = new StringBuilder("select id from declaration_type where status = ");
-        query.append(filter.isActive()?0:1);
+        StringBuilder query = new StringBuilder("select id from declaration_type where status = 0");
         if (filter.getTaxType() != null) {
             query.append(" and TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
         }
