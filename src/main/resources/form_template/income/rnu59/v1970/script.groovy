@@ -190,50 +190,52 @@ def fillForm(){
         sort(data)
     }
 
-    data.getAllCached().each{ DataRow row ->
-        /**
-         * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
-         */
-        if (formDataEvent != FormDataEvent.IMPORT) {
-            // графа 9, 10
-            // A=«графа8» - «графа7»
-            BigDecimal a = (row.salePrice?:0) - (row.acquisitionPrice?:0)
-            // B=ОКРУГЛ(A;2),
-            BigDecimal b = roundTo2(a)
-            // C= ОКРУГЛ(ABS(A);2),
-            BigDecimal c = roundTo2(a.abs())
+    if (formData.kind == FormDataKind.PRIMARY) {
+        data.getAllCached().each { DataRow row ->
             /**
-             *    Если  .A>0, то
-             «графа 9» = B
-             «графа 10» = 0
-             Иначе Если  A<0
-             «графа 9» = 0
-             «графа 10» = С
-             Иначе
-             «графа 9»= «графа 10» = 0
+             * Табл. 199 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части»
              */
-            if (a.compareTo(0) > 0){
-                row.income = b
-                row.outcome = 0
-            } else if (a.compareTo(0) < 0){
-                row.income = 0
-                row.outcome = c
-            }   else{
-                row.income = 0
-                row.outcome = 0
+            if (formDataEvent != FormDataEvent.IMPORT) {
+                // графа 9, 10
+                // A=«графа8» - «графа7»
+                BigDecimal a = (row.salePrice ?: 0) - (row.acquisitionPrice ?: 0)
+                // B=ОКРУГЛ(A;2),
+                BigDecimal b = roundTo2(a)
+                // C= ОКРУГЛ(ABS(A);2),
+                BigDecimal c = roundTo2(a.abs())
+                /**
+                 *    Если  .A>0, то
+                 «графа 9» = B
+                 «графа 10» = 0
+                 Иначе Если  A<0
+                 «графа 9» = 0
+                 «графа 10» = С
+                 Иначе
+                 «графа 9»= «графа 10» = 0
+                 */
+                if (a.compareTo(0) > 0) {
+                    row.income = b
+                    row.outcome = 0
+                } else if (a.compareTo(0) < 0) {
+                    row.income = 0
+                    row.outcome = c
+                } else {
+                    row.income = 0
+                    row.outcome = 0
+                }
             }
+
+            // Графа 11
+            row.rateBR = roundTo2(calculateColumn11(row, row.part2REPODate))
+
+            // графа 12
+            row.outcome269st = roundTo2(calculateColumn12(row))
+
+            // Графа 13
+            row.outcomeTax = roundTo2(calculateColumn13(row))
         }
-
-        // Графа 11
-        row.rateBR = roundTo2(calculateColumn11(row,row.part2REPODate))
-
-        // графа 12
-        row.outcome269st = roundTo2(calculateColumn12(row))
-
-        // Графа 13
-        row.outcomeTax = roundTo2(calculateColumn13(row))
+        data.save(data.getAllCached())
     }
-    data.save(data.getAllCached())
 
     if (data.getAllCached().size()>0) {
         // строка для Итого

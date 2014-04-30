@@ -436,17 +436,19 @@ BigDecimal calc13(DataRow row) {
  * Табл. 207 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части»
  */
 void calc() {
-    def data = getData(formData)
-    for (DataRow row in getRows(data)) {
-        if (row.getAlias() == null) {
-            row.income = calc9(row)
-            row.outcome = calc10(row)
-            row.rateBR = calc11(row,row.part2REPODate)
-            row.outcome269st = calc12(row)
-            row.outcomeTax = calc13(row)
+    if (formData.kind == FormDataKind.PRIMARY) {
+        def data = getData(formData)
+        for (DataRow row in getRows(data)) {
+            if (row.getAlias() == null) {
+                row.income = calc9(row)
+                row.outcome = calc10(row)
+                row.rateBR = calc11(row, row.part2REPODate)
+                row.outcome269st = calc12(row)
+                row.outcomeTax = calc13(row)
+            }
         }
+        data.save(getRows(data));
     }
-    data.save(getRows(data));
 }
 
 /**
