@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <type>
-        <id>201</id>
-        <name>Сведения о транспортных средствах, по которым уплачивается транспортный налог</name>
-        <status>NORMAL</status>
-        <taxType>TRANSPORT</taxType>
-    </type>
     <fixedRows>false</fixedRows>
     <name>Сведения о транспортных средствах, по которым уплачивается транспортный налог</name>
     <fullName>Сведения о транспортных средствах, по которым уплачивается транспортный налог</fullName>
@@ -13,7 +7,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
-        <id>17555</id>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
@@ -23,10 +16,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>codeOKATO</alias>
         <checking>false</checking>
-        <id>17556</id>
         <name>Код ОКТМО</name>
         <order>2</order>
-        <width>11</width>
+        <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>841</nameAttributeId>
         <refBookAttributeId>840</refBookAttributeId>
@@ -34,17 +26,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>regionName</alias>
         <checking>false</checking>
-        <id>17557</id>
         <name>Муниципальное образование, на территории которого зарегистрировано транспортное средство (ТС)</name>
         <order>3</order>
-        <width>12</width>
-        <parentId>17556</parentId>
+        <width>20</width>
+        <parentAlias>codeOKATO</parentAlias>
         <refBookAttributeId>841</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>tsTypeCode</alias>
         <checking>false</checking>
-        <id>17558</id>
         <name>Код вида ТС</name>
         <order>4</order>
         <width>5</width>
@@ -55,38 +45,36 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>tsType</alias>
         <checking>false</checking>
-        <id>17559</id>
         <name>Вид ТС</name>
         <order>5</order>
         <width>10</width>
-        <parentId>17558</parentId>
+        <parentAlias>tsTypeCode</parentAlias>
         <refBookAttributeId>423</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>identNumber</alias>
         <checking>false</checking>
-        <id>17560</id>
         <name>Идентификационный номер</name>
         <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>model</alias>
         <checking>false</checking>
-        <id>17561</id>
         <name>Марка</name>
         <order>7</order>
         <width>7</width>
         <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>ecoClass</alias>
         <checking>false</checking>
-        <id>17562</id>
         <name>Экологический класс</name>
         <order>8</order>
-        <width>6</width>
+        <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>401</nameAttributeId>
         <refBookAttributeId>400</refBookAttributeId>
@@ -94,16 +82,15 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
-        <id>17563</id>
         <name>Регистрационный знак</name>
         <order>9</order>
-        <width>9</width>
+        <width>8</width>
         <maxLength>9</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>powerVal</alias>
         <checking>false</checking>
-        <id>17564</id>
         <name>Мощность (величина)</name>
         <order>10</order>
         <width>8</width>
@@ -113,10 +100,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>baseUnit</alias>
         <checking>false</checking>
-        <id>17565</id>
         <name>Мощность (ед. измерения)</name>
         <order>11</order>
-        <width>8</width>
+        <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>58</nameAttributeId>
         <refBookAttributeId>57</refBookAttributeId>
@@ -124,7 +110,6 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>year</alias>
         <checking>false</checking>
-        <id>17566</id>
         <name>Год изготовления</name>
         <order>12</order>
         <width>6</width>
@@ -133,37 +118,33 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>regDate</alias>
         <checking>false</checking>
-        <id>17567</id>
         <name>Регистрация (дата регистрации)</name>
         <order>13</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>regDateEnd</alias>
         <checking>false</checking>
-        <id>17568</id>
         <name>Регистрация (дата снятия с регистрации)</name>
         <order>14</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>stealDateStart</alias>
         <checking>false</checking>
-        <id>17569</id>
         <name>Сведения об угоне (дата начала розыска ТС)</name>
         <order>15</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>stealDateEnd</alias>
         <checking>false</checking>
-        <id>17570</id>
         <name>Сведения об угоне (дата возврата ТС)</name>
         <order>16</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <styles>
@@ -171,7 +152,6 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
-        <id>10580</id>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
