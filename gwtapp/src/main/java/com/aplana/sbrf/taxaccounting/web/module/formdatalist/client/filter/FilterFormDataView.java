@@ -214,8 +214,5 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         returnState.setValue(null);
         reportPeriodIds.setValue(null);
         departmentPicker.setValue(null);
-        if (getUiHandlers() != null) {
-            getUiHandlers().onApplyClicked();
-        }
     }
 }
