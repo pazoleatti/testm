@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -13,7 +12,7 @@ import java.text.SimpleDateFormat
 
 /**
  * Сводная форма "Доходы, учитываемые в простых РНУ (доходы простые)"
- * formTemplateId=301
+ * formTypeId=301
  *
  * TODO:
  *      - не сделан подсчет графы 13 (контрольные графы) потому что справочники "Отчет о прибылях и убытках" и "Оборотная ведомость" еще не реализованы
@@ -153,37 +152,13 @@ void fillRecordsMap(def ref_id, String alias, List<String> values, Date date) {
     }
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значении после обработки потока данных')
-    }
-    return xml
-}
-
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
 
     def row40001 = getDataRow(dataRows, 'R53')
     def row40002 = getDataRow(dataRows, 'R156')
-    totalColumns.each{ alias ->
+    totalColumns.each { alias ->
         row40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
         row40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
     }
@@ -311,7 +286,7 @@ void logicCheck() {
         logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
     }
 
-    dataRows.each {row ->
+    dataRows.each { row ->
         if (!rowsNotCalc.contains(row.getAlias())) {
             // Проверка обязательных полей
             checkRequiredColumns(row, nonEmptyColumns)
@@ -322,7 +297,7 @@ void logicCheck() {
     def row40002 = getDataRow(dataRows, 'R156')
     def need40001 = [:]
     def need40002 = [:]
-    totalColumns.each{ alias ->
+    totalColumns.each { alias ->
         need40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
         need40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
     }
@@ -412,7 +387,7 @@ def consolidationSummary(def dataRows) {
     }
 
     // Прошел по строкам и получил список кну
-    def knuList = ((2..52) + (55..155)).collect{
+    def knuList = ((2..52) + (55..155)).collect {
         def row = getDataRow(dataRows, 'R' + it)
         return row.incomeTypeId
     }
@@ -434,29 +409,28 @@ def consolidationSummary(def dataRows) {
                         def sum5 = 0
                         def sum6 = 0
                         def sum7 = 0
-                            dataChild.getAll().each {rowRNU6 ->
-                                if (rowRNU6.getAlias() == null) {
-                                    // если «графа 2» (столбец «Код налогового учета») формы источника = «графе 1» (столбец «КНУ») текущей строки и
-                                    //«графа 4» (столбец «Балансовый счёт (номер)») формы источника = «графе 4» (столбец «Балансовый счёт по учёту дохода»)
-                                    if (row.incomeTypeId != null && row.accountNo != null && recordId == rowRNU6.code && isEqualNum(row.accountNo, rowRNU6.code)) {
-                                        //«графа 5» =  сумма значений по «графе 10» (столбец «Сумма дохода в налоговом учёте. Рубли») всех форм источников вида «(РНУ-6)
-                                        sum5 += rowRNU6.taxAccountingRuble ?: 0
-                                        //«графа 6» =  сумма значений по «графе 12» (столбец «Сумма дохода в бухгалтерском учёте. Рубли») всех форм источников вида «(РНУ-6)
-                                        sum6 += rowRNU6.ruble ?: 0
-                                        //графа 7
-                                        if (rowRNU6.ruble != null && rowRNU6.ruble != 0) {
-                                            def dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(rowRNU6.date)) - 3))
-                                            def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
-                                            reportPeriodList.each { period ->
-                                                def primaryRNU6 = formDataService.find(child.formType.id, FormDataKind.PRIMARY, child.departmentId, period.getId()) // TODO не реализовано получение по всем подразделениям.
-                                                if (primaryRNU6 != null) {
-                                                    def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
-                                                    dataPrimary.getAll().each { rowPrimary ->
-                                                        if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
-                                                                rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
-                                                                rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                            sum7 += rowPrimary.taxAccountingRuble
-                                                        }
+                        dataChild.getAll().each { rowRNU6 ->
+                            if (rowRNU6.getAlias() == null) {
+                                // если «графа 2» (столбец «Код налогового учета») формы источника = «графе 1» (столбец «КНУ») текущей строки и
+                                //«графа 4» (столбец «Балансовый счёт (номер)») формы источника = «графе 4» (столбец «Балансовый счёт по учёту дохода»)
+                                if (row.incomeTypeId != null && row.accountNo != null && recordId == rowRNU6.code && isEqualNum(row.accountNo, rowRNU6.code)) {
+                                    //«графа 5» =  сумма значений по «графе 10» (столбец «Сумма дохода в налоговом учёте. Рубли») всех форм источников вида «(РНУ-6)
+                                    sum5 += rowRNU6.taxAccountingRuble ?: 0
+                                    //«графа 6» =  сумма значений по «графе 12» (столбец «Сумма дохода в бухгалтерском учёте. Рубли») всех форм источников вида «(РНУ-6)
+                                    sum6 += rowRNU6.ruble ?: 0
+                                    //графа 7
+                                    if (rowRNU6.ruble != null && rowRNU6.ruble != 0) {
+                                        def dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(rowRNU6.date)) - 3))
+                                        def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
+                                        reportPeriodList.each { period ->
+                                            def primaryRNU6 = formDataService.find(child.formType.id, FormDataKind.PRIMARY, child.departmentId, period.getId()) // TODO не реализовано получение по всем подразделениям.
+                                            if (primaryRNU6 != null) {
+                                                def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
+                                                dataPrimary.getAll().each { rowPrimary ->
+                                                    if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
+                                                            rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
+                                                            rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
+                                                        sum7 += rowPrimary.taxAccountingRuble
                                                     }
                                                 }
                                             }
@@ -464,6 +438,7 @@ def consolidationSummary(def dataRows) {
                                     }
                                 }
                             }
+                        }
                         row.rnu6Field10Sum += sum5
                         row.rnu6Field12Accepted += sum6
                         row.rnu6Field12PrevTaxPeriod += sum7
@@ -541,7 +516,7 @@ def checkRequiredColumns(def row, def columns) {
 
 // Получение импортируемых данных
 void importData() {
-    def xml = getXML('КНУ', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 3)
 
@@ -554,17 +529,11 @@ void importData() {
             (xml.row[0].cell[5]): 'РНУ-6 (графа 12)',
             (xml.row[0].cell[7]): 'РНУ-4 (графа 5) сумма',
             (xml.row[1].cell[5]): 'сумма',
-            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
+            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10'
     ]
-
+    (0..7).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
     checkHeaderEquals(headerMapping)
 
     addData(xml, 2)
@@ -575,8 +544,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
-    def int rowOffset = 3
-    def int colOffset = 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
     def int maxRow = 156
 
     def rows = dataRowHelper.allCached
@@ -638,25 +607,19 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 4
 
         // графа 5
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.rnu6Field10Sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 6
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.rnu6Field12Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 7
-        if (row.cell[xmlIndexCol].text().trim().isBigDecimal()){
-            curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        curRow.rnu6Field12PrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 8
-        curRow.rnu4Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        curRow.rnu4Field5Accepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
     }
     if (rowIndex < maxRow) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
@@ -671,17 +634,17 @@ def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAl
     if (from > to) {
         return 0
     }
-    return ((BigDecimal)summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
+    return ((BigDecimal) summ(formData, dataRows, new ColumnRange(columnAlias, from, to))).setScale(2, BigDecimal.ROUND_HALF_UP)
 }
 
-void checkTotalSum(totalRow, needRow){
+void checkTotalSum(totalRow, needRow) {
     def errorColumns = []
     totalColumns.each { totalColumn ->
         if (totalRow[totalColumn] != needRow[totalColumn]) {
             errorColumns += "\"" + getColumnName(totalRow, totalColumn) + "\""
         }
     }
-    if (!errorColumns.isEmpty()){
+    if (!errorColumns.isEmpty()) {
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графах ${errorColumns.join(", ")}!")
     }
 }
@@ -692,4 +655,3 @@ def getReportPeriodEndDate() {
     }
     return endDate
 }
-
