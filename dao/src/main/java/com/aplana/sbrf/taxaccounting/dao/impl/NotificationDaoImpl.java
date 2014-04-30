@@ -191,7 +191,19 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 				params.addValue("sdid", filter.getSenderDepartmentId());
 				query.append(" and nt.SENDER_DEPARTMENT_ID = :sdid");
 			}
-			query.append(" order by nt.create_date desc ");
+            query.append(" order by ");
+            switch (filter.getSortColumn()){
+                case DATE:
+                    query.append("nt.create_date ");
+                    break;
+                case TEXT:
+                    query.append("nt.text ");
+                    break;
+                default:
+                    query.append("nt.create_date ");
+                    break;
+            }
+            query.append(filter.isAsc() ? "asc " : "desc ");
 			query.append("))");
 			if ((filter.getStartIndex() != null) && (filter.getCountOfRecords() != null)) {
 				params.addValue("start", filter.getStartIndex() + 1);

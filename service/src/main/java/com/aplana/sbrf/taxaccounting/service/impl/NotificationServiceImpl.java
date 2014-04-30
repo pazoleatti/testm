@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -63,7 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public PagingResult<Notification> getByFilter(NotificationsFilterData filter) {
-		List<Notification> notifications = new ArrayList<Notification>();
+		List<Notification> notifications = new LinkedList<Notification>();
 		for (Integer id : notificationDao.getByFilter(filter)) {
 			notifications.add(notificationDao.get(id));
 		}

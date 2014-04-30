@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -23,7 +24,11 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 		void setRows(PagingResult<NotificationTableRow> rows, int startIndex);
 		void updateData(int pageNumber);
 		void updateData();
-	}
+
+        boolean isAsc();
+
+        NotificationsFilterData.SortColumn getSortColumn();
+    }
 
 	@Inject
 	public DialogPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
@@ -42,11 +47,14 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
 	@Override
 	public void onRangeChange(final int start, int length) {
 
-		GetNotificationsAction action = new GetNotificationsAction();
-		action.setStart(start);
-		action.setLength(length);
 
-		dispatchAsync.execute(action, CallbackUtils
+        NotificationsFilterData filterData = new NotificationsFilterData();
+        filterData.setStartIndex(start);
+        filterData.setCountOfRecords(length);
+        filterData.setAsc(getView().isAsc());
+        filterData.setSortColumn(getView().getSortColumn());
+
+		dispatchAsync.execute(new GetNotificationsAction(filterData), CallbackUtils
 				.defaultCallback(new AbstractCallback<GetNotificationsResult>() {
 					@Override
 					public void onSuccess(GetNotificationsResult result) {
