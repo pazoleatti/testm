@@ -154,15 +154,19 @@ public class GetMainMenuActionHandler extends
             settingMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN + SchedulerTokens.taskList));
         }*/
         // НСИ
-        MenuItem nsiMenuItem = new MenuItem("НСИ");
-        nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
+        if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                || currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)){
+            MenuItem nsiMenuItem = new MenuItem("НСИ");
+            nsiMenuItem.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN + RefBookListTokens.REFBOOK_LIST));
 
-        if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-            nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
-                    + BookerStatementsTokens.bookerStatements));
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                nsiMenuItem.getSubMenu().add(new MenuItem("Бухгалтерская отчётность", NUMBER_SIGN
+                        + BookerStatementsTokens.bookerStatements));
+            }
+            menuItems.add(nsiMenuItem);
         }
-        menuItems.add(nsiMenuItem);
+
 
         // АДМИНИСТРИРОВАНИЕ
         if (currentUser.hasRole(TARole.ROLE_ADMIN)
