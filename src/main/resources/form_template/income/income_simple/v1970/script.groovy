@@ -117,6 +117,9 @@ def rbIncome101 = null
 @Field
 def rbIncome102 = null
 
+@Field
+def editableStyle = 'Редактируемая'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -317,7 +320,7 @@ def consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in ['R53', 'R156']) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R156']) {
                 row[alias] = 0
             }
         }
@@ -353,7 +356,7 @@ def consolidationSummary(def dataRows) {
     // Очистить форму
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
-            if (row.getCell(alias).isEditable() || row.getAlias() in ['R53', 'R156']) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R156']) {
                 row[alias] = 0
             }
         }
@@ -504,7 +507,7 @@ def checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each {
         def cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
             colNames.add('«' + getColumnName(row, it) + '»')
         }
     }

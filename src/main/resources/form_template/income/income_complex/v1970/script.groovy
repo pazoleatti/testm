@@ -149,6 +149,9 @@ def rbIncome101 = null
 @Field
 def rbIncome102 = null
 
+@Field
+def editableStyle = 'Числовое значение'
+
 // Получение Id записи с использованием кэширования
 def getRecordId(def ref_id, String alias, String value, Date date) {
     String filter = "LOWER($alias) = LOWER('$value')"
@@ -238,7 +241,7 @@ void consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         editableColumns.each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -277,7 +280,7 @@ void consolidationSummary(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         editableColumns.each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -487,7 +490,7 @@ void checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each { column ->
         def cell = row.getCell(column)
-        if (cell.isEditable() && (cell.getValue() == null || cell.getValue() == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || cell.getValue() == '')) {
             def name = getColumnName(row, column)
             colNames.add('«' + name + '»')
         }
