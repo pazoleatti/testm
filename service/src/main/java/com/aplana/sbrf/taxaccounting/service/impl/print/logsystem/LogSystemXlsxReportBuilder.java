@@ -59,6 +59,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
         Row row = sheet.createRow(rowNumber);
         for (String s : headers){
+            fillWidth(cellNumber, cellWidthMin);
             Cell cell = row.createCell(cellNumber++);
             cell.setCellStyle(cs);
             cell.setCellValue(s);
@@ -133,69 +134,58 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
             Cell cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(sdf.format(item.getLogDate()));
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getEvent().getTitle());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getNote() == null?"":item.getNote());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getReportPeriodName() != null ? item.getReportPeriodName() : "");
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getDepartmentName());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getFormType() != null?"Налоговые формы" :
                     item.getDeclarationType() != null?"Декларации":"");
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getFormKind() != null?item.getFormKind().getName():"");
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(csFormType);
             cell.setCellValue(item.getFormType() != null? item.getFormType().getName() :
                     item.getDeclarationType() != null? item.getDeclarationType().getName() : "");
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getUser().getLogin());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getRoles());
-            fillWidth(cellNumber, cell.getStringCellValue().length());
             cellNumber++;
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
             cell.setCellValue(item.getIp());
-            fillWidth(cellNumber, cell.getStringCellValue()!= null?cell.getStringCellValue().length():0);
             cellNumber++;
 
             cellNumber = 0;

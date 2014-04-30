@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionExcept
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 
 public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 
@@ -48,31 +49,34 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
 	}
 
 	@Override
-	public void onFailure(Throwable caught) {
-		if (callback != null) {
-			callback.onFailure(caught);
-		}
-		if (caught instanceof TaActionException) {
-			String uuid = ((TaActionException) caught).getUuid();
-			if (uuid != null) {
-				LogAddEvent.fire(hasHandlers, ((TaActionException) caught).getUuid());
-				// Флаг showLogOnly актуален только когда ошибка вызвана
-				// присутствием
-				// сообщений об ошибке в логе. В других случаях всё равно нужно
-				// отобразить диалог.
-				if (!showLogOnly) {
+    public void onFailure(Throwable caught) {
+        if (callback != null) {
+            callback.onFailure(caught);
+        }
+        if (caught instanceof TaActionException) {
+            String uuid = ((TaActionException) caught).getUuid();
+            if (uuid != null) {
+                LogAddEvent.fire(hasHandlers, ((TaActionException) caught).getUuid());
+                // Флаг showLogOnly актуален только когда ошибка вызвана
+                // присутствием
+                // сообщений об ошибке в логе. В других случаях всё равно нужно
+                // отобразить диалог.
+                if (!showLogOnly) {
                     if (((TaActionException) caught).isNeedStackTrace()) {
                         MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
                     } else {
                         Dialog.errorMessage(caught.getLocalizedMessage());
                     }
-				}
-			} else {
-				MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
-			}
-		} else {
-			MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
-		}
+                }
+            } else {
+                MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
+            }
+        } else if (caught instanceof StatusCodeException) {
+            MessageEvent.fire(hasHandlers, true, "Не удалось получить ответ сервера на последний запрос.", caught);
+        } else {
+            MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
+        }
+
         ScreenLockEvent.fire(hasHandlers, false);
     }
 
