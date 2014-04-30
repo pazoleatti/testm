@@ -2,9 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
@@ -29,6 +31,9 @@ public class GetRowsDataHandler extends
 
     @Autowired
     RefBookHelper refBookHelper;
+
+    @Autowired
+    private LogEntryService logEntryService;
 
 	public GetRowsDataHandler() {
 		super(GetRowsDataAction.class);
@@ -58,8 +63,10 @@ public class GetRowsDataHandler extends
 		result.setDataRows(dataRowService.getDataRows(userInfo,
 				action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual()));
 
-        refBookHelper.dataRowsDereference(result.getDataRows(),
+        Logger logger = new Logger();
+        refBookHelper.dataRowsDereference(logger, result.getDataRows(),
                 formTemplate.getColumns());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
 		return result;
 	}

@@ -86,6 +86,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
+                            if (result != null) {
+                                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                            }
                             if (result == null || result.getDataRows().getTotalCount() == 0) {
                                 getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
                             } else {
@@ -274,7 +277,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					modifiedRows.clear();
                     getView().updateData();
 				}
 

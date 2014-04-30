@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
@@ -57,7 +58,7 @@
         <checking>false</checking>
         <name>Средняя остаточная стоимость амортизируемого имущества (руб.)</name>
         <order>6</order>
-        <width>7</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -66,7 +67,7 @@
         <checking>false</checking>
         <name>Среднесписочная численность работников (чел.)</name>
         <order>7</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -94,7 +95,7 @@
         <checking>false</checking>
         <name>Обязанность по уплате налога</name>
         <order>10</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>111</nameAttributeId>
         <refBookAttributeId>110</refBookAttributeId>
@@ -140,7 +141,7 @@
         <checking>false</checking>
         <name>Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога</name>
         <order>15</order>
-        <width>5</width>
+        <width>7</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -158,7 +159,7 @@
         <checking>false</checking>
         <name>Сумма налога к уменьшению</name>
         <order>17</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -167,7 +168,7 @@
         <checking>false</checking>
         <name>Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)</name>
         <order>18</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -176,7 +177,7 @@
         <checking>false</checking>
         <name>Ежемесячные авансовые платежи на I квартал следующего налогового периода</name>
         <order>19</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -185,7 +186,7 @@
         <checking>false</checking>
         <name>Ежемесячные авансовые платежи на II квартал текущего налогового периода (отчёт за I квартал)</name>
         <order>20</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -194,7 +195,7 @@
         <checking>false</checking>
         <name>Ежемесячные авансовые платежи на III квартал текущего налогового периода (отчёт за 6 месяцев)</name>
         <order>21</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -203,7 +204,7 @@
         <checking>false</checking>
         <name>Ежемесячные авансовые платежи на IV квартал текущего налогового периода (отчёт за 9 месяцев)</name>
         <order>22</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -212,7 +213,7 @@
         <checking>false</checking>
         <name>Льготы по налогу в бюджет субъекта (руб.). Уменьшение суммы налога (руб.)</name>
         <order>23</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -221,7 +222,7 @@
         <checking>false</checking>
         <name>Льготы по налогу в бюджет субъекта (руб.). Ставка налога (%)</name>
         <order>24</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
     </columns>
