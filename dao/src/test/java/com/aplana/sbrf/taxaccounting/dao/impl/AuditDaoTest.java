@@ -51,6 +51,7 @@ public class AuditDaoTest {
         filter.setFromSearchDate(new Date(1304247365000l));
         filter.setToSearchDate(new Date(1369911365000l));
         filter.setTaxType(TaxType.TRANSPORT);
+        filter.setReportPeriodName("2013");
 
         PagingResult<LogSearchResultItem> records = auditDao.getLogs(filter);
         LogSearchResultItem logSystem = records.get(0);
