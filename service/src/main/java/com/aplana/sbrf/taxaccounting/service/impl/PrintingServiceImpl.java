@@ -82,7 +82,6 @@ public class PrintingServiceImpl implements PrintingService {
             reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
         }
         data.setData(formData);
-        data.setDepartmentName(department.getId() != 0 ? departmentDao.getParentsHierarchy(department.getId()) : department.getName());
         data.setFormTemplate(formTemplate);
         data.setReportPeriod(reportPeriod);
         data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
