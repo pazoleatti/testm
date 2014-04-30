@@ -131,6 +131,15 @@ public interface FormDataDao {
     boolean existManual(Long formDataId);
 
     /**
+     * Получить список id форм типа/вида/подразделения без привязки к периоду
+     * @param formTypeId тип формы
+     * @param kind вид формы
+     * @param departmentId подразделение
+     * @return список id форм
+     */
+    List<Long> getFormDataIds(int formTypeId, FormDataKind kind, int departmentId);
+
+    /**
      * Удаляет версию ручного ввода
      * @param formDataId идентификатор нф
      */

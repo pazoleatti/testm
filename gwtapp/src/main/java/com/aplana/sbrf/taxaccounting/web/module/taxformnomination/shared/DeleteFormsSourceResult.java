@@ -8,6 +8,7 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class DeleteFormsSourceResult implements Result {
     private String uuid;
+    private boolean existFormData;
 
     public String getUuid() {
         return uuid;
@@ -15,5 +16,13 @@ public class DeleteFormsSourceResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isExistFormData() {
+        return existFormData;
+    }
+
+    public void setExistFormData(boolean existFormData) {
+        this.existFormData = existFormData;
     }
 }

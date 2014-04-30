@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.DeleteFormsSourceResult;
@@ -36,6 +34,9 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
     FormTypeService formTypeService;
 
     @Autowired
+    FormDataService formDataService;
+
+    @Autowired
     DeclarationTypeService declarationTypeService;
 
     @Autowired
@@ -51,13 +52,20 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         Set<Long> set = new HashSet<Long>();
         Logger logger = new Logger();
         // Удаление записей, для которых не указаны источники-приёмники, из таблицы в БД Системы и из списка назначенных налоговых форм / деклараций на подразделение;
-        for (FormTypeKind data: action.getKind()){
+        boolean existFormData = false;
+        for (FormTypeKind data: action.getKind()) {
+            // проверим наличие форм
+            existFormData |= formDataService.existFormData(data.getFormTypeId().intValue(), data.getKind(), data.getDepartment().getId(), logger);
+            // если есть формы, то проверки на связи не делаем
+            if (existFormData) {
+                continue;
+            }
             // возьмем его источников - налоговые формы
             List<DepartmentFormType> formsSources = departmentFormTypeService.getDFTSourcesByDFT(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
             // возьмем его назначений - налоговые формы
             List<DepartmentFormType> formsDestinations = departmentFormTypeService.getFormDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
             // приемники - декларации, источников деклараций у нас не существует
-            List<DepartmentDeclarationType> declarationDestinitions = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
+            List<DepartmentDeclarationType> declarationDestinations = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind());
             // шаблонг начала сообщения
             final String headErrMsg = "Не может быть отменено назначение " +
                     data.getDepartment().getName() +
@@ -79,9 +87,9 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 }
                 // удаляем последний символ ", "
                 logger.error(headErrMsg+ " источником для "+stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString());
-            } else if (declarationDestinitions.size() != 0){
+            } else if (declarationDestinations.size() != 0){
                 StringBuffer stringBuffer = new StringBuffer();
-                for (DepartmentDeclarationType form: declarationDestinitions){
+                for (DepartmentDeclarationType form: declarationDestinations){
                     stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
                     stringBuffer.append(" - ");
                     stringBuffer.append(declarationTypeService.get(form.getDeclarationTypeId()).getName());
@@ -93,11 +101,14 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                 set.add(data.getId());
             }
         }
-        // удаляем назначение
-        departmentFormTypeService.deleteDFT(set);
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            // удаляем назначение
+            departmentFormTypeService.deleteDFT(set);
+        }
 
         DeleteFormsSourceResult result = new DeleteFormsSourceResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
+        result.setExistFormData(existFormData);
 
         return result;
     }

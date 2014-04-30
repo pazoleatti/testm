@@ -2,9 +2,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -52,6 +55,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
+    public static final String MSG_IS_EXIST_DECLARATION = "Существует экземпляр %s в подразделении %s периоде %s";
+
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
 
@@ -66,6 +71,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
+
+    @Autowired
+    private ReportPeriodDao reportPeriodDao;
+
+    @Autowired
+    private DepartmentDao departmentDao;
 
     @Autowired
     private BlobDataService blobDataService;
@@ -468,6 +479,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate) {
         return declarationDataDao.findDeclarationDataByFormTemplate(declarationTemplateId, startDate);
+    }
+
+    @Override
+    public boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs) {
+        List<Long> declarationIds = declarationDataDao.getDeclarationIds(declarationTypeId, departmentId);
+        if (logs != null) {
+            for (long declarationId : declarationIds) {
+                DeclarationData declarationData = declarationDataDao.get(declarationId);
+                ReportPeriod period = reportPeriodDao.get(declarationData.getReportPeriodId());
+
+                logs.add(new LogEntry(LogLevel.ERROR, String.format(MSG_IS_EXIST_DECLARATION,
+                        declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                        departmentDao.getDepartment(departmentId).getName(),
+                        period.getName() + " " + period.getTaxPeriod().getYear())));
+            }
+        }
+        return !declarationIds.isEmpty();
     }
 
     private byte[] getBytesFromInputstream(String blobId){

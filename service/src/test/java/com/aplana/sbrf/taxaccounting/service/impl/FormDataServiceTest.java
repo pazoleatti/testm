@@ -1,12 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Test;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -107,5 +112,76 @@ public class FormDataServiceTest {
         formDataService.compose(WorkflowMove.APPROVED_TO_ACCEPTED, formData, userInfo, logger);
         // проверяем что источник удален
         assertTrue(list.size() == 0);
+    }
+
+    @Test
+    public void existFormDataTest() {
+
+        Logger logger = new Logger();
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Тестовый тип НФ");
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setType(formType);
+        formTemplate.setId(1);
+
+        FormData formData = new FormData(formTemplate);
+        formData.setState(WorkflowState.CREATED);
+        formData.setKind(FormDataKind.SUMMARY);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setId(1l);
+
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setState(WorkflowState.CREATED);
+        formData1.setKind(FormDataKind.SUMMARY);
+        formData1.setDepartmentId(1);
+        formData1.setReportPeriodId(2);
+        formData1.setId(2l);
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(1);
+        taxPeriod.setYear(2014);
+        taxPeriod.setTaxType(TaxType.INCOME);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        reportPeriod.setName("Тестовый период");
+        ReportPeriod reportPeriod1 = new ReportPeriod();
+        reportPeriod1.setId(2);
+        reportPeriod1.setTaxPeriod(taxPeriod);
+        reportPeriod1.setName("Второй тестовый период");
+
+        Department department = new Department();
+        department.setName("Тестовое подразделение");
+
+        List<Long> list = new ArrayList<Long>() {{
+            add(1l);
+            add(2l);
+        }};
+
+        FormDataDao formDataDao = mock(FormDataDao.class);
+        ReflectionTestUtils.setField(formDataService, "formDataDao", formDataDao);
+
+        when(formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1)).thenReturn(list);
+        when(formDataDao.getWithoutRows(1)).thenReturn(formData);
+        when(formDataDao.getWithoutRows(2)).thenReturn(formData1);
+
+        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
+        ReflectionTestUtils.setField(formDataService, "reportPeriodDao", reportPeriodDao);
+
+        when(reportPeriodDao.get(1)).thenReturn(reportPeriod);
+        when(reportPeriodDao.get(2)).thenReturn(reportPeriod1);
+
+        DepartmentDao departmentDao = mock(DepartmentDao.class);
+        ReflectionTestUtils.setField(formDataService, "departmentDao", departmentDao);
+
+        when(departmentDao.getDepartment(1)).thenReturn(department);
+
+        assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
+        assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
+        assertEquals("Существует экземпляр налоговой формы Тестовый тип НФ типа Сводная в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
     }
 }

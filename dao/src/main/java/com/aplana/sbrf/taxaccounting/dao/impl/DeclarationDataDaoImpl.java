@@ -318,5 +318,30 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
     }
 
+    @Override
+    public List<Long> getDeclarationIds(int declarationTypeId, int departmentId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select dec.id from declaration_data dec where exists (select 1 from declaration_template dt where dec.declaration_template_id=dt.id and dt.declaration_type_id = ?)"
+                            + " and dec.department_id = ?",
+                    new Object[] {
+                            declarationTypeId,
+                            departmentId
+                    },
+                    new int[] {
+                            Types.NUMERIC,
+                            Types.NUMERIC
+                    },
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Long>();
+        } catch (DataAccessException e) {
+            String errorMsg = String.format("Ошибка при поиске деклараций по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d",declarationTypeId, departmentId);
+            logger.error(errorMsg, e);
+            throw new DaoException(errorMsg);
+        }
+    }
+
 
 }
