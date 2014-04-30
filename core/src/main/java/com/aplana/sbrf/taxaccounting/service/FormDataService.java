@@ -231,4 +231,14 @@ public interface FormDataService {
      * @return список налоговых форм, удовлетворяющих критерию
      */
     List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
+
+    /**
+     * Проверяет наличие налоговых форм без привязки к периоду
+     * @return
+     * @param formTypeId
+     * @param kind
+     * @param departmentId
+     * @param logger
+     */
+    boolean existFormData(int formTypeId, FormDataKind kind, int departmentId, Logger logger);
 }

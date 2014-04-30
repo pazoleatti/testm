@@ -368,6 +368,33 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
+    public List<Long> getFormDataIds(int formTypeId, FormDataKind kind, int departmentId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select fd.id from FORM_DATA fd where exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?)"
+                            + " and fd.kind = ? and fd.department_id = ?",
+                    new Object[] {
+                            formTypeId,
+                            kind.getId(),
+                            departmentId
+                    },
+                    new int[] {
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.NUMERIC
+                    },
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>(0);
+        } catch (DataAccessException e) {
+            String errorMsg = String.format("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s",formTypeId, kind.getId(), departmentId);
+            logger.error(errorMsg, e);
+            throw new DaoException(errorMsg, e);
+        }
+    }
+
+    @Override
     public void deleteManual(long formDataId) {
         getJdbcTemplate().update("delete from data_row where manual = 1 and form_data_id = ?", formDataId);
     }

@@ -36,13 +36,22 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 	FormTypeService formTypeService;
 	@Autowired
 	DeclarationTypeService declarationTypeService;
+	@Autowired
+	DeclarationDataService declarationDataService;
 
 	@Override
 	public DeleteDeclarationSourcesResult execute(DeleteDeclarationSourcesAction action, ExecutionContext executionContext) throws ActionException {
 		DeleteDeclarationSourcesResult result = new DeleteDeclarationSourcesResult();
 		List<LogEntry> logs = new ArrayList<LogEntry>();
+        boolean existDeclaration = false;
 		for (FormTypeKind ddt : action.getKind()) {
-			List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
+            // проверим наличие деклараций
+            existDeclaration |= declarationDataService.existDeclaration(ddt.getFormTypeId().intValue(), ddt.getDepartment().getId(), logs);
+            // если есть, то проверки на связи не делаем
+            if (existDeclaration) {
+                continue;
+            }
+            List<DepartmentFormType> departmentFormTypes = departmentFormTypeService
 					.getDFTSourceByDDT(ddt.getDepartment().getId(), ddt.getFormTypeId().intValue());
 			if (departmentFormTypes.isEmpty()) { // Нет назначений
 				departmentFormTypeService.deleteDDT(Arrays.asList(ddt.getId()));
@@ -62,6 +71,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 		}
 
 		result.setUuid(logEntryService.save(logs));
+        result.setExistDeclaration(existDeclaration);
 		return result;
 	}
 

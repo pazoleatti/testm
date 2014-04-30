@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
@@ -127,4 +128,13 @@ public interface DeclarationDataService {
 	DeclarationData find(int declarationTypeId, int departmentId, int reportPeriodId);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
+
+    /**
+     * Проверить наличие форм декларации
+     * @param declarationTypeId идентификатор типа декларации
+     * @param departmentId подразделение
+     * @param logs записи лога
+     * @return наличие форм декларации
+     */
+    boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs);
 }
