@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
@@ -24,6 +25,7 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -337,5 +339,14 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     private void updateMode() {
         getView().updateMode(mode);
+    }
+
+    @Override
+    public void updateHistory() {
+        PlaceRequest currentPlaceRequest = placeManager.getCurrentPlaceRequest();
+        placeManager.updateHistory(new PlaceRequest.Builder().nameToken(currentPlaceRequest.getNameToken())
+                .with(RefBookDataTokens.REFBOOK_DATA_ID, currentPlaceRequest.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null))
+                .with(RefBookDataTokens.REFBOOK_RECORD_ID, recordId.toString())
+                .build(), true);
     }
 }

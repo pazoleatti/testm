@@ -161,11 +161,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
             recordId = getView().getSelectedRow().getRefBookRowId();
             page = getView().getPage();
 			editFormPresenter.show(recordId);
-            PlaceRequest currentPlaceRequest = placeManager.getCurrentPlaceRequest();
-            placeManager.updateHistory(new PlaceRequest.Builder().nameToken(currentPlaceRequest.getNameToken())
-                    .with(RefBookDataTokens.REFBOOK_DATA_ID, currentPlaceRequest.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null))
-                    .with(RefBookDataTokens.REFBOOK_RECORD_ID, recordId.toString())
-                    .build(), true);
         }
 	}
 
