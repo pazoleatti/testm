@@ -78,6 +78,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		this.placeManager = placeManager;
 		this.dispatchAsync = dispatchAsync;
 		getView().setUiHandlers(this);
+        mode = FormMode.VIEW;
+        getView().updateMode(mode);
 	}
 
 	public void init(final Long refbookId, final boolean readOnly) {
