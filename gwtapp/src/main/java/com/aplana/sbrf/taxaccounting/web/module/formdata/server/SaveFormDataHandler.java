@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -30,6 +31,8 @@ public class SaveFormDataHandler extends
 	private DataRowService dataRowService;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    RefBookHelper refBookHelper;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -41,7 +44,8 @@ public class SaveFormDataHandler extends
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
 		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
+            refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
+		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 
