@@ -94,6 +94,9 @@ def endDate = null
 @Field
 def rbIncome102 = null
 
+@Field
+def editableStyle = 'Редактирование (светло-голубой)'
+
 //// Кастомные методы
 
 // Алгоритмы заполнения полей формы
@@ -116,7 +119,8 @@ void calc() {
             sum6 = 0
             sum7 = 0
             for (rowSum in dataRows) {
-                if (!rowSum.getCell('consumptionBuhSumAccepted').isEditable() || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
+                if (rowSum.getCell('consumptionBuhSumAccepted')?.style?.alias != editableStyle
+                        || !rowSum.getCell('consumptionBuhSumPrevTaxPeriod')) {
                     continue
                 }
                 String knySum
@@ -233,7 +237,7 @@ void consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
                 row[alias] = 0
             }
         }
@@ -272,10 +276,9 @@ void consolidationSummary(def dataRows) {
         return
     }
     // очистить форму
-    // очистить форму
     dataRows.each { row ->
         ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
-            if (row.getCell(alias).isEditable()) {
+            if (row.getCell(alias)?.style?.alias != editableStyle) {
                 row[alias] = 0
             }
         }
@@ -639,7 +642,7 @@ def checkRequiredColumns(def row, def columns) {
     def colNames = []
     columns.each {
         def cell = row.getCell(it)
-        if (cell.isEditable() && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
+        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
             def name = getColumnName(row, it)
             colNames.add('«' + name + '»')
         }
