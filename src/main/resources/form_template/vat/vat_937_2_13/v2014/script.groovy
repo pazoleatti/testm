@@ -98,16 +98,16 @@ void logicCheck() {
     if (itog.sum != calcItog(dataRows)) {
         logger.error(WRONG_TOTAL, getColumnName(itog, 'sum'))
     }
-    // Проверка наличия экземпляра налоговой формы 937.1 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
-    def formData937_1 = formDataService.find(606, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (formData937_1 == null) {
+    // Проверка наличия экземпляра налоговой формы 937.2 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
+    def formData937_2 = formDataService.find(608, formData.kind, formData.departmentId, formData.reportPeriodId)
+    if (formData937_2 == null) {
         logger.warn("Экземпляр налоговой формы 937.2 «Итоговые данные книги продаж» за период %s — %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
     } else {
-        def dataRows937_1 = formDataService.getDataRowHelper(formData937_1).allCached
+        def dataRows937_2 = formDataService.getDataRowHelper(formData937_2).allCached
         def totalARow = null
-        if (dataRows937_1 != null) {
-            totalARow = getDataRow(dataRows937_1, 'totalA') // TODO Уточнить когда будет готова форма 937.2 http://jira.aplana.com/browse/SBRFACCTAX-6470
+        if (dataRows937_2 != null) {
+            totalARow = getDataRow(dataRows937_2, 'totalA')
         }
         if (calcItog(dataRows) - calcOther(dataRows) != totalARow?.diff) {
             logger.warn('Сумма расхождения не соответствует расшифровке!')

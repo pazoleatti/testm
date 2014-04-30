@@ -151,12 +151,12 @@ void logicCheck() {
     // 5. По строке 2:
     // «Графа 3» ≥ «Графа 4» + «Графа 5» + «Графа 6» + «Графа 7» + «Графа 8» + «Графа 9» + «Графа 10» + «Графа 11»
     if (totalA.dealNds < totalA.deal_20 + totalA.deal_20_Nds + totalA.deal_18 + totalA.deal_18_Nds + totalA.deal_10 + totalA.deal_10_Nds + totalA.deal_0 + totalA.deal) {
-        logger.warn("Строка ${totalA.getIndex()}: " + "Сумма покупок по разделу «А» неверная!")
+        logger.warn("Строка ${totalA.getIndex()}: " + "Сумма продаж по разделу «А» неверная!")
     }
     // 6. По строке 7:
     // «Графа 3» ≥ «Графа 4» + «Графа 5» + «Графа 6» + «Графа 7» + «Графа 8» + «Графа 9» + «Графа 10» + «Графа 11»
     if (totalB.dealNds < totalB.deal_20 + totalB.deal_20_Nds + totalB.deal_18 + totalB.deal_18_Nds + totalB.deal_10 + totalB.deal_10_Nds + totalB.deal_0 + totalB.deal) {
-        logger.warn("Строка ${totalB.getIndex()}: " + "Сумма покупок по разделу «Б» неверная!")
+        logger.warn("Строка ${totalB.getIndex()}: " + "Сумма продаж по разделу «Б» неверная!")
     }
     // 7. По строке 2:
     // «Графа 13» = «Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»

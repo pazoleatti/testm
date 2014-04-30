@@ -169,7 +169,7 @@ void logicCheck() {
         if (appDataRows) {
             def appR13Row = getDataRow(appDataRows, 'R13')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (totalA.diff != (appTotalRow.differences - appR13Row.differences)) {
+            if (totalA.diff != (appTotalRow.sum - appR13Row.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
