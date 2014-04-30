@@ -153,50 +153,52 @@ void calc() {
         sort(data)
     }
 
-    /** Отчетная дата. */
-    def reportDate = getReportDate()
+    if (formData.kind == FormDataKind.PRIMARY) {
+        /** Отчетная дата. */
+        def reportDate = getReportDate()
 
-    /** Дата нужная при подсчете графы 12. */
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def someDate = getDate('01.11.2009', format)
+        /** Дата нужная при подсчете графы 12. */
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        def someDate = getDate('01.11.2009', format)
 
-    /** Количество дней в году. */
-    def daysInYear = getCountDaysInYaer(getReportPeriodEndDate())
+        /** Количество дней в году. */
+        def daysInYear = getCountDaysInYaer(getReportPeriodEndDate())
 
-    /** Курс ЦБ РФ на отчётную дату. */
-    def course = 1
+        /** Курс ЦБ РФ на отчётную дату. */
+        def course = 1
 
-    def tmp
-    def a, b, c
+        def tmp
+        def a, b, c
 
-    getRows(data).each { row ->
-        //def currency = getCurrency(row.currencyCode)
-        course = getCourse(row.currencyCode, reportDate)
+        getRows(data).each { row ->
+            //def currency = getCurrency(row.currencyCode)
+            course = getCourse(row.currencyCode, reportDate)
 
-        // графа 9, 10 - при импорте не рассчитывать эти графы
-        if (formDataEvent != FormDataEvent.IMPORT) {
+            // графа 9, 10 - при импорте не рассчитывать эти графы
+            if (formDataEvent != FormDataEvent.IMPORT) {
 
-            a = calcAForColumn9or10(row, reportDate, course)
-            b = 0; c = 0
-            if (a < 0) {
-                c = abs(a)
-            } else if (a > 0) {
-                b = a
+                a = calcAForColumn9or10(row, reportDate, course)
+                b = 0; c = 0
+                if (a < 0) {
+                    c = abs(a)
+                } else if (a > 0) {
+                    b = a
+                }
+                // графа 10
+                row.outcome = b
+                // графа 9
+                row.income = c
             }
-            // графа 10
-            row.outcome = b
-            // графа 9
-            row.income = c
-        }
 
-        // графа 11
-        row.rateBR = roundTo2(calc11Value(row, reportDate))
-        // графа 12
-        row.outcome269st = calc12(row, daysInYear, course, someDate, reportDate)
-        // графа 13
-        row.outcomeTax = calc13(row)
+            // графа 11
+            row.rateBR = roundTo2(calc11Value(row, reportDate))
+            // графа 12
+            row.outcome269st = calc12(row, daysInYear, course, someDate, reportDate)
+            // графа 13
+            row.outcomeTax = calc13(row)
+        }
+        save(data)
     }
-    save(data)
 
     // строка итого
     def totalRow = getCalcTotalRow()

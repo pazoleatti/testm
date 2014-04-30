@@ -579,7 +579,7 @@ void calc() {
 
     for (row in dataRows) {
         row.number = ++number
-        if (!isBalancePeriod) {
+        if (!isBalancePeriod && formData.kind == FormDataKind.PRIMARY) {
             row.reserveCalcValuePrev = calc8(row, dataPrevRows)
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)

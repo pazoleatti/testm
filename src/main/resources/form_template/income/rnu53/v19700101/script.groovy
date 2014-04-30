@@ -169,64 +169,66 @@ void calc() {
         sort(dataRowHelper)
     }
 
-    /** Отчетная дата. */
-    def reportDate = getReportDate()
-    /** Последний день отчетного периода */
-    def lastDayReportPeriod = getReportPeriodEndDate()
+    if (formData.kind == FormDataKind.PRIMARY) {
+        /** Отчетная дата. */
+        def reportDate = getReportDate()
+        /** Последний день отчетного периода */
+        def lastDayReportPeriod = getReportPeriodEndDate()
 
-    checkBeforeCalc(dataRowHelper)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return  // Расчитывать не можем
-    }
+        checkBeforeCalc(dataRowHelper)
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return  // Расчитывать не можем
+        }
 
-    /** Дата нужная при подсчете графы 12. */
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def someDate = getDate('01.11.2009', format)
+        /** Дата нужная при подсчете графы 12. */
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        def someDate = getDate('01.11.2009', format)
 
-    /** Количество дней в году. */
-    def daysInYear = getCountDaysInYear(getReportPeriodEndDate())
+        /** Количество дней в году. */
+        def daysInYear = getCountDaysInYear(getReportPeriodEndDate())
 
-    /** Курс ЦБ РФ на Последний день отчетного периода. */
-    def course = 1
+        /** Курс ЦБ РФ на Последний день отчетного периода. */
+        def course = 1
 
-    def tmp = 0
-    def a, b, c
+        def tmp = 0
+        def a, b, c
 
-    for (def row : dataRows) {
+        for (def row : dataRows) {
 
-        // графа 9, 10 - при импорте не рассчитывать эти графы
-        if (formDataEvent != FormDataEvent.IMPORT) {
-            course = getCourse(row.currencyCode, reportDate)
+            // графа 9, 10 - при импорте не рассчитывать эти графы
+            if (formDataEvent != FormDataEvent.IMPORT) {
+                course = getCourse(row.currencyCode, reportDate)
 
-            a = calcAForColumn9or10(row, reportDate, course)
-            b = 0
-            c = 0
-            if (a != null && a > 0) {
-                c = roundTo2(a)
-            } else if (a != null && a < 0) {
-                b = roundTo2(-a)
+                a = calcAForColumn9or10(row, reportDate, course)
+                b = 0
+                c = 0
+                if (a != null && a > 0) {
+                    c = roundTo2(a)
+                } else if (a != null && a < 0) {
+                    b = roundTo2(-a)
+                }
+                row.income = c
+                row.outcome = b
             }
-            row.income = c
-            row.outcome = b
+
+            // графа 11
+            row.rateBR = roundTo2(calc11(row, lastDayReportPeriod))
+
+            // графа 12
+            row.outcome269st = roundTo2(calc12(row, daysInYear, course, someDate, reportDate))
+
+            // графа 13
+            if (row.outcome == 0) {
+                tmp = 0
+            } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
+                tmp = row.outcome
+            } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
+                tmp = row.outcome269st
+            }
+            row.outcomeTax = roundTo2(tmp)
         }
-
-        // графа 11
-        row.rateBR = roundTo2(calc11(row, lastDayReportPeriod))
-
-        // графа 12
-        row.outcome269st = roundTo2(calc12(row, daysInYear, course, someDate, reportDate))
-
-        // графа 13
-        if (row.outcome == 0) {
-            tmp = 0
-        } else if (row.outcome > 0 && row.outcome <= row.outcome269st) {
-            tmp = row.outcome
-        } else if (row.outcome > 0 && row.outcome > row.outcome269st) {
-            tmp = row.outcome269st
-        }
-        row.outcomeTax = roundTo2(tmp)
+        dataRowHelper.save(dataRows)
     }
-    dataRowHelper.save(dataRows)
 
     // строка итого
     if (dataRows.size() > 0) {
