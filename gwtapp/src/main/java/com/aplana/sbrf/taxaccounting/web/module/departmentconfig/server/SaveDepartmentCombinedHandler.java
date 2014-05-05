@@ -247,8 +247,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                String strEndDate = sdf.format(period.getEndDate());  //TODO поменять когда поменяют действие "сохранить", связано с задачей http://jira.aplana.com/browse/SBRFACCTAX-6994
-                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getStartDate()), strEndDate));
+                String strEndDate = sdf.format(period.getEndDate());  //TODO поменять когда изменять действие "сохранить", связано с задачей http://jira.aplana.com/browse/SBRFACCTAX-6994
+                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), strEndDate));
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
             if (logger.containsLevel(LogLevel.ERROR)) {
