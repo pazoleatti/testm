@@ -236,7 +236,7 @@ public class FlexiblePager extends AbstractPager {
 	private final ImageButton nextPage;
 	private final ImageButton prevPage;
 
-    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int DEFAULT_PAGE_SIZE = 500;
     private static final int DEFAULT_SPACING = 3;
 
 	/**

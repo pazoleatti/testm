@@ -16,6 +16,15 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 	long formDataId;
 	int formDataTemplateId;
 	List<DataRow<Cell>> modifiedRows;
+    String innerLogUuid;
+
+    public String getInnerLogUuid() {
+        return innerLogUuid;
+    }
+
+    public void setInnerLogUuid(String innerLogUuid) {
+        this.innerLogUuid = innerLogUuid;
+    }
 
     public boolean isManual() {
         return manual;

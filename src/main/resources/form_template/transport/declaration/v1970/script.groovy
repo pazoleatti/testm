@@ -262,7 +262,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                     НалПУ: row.amountOfTaxPayable.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
                             ) {
                                 row.rowData.each { tRow ->
-                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode, "CODE")?.VALUE?.stringValue : null
+                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode)?.CODE?.stringValue : null
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
@@ -278,7 +278,7 @@ def bildXml(def departmentParamTransport, def formDataCollection, def department
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
-                                                            НалСтавка: getRefBookValue(41, tRow.taxRate, 'VALUE')?.VALUE?.numberValue,
+                                                            НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue,
                                                             СумИсчисл: tRow.calculatedTaxSum,
                                                     ]
                                                     + (taxBenefitCode && tRow.benefitStartDate ? [ЛьготМесТС: getBenefitMonths(tRow)] : []) +
