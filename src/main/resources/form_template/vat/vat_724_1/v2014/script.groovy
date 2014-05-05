@@ -61,7 +61,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -90,7 +92,14 @@ def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum']
 
 // список алиасов подразделов
 @Field
-sections = ['1', '2', '3', '4', '5', '6', '7']
+def sections = ['1', '2', '3', '4', '5', '6', '7']
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Добавить новую строку (строки между заглавными строками и строками итогов)
 def addRow() {
@@ -330,4 +339,118 @@ def calc7(def section) {
             break
     }
     return tmp
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 9, 4)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 4)
+
+    def headerMapping = [
+            (xml.row[1].cell[2]): 'Налоговая база',
+            (xml.row[1].cell[5]): 'НДС',
+            (xml.row[1].cell[7]): 'Ставка НДС',
+            (xml.row[1].cell[8]): 'Сумма НДС по книге продаж',
+            (xml.row[2].cell[2]): 'Наименование балансового счета',
+            (xml.row[2].cell[3]): 'Номер балансового счета',
+            (xml.row[2].cell[4]): 'Сумма',
+            (xml.row[2].cell[5]): 'Номер балансового счета',
+            (xml.row[2].cell[6]): 'Сумма',
+            (xml.row[2].cell[7]): 'Ставка НДС',
+            (xml.row[2].cell[8]): 'Сумма НДС по книге продаж'
+    ]
+    (2..8).each { index ->
+        headerMapping.put((xml.row[3].cell[index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 3)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def rows = []
+    def int rowIndex = 1
+
+    def aliasR = [
+            '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(dataRows, 'head_1')],
+            'head_1': [getDataRow(dataRows, 'total_1')],
+            '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(dataRows, 'head_2')],
+            'head_2': [getDataRow(dataRows, 'total_2')],
+            '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_3')],
+            'head_3': [getDataRow(dataRows, 'total_3')],
+            '4. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 10/110': [getDataRow(dataRows, 'head_4')],
+            'head_4': [getDataRow(dataRows, 'total_4')],
+            '5. Суммы полученной оплаты (частичной оплаты) в счёт предстоящего оказания услуг по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_5')],
+            'head_5': [getDataRow(dataRows, 'total_5')],
+            '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_6')],
+            'head_6': [getDataRow(dataRows, 'total_6')],
+            '7. Суммы, отражённые в бухгалтерском учёте и книге продаж, не вошедшие в разделы с 1 по 6': [getDataRow(dataRows, 'head_7')],
+            'head_7': [getDataRow(dataRows, 'total_7')]
+    ]
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапок
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            title = row.cell[1].text()
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // Графа 2
+        newRow.baseAccName = row.cell[2].text()
+
+        // Графа 3
+        newRow.baseAccNum = row.cell[3].text()
+
+        // Графа 4
+        newRow.baseSum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+
+        // Графа 5
+        newRow.ndsNum = row.cell[5].text()
+
+        // Графа 6
+        newRow.ndsSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+
+        // Графа 7
+        newRow.ndsRate = row.cell[7].text()
+
+        // Графа 8
+        newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+
+        aliasR[title].add(newRow)
+    }
+    aliasR.each { k, v ->
+        rows.addAll(v)
+    }
+    dataRowHelper.save(rows)
 }
