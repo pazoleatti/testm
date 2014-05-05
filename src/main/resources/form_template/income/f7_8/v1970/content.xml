@@ -22,7 +22,7 @@
         <checking>false</checking>
         <name>Номер балансового счёта</name>
         <order>2</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>10</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -41,7 +41,7 @@
         <checking>false</checking>
         <name>Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли, 5 - прочие</name>
         <order>4</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>825</nameAttributeId>
         <refBookAttributeId>825</refBookAttributeId>
@@ -51,7 +51,7 @@
         <checking>false</checking>
         <name>Наименование контрагента</name>
         <order>5</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -60,7 +60,7 @@
         <checking>false</checking>
         <name>Наименование ценной бумаги (включая наименование эмитента)</name>
         <order>6</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -88,7 +88,7 @@
         <checking>false</checking>
         <name>Признак ценной бумаги: «+» - обращающаяся на ОРЦБ; «-» - необращающаяся на ОРЦБ</name>
         <order>9</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>622</nameAttributeId>
         <refBookAttributeId>621</refBookAttributeId>
@@ -108,7 +108,7 @@
         <checking>false</checking>
         <name>Наименование валюты бумаги (номинала)</name>
         <order>11</order>
-        <width>5</width>
+        <width>6</width>
         <parentAlias>currencyCode</parentAlias>
         <refBookAttributeId>66</refBookAttributeId>
     </columns>
@@ -161,7 +161,7 @@
         <checking>false</checking>
         <name>Наименование валюты расчётов по сделке</name>
         <order>17</order>
-        <width>5</width>
+        <width>6</width>
         <parentAlias>currencyCodeTrade</parentAlias>
         <refBookAttributeId>66</refBookAttributeId>
     </columns>
@@ -305,7 +305,7 @@
         <checking>false</checking>
         <name>Средневзвешенная цена 1 бумаги на дату, когда выпуск ценных бумаг признан размещенным, ед. валюты</name>
         <order>33</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>21</maxLength>
         <precision>6</precision>
     </columns>
@@ -314,7 +314,7 @@
         <checking>false</checking>
         <name>Срок обращения согласно условиям выпуска (дни) (для дисконтных облигаций)</name>
         <order>34</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -323,7 +323,7 @@
         <checking>false</checking>
         <name>Срок владения ценной бумагой (дни) (для дисконтных облигаций)</name>
         <order>35</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

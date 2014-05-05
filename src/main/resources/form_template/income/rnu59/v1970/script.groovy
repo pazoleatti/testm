@@ -110,6 +110,9 @@ switch (formDataEvent){
 @Field
 def endDate = null
 
+@Field
+def totalColumns = ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax']
+
 /**
  * Добавление новой строки
  */
@@ -270,13 +273,10 @@ def logicalCheck(){
         }
     }
 
-    def nominalPrice = 0
-    def acquisitionPrice = 0
-    def salePrice = 0
-    def income = 0
-    def outcome = 0
-    def outcome269st = 0
-    def outcomeTax = 0
+    def totalValues = [:]
+    totalColumns.each {
+        totalValues[it] = 0
+    }
 
     def dFrom = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).getTime()
     def dTo = getReportPeriodEndDate()
@@ -354,31 +354,26 @@ def logicalCheck(){
                 return false
             }
             // экономим на итерациях, подсчитаем сумму для граф 4,7-10, 12-13, суммы нужны для проверок
-            nominalPrice += row.nominalPrice ?:0
-            acquisitionPrice += row.acquisitionPrice ?:0
-            salePrice += row.salePrice ?:0
-            income += row.income ?:0
-            outcome += row.outcome ?:0
-            outcome269st += row.outcome269st ?:0
-            outcomeTax += row.outcomeTax ?:0
+            totalColumns.each {
+                totalValues[it] += row[it]
+            }
         }
     }
 
     // Проверка итоговых значений по всей форме
     for(def dataRow:data.getAllCached()){
         if (isTotalRow(dataRow)){
-            def totalRow = data.getDataRow(data.getAllCached(),"total")
-            if (totalRow != null && totalRow.nominalPrice != nominalPrice ||
-                    totalRow.acquisitionPrice != acquisitionPrice ||
-                    totalRow.salePrice != salePrice ||
-                    totalRow.income != income ||
-                    totalRow.outcome != outcome ||
-                    totalRow.outcome269st != outcome269st ||
-                    totalRow.outcomeTax != outcomeTax){
-                // TODO Исправить на WRONG_TOTAL
-                loggerError('Итоговые значения рассчитаны неверно!')//TODO вернуть error
-                return false
+            def totalRow = getDataRow(data.getAllCached(), "total")
+            def totalCorrect = true
+            if (totalRow != null) {
+                totalColumns.each {
+                    if (totalValues[it] != totalRow[it]) {
+                        totalCorrect = false
+                        loggerError(WRONG_TOTAL, getColumnName(totalRow, it))
+                    }
+                }
             }
+            return totalCorrect
         }
     }
     return true
@@ -985,19 +980,6 @@ def checkRequiredColumns(def row, def columns) {
 }
 
 /**
- * Получить название графы по псевдониму.
- *
- * @param row строка
- * @param alias псевдоним графы
- */
-def getColumnName(def row, def alias) {
-    if (row != null && alias != null) {
-        return row.getCell(alias).getColumn().getName().replace('%', '%%')
-    }
-    return ''
-}
-
-/**
  * Получить номер строки в таблице.
  */
 def getIndex(def row) {
@@ -1015,19 +997,15 @@ def getCalcTotalRow() {
     setTotalStyle(totalRow)
 
     // проставим 0ми
-    ['nominalPrice', 'acquisitionPrice', 'salePrice', 'income', 'outcome', 'outcome269st', 'outcomeTax'].each{ alias ->
+    totalColumns.each{ alias ->
         totalRow[alias] = 0
     }
 
     def data = getData(formData)
     getRows(data).each{ DataRow row ->
-        totalRow.nominalPrice += row.nominalPrice ?:0
-        totalRow.acquisitionPrice += row.acquisitionPrice ?:0
-        totalRow.salePrice += row.salePrice ?:0
-        totalRow.income += row.income ?:0
-        totalRow.outcome += row.outcome ?:0
-        totalRow.outcome269st += row.outcome269st ?:0
-        totalRow.outcomeTax += row.outcomeTax ?:0
+        totalColumns.each{ alias ->
+            totalRow[alias] += (row[alias] ?:0)
+        }
     }
 
     return totalRow
@@ -1078,10 +1056,10 @@ void sort(def data) {
     }
 }
 
-void loggerError(def msg) {
+void loggerError(def msg, Object... args) {
     //TODO вернуть error
     //logger.error(msg)
-    logger.warn(msg)
+    logger.warn(msg, args)
 }
 
 def getReportPeriodEndDate() {
