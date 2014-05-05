@@ -307,12 +307,13 @@ void logicCheck() {
     def totalValues = getTotalValues(dataRows)
     for (row in dataRows) {
         def index = dataRows.indexOf(row)
-        if ((index == 11 || index == 12) &&
-                !(row.sumCurrentPeriodTotal == totalValues[index].sumCurrentPeriodTotal &&
-                        row.sumTaxPeriodTotal == totalValues[index].sumTaxPeriodTotal)) {
-            // TODO Исправить на WRONG_TOTAL
-            loggerError('Итоговые значения рассчитаны неверно!')
-            break
+        def errorMsg = "Строка ${index+1}: "
+        if (index == 11 || index == 12) {
+            for (def col in ['sumCurrentPeriodTotal', 'sumTaxPeriodTotal']) {
+                if (row[col] != totalValues[index][col]) {
+                    logger.error(errorMsg + WRONG_TOTAL, getColumnName(row, col))
+                }
+            }
         }
     }
 }

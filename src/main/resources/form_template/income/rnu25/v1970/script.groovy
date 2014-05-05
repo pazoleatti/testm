@@ -414,11 +414,7 @@ void logicCheck() {
     }
 
     // 18. Проверка итогового значений по всей форме
-    def totalRow = getDataRow(dataRows, 'total')
-    def tmpTotalRow = getCalcTotalRow(dataRows)
-    if (isDiffRow(totalRow, tmpTotalRow, totalSumColumns)) {
-        loggerError('Итоговые значения рассчитаны неверно!')
-    }
+    checkTotalSum(dataRows, totalSumColumns, logger, true)
 }
 
 /** Получение импортируемых данных. */
