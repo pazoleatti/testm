@@ -12,7 +12,7 @@
 	<script type="text/javascript" src="Main/Main.nocache.js"></script>
     <script type="text/javascript" src="resources/js/browserDetect.js"></script>
 
-    <!--script>
+    <script>
         window.onload = function(){
             var data = browserDetectNav();
             var isIE11 = !!navigator.userAgent.match(/Trident\/7\./);
@@ -22,9 +22,13 @@
                             || isIE11
                             ||(data[0]=="Safari")
                             ||(data[0]=="Chrome")))
-                document.write('<div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;">Работа приложения невозможна. Обнаружен несовместимый браузер. Приложение поддерживает Internet Explorer версии 8 и старше. В том числе и в режиме совместимости версия браузера и документов должны быть установлены не ниже 8.</div>');
+                document.write('<div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;">Работа приложения невозможна. Обнаружен несовместимый браузер. Приложение поддерживает Internet Explorer версии 8 и старше. В том числе и в режиме совместимости версия браузера и документов должны быть установлены не ниже 8.' +
+                        '<p><a href=\"/resources/help_un.pdf\">Руководство_пользователя \"Учет Налогов\"</a></p>' +
+                        '<p><a href=\"/resources/help_uks.pdf\">Руководство_пользователя \"Учет КС\"</a></p>' +
+                        '</div>');
+
         }
-    </script-->
+    </script>
 
 </head>
 <body>
