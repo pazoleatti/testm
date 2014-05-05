@@ -228,9 +228,8 @@ void calc() {
             }
         }
     }
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(dataRows)
+
     for (def row : dataRows) {
         if (row != null && row.getAlias() != null) {
             continue
@@ -288,16 +287,7 @@ void consolidation() {
     def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
-    def deleteRows = []
-    dataRows.each { row ->
-        if (!(row != null && row.getAlias() != null)) {
-            deleteRows += row
-        }
-    }
-    dataRows.removeAll(deleteRows)
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    deleteNotFixedRows(dataRows)
 
     // Налоговый период
     def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
@@ -330,9 +320,7 @@ void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
     def copyRows = sourceRows.subList(from, to)
     destinationRows.addAll(getDataRow(destinationRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
-    destinationRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
+    updateIndexes(destinationRows)
 }
 
 void logicCheck() {
@@ -680,46 +668,12 @@ void importData() {
             (xml.row[1].cell[25]): '% к номиналу - для облигаций; руб.коп.- для акций',
             (xml.row[1].cell[26]): 'рублей (по курсу на дату признания дохода)',
             (xml.row[1].cell[27]): '% к номиналу - для облигаций; руб.коп.- для акций',
-            (xml.row[1].cell[28]): 'рублей по курсу на дату признания дохода',
-            (xml.row[2].cell[1]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12',
-            (xml.row[2].cell[13]): '13',
-            (xml.row[2].cell[14]): '14',
-            (xml.row[2].cell[15]): '15',
-            (xml.row[2].cell[16]): '16',
-            (xml.row[2].cell[17]): '17',
-            (xml.row[2].cell[18]): '18',
-            (xml.row[2].cell[19]): '19',
-            (xml.row[2].cell[20]): '20',
-            (xml.row[2].cell[21]): '21',
-            (xml.row[2].cell[22]): '22',
-            (xml.row[2].cell[23]): '23',
-            (xml.row[2].cell[24]): '24',
-            (xml.row[2].cell[25]): '25',
-            (xml.row[2].cell[26]): '26',
-            (xml.row[2].cell[27]): '27',
-            (xml.row[2].cell[28]): '28',
-            (xml.row[2].cell[29]): '29',
-            (xml.row[2].cell[30]): '30',
-            (xml.row[2].cell[31]): '31',
-            (xml.row[2].cell[32]): '32',
-            (xml.row[2].cell[33]): '33',
-            (xml.row[2].cell[34]): '34',
-            (xml.row[2].cell[35]): '35',
-            (xml.row[2].cell[36]): '36',
-            (xml.row[2].cell[37]): '37',
-            (xml.row[2].cell[38]): '38'
+            (xml.row[1].cell[28]): 'рублей по курсу на дату признания дохода'
     ]
+
+    (1..38).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
 
     checkHeaderEquals(headerMapping)
 
@@ -736,29 +690,10 @@ void addData(def xml, int headRowCount) {
     def int rowOffset = 10 // Смещение для индекса колонок в ошибках импорта
     def int colOffset = 1 // Смещение для индекса колонок в ошибках импорта
 
-    def rows = []
     def int rowIndex = 1  // Строки НФ, от 1
 
-    def aliasR = ['1. Еврооблигации 2018 года погашения, полученные в результате реструктуризации ГКО': [getDataRow(dataRows, 'R1')],
-            'R1': [getDataRow(dataRows, 'R1-total')],
-            '2. Прочие еврооблигации и ОВГВЗ': [getDataRow(dataRows, 'R2')],
-            'R2': [getDataRow(dataRows, 'R2-total')],
-            '3. Акции: ОАО «АК Сбербанк России»': [getDataRow(dataRows, 'R3')],
-            'R3': [getDataRow(dataRows, 'R3-total')],
-            '4. Акции: ОАО «ГМК Норильский никель», РАО «ЕЭС России», ОАО «Газпром», ОАО «Мосэнерго», ОАО «НК Роснефть», ОАО «Сургутнефтегаз», ОАО «НК ЛУКойл», ОАО «Ростелеком», ОАО «Татнефть», ОАО «Газпром нефть»': [getDataRow(dataRows, 'R4')],
-            'R4': [getDataRow(dataRows, 'R4-total')],
-            '5. Другие акции и облигации акционерных обществ, включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R5')],
-            'R5': [getDataRow(dataRows, 'R5-total')],
-            '6. Прочие акции и облигации акционерных обществ, не включённые в классификатор АС «Статотчётность»': [getDataRow(dataRows, 'R6')],
-            'R6': [getDataRow(dataRows, 'R6-total')],
-            '7. Субфедеральные и муниципальные ценные бумаги, кроме муниципальных ценных бумаг, эмитированных до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R7')],
-            'R7': [getDataRow(dataRows, 'R7-total')],
-            '8. Муниципальные ценные бумаги, эмитированные до 1 января 2007 года на срок не менее 3 лет': [getDataRow(dataRows, 'R8')],
-            'R8': [getDataRow(dataRows, 'R8-total')],
-            '9. Прочие ценные бумаги': [getDataRow(dataRows, 'R9')],
-            'R9': [getDataRow(dataRows, 'R9-total')],
-            'R10-11': [getDataRow(dataRows, 'R10'), getDataRow(dataRows, 'R11')]
-    ]
+    def mapRows = [:]
+    def sectionIndex = null
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -773,9 +708,15 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
-        if (row.cell[0].text() != null && row.cell[0].text() != '') {
-            title = row.cell[0].text()
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        def firstValue = row.cell[0].text()
+        if (firstValue == 'Итого') {
+            continue
+        } else if (firstValue == 'Всего за текущий месяц' || firstValue == 'Всего за текущий налоговый период') {
+            break
+        } else if (firstValue != null && firstValue != '' && firstValue != 'Итого') {
+            sectionIndex = 'R' + firstValue[0]
+            mapRows.put(sectionIndex, [])
             continue
         }
 
@@ -836,7 +777,7 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 13
-        newRow.acquisitionDate = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
+        newRow.acquisitionDate = parseDate(row.cell[indexCell].text(), "dd.MM.yyyy", xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 14
@@ -899,16 +840,48 @@ void addData(def xml, int headRowCount) {
         indexCell++
 
         // графа 29
+        newRow.costRealization = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
         // графа 30
         newRow.lossRealization = parseNumber(row.cell[indexCell].text(), xlsIndexRow, indexCell + colOffset, logger, true)
         indexCell++
 
-        aliasR[title].add(newRow)
+        mapRows[sectionIndex].add(newRow)
     }
-    aliasR.each { k, v ->
-        rows.addAll(v)
+
+    deleteNotFixedRows(dataRows)
+
+    // копирование данных по разделам
+    groups.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(dataRows, section + '-total').getIndex() - 1
+            dataRows.addAll(insertIndex, copyRows)
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
     }
-    dataRowHelper.save(rows)
+    dataRowHelper.save(dataRows)
+}
+
+// Удалить нефиксированные строки
+void deleteNotFixedRows(def dataRows) {
+    def deleteRows = []
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            deleteRows.add(row)
+        }
+    }
+    if (!deleteRows.isEmpty()) {
+        dataRows.removeAll(deleteRows)
+        updateIndexes(dataRows)
+    }
+}
+
+/** Поправить индексы. */
+void updateIndexes(def dataRows) {
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
 }
