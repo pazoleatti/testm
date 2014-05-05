@@ -210,7 +210,7 @@ void calc() {
         def map = row.amortGroup == null ? null : getRefBookValue(71, row.amortGroup)
 
         // Строка из предыдущей формы с тем же инвентарным номером
-        prevRow = getPrevRow(dataPrev, row)
+        def prevRow = getPrevRow(dataPrev, row)
 
         // Графа 8
         row.usefulLifeWithUsed = calc8(row)
@@ -279,7 +279,7 @@ BigDecimal[] calc11and15and16(def row, def prevRow) {
     if (reportMonth == (Calendar.JANUARY + 1)) {
         values[0] = row.cost10perMonth
         values[1] = row.amortMonth
-        values[2] = row.amortMonth
+        values[2] = (prevRow != null ? prevRow.amortExploitation : 0)
     } else if (prevRow != null) {
         if (row.cost10perMonth != null && prevRow.cost10perTaxPeriod != null) {
             values[0] = row.cost10perMonth + prevRow.cost10perTaxPeriod
