@@ -21,7 +21,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
     private int rowNumber = 3;
     private int cellNumber = 0;
 
-    private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm";
+    private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm:ss";
     private static final String DATE_FORMAT = "dd.MM.yyyy";
 
     private static final String fileName = "Журнал_аудита_";
