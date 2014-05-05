@@ -414,7 +414,7 @@ void logicCheck() {
     }
 
     // 18. Проверка итогового значений по всей форме
-    checkTotalSum(dataRows, totalSumColumns, logger, true)
+    checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod)
 }
 
 /** Получение импортируемых данных. */

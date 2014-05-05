@@ -311,7 +311,7 @@ void logicCheck() {
         if (index == 11 || index == 12) {
             for (def col in ['sumCurrentPeriodTotal', 'sumTaxPeriodTotal']) {
                 if (row[col] != totalValues[index][col]) {
-                    logger.error(errorMsg + WRONG_TOTAL, getColumnName(row, col))
+                    loggerError(errorMsg + WRONG_TOTAL, getColumnName(row, col))
                 }
             }
         }
@@ -412,11 +412,11 @@ BigDecimal round(BigDecimal value, int newScale = 2) {
     return value?.setScale(newScale, RoundingMode.HALF_UP)
 }
 
-def loggerError(def msg) {
+def loggerError(def msg, Object... args) {
     if (isMonthBalance()) {
-        logger.warn(msg)
+        logger.warn(msg, args)
     } else {
-        logger.error(msg)
+        logger.error(msg, args)
     }
 }
 
