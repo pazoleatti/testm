@@ -76,9 +76,9 @@ def editableColumns = ['baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'ndsSum
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (1..8)
+// Проверяемые на пустые значения атрибуты (1..4, 6..8)
 @Field
-def nonEmptyColumns = allColumns
+def nonEmptyColumns = allColumns - 'ndsNum'
 
 // Сортируемые атрибуты (графа 3, 5)
 @Field
@@ -135,9 +135,17 @@ void calc() {
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
         // отсортировать/группировать
-        def rowsFofSort = (from <= to ? dataRows[from..(to - 1)] : [])
-        sortRows(rowsFofSort, sortColumns)
+        sortRows(sectionsRows, sortColumns)
+
+        // расчитать
+        def value7 = calc7(section)
+        for (def row : sectionsRows) {
+            // графа 7
+            row.ndsRate = value7
+        }
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
@@ -193,14 +201,24 @@ void logicCheck() {
         }
     }
 
-    // 4. Проверка итоговых значений по разделам 1-7
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, 'head_' + section)
         def lastRow = getDataRow(dataRows, 'total_' + section)
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
+
+        // 4. Проверка итоговых значений по разделам 1-7
         def rows = (from <= to ? dataRows[from..to] : [])
         checkTotalSum(rows, totalColumns, logger, true)
+
+        // 5..8. Проверка номера балансового счета (графа 5) по разделам
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def value5 = calc5(section)
+        for (def row : sectionsRows) {
+            if (row.ndsNum != null && row.ndsNum != '' && row.ndsNum != value5) {
+                logger.error('Строка %d: Графа «%s» заполнена неверно!', row.getIndex(), getColumnName(row, 'ndsNum'))
+            }
+        }
     }
 }
 
@@ -268,4 +286,48 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
     updateIndexes(destinationDataRows)
+}
+
+def calc5(def section) {
+    def tmp = null
+    switch (section) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+            tmp = '60309.01'
+            break
+        case '5':
+            tmp = '60309.04'
+            break
+        case '6':
+            tmp = '60309.05'
+            break
+        case '7':
+            break
+    }
+    return tmp
+}
+
+def calc7(def section) {
+    def tmp = null
+    switch (section) {
+        case '1':
+            tmp = '18'
+            break
+        case '2':
+            tmp = '10'
+            break
+        case '3':
+        case '5':
+        case '6':
+            tmp = '18/118'
+            break
+        case '4':
+            tmp = '10/118'
+            break
+        case '7':
+            break
+    }
+    return tmp
 }
