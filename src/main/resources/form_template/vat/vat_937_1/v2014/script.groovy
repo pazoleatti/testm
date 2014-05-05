@@ -142,13 +142,13 @@ void logicCheck() {
     // «Графа 9» = «Графа 8» * 10 / 100
     for (def row in [totalA, totalPeriod, totalAnnul]) {
         def errorMsg = "Строка ${row.getIndex()}: "
-        if (row.deal_20_Nds != row.deal_20 * 0.2) {
+        if (row.deal_20 != null && row.deal_20_Nds != row.deal_20 * 0.2) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%% неверная!")
         }
-        if (row.deal_18_Nds != row.deal_18 * 0.18) {
+        if (row.deal_18 != null && row.deal_18_Nds != row.deal_18 * 0.18) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%% неверная!")
         }
-        if (row.deal_10_Nds != row.deal_10 * 0.1) {
+        if (row.deal_10 != null && row.deal_10_Nds != row.deal_10 * 0.1) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%% неверная!")
         }
     }
