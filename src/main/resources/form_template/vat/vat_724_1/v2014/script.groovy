@@ -433,19 +433,19 @@ void addData(def xml, int headRowCount) {
         newRow.baseAccNum = row.cell[3].text()
 
         // Графа 4
-        newRow.baseSum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.baseSum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
 
         // Графа 5
         newRow.ndsNum = row.cell[5].text()
 
         // Графа 6
-        newRow.ndsSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.ndsSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         // Графа 7
         newRow.ndsRate = row.cell[7].text()
 
         // Графа 8
-        newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
         aliasR[title].add(newRow)
     }

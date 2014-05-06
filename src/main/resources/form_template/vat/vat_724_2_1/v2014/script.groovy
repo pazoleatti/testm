@@ -49,11 +49,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        // TODO В данной форме только фиксированные строки и только расчетные значения: результат импорта перетирается
-        // расчетами, вызываемыми непосредственно после импорта. (http://jira.aplana.com/browse/SBRFACCTAX-7088)
-        importData()
-        calc()
-        logicCheck()
+        noImport(logger)
         break
 }
 
@@ -320,65 +316,4 @@ def roundValue(def value, int precision = 2) {
     } else {
         return null
     }
-}
-
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 6, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Код операции',
-            (xml.row[0].cell[3]): 'Наименование операции',
-            (xml.row[0].cell[4]): 'Стоимость реализованных (переданных) товаров (работ, услуг) без НДС',
-            (xml.row[0].cell[5]): 'Стоимость приобретенных товаров (работа, услуг), не облагаемых НДС',
-            (xml.row[1].cell[0]): '1',
-            (xml.row[1].cell[1]): '2',
-            (xml.row[1].cell[3]): '3',
-            (xml.row[1].cell[4]): '4',
-            (xml.row[1].cell[5]): '5',
-    ]
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 1)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапок
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        rowNumber =  row.cell[0].text()
-        if (rowNumber == null || rowNumber == "") {
-            continue
-        }
-
-        def oldRow =  getDataRow(dataRows, 'R'+rowNumber)
-
-        // Графа 4
-        oldRow.realizeCost = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false) ?: 0
-
-        // Графа 5
-        oldRow.obtainCost = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, false) ?: 0
-    }
-    dataRowHelper.update(dataRows);
 }
