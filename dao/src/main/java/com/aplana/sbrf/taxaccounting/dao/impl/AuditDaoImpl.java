@@ -138,11 +138,12 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
         sql.append("select ordDat.* from ( ");
-        sql.append("select ls.id, ls.log_date, ls.ip, ls.event_id, ls.user_id, ls.roles, ls.department_id, ls.declaration_type_id, ls.form_type_id, ls.form_kind_id, ls.note, ls.user_department_id, ls.report_period_name, ");
-        sql.append("rownum as rn FROM log_system ls ");
+        sql.append("select dat.*, rownum as rn from (");
+        sql.append("select ls.id, ls.log_date, ls.ip, ls.event_id, ls.user_id, ls.roles, ls.department_id, ls.declaration_type_id, ls.form_type_id, ls.form_kind_id, ls.note, ls.user_department_id, ls.report_period_name ");
+        sql.append("FROM log_system ls ");
         appendJoinWhereClause(sql, filter);
         sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
-        sql.append(") ordDat");
+        sql.append(") dat) ordDat");
         if(filter.getCountOfRecords() != 0){
             sql.append(" where ordDat.rn between :startIdx and :endIdx");
         }
@@ -348,7 +349,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         String column = null;
 
         if (ordering == null) {
-            ordering = HistoryBusinessSearchOrdering.ID;
+            ordering = HistoryBusinessSearchOrdering.DATE;
         }
 
         switch (ordering) {
