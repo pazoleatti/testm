@@ -55,11 +55,19 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
     @Override
     public GetRefBookTreeValuesResult execute(GetRefBookTreeValuesAction action, ExecutionContext context) throws ActionException {
 
+        GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
         Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
         Department userDep = departmentService.getDepartment(securityService.currentUserInfo().getUser().getDepartmentId());
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, userDep);
+
+        if (filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+            //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
+            result.setPage(new PagingResult<RefBookTreeItem>(new LinkedList<RefBookTreeItem>(), 0));
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
 
         PagingResult<Map<String, RefBookValue>> refBookPage;
 
@@ -81,8 +89,6 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null);
 
         }
-
-        GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
 
         result.setUuid(logEntryService.save(logger.getEntries()));
         result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
@@ -108,6 +114,9 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
         String regionFilter = RefBookPickerUtils.buildRegionFilterForUser(dep == null ? null : Arrays.asList(dep), refBook);
         if (regionFilter != null) {
+            if (regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+                return regionFilter;
+            }
             if (resultFilter.length() > 0) {
                 resultFilter.append(" and ");
             }

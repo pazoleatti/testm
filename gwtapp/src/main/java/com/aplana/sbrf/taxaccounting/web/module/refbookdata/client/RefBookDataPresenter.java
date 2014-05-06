@@ -258,6 +258,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     if (recordId != null && page != null) {
                                         getView().setSelected(recordId);
                                     }
+                                    //LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
 								}
 							}, RefBookDataPresenter.this));
 		}
