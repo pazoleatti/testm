@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.MigrationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.MapperUtils;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.row.*;
 import org.apache.commons.logging.Log;
@@ -27,7 +28,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
         public Exemplar mapRow(ResultSet rs, int index) throws SQLException {
             Exemplar exemplar = new Exemplar();
 
-            exemplar.setExemplarId(rs.getLong(1));
+            exemplar.setExemplarId(SqlUtils.getLong(rs,1));
             exemplar.setPeriodityId(rs.getInt(2));
             exemplar.setBeginDate(rs.getDate(3));
             exemplar.setEndDate(rs.getDate(4));

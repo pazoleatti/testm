@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -285,7 +286,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		@Override
 		public LogSearchResultItem mapRow(ResultSet rs, int index) throws SQLException {
             LogSearchResultItem log = new LogSearchResultItem();
-			log.setId(rs.getLong("id"));
+			log.setId(SqlUtils.getLong(rs,"id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setIp(rs.getString("ip"));
 			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));

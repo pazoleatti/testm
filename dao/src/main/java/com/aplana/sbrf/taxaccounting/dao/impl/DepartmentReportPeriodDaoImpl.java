@@ -33,8 +33,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 		public DepartmentReportPeriod mapRow(ResultSet rs, int index)
 				throws SQLException {
 			DepartmentReportPeriod reportPeriod = new DepartmentReportPeriod();
-            reportPeriod.setId(rs.getLong("ID"));
-			reportPeriod.setDepartmentId(rs.getLong("DEPARTMENT_ID"));
+            reportPeriod.setId(SqlUtils.getLong(rs,"ID"));
+			reportPeriod.setDepartmentId(SqlUtils.getLong(rs,"DEPARTMENT_ID"));
 			reportPeriod.setReportPeriod(reportPeriodDao.get(rs
 					.getInt("REPORT_PERIOD_ID")));
 			reportPeriod.setActive(rs.getInt("IS_ACTIVE") == 0 ? false : true);

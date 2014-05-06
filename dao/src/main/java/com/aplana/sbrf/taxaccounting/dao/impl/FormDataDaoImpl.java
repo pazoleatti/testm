@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -60,7 +61,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(formTemplate);
-			fd.setId(rs.getLong("id"));
+			fd.setId(SqlUtils.getLong(rs, "id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
@@ -82,7 +83,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		public FormData mapRow(ResultSet rs, int index)
 				throws SQLException {
 			FormData result = new FormData();
-			result.setId(rs.getLong("id"));
+			result.setId(SqlUtils.getLong(rs, "id"));
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));

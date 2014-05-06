@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultItemMapper;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -35,7 +36,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		@Override
 		public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationData d = new DeclarationData();
-			d.setId(rs.getLong("id"));
+			d.setId(SqlUtils.getLong(rs,"id"));
 			d.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
 			d.setDepartmentId(rs.getInt("department_id"));
 			d.setReportPeriodId(rs.getInt("report_period_id"));
@@ -144,7 +145,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 new RowMapper<Long>() {
                     @Override
                     public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getLong("declaration_data_id");
+                        return SqlUtils.getLong(rs,"declaration_data_id");
                     }
                 }
         );

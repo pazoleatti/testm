@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -45,8 +46,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				result = new StringColumn();
 				((StringColumn) result).setMaxLength(rs.getInt("max_length"));
 			} else if ("R".equals(type)) {
-                long attributeId = rs.getLong("attribute_id");
-                Long attributeId2 = rs.getLong("attribute_id2");
+                Long attributeId = SqlUtils.getLong(rs,"attribute_id");
+                Long attributeId2 = SqlUtils.getLong(rs,"attribute_id2");
                 if (rs.wasNull()) {
                     attributeId2 = null;
                 }

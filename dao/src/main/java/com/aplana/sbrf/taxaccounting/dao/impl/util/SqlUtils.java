@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -92,5 +94,25 @@ public final class SqlUtils {
 			result.append(',');
         }
 	    return null; // недостижимый код
+    }
+
+    public static Long getLong(ResultSet resultSet, String columnLabel) throws SQLException {
+        Long ret = resultSet.getLong(columnLabel);
+        return resultSet.wasNull()?null:ret;
+    }
+
+    public static Long getLong(ResultSet resultSet, int columnIndex) throws SQLException {
+        Long ret = resultSet.getLong(columnIndex);
+        return resultSet.wasNull()?null:ret;
+    }
+
+    public static Integer getInteger(ResultSet resultSet, String columnLabel) throws SQLException {
+        Integer ret = resultSet.getInt(columnLabel);
+        return resultSet.wasNull()?null:ret;
+    }
+
+    public static Integer getInteger(ResultSet resultSet, int columnIndex) throws SQLException{
+        Integer ret = resultSet.getInt(columnIndex);
+        return resultSet.wasNull()?null:ret;
     }
 }
