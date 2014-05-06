@@ -307,12 +307,13 @@ void logicCheck() {
     def totalValues = getTotalValues(dataRows)
     for (row in dataRows) {
         def index = dataRows.indexOf(row)
-        if ((index == 11 || index == 12) &&
-                !(row.sumCurrentPeriodTotal == totalValues[index].sumCurrentPeriodTotal &&
-                        row.sumTaxPeriodTotal == totalValues[index].sumTaxPeriodTotal)) {
-            // TODO Исправить на WRONG_TOTAL
-            loggerError('Итоговые значения рассчитаны неверно!')
-            break
+        def errorMsg = "Строка ${index+1}: "
+        if (index == 11 || index == 12) {
+            for (def col in ['sumCurrentPeriodTotal', 'sumTaxPeriodTotal']) {
+                if (row[col] != totalValues[index][col]) {
+                    loggerError(errorMsg + WRONG_TOTAL, getColumnName(row, col))
+                }
+            }
         }
     }
 }
@@ -411,11 +412,11 @@ BigDecimal round(BigDecimal value, int newScale = 2) {
     return value?.setScale(newScale, RoundingMode.HALF_UP)
 }
 
-def loggerError(def msg) {
+def loggerError(def msg, Object... args) {
     if (isMonthBalance()) {
-        logger.warn(msg)
+        logger.warn(msg, args)
     } else {
-        logger.error(msg)
+        logger.error(msg, args)
     }
 }
 

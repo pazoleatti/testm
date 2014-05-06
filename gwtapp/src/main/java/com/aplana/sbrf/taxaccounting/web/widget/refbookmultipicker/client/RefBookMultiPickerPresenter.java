@@ -172,7 +172,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     private boolean isNeedReloadHeaders(PickerState newPs) {
         return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
+                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
+                WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
     }
 
     /* Проверка на изменения входных параметров*/
