@@ -39,6 +39,11 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        calc()
+        logicCheck()
+        break
 }
 
 // Редактируемые атрибуты
@@ -89,4 +94,106 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Дата операции',
+            (xml.row[0].cell[3]): 'Контрагент',
+            (xml.row[0].cell[4]): 'Доход контрагента',
+            (xml.row[0].cell[6]): 'НДС',
+            (xml.row[0].cell[8]): 'Счёт-фактура',
+            (xml.row[1].cell[4]): 'Вид',
+            (xml.row[1].cell[5]): 'Сумма',
+            (xml.row[1].cell[6]): 'Номер мемориального ордера',
+            (xml.row[1].cell[7]): 'Сумма',
+            (xml.row[1].cell[8]): 'Дата',
+            (xml.row[1].cell[9]): 'Номер',
+            (xml.row[2].cell[0]): '1'
+    ]
+    (2..9).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        newRow.operDate = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
+
+        // графа 3
+        newRow.contragent =  row.cell[3].text()
+
+        // графа 4
+        newRow.type = row.cell[4].text()
+
+        // графа 5
+        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
+
+        // графа 6
+        newRow.number = row.cell[6].text()
+
+        // графа 7
+        newRow.sum2 = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
+
+        // графа 8
+        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
+
+        // графа 9
+        newRow.number2 = row.cell[9].text()
+
+        rows.add(newRow)
+    }
+
+    // Добавляем итоговые строки
+    rows.add(getDataRow(dataRows, 'total'))
+
+    dataRowHelper.save(rows)
 }
