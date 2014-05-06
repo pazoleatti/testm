@@ -277,7 +277,7 @@ def getReportPeriodEndDate() {
 }
 
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 14, 4)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 13, 4)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 4)
 
