@@ -51,6 +51,11 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        calc()
+        logicCheck()
+        break
 }
 
 @Field
@@ -74,6 +79,11 @@ def endDate = null
 
 @Field
 def dateFormat = 'dd.MM.yyyy'
+
+// Получение числа из строки при импорте
+def getNumber(def value, def indexRow, def indexCol) {
+    return parseNumber(value, indexRow, indexCol, logger, true)
+}
 
 void calcAfterCreate() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -138,29 +148,32 @@ void logicCheck() {
     // «Графа 9» = «Графа 8» * 10 / 100
     for (def row in [totalA, totalPeriod, totalAnnul, totalFix]) {
         def errorMsg = "Строка ${row.getIndex()}: "
-        if (row.deal_20_Nds != row.deal_20 * 0.2) {
+        if (row.deal_20 != null && row.deal_20_Nds != row.deal_20 * 0.2) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 20%% неверная!")
         }
-        if (row.deal_18_Nds != row.deal_18 * 0.18) {
+        if (row.deal_18 != null && row.deal_18_Nds != row.deal_18 * 0.18) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 18%% неверная!")
         }
-        if (row.deal_10_Nds != row.deal_10 * 0.1) {
+        if (row.deal_10 != null && row.deal_10_Nds != row.deal_10 * 0.1) {
             logger.warn(errorMsg + "Сумма НДС, облагаемая по ставке 10%% неверная!")
         }
     }
     // 5. По строке 2:
     // «Графа 3» ≥ «Графа 4» + «Графа 5» + «Графа 6» + «Графа 7» + «Графа 8» + «Графа 9» + «Графа 10» + «Графа 11»
-    if (totalA.dealNds < totalA.deal_20 + totalA.deal_20_Nds + totalA.deal_18 + totalA.deal_18_Nds + totalA.deal_10 + totalA.deal_10_Nds + totalA.deal_0 + totalA.deal) {
+    if (totalA.deal_20 != null && totalA.deal_20_Nds != null && totalA.deal_18 != null && totalA.deal_18_Nds != null && totalA.deal_10 != null && totalA.deal_10_Nds != null && totalA.deal_0 != null && totalA.deal != null &&
+            totalA.dealNds < totalA.deal_20 + totalA.deal_20_Nds + totalA.deal_18 + totalA.deal_18_Nds + totalA.deal_10 + totalA.deal_10_Nds + totalA.deal_0 + totalA.deal) {
         logger.warn("Строка ${totalA.getIndex()}: " + "Сумма продаж по разделу «А» неверная!")
     }
     // 6. По строке 7:
     // «Графа 3» ≥ «Графа 4» + «Графа 5» + «Графа 6» + «Графа 7» + «Графа 8» + «Графа 9» + «Графа 10» + «Графа 11»
-    if (totalB.dealNds < totalB.deal_20 + totalB.deal_20_Nds + totalB.deal_18 + totalB.deal_18_Nds + totalB.deal_10 + totalB.deal_10_Nds + totalB.deal_0 + totalB.deal) {
+    if (totalB.deal_20 != null && totalB.deal_20_Nds != null && totalB.deal_18 != null && totalB.deal_18_Nds != null && totalB.deal_10 != null && totalB.deal_10_Nds != null && totalB.deal_0 != null && totalB.deal != null &&
+            totalB.dealNds < totalB.deal_20 + totalB.deal_20_Nds + totalB.deal_18 + totalB.deal_18_Nds + totalB.deal_10 + totalB.deal_10_Nds + totalB.deal_0 + totalB.deal) {
         logger.warn("Строка ${totalB.getIndex()}: " + "Сумма продаж по разделу «Б» неверная!")
     }
     // 7. По строке 2:
     // «Графа 13» = «Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»
-    if (totalA.diff != totalA.nds - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
+    if (totalA.nds != null && totalA.deal_20_Nds != null && totalA.deal_18_Nds != null && totalA.deal_10_Nds != null &&
+            totalA.diff != totalA.nds - totalA.deal_20_Nds - totalA.deal_18_Nds - totalA.deal_10_Nds) {
         logger.error("Строка ${totalA.getIndex()}: " + "Неверно рассчитана графа «Расхождение (руб.)»!")
     }
     // 8. Если существует экземпляр налоговой формы 937.2.13, чье подразделение и  налоговый период,
@@ -261,4 +274,99 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 14, 4)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 4)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : 'Налоговый период',
+            (xml.row[0].cell[1]) : 'Всего счетов-фактур (шт.)',
+            (xml.row[0].cell[2]) : 'Всего продаж, включая НДС (руб.)',
+            (xml.row[0].cell[3]) : 'В том числе (руб.)',
+            (xml.row[0].cell[11]) : 'Сумма НДС, подлежащая начислению согласно [1] (руб.)',
+            (xml.row[0].cell[12]) : 'Расхождение (руб.)',
+            (xml.row[1].cell[3]) : 'продажи, облагаемые налогом по ставке',
+            (xml.row[1].cell[10]) : 'продажи, освобождаемые от налога (ст. 145, 149 НК РФ)',
+            (xml.row[2].cell[3]) : '20%%',
+            (xml.row[2].cell[5]) : '18%%',
+            (xml.row[2].cell[7]) : '10%%',
+            (xml.row[2].cell[9]) : '0%%',
+            (xml.row[3].cell[3]) : 'стоимость без НДС',
+            (xml.row[3].cell[4]) : 'сумма НДС',
+            (xml.row[3].cell[5]) : 'стоимость без НДС',
+            (xml.row[3].cell[6]) : 'сумма НДС',
+            (xml.row[3].cell[7]) : 'стоимость без НДС',
+            (xml.row[3].cell[8]) : 'сумма НДС'
+    ]
+    (0..12).each { index ->
+        headerMapping.put((xml.row[4].cell[index]), (index+1).toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 4)
+}
+
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    for (int i in [2, 4, 5, 6, 7]) {
+        def row = xml.row[headRowCount + i]
+        def int xlsIndexRow = rowOffset + headRowCount + i
+
+        // графа 2
+        def xmlIndexCol = 1
+        dataRows[i - 1].bill = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 3
+        xmlIndexCol = 2
+        dataRows[i - 1].dealNds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 4
+        xmlIndexCol = 3
+        dataRows[i - 1].deal_20 = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 5
+        xmlIndexCol = 4
+        dataRows[i - 1].deal_20_Nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 6
+        xmlIndexCol = 5
+        dataRows[i - 1].deal_18 = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 7
+        xmlIndexCol = 6
+        dataRows[i - 1].deal_18_Nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 8
+        xmlIndexCol = 7
+        dataRows[i - 1].deal_10 = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 9
+        xmlIndexCol = 8
+        dataRows[i - 1].deal_10_Nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        xmlIndexCol = 9
+        dataRows[i - 1].deal_0 = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 11
+        xmlIndexCol = 10
+        dataRows[i - 1].deal = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 12
+        xmlIndexCol = 11
+        dataRows[i - 1].nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 13
+        xmlIndexCol = 12
+        dataRows[i - 1].diff = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+    }
 }
