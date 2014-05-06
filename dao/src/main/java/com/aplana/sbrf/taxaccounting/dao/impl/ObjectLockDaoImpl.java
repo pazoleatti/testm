@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.IdentityObject;
 import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -36,7 +37,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 		@SuppressWarnings("unchecked")
 		public ObjectLock<IdType> mapRow(ResultSet rs, int index) throws SQLException {
 			ObjectLock<IdType> lock = new ObjectLock<IdType>();
-			lock.setObjectId(rs.getLong("object_id"));
+			lock.setObjectId(SqlUtils.getLong(rs, "object_id"));
 			String className = rs.getString("class");
 			try {
 				Class<? extends IdentityObject<IdType>> clazz = (Class<? extends IdentityObject<IdType>>)Class.forName(className);

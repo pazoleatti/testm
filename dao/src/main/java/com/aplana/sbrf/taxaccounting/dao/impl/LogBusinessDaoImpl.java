@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,24 +28,13 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		@Override
 		public LogBusiness mapRow(ResultSet rs, int index) throws SQLException {
 			LogBusiness log = new LogBusiness();
-			log.setId(rs.getLong("id"));
+			log.setId(SqlUtils.getLong(rs, "id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setEventId(rs.getInt("event_id"));
 			log.setUserId(rs.getInt("user_id"));
 			log.setRoles(rs.getString("roles"));
-
-			if (rs.getLong("declaration_data_id") != 0) {
-				log.setDeclarationId(rs.getLong("declaration_data_id"));
-			} else {
-				log.setDeclarationId(null);
-			}
-
-			if (rs.getLong("form_data_id") != 0) {
-				log.setFormId(rs.getLong("form_data_id"));
-			} else {
-				log.setFormId(null);
-			}
-
+			log.setDeclarationId(SqlUtils.getLong(rs, "declaration_data_id"));
+			log.setFormId(SqlUtils.getLong(rs, "form_data_id"));
 			log.setDepartmentId(rs.getInt("user_department_id"));
 			log.setNote(rs.getString("note"));
 			return log;

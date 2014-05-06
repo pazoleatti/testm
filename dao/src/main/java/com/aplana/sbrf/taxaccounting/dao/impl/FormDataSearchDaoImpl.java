@@ -110,7 +110,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         return getJdbcTemplate().query(sql.toString(), new RowMapper<Long>() {
             @Override
             public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getLong("form_data_id");
+                return SqlUtils.getLong(rs, "form_data_id");
             }
         });
     }

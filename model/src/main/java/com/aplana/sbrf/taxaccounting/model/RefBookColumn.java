@@ -10,7 +10,7 @@ package com.aplana.sbrf.taxaccounting.model;
 public class RefBookColumn extends Column {
 	private static final long serialVersionUID = -6969365681036598158L;
 
-	private long refBookAttributeId;
+	private Long refBookAttributeId;
 
     private long nameAttributeId;
 
@@ -32,11 +32,11 @@ public class RefBookColumn extends Column {
 		}
 	};
 
-	public long getRefBookAttributeId() {
+	public Long getRefBookAttributeId() {
 		return refBookAttributeId;
 	}
 
-	public void setRefBookAttributeId(long refBookAttributeId) {
+	public void setRefBookAttributeId(Long refBookAttributeId) {
 		this.refBookAttributeId = refBookAttributeId;
 	}
 
