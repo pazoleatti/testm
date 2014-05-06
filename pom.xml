@@ -39,6 +39,7 @@
 		<jasperreports.version>5.0.1</jasperreports.version>
 		<poi.version>3.8</poi.version>
 		<org.slf4j.version>1.7.2</org.slf4j.version>
+        <java.version>1.6</java.version>
 	</properties>
 
 	<dependencyManagement>
@@ -184,6 +185,11 @@
 				<artifactId>spring-security-web</artifactId>
 				<version>${springsecurity.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aspects</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
 
 			<!-- AspectJ -->
 			<dependency>
@@ -357,6 +363,11 @@
                 <artifactId>validation-api</artifactId>
                 <version>1.1.0.Final</version>
             </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>persistence-api</artifactId>
+                <version>1.0.2</version>
+            </dependency>
         </dependencies>
 	</dependencyManagement>
 
@@ -385,11 +396,19 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>2.5.1</version>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
 					</configuration>
 				</plugin>
-
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>aspectj-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
