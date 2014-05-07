@@ -180,17 +180,20 @@ void logicCheck() {
 
     def isSection1or2 = false
     def isSection5or6 = false
+    def isSection7 = false
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
+            isSection7 = row.getAlias() == 'head_7'
             continue
         }
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        def columns = (isSection7 ? nonEmptyColumns - 'ndsRate' : nonEmptyColumns)
+        checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
         if (row.ndsSum != row.ndsBookSum &&
@@ -200,11 +203,11 @@ void logicCheck() {
 
         // TODO (Ramil Timerbaev) пока исключил эту проверку потому что графа 7 имеет тип строка
         // 3. Проверка суммы НДС
-        if (false && row.baseSum != null && row.ndsRate != null) {
+        if (false && row.baseSum != null && row.ndsRate != null && row.ndsSum != null) {
             def tmp = row.baseSum * row.ndsRate
             def tmp1 = tmp + (tmp * 3) / 100
             def tmp2 = tmp - (tmp * 3) / 100
-            if (tmp1 > tmp2) {
+            if (tmp1 > row.ndsSum && row.ndsSum > tmp2) {
                 logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!')
             }
         }
@@ -216,12 +219,41 @@ void logicCheck() {
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def tmpTotal = getTotalRow(sectionsRows)
+        def hasError = false
+        totalColumns.each { alias ->
+            if (lastRow[alias] != tmpTotal[alias]) {
+                logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
+                hasError = true
+            }
+        }
+        if (hasError) {
+            break
+        }
+    }
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'head_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
         // 4. Проверка итоговых значений по разделам 1-7
-        def rows = (from <= to ? dataRows[from..to] : [])
-        checkTotalSum(rows, totalColumns, logger, true)
+        def tmpTotal = getTotalRow(sectionsRows)
+        def hasError = false
+        if (!hasError) {
+            totalColumns.each { alias ->
+                if (lastRow[alias] != tmpTotal[alias]) {
+                    logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
+                    hasError = true
+                }
+            }
+        }
 
         // 5..8. Проверка номера балансового счета (графа 5) по разделам
-        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
         def value5 = calc5(section)
         for (def row : sectionsRows) {
             if (row.ndsNum != null && row.ndsNum != '' && row.ndsNum != value5) {
@@ -453,4 +485,19 @@ void addData(def xml, int headRowCount) {
         rows.addAll(v)
     }
     dataRowHelper.save(rows)
+}
+
+def getTotalRow(sectionsRows) {
+    def newRow = formData.createDataRow()
+    totalColumns.each { alias ->
+        newRow.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+    for (def row : sectionsRows) {
+        totalColumns.each { alias ->
+            def value1 = newRow.getCell(alias).value
+            def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+            newRow.getCell(alias).setValue(value1 + value2, null)
+        }
+    }
+    return newRow
 }

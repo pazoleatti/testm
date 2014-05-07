@@ -38,6 +38,11 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        calc()
+        logicCheck()
+        break
 }
 
 // Редактируемые атрибуты
@@ -88,4 +93,114 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]): '№ пп',
+            (xml.row[0].cell[2]): 'Дата операции',
+            (xml.row[0].cell[3]): 'Арендодатель',
+            (xml.row[0].cell[6]): 'Номер балансового счёта учёта суммы арендной платы',
+            (xml.row[0].cell[7]): 'Сумма арендной платы, уплаченная арендодателю',
+            (xml.row[0].cell[8]): 'НДС',
+            (xml.row[0].cell[10]): 'Счёт-фактура',
+            (xml.row[1].cell[3]): 'наименование',
+            (xml.row[1].cell[4]): 'ИНН',
+            (xml.row[1].cell[5]): 'КПП',
+            (xml.row[1].cell[8]): 'номер мемориального ордера',
+            (xml.row[1].cell[9]): 'сумма',
+            (xml.row[1].cell[10]): 'дата',
+            (xml.row[1].cell[11]): 'номер',
+            (xml.row[2].cell[0]): '1'
+    ]
+    (2..11).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def rows = []
+    def int rowIndex = 1  // Строки НФ, от 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != "") {
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // графа 2
+        newRow.operDate = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
+
+        // графа 3
+        newRow.name =  row.cell[3].text()
+
+        // графа 4
+        newRow.inn = row.cell[4].text()
+
+        // графа 5
+        newRow.kpp = row.cell[5].text()
+
+        // графа 6
+        newRow.balanceNumber = row.cell[6].text()
+
+        // графа 7
+        newRow.sum = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
+
+        // графа 8
+        newRow.orderNumber = row.cell[8].text()
+
+        // графа 9
+        newRow.ndsSum = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
+
+        // графа 10
+        newRow.sfDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, true)
+
+        // графа 11
+        newRow.sfNumber = row.cell[11].text()
+
+        rows.add(newRow)
+    }
+
+    // Добавляем итоговые строки
+    rows.add(getDataRow(dataRows, 'total'))
+
+    dataRowHelper.save(rows)
 }
