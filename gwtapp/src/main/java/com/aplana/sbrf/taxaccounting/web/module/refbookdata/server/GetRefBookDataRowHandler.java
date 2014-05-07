@@ -63,7 +63,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
                 List<Department> deps = departmentService.getBADepartments(securityService.currentUserInfo().getUser());
                 filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
-                if (filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+                if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
                     //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
                     result.setTotalCount(0);
                     result.setDataRows(new ArrayList<RefBookDataRow>());

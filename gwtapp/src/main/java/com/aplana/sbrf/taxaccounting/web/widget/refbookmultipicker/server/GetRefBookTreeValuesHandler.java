@@ -62,7 +62,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         Department userDep = departmentService.getDepartment(securityService.currentUserInfo().getUser().getDepartmentId());
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, userDep);
 
-        if (filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+        if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
             result.setPage(new PagingResult<RefBookTreeItem>(new LinkedList<RefBookTreeItem>(), 0));
             result.setUuid(logEntryService.save(logger.getEntries()));

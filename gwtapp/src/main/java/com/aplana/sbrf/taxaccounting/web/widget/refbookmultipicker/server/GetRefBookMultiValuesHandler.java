@@ -71,7 +71,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, context);
-        if (filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+        if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
             result.setPage(new PagingResult<RefBookItem>(new LinkedList<RefBookItem>(), 0));
             result.setUuid(logEntryService.save(logger.getEntries()));
@@ -145,7 +145,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                         department = departmentService.getFormDepartment(context.getFormDataId());
                     }
                     regionFilter = RefBookPickerUtils.buildRegionFilterForUser(department == null ? null : Arrays.asList(department), refBook);
-                    if (regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+                    if (regionFilter != null && regionFilter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
                         return regionFilter;
                     }
                     break;
