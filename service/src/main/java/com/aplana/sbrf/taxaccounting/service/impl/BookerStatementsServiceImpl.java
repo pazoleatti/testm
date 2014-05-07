@@ -238,6 +238,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                     Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
 
+                    if(cell.getColumnIndex() > 1 && endOfFile) {
+                        break;
+                    }
+                    // пропускаем пустые ячейки
                     if (cell == null) {
                         continue;
                     }
