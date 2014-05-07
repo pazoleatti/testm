@@ -157,8 +157,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
 	@Override
 	public void check(Logger logger, long id, TAUserInfo userInfo) {
-        validateDeclaration(declarationDataDao.get(id), logger, true);
         declarationDataScriptingService.executeScript(userInfo, declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+        validateDeclaration(declarationDataDao.get(id), logger, true);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -198,13 +198,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 		if (accepted) {
             DeclarationData declarationData  = declarationDataDao.get(id);
 
+            Map<String, Object> exchangeParams = new HashMap<String, Object>();
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+
             validateDeclaration(declarationDataDao.get(id), logger, true);
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
             declarationData.setAccepted(true);
-
-            Map<String, Object> exchangeParams = new HashMap<String, Object>();
-            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
             Integer declarationTypeId = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getId();
             logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
