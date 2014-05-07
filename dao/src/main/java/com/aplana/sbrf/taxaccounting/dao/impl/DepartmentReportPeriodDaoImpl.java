@@ -35,10 +35,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
 			DepartmentReportPeriod reportPeriod = new DepartmentReportPeriod();
             reportPeriod.setId(SqlUtils.getLong(rs,"ID"));
 			reportPeriod.setDepartmentId(SqlUtils.getLong(rs,"DEPARTMENT_ID"));
-			reportPeriod.setReportPeriod(reportPeriodDao.get(rs
-					.getInt("REPORT_PERIOD_ID")));
-			reportPeriod.setActive(rs.getInt("IS_ACTIVE") == 0 ? false : true);
-			reportPeriod.setBalance(rs.getInt("IS_BALANCE_PERIOD") == 0 ? false : true);
+			reportPeriod.setReportPeriod(reportPeriodDao.get(SqlUtils
+                    .getInteger(rs,"REPORT_PERIOD_ID")));
+			reportPeriod.setActive(SqlUtils.getInteger(rs,"IS_ACTIVE") == 0 ? false : true);
+			reportPeriod.setBalance(SqlUtils.getInteger(rs,"IS_BALANCE_PERIOD") == 0 ? false : true);
             reportPeriod.setCorrectPeriod(rs.getDate("CORRECTION_DATE"));
 			return reportPeriod;
 		}

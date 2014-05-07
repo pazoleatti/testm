@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -30,7 +31,7 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 			FormDataPerformer res = new FormDataPerformer();
 			res.setName(rs.getString("name"));
 			res.setPhone(rs.getString("phone"));
-            res.setPrintDepartmentId(rs.getInt("print_department_id"));
+            res.setPrintDepartmentId(SqlUtils.getInteger(rs, "print_department_id"));
             res.setReportDepartmentName(rs.getString("report_department_name"));
 			return res;
 		}

@@ -24,11 +24,11 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	private static final class FormTypeMapper implements RowMapper<FormType> {
 		public FormType mapRow(ResultSet rs, int index) throws SQLException {
 			FormType result = new FormType();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
 			String taxCode = rs.getString("tax_type");
 			result.setTaxType(TaxType.fromCode(taxCode.charAt(0)));
-            result.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
 			return result;
 		}
 	}

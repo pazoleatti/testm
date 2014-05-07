@@ -423,7 +423,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
                 SqlUtils.transformToSqlInStatement(uniqueRecordIds)), new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
-                result.put(rs.getLong("id"), rs.getDate("version"));
+                result.put(SqlUtils.getLong(rs,"id"), rs.getDate("version"));
             }
         });
         return result;
@@ -461,7 +461,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
                 matches.addAll(getJdbcTemplate().query(sql, new RowMapper<Pair<Long, String>>() {
                     @Override
                     public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(rs.getLong("ID"), attribute.getAlias());
+                        return new Pair<Long, String>(SqlUtils.getLong(rs,"ID"), attribute.getAlias());
                     }
                 }));
             }
@@ -540,13 +540,13 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
             @Override
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 CheckCrossVersionsResult result = new CheckCrossVersionsResult();
-                result.setNum(rs.getInt("NUM"));
-                result.setRecordId(rs.getLong("ID"));
+                result.setNum(SqlUtils.getInteger(rs,"NUM"));
+                result.setRecordId(SqlUtils.getLong(rs,"ID"));
                 result.setVersion(rs.getDate("VERSION"));
-                result.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("STATUS")));
+                result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"STATUS")));
                 result.setNextVersion(rs.getDate("NEXTVERSION"));
-                result.setNextStatus(VersionedObjectStatus.getStatusById(rs.getInt("NEXTSTATUS")));
-                result.setResult(CrossResult.getResultById(rs.getInt("RESULT")));
+                result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                result.setResult(CrossResult.getResultById(SqlUtils.getInteger(rs,"RESULT")));
                 return result;
             }
         }, recordId, excludedRecordId, excludedRecordId,

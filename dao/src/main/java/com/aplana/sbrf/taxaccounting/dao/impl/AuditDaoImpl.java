@@ -289,17 +289,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 			log.setId(SqlUtils.getLong(rs,"id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
 			log.setIp(rs.getString("ip"));
-			log.setEvent(FormDataEvent.getByCode(rs.getInt("event_id")));
-			log.setUser(userDao.getUser(rs.getInt("user_id")));
+			log.setEvent(FormDataEvent.getByCode(SqlUtils.getInteger(rs, "event_id")));
+			log.setUser(userDao.getUser(SqlUtils.getInteger(rs, "user_id")));
 			log.setRoles(rs.getString("roles"));
             log.setDepartmentName(rs.getString("department_name"));
 			log.setReportPeriodName(rs.getString("report_period_name"));
-            if(rs.getInt("declaration_type_id") != 0)
-			    log.setDeclarationType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
-            if(rs.getInt("form_type_id") != 0)
-			    log.setFormType(formTypeDao.get(rs.getInt("form_type_id")));
-			if (rs.getInt("form_kind_id") != 0) {
-				log.setFormKind(FormDataKind.fromId(rs.getInt("form_kind_id")));
+            if(SqlUtils.getInteger(rs, "declaration_type_id") != null)
+			    log.setDeclarationType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declaration_type_id")));
+            if(SqlUtils.getInteger(rs, "form_type_id") != null)
+			    log.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "form_type_id")));
+			if (SqlUtils.getInteger(rs, "form_kind_id") != null) {
+				log.setFormKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "form_kind_id")));
 			}
 			log.setNote(rs.getString("note"));
 			log.setUserDepartmentName(rs.getString("user_department_name"));
@@ -460,7 +460,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                         @Override
                         public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                             return String.format(AuditService.RP_NAME_PATTERN,
-                                    rs.getInt("tax_year"), rs.getString("report_period_name"));
+                                    SqlUtils.getInteger(rs, "tax_year"), rs.getString("report_period_name"));
                         }
                     });
         } catch (DataAccessException e){

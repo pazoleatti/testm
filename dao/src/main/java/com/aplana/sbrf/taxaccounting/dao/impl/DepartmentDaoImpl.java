@@ -161,13 +161,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 		@Override
 		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Department department = new Department();
-			department.setId(rs.getInt("id"));
+			department.setId(SqlUtils.getInteger(rs,"id"));
 			department.setName(rs.getString("name"));
-			Integer parentId = rs.getInt("parent_id");
+			Integer parentId = SqlUtils.getInteger(rs,"parent_id");
             // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
             // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
             department.setParentId(rs.wasNull() ? null : parentId);
-			department.setType(DepartmentType.fromCode(rs.getInt("type")));
+			department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"type")));
 			department.setShortName(rs.getString("shortname"));
 			department.setTbIndex(rs.getString("tb_index"));
 			department.setSbrfCode(rs.getString("sbrf_code"));

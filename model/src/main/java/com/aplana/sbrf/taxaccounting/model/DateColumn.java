@@ -10,13 +10,13 @@ import java.io.Serializable;
 public class DateColumn extends Column implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private int formatId;
+	private Integer formatId;
 
-	public int getFormatId() {
+	public Integer getFormatId() {
 		return formatId;
 	}
 
-	public void setFormatId(int formatId) {
+	public void setFormatId(Integer formatId) {
 		this.formatId = formatId;
 	}
 

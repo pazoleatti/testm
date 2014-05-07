@@ -117,12 +117,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private class RefBookRowMapper implements RowMapper<RefBook> {
         public RefBook mapRow(ResultSet rs, int index) throws SQLException {
             RefBook result = new RefBook();
-            result.setId(rs.getLong("id"));
+            result.setId(SqlUtils.getLong(rs,"id"));
             result.setName(rs.getString("name"));
             result.setScriptId(rs.getString("script_id"));
 			result.setVisible(rs.getBoolean("visible"));
             result.setAttributes(getAttributes(result.getId()));
-			result.setType(rs.getInt("type"));
+			result.setType(SqlUtils.getInteger(rs,"type"));
 			result.setReadOnly(rs.getBoolean("read_only"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
@@ -155,20 +155,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         public RefBookAttribute mapRow(ResultSet rs, int index) throws SQLException {
 
             RefBookAttribute result = new RefBookAttribute();
-            result.setId(rs.getLong("id"));
+            result.setId(SqlUtils.getLong(rs,"id"));
             result.setName(rs.getString("name"));
             result.setAlias(rs.getString("alias"));
-            result.setAttributeType(RefBookAttributeType.values()[rs.getInt("type") - 1]);
-            result.setRefBookId(rs.getLong("reference_id"));
-            result.setRefBookAttributeId(rs.getLong("attribute_id"));
+            result.setAttributeType(RefBookAttributeType.values()[SqlUtils.getInteger(rs,"type") - 1]);
+            result.setRefBookId(SqlUtils.getLong(rs,"reference_id"));
+            result.setRefBookAttributeId(SqlUtils.getLong(rs,"attribute_id"));
             result.setVisible(rs.getBoolean("visible"));
-            result.setPrecision(rs.getInt("precision"));
-            result.setWidth(rs.getInt("width"));
+            result.setPrecision(SqlUtils.getInteger(rs,"precision"));
+            result.setWidth(SqlUtils.getInteger(rs,"width"));
             result.setRequired(rs.getBoolean("required"));
             result.setUnique(rs.getBoolean("is_unique"));
-			result.setSortOrder(rs.getInt("sort_order"));
-            Integer formatId = rs.getInt("format");
-            if (formatId!=0){
+			result.setSortOrder(SqlUtils.getInteger(rs,"sort_order"));
+            Integer formatId = SqlUtils.getInteger(rs,"format");
+            if (formatId!=null){
                 result.setFormat(Formats.getById(formatId));
             }
             return result;
@@ -300,7 +300,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new RowMapper<Pair<Long, Long>>() {
                         @Override
                         public Pair<Long, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return new Pair<Long, Long>(rs.getLong("ID"), rs.getLong("RECORD_ID"));
+                            return new Pair<Long, Long>(SqlUtils.getLong(rs,"ID"), SqlUtils.getLong(rs,"RECORD_ID"));
                         }
                     });
         } catch (EmptyResultDataAccessException e) {
@@ -340,9 +340,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			public void processRow(ResultSet rs) throws SQLException {
 				RefBookValue recordIdValue = result.get(RefBook.RECORD_ID_ALIAS);
 				if (recordIdValue.getNumberValue() == null) {
-					recordIdValue.setValue(rs.getLong("id"));
+					recordIdValue.setValue(SqlUtils.getLong(rs,"id"));
 				}
-				Long attributeId = rs.getLong("attribute_id");
+				Long attributeId = SqlUtils.getLong(rs,"attribute_id");
 				RefBookAttribute attribute = refBook.getAttribute(attributeId);
 				String columnName = attribute.getAttributeType().name() + "_value";
 				if (rs.getObject(columnName) != null) {
@@ -361,7 +361,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 						}
 						break;
 						case REFERENCE: {
-							value = rs.getLong(columnName);
+							value = SqlUtils.getLong(rs,columnName);
 						}
 						break;
 					}
@@ -952,7 +952,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                 }
                                 break;
                                 case REFERENCE: {
-                                    value = rs.getLong(columnName);
+                                    value = SqlUtils.getLong(rs,columnName);
                                 }
                                 break;
                             }
@@ -1049,7 +1049,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 SqlUtils.transformToSqlInStatement(uniqueRecordIds)), new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
-                result.put(rs.getLong("id"), rs.getDate("version"));
+                result.put(SqlUtils.getLong(rs,"id"), rs.getDate("version"));
             }
         });
         return result;
@@ -1079,7 +1079,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             return getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("record_id");
+                    return SqlUtils.getLong(rs,"record_id");
                 }
             }, uniqueRecordId);
         } catch (EmptyResultDataAccessException e) {
@@ -1113,7 +1113,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
                 @Override
                 public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
+                    result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs,"id"), SqlUtils.getInteger(rs,"result")));
                     return null;
                 }
             }, versionTo, versionTo, versionFrom);
@@ -1196,13 +1196,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             @Override
             public CheckCrossVersionsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 CheckCrossVersionsResult result = new CheckCrossVersionsResult();
-                result.setNum(rs.getInt("NUM"));
-                result.setRecordId(rs.getLong("ID"));
+                result.setNum(SqlUtils.getInteger(rs,"NUM"));
+                result.setRecordId(SqlUtils.getLong(rs,"ID"));
                 result.setVersion(rs.getDate("VERSION"));
-                result.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("STATUS")));
+                result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"STATUS")));
                 result.setNextVersion(rs.getDate("NEXTVERSION"));
-                result.setNextStatus(VersionedObjectStatus.getStatusById(rs.getInt("NEXTSTATUS")));
-                result.setResult(CrossResult.getResultById(rs.getInt("RESULT")));
+                result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                result.setResult(CrossResult.getResultById(SqlUtils.getInteger(rs,"RESULT")));
                 return result;
             }
         });
@@ -1276,7 +1276,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
                     @Override
                     public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Pair<Long, String>(rs.getLong("ID"), rs.getString("NAME"));
+                        return new Pair<Long, String>(SqlUtils.getLong(rs,"ID"), rs.getString("NAME"));
                     }
                 });
             } else {
@@ -1334,7 +1334,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             List<Long> matchedIds = getJdbcTemplate().query(sql, ps.getParams().toArray(), new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("ID");
+                    return SqlUtils.getLong(rs,"ID");
                 }
             });
             List<Pair<Long, String>> result = new ArrayList<Pair<Long, String>>();
@@ -1473,9 +1473,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     StringBuilder result = new StringBuilder();
                     result.append("Существует экземпляр налоговой формы \"");
-                    result.append(FormDataKind.fromId(rs.getInt("formKind")).getName()).append("\" типа \"");
+                    result.append(FormDataKind.fromId(SqlUtils.getInteger(rs,"formKind")).getName()).append("\" типа \"");
                     result.append(rs.getString("formType")).append("\" в подразделении \"");
-                    if (rs.getInt("departmentType") != 1) {
+                    if (SqlUtils.getInteger(rs,"departmentType") != 1) {
                         result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" периоде \"");
                     } else {
                         result.append(rs.getString("departmentPath")).append("\" периоде \"");

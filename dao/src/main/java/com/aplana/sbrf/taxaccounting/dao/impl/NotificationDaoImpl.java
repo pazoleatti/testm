@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
@@ -26,11 +27,11 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         @Override
         public Notification mapRow(ResultSet rs, int index) throws SQLException {
             Notification notification = new Notification();
-            notification.setId(rs.getInt("ID"));
-            notification.setReportPeriodId(rs.getInt("REPORT_PERIOD_ID"));
-            notification.setSenderDepartmentId(rs.getInt("SENDER_DEPARTMENT_ID"));
-            notification.setReceiverDepartmentId(rs.getInt("RECEIVER_DEPARTMENT_ID"));
-            notification.setFirstReaderId(rs.getInt("FIRST_READER_ID"));
+            notification.setId(SqlUtils.getInteger(rs, "ID"));
+            notification.setReportPeriodId(SqlUtils.getInteger(rs,"REPORT_PERIOD_ID"));
+            notification.setSenderDepartmentId(SqlUtils.getInteger(rs,"SENDER_DEPARTMENT_ID"));
+            notification.setReceiverDepartmentId(SqlUtils.getInteger(rs,"RECEIVER_DEPARTMENT_ID"));
+            notification.setFirstReaderId(SqlUtils.getInteger(rs,"FIRST_READER_ID"));
             notification.setText(rs.getString("TEXT"));
             notification.setCreateDate(new Date(rs.getTimestamp("CREATE_DATE").getTime()));
             notification.setDeadline(rs.getDate("DEADLINE"));
