@@ -24,7 +24,8 @@ class Main {
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
-    def static TAX_FOLDERS = ['deal': 'МУКС', 'income': 'Налог на прибыль', /*'vat': 'НДС',*/ 'transport': 'Транспортный налог']
+    def
+    static TAX_FOLDERS = ['deal': 'МУКС', 'income': 'Налог на прибыль', /*'vat': 'НДС',*/ 'transport': 'Транспортный налог']
 
     def static REPORT_NAME = 'report.html'
 
@@ -211,6 +212,8 @@ class Main {
                         templateFolder.eachDir { versionFolder ->
 
                             def result = new Expando()
+                            result.folder = templateFolder.name
+                            result.folderFull = versionFolder.absolutePath
                             result.id = id
                             // Версия в git
                             def version = versionFolder.name.substring(1)
@@ -321,10 +324,11 @@ class Main {
                         def scanResult = scanSrcFolder(versionsMap, folderName)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 5, class: 'hdr', TAX_FOLDERS[folderName])
+                                td(colspan: 6, class: 'hdr', TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'Id'
+                                th 'Папка'
                                 th 'Название'
                                 th 'Версия git'
                                 th 'Версия БД'
@@ -333,6 +337,9 @@ class Main {
                             scanResult.each { result ->
                                 tr {
                                     td result.id
+                                    td {
+                                        a(href: result.folderFull, result.folder)
+                                    }
                                     td result.name
                                     td result.versionGit
                                     td result.versionDB
