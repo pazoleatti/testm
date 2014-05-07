@@ -6,7 +6,7 @@
 
     <ui:style>
         .content {
-            margin: 10px 10px 35px 10px;
+            margin: 15px 15px 18px 15px;
             min-height: 50px;
         }
 
@@ -19,12 +19,21 @@
         .footerButton {
             margin: 8px 10px 8px 0 !important;
         }
+
+        .image {
+            margin-right: 9px;
+            margin-bottom: 11px;
+        }
     </ui:style>
 
-    <dw:ModalWindow ui:field="dialogBox" title="Сообщение">
+    <dw:ModalWindow ui:field="dialogBox" title="Информация">
         <g:VerticalPanel width="450px" addStyleNames="aplana-ModalWindow-contentBackWhite">
             <g:VerticalPanel addStyleNames="{style.content}">
-                <g:Label ui:field="message"/>
+                <g:HorizontalPanel>
+                    <g:Image ui:field="image" addStyleNames="{style.image}"/>
+                    <g:Label ui:field="message"/>
+                </g:HorizontalPanel>
+
                 <log:ThrowableWidget ui:field="throwableView" height="100%" width="100%"/>
             </g:VerticalPanel>
             <g:VerticalPanel addStyleNames="{style.footerPanel}">

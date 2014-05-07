@@ -269,5 +269,21 @@ public class Cell extends AbstractCell {
         this.refBookDereference = refBookDereference;
     }
 
+    /**
+     * Устанавливает цвет фона и шрифта. Использовать только в режиме ручного ввода для жесткого задания цвета ячеек!
+     * @param alias алиас для нового стиля
+     * @param fontColor цвет шрифта
+     * @param backColor цвет фона
+     */
+    public void setColor(String alias, Color fontColor, Color backColor) {
+        if (formStyleList != null && !formStyleList.isEmpty()) {
+            style = new FormStyle();
+            style.setAlias(alias);
+            style.setBackColor(backColor);
+            style.setFontColor(fontColor);
+            formStyleList.add(style);
+        }
+    }
+
 
 }

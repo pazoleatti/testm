@@ -97,24 +97,28 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
 
 		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
-        Date startDate = periodService.getStartDate(reportPeriodId).getTime();
-        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(startDate, null, String.format("DEPARTMENT_ID = %d", departmentId), null);
-        Map<String, RefBookValue> departmentParam = departmentParams.get(0);
+        Date startDate = periodService.getEndDate(reportPeriodId).getTime();
+        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(addDayToDate(startDate, -1), null, String.format("DEPARTMENT_ID = %d", departmentId), null);
 
-        Calendar calendar = Calendar.getInstance();
-		stringBuilder.append('_').
-                append(departmentParam.get("TAX_ORGAN_CODE").toString()).
-                append('_').
-                append(departmentParam.get("TAX_ORGAN_CODE").toString()).
-                append('_').
-                append(departmentParam.get("INN").toString()).
-                append(departmentParam.get("KPP").toString()).
-                append('_').
-                append(dateFormat.format(calendar.getTime())).
-                append('_').
-                append(UUID.randomUUID().toString().toUpperCase());
+        if (departmentParams != null && !departmentParams.isEmpty()) {
+            Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
-		return stringBuilder.toString();
+            Calendar calendar = Calendar.getInstance();
+            stringBuilder.append('_').
+                    append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                    append('_').
+                    append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                    append('_').
+                    append(departmentParam.get("INN").toString()).
+                    append(departmentParam.get("KPP").toString()).
+                    append('_').
+                    append(dateFormat.format(calendar.getTime())).
+                    append('_').
+                    append(UUID.randomUUID().toString().toUpperCase());
+
+            return stringBuilder.toString();
+        }
+        return null;
 	}
 	
     @Override
@@ -167,4 +171,12 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	public void setScriptComponentContext(ScriptComponentContext context) {
 		this.context = context;
 	}
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
+    }
+
 }

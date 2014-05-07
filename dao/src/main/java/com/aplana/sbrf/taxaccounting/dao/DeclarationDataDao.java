@@ -89,4 +89,12 @@ public interface DeclarationDataDao {
     void update(DeclarationData declarationData);
 
     List<Long> findDeclarationDataByFormTemplate(int templateId, Date startDate);
+
+    /**
+     * Получить список id деклараций
+     * @param declarationTypeId тип декларации
+     * @param departmentId подразделение
+     * @return список id деклараций
+     */
+    List<Long> getDeclarationIds(int declarationTypeId, int departmentId);
 }

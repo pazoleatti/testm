@@ -3,11 +3,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.ConfigurationProvider;
 import com.aplana.sbrf.taxaccounting.core.api.LockCoreService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -40,6 +39,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String ERROR_PERIOD = "Переход невозможен, т.к. у одного из приемников период не открыт.";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы %s типа %s в подразделении %s периоде %s";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -61,6 +61,10 @@ public class FormDataServiceImpl implements FormDataService {
 	private AuditService auditService;
 	@Autowired
 	private DataRowDao dataRowDao;
+	@Autowired
+	private ReportPeriodDao reportPeriodDao;
+	@Autowired
+	private DepartmentDao departmentDao;
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
@@ -727,5 +731,24 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         return formDataDao.find(departmentIds, reportPeriodId);
+    }
+
+    @Override
+    public boolean existFormData(int formTypeId, FormDataKind kind, int departmentId, Logger logger) {
+        // Если для удаляемого назначения нет созданных экземпляров форм
+        List<Long> formDataIds = formDataDao.getFormDataIds(formTypeId, kind, departmentId);
+        if (logger != null) {
+            for (long formDataId : formDataIds) {
+                FormData formData = formDataDao.getWithoutRows(formDataId);
+                ReportPeriod period = reportPeriodDao.get(formData.getReportPeriodId());
+
+                logger.error(MSG_IS_EXIST_FORM,
+                        formData.getFormType().getName(),
+                        kind.getName(),
+                        departmentDao.getDepartment(departmentId).getName(),
+                        period.getName() + " " + period.getTaxPeriod().getYear());
+            }
+        }
+        return !formDataIds.isEmpty();
     }
 }

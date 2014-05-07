@@ -12,14 +12,6 @@
             border-right: 1px solid #aeaeac;
         }
 
-        .btnPanel {
-            height: 30px;
-            width: 100%;
-        }
-
-        .btnPanel td {
-            vertical-align: middle !important;
-        }
     </ui:style>
 
     <ui:style field="margin">
@@ -34,11 +26,12 @@
         }
     </ui:style>
 
-    <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+
+    <g:HorizontalPanel width="100%" height="30px"  verticalAlignment="middle">
         <g:cell horizontalAlignment="right">
             <g:Label text="Подразделение:" addStyleNames="{margin.right5}"/>
         </g:cell>
-        <g:cell width="24%">
+        <g:cell width="24%"> <!--ширина регулируется в коде-->
             <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
         </g:cell>
         <g:cell horizontalAlignment="right">
@@ -59,9 +52,8 @@
         <g:cell width="24%">
             <g:ValueListBox width="100%" ui:field="formState" />
         </g:cell>
-        <g:cell verticalAlignment="middle">
-            <g:HTML addStyleNames="{style.separator}"/>
-        </g:cell>
+
+        <g:HTML addStyleNames="{style.separator}"/>
 
         <g:Button title="Найти" text="Найти" ui:field="apply" addStyleNames="{margin.right15}"/>
     </g:HorizontalPanel>

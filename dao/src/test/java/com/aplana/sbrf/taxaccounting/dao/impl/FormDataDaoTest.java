@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
 // Нужно написать нормальные тесты на получение сохранение FormData и проверить поля
@@ -168,6 +170,14 @@ public class FormDataDaoTest {
 		FormData fd = formDataDao.find(1, FormDataKind.SUMMARY, 1, 11);
 		Assert.assertEquals(11l, fd.getId().longValue());
 	}
+
+    @Test
+    public void getFormDataIdsTest(){
+        List<Long> list = new ArrayList<Long>() {{ add(1l); add(11l); add(12l); add(13l); }};
+        List<Long> list1 = new ArrayList<Long>() {{ add(14l); add(15l); add(16l); add(17l); add(18l); add(19l); add(20l); }};
+        Assert.assertEquals(list, formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1));
+        Assert.assertEquals(list1, formDataDao.getFormDataIds(2, FormDataKind.PRIMARY, 1));
+    }
 
     @Test
     public void findMonth1Test() {

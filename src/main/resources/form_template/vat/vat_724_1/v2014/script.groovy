@@ -61,7 +61,9 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
@@ -76,9 +78,9 @@ def editableColumns = ['baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'ndsSum
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (1..8)
+// Проверяемые на пустые значения атрибуты (1..4, 6..8)
 @Field
-def nonEmptyColumns = allColumns
+def nonEmptyColumns = allColumns - 'ndsNum'
 
 // Сортируемые атрибуты (графа 3, 5)
 @Field
@@ -90,7 +92,14 @@ def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum']
 
 // список алиасов подразделов
 @Field
-sections = ['1', '2', '3', '4', '5', '6', '7']
+def sections = ['1', '2', '3', '4', '5', '6', '7']
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
 
 // Добавить новую строку (строки между заглавными строками и строками итогов)
 def addRow() {
@@ -135,9 +144,17 @@ void calc() {
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
         // отсортировать/группировать
-        def rowsFofSort = (from <= to ? dataRows[from..(to - 1)] : [])
-        sortRows(rowsFofSort, sortColumns)
+        sortRows(sectionsRows, sortColumns)
+
+        // расчитать
+        def value7 = calc7(section)
+        for (def row : sectionsRows) {
+            // графа 7
+            row.ndsRate = value7
+        }
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
@@ -163,17 +180,20 @@ void logicCheck() {
 
     def isSection1or2 = false
     def isSection5or6 = false
+    def isSection7 = false
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
+            isSection7 = row.getAlias() == 'head_7'
             continue
         }
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
         // 1. Обязательность заполнения полей
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        def columns = (isSection7 ? nonEmptyColumns - 'ndsRate' : nonEmptyColumns)
+        checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
         if (row.ndsSum != row.ndsBookSum &&
@@ -183,24 +203,63 @@ void logicCheck() {
 
         // TODO (Ramil Timerbaev) пока исключил эту проверку потому что графа 7 имеет тип строка
         // 3. Проверка суммы НДС
-        if (false && row.baseSum != null && row.ndsRate != null) {
+        if (false && row.baseSum != null && row.ndsRate != null && row.ndsSum != null) {
             def tmp = row.baseSum * row.ndsRate
             def tmp1 = tmp + (tmp * 3) / 100
             def tmp2 = tmp - (tmp * 3) / 100
-            if (tmp1 > tmp2) {
+            if (tmp1 > row.ndsSum && row.ndsSum > tmp2) {
                 logger.warn(errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!')
             }
         }
     }
 
-    // 4. Проверка итоговых значений по разделам 1-7
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, 'head_' + section)
         def lastRow = getDataRow(dataRows, 'total_' + section)
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
-        def rows = (from <= to ? dataRows[from..to] : [])
-        checkTotalSum(rows, totalColumns, logger, true)
+
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+        def tmpTotal = getTotalRow(sectionsRows)
+        def hasError = false
+        totalColumns.each { alias ->
+            if (lastRow[alias] != tmpTotal[alias]) {
+                logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
+                hasError = true
+            }
+        }
+        if (hasError) {
+            break
+        }
+    }
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'head_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // 4. Проверка итоговых значений по разделам 1-7
+        def tmpTotal = getTotalRow(sectionsRows)
+        def hasError = false
+        if (!hasError) {
+            totalColumns.each { alias ->
+                if (lastRow[alias] != tmpTotal[alias]) {
+                    logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
+                    hasError = true
+                }
+            }
+        }
+
+        // 5..8. Проверка номера балансового счета (графа 5) по разделам
+        def value5 = calc5(section)
+        for (def row : sectionsRows) {
+            if (row.ndsNum != null && row.ndsNum != '' && row.ndsNum != value5) {
+                logger.error('Строка %d: Графа «%s» заполнена неверно!', row.getIndex(), getColumnName(row, 'ndsNum'))
+            }
+        }
     }
 }
 
@@ -268,4 +327,177 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
     updateIndexes(destinationDataRows)
+}
+
+def calc5(def section) {
+    def tmp = null
+    switch (section) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+            tmp = '60309.01'
+            break
+        case '5':
+            tmp = '60309.04'
+            break
+        case '6':
+            tmp = '60309.05'
+            break
+        case '7':
+            break
+    }
+    return tmp
+}
+
+def calc7(def section) {
+    def tmp = null
+    switch (section) {
+        case '1':
+            tmp = '18'
+            break
+        case '2':
+            tmp = '10'
+            break
+        case '3':
+        case '5':
+        case '6':
+            tmp = '18/118'
+            break
+        case '4':
+            tmp = '10/118'
+            break
+        case '7':
+            break
+    }
+    return tmp
+}
+
+// Получение импортируемых данных
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 9, 4)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 4)
+
+    def headerMapping = [
+            (xml.row[1].cell[2]): 'Налоговая база',
+            (xml.row[1].cell[5]): 'НДС',
+            (xml.row[1].cell[7]): 'Ставка НДС',
+            (xml.row[1].cell[8]): 'Сумма НДС по книге продаж',
+            (xml.row[2].cell[2]): 'Наименование балансового счета',
+            (xml.row[2].cell[3]): 'Номер балансового счета',
+            (xml.row[2].cell[4]): 'Сумма',
+            (xml.row[2].cell[5]): 'Номер балансового счета',
+            (xml.row[2].cell[6]): 'Сумма',
+            (xml.row[2].cell[7]): 'Ставка НДС',
+            (xml.row[2].cell[8]): 'Сумма НДС по книге продаж'
+    ]
+    (2..8).each { index ->
+        headerMapping.put((xml.row[3].cell[index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 3)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def rows = []
+    def int rowIndex = 1
+
+    def aliasR = [
+            '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(dataRows, 'head_1')],
+            'head_1': [getDataRow(dataRows, 'total_1')],
+            '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(dataRows, 'head_2')],
+            'head_2': [getDataRow(dataRows, 'total_2')],
+            '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_3')],
+            'head_3': [getDataRow(dataRows, 'total_3')],
+            '4. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 10/110': [getDataRow(dataRows, 'head_4')],
+            'head_4': [getDataRow(dataRows, 'total_4')],
+            '5. Суммы полученной оплаты (частичной оплаты) в счёт предстоящего оказания услуг по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_5')],
+            'head_5': [getDataRow(dataRows, 'total_5')],
+            '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_6')],
+            'head_6': [getDataRow(dataRows, 'total_6')],
+            '7. Суммы, отражённые в бухгалтерском учёте и книге продаж, не вошедшие в разделы с 1 по 6': [getDataRow(dataRows, 'head_7')],
+            'head_7': [getDataRow(dataRows, 'total_7')]
+    ]
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапок
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            title = row.cell[1].text()
+            continue
+        }
+
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
+
+        // Графа 2
+        newRow.baseAccName = row.cell[2].text()
+
+        // Графа 3
+        newRow.baseAccNum = row.cell[3].text()
+
+        // Графа 4
+        newRow.baseSum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
+
+        // Графа 5
+        newRow.ndsNum = row.cell[5].text()
+
+        // Графа 6
+        newRow.ndsSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
+
+        // Графа 7
+        newRow.ndsRate = row.cell[7].text()
+
+        // Графа 8
+        newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
+
+        aliasR[title].add(newRow)
+    }
+    aliasR.each { k, v ->
+        rows.addAll(v)
+    }
+    dataRowHelper.save(rows)
+}
+
+def getTotalRow(sectionsRows) {
+    def newRow = formData.createDataRow()
+    totalColumns.each { alias ->
+        newRow.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
+    for (def row : sectionsRows) {
+        totalColumns.each { alias ->
+            def value1 = newRow.getCell(alias).value
+            def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+            newRow.getCell(alias).setValue(value1 + value2, null)
+        }
+    }
+    return newRow
 }

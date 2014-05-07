@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,7 +22,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 	private final static class FormDataSignerMapper implements RowMapper<FormDataSigner> {
 		public FormDataSigner mapRow(ResultSet rs, int index) throws SQLException {
 			final FormDataSigner result = new FormDataSigner();
-			result.setId(rs.getLong("id"));
+			result.setId(SqlUtils.getLong(rs, "id"));
 			result.setName(rs.getString("name"));
 			result.setPosition(rs.getString("position"));
             result.setOrd(rs.getInt("ord"));

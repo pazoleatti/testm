@@ -33,9 +33,7 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 
 	@Override
 	public GetNotificationsResult execute(GetNotificationsAction action, ExecutionContext executionContext) throws ActionException {
-		NotificationsFilterData filter = new NotificationsFilterData();
-		filter.setCountOfRecords(action.getLength());
-		filter.setStartIndex(action.getStart());
+		NotificationsFilterData filter = action.getFilter();
 		filter.setSenderDepartmentId(securityService.currentUserInfo().getUser().getDepartmentId());
 		List<NotificationTableRow> rows = new ArrayList<NotificationTableRow>();
 		PagingResult<Notification> result = notificationService.getByFilter(filter);

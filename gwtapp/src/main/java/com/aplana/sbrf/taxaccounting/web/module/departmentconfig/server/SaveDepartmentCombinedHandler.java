@@ -1,13 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -23,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -40,6 +40,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
     private static final String DECLARATION_WARN = "В декларации \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
     private static final String DECLARATION_WARN_D = "В уведомлении \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+
+    private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
+
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private TAUserService userService;
@@ -242,12 +246,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 }
             }
 
-            // Запись ошибок в лог при наличии
-            if (!logger.getEntries().isEmpty()) {
-                result.setUuid(logEntryService.save(logger.getEntries()));
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    result.setHasError(true);
-                }
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                String strEndDate = sdf.format(period.getEndDate());  //TODO поменять когда изменять действие "сохранить", связано с задачей http://jira.aplana.com/browse/SBRFACCTAX-6994
+                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), strEndDate));
+            }
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                result.setHasError(true);
             }
         }
         return result;

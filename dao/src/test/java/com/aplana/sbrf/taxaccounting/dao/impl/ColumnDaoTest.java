@@ -105,7 +105,7 @@ public class ColumnDaoTest {
         List<Column> columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
         RefBookColumn refBookColumn = new RefBookColumn();
-        refBookColumn.setRefBookAttributeId(4);
+        refBookColumn.setRefBookAttributeId(4L);
         refBookColumn.setAlias("refBookColumn");
         refBookColumn.setName("Справочная графа");
         refBookColumn.setOrder(4);

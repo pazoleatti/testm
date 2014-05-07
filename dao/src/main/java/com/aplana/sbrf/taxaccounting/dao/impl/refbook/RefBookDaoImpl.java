@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -490,7 +491,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         // обработка параметров фильтра
-        if (filterPS.getQuery().length() > 0) {
+        if (filterPS.getQuery().length() > 0
+                && !filterPS.getQuery().toString().trim().equals("()")) {
             ps.appendQuery(" and\n ");
             ps.appendQuery("(");
             ps.appendQuery(filterPS.getQuery().toString());
@@ -1131,13 +1133,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public PagingResult<Map<String, RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
 			PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams, true);
-        RefBook refBook = get(refBookId);
-        refBook.getAttributes().add(RefBook.getVersionFromAttribute());
-        refBook.getAttributes().add(RefBook.getVersionToAttribute());
+        RefBook refBookClone = SerializationUtils.clone(get(refBookId));
+        refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
+        refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
 
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        // Получение количества данных в справкочнике
+        // Получение количества данных в справочнике
         result.setTotalCount(getRecordVersionsCount(refBookId, uniqueRecordId));
         return result;
     }
@@ -1556,10 +1558,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String sql = String.format(GET_PREVIOUS_RECORD_VERSION, RefBook.RECORD_ID_ALIAS);
         try {
             return getJdbcTemplate().queryForObject(sql,
-                    new Object[] {
+                    new Object[]{
                             refBookId, recordId, versionFrom
                     },
-                    new RefBookUtils.RecordVersionMapper());
+                    new RefBookUtils.RecordVersionMapper()
+            );
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

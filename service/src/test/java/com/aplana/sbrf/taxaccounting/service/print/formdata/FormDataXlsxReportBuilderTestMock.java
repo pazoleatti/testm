@@ -210,6 +210,7 @@ public class FormDataXlsxReportBuilderTestMock {
 		
 		formDataperformer.setName("performer");
 		formDataperformer.setPhone("777");
+        formDataperformer.setReportDepartmentName("Деп.");
 		formDataSigner1.setName("Карл Петрович");
 		formDataSigner1.setPosition("Топ");
 		formDataSigner2.setPosition("Гл. бухгалтер");
@@ -224,7 +225,6 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setSigners(formDataSigners);
 
 		data.setData(formData);
-		data.setDepartmentName(department.getName());
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);

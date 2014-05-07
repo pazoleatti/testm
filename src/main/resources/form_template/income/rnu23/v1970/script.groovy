@@ -118,12 +118,6 @@ def endDate = null
 def Boolean isBalancePeriod = null
 
 //// Обертки методов
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
 
 // Поиск записи в справочнике по значению (для расчетов)
 def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
@@ -532,34 +526,34 @@ void addData(def xml, int headRowCount) {
         newRow.contract = row.cell[2].text()
 
         // графа 3
-        newRow.contractDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
+        newRow.contractDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, true)
 
         // графа 4
-        newRow.amountOfTheGuarantee = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.amountOfTheGuarantee = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
 
         // графа 5
-        newRow.dateOfTransaction = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.dateOfTransaction = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
-        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.interestRate = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
 
         // графа 8
-        newRow.baseForCalculation = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.baseForCalculation = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 9
-        newRow.accrualAccountingStartDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.accrualAccountingStartDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 10
-        newRow.accrualAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.accrualAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, true)
 
         // графа 11
-        newRow.preAccrualsStartDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.preAccrualsStartDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, true)
 
         // графа 12
-        newRow.preAccrualsEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.preAccrualsEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, true)
 
         rows.add(newRow)
     }

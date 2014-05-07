@@ -118,7 +118,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private RefBookValue refBookValue;
 	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
 	private FormTemplate formTemplate;
-	private String departmentName;
 	private ReportPeriod reportPeriod;
 	private Date acceptanceDate;
 	private Date creationDate;
@@ -142,7 +141,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         this.dataRows = dataRows;
 		formTemplate = data.getFormTemplate();
 		this.isShowChecked = isShowChecked;
-        departmentName = data.getDepartmentName();
 		reportPeriod = data.getReportPeriod();
 		acceptanceDate = data.getAcceptanceDate();
 		creationDate = data.getCreationDate();
@@ -164,7 +162,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         //Fill subdivision
-        createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, departmentName, 0, 0);
+        if (data.getPerformer() != null){
+            createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, data.getPerformer().getReportDepartmentName(), 0, 0);
+        }
 
         //Fill subdivision signature
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN, null, 0, 0);

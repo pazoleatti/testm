@@ -8,10 +8,9 @@ import java.text.SimpleDateFormat
 
 /**
  * (РНУ-59) Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части
- * formTemplateId=350
+ * formTypeId=350
  *
  * @author auldanov
- * @version 55
  *
  * TODO:
  *      - убрать loggerError и заменить на logger.error

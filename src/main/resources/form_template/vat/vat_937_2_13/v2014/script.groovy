@@ -38,6 +38,11 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.IMPORT:
+        importData()
+        calc()
+        logicCheck()
+        break
 }
 
 // Редактируемые атрибуты
@@ -89,25 +94,25 @@ void logicCheck() {
         }
     }
     // Проверка суммы в строке 4
-    def other = dataRowHelper.getDataRow(dataRows, 'R4')
+    def other = getDataRow(dataRows, 'R4')
     if (other.sum != calcOther(dataRows)) {
         logger.error("Сумма в строке 4 «Прочие (расшифровать):» не совпадает с расшифровкой!")
     }
     // Проверка итоговых значений
-    def itog = dataRowHelper.getDataRow(dataRows, 'total')
+    def itog = getDataRow(dataRows, 'total')
     if (itog.sum != calcItog(dataRows)) {
         logger.error(WRONG_TOTAL, getColumnName(itog, 'sum'))
     }
-    // Проверка наличия экземпляра налоговой формы 937.1 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
-    def formData937_1 = formDataService.find(606, formData.kind, formData.departmentId, formData.reportPeriodId)
-    if (formData937_1 == null) {
+    // Проверка наличия экземпляра налоговой формы 937.2 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
+    def formData937_2 = formDataService.find(608, formData.kind, formData.departmentId, formData.reportPeriodId)
+    if (formData937_2 == null) {
         logger.warn("Экземпляр налоговой формы 937.2 «Итоговые данные книги продаж» за период %s — %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
     } else {
-        def dataRows937_1 = formDataService.getDataRowHelper(formData937_1).allCached
+        def dataRows937_2 = formDataService.getDataRowHelper(formData937_2).allCached
         def totalARow = null
-        if (dataRows937_1 != null) {
-            totalARow = getDataRow(dataRows937_1, 'totalA') // TODO Уточнить когда будет готова форма 937.2 http://jira.aplana.com/browse/SBRFACCTAX-6470
+        if (dataRows937_2 != null) {
+            totalARow = getDataRow(dataRows937_2, 'totalA')
         }
         if (calcItog(dataRows) - calcOther(dataRows) != totalARow?.diff) {
             logger.warn('Сумма расхождения не соответствует расшифровке!')
@@ -125,9 +130,9 @@ void calc() {
             row.rowNum = rowNum
         }
     }
-    def itog = dataRowHelper.getDataRow(dataRows, 'total')
+    def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
-    def other = dataRowHelper.getDataRow(dataRows, 'R4')
+    def other = getDataRow(dataRows, 'R4')
     other?.sum = calcOther(dataRows)
     dataRowHelper.update(dataRows)
 }
@@ -209,4 +214,94 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ п/п', null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 3, 1)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNum'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'differences'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'sum'),
+            (xml.row[1].cell[0]) : '1',
+            (xml.row[1].cell[2]) : '2',
+            (xml.row[1].cell[3]) : '3',
+            (xml.row[2].cell[0]) : '1',
+            (xml.row[2].cell[2]) : 'Реализация имущества, учитываемого на балансе с учетом уплаченного НДС',
+            (xml.row[3].cell[0]) : '2',
+            (xml.row[3].cell[2]) : 'Округления',
+            (xml.row[4].cell[0]) : '3',
+            (xml.row[4].cell[2]) : 'Исправительные обороты',
+            (xml.row[5].cell[0]) : '4',
+            (xml.row[5].cell[2]) : 'Прочие (расшифровать):'
+    ]
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
+}
+
+// Заполнить форму данными
+void addData(def xml, int headRowCount) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def totalRow = getDataRow(dataRows, 'total')
+    totalRow.sum = 0
+    dataRows.remove(totalRow)
+    dataRows.removeAll{ it.getAlias() == null }
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+
+        // Пропуск строк шапки
+        if (xmlIndexRow < headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[1].text() != null && row.cell[1].text() != '') {
+            continue
+        }
+
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        def newRow = null
+
+        def rowIndex = xmlIndexRow - headRowCount + 1
+        def isFixed = rowIndex <= 4
+        if (isFixed) {
+            newRow = getDataRow(dataRows, "R$rowIndex")
+        } else {
+            newRow = formData.createDataRow()
+            editableColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
+            newRow.setIndex(rowIndex)
+        }
+
+        if (!isFixed) {
+            newRow.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
+            newRow.differences = row.cell[2].text()
+        }
+        newRow.sum = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)
+
+        if (!isFixed) {
+            dataRows.add(newRow)
+        }
+    }
+    dataRows.add(totalRow)
+    dataRowHelper.save(dataRows)
 }

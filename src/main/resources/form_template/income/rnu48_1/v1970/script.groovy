@@ -1,12 +1,11 @@
 package form_template.income.rnu48_1.v1970
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
  * Форма "(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.".
- * formTemplateId=343
+ * formTypeId=343
  *
  * @author vsergeev
  * @author rtimerbaev
@@ -110,7 +109,7 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.getAllCached()
 
-    def periodStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)?.time
+    def periodStartDate = reportPeriodService.getStartDate(formData.reportPeriodId)?.time
     def periodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
     def reportPeriodRange = periodStartDate..periodEndDate
 
@@ -205,7 +204,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 1
-        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // fix
         xmlIndexCol++
@@ -213,10 +212,10 @@ void addData(def xml, int headRowCount) {
         newRow.inventoryNumber = row.cell[xmlIndexCol].text()
         xmlIndexCol++
         // графа 3
-        newRow.usefulDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.usefulDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
         // графа 4
-        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        newRow.amount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }

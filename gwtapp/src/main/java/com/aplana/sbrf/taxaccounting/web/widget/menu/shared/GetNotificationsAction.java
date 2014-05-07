@@ -1,24 +1,24 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.shared;
 
+import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class GetNotificationsAction extends UnsecuredActionImpl<GetNotificationsResult> {
-	int start;
-	int length;
 
-	public int getStart() {
-		return start;
-	}
+    public GetNotificationsAction() {
+    }
 
-	public void setStart(int start) {
-		this.start = start;
-	}
+    public GetNotificationsAction(NotificationsFilterData filter) {
+        this.filter = filter;
+    }
 
-	public int getLength() {
-		return length;
-	}
+    private NotificationsFilterData filter;
 
-	public void setLength(int length) {
-		this.length = length;
-	}
+    public NotificationsFilterData getFilter() {
+        return filter;
+    }
+
+    public void setFilter(NotificationsFilterData filter) {
+        this.filter = filter;
+    }
 }

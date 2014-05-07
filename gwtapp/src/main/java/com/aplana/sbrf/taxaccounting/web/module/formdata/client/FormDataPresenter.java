@@ -35,6 +35,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
@@ -88,6 +89,25 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             if (result == null || result.getDataRows().getTotalCount() == 0) {
                                 getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
                             } else {
+                                if (formData.isManual() && !readOnlyMode) {
+                                    /** Устанавливаем возможность редактирования и стили для ручного ввода */
+                                    Set<String> aliases = result.getDataRows().get(0).keySet();
+                                    for (DataRow<Cell> row : result.getDataRows()) {
+                                        for (String alias : aliases) {
+                                            Cell cell = row.getCell(alias);
+                                            if (!(cell.getColumn() instanceof ReferenceColumn)) {
+                                                cell.setEditable(true);
+                                                if (cell.getStyle() == null) {
+                                                    cell.setColor("manual_editable_cell", Color.BLACK, Color.LIGHT_BLUE);
+                                                }
+                                            }  else {
+                                                if (cell.getStyle() == null) {
+                                                    cell.setColor("manual_non_editable_cell", Color.BLACK, Color.WHITE);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 getView().setRowsData(start, result.getDataRows().getTotalCount(), result.getDataRows());
                                 if (result.getDataRows().size() > getView().getPageSize()) {
                                     getView().assignDataProvider(result.getDataRows().size());

@@ -8,7 +8,7 @@ import java.math.RoundingMode
 
 /**
  * (РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
- * formTemplateId=313
+ * formTypeId=313
  *
  * @author vsergeev
  */
@@ -150,7 +150,7 @@ void addData(def xml, int headRowCount) {
         def rowIndex = headRowCount + i
         if (xml.row[rowIndex] != null) {
             // графа 3 строки i
-            dataRows[i].summ = parseNumber(xml.row[rowIndex].cell[3].text(), rowOffset + rowIndex + 1, 4 + colOffset, logger, false)
+            dataRows[i].summ = parseNumber(xml.row[rowIndex].cell[3].text(), rowOffset + rowIndex + 1, 4 + colOffset, logger, true)
         } else {
             dataRows[i].summ = null
         }

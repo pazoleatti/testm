@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -60,7 +61,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(formTemplate);
-			fd.setId(rs.getLong("id"));
+			fd.setId(SqlUtils.getLong(rs, "id"));
 			fd.setDepartmentId(rs.getInt("department_id"));
 			fd.setState(WorkflowState.fromId(rs.getInt("state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
@@ -82,7 +83,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		public FormData mapRow(ResultSet rs, int index)
 				throws SQLException {
 			FormData result = new FormData();
-			result.setId(rs.getLong("id"));
+			result.setId(SqlUtils.getLong(rs, "id"));
 			result.setDepartmentId(rs.getInt("department_id"));
 			result.setState(WorkflowState.fromId(rs.getInt("state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));
@@ -365,6 +366,33 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public boolean existManual(Long formDataId) {
         return getJdbcTemplate()
                 .queryForInt("select count(*) from data_row where form_data_id = ? and manual = 1", formDataId) > 0;
+    }
+
+    @Override
+    public List<Long> getFormDataIds(int formTypeId, FormDataKind kind, int departmentId) {
+        try {
+            return getJdbcTemplate().queryForList(
+                    "select fd.id from FORM_DATA fd where exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?)"
+                            + " and fd.kind = ? and fd.department_id = ?",
+                    new Object[] {
+                            formTypeId,
+                            kind.getId(),
+                            departmentId
+                    },
+                    new int[] {
+                            Types.NUMERIC,
+                            Types.NUMERIC,
+                            Types.NUMERIC
+                    },
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>(0);
+        } catch (DataAccessException e) {
+            String errorMsg = String.format("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s",formTypeId, kind.getId(), departmentId);
+            logger.error(errorMsg, e);
+            throw new DaoException(errorMsg, e);
+        }
     }
 
     @Override

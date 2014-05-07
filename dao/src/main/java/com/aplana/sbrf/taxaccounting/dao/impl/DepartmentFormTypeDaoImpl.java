@@ -40,7 +40,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         @Override
         public DepartmentFormType mapRow(ResultSet rs, int rowNum) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
-            departmentFormType.setId(rs.getLong("id"));
+            departmentFormType.setId(SqlUtils.getLong(rs,"id"));
             departmentFormType.setFormTypeId(rs.getInt("form_type_id"));
             departmentFormType.setDepartmentId(rs.getInt("department_id"));
             departmentFormType.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -175,10 +175,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
-            formTypeKind.setId(rs.getLong("id"));
+            formTypeKind.setId(SqlUtils.getLong(rs,"id"));
             formTypeKind.setKind(FormDataKind.fromId(rs.getInt("kind")));
             formTypeKind.setName(rs.getString("name"));
-            formTypeKind.setFormTypeId(rs.getLong("typeId"));
+            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "typeId"));
             formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
             Integer performerId = rs.getInt("performer_id");
             if (rs.wasNull()){
@@ -212,9 +212,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         @Override
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
-            formTypeKind.setId(rs.getLong("id"));
+            formTypeKind.setId(SqlUtils.getLong(rs, "id"));
             formTypeKind.setName(rs.getString("name"));
-            formTypeKind.setFormTypeId(rs.getLong("typeId"));
+            formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "typeId"));
             formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
             return formTypeKind;
         }

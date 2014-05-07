@@ -246,7 +246,12 @@ public class TaxFormNominationPresenter
 							public void onSuccess(DeleteDeclarationSourcesResult result) {
 								reloadDeclarationTableData();
 								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
-									Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+                                    if (result.isExistDeclaration()) {
+                                        Dialog.errorMessage("Ошибка", "Невозможно отменить назначение, т. к. созданы экземпляры декларации");
+                                    } else {
+                                        Dialog.errorMessage("Ошибка", "Невозможно снять назначение декларации, т. к. назначение декларации является приемником данных");
+                                        // TODO удаление связей
+                                    }
 									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
 								}
 
@@ -279,7 +284,12 @@ public class TaxFormNominationPresenter
                             public void onSuccess(DeleteFormsSourceResult result) {
                                 LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
                                 if (result.getUuid() != null){
-                                    Dialog.errorMessage("Ошибка", "Невозможно снять назначение налоговой формы, т. к. назначение является приемником данных / назначение является источником данных");
+                                    if (result.isExistFormData()) {
+                                        Dialog.errorMessage("Ошибка", "Невозможно отменить назначение, т. к. созданы экземпляры налоговых форм");
+                                    } else {
+                                        Dialog.errorMessage("Ошибка", "Невозможно снять назначение налоговой формы, т. к. назначение является приемником данных / назначение является источником данных");
+                                        // TODO удаление источников-приемников
+                                    }
                                 }
                                 reloadFormTableData();
                             }

@@ -33,8 +33,24 @@ public class MessageEvent extends AbstractMessageEvent<MessageEvent.MyHandler> {
 		errorEvent.setMessage(msg);
 		source.fireEvent(errorEvent);
 	}
-	
+
+    public static void fire(HasHandlers source, Boolean isError, String msg, Throwable throwable) {
+        MessageEvent errorEvent = new MessageEvent();
+        errorEvent.setMessage(msg);
+        errorEvent.setThrowable(throwable);
+        errorEvent.setError(isError);
+        source.fireEvent(errorEvent);
+    }
+
+    public static void fire(HasHandlers source, Boolean isError, String msg) {
+        MessageEvent errorEvent = new MessageEvent();
+        errorEvent.setMessage(msg);
+        errorEvent.setError(isError);
+        source.fireEvent(errorEvent);
+    }
+
 	private boolean modal;
+    private boolean isError = false;
 
 	public MessageEvent() {
 	}
@@ -57,4 +73,11 @@ public class MessageEvent extends AbstractMessageEvent<MessageEvent.MyHandler> {
 		this.modal = modal;
 	}
 
+    public boolean isError() {
+        return isError;
+    }
+
+    public void setError(boolean isError) {
+        this.isError = isError;
+    }
 }

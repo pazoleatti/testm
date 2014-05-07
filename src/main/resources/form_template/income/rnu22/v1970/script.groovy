@@ -411,58 +411,58 @@ void addData(def xml, int headRowCount) {
         newRow.contractNumber = row.cell[2].text()
 
         // графа 3
-        newRow.contractData = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, false)
+        newRow.contractData = parseDate(row.cell[3].text(), "dd.MM.yyyy", xlsIndexRow, 3 + colOffset, logger, true)
 
         // графа 4
-        newRow.base = parseNumber(row.cell[4].text(),xlsIndexRow, 4 + colOffset, logger, false)
+        newRow.base = parseNumber(row.cell[4].text(),xlsIndexRow, 4 + colOffset, logger, true)
 
         // графа 5
-        newRow.transactionDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, false)
+        newRow.transactionDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
 
         // графа 6
-        newRow.course = parseNumber(row.cell[6].text(),xlsIndexRow, 6 + colOffset, logger, false)
+        newRow.course = parseNumber(row.cell[6].text(),xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.interestRate = parseNumber(row.cell[7].text(),xlsIndexRow, 7 + colOffset, logger, false)
+        newRow.interestRate = parseNumber(row.cell[7].text(),xlsIndexRow, 7 + colOffset, logger, true)
 
         // графа 8
-        newRow.basisForCalc = parseNumber(row.cell[8].text(),xlsIndexRow, 8 + colOffset, logger, false)
+        newRow.basisForCalc = parseNumber(row.cell[8].text(),xlsIndexRow, 8 + colOffset, logger, true)
 
         // графа 9
-        newRow.calcPeriodAccountingBeginDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, false)
+        newRow.calcPeriodAccountingBeginDate = parseDate(row.cell[9].text(), "dd.MM.yyyy", xlsIndexRow, 9 + colOffset, logger, true)
 
         // графа 10
-        newRow.calcPeriodAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, false)
+        newRow.calcPeriodAccountingEndDate = parseDate(row.cell[10].text(), "dd.MM.yyyy", xlsIndexRow, 10 + colOffset, logger, true)
 
         // графа 11
-        newRow.calcPeriodBeginDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, false)
+        newRow.calcPeriodBeginDate = parseDate(row.cell[11].text(), "dd.MM.yyyy", xlsIndexRow, 11 + colOffset, logger, true)
 
         // графа 12
-        newRow.calcPeriodEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, false)
+        newRow.calcPeriodEndDate = parseDate(row.cell[12].text(), "dd.MM.yyyy", xlsIndexRow, 12 + colOffset, logger, true)
 
         // графа 13
-        newRow.accruedCommisCurrency = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, false)
+        newRow.accruedCommisCurrency = parseNumber(row.cell[13].text(), xlsIndexRow, 13 + colOffset, logger, true)
 
         // графа 14
-        newRow.accruedCommisRub = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, false)
+        newRow.accruedCommisRub = parseNumber(row.cell[14].text(), xlsIndexRow, 14 + colOffset, logger, true)
 
         // графа 15
-        newRow.commisInAccountingCurrency = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
+        newRow.commisInAccountingCurrency = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, true)
 
         // графа 16
-        newRow.commisInAccountingRub = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, false)
+        newRow.commisInAccountingRub = parseNumber(row.cell[16].text(), xlsIndexRow, 16 + colOffset, logger, true)
 
         // графа 17
-        newRow.accrualPrevCurrency = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, false)
+        newRow.accrualPrevCurrency = parseNumber(row.cell[17].text(), xlsIndexRow, 17 + colOffset, logger, true)
 
         // графа 18
-        newRow.accrualPrevRub = parseNumber(row.cell[18].text(), xlsIndexRow, 18 + colOffset, logger, false)
+        newRow.accrualPrevRub = parseNumber(row.cell[18].text(), xlsIndexRow, 18 + colOffset, logger, true)
 
         // графа 19
-        newRow.reportPeriodCurrency = parseNumber(row.cell[19].text(), xlsIndexRow, 19 + colOffset, logger, false)
+        newRow.reportPeriodCurrency = parseNumber(row.cell[19].text(), xlsIndexRow, 19 + colOffset, logger, true)
 
         // графа 20
-        newRow.reportPeriodRub = parseNumber(row.cell[20].text(), xlsIndexRow, 20 + colOffset, logger, false)
+        newRow.reportPeriodRub = parseNumber(row.cell[20].text(), xlsIndexRow, 20 + colOffset, logger, true)
 
         rows.add(newRow)
     }

@@ -19,6 +19,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -99,6 +100,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 	public void setConfigData(List<ConfigTuple> data) {
 		this.configData = data;
         dataProvider.setList(data);
+        configTable.setVisibleRange(new Range(0, data.size()));
         configTupleListHandler.setList(dataProvider.getList());
 	}
 

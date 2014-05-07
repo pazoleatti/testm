@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -212,6 +209,14 @@ public class DeclarationDataDaoTest {
 		DeclarationData declaration = declarationDataDao.find(222, 222, 222);
 		assertNull(declaration);
 	}
+
+    @Test
+    public void getDeclarationIdsTest(){
+        List<Long> list = new ArrayList<Long>() {{ add(1l);}};
+        List<Long> list1 = new ArrayList<Long>() ;
+        Assert.assertEquals(list, declarationDataDao.getDeclarationIds(1, 2));
+        Assert.assertEquals(list1, declarationDataDao.getDeclarationIds(222, 222));
+    }
 
     @Test
     public void updateTest(){

@@ -20,5 +20,13 @@ public enum DeclarationDataSearchOrdering {
 	/**
 	 * По наименованию типа декларации
 	 */
-	DECLARATION_TYPE_NAME
+	DECLARATION_TYPE_NAME,
+    /**
+     * По состоянию декларации
+     */
+    DECLARATION_ACCEPTED,
+    /**
+     * По году периода
+     */
+    REPORT_PERIOD_YEAR
 }

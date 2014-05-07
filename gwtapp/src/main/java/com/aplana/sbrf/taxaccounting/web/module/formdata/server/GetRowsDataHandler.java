@@ -58,15 +58,6 @@ public class GetRowsDataHandler extends
 		result.setDataRows(dataRowService.getDataRows(userInfo,
 				action.getFormDataId(), dataRowRange, action.isReadOnly(), action.isManual()));
 
-        if (action.isManual() && result.getDataRows() != null && !result.getDataRows().isEmpty()) {
-            Set<String> aliases = result.getDataRows().get(0).keySet();
-            for (DataRow<Cell> row : result.getDataRows()) {
-                for (String alias : aliases) {
-                    row.getCell(alias).setEditable(true);
-                }
-            }
-        }
-
         refBookHelper.dataRowsDereference(result.getDataRows(),
                 formTemplate.getColumns());
 
