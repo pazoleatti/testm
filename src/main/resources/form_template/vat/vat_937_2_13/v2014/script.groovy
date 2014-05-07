@@ -218,10 +218,11 @@ def getReportPeriodEndDate() {
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ п/п', null)
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 3, 1)
 
+    // TODO отделить шапку от фиксированных строк, но пока метода нет и сообщение не утвердили
     def headerMapping = [
             (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNum'),
             (xml.row[0].cell[2]) : getColumnName(tmpRow, 'differences'),
