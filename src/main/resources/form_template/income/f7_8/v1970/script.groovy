@@ -221,11 +221,12 @@ void calc() {
             def aList = getCompareList(a)
             def bList = getCompareList(b)
             for (def aD : aList) {
-                bD = bList.get(aList.indexOf(aD))
+                def bD = bList.get(aList.indexOf(aD))
                 if (aD != bD) {
                     return aD <=> bD
                 }
             }
+            return 0
         }
     }
     updateIndexes(dataRows)
