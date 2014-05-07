@@ -1053,7 +1053,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 new RowCallbackHandler() {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
-                        result.put(rs.getLong("id"), rs.getDate("version"));
+                        result.put(SqlUtils.getLong(rs,"id"), rs.getDate("version"));
                     }
                 }
         );
@@ -1135,7 +1135,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new RowMapper<Pair<Long, Integer>>() {
                         @Override
                         public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            result.add(new Pair<Long, Integer>(rs.getLong("id"), rs.getInt("result")));
+                            result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs,"id"), SqlUtils.getInteger(rs,"result")));
                             return null;
                         }
                     }, list.toArray()
@@ -1367,7 +1367,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new RowMapper<Long>() {
                         @Override
                         public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return rs.getLong("ID");
+                            return SqlUtils.getLong(rs,"ID");
                         }
                     }
             );
