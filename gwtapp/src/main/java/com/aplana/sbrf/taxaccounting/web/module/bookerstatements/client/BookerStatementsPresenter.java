@@ -282,6 +282,7 @@ public class BookerStatementsPresenter extends Presenter<BookerStatementsPresent
                         new AbstractCallback<ImportResult>() {
                             @Override
                             public void onSuccess(ImportResult importResult) {
+                                onSearch();
                                 Dialog.infoMessage("Загрузка бух отчетности выполнена успешно.");
                             }
                         }, BookerStatementsPresenter.this));
