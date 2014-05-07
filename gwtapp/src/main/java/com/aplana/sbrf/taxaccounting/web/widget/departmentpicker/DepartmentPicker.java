@@ -29,7 +29,7 @@ public interface DepartmentPicker extends HasValue<List<Integer>>, LeafValueEdit
 	List<String> getValueDereference();
 
     /** Установить заголовок в окне выбора подразделений. */
-	void setHeader(String header);
+	void setTitle(String title);
 
     void setSelectButtonFocus(boolean focused);
 

@@ -126,7 +126,7 @@
                                     <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
                                     <g:cell width="100%">
                                         <d:DepartmentPickerPopupWidget ui:field="departmentReceiverPicker" width="100%"
-                                                                       header="Выберите приёмник" multiselection="false"/>
+                                                                       title="Выберите приёмник" multiselection="false"/>
                                     </g:cell>
 
                                 </g:HorizontalPanel>
@@ -141,7 +141,7 @@
                                     <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
                                     <g:cell width="100%">
                                         <d:DepartmentPickerPopupWidget ui:field="departmentSourcePicker" width="100%"
-                                                                       header="Выберите источник" multiselection="false"/>
+                                                                       title="Выберите источник" multiselection="false"/>
                                     </g:cell>
                                 </g:HorizontalPanel>
                                 <style:GenericDataGrid ui:field="sourcesTable" width="100%" height="350px"/>
