@@ -473,10 +473,7 @@ void logicalCheckAfterCalc() {
  */
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    // удалить все строки и собрать из источников их строки
-    dataRowHelper.clear()
+    def dataRows = []
 
     /** Идентификатор шаблона источников (Приложение 5). */
     def id = 372
@@ -583,7 +580,10 @@ def getFormDataSummary(def id) {
 }
 
 def getData(def formData) {
-    if (formData != null && formData.id != null && formData.state == WorkflowState.ACCEPTED && !helperCache[formData.id]) {
+    if(formData == null) {
+        return null
+    }
+    if (formData.id != null && formData.state == WorkflowState.ACCEPTED && !helperCache[formData.id]) {
         helperCache[formData.id] = formDataService.getDataRowHelper(formData)
     }
     return helperCache[formData.id]
