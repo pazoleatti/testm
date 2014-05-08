@@ -3,8 +3,8 @@ package com.aplana.taxaccounting
 import groovy.sql.Sql
 
 /**
- * Утилита для синхронизации шаблонов НФ
- * http://jira.aplana.com/browse/SBRFACCTAX-4929
+ * Утилита сравнения скриптов из git и БД с учетом версионирования.
+ * Если скрипты в БД не актуальны, то они обновляются.
  *
  * Запуск командой gradle:
  * gradle run
@@ -24,8 +24,10 @@ class Main {
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
-    def
-    static TAX_FOLDERS = ['deal': 'МУКС', 'income': 'Налог на прибыль', /*'vat': 'НДС',*/ 'transport': 'Транспортный налог']
+    def static TAX_FOLDERS = ['deal': 'МУКС',
+            'income': 'Налог на прибыль',
+            /*'vat': 'НДС',*/
+            'transport': 'Транспортный налог']
 
     def static REPORT_NAME = 'report.html'
 
@@ -165,7 +167,7 @@ class Main {
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
         def map = [:]
 
-        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, script from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, script, status from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map[type_id] == null) {
                 map.put((Integer) it.type_id, [:])
@@ -176,17 +178,17 @@ class Main {
             version.type_id = it.type_id as Integer
             version.version = it.version
             version.name = it.name
-
+            version.status = it.status
             version.script = it.script?.characterStream?.text
             map[type_id].put(it.version, version)
         }
         sql.close()
-        println("DBMS Ok")
+        println("Load DB form_template OK")
         return map
     }
 
-    // Сравнение git-версии с версией в БД
-    def static scanSrcFolder(def versionsMap, def folderName) {
+    // Сравнение git-версии с версией в БД и загрузка в случае отличий
+    def static scanSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
         def map = [:]
         def scanResult = []
 
@@ -225,6 +227,7 @@ class Main {
                                 scanResult.add(result)
                             } else { // Версии совпали
                                 result.name = versions[version]?.name
+                                result.status = versions[version]?.status
                                 result.versionGit = version
                                 result.versionDB = versions[version]?.version
                                 scanResult.add(result)
@@ -240,8 +243,21 @@ class Main {
                                     if (dbScript == gitScript) {
                                         result.check = "Ok"
                                     } else {
-                                        result.check = "Скрипты отличаются"
                                         result.error = true
+                                        def updateResult = -1
+                                        if (sql == null) {
+                                            result.check = "Скрипт устарел"
+                                        } else {
+                                            def error = "Число измененных строк не равно 1."
+                                            try {
+                                                updateResult = sql.executeUpdate("update form_template set script = ? where id = ? and type_id = ?", scriptFile?.text, versions[version].id, id)
+                                                println("Update form_template id = ${versions[version].id}, type_id=$id")
+                                            } catch (Exception ex) {
+                                                error = ex.getLocalizedMessage()
+                                                ex.printStackTrace()
+                                            }
+                                            result.check = updateResult == 1 ? "Скрипт устарел и был обновлен" : "Скрипт устарел. Ошибка обновления: $error"
+                                        }
                                     }
                                 }
                                 // Удаляем из списка не найденных
@@ -253,6 +269,7 @@ class Main {
                             def result = new Expando()
                             result.versionDB = version
                             result.name = template.name
+                            result.status = template.status
                             result.id = id
                             result.check = "Нет в git! (id=${template.id})"
                             result.error = true
@@ -276,8 +293,11 @@ class Main {
         return scanResult
     }
 
-    // Отчет в html-файле
-    private static void printReport(def versionsMap) {
+    // Загрузка из git в БД и отчет в html-файле
+    private static void updateScripts(def versionsMap, def checkOnly = true) {
+        println("DBMS connect: url=$DB_URL user=$DB_USER")
+        def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
         def writer = new FileWriter(new File(REPORT_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
@@ -321,7 +341,7 @@ class Main {
                 p "Сравнение макетов в БД $DB_USER и git:"
                 table {
                     TAX_FOLDERS.keySet().each { folderName ->
-                        def scanResult = scanSrcFolder(versionsMap, folderName)
+                        def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (!scanResult.isEmpty()) {
                             tr {
                                 td(colspan: 6, class: 'hdr', TAX_FOLDERS[folderName])
@@ -340,7 +360,13 @@ class Main {
                                     td {
                                         a(href: result.folderFull, result.folder)
                                     }
-                                    td result.name
+                                    if (result.status != 0) {
+                                        td {
+                                            s result.name
+                                        }
+                                    } else {
+                                        td result.name
+                                    }
                                     td result.versionGit
                                     td result.versionDB
                                     td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
@@ -351,6 +377,10 @@ class Main {
                 }
             }
         }
+        writer.close()
+        sql.close()
+        def action = checkOnly ? 'Check' : 'Update'
+        println("$action DB form_template OK")
     }
 
     static void main(String[] args) {
@@ -360,6 +390,7 @@ class Main {
             report.delete()
         }
         // Построение отчета сравнения
-        printReport(getDBVersions())
+        updateScripts(getDBVersions(), true)
+        println("See $REPORT_NAME for details")
     }
 }
