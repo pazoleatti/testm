@@ -206,7 +206,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @Override
 	public void setAcceptableKinds(List<FormDataKind> dataKinds) {
-        if ((dataKinds == null) || dataKinds.isEmpty()) {
+        if (dataKinds == null) {
+            formDataKind.setFilter(null);
+            return;
+        }
+        if (dataKinds.isEmpty()) {
             formDataKind.setFilter("");
             return;
         }
