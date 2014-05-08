@@ -221,7 +221,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 	@Override
 	public void setAcceptableTypes(List<FormType> types) {
         if ((types == null) || types.isEmpty()) {
-            formTypeId.setFilter("");
+            /**
+             * TODO продумать как сделать правильней,
+             * на текущий момент синтаксис IN (..) не реализован в парсере фильтра,
+             * так же нет варианта остановить подрузку на самом фронтенде
+            */
+            formTypeId.setFilter("2 = 1");
             return;
         }
 		StringBuilder str = new StringBuilder();
