@@ -7,5 +7,5 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
  * @author auldanov
  */
 public enum FormMode {
-    EDIT, VIEW, READ
+    EDIT, VIEW, READ, CREATE
 }

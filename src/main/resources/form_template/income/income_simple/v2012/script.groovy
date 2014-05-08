@@ -448,7 +448,7 @@ def consolidationSummary(def dataRows) {
                     }
                     break
             // рну 4
-                case 318:
+                case 316:
                     rows8.each { rowNum ->
                         def row = getDataRow(dataRows, "R$rowNum")
 
