@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
@@ -37,7 +36,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public interface MyProxy extends ProxyPlace<DepartmentConfigPresenter>, Place {
     }
 
-    private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
+    private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации, использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
     private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
 
     private static final String EDIT_FOUND_TEXT = "Настройки используются для налоговых форм/деклараций. Желаете внести изменения в Настройки?";
@@ -164,7 +163,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                         if (!result.isHasError()) {
                             //MessageEvent.fire(DepartmentConfigPresenter.this, "Параметры подразделения сохранены");
                             if (result.isDeclarationFormFound()) {
-                                Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
+                                Dialog.infoMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
                             }
                             getView().reloadDepartmentParams();
                         }

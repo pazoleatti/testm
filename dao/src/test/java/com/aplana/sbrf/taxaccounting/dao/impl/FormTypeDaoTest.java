@@ -75,11 +75,8 @@ public class FormTypeDaoTest {
     public void testGetByFilter(){
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.INCOME);
-        filter.setActive(true);
         filter.setSearchText("IncOmE");
         Assert.assertEquals(1, formTypeDao.getByFilter(filter).size());
-        filter.setActive(false);
-        Assert.assertEquals(0, formTypeDao.getByFilter(filter).size());
     }
 
     @Test

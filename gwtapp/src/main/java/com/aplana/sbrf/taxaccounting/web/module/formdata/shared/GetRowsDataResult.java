@@ -7,9 +7,18 @@ import com.gwtplatform.dispatch.shared.Result;
 
 public class GetRowsDataResult implements Result {
 	private static final long serialVersionUID = -6510327178774833524L;
-	
+
+    private String uuid;
 	private PagingResult<DataRow<Cell>> dataRows;
     private boolean manual;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public boolean isManual() {
         return manual;

@@ -128,7 +128,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         names.put("formDataIds", filter.getFormDataIds());
         names.put("declarationDataIds", filter.getDeclarationDataIds());
         names.put("number", filter.getCountOfRecords());
-        names.put("rpName", filter.getReportPeriodName());
+        names.put("rpName", "%" + filter.getReportPeriodName() + "%");
         names.put("startIdx", filter.getStartIndex() + 1);
         names.put("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
 
@@ -139,9 +139,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append("rownum as rn FROM log_system ls ");
         appendJoinWhereClause(sql, filter);
         sql.append(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
-        sql.append(")");
+        sql.append(") ordDat");
         if(filter.getCountOfRecords() != 0){
-            sql.append("ordDat where ordDat.rn between :startIdx and :endIdx");
+            sql.append(" where ordDat.rn between :startIdx and :endIdx");
         }
 
         try {
@@ -244,7 +244,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 		}
 
 		if (filter.getReportPeriodName() != null) {
-            sql.append(String.format(" AND %sreport_period_name = \'", prefix)).append(filter.getReportPeriodName()).append("\'");
+            sql.append(String.format(" AND %sreport_period_name LIKE \'", prefix))
+                    .append("%").append(filter.getReportPeriodName()).append("%\'");
 		}
 
 		if (filter.getFormKind() != null && filter.getFormKind().getId() != 0) {
@@ -269,10 +270,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         if (filter.getTaxType() != null){
             List<String> rpNames = expressionForReportNames(filter.getTaxType());
-            sql.append(String.format(" AND (%sreport_period_name = \'", prefix)).append(rpNames.get(0)).append("\'");
-            for (int i = 1; i < rpNames.size(); i++) {
-                sql.append(String.format(" OR %sreport_period_name = \'", prefix)).append(rpNames.get(i)).append("\'");
+            sql.append(String.format(" AND %sreport_period_name IN (", prefix));
+            for (String rpName : rpNames) {
+                sql.append("\'").append(rpName).append("\'").append(",");
             }
+            sql.replace(sql.length() - 1, sql.length(), "");
             sql.append(")");
         }
 
@@ -434,6 +436,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     private void appendJoinWhereClause(StringBuilder sql, LogSystemFilterDao filterDao){
+        boolean isEventColumn = filterDao.getSearchOrdering() == HistoryBusinessSearchOrdering.EVENT;
+        if (isEventColumn) {
+            try {
+                getJdbcTemplate().execute("CREATE GLOBAL TEMPORARY TABLE event_map (event_id NUMBER, event_title CHAR(100)) ON COMMIT DELETE ROWS");
+            } catch (Throwable e) {
+                // Выкидывает исключение если таблица существует
+            }
+
+            getJdbcTemplate().execute(insertEventTitles());
+        }
+
         sql.append(!filterDao.getFormDataIds().isEmpty() ?
                 " LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind" : "");
         sql.append(!filterDao.getDeclarationDataIds().isEmpty() ?
@@ -443,16 +456,22 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !filterDao.getFormDataIds().isEmpty() ? " LEFT JOIN report_period rp ON rp.id = fds.report_period_id" :
                         " LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
         sql.append(" LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id");
+        sql.append(" left join department dep on ls.department_id=dep.\"ID\" ");
+        sql.append(" left join form_type ft on ls.form_type_id=ft.\"ID\" ");
+        sql.append(" left join sec_user su on ls.user_id=su.\"ID\" ");
+        if (isEventColumn) {
+            sql.append(" LEFT JOIN event_map em ON ls.event_id=em.\"EVENT_ID\" ");
+        }
         sql.append(" WHERE (ls.report_period_name = CAST(tp.year AS VARCHAR(4)) || ' ' || rp.name) ");
         sql.append(filterDao.getDepartmentName() != null && !filterDao.getDepartmentName().isEmpty() ?
                 " AND lower(ls.department_name) LIKE lower(\'%" + filterDao.getDepartmentName() + "%\')" : "");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
-                " AND ls.report_period_name = :rpName ":"");
+                "AND ls.report_period_name LIKE :rpName ":"");
         sql.append(filterDao.getFromSearchDate() != null && filterDao.getToSearchDate() != null ?
                 " AND ls.log_date between :fromDate AND :endDate + interval '1' day" : "");
     }
 
-    private List<String> expressionForReportNames(TaxType taxType){
+    private List<String>  expressionForReportNames(TaxType taxType){
         try {
             return getJdbcTemplate().query("SELECT tp.year as tax_year, rp.name AS report_period_name FROM tax_period tp" +
                     " LEFT JOIN report_period rp ON rp.tax_period_id = tp.id WHERE tp.tax_type = \'" + taxType.getCode()+ "\'",

@@ -15,7 +15,7 @@
             margin-bottom: 0;
             display: inline-block;
             vertical-align: middle;
-            height: 16px;
+            min-height: 16px;
             /*многоточие*/
             overflow: hidden;
             white-space: nowrap;

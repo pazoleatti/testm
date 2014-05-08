@@ -152,10 +152,15 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				}
 
 				if ((currentCell != null) && (currentCell instanceof com.aplana.sbrf.taxaccounting.model.Cell)) {
-					FormStyle currentCellStyle = ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).getStyle();
-					if (currentCellStyle != null) { // если на ячейку назначен стиль
-						applyOurCustomStyles(td, currentCellStyle);
-					}
+                    FormStyle clientCellStyle = ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).getClientStyle();
+                    if (clientCellStyle != null) { // если на ячейку назначен стиль
+                        applyOurCustomStyles(td, clientCellStyle);
+                    } else {
+                        FormStyle currentCellStyle = ((com.aplana.sbrf.taxaccounting.model.Cell)currentCell).getStyle();
+                        if (currentCellStyle != null) { // если на ячейку назначен стиль
+                            applyOurCustomStyles(td, currentCellStyle);
+                        }
+                    }
 				}
 
 

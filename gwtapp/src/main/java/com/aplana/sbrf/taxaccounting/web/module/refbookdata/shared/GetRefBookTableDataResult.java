@@ -11,6 +11,7 @@ public class GetRefBookTableDataResult implements Result {
 	List<RefBookDataRow> dataRows;
 	int totalCount;
 	String desc;
+    private String uuid;
 
 	public List<RefBookAttribute> getTableHeaders() {
 		return tableHeaders;
@@ -43,4 +44,12 @@ public class GetRefBookTableDataResult implements Result {
 	public void setDesc(String desc) {
 		this.desc = desc;
 	}
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }

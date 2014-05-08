@@ -116,41 +116,7 @@ public class DeclarationListView extends
                 return departmentFullNames.get(object.getDepartmentId());
             }
         };
-
-        Column reportPeriodYearColumn = null;
-        if (taxType == TaxType.DEAL) {
-            reportPeriodYearColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
-                    new AbstractCell<DeclarationDataSearchResultItem>() {
-
-                        @Override
-                        public void render(Context context,
-                                           DeclarationDataSearchResultItem declaration,
-                                           SafeHtmlBuilder sb) {
-                            if (declaration == null) {
-                                return;
-                            }
-                            sb.appendHtmlConstant("<a href=\"#"
-                                    + DeclarationDataTokens.declarationData + ";"
-                                    + DeclarationDataTokens.declarationId + "="
-                                    + declaration.getDeclarationDataId() + "\">"
-                                    + declaration.getReportPeriodName() + "</a>");
-                        }
-                    }) {
-                @Override
-                public DeclarationDataSearchResultItem getValue(
-                        DeclarationDataSearchResultItem object) {
-                    return object;
-                }
-            };
-        } else {
-            reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
-                @Override
-                public String getValue(DeclarationDataSearchResultItem object) {
-                    return String.valueOf(object.getReportPeriodYear());
-                }
-            };
-        }
-
+        
         reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                 new AbstractCell<DeclarationDataSearchResultItem>() {
 
@@ -165,7 +131,7 @@ public class DeclarationListView extends
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + declaration.getDeclarationDataId() + "\">"
-                                + declaration.getReportPeriodName() + "</a>");
+                                + declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName() + "</a>");
                     }
                 }) {
             @Override
@@ -190,7 +156,6 @@ public class DeclarationListView extends
         };
 
         departmentColumn.setSortable(true);
-        reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
         declarationTypeColumn.setSortable(true);
         stateColumn.setSortable(true);
@@ -200,13 +165,11 @@ public class DeclarationListView extends
 
         if (taxType == TaxType.DEAL) {
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_YEAR_TITLE, reportPeriodYearColumn));
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         } else {
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.setColumnWidth(declarationTypeColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_YEAR_TITLE, reportPeriodYearColumn));
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);
             declarationTable.setColumnWidth(reportPeriodColumn, 0, Style.Unit.EM);
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
@@ -284,6 +247,8 @@ public class DeclarationListView extends
             declarationTypeHeader.setTitle("");
             reportPeriodHeader.setTitle("");
             declarationHeader.setText(DECLARATION_HEADER_D);
+            reportPeriodHeader.setTitle(PERIOD_TITLE);
+            declarationTable.clearColumnWidth(reportPeriodColumn);
         }
         declarationTable.redrawHeaders();
 	}

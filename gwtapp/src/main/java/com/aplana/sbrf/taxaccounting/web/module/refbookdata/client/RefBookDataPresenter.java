@@ -161,12 +161,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
             page = getView().getPage();
+            editFormPresenter.setRecordId(recordId);
 			editFormPresenter.show(recordId);
-            PlaceRequest currentPlaceRequest = placeManager.getCurrentPlaceRequest();
-            placeManager.updateHistory(new PlaceRequest.Builder().nameToken(currentPlaceRequest.getNameToken())
-                    .with(RefBookDataTokens.REFBOOK_DATA_ID, currentPlaceRequest.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null))
-                    .with(RefBookDataTokens.REFBOOK_RECORD_ID, recordId.toString())
-                    .build(), true);
         }
 	}
 
@@ -263,6 +259,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     if (recordId != null && page != null) {
                                         getView().setSelected(recordId);
                                     }
+                                    //LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
 								}
 							}, RefBookDataPresenter.this));
 		}

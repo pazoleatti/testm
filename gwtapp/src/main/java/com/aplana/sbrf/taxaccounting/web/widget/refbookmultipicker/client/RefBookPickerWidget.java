@@ -19,7 +19,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -27,7 +26,6 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 /**
  * Версионный справочник с выбором значения из линейного или иерархичного опредставления
@@ -132,7 +130,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onOpen(OpenModalWindowEvent event) {
                 refBookView.load(state);
-                refBookView.find(searchTextBox.getText());
             }
         });
 

@@ -58,9 +58,6 @@ public class DeclarationTypeDaoTest {
     public void testGetByFilter(){
         TemplateFilter filter = new TemplateFilter();
         filter.setTaxType(TaxType.INCOME);
-        filter.setActive(true);
-        Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
-        filter.setActive(false);
         Assert.assertEquals(0, declarationTypeDao.getByFilter(filter).size());
     }
 

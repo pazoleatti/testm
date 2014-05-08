@@ -34,9 +34,6 @@ public class FilterFormTemplateView extends ViewWithUiHandlers<FilterFormTemplat
     ValueListBox<TaxType> taxType;
 
     @UiField
-    CheckBox active;
-
-    @UiField
     TextBox searchText;
 
 	@Ignore
