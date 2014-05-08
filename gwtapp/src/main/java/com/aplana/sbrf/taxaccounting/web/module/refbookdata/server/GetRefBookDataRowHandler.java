@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -10,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataResult;
@@ -38,6 +40,8 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
     SecurityService securityService;
     @Autowired
     DepartmentService departmentService;
+    @Autowired
+    LogEntryService logEntryService;
 
 	public GetRefBookDataRowHandler() {
 		super(GetRefBookTableDataAction.class);
@@ -49,6 +53,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
 		GetRefBookTableDataResult result = new GetRefBookTableDataResult();
+        Logger logger = new Logger();
 		RefBook refBook = refBookFactory.get(action.getRefBookId());
 		result.setTableHeaders(refBook.getAttributes());
 		result.setDesc(refBook.getName());
@@ -58,6 +63,12 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             if (refBook.getRegionAttribute() != null && !currentUser.hasRole("ROLE_CONTROL_UNP")) {
                 List<Department> deps = departmentService.getBADepartments(securityService.currentUserInfo().getUser());
                 filter = RefBookPickerUtils.buildRegionFilterForUser(deps, refBook);
+                if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
+                    //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
+                    result.setTotalCount(0);
+                    result.setDataRows(new ArrayList<RefBookDataRow>());
+                    return result;
+                }
             }
 
             String searchPattern = action.getSearchPattern();

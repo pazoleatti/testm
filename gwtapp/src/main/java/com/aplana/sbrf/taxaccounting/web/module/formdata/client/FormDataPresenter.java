@@ -85,13 +85,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             action.setManual(formData.isManual());
 			action.setFormDataTemplateId(formData.getFormTemplateId());
             action.setInnerLogUuid(innerLogUuid);
-            System.out.println("innerLogUuid1 : "+innerLogUuid);
             dispatcher.execute(action, CallbackUtils
-					.wrongStateCallback(new AbstractCallback<GetRowsDataResult>() {
+					.defaultCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-                            System.out.println("innerLogUuid2 : "+innerLogUuid);
-                            if (result != null) {
+                            if (result != null && innerLogUuid!= null) {
                                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                                 innerLogUuid = null;
                             }
@@ -287,6 +285,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     if (caught instanceof TaActionException) {
                         innerLogUuid = ((TaActionException) caught).getUuid();
                     }
+                    modifiedRows.clear();
                     getView().updateData();
 				}
 

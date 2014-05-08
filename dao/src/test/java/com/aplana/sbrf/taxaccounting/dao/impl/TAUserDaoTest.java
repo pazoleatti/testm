@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -93,7 +94,8 @@ public class TAUserDaoTest {
 		userDB = userDao.getUser(userId);
 		Assert.assertFalse(userDB.isActive());
 	}
-	
+
+    @CacheEvict(value = "User", allEntries = true)
 	@Test
 	public void testUpdateUser(){
 		TAUser user = new TAUser();

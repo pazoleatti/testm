@@ -165,6 +165,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
 	}
 
+    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
     @Override
     public int[] update(final List<FormTemplate> formTemplates) {
         try {

@@ -1,23 +1,24 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
-import com.aplana.sbrf.taxaccounting.dao.api.exception.LockException;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.ObjectLock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ObjectLockDaoTest.xml"})
@@ -25,7 +26,30 @@ import com.aplana.sbrf.taxaccounting.model.ObjectLock;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ObjectLockDaoTest {
 	@Autowired
-	private ObjectLockDao objectLockDao; 
+	private ObjectLockDao objectLockDao;
+
+    @Before
+    public void init(){
+        // user dao mock
+        TAUserDao userDao = mock(TAUserDao.class);
+
+        // user 1
+        TAUser user1 = new TAUser();
+        user1.setId(1);
+        user1.setName("user1");
+
+        // user 2
+        TAUser user2 = new TAUser();
+        user1.setId(2);
+        user1.setName("user1");
+
+        // invokes
+        when(userDao.getUser(1)).thenReturn(user1);
+        when(userDao.getUser(2)).thenReturn(user2);
+
+        // objectLockDao userDao property mock
+        ReflectionTestUtils.setField(objectLockDao, "userDao", userDao);
+    }
 
 	@Test
 	public void testGetObjectLockNotLocked() {

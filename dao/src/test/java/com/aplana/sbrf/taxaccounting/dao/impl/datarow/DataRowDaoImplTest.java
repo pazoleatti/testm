@@ -32,9 +32,6 @@ import java.util.List;
 public class DataRowDaoImplTest {
 
 	@Autowired
-	FormTemplateDao formTemplateDao;
-
-	@Autowired
 	FormDataDao formDataDao;
 
 	@Autowired
