@@ -162,13 +162,50 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /** Получить все элементы дерева. */
-    protected List<MultiSelectTreeItem> getItems() {
+    public List<MultiSelectTreeItem> getItems() {
+        return getAllItems(false);
+    }
+
+    /** Получить все элементы дерева. */
+    public List<MultiSelectTreeItem> getItemsWithFilter() {
+        return getAllItems(true);
+    }
+
+    private List<MultiSelectTreeItem> getAllItems(boolean withFilter) {
         List<MultiSelectTreeItem> result = new ArrayList<MultiSelectTreeItem>();
         for (int i = 0; i < tree.getItemCount(); i++) {
             TreeItem item = tree.getItem(i);
-            findAllChild(result, (MultiSelectTreeItem) item);
+            if (withFilter) {
+                if (item.isVisible()) {
+                    findAllChildWithFilter(result, (MultiSelectTreeItem) item);
+                }
+            } else {
+                findAllChild(result, (MultiSelectTreeItem) item);
+            }
         }
         return result;
+    }
+
+    public void selectAll(){
+        setSelectOrUnselect(true);
+    }
+
+    public void unselectAll(){
+        setSelectOrUnselect(false);
+    }
+
+    /**
+     * Выделить всех чилдов или развыделить
+     * @param selectOrUnselect true - выдетиь все, false развыделить
+     */
+    private void setSelectOrUnselect(boolean selectOrUnselect){
+        List<MultiSelectTreeItem> items = getItemsWithFilter();
+        for (MultiSelectTreeItem item : items) {
+            if(item.isVisible()){
+                item.setValue(selectOrUnselect);
+            }
+        }
+        ValueChangeEvent.fire(this, getValue());
     }
 
     public void clear() {
@@ -220,9 +257,18 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
             }
             child.setMultiSelection(multiSelection);
             treeItemsHash.put(child.getWidget(), child);
-            child.getPanel().getElement().addClassName(style.msiTreeItem());
+            child.getWidget().getElement().getParentElement().getParentElement().addClassName(style.msiTreeItem());
         }
-        updateItems();
+
+        /** Обновить верстку узлов дерева. */
+        // задать им ширину 100% + найти картинки +/- и задать им ширину 16px
+        NodeList<Element> tableTags = item.getElement().getElementsByTagName("table");
+        for (int i = 0; i < tableTags.getLength(); i++) {
+            Element tableTag = tableTags.getItem(i);
+            tableTag.addClassName(style.msiTableTag()); // tableTag.getStyle().setWidth(100, Style.Unit.PCT);
+            NodeList<Element> tdTags = tableTag.getElementsByTagName("td");
+            tdTags.getItem(0).addClassName(style.msiImg()); // tdTags.getItem(0).getStyle().setWidth(16, Style.Unit.PX);
+        }
     }
 
     /**
@@ -236,6 +282,21 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         if (item.getChildCount() > 0) {
             for (int i = 0; i < item.getChildCount(); i++) {
                 findAllChild(list, (MultiSelectTreeItem) item.getChild(i));
+            }
+        }
+    }
+
+    private void findAllChildWithFilter(List<MultiSelectTreeItem> list, MultiSelectTreeItem item) {
+        list.add(item);
+        if (item.getChildCount() > 0) {
+            for (int i = 0; i < item.getChildCount(); i++) {
+                TreeItem child = item.getChild(i);
+                if(!child.isVisible()){
+                    continue;
+                } else {
+                    findAllChildWithFilter(list, (MultiSelectTreeItem) item.getChild(i));
+                }
+
             }
         }
     }
@@ -328,22 +389,6 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
         setValue(null);
     }
 
-    /** Обновить верстку узлов дерева. */
-    public void updateItems() {
-        for (int index = 0; index < tree.getItemCount(); index++) {
-            MultiSelectTreeItem item = (MultiSelectTreeItem) tree.getItem(index);
-            // найти все таблицы (узлы, у которых есть дочерние элементы, имеют ограниченную ширину)
-            // и задать им ширину 100% + найти картинки +/- и задать им ширину 16px
-            NodeList<Element> tableTags = item.getElement().getElementsByTagName("table");
-            for (int i = 0; i < tableTags.getLength(); i++) {
-                Element tableTag = tableTags.getItem(i);
-                tableTag.addClassName(style.msiTableTag()); // tableTag.getStyle().setWidth(100, Style.Unit.PCT);
-                NodeList<Element> tdTags = tableTag.getElementsByTagName("td");
-                tdTags.getItem(0).addClassName(style.msiImg()); // tdTags.getItem(0).getStyle().setWidth(16, Style.Unit.PX);
-            }
-        }
-    }
-
     public void setHeaderVisible(boolean value) {
         labelPanel.setVisible(value);
     }
@@ -372,7 +417,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                     List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
                     findAllChild(list, item);
                     for (MultiSelectTreeItem i : list) {
-                        i.setValue(widget.getValue());
+                        if (i.isVisible()) {    // визиблом управляет фильтр
+                            i.setValue(widget.getValue());
+                        }
                     }
                 }
             }
@@ -403,9 +450,11 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                     parent = (MultiSelectTreeItem) parent.getParentItem();
                 }
             } else {
+                item.setValue(false);
                 item.setState(false);
                 item.setVisible(false);
             }
         }
+        ValueChangeEvent.fire(this, getValue());
     }
 }
