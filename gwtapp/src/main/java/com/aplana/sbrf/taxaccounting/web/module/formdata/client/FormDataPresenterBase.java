@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		Presenter<FormDataPresenterBase.MyView, Proxy_>{
-	protected Logger logger = Logger.getLogger(getClass().getName());
+    protected Logger logger = Logger.getLogger(getClass().getName());
 
 	/**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -129,8 +130,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final DialogPresenter dialogPresenter;
 	protected final HistoryPresenter historyPresenter;
 	protected final FormSearchPresenter formSearchPresenter;
+    protected final SourcesPresenter sourcesPresenter;
 
-	protected FormData formData;
+    protected FormData formData;
 	
 	protected FormDataAccessParams formDataAccessParams;
 
@@ -159,7 +161,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 								 SignersPresenter signersPresenter,
 								 DialogPresenter dialogPresenter,
 								 HistoryPresenter historyPresenter,
-                                 FormSearchPresenter formDataPresenter) {
+                                 FormSearchPresenter formDataPresenter,
+                                 SourcesPresenter sourcesPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
@@ -167,6 +170,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		this.signersPresenter = signersPresenter;
 		this.dialogPresenter = dialogPresenter;
         this.formSearchPresenter = formDataPresenter;
+        this.sourcesPresenter = sourcesPresenter;
 	}
 
 	@Override
