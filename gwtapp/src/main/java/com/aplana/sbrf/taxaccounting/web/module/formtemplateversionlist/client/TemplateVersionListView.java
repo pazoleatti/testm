@@ -110,8 +110,8 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
     }
 
     @Override
-    public void setFTVersionTable(List<FormTemplateVersion> userFullList) {
-        ftVersionCellTable.setRowData(userFullList);
+    public void setFTVersionTable(List<FormTemplateVersion> versions) {
+        ftVersionCellTable.setRowData(versions);
     }
 
     @Override
