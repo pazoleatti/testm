@@ -456,7 +456,6 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !filterDao.getFormDataIds().isEmpty() ? " LEFT JOIN report_period rp ON rp.id = fds.report_period_id" :
                         " LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
         sql.append(" LEFT JOIN tax_period tp ON tp.id = rp.tax_period_id");
-        sql.append(" left join department dep on ls.department_id=dep.\"ID\" ");
         sql.append(" left join form_type ft on ls.form_type_id=ft.\"ID\" ");
         sql.append(" left join sec_user su on ls.user_id=su.\"ID\" ");
         if (isEventColumn) {
@@ -466,7 +465,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append(filterDao.getDepartmentName() != null && !filterDao.getDepartmentName().isEmpty() ?
                 " AND lower(ls.department_name) LIKE lower(\'%" + filterDao.getDepartmentName() + "%\')" : "");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
-                "AND ls.report_period_name LIKE :rpName ":"");
+                " AND ls.report_period_name = :rpName ":"");
         sql.append(filterDao.getFromSearchDate() != null && filterDao.getToSearchDate() != null ?
                 " AND ls.log_date between :fromDate AND :endDate + interval '1' day" : "");
     }

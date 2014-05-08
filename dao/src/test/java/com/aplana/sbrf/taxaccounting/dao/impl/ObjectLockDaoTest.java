@@ -51,29 +51,6 @@ public class ObjectLockDaoTest {
         ReflectionTestUtils.setField(objectLockDao, "userDao", userDao);
     }
 
-    @Before
-    public void init(){
-        // user dao mock
-        TAUserDao userDao = mock(TAUserDao.class);
-
-        // user 1
-        TAUser user1 = new TAUser();
-        user1.setId(1);
-        user1.setName("user1");
-
-        // user 2
-        TAUser user2 = new TAUser();
-        user1.setId(2);
-        user1.setName("user1");
-
-        // invokes
-        when(userDao.getUser(1)).thenReturn(user1);
-        when(userDao.getUser(2)).thenReturn(user2);
-
-        // objectLockDao userDao property mock
-        ReflectionTestUtils.setField(objectLockDao, "userDao", userDao);
-    }
-
 	@Test
 	public void testGetObjectLockNotLocked() {
 		ObjectLock<Long> lock = objectLockDao.getObjectLock(41L, FormData.class);
