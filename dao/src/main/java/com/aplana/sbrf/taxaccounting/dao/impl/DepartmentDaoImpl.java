@@ -87,11 +87,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public String getParentsHierarchy(Integer departmentId) {
         try {
             String path = getJdbcTemplate().queryForObject(
-                    "select path from (SELECT id, level as lvl, sys_connect_by_path(name,'/') as path \n" +
-                            "FROM department  where type != 1 START\n" +
-                            "WITH id = ?\n" +
-                            "CONNECT BY PRIOR parent_id = id order by lvl desc)\n" +
-                            "where ROWNUM = 1 ",
+                    "SELECT SYS_CONNECT_BY_PATH(name, '/') as path \n" +
+                            "FROM department \n" +
+                            "WHERE id = ? \n" +
+                            "START WITH parent_id in (select id from department where parent_id is null)  \n" +
+                            "CONNECT BY PRIOR id = parent_id",
                     new RowMapper<String>() {
                         @Override
                         public String mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -100,17 +100,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                     },
                     departmentId
             );
-            String[] pathParts = path.substring(1).split("/");
-            StringBuilder result = new StringBuilder();
-            for (int i = pathParts.length - 1; i > -1; i--) {
-                result.append(pathParts[i]);
-                if (i != 0) {
-                    result.append("/");
-                }
-            }
-            return result.toString();
+            return path.substring(1);
         } catch (EmptyResultDataAccessException e) {
-            return null;
+            return getDepartment(departmentId).getName();
         }
     }
 
@@ -118,11 +110,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	public String getParentsHierarchyShortNames(Integer departmentId) {
 		try {
 			String path = getJdbcTemplate().queryForObject(
-					"select path from (SELECT id, level as lvl, sys_connect_by_path(shortname,'/') as path \n" +
-							"FROM department  where type != 1 START\n" +
-							"WITH id = ?\n" +
-							"CONNECT BY PRIOR parent_id = id order by lvl desc)\n" +
-							"where ROWNUM = 1 ",
+                    "SELECT SYS_CONNECT_BY_PATH(shortname, '/') as path \n" +
+                            "FROM department\n" +
+                            "WHERE id = ?\n" +
+                            "START WITH parent_id in (select id from department where parent_id is null)  \n" +
+                            "CONNECT BY PRIOR id = parent_id",
 					new RowMapper<String>() {
 						@Override
 						public String mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -131,17 +123,9 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 					},
 					departmentId
 			);
-			String[] pathParts = path.substring(1).split("/");
-			StringBuilder result = new StringBuilder();
-			for (int i = pathParts.length - 1; i > -1; i--) {
-				result.append(pathParts[i]);
-				if (i != 0) {
-					result.append("/");
-				}
-			}
-			return result.toString();
+			return path.substring(1);
 		} catch (EmptyResultDataAccessException e) {
-			return null;
+			return getDepartment(departmentId).getShortName();
 		}
 	}
 
@@ -161,13 +145,13 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 		@Override
 		public Department mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Department department = new Department();
-			department.setId(rs.getInt("id"));
+			department.setId(SqlUtils.getInteger(rs,"id"));
 			department.setName(rs.getString("name"));
-			Integer parentId = rs.getInt("parent_id");
+			Integer parentId = SqlUtils.getInteger(rs,"parent_id");
             // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
             // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
             department.setParentId(rs.wasNull() ? null : parentId);
-			department.setType(DepartmentType.fromCode(rs.getInt("type")));
+			department.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"type")));
 			department.setShortName(rs.getString("shortname"));
 			department.setTbIndex(rs.getString("tb_index"));
 			department.setSbrfCode(rs.getString("sbrf_code"));

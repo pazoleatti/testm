@@ -37,9 +37,9 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		public DeclarationData mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationData d = new DeclarationData();
 			d.setId(SqlUtils.getLong(rs,"id"));
-			d.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
-			d.setDepartmentId(rs.getInt("department_id"));
-			d.setReportPeriodId(rs.getInt("report_period_id"));
+			d.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
+			d.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+			d.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 			d.setAccepted(rs.getBoolean("is_accepted"));
             d.setPdfDataUuid(rs.getString("data_pdf"));
             d.setXlsxDataUuid(rs.getString("data_xlsx"));

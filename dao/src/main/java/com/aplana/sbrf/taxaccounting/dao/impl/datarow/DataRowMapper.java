@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
@@ -142,16 +143,16 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			cell.setEditable(rs.getBoolean(String.format("E%s", cell
 					.getColumn().getId())));
 			// Span Info
-			int rowSpan = rs.getInt(String.format("RSI%s", cell.getColumn()
+			Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
+                    .getId()));
+			cell.setRowSpan(((rowSpan == null)||(rowSpan == 0)) ? 1 : rowSpan);
+			Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
 					.getId()));
-			cell.setRowSpan(rowSpan == 0 ? 1 : rowSpan);
-			int colSpan = rs.getInt(String.format("CSI%s", cell.getColumn()
-					.getId()));
-			cell.setColSpan(colSpan == 0 ? 1 : colSpan);
+			cell.setColSpan(((colSpan == null)||(colSpan == 0)) ? 1 : colSpan);
 		}
 		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("A"), cells);
-		dataRow.setId(rs.getLong("ID"));
-		dataRow.setIndex(rs.getInt("IDX"));
+		dataRow.setId(SqlUtils.getLong(rs,"ID"));
+		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
 		return dataRow;
 	}
 }

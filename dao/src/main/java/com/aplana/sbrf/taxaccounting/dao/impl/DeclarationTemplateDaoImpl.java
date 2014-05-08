@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -42,14 +43,14 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		@Override
 		public DeclarationTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationTemplate d = new DeclarationTemplate();
-			d.setId(rs.getInt("id"));
+			d.setId(SqlUtils.getInteger(rs,"id"));
             d.setName(rs.getString("name"));
 			d.setVersion(rs.getDate("version"));
-			d.setEdition(rs.getInt("edition"));
-			d.setType(declarationTypeDao.get(rs.getInt("declaration_type_id")));
+			d.setEdition(SqlUtils.getInteger(rs,"edition"));
+			d.setType(declarationTypeDao.get(SqlUtils.getInteger(rs,"declaration_type_id")));
             d.setXsdId(rs.getString("XSD"));
             d.setJrxmlBlobId(rs.getString("JRXML"));
-            d.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            d.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
 			return d;
 		}
 	}
@@ -340,8 +341,8 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                 @Override
                 public VersionSegment mapRow(ResultSet resultSet, int i) throws SQLException {
                     VersionSegment segment = new VersionSegment();
-                    segment.setTemplateId(resultSet.getInt("ID"));
-                    segment.setStatus(VersionedObjectStatus.getStatusById(resultSet.getInt("STATUS")));
+                    segment.setTemplateId(SqlUtils.getInteger(resultSet, "ID"));
+                    segment.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(resultSet,"STATUS")));
                     segment.setBeginDate(resultSet.getDate("versionFrom"));
                     segment.setEndDate(resultSet.getDate("versionTo"));
                     return segment;

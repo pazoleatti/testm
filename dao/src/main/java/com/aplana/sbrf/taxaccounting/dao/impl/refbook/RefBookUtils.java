@@ -246,7 +246,7 @@ public class RefBookUtils extends AbstractDao {
         return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RowMapper<Long>() {
             @Override
             public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getLong(RefBook.RECORD_ID_ALIAS);
+                return SqlUtils.getLong(rs,RefBook.RECORD_ID_ALIAS);
             }
         });
     }
@@ -428,7 +428,7 @@ public class RefBookUtils extends AbstractDao {
             return getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getLong("ID");
+                    return SqlUtils.getLong(rs,"ID");
                 }
             }, uniqueRecordId);
         } catch (EmptyResultDataAccessException e) {
@@ -477,7 +477,7 @@ public class RefBookUtils extends AbstractDao {
         @Override
         public RefBookRecordVersion mapRow(ResultSet rs, int rowNum) throws SQLException {
             RefBookRecordVersion result = new RefBookRecordVersion();
-            result.setRecordId(rs.getLong(RefBook.RECORD_ID_ALIAS));
+            result.setRecordId(SqlUtils.getLong(rs,RefBook.RECORD_ID_ALIAS));
             result.setVersionStart(rs.getDate("versionStart"));
             result.setVersionEnd(rs.getDate("versionEnd"));
             result.setVersionEndFake(rs.getBoolean("endIsFake"));

@@ -16,16 +16,16 @@ public class DeclarationDataSearchResultItemMapper implements RowMapper<Declarat
 	public DeclarationDataSearchResultItem mapRow(ResultSet rs, int i) throws SQLException {
 		DeclarationDataSearchResultItem result = new DeclarationDataSearchResultItem();
 
-		result.setDepartmentId(rs.getInt("department_id"));
+		result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
 		result.setDepartmentName(rs.getString("department_name"));
-		result.setDepartmentType(DepartmentType.fromCode(rs.getInt("department_type")));
-		result.setDeclarationDataId(rs.getLong("declaration_data_id"));
-		result.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
-		result.setReportPeriodId(rs.getInt("report_period_id"));
+		result.setDepartmentType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"department_type")));
+		result.setDeclarationDataId(SqlUtils.getLong(rs,"declaration_data_id"));
+		result.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
+		result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 		result.setReportPeriodName(rs.getString("report_period_name"));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 		result.setAccepted(rs.getBoolean("is_accepted"));
-        result.setReportPeriodYear(rs.getInt("year"));
+        result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
 		result.setDeclarationType(rs.getString("declaration_type_name"));
 
 		return result;

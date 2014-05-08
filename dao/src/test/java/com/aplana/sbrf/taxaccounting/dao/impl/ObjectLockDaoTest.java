@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ObjectLockDaoTest {
 	@Autowired
-	private ObjectLockDao objectLockDao; 
+	private ObjectLockDao objectLockDao;
 
     @Before
     public void init(){

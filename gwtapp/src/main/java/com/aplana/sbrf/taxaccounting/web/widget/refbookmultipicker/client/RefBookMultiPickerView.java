@@ -288,10 +288,11 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             if (pager.getPage() != 0) {
                 pager.firstPage();
             } else {
-                // Если данные еще не грузились или игнорим если "силой" грузим
-                if (cellTable.getVisibleItemCount() < 1 || force) {
+                //TODO пока убрал aivanov 5.5.14
+                //// Если данные еще не грузились или игнорим если "силой" грузим
+                //if (cellTable.getVisibleItemCount() < 1 || force) {
                     cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
-                }
+                //}
             }
         }
     }

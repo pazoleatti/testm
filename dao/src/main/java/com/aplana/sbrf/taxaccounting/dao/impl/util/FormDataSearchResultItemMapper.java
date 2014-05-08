@@ -13,22 +13,22 @@ public class FormDataSearchResultItemMapper implements RowMapper<FormDataSearchR
 	public FormDataSearchResultItem mapRow(ResultSet rs, int rowNum) throws SQLException {
 		FormDataSearchResultItem result = new FormDataSearchResultItem();
 
-		result.setDepartmentId(rs.getInt("department_id"));
+		result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
 		result.setDepartmentName(rs.getString("department_name"));
-		result.setDepartmentType(DepartmentType.fromCode(rs.getInt("department_type")));
-		result.setFormDataId(rs.getLong("form_data_id"));
-		result.setFormDataKind(FormDataKind.fromId(rs.getInt("form_data_kind_id")));
-		result.setFormTemplateId(rs.getInt("form_template_id"));
-		result.setFormTypeId(rs.getInt("form_type_id"));
+		result.setDepartmentType(DepartmentType.fromCode(SqlUtils.getInteger(rs,"department_type")));
+		result.setFormDataId(SqlUtils.getLong(rs,"form_data_id"));
+		result.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"form_data_kind_id")));
+		result.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
+		result.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
 		result.setFormTypeName(rs.getString("form_type_name"));
-		result.setReportPeriodId(rs.getInt("report_period_id"));
+		result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
 		result.setReportPeriodName(rs.getString("report_period_name"));
-		result.setState(WorkflowState.fromId(rs.getInt("state")));
+		result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
 		result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-        result.setReportPeriodYear(rs.getInt("year"));
-        Integer reportPeriodMonth = rs.getInt("period_order");
+        result.setReportPeriodYear(SqlUtils.getInteger(rs,"year"));
+        Integer reportPeriodMonth = SqlUtils.getInteger(rs,"period_order");
         result.setReportPeriodMonth(rs.wasNull() ? null : reportPeriodMonth);
-        Integer returnSign = rs.getInt("return_sign");
+        Integer returnSign = SqlUtils.getInteger(rs,"return_sign");
         result.setReturnSign(rs.wasNull() ? null : 1 == returnSign);
 
 		return result;

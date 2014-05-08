@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,9 +29,9 @@ public class TaxPeriodDaoImpl extends AbstractDao implements TaxPeriodDao {
 		@Override
 		public TaxPeriod mapRow(ResultSet rs, int index) throws SQLException {
 			TaxPeriod t = new TaxPeriod();
-			t.setId(rs.getInt("id"));
+			t.setId(SqlUtils.getInteger(rs, "id"));
 			t.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-			t.setYear(rs.getInt("year"));
+			t.setYear(SqlUtils.getInteger(rs,"year"));
 			return t;
 		}
 	}

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -24,10 +25,10 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 	private final static class FormStyleMapper implements RowMapper<FormStyle> {
 		public FormStyle mapRow(ResultSet rs, int index) throws SQLException {
 			final FormStyle result = new FormStyle();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setAlias(rs.getString("alias"));
-			result.setFontColor(Color.getById(rs.getInt("font_color")));
-			result.setBackColor(Color.getById(rs.getInt("back_color")));
+			result.setFontColor(Color.getById(SqlUtils.getInteger(rs,"font_color")));
+			result.setBackColor(Color.getById(SqlUtils.getInteger(rs,"back_color")));
 			result.setItalic(rs.getBoolean("italic"));
 			result.setBold(rs.getBoolean("bold"));
 			return result;
@@ -163,7 +164,7 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 					@Override
 					public void processRow(ResultSet rs) throws SQLException {
 						String alias = rs.getString("alias");
-						int columnId = rs.getInt("id");
+						int columnId = SqlUtils.getInteger(rs,"id");
 						formTemplate.getStyle(alias).setId(columnId);
 					}
 				}

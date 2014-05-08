@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,10 +27,10 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 		@Override
 		public DeclarationType mapRow(ResultSet rs, int index) throws SQLException {
 			DeclarationType res = new DeclarationType();
-			res.setId(rs.getInt("id"));
+			res.setId(SqlUtils.getInteger(rs, "id"));
 			res.setName(rs.getString("name"));
 			res.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-            res.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            res.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
 			return res;
 		}
 		
@@ -98,8 +99,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
-        StringBuilder query = new StringBuilder("select id from declaration_type where status = ");
-        query.append(filter.isActive()?0:1);
+        StringBuilder query = new StringBuilder("select id from declaration_type where status = 0");
         if (filter.getTaxType() != null) {
             query.append(" and TAX_TYPE = \'").append(filter.getTaxType().getCode()).append("\'");
         }

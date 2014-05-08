@@ -81,6 +81,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize(), dataProvider);
+        mode = FormMode.READ;
+        getView().updateMode(mode);
 	}
 
 	@Override

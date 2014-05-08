@@ -50,7 +50,7 @@ public class ObjectLockDaoImpl extends AbstractDao implements ObjectLockDao{
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis(lockTime.getTime());
 			lock.setLockTime(cal.getTime());
-			lock.setUserId(rs.getInt("user_id"));
+			lock.setUserId(SqlUtils.getInteger(rs,"user_id"));
 			return lock;
 		}
 	}

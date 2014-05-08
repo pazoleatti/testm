@@ -70,7 +70,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
         // Вид налоговой формы
         TemplateFilter filter = new TemplateFilter();
-        filter.setActive(true);
         filter.setTaxType(taxType);
         List<FormType> formTypesList = formTypeService.getByFilter(filter);
         Collections.sort(formTypesList, new FormTypeAlphanumericComparator());

@@ -124,11 +124,11 @@
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Период актуальности с"/>
                             <g:HorizontalPanel width="300px">
-                                <w:YearMaskBox ui:field="versionDateBegin" width="134px"/>
+                                <w:YearMaskBox ui:field="versionDateBegin" width="134px" mayBeNull="true"/>
                                 <g:cell horizontalAlignment="center">
                                     <g:Label width="30px" text="по"/>
                                 </g:cell>
-                                <w:YearMaskBox ui:field="versionDateEnd" width="134px"/>
+                                <w:YearMaskBox ui:field="versionDateEnd" width="134px" mayBeNull="true"/>
                             </g:HorizontalPanel>
                         </g:HorizontalPanel>
 

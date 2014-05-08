@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -87,7 +89,12 @@ public class PrintingServiceImpl implements PrintingService {
         data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
         data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
         List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
-        refBookHelper.dataRowsDereference(dataRows, formTemplate.getColumns());
+        Logger log = new Logger();
+        refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
+        if (log.containsLevel(LogLevel.ERROR)) {
+            logger.error(log.toString());
+            throw new ServiceException("Ошибка при создании печатной формы.");
+        }
 
         RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                 getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);

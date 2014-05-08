@@ -41,9 +41,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         public DepartmentFormType mapRow(ResultSet rs, int rowNum) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
             departmentFormType.setId(SqlUtils.getLong(rs,"id"));
-            departmentFormType.setFormTypeId(rs.getInt("form_type_id"));
-            departmentFormType.setDepartmentId(rs.getInt("department_id"));
-            departmentFormType.setKind(FormDataKind.fromId(rs.getInt("kind")));
+            departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
+            departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
             return departmentFormType;
         }
     };
@@ -52,9 +52,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         @Override
         public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum) throws SQLException {
             DepartmentDeclarationType departmentFormType = new DepartmentDeclarationType();
-            departmentFormType.setId(rs.getInt("id"));
-            departmentFormType.setDepartmentId(rs.getInt("department_id"));
-            departmentFormType.setDeclarationTypeId(rs.getInt("declaration_type_id"));
+            departmentFormType.setId(SqlUtils.getInteger(rs,"id"));
+            departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentFormType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             return departmentFormType;
         }
     };
@@ -176,11 +176,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         public FormTypeKind mapRow(ResultSet rs, int rowNum) throws SQLException {
             FormTypeKind formTypeKind = new FormTypeKind();
             formTypeKind.setId(SqlUtils.getLong(rs,"id"));
-            formTypeKind.setKind(FormDataKind.fromId(rs.getInt("kind")));
+            formTypeKind.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
             formTypeKind.setName(rs.getString("name"));
             formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "typeId"));
-            formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
-            Integer performerId = rs.getInt("performer_id");
+            formTypeKind.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs,"department_id")));
+            Integer performerId = SqlUtils.getInteger(rs,"performer_id");
             if (rs.wasNull()){
                 formTypeKind.setPerformer(null);
             } else{
@@ -215,7 +215,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             formTypeKind.setId(SqlUtils.getLong(rs, "id"));
             formTypeKind.setName(rs.getString("name"));
             formTypeKind.setFormTypeId(SqlUtils.getLong(rs, "typeId"));
-            formTypeKind.setDepartment(departmentDao.getDepartment(rs.getInt("department_id")));
+            formTypeKind.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs,"department_id")));
             return formTypeKind;
         }
     };
@@ -420,7 +420,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 "and fd.report_period_id = ? and fd.state = 4", new RowMapper<Pair<String, String>>() {
             @Override
             public Pair<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new Pair<String, String>(FormDataKind.fromId(rs.getInt("KIND")).getName(), rs.getString("NAME"));
+                return new Pair<String, String>(FormDataKind.fromId(SqlUtils.getInteger(rs,"KIND")).getName(), rs.getString("NAME"));
             }
         }, sourceDepartmentId, sourceKind.getId(), sourceFormTypeId, reportPeriodId);
     }

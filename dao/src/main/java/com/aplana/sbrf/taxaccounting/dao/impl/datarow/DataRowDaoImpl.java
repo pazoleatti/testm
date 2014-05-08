@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowFilter;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
@@ -431,9 +432,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 										public Pair<Long, Integer> mapRow(
 												ResultSet rs, int rowNum)
 												throws SQLException {
-											return new Pair<Long, Integer>(rs
-													.getLong("ORD"), rs
-													.getInt("IDX"));
+											return new Pair<Long, Integer>(SqlUtils
+                                                    .getLong(rs,"ORD"), SqlUtils
+                                                    .getInteger(rs, "IDX"));
 										}
 									}));
 		} catch (EmptyResultDataAccessException e) {
@@ -467,9 +468,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 										public Pair<Integer, Long> mapRow(
 												ResultSet rs, int rowNum)
 												throws SQLException {
-											return new Pair<Integer, Long>(rs
-													.getInt("TYPE"), rs
-													.getLong("ORD"));
+											return new Pair<Integer, Long>(SqlUtils
+                                                    .getInteger(rs,"TYPE"), SqlUtils
+                                                    .getLong(rs,"ORD"));
 										}
 									}));
 		} catch (EmptyResultDataAccessException e) {
@@ -596,9 +597,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             @Override
             public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
                 FormDataSearchResult result = new FormDataSearchResult();
-                result.setIndex(rs.getLong("IDX"));
-                result.setColumnIndex(rs.getLong("column_index"));
-                result.setRowIndex(rs.getLong("row_index"));
+                result.setIndex(SqlUtils.getLong(rs,"IDX"));
+                result.setColumnIndex(SqlUtils.getLong(rs,"column_index"));
+                result.setRowIndex(SqlUtils.getLong(rs,"row_index"));
                 result.setStringFound(rs.getString("true_val"));
 
                 return result;

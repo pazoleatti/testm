@@ -42,6 +42,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	private static final String DEFAULT_TEXT = "";
 	private String text;
 	private String img;
+    private boolean disablePic = false;
 
 	public LinkButton() {
 		this(null, null, null);
@@ -62,6 +63,8 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	public LinkButton(String text, String img, String title) {
 		setElement(Document.get().createDivElement());
 		setStyleName("gwt-Anchor");
+        addStyleName("aplana-NoSelectable");
+        getElement().setAttribute("unselectable", "on");
 		directionalTextHelper = new DirectionalTextHelper(getDivElement(), true);
 		this.text = text == null ? DEFAULT_TEXT : text;
 		this.img = img == null ? DEFAULT_IMG : img;
@@ -84,6 +87,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	}
 
     public void setDisableImage(Boolean disable) {
+        this.disablePic = disable;
         DOM.getChild((Element) getElement().getFirstChildElement(), 0).getStyle().setDisplay(disable ? Style.Display.NONE: Style.Display.INLINE);
         DOM.getChild((Element) getElement().getFirstChildElement(), 1).getStyle().setMarginLeft(disable ? 0 : 19, Style.Unit.PX);
     }
@@ -132,6 +136,7 @@ public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 	@Override
 	public void setHTML(SafeHtml html) {
 		setHTML(html.asString());
+        setDisableImage(disablePic);
 	}
 
 	@Override

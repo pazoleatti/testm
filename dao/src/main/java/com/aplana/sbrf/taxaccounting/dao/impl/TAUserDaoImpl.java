@@ -34,7 +34,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		@Override
 		public TARole mapRow(ResultSet rs, int index) throws SQLException {
 			TARole result = new TARole();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
 			result.setAlias(rs.getString("alias"));
 			return result;
@@ -46,10 +46,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		@Override
 		public TAUser mapRow(ResultSet rs, int index) throws SQLException {
 			TAUser result = new TAUser();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
-			result.setActive(rs.getInt("is_active") == 1);
-			result.setDepartmentId(rs.getInt("department_id"));
+			result.setActive(SqlUtils.getInteger(rs,"is_active") == 1);
+			result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
 			result.setLogin(rs.getString("login"));
 			result.setEmail(rs.getString("email"));
 			return result;
@@ -270,7 +270,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					@Override
 					public Integer mapRow(ResultSet rs, int arg1)
 							throws SQLException {
-						return rs.getInt("id");
+						return SqlUtils.getInteger(rs,"id");
 					}
 				});
 		 return list.size()!=0 ? list.get(0) : 0;

@@ -25,7 +25,7 @@ public class FormDataSignerDaoImpl extends AbstractDao implements FormDataSigner
 			result.setId(SqlUtils.getLong(rs, "id"));
 			result.setName(rs.getString("name"));
 			result.setPosition(rs.getString("position"));
-            result.setOrd(rs.getInt("ord"));
+            result.setOrd(SqlUtils.getInteger(rs,"ord"));
 			return result;
 		}
 	}

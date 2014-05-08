@@ -76,7 +76,7 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
                 col.setAlias(attribute.getAlias());
                 col.setAttributeType(attribute.getAttributeType());
                 col.setName(attribute.getName());
-                col.setRefBookName(rbFactory.get(attribute.getRefBookId()).getName());
+                col.setRefBookName(attribute.getRefBookId()==null?"":rbFactory.get(attribute.getRefBookId()).getName());
                 col.setRefBookAttributeId(attribute.getRefBookAttributeId());
                 col.setWidth(attribute.getWidth());
                 col.setAlignment(getHorizontalAlignment(attribute));
