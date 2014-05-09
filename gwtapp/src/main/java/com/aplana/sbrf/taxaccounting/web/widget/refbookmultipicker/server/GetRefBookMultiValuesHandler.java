@@ -141,10 +141,10 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
             return resultFilter.toString();
         } else if (resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch.toString();
-        } else {
-            return null;
+        } else if ("".equals(filter)) {
+            return "";
         }
-
+        return null;
     }
 
     public static boolean isNumeric(String str) {
