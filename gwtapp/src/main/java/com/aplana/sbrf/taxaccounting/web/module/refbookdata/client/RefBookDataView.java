@@ -150,7 +150,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void setSelected(Long recordId) {
-        System.out.println("setSelected: "+recordId);
         selectionModel.clear();
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {

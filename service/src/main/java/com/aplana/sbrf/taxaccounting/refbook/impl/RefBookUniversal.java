@@ -376,15 +376,18 @@ public class RefBookUniversal implements RefBookDataProvider {
                     crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, recordId, versionFrom, versionTo, uniqueRecordId),
                             versionFrom, versionTo, logger);
                 }
+            }
 
-                //Проверка использования
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId));
-                if (usagesResult != null && !usagesResult.isEmpty()) {
-                    for (String error: usagesResult) {
-                        logger.error(error);
-                    }
-                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+            /** Проверяем изменились ли значения атрибутов */
+            boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
+
+            //Проверка использования
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged);
+            if (usagesResult != null && !usagesResult.isEmpty()) {
+                for (String error: usagesResult) {
+                    logger.error(error);
                 }
+                throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
             }
 
             //Обновление периода актуальности
@@ -427,6 +430,19 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
 
+    private boolean checkValuesChanged(Long uniqueRecordId, Map<String,RefBookValue> records) {
+        PagingResult<Map<String,RefBookValue>> oldValues = refBookDao.getRecordVersions(refBookId, uniqueRecordId, null, null, null);
+        if (oldValues.size() == 0) throw new ServiceException("По уникальному идентификатору не найдена запись справочника. Нарушена целостность записей справочника");
+        if (oldValues.size() > 1) throw new ServiceException("По уникальному идентификатору получено несколько записей. Нарушена целостность записей справочника");
+        for (Map.Entry<String, RefBookValue> newValue : records.entrySet()) {
+            RefBookValue oldValue = oldValues.get(0).get(newValue.getKey());
+            if (!newValue.getValue().equals(oldValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         for (Long uniqueRecordId : uniqueRecordIds) {
@@ -460,7 +476,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         try {
             //Проверка использования
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {
                     logger.error(error);
@@ -487,7 +503,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         try {
             //Проверка использования
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds);
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true);
             if (usagesResult != null && !usagesResult.isEmpty()) {
                 for (String error: usagesResult) {
                     logger.error(error);
