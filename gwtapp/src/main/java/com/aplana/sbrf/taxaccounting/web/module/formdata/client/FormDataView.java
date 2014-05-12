@@ -170,6 +170,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     Label autoVersionLabel;
     @UiField
     HorizontalPanel versionBlock;
+    @UiField
+    LinkButton sources;
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
@@ -701,6 +703,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
         getUiHandlers().onOpenSearchDialog();
+    }
+
+    @UiHandler("sources")
+    public void onSourcesClicked(ClickEvent event){
+        getUiHandlers().onOpenSourcesDialog();
     }
 
     @Override

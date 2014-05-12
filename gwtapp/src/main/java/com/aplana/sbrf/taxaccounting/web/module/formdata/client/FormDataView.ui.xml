@@ -158,6 +158,8 @@
                             <g:Label ui:field="editModeLabel" text="Режим редактирования"
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
                             <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px" uploadAsTemporal="true"/>
+                            <style:LinkButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
+                                              title="Отобразить печатное представление документа"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -215,8 +217,8 @@
                             <style:LinkButton ui:field="infoAnchor" text="История изменений"
                                               img="resources/img/exclamation_mark.png"
                                               title="Отобразить историю налоговой формы"/>
-                            <style:LinkButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
-                                              title="Отобразить печатное представление документа"/>
+                            <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/star.png"
+                                              title="Источники и приемники"/>
                         </g:VerticalPanel>
                     </g:cell>
 

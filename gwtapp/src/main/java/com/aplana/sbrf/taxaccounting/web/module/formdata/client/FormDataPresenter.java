@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -17,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionExcept
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
@@ -54,8 +54,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Inject
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
-			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter);
+			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter,
+            SourcesPresenter sourcesPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
 	}
@@ -425,7 +426,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         });
     }
 
-	@Override
+    @Override
+    public void onOpenSourcesDialog() {
+        sourcesPresenter.setFormData(formData);
+        sourcesPresenter.open();
+        addToPopupSlot(sourcesPresenter);
+    }
+
+    @Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
         if (formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
             Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {

@@ -54,4 +54,6 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onCreateManualClicked();
 
     void onDeleteManualClicked();
+
+    void onOpenSourcesDialog();
 }

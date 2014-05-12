@@ -39,13 +39,15 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     private static final String DATE_TYPE = "Дата";
     private static final String REFBOOK_TYPE = "Справочник";
     private static final String REFERENCE_TYPE = "Зависимая графа";
+    private static final String AUTONUMERATION_TYPE = "Автонумеруемая графа";
 
 	private List<Column> columns;
 
 	private static final List<String> columnTypeNameList = Arrays.asList(STRING_TYPE, NUMERIC_TYPE, DATE_TYPE,
-            REFBOOK_TYPE, REFERENCE_TYPE);
+            REFBOOK_TYPE, REFERENCE_TYPE, AUTONUMERATION_TYPE);
 	private static final List<Integer> precisionList = new ArrayList<Integer>();
 	private static final List<Formats> dateFormatList = new ArrayList<Formats>();
+    private static final List<AutoNumerationColumn> autoNumerationList = new ArrayList<AutoNumerationColumn>();
 
 	static {
 		for(int i = 0; i <= NumericColumn.MAX_PRECISION; i++) {
@@ -57,7 +59,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 				dateFormatList.add(f);
 			}
 		}
-	}
+
+        autoNumerationList.add(new AutoNumerationColumn("Последовательная"));
+        autoNumerationList.add(new AutoNumerationColumn("Сквозная"));
+    }
 
 	@UiField
 	Button upColumn;
@@ -111,6 +116,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     Panel refBooktAttrParentPanel;
 
     @UiField
+    Panel autoNumerationPanel;
+
+    @UiField
     ListBox columnListBox;
 
 	@UiField(provided = true)
@@ -133,6 +141,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiField(provided = true)
     ValueListBox<Column> refBooktAttrParentBox;
+
+    @UiField(provided = true)
+    ValueListBox<AutoNumerationColumn> autoNumerationBox;
 
     @UiField
     TextArea refBookAttrFilterArea;
@@ -223,6 +234,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             @Override
             public String render(Column column) {
                 return column == null ? "" : column.getName();
+            }
+        });
+
+        // Автонумеруемая графа
+        autoNumerationBox = new ValueListBox<AutoNumerationColumn>(new AbstractRenderer<AutoNumerationColumn>() {
+            @Override
+            public String render(AutoNumerationColumn object) {
+                return object.getName();
             }
         });
     }
@@ -457,6 +476,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			typeColumnDropBox.setValue(REFBOOK_TYPE);
 		} else if (column instanceof ReferenceColumn) {
             typeColumnDropBox.setValue(REFERENCE_TYPE);
+        } else if (column instanceof AutoNumerationColumn) {
+            typeColumnDropBox.setValue(AUTONUMERATION_TYPE);
         } else {
 			throw new IllegalStateException();
 		}
@@ -477,6 +498,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         refBookAttrFilterPanel.setVisible(false);
         refBooktAttrParentPanel.setVisible(false);
         refBookAttrRefBox.setVisible(false);
+        autoNumerationPanel.setVisible(false);
 
 		if (STRING_TYPE.equals(typeColumnDropBox.getValue())) {
             // Строка
@@ -566,6 +588,11 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
                 refBookAttrBox.setValue(null, false);
                 refBookAttrBox.setAcceptableValues(new ArrayList<RefBookAttribute>());
             }
+        } else if (AUTONUMERATION_TYPE.equals(typeColumnDropBox.getValue())) {
+            autoNumerationPanel.setVisible(true);
+            autoNumerationBox.setVisible(true);
+            autoNumerationBox.setAcceptableValues(autoNumerationList);
+//            autoNumerationBox.set
         }
     }
 

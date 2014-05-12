@@ -17,6 +17,7 @@ public class DepartmentFormType implements Serializable {
 	private int departmentId;
 	private int formTypeId;
 	private FormDataKind kind;
+    private int performerId;
 	
 	/**
 	 * Получить идентификатор записи
@@ -82,10 +83,22 @@ public class DepartmentFormType implements Serializable {
 		this.kind = kind;
 	}
 
-	@Override
-	public String toString() {
-		return "DepartmentFormType [id=" + id + ", departmentId="
-				+ departmentId + ", formTypeId=" + formTypeId + ", kind="
-				+ kind + "]";
-	}	
+    public int getPerformerId() {
+        return performerId;
+    }
+
+    public void setPerformerId(int performerId) {
+        this.performerId = performerId;
+    }
+
+    @Override
+    public String toString() {
+        return "DepartmentFormType{" +
+                "id=" + id +
+                ", departmentId=" + departmentId +
+                ", formTypeId=" + formTypeId +
+                ", kind=" + kind +
+                ", performerId=" + performerId +
+                '}';
+    }
 }
