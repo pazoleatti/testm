@@ -190,7 +190,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 //Создание новой версии
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
-                action.setRecordId(recordId);
+                if (isVersionMode) {
+                    action.setRecordId(recordId);
+                } else {
+                    action.setRecordId(null);
+                }
+
                 Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
                 List<Map<String, RefBookValueSerializable>> valuesToAdd = new ArrayList<Map<String, RefBookValueSerializable>>();
                 valuesToAdd.add(map);
