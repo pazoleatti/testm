@@ -196,13 +196,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
         //Получаем записи у которых совпали значения уникальных атрибутов
         List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
-        if (matchedRecords == null || matchedRecords.size() == 0) {
-            //Проверка ссылочных значений
-            boolean isReferencesOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, versionFrom, attributes, records);
-            if (!isReferencesOk) {
-                logger.info("Период актуальности выбранного значения меньше периода актуальности версии");
-            }
-        } else {
+        if (matchedRecords != null && !matchedRecords.isEmpty()) {
             //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
             List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
 
@@ -219,6 +213,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 throw new ServiceException("Нарушено требование к уникальности, уже существует элемент с такими значениями атрибута "+attrNames+" в указанном периоде!");
             }
         }
+
+        //Проверка ссылочных значений
+        refBookUtils.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
     }
 
     /**

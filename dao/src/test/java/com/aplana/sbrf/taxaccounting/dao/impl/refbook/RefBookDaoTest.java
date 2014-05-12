@@ -435,10 +435,7 @@ public class RefBookDaoTest {
             record.setRecordId(null);
             records.add(record);
         }
-        boolean isOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2011), refBook.getAttributes(), records);
-        assertTrue(isOk);
-        isOk = refBookUtils.isReferenceValuesCorrect(REF_BOOK_RECORD_TABLE_NAME, new Date(), refBook.getAttributes(), records);
-        assertFalse(isOk);
+        refBookUtils.isReferenceValuesCorrect(null, REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2011), getDate(1, 1, 2014),refBook.getAttributes(), records);
     }
 
     @Test

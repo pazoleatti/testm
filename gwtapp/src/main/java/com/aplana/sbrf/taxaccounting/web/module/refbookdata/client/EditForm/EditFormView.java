@@ -57,7 +57,32 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@UiConstructor
 	public EditFormView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
+        versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                updateRefBookPickerPeriod();
+            }
+        });
+        versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                updateRefBookPickerPeriod();
+            }
+        });
 	}
+
+    private void updateRefBookPickerPeriod() {
+        Date start = versionStart.getValue();
+        if (start == null) {
+            start = new Date();
+        }
+        for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
+            if (w.getValue() instanceof RefBookPickerWidget) {
+                RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                rbw.setPeriodDates(start, versionEnd.getValue());
+            }
+        }
+    }
 
 	@Override
 	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
@@ -92,11 +117,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);
                     refbookWidget.setManualUpdate(true);
-                    Date start = versionStart.getValue();
+                    /*Date start = versionStart.getValue();
                     if (start == null) {
                         start = new Date();
                     }
-                    refbookWidget.setPeriodDates(start, versionEnd.getValue());
+                    refbookWidget.setPeriodDates(start, versionEnd.getValue());*/
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
                     refbookWidget.setTitle(col.getRefBookName());
 					widget = refbookWidget;
@@ -134,6 +159,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			widgets.put(col, (HasValue)widget);
 		}
 		this.widgets = widgets;
+        updateRefBookPickerPeriod();
 		return widgets;
 	}
 
@@ -181,7 +207,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                         isNeedToReload = false;
                         rbw.reload();
                     }
-                    rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
+                    //rbw.setPeriodDates(versionStart.getValue(), versionEnd.getValue());
 					rbw.setDereferenceValue(recordValue.getDereferenceValue());
 					rbw.setSingleValue(recordValue.getReferenceValue());
 				} else if(w.getValue() instanceof HasText) {

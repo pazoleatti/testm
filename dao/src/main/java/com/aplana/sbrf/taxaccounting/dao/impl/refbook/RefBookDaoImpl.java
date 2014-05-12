@@ -1332,14 +1332,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String CHECK_USAGES_IN_REFBOOK = "select b.name as refBookName from ref_book b\n" +
+    private static final String CHECK_USAGES_IN_REFBOOK = "select \n" +
+            "  b.name as refBookName, \n" +
+            "  r.version as versionStart\n" +
+            "from ref_book b\n" +
             "join ref_book_record r on r.ref_book_id = b.id \n" +
             "join ref_book_value v on (v.record_id = r.id and v.reference_value in %s)\n" +
             "join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)";
 
-    private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION = "select refBookName from (\n" +
+    private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION = "select refBookName, versionStart from (\n" +
             "  select r.version as versionStart, (select min(version) - interval '1' day from ref_book_record rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd,\n" +
-            "  b.name as refBookName from ref_book b\n" +
+            "  b.name as refBookName\n" +
+            "  from ref_book b\n" +
             "  join ref_book_record r on r.ref_book_id = b.id\n" +
             "  join ref_book_value v on (v.record_id = r.id and v.reference_value in %s)\n" +
             "  join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)\n" +
@@ -1406,7 +1410,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
                 @Override
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return "Существует запись справочника "+rs.getString("refBookName")+", которая содержит ссылку на версию!";
+                    return "Существует ссылка на запись справочника. Справочник "+rs.getString("refBookName")+", действует с "+sdf.format(rs.getDate("versionStart"))+".";
                 }
             }));
         } catch (EmptyResultDataAccessException e) {

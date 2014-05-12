@@ -197,6 +197,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         pager.setPage(page);
     }
 
+    @Override
+    public void clearSelection() {
+        selectionModel.clear();
+    }
+
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
         selectionModel.clear();
