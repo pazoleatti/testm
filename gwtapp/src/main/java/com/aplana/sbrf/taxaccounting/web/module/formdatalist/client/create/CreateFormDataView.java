@@ -206,7 +206,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @Override
 	public void setAcceptableKinds(List<FormDataKind> dataKinds) {
-        if ((dataKinds == null) || dataKinds.isEmpty()) {
+        if (dataKinds == null) {
+            formDataKind.setFilter(null);
+            return;
+        }
+        if (dataKinds.isEmpty()) {
             formDataKind.setFilter("");
             return;
         }
@@ -220,8 +224,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
 	@Override
 	public void setAcceptableTypes(List<FormType> types) {
-        if ((types == null) || types.isEmpty()) {
-            formTypeId.setFilter("");
+        if (types == null) {
+            formTypeId.setFilter(null);
+            return;
+        }
+        if (types.isEmpty()) {
+            formTypeId.setFilter(RefBook.RECORD_ID_ALIAS + "=-1");
             return;
         }
 		StringBuilder str = new StringBuilder();

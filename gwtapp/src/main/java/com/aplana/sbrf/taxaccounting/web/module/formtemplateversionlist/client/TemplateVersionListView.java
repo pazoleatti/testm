@@ -36,6 +36,11 @@ public class TemplateVersionListView extends ViewWithUiHandlers<FTVersionListUiH
 
     interface Binder extends UiBinder<Widget, TemplateVersionListView> {
     }
+    private SingleSelectionModel<FormTemplateVersion> selectionModel;
+
+
+    @UiField
+    GenericCellTable<FormTemplateVersion> ftVersionCellTable;
 
     @UiField
     Anchor returnAnchor;

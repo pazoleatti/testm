@@ -4,7 +4,12 @@
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
-            margin: 10px;
+            margin: 0 10px 0 10px;
+        }
+
+        .label {
+            font-size: 11px;
+            color: #959595;
         }
 
         .footerPanel {
@@ -16,13 +21,21 @@
         .footerButton {
             margin: 8px 10px 8px 0 !important;
         }
+
+        .margin {
+           margin-right: 4px;
+        }
     </ui:style>
 
 
-    <dw:ModalWindow title="Архивация" width="200px" height="120px">
-        <g:VerticalPanel width="100%" height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
-            <g:cell height="100%" verticalAlignment="middle">
-                <d:DateMaskBoxPicker ui:field="toSearchDate" width="120px" addStyleNames="{style.content}"/>
+    <dw:ModalWindow title="Архивация журнала аудита" width="200px">
+        <g:VerticalPanel verticalAlignment="middle" width="100%" height="100%" addStyleNames="aplana-ModalWindow-contentBackWhite">
+            <g:HorizontalPanel height="50px" verticalAlignment="middle" addStyleNames="{style.content}">
+                    <g:Label text="Архивировать по дату: " addStyleNames="{style.margin}"/>
+                    <d:DateMaskBoxPicker ui:field="toSearchDate" width="120px"/>
+                </g:HorizontalPanel>
+            <g:cell height="45px" verticalAlignment="top">
+                <g:Label text="До выбранной даты, будет производится архивация всех текущих записей журнала аудита." addStyleNames="{style.content} {style.label}"/>
             </g:cell>
             <g:cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="bottom">
                 <g:FlowPanel width="100%" addStyleNames="{style.footerPanel}">
