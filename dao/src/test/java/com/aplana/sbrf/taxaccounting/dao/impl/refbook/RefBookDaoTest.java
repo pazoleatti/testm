@@ -423,7 +423,7 @@ public class RefBookDaoTest {
         assertEquals(2, matches.size());
     }
 
-    @Test
+    /*@Test
     public void checkReferenceValuesVersions() {
         RefBook refBook = refBookDao.get(1L);
         PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
@@ -436,7 +436,7 @@ public class RefBookDaoTest {
             records.add(record);
         }
         refBookUtils.isReferenceValuesCorrect(null, REF_BOOK_RECORD_TABLE_NAME, getDate(1, 1, 2011), getDate(1, 1, 2014),refBook.getAttributes(), records);
-    }
+    }*/
 
     @Test
     public void checkVersionUsages() {
