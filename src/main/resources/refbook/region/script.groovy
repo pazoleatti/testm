@@ -110,7 +110,9 @@ void importFromXML() {
                 }
             } else if (reader.endElement) {
                 if (reader.name.equals(recordQN)) {
-                    addRecordList.add(recordValueMap)
+                    if (isReplaceStart) {
+                        addRecordList.add(recordValueMap)
+                    }
                     isRecordStart = false
                 } else if (reader.name.equals(tableQN)) {
                     isTableStart = false
