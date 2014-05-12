@@ -54,14 +54,14 @@ public class LogEntryDaoTest {
         Assert.assertEquals(lel.get(3).getLevel(), LogLevel.WARNING);
     }
 
-    @Test
-    public void testGetEmpty1() {
-        Assert.assertNull(logEntryDao.get(""));
-    }
-
     @Test(expected = RuntimeException.class)
     public void testGetNull(){
         logEntryDao.get(null);
+    }
+
+    @Test
+    public void testGetEmpty1() {
+        Assert.assertNull(logEntryDao.get(""));
     }
 
     @Test(expected = DaoException.class)

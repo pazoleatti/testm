@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TARoleDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -23,7 +24,7 @@ public class TARoleDaoImpl extends AbstractDao implements TARoleDao {
 		@Override
 		public TARole mapRow(ResultSet rs, int index) throws SQLException {
 			TARole result = new TARole();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setName(rs.getString("name"));
 			result.setAlias(rs.getString("alias"));
 			return result;

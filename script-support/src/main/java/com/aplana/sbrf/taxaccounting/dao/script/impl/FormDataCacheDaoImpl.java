@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -36,7 +37,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
             RefBookAttributeType type = null;
             Object value = null;
 
-            switch (rs.getInt("type")) {
+            switch (SqlUtils.getInteger(rs, "type")) {
                 case 1:
                     type = RefBookAttributeType.STRING;
                     value = rs.getString("string_value");
@@ -45,7 +46,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     type = RefBookAttributeType.NUMBER;
                     BigDecimal val = rs.getBigDecimal("number_value");
                     if (val != null) {
-                        value = val.setScale(rs.getInt("precision"));
+                        value = val.setScale(SqlUtils.getInteger(rs,"precision"));
                     }
                     break;
                 case 3:
@@ -54,13 +55,13 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
                     break;
                 case 4:
                     type = RefBookAttributeType.REFERENCE;
-                    value = rs.getLong("reference_value");
+                    value = SqlUtils.getLong(rs,"reference_value");
                     break;
             }
 
             RefBookValue rbValue = new RefBookValue(type, value);
 
-            return new Pair<Long, Pair<String, RefBookValue>>(rs.getLong("record_id"), new Pair<String, RefBookValue>(rs.getString("alias"), rbValue));
+            return new Pair<Long, Pair<String, RefBookValue>>(SqlUtils.getLong(rs,"record_id"), new Pair<String, RefBookValue>(rs.getString("alias"), rbValue));
         }
     }
 

@@ -47,7 +47,7 @@ public class RefBookAttribute implements Serializable {
 	/** Точность. Количество знаков после запятой. Используется для форматирования вещественных значений при выводе
 	 * на экран
  	 */
-	private int precision;
+	private Integer precision;
 
 	/** Ширина атрибута в относительных единицах по аналогии с НФ. Используется для задания ширины столбца при
 	 * отображении таблицы справочника на экране.
@@ -163,7 +163,7 @@ public class RefBookAttribute implements Serializable {
 	 * Возвращает значение точности атрибута
 	 * @return точность [кол-во знаков после запятой]
 	 */
-	public int getPrecision() {
+	public Integer getPrecision() {
 		return precision;
 	}
 
@@ -171,7 +171,7 @@ public class RefBookAttribute implements Serializable {
 	 * Устанавливает точность атрибута
 	 * @param precision точность [кол-во знаков после запятой]
 	 */
-	public void setPrecision(int precision) {
+	public void setPrecision(Integer precision) {
 		this.precision = precision;
 	}
 

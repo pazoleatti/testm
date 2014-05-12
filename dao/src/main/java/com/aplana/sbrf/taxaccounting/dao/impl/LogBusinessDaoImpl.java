@@ -30,12 +30,12 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			LogBusiness log = new LogBusiness();
 			log.setId(SqlUtils.getLong(rs, "id"));
 			log.setLogDate(new Date(rs.getTimestamp("log_date").getTime()));
-			log.setEventId(rs.getInt("event_id"));
-			log.setUserId(rs.getInt("user_id"));
+			log.setEventId(SqlUtils.getInteger(rs,"event_id"));
+			log.setUserId(SqlUtils.getInteger(rs,"user_id"));
 			log.setRoles(rs.getString("roles"));
 			log.setDeclarationId(SqlUtils.getLong(rs, "declaration_data_id"));
 			log.setFormId(SqlUtils.getLong(rs, "form_data_id"));
-			log.setDepartmentId(rs.getInt("user_department_id"));
+			log.setDepartmentId(SqlUtils.getInteger(rs,"user_department_id"));
 			log.setNote(rs.getString("note"));
 			return log;
 		}

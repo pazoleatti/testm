@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.TemplateChangesDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.TemplateChanges;
 import com.aplana.sbrf.taxaccounting.model.TemplateChangesEvent;
 import org.apache.commons.logging.Log;
@@ -33,12 +34,12 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
         @Override
         public TemplateChanges mapRow(ResultSet rs, int rowNum) throws SQLException {
             TemplateChanges changes = new TemplateChanges();
-            changes.setId(rs.getInt("id"));
+            changes.setId(SqlUtils.getInteger(rs, "id"));
             changes.setEventDate(rs.getDate("date_event"));
-            changes.setAuthor(taUserDao.getUser(rs.getInt("author")));
-            changes.setEvent(TemplateChangesEvent.fromId(rs.getInt("event")));
-            changes.setFormTemplateId(rs.getInt("form_template_id"));
-            changes.setDeclarationTemplateId(rs.getInt("declaration_template_id"));
+            changes.setAuthor(taUserDao.getUser(SqlUtils.getInteger(rs,"author")));
+            changes.setEvent(TemplateChangesEvent.fromId(SqlUtils.getInteger(rs,"event")));
+            changes.setFormTemplateId(SqlUtils.getInteger(rs,"form_template_id"));
+            changes.setDeclarationTemplateId(SqlUtils.getInteger(rs,"declaration_template_id"));
             return changes;
         }
     }

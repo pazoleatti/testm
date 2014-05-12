@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class RefBookPickerUtils {
 
+    public static final String NO_REGION_MATCHES_FLAG = "NO_REGION_MATCHES";
+
     /* Провайдер для идентификации конкретноого объекта в строке
      * С помощью провайдера при листании селектшнМодел понимает что
      * за объект был выделе или развыделен */
@@ -104,12 +106,12 @@ public class RefBookPickerUtils {
         boolean haveRegion = false;
         for (Department dep : departments) {
             if (dep.getRegionId() != null) {
-                regions.append(attrAlias + " = " + dep.getRegionId() + " or ");
+                regions.append(attrAlias).append(" = ").append(dep.getRegionId()).append(" or ");
                 haveRegion = true;
             }
         }
         if (!haveRegion) {
-            return "";
+            return NO_REGION_MATCHES_FLAG;
         }
         regions.delete(regions.length() - 4, regions.length() - 1);
         regions.append(")");

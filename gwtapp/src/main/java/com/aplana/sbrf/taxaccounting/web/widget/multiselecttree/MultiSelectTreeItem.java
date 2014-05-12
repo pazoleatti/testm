@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -18,7 +19,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     protected Integer id;
     /** Тип узла дерева: true - с чекбоксом, false - с радиокнопкой, null - только с текстом*/
     protected Boolean multiSelection;
-    protected FocusPanel focusPanel;
+
     protected Label label;
     protected CheckBox checkBox;
     protected RadioButton radioButton;
@@ -42,10 +43,43 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         label = new Label(name);
         checkBox = new CheckBox(name);
         radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
-        focusPanel = new FocusPanel();
-//        focusPanel.getElement().getStyle().setFontStyle(Style.FontStyle.NORMAL); // TODO (Ramil Timerbaev)
+
         setMultiSelection(multiSelection);
-        setWidget(focusPanel);
+        setWidget(multiSelection == null ? label : multiSelection ? checkBox : radioButton);
+
+        // установка стилей курсора
+        label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+        DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
+        DOM.getChild(checkBox.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
+        DOM.getChild(radioButton.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
+        DOM.getChild(radioButton.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
+
+        // установка стилей отображения элемента
+        checkBox.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+        checkBox.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        checkBox.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+        radioButton.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+        radioButton.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        radioButton.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+
+        DOM.getChild(checkBox.getElement(), 1).getStyle().setWidth(100, Style.Unit.PCT);
+        DOM.getChild(radioButton.getElement(), 1).getStyle().setWidth(100, Style.Unit.PCT);
+        DOM.getChild(checkBox.getElement(), 1).getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        DOM.getChild(radioButton.getElement(), 1).getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+
+        // усчтановка хендлеров
+        label.addDoubleClickHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(DoubleClickEvent event) {
+                MultiSelectTreeItem.this.setState(!MultiSelectTreeItem.this.getState());
+            }
+        });
+        label.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                MultiSelectTreeItem.this.setState(!MultiSelectTreeItem.this.getState());
+            }
+        });
     }
 
     public Integer getId() {
@@ -90,40 +124,10 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
         return ((HasClickHandlers) getWidget()).addClickHandler(handler);
     }
 
-    @Override
-    public Widget getWidget() {
-        return ((FocusPanel)super.getWidget()).getWidget();
-    }
-
-    public FocusPanel getPanel() {
-        return focusPanel;
-    }
-
-    @Override
-    public void addItem(TreeItem item) {
-        super.addItem(item);
-        // выравнивание смещения узлов дерева
-        String lm = item.getElement().getStyle().getMarginLeft();
-        if (lm != null && !"".equals(lm)) {
-            lm = lm.replaceAll("px", "");
-            double tmp = Double.valueOf(lm);
-            if (tmp > 0.0) {
-                item.getElement().getStyle().setMarginLeft(tmp + 7.0, Style.Unit.PX);
-            }
-        }
-    }
-
     /** Установить чекбокс или радиокнопку. */
     public void setMultiSelection(Boolean multiSelection) {
         this.multiSelection = multiSelection;
-        focusPanel.clear();
-        if (multiSelection == null) {
-            focusPanel.add(label);
-        } else if (multiSelection) {
-            focusPanel.add(checkBox);
-        } else {
-            focusPanel.add(radioButton);
-        }
+        setWidget(multiSelection == null ? label : multiSelection ? checkBox : radioButton);
     }
 
     public Boolean isMultiSelection() {
@@ -142,13 +146,8 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
 
     @Override
     public void setValue(Boolean value, boolean fireEvents) {
-        if (multiSelection == null) {
-            checkBox.setValue(false, fireEvents);
-            radioButton.setValue(false, fireEvents);
-        } else {
-            checkBox.setValue(value, fireEvents);
-            radioButton.setValue(value, fireEvents);
-        }
+        checkBox.setValue(multiSelection == null ? false : value, fireEvents);
+        radioButton.setValue(multiSelection == null ? false : value, fireEvents);
     }
 
     public void setGroup(String name) {

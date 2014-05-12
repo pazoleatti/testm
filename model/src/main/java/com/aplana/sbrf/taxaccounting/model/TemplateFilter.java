@@ -6,7 +6,6 @@ public class TemplateFilter implements Serializable {
     private static final long serialVersionUID = 3549128515346222523L;
 
     TaxType taxType;
-    boolean active;
     String searchText;
 
     public String getSearchText() {
@@ -25,14 +24,6 @@ public class TemplateFilter implements Serializable {
         this.taxType = taxType;
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -40,13 +31,13 @@ public class TemplateFilter implements Serializable {
 
         TemplateFilter filter = (TemplateFilter) o;
 
-        return active == filter.active && taxType == filter.taxType;
+        return taxType == filter.taxType;
     }
 
 	@Override
 	public int hashCode() {
 		int result = taxType != null ? taxType.hashCode() : 0;
-		result = 31 * result + (active ? 1 : 0);
+		result = 31 * result;
 		return result;
 	}
 }

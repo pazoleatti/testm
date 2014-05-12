@@ -112,13 +112,13 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void init() {
         // Сброс состояния формы
-        reportPeriodIds.setValue(null);
-        departmentPicker.setValue(null);
-        formDataKind.setValue(null);
-        formDataKind.setDereferenceValue(null);
-        formTypeId.setValue(null);
-        formTypeId.setDereferenceValue(null);
-        formMonth.setValue(null);
+        // убрал потому что при сеттинге нового бина это установка в нул и так будет
+//        reportPeriodIds.setValue(null);
+//        departmentPicker.setValue(null);
+//        formDataKind.setValue(null);
+//        formDataKind.setDereferenceValue(null);
+//        //formTypeId.setValue(null);
+//        formMonth.setValue(null);
         monthPanel.setVisible(false);
         updateEnabled();
     }
@@ -157,10 +157,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiHandler("formDataKind")
     public void onDataKindChange(ValueChangeEvent<List<Long>> event) {
-        formTypeId.setValue(new ArrayList<Long>(), true);
-        formTypeId.setDereferenceValue(null);
         if ((formDataKind.getValue() != null) && !formDataKind.getValue().isEmpty()) {
             getUiHandlers().onDataKindChanged();
+        }
+        if (formTypeId.getValue() != null) {
+            formTypeId.setValue(null, true);
         }
         updateEnabled();
     }

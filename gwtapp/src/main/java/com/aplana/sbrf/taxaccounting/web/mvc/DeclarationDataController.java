@@ -3,7 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -28,6 +31,8 @@ public class DeclarationDataController {
 	@Autowired
 	private SecurityService securityService;
 
+    private static final String ENCODING = "UTF-8";
+
 	
 	@RequestMapping(value = "/xlsx/{id}", method = RequestMethod.GET)
 	public void xlsx(@PathVariable long id, HttpServletResponse response)
@@ -35,7 +40,7 @@ public class DeclarationDataController {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
 		byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
-		String fileName = getFileName(id, userInfo, "xlsx");
+		String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), "UTF-8");
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -63,7 +68,7 @@ public class DeclarationDataController {
 			throws IOException {
 
 		String xmlData = declarationService.getXmlData(id, securityService.currentUserInfo());
-		String fileName = getFileName(id, securityService.currentUserInfo(), "xml");
+		String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), "UTF-8");
 
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\""

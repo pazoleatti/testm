@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.mapper;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -24,7 +25,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
     }
     public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
-        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, rs.getLong(RefBook.RECORD_ID_ALIAS)));
+        result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS)));
         for (RefBookAttribute attribute: refBook.getAttributes()) {
             Object value = null;
             if (rs.getObject(attribute.getAlias()) != null) {
@@ -42,7 +43,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
                     }
                     break;
                     case REFERENCE: {
-                        value = rs.getLong(attribute.getAlias());
+                        value = SqlUtils.getLong(rs,attribute.getAlias());
                     }
                     break;
                 }

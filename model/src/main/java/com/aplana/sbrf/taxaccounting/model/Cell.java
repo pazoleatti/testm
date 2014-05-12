@@ -24,6 +24,8 @@ public class Cell extends AbstractCell {
     private String refBookDereference;
 
     private FormStyle style;
+    /** Временный стиль ячейки. Используется только в режиме ручного ввода и не сохраняется в бд */
+    private FormStyle clientStyle;
 
     private List<FormStyle> formStyleList;
 
@@ -168,6 +170,7 @@ public class Cell extends AbstractCell {
 
     /**
      * Признак того, что ячейка допускает ввод значения пользователем
+     * Не использовать в проверках в скриптах, т.к. есть режим ручного ввода!
      *
      * @return что ячейка допускает ввод значения пользователем
      */
@@ -275,15 +278,17 @@ public class Cell extends AbstractCell {
      * @param fontColor цвет шрифта
      * @param backColor цвет фона
      */
-    public void setColor(String alias, Color fontColor, Color backColor) {
+    public void setClientStyle(String alias, Color fontColor, Color backColor) {
         if (formStyleList != null && !formStyleList.isEmpty()) {
-            style = new FormStyle();
-            style.setAlias(alias);
-            style.setBackColor(backColor);
-            style.setFontColor(fontColor);
-            formStyleList.add(style);
+            clientStyle = new FormStyle();
+            clientStyle.setAlias(alias);
+            clientStyle.setBackColor(backColor);
+            clientStyle.setFontColor(fontColor);
+            formStyleList.add(clientStyle);
         }
     }
 
-
+    public FormStyle getClientStyle() {
+        return clientStyle;
+    }
 }

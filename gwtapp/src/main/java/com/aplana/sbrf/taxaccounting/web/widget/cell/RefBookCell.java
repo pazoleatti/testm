@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.widget.cell;
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
-import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
@@ -18,8 +17,6 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -72,11 +69,6 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		// Create popup panel
         refBookPiker.setTitle(this.column.getName());
         attrId = column.isHierarchical() ? column.getNameAttributeId() : column.getRefBookAttributeId();
-        refBookPiker.addCloseHandler(new CloseHandler<ModalWindow>() {
-            public void onClose(CloseEvent<ModalWindow> event) {
-                changeHandlerRegistration.removeHandler();
-            }
-        });
 
         refBookPiker.setVisible(false);
 	}
@@ -98,22 +90,9 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 	    String eventType = nevent.getType();
 	    if ((BrowserEvents.KEYDOWN.equals(eventType) && nevent.getKeyCode() == KeyCodes.KEY_ENTER)
 	    		|| (CLICK.equals(eventType))) {
-			
-			// При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
-			if (!refBookPikerAlredyInit) {
-                refBookPiker.load(attrId, column.getFilter(), columnContext.getStartDate(),
-                        columnContext.getEndDate());
-				refBookPikerAlredyInit = true;
-			}
-            // Устанавливаем старое значение
-            if (nvalue != null) {
-                if(refBookPiker.getValue()!= null && !refBookPiker.getValue().isEmpty()){
-                    if(!nvalue.equals(refBookPiker.getValue().get(0))){
-                        refBookPiker.setValue(Arrays.asList(nvalue), false);
-                    }
-                } else {
-                    refBookPiker.setValue(Arrays.asList(nvalue), false);
-                }
+
+            if (this.changeHandlerRegistration != null) {
+                this.changeHandlerRegistration.removeHandler();
             }
 
             // Регистрируем событие изменения значени
@@ -154,6 +133,24 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 					}
 				}
 			});
+
+            // При нажатии на ячейку инициализируем справочник, если он ещё не инициализирован
+            if (!refBookPikerAlredyInit) {
+                refBookPiker.load(attrId, column.getFilter(), columnContext.getStartDate(),
+                        columnContext.getEndDate());
+                refBookPikerAlredyInit = true;
+            }
+
+            // Устанавливаем старое значение
+            if (nvalue != null) {
+                if(refBookPiker.getValue()!= null && !refBookPiker.getValue().isEmpty()){
+                    if(!nvalue.equals(refBookPiker.getValue().get(0))){
+                        refBookPiker.setValue(Arrays.asList(nvalue), false);
+                    }
+                } else {
+                    refBookPiker.setValue(Arrays.asList(nvalue), false);
+                }
+            }
 
 			// Устанавливаем позицию и отображаем справочник
 			refBookPiker.open();

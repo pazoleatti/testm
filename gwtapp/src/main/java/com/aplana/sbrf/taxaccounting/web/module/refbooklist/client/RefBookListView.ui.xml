@@ -77,7 +77,7 @@
             <fm:BodyContainer>
                 <g:HorizontalPanel verticalAlignment="middle" spacing="2" addStyleNames="{style.btnPanel}">
                     <g:cell horizontalAlignment="right"  width="180px">
-                        <g:Label addStyleNames="{style.labelBlockMargin}" text="Наименование справочника:"/>
+                        <g:Label addStyleNames="{style.labelBlockMargin}" wordWrap="false" text="Наименование справочника:"/>
                     </g:cell>
                     <g:cell width="217px" >
                         <g:TextBox width="210px" ui:field="filterText"/>

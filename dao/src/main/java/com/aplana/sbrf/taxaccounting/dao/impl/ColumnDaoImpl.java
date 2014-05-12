@@ -37,23 +37,23 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			String type = rs.getString("type");
 			if ("N".equals(type)) {
 				result = new NumericColumn();
-				((NumericColumn)result).setPrecision(rs.getInt("precision"));
-				((NumericColumn) result).setMaxLength(rs.getInt("max_length"));
+				((NumericColumn)result).setPrecision(SqlUtils.getInteger(rs, "precision"));
+				((NumericColumn) result).setMaxLength(SqlUtils.getInteger(rs, "max_length"));
 			} else if ("D".equals(type)) {
 				result = new DateColumn();
-				((DateColumn) result).setFormatId(rs.getInt("format"));
+				((DateColumn) result).setFormatId(SqlUtils.getInteger(rs, "format"));
 			} else if ("S".equals(type)) {
 				result = new StringColumn();
-				((StringColumn) result).setMaxLength(rs.getInt("max_length"));
+				((StringColumn) result).setMaxLength(SqlUtils.getInteger(rs, "max_length"));
 			} else if ("R".equals(type)) {
                 Long attributeId = SqlUtils.getLong(rs,"attribute_id");
                 Long attributeId2 = SqlUtils.getLong(rs,"attribute_id2");
                 if (rs.wasNull()) {
                     attributeId2 = null;
                 }
-                int parentColumnId = rs.getInt("parent_column_id");
+                Integer parentColumnId = SqlUtils.getInteger(rs, "parent_column_id");
                 String filter = rs.getString("filter");
-                if (parentColumnId == 0) {
+                if (parentColumnId == null) {
 				    result = new RefBookColumn();
     				((RefBookColumn)result).setRefBookAttributeId(attributeId);
                     ((RefBookColumn)result).setFilter(filter);
@@ -75,11 +75,11 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			} else {
 				throw new IllegalArgumentException("Unknown column type: " + type);
 			}
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs, "id"));
 			result.setAlias(rs.getString("alias"));
 			result.setName(rs.getString("name"));
-			result.setWidth(rs.getInt("width"));
-			result.setOrder(rs.getInt("ord"));
+			result.setWidth(SqlUtils.getInteger(rs, "width"));
+			result.setOrder(SqlUtils.getInteger(rs, "ord"));
 			result.setChecking(rs.getBoolean("checking"));
 			return result;
 		}
@@ -301,7 +301,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                                 ps.setNull(12, Types.NUMERIC);
                                 ps.setNull(13, Types.NUMERIC);
 							} else if (col instanceof DateColumn) {
-								ps.setInt(9, ((DateColumn)col).getFormatId());
+                                if (((DateColumn)col).getFormatId() == null)
+                                    ps.setNull(9, Types.INTEGER);
+                                else
+								    ps.setInt(9, ((DateColumn)col).getFormatId());
 								ps.setNull(7, Types.INTEGER);
 								ps.setNull(10, Types.NUMERIC);
                                 ps.setNull(11, Types.CHAR);
@@ -351,7 +354,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					String alias = rs.getString("alias");
-					int columnId = rs.getInt("id");
+					int columnId = SqlUtils.getInteger(rs, "id");
 					formTemplate.getColumn(alias).setId(columnId);
 				}
 			}

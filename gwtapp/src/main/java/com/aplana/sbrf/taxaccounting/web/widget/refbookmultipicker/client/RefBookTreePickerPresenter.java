@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -144,6 +145,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                     @Override
                     public void onSuccess(GetRefBookTreeValuesResult result) {
                         getView().setSelection(result.getPage());
+                        LogAddEvent.fire(RefBookTreePickerPresenter.this, result.getUuid());
                     }
                 }, this));
 

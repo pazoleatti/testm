@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
@@ -52,15 +53,15 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		@Override
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
 			FormTemplate formTemplate = new FormTemplate();
-			formTemplate.setId(rs.getInt("id"));
+			formTemplate.setId(SqlUtils.getInteger(rs,"id"));
             formTemplate.setVersion(rs.getDate("version"));
 			formTemplate.setName(rs.getString("name"));
 			formTemplate.setFullName(rs.getString("fullname"));
-            formTemplate.setType(formTypeDao.get(rs.getInt("type_id")));
-            formTemplate.setEdition(rs.getInt("edition"));
+            formTemplate.setType(formTypeDao.get(SqlUtils.getInteger(rs,"type_id")));
+            formTemplate.setEdition(SqlUtils.getInteger(rs,"edition"));
             formTemplate.setFixedRows(rs.getBoolean("fixed_rows"));
             formTemplate.setCode(rs.getString("code"));
-            formTemplate.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            formTemplate.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
             formTemplate.setMonthly(rs.getBoolean("monthly"));
             formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
 
@@ -325,8 +326,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 @Override
                 public VersionSegment mapRow(ResultSet resultSet, int i) throws SQLException {
                     VersionSegment segment = new VersionSegment();
-                    segment.setTemplateId(resultSet.getInt("ID"));
-                    segment.setStatus(VersionedObjectStatus.getStatusById(resultSet.getInt("STATUS")));
+                    segment.setTemplateId(SqlUtils.getInteger(resultSet, "ID"));
+                    segment.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(resultSet,"STATUS")));
                     segment.setBeginDate(resultSet.getDate("versionFrom"));
                     segment.setEndDate(resultSet.getDate("versionTo"));
                     return segment;

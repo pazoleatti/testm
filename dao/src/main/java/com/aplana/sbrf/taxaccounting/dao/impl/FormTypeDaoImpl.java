@@ -24,11 +24,11 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	private static final class FormTypeMapper implements RowMapper<FormType> {
 		public FormType mapRow(ResultSet rs, int index) throws SQLException {
 			FormType result = new FormType();
-			result.setId(rs.getInt("id"));
+			result.setId(SqlUtils.getInteger(rs,"id"));
 			result.setName(rs.getString("name"));
 			String taxCode = rs.getString("tax_type");
 			result.setTaxType(TaxType.fromCode(taxCode.charAt(0)));
-            result.setStatus(VersionedObjectStatus.getStatusById(rs.getInt("status")));
+            result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
 			return result;
 		}
 	}
@@ -69,8 +69,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
         try {
-            StringBuilder query = new StringBuilder("select id from form_type where status = ");
-            query.append(filter.isActive() ? 0 : 1);
+            StringBuilder query = new StringBuilder("select id from form_type where status = 0");
             if (filter.getTaxType() != null) {
                 query.append(" and tax_type = \'").append(filter.getTaxType().getCode()).append("\'");
             }

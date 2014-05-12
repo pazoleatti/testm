@@ -78,9 +78,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 	private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT = "Обороты за отчетный период по кредиту";
 	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET = "Исходящие остатки по дебету";
 	private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = "Исходящие остатки по кредиту";
-	private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статьи";
-	private static final String ATTRIBUTE_OPU_CODE = "Код ОПУ";
-	private static final String ATTRIBUTE_SUM = "Сумма";
+	private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статей";
+	private static final String ATTRIBUTE_SYMBOLS = "Символы";
+	private static final String ATTRIBUTE_TOTAL = "Всего";
 
 	@Autowired
     PeriodService reportPeriodService;
@@ -238,6 +238,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
                     Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
 
+                    if(cell.getColumnIndex() > 1 && endOfFile) {
+                        break;
+                    }
+                    // пропускаем пустые ячейки
                     if (cell == null) {
                         continue;
                     }
@@ -322,8 +326,25 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             Row row = it.next();
             Iterator<Cell> cells = row.iterator();
 
-            // парсим с 18 строки
-            if (row.getRowNum() < 9) {
+            // проверка ячеек в строке 10
+            if (row.getRowNum() == 9) {
+                while (cells.hasNext()) {
+                    Cell cell = cells.next();
+                    if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
+                            && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
+                        throw new ServiceException(BAD_FILE_MSG);
+                    }
+                    int colNum = cell.getColumnIndex();
+                    String colName = cell.getStringCellValue().trim();
+                    if ((colNum == 2 && !colName.equals(ATTRIBUTE_ARTICLE_NAME))
+                            || (colNum == 3 && !colName.equals(ATTRIBUTE_SYMBOLS))
+                            || (colNum == 6 && !colName.equals(ATTRIBUTE_TOTAL)))
+                        throw new ServiceException(BAD_FILE_MSG);
+                }
+            }
+
+            // парсим с 17 строки
+            if (row.getRowNum() < 16) {
                 continue;
             }
 
@@ -449,10 +470,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     colName = ATTRIBUTE_ARTICLE_NAME;
                     break;
                 case 3:
-                    colName = ATTRIBUTE_OPU_CODE;
+                    colName = ATTRIBUTE_SYMBOLS;
                     break;
                 case 6:
-                    colName = ATTRIBUTE_SUM;
+                    colName = ATTRIBUTE_TOTAL;
                     break;
             }
         }

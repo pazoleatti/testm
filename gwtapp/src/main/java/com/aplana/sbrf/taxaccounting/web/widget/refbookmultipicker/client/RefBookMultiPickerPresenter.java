@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -114,6 +115,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                     @Override
                     public void onSuccess(GetRefMultiBookValuesResult result) {
                         getView().setRowData(offset, result.getPage(), result.getPage().getTotalCount());
+                        LogAddEvent.fire(RefBookMultiPickerPresenter.this, result.getUuid());
                     }
                 }, this
         ));
@@ -136,6 +138,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                     public void onSuccess(GetRefMultiBookValuesResult result) {
                         if (result.getUuid() == null) {
                             getView().setSelection(result.getPage());
+                            LogAddEvent.fire(RefBookMultiPickerPresenter.this, result.getUuid());
                         }
                     }
                 }, this
@@ -172,7 +175,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     private boolean isNeedReloadHeaders(PickerState newPs) {
         return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
-                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
+                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                WidgetUtils.isWasChange(ps.getFilter(), newPs.getFilter()) ||
+                WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern());
     }
 
     /* Проверка на изменения входных параметров*/

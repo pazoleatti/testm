@@ -29,12 +29,12 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
             Exemplar exemplar = new Exemplar();
 
             exemplar.setExemplarId(SqlUtils.getLong(rs,1));
-            exemplar.setPeriodityId(rs.getInt(2));
+            exemplar.setPeriodityId(SqlUtils.getInteger(rs,2));
             exemplar.setBeginDate(rs.getDate(3));
             exemplar.setEndDate(rs.getDate(4));
-            exemplar.setRnuTypeId(rs.getInt(5));
+            exemplar.setRnuTypeId(SqlUtils.getInteger(rs,5));
             exemplar.setDepCode(rs.getString(6));
-            exemplar.setSystemId(rs.getInt(7));
+            exemplar.setSystemId(SqlUtils.getInteger(rs,7));
             exemplar.setSubSystemId(rs.getString(8));
             exemplar.setTerCode(rs.getString(9));
 

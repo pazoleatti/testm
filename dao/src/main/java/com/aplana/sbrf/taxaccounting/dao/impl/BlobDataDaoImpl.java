@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -26,12 +27,12 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         @Override
         public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
             BlobData blobData = new BlobData();
-            blobData.setType(rs.getInt("type"));
+            blobData.setType(SqlUtils.getInteger(rs, "type"));
             blobData.setCreationDate(rs.getDate("creation_date"));
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
             blobData.setInputStream(rs.getBlob("data").getBinaryStream());
-            blobData.setDataSize(rs.getInt("data_size"));
+            blobData.setDataSize(SqlUtils.getInteger(rs, "data_size"));
             return blobData;
         }
     }

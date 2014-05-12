@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -32,9 +33,9 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum)
 				throws SQLException {
 			DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
-			departmentDeclarationType.setId(rs.getInt("id"));
-			departmentDeclarationType.setDeclarationTypeId(rs.getInt("declaration_type_id"));
-			departmentDeclarationType.setDepartmentId(rs.getInt("department_id"));
+			departmentDeclarationType.setId(SqlUtils.getInteger(rs, "id"));
+			departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
+			departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
 			return departmentDeclarationType;
 		}
 	};

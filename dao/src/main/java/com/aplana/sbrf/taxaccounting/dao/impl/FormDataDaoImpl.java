@@ -56,18 +56,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				throws SQLException {
 			RowMapperResult result = new RowMapperResult();
 
-			int formTemplateId = rs.getInt("form_template_id");
+			int formTemplateId = SqlUtils.getInteger(rs,"form_template_id");
 			FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
 			FormData fd = new FormData();
 			fd.initFormTemplateParams(formTemplate);
 			fd.setId(SqlUtils.getLong(rs, "id"));
-			fd.setDepartmentId(rs.getInt("department_id"));
-			fd.setState(WorkflowState.fromId(rs.getInt("state")));
+			fd.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+			fd.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
 			fd.setReturnSign(rs.getBoolean("return_sign"));
-			fd.setKind(FormDataKind.fromId(rs.getInt("kind")));
-			fd.setReportPeriodId(rs.getInt("report_period_id"));
-            Integer periodOrder = rs.getInt("period_order");
+			fd.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+			fd.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
+            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
             fd.setPeriodOrder(rs.wasNull() ? null : periodOrder);
 			fd.setSigners(formDataSignerDao.getSigners(fd.getId()));
 			fd.setPerformer(formPerformerDao.get(fd.getId()));
@@ -84,14 +84,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 				throws SQLException {
 			FormData result = new FormData();
 			result.setId(SqlUtils.getLong(rs, "id"));
-			result.setDepartmentId(rs.getInt("department_id"));
-			result.setState(WorkflowState.fromId(rs.getInt("state")));
+			result.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+			result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
 			result.setReturnSign(rs.getBoolean("return_sign"));
-			result.setKind(FormDataKind.fromId(rs.getInt("kind")));
-			result.setReportPeriodId(rs.getInt("report_period_id"));
-            Integer periodOrder = rs.getInt("period_order");
+			result.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+			result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
+            Integer periodOrder = SqlUtils.getInteger(rs,"period_order");
 			result.setPeriodOrder(rs.wasNull() ? null : periodOrder);
-			result.setFormType(formTypeDao.get(rs.getInt("type_id")));
+			result.setFormType(formTypeDao.get(SqlUtils.getInteger(rs,"type_id")));
 			return result;
 		}
 
