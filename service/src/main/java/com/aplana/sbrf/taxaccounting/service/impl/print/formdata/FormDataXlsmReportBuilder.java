@@ -153,6 +153,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     protected void fillHeader(){
 
         int nullColumnCount = 0;
+        int notNullColumn = formTemplate.getColumns().size() - 1;
         //Необходимо чтобы определять нулевые столбцы для Excel, по идее в конце должно делаться
         for (int i = formTemplate.getColumns().size() - 1, j = 0; i >= 0 && j <= 2; i-- ){
             if (formTemplate.getColumns().get(i).getWidth() == 0){
@@ -163,8 +164,22 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             }
         }
 
+        //Опеределяет первый не нулевой столбец
+        for (int i = 0; i <= formTemplate.getColumns().size() - 1 ; i++){
+            if (formTemplate.getColumns().get(i).getWidth() != 0) {
+                notNullColumn = i;
+                break;
+            }
+        }
+
         //Fill subdivision
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION, departmentName, 0, 0);
+        if (notNullColumn != 0) {
+            AreaReference arDN = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_SUBDIVISION).getRefersToFormula());
+            Row rDN = sheet.getRow(arDN.getFirstCell().getRow()) != null ? sheet.getRow(arDN.getFirstCell().getRow())
+                    : sheet.createRow(arDN.getFirstCell().getRow());
+            createNotHiddenCell(notNullColumn, rDN).setCellValue(rDN.getCell(0).getRichStringCellValue());
+        }
 
         //Fill subdivision signature
         createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION_SIGN, null, 0, 0);
@@ -213,7 +228,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         r.setHeight((short) -1);
 
         //Fill report name
-        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, 0);
+        createCellByRange(XlsxReportMetadata.RANGE_REPORT_NAME, formTemplate.getFullName(), 0, notNullColumn);
 
         //Fill code
         AreaReference ar2 = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_REPORT_CODE).getRefersToFormula());
