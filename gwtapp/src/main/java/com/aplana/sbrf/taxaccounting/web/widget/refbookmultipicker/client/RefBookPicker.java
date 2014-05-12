@@ -76,6 +76,10 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
 
     void setSearchEnabled(boolean isSearchEnabled);
 
+    boolean getVersionEnabled();
+
+    void setVersionEnabled(boolean isVersionEnabled);
+
     boolean isManualUpdate();
 
     /**

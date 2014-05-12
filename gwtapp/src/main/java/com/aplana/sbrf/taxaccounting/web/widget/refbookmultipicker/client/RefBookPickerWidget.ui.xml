@@ -114,7 +114,7 @@
                         </g:cell>
                         <g:Button ui:field="searchButton" text="Найти" width="70px"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel spacing="0" width="100%"
+                    <g:HorizontalPanel ui:field="versionPanel" spacing="0" width="100%"
                                        verticalAlignment="middle" horizontalAlignment="right">
                         <g:cell horizontalAlignment="left" width="99%">
                             <g:Label text="Дата актуальности:" wordWrap="false"
