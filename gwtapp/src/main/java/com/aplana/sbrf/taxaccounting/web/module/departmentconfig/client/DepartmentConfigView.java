@@ -156,7 +156,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiField
     @Ignore
-    HorizontalPanel findButtonPanel, reorgCodePanel, reorgInnPanel, reorgKppPanel;
+    HorizontalPanel findButtonPanel,
+            reorgCodePanel,
+            reorgInnPanel,
+            reorgKppPanel;
 
     @UiField
     @Ignore
