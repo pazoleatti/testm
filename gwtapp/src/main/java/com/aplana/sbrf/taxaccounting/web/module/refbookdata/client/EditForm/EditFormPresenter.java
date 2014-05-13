@@ -150,7 +150,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId == null) {
 			currentUniqueRecordId = null;
 			getView().fillInputFields(null);
-			setMode(mode);
+            if (!isVersionMode && mode == FormMode.EDIT) {
+                getView().updateMode(FormMode.CREATE);
+            } else {
+                setMode(mode);
+            }
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
 			return;
@@ -297,12 +301,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void no() {
                     setIsFormModified(false);
                     showRecord(currentUniqueRecordId);
-                    if (currentUniqueRecordId == null) setMode(mode);
                 }
             });
         } else {
             showRecord(currentUniqueRecordId);
-            if (currentUniqueRecordId == null) setMode(mode);
         }
 	}
 

@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -78,9 +77,7 @@ public class DeclarationTemplateListPresenter
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
-        TemplateFilter defaultFilter = new TemplateFilter();
-        defaultFilter.setTaxType(null);
-        filterPresenter.initFilter(defaultFilter);
+        filterPresenter.initFilter();
 	}
 
 	@Override
