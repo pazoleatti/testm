@@ -66,6 +66,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void setReadOnlyMode(boolean readOnly);
 
         void setNeedToReload(boolean b);
+        void updateRefBookPickerPeriod();
     }
 
 	@Inject
@@ -146,6 +147,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			setEnabled(true);
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
+            getView().updateRefBookPickerPeriod();
 			return;
 		}
 		GetRefBookRecordAction action = new GetRefBookRecordAction();
