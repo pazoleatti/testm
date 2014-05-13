@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -63,6 +62,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        prevPeriodCheck()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -476,8 +476,8 @@ def getReportPeriodEndDate() {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isBalancePeriod() && !formDataService.existAcceptedFormDataPrev(formData, formData.departmentId)) {
-        throw new ServiceException('Не найдены экземпляры РНУ-62 за прошлый отчетный период!')
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
 

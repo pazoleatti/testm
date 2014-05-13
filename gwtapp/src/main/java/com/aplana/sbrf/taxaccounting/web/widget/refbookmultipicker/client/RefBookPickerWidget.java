@@ -66,6 +66,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     Label selectionCountLabel;
     @UiField
     HorizontalPanel filterPanel;
+    @UiField
+    HorizontalPanel versionPanel;
 
     private Tooltip tooltip;
 
@@ -412,9 +414,24 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
+    public boolean getVersionEnabled() {
+        return versionPanel.isVisible();
+    }
+
+    @Override
     public void setSearchEnabled(boolean isSearchEnabled) {
         filterPanel.setVisible(isSearchEnabled);
-        widgetWrapper.getElement().getStyle().setTop(isSearchEnabled ? 55 : 30, Style.Unit.PX);
+        tuneWrapperTopShift(isSearchEnabled, versionPanel.isVisible());
+    }
+
+    @Override
+    public void setVersionEnabled(boolean isVersionEnabled) {
+        versionPanel.setVisible(isVersionEnabled);
+        tuneWrapperTopShift(filterPanel.isVisible(), isVersionEnabled);
+    }
+
+    private void tuneWrapperTopShift(boolean isSearchEnabled, boolean isVersionEnabled) {
+        widgetWrapper.getElement().getStyle().setTop(isSearchEnabled && isVersionEnabled ? 55 : !isSearchEnabled && !isVersionEnabled ? 5 : 30, Style.Unit.PX);
     }
 
     @Override

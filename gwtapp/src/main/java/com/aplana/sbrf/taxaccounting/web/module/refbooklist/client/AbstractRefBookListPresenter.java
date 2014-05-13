@@ -66,16 +66,6 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
     }
 
     /**
-     * При загрузки страницы сбрасываем фильтр.
-     */
-    @Override
-    protected void onReveal() {
-        super.onReveal();
-        getView().setFilter("");
-        onFindClicked();
-    }
-
-    /**
      * Загрузка справочников
      *
      * @param filter фильтр, при поиске

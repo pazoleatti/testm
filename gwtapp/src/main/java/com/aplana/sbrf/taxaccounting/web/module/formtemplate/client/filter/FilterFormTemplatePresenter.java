@@ -32,6 +32,8 @@ public class FilterFormTemplatePresenter extends PresenterWidget<FilterFormTempl
 
 	private final DispatchAsync dispatchAsync;
 
+    private TemplateFilter previousFilter;
+
 	@Inject
 	public FilterFormTemplatePresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
 		super(eventBus, view);
@@ -40,12 +42,15 @@ public class FilterFormTemplatePresenter extends PresenterWidget<FilterFormTempl
 	}
 
 	public TemplateFilter getFilterData() {
-		return getView().getDataFilter();
+        previousFilter = getView().getDataFilter();
+		return previousFilter;
 	}
 
-	public void initFilter(final TemplateFilter filter) {
-        getView().setTemplateFilter(filter);
-
+	public void initFilter() {
+        if (previousFilter != null)
+            getView().setTemplateFilter(previousFilter);
+        else
+            getView().setTemplateFilter(new TemplateFilter());
         GetFilterFormTemplateData action = new GetFilterFormTemplateData();
         FilterFormTemplateReadyEvent.fire(FilterFormTemplatePresenter.this, true);
 		dispatchAsync.execute(action, CallbackUtils
