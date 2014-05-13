@@ -334,7 +334,7 @@ public class RefBookUtils extends AbstractDao {
     private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id from (\n" +
             "  select r.id, r.version as versionStart, (select min(version) - interval '1' day from %s rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd \n" +
             "  from %s r\n" +
-            "  where id in %s\n" +
+            "  where id in (%s)\n" +
             ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
     /**
