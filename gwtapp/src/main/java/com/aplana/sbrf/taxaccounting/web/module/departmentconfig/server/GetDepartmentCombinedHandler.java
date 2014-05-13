@@ -210,7 +210,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
     private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
         try {
             map.put(attributeId, getNumberValue(rbFactory.getDataProvider(refBookId).getValue(recordId, attributeId)));
-        } catch (TAException e) {
+        } catch (Exception e) {
             logger.error(String.format("Ошибка получения значений для формы «%s»: " +
                     "Обнаружена ссылка на несуществующую запись справочника «%s», id = %d",
                     rbFactory.get(parentRefBookId).getName(), rbFactory.get(refBookId).getName(), recordId), e);
