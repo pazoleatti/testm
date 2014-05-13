@@ -172,6 +172,29 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
+    public void delete(DepartmentCombined combinedDepartmentParam, Integer period, Integer department) {
+        if (combinedDepartmentParam == null || department == null || period == null) {
+            return;
+        }
+
+        LogCleanEvent.fire(DepartmentConfigPresenter.this);
+
+        DeleteDepartmentCombinedAction action = new DeleteDepartmentCombinedAction();
+        action.setDepartmentCombined(combinedDepartmentParam);
+        action.setReportPeriodId(period);
+        action.setTaxType(getView().getTaxType());
+        action.setDepartment(department);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<DeleteDepartmentCombinedResult>() {
+                    @Override
+                    public void onSuccess(DeleteDepartmentCombinedResult result) {
+                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                        getView().reloadDepartmentParams();
+                    }
+                }, this));
+    }
+
+    @Override
     public void edit(Integer period, Integer department) {
         if (department == null || period == null) {
             return;
