@@ -162,6 +162,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         }
 
+        // TODO порефакторить вынести в отдельный метод в refBookFactory
         StringBuilder resultSearch = new StringBuilder();
         if (searchPattern != null && !searchPattern.trim().isEmpty()) {
 
@@ -178,6 +179,26 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                     }
                     resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
                             .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                } else if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+                    if (resultSearch.length() > 0) {
+                        resultSearch.append(" or ");
+                    }
+
+                    RefBookAttribute nextAttribute = attribute;
+                    String alias = attribute.getAlias();
+                    while (nextAttribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        RefBook rb = refBookFactory.getByAttribute(nextAttribute.getRefBookAttributeId());
+                        nextAttribute = rb.getAttribute(nextAttribute.getRefBookAttributeId());
+                        alias = alias + "." + nextAttribute.getAlias();
+                    }
+
+                    if (RefBookAttributeType.STRING.equals(nextAttribute.getAttributeType()) || RefBookAttributeType.DATE.equals(nextAttribute.getAttributeType())) {
+                        resultSearch.append("LOWER(").append(alias).append(")").append(" like ")
+                                .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                    } else if (RefBookAttributeType.NUMBER.equals(nextAttribute.getAttributeType())) {
+                        resultSearch.append("TO_CHAR(").append(alias).append(")").append(" like ")
+                                .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                    }
                 }
             }
 
