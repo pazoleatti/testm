@@ -320,6 +320,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public boolean isHierarchy() {
+        return isHierarchy;
+    }
+
+    @Override
 	public void setSaveButtonEnabled(boolean enabled) {
 		save.setEnabled(enabled);
 	}
