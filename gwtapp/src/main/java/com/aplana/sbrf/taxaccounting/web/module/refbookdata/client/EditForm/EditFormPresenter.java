@@ -54,6 +54,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
         void setHierarchy(boolean isHierarchy);
 
+        boolean isHierarchy();
+
         void setSaveButtonEnabled(boolean enabled);
 		void setCancelButtonEnabled(boolean enabled);
 		void setEnabled(boolean enabled);

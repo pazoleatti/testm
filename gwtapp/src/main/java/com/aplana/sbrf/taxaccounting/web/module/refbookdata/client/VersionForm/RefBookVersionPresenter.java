@@ -136,7 +136,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                                     .build());
                                 } else {
                                     placeManager
-                                            .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookData)
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(editFormPresenter.getView().isHierarchy() ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
                                                     .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
                                                     .build());
                                 }
