@@ -3,10 +3,12 @@ package form_template.income.rnu61.v2012
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.time.TimeCategory
 import groovy.transform.Field
 
 import java.math.RoundingMode
+import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России»,
@@ -118,7 +120,7 @@ def isBalancePeriod = null
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -363,14 +365,26 @@ def isRubleCurrency(def currencyCode) {
 
 // Получить курс банка России на указанную дату.
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : new Date(), null, "CODE_NUMBER = $value", null);
-    return res.getRecords().get(0).RATE.numberValue
+    def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
+    if (res.getRecords().isEmpty()) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
+        throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
+    } else {
+        return res.getRecords().get(0)?.RATE?.numberValue
+    }
 }
 
 def getCountDays(def Date date) {
     def Calendar calendar = Calendar.getInstance()
     calendar.setTime(date)
     return (new GregorianCalendar()).isLeapYear(calendar.get(Calendar.YEAR)) ? 366 : 365
+}
+
+def getReportPeriodEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return reportPeriodEndDate
 }
 
 // Получение импортируемых данных

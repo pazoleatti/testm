@@ -219,13 +219,10 @@ def BigDecimal calc12(DataRow row) {
 
 // Получить курс валюты value на дату date
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords((date ?: getReportPeriodEndDate()), null, "CODE_NUMBER = $value", null);
-    if (res.getRecords().isEmpty()) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
-        throw new ServiceException("В справочнике \"Курсы Валют\" не обнаружена строка для валюты \"${getRefBookValue(15, value)?.NAME?.stringValue}\" на дату \"${dateFormat.format(date)}\"")
-    } else {
-        return res.getRecords().get(0)?.RATE?.numberValue
-    }
+    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$value",
+            date?:getReportPeriodEndDate(), -1, null, logger, true)
+
+    return record?.RATE?.numberValue
 }
 
 // Проверка валюты currencyCode на рубли
