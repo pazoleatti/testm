@@ -97,7 +97,8 @@ public class RefBookBigDataProvider implements RefBookDataProvider {
     public RefBookValue getValue(Long recordId, Long attributeId) {
         RefBook refBook = rbDao.get(refBookId);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
-        return dao.getRecordData(getTableName(), refBookId, recordId).get(attribute.getAlias());
+        Map<String, RefBookValue> value = dao.getRecordData(getTableName(), refBookId, recordId);
+        return value != null ? value.get(attribute.getAlias()) : null;
     }
 
     @Override

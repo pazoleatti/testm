@@ -461,7 +461,11 @@ public class RefBookUtils extends AbstractDao {
 		sql.append(" WHERE id = :id");
 		Map<String, Long> params = new HashMap<String, Long>();
 		params.put("id", recordId);
-        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
 	}
 
 
