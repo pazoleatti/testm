@@ -1,17 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentDeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +35,17 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     DeclarationTypeDao declarationTypeDao;
 
+    @Autowired
+    FormDataService formDataService;
+
+    @Autowired
+    DepartmentDao departmentDao;
+
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    FormDataDao formDataDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind) {
@@ -163,5 +178,68 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void updatePerformer(int id, Integer performerId){
         departmentFormTypeDao.updatePerformer(id, performerId);
+    }
+
+    @Override
+    public List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, boolean includeDestinations, boolean includeSources, boolean includeUncreated) {
+        List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>();
+        // включения источников
+        if (includeSources){
+            List<DepartmentFormType> sourcesForm = getDFTSourcesByDFT(departmentId, formTypeId, kind);
+            formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, true, includeUncreated));
+        }
+
+        // включения приемников
+        if (includeDestinations){
+            List<DepartmentFormType> destinationsForm = getFormDestinations(departmentId, formTypeId, kind);
+            formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, false, includeUncreated));
+        }
+
+        return formToFormRelations;
+    }
+
+    /**
+     * Метод для составления списка с информацией об источниках приемниках
+     * @param departmentFormTypes
+     * @param isSource - true источник иначе приемник
+     * @param includeUncreatedForms флаг включения не созданных нф в список
+     * @return
+     */
+    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes, boolean isSource, boolean includeUncreatedForms){
+        List<FormToFormRelation> formToFormRelations = new ArrayList<FormToFormRelation>(departmentFormTypes.size());
+        for (DepartmentFormType departmentFormType : departmentFormTypes) {
+            FormToFormRelation formToFormRelation = new FormToFormRelation();
+            /** источник/приемник */
+            formToFormRelation.setSource(isSource);
+            /** исполнитель */
+            formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
+            /** Полнино название подразделения */
+            formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
+            // TODO Добавить период
+            FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), departmentFormType.getDepartmentId(), 1);
+            if (formData != null){
+                /** Форма существует */
+                formToFormRelation.setCreated(true);
+                /** Установить статус */
+                formToFormRelation.setState(formData.getState());
+                /** вид формы */
+                formToFormRelation.setFormType(formData.getFormType());
+                /** тип нф */
+                formToFormRelation.setFormDataKind(departmentFormType.getKind());
+
+                formToFormRelations.add(formToFormRelation);
+            } else if (includeUncreatedForms){
+                /** Формы не существует */
+                formToFormRelation.setCreated(false);
+                /** вид формы */
+                formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
+                /** тип нф */
+                formToFormRelation.setFormDataKind(departmentFormType.getKind());
+
+                formToFormRelations.add(formToFormRelation);
+            }
+        }
+
+        return formToFormRelations;
     }
 }

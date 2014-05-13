@@ -3,13 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import java.util.Collection;
 import java.util.List;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 /**
@@ -253,4 +247,19 @@ public interface SourceService {
     void updatePerformer(int id, Integer performerId);
 
 	List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType);
+
+    /**
+     * Метод возвращает модель с информацией о созданных/не созданных
+     * источниках/приемниках
+     *
+     * @param departmentId id подразделения
+     * @param formTypeId вид налоговой формы
+     * @param kind тип налоговой формы
+     * @param includeDestinations флаг влючения приемников
+     * @param includeSources флаг включения источнико
+     * @param includeUncreated флаг включения не созданных налогоных форм
+     *
+     * @return
+     */
+    List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, boolean includeDestinations, boolean includeSources, boolean includeUncreated);
 }

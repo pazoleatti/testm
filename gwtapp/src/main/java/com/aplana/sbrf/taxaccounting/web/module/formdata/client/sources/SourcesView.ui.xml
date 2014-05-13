@@ -1,0 +1,90 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
+             xmlns:pager="urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager"
+             xmlns:dw="urn:import:com.aplana.gwt.client">
+
+    <ui:style field="modal">
+        .mainPanel {
+            position: absolute !important;
+            top: 25px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .widgetWrapper {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            border-bottom-width: 0;
+            position: absolute !important;
+            top: 40px;
+            left: 8px;
+            right: 8px;
+            bottom: 77px;
+        }
+
+        .pagerWrapper {
+            border: 1px solid #000000;
+            border-top-width: 0;
+
+
+            position: absolute !important;
+            bottom: 46px;
+            right: 8px;
+            left: 8px;
+        }
+
+        .pager {
+            white-space: nowrap;
+            padding-right: 0;
+        }
+
+        .buttons {
+            background-color: #E8E1CF;
+            position: absolute !important;
+            left: 0;
+            right: 0;
+            width: 25px;
+            bottom: 0;
+        }
+
+        .checkboxes{
+            float: left;
+            margin-left: 10px;
+        }
+
+    </ui:style>
+
+    <dw:ModalWindow ui:field="modalWindow" height="400px" width="1000px" minWidth="520px"
+                    iconUrl="resources/img/star.png"
+                    title="Источники и приёмники формы" resizable="true">
+
+    <g:FlowPanel addStyleNames="{modal.mainPanel}">
+
+            <g:HorizontalPanel spacing="10" height="22px" verticalAlignment="middle" addStyleNames="{modal.checkboxes}">
+                <g:CheckBox ui:field="source" text="Источники"/>
+                <g:CheckBox ui:field="destination" text="Приемники"/>
+                <g:CheckBox ui:field="uncreated" text="Не созданные"/>
+            </g:HorizontalPanel>
+
+            <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{modal.widgetWrapper}">
+                <style:GenericDataGrid ui:field="table" width="100%"/>
+            </g:ResizeLayoutPanel>
+
+            <g:HTMLPanel addStyleNames="{modal.pagerWrapper}">
+                <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{modal.pager}"
+                                     showFastForwardButton="false" fastForwardRows="0" showLastPageButton="true"
+                                     type="formDataSearch" />
+            </g:HTMLPanel>
+
+            <g:HorizontalPanel spacing="8" horizontalAlignment="right" verticalAlignment="middle"
+                               width="100%" addStyleNames="{modal.buttons}">
+                <g:Button ui:field="close" text="Закрыть" width="70px"/>
+            </g:HorizontalPanel>
+        </g:FlowPanel>
+
+    </dw:ModalWindow>
+
+</ui:UiBinder>

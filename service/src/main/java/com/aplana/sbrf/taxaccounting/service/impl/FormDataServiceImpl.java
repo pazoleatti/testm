@@ -623,7 +623,8 @@ public class FormDataServiceImpl implements FormDataService {
                 scriptComponentContext.setLogger(logger);
                 FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
                 ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-                formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), formData.getPeriodOrder(),
+                Integer periodOrder = (destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
+                formDataCompositionService.compose(destinationForm, formData.getReportPeriodId(), periodOrder,
                         destinationDFT.getDepartmentId(), destinationDFT.getFormTypeId(), destinationDFT.getKind());
             } else if (destinationForm != null) {
                 deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());

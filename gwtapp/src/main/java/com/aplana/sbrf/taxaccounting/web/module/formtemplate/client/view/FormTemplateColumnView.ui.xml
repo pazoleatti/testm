@@ -89,6 +89,12 @@
                         <g:Label width="150px">Фильтры</g:Label>
                         <g:TextArea width="200px" ui:field="refBookAttrFilterArea"/>
                     </g:HorizontalPanel>
+
+                    <g:HorizontalPanel height="30px" ui:field="autoNumerationPanel">
+                        <g:Label width="150px">Тип нумерации строк</g:Label>
+                        <g:ValueListBox width="200px" ui:field="autoNumerationBox"/>
+                    </g:HorizontalPanel>
+
                 </g:FlowPanel>
             </g:cell>
         </g:HorizontalPanel>

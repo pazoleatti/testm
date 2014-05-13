@@ -1014,7 +1014,7 @@ a, a:visited, a:hover {
 
 .gwt-TextBox {
     border: 1px solid green;
-    padding: 2px 0;
+    padding: 2px 0 2px 2px;
     margin-left: -1px;
     margin-right: -1px;
 }
@@ -1345,8 +1345,6 @@ td.datePickerMonth {
 
 .aplana-DoubleStateComposite-label {
     font-weight: bold;
-    margin-bottom: 1px;
-    padding: 2px 0;
     overflow: hidden;
     text-overflow: ellipsis;
     -ms-text-overflow: ellipsis;
