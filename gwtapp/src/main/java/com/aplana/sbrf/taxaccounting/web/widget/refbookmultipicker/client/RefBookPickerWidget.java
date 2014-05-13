@@ -404,7 +404,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setPeriodDates(Date startDate, Date endDate) {
         versionDateBox.setLimitDates(startDate, endDate);
-        state.setVersionDate(endDate != null ? endDate : startDate);
+        state.setVersionDate(startDate);
         versionDateBox.setValue(state.getVersionDate());
     }
 

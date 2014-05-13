@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
 import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm.exception.BadValueException;
@@ -82,13 +83,23 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 updateRefBookPickerPeriod();
             }
         });
+        versionStart.setCanBeEmpty(true);
+        versionStart.setCanBeEmpty(true);
 	}
 
-    private void updateRefBookPickerPeriod() {
+    @Override
+    public void updateRefBookPickerPeriod() {
         Date start = versionStart.getValue();
         if (start == null) {
             start = new Date();
         }
+
+        if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
+            Dialog.errorMessage("Ошибка", "Неправильно указан диапазон дат!");
+            versionEnd.setValue(null);
+            return;
+        }
+
         for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
             if (w.getValue() instanceof RefBookPickerWidget) {
                 RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
@@ -130,11 +141,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(isHierarchy, false);
                     refbookWidget.setManualUpdate(true);
-                    /*Date start = versionStart.getValue();
-                    if (start == null) {
-                        start = new Date();
-                    }
-                    refbookWidget.setPeriodDates(start, versionEnd.getValue());*/
 					refbookWidget.setAttributeId(col.getRefBookAttributeId());
                     refbookWidget.setTitle(col.getRefBookName());
 					widget = refbookWidget;
@@ -234,6 +240,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 				}
 			}
 		}
+        updateRefBookPickerPeriod();
 	}
 
 	@Override
@@ -322,6 +329,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void setHierarchy(boolean isHierarchy) {
         this.isHierarchy = isHierarchy;
+    }
+
+    @Override
+    public boolean isHierarchy() {
+        return isHierarchy;
     }
 
 	private void updateWidgetsVisibility(boolean enabled) {
