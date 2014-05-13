@@ -113,7 +113,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 			return;
 		}
 		if (isFormModified) {
-            Dialog.confirmMessage("Вопрос", DIALOG_MESSAGE, new DialogHandler() {
+            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
@@ -225,12 +225,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         setIsFormModified(false);
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
-                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!", new DialogHandler() {
-                                                @Override
-                                                public void close() {
-                                                    super.close();
-                                                }
-                                            });
+                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                         }
                                     }
                                 }, this));
