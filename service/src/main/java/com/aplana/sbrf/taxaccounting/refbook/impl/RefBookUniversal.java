@@ -448,11 +448,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     private boolean checkValuesChanged(Long uniqueRecordId, Map<String,RefBookValue> records) {
-        PagingResult<Map<String,RefBookValue>> oldValues = refBookDao.getRecordVersions(refBookId, uniqueRecordId, null, null, null);
-        if (oldValues.size() == 0) throw new ServiceException("По уникальному идентификатору не найдена запись справочника. Нарушена целостность записей справочника");
-        if (oldValues.size() > 1) throw new ServiceException("По уникальному идентификатору получено несколько записей. Нарушена целостность записей справочника");
+        Map<String,RefBookValue> oldValues = refBookDao.getRecordData(refBookId, uniqueRecordId);
         for (Map.Entry<String, RefBookValue> newValue : records.entrySet()) {
-            RefBookValue oldValue = oldValues.get(0).get(newValue.getKey());
+            RefBookValue oldValue = oldValues.get(newValue.getKey());
             if (!newValue.getValue().equals(oldValue)) {
                 return true;
             }
