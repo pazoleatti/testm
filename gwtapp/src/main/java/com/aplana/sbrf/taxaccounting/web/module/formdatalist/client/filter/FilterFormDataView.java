@@ -109,8 +109,9 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         this.driver.initialize(this);
 
         // т.к. справочник не версионный, а дату выставлять обязательно
-        formDataKind.setPeriodDates(null, new Date());
-        formTypeId.setPeriodDates(null, new Date());
+        Date current = new Date();
+        formDataKind.setPeriodDates(current, current);
+        formTypeId.setPeriodDates(current, current);
     }
 
     @Override
