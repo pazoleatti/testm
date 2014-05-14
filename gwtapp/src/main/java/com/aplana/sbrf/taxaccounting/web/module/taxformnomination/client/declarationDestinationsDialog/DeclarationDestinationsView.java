@@ -9,10 +9,13 @@ import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicke
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -49,6 +52,9 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
 
+    @UiField
+    Button continueButton;
+
     @Inject
     public DeclarationDestinationsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
@@ -64,6 +70,20 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
         });
 
         initWidget(uiBinder.createAndBindUi(this));
+
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> listValueChangeEvent) {
+                updateCreateButtonStatus();
+            }
+        });
+
+        declarationTypeId.addValueChangeHandler(new ValueChangeHandler<DeclarationType>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<DeclarationType> declarationTypeValueChangeEvent) {
+                updateCreateButtonStatus();
+            }
+        });
     }
 
 	@UiHandler("cancelButton")
@@ -116,4 +136,15 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
             modalWindowTitle.setTitle(MODAL_WINDOW_TITLE_D);
         }
     }
+
+    @Override
+    public void updateCreateButtonStatus() {
+        if (!getSelectedDepartments().isEmpty() && !getSelectedDeclarationTypes().isEmpty()){
+            continueButton.setEnabled(true);
+        } else {
+            continueButton.setEnabled(false);
+        }
+    }
+
+
 }

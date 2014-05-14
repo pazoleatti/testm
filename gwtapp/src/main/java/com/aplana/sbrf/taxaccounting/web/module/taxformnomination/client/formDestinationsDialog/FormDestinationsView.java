@@ -7,11 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -89,31 +90,55 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         initWidget(uiBinder.createAndBindUi(this));
         formTypeId.setPeriodDates(null, new Date());
         formDataKind.setPeriodDates(null, new Date());
+        setButtonStatusUpdateHandlers();
 	}
 
-	@UiHandler("createButton")
+    private void setButtonStatusUpdateHandlers() {
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> listValueChangeEvent) {
+                updateSaveEditButtonsStatus();
+            }
+        });
+
+        formDataKind.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> listValueChangeEvent) {
+                updateSaveEditButtonsStatus();
+            }
+        });
+
+        formTypeId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> listValueChangeEvent) {
+                updateSaveEditButtonsStatus();
+            }
+        });
+
+        performersPickerWidget.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> listValueChangeEvent) {
+                updateSaveEditButtonsStatus();
+            }
+        });
+    }
+
+    @UiHandler("createButton")
 	public void onSave(ClickEvent event){
-        // проверка заполненности полей
-        if (!checkRequiredFields()){
-            Dialog.errorMessage(
-                    "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
-            );
-        } else {
-            getUiHandlers().onConfirm();
-        }
+        /**
+         * проверка заполненности полей нет, так
+         * как кнопка доступна только в случае если все поля заполнены
+         */
+        getUiHandlers().onConfirm();
 	}
 
     @UiHandler("editButton")
     public void onEdit(ClickEvent event){
-        if (!checkRequiredFields()){
-            Dialog.errorMessage(
-                    "Ошибка",
-                    "Не заполнены обязательные атрибуты, необходимые для создания назначения: " + StringUtils.join(getEmptyFieldsNames().toArray(), ", ", "\"")
-            );
-        } else {
-            getUiHandlers().onEdit(selectedDFT);
-        }
+        /**
+         * проверка заполненности полей нет, так
+         * как кнопка доступна только в случае если все поля заполнены
+         */
+        getUiHandlers().onEdit(selectedDFT);
     }
 
 
@@ -135,7 +160,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             * Если хотя бы одно значение было установлено пользователем: Система выводит Диалог - вопрос:
             *
             */
-            if (getEmptyFieldsNames().size() != REQUIDED_FIELDS_COUNT){
+            if (getFieldsCount() != REQUIDED_FIELDS_COUNT){
                 Dialog.confirmMessage("Подтверждение закрытия формы", "Вы хотите отменить создание назначения?", new DialogHandler() {
                     @Override
                     public void yes() {
@@ -152,31 +177,42 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	}
 
     /**
-     * Проверка заполненности полей, при создании назначений
-     * @return true - если заполнены все требуемые поля, false в обратном случае
+     * Обновить доступность кнопок Редактировать и Создать
      */
-    private boolean checkRequiredFields(){
-        return getEmptyFieldsNames().size() == 0;
+    private void updateSaveEditButtonsStatus(){
+        if (getFieldsCount() == 0){
+            if (isEditForm){
+                editButton.setEnabled(true);
+            } else {
+                createButton.setEnabled(true);
+            }
+        } else {
+            if (isEditForm){
+                editButton.setEnabled(false);
+            } else {
+                createButton.setEnabled(false);
+            }
+        }
     }
 
-    private List<String> getEmptyFieldsNames(){
-        List<String> emptyFields = new ArrayList<String>();
+    private int getFieldsCount(){
+        int cnt = 0;
         // Подразделение
         if (departmentPicker.getValue().size() == 0){
-            emptyFields.add("Подразделение");
+            cnt++;
         }
 
         // Тип налоговой формы
         if (formDataKind.getValue() == null || formDataKind.getValue().size() == 0){
-            emptyFields.add("Тип налоговой формы");
+            cnt++;
         }
 
         // Вид налоговой формы
         if (formTypeId.getValue() == null || formTypeId.getValue().size() == 0){
-            emptyFields.add("Вид налоговой формы");
+            cnt++;
         }
 
-        return emptyFields;
+        return cnt;
     }
 
     @Override
@@ -215,6 +251,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         formDataKind.setEnabled(true);
         formDataKind.setValue(null, false);
         formDataKind.setMultiSelect(false);
+
+        updateSaveEditButtonsStatus();
     }
 
     @Override
@@ -278,6 +316,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         formDataKind.setValue(new ArrayList<Long>(kinds), true);
         formDataKind.setEnabled(false);
 
+        updateSaveEditButtonsStatus();
     }
 
     @Override
