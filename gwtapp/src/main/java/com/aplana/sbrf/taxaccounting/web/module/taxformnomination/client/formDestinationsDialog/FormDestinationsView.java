@@ -122,23 +122,12 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 	public void onCancel(ClickEvent event){
         if (isEditForm){
             Dialog.confirmMessage("Подтверждение закрытия формы",
-                    "Сохранить изменения?",
+                    "Вы хотите отменить редактирование назначения?",
                     new DialogHandler() {
                 @Override
                 public void yes() {
-                    onEdit(null);
                     super.yes();
-                }
-
-                @Override
-                public void no() {
-                    super.no();
                     hide();
-                }
-
-                @Override
-                public void close() {
-                    super.close();
                 }
             });
         } else{
@@ -147,23 +136,11 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             *
             */
             if (getEmptyFieldsNames().size() != REQUIDED_FIELDS_COUNT){
-                Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
+                Dialog.confirmMessage("Подтверждение закрытия формы", "Вы хотите отменить создание назначения?", new DialogHandler() {
                     @Override
                     public void yes() {
-                        // Выполнение события "Нажатие на кнопку "Создать"
-                        onSave(null);
-                        super.yes();
-                    }
-
-                    @Override
-                    public void no() {
-                        super.no();
                         hide();
-                    }
-
-                    @Override
-                    public void close() {
-                        super.close();
+                        super.yes();
                     }
                 });
             } else {

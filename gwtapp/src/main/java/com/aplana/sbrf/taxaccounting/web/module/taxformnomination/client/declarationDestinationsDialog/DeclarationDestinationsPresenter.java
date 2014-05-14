@@ -71,14 +71,10 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 		if (getView().getSelectedDepartments().isEmpty() && getView().getSelectedDeclarationTypes().isEmpty()) {
 			getView().hide();
 		} else {
-			Dialog.confirmMessage("Подтверждение закрытия формы", "Сохранить изменения?", new DialogHandler() {
+			Dialog.confirmMessage("Подтверждение закрытия формы", "Вы хотите отменить создание назначения?", new DialogHandler() {
 				@Override
 				public void yes() {
-					onConfirm();
-				}
-				@Override
-				public void no() {
-					getView().hide();
+                    getView().hide();
 				}
 			});
 		}
