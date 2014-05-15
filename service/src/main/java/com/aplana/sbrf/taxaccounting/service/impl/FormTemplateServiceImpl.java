@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -48,18 +49,16 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Autowired
 	private FormTemplateDao formTemplateDao;
-
 	@Autowired
 	private ObjectLockDao lockDao;
-
     @Autowired
     private FormDataScriptingService scriptingService;
-
     @Autowired
     TAUserService userService;
-
     @Autowired
     FormDataDao formDataDao;
+    @Autowired
+    LogEntryService logEntryService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -146,19 +145,51 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public String getFormTemplateScript(int formTemplateId) {
-        return formTemplateDao.getFormTemplateScript(formTemplateId);
+    public String getFormTemplateScript(int formTemplateId, Logger logger) {
+        try {
+            return formTemplateDao.getFormTemplateScript(formTemplateId);
+        } catch (DaoException e){
+            this.logger.error("Ошибка получение НФ.", e);
+            logger.error("Ошибка получение НФ.", e.getLocalizedMessage());
+            return "";
+        }
+
     }
 
     @Override
     public FormTemplate getFullFormTemplate(int formTemplateId) {
-        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        if(formTemplate.getRows().isEmpty()){
+        try {
+            FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
             formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-        }
-        if (formTemplate.getHeaders().isEmpty()){
             formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
             FormDataUtils.setValueOners(formTemplate.getHeaders());
+
+            return formTemplate;
+        } catch (DaoException e){
+            logger.error("Ошибка при получении шаблона НФ.", e);
+            throw new ServiceException("Ошибка при получении шаблона НФ.", e);
+        }
+    }
+
+    @Override
+    public FormTemplate getFullFormTemplate(int formTemplateId, Logger logger) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        if(formTemplate.getRows().isEmpty()){
+            try {
+                formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+            } catch (DaoException e){
+                this.logger.error("Ошибка при получении начальных данных шаблона НФ.", e);
+                logger.error("Ошибка при получении графы \"Начальные данные\" шаблона НФ. %s", e.getMessage());
+            }
+        }
+        if (formTemplate.getHeaders().isEmpty()){
+            try {
+                formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+                FormDataUtils.setValueOners(formTemplate.getHeaders());
+            } catch (DaoException e){
+                this.logger.error("Ошибка при получении заголовков шаблона НФ.", e);
+                logger.error("Ошибка при получении графы \"Заголовки\" заголовков шаблона НФ. %s", e.getMessage());
+            }
         }
         return formTemplate;
     }
@@ -208,8 +239,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public Date getFTEndDate(int formTemplateId) {
         if (formTemplateId == 0)
             return null;
-        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        return formTemplateDao.getFTVersionEndDate(formTemplate.getType().getId(), formTemplate.getVersion());
+        try {
+            FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+            return formTemplateDao.getFTVersionEndDate(formTemplate.getType().getId(), formTemplate.getVersion());
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка получения даты окончания шаблона.", e);
+        }
     }
 
     @Override
