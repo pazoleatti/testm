@@ -74,9 +74,9 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
             String searchPattern = action.getSearchPattern();
             if (searchPattern != null && !searchPattern.isEmpty()){
                 if (filter != null && filter.length() > 0){
-                    filter += " and ("+buildQuery(refBook, searchPattern)+")";
+                    filter += " and ("+refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId())+")";
                 } else{
-                    filter = buildQuery(refBook, searchPattern);
+                    filter = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
                 }
             }
 
@@ -151,71 +151,6 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		}
 		return result;
 	}
-
-    /**
-     * Метод для создания строки фильтра для справочника
-     *
-     * @param refBook
-     * @param searchPattern
-     * @return
-     */
-    private String buildQuery(RefBook refBook, String searchPattern){
-        StringBuilder resultSearch = new StringBuilder();
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (RefBookAttributeType.STRING.equals(attribute.getAttributeType()) || RefBookAttributeType.DATE.equals(attribute.getAttributeType())) {
-                if (resultSearch.length() > 0) {
-                    resultSearch.append(" or ");
-                }
-                resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
-                        .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-            } else if (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType())) {
-                if (resultSearch.length() > 0) {
-                    resultSearch.append(" or ");
-                }
-                resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
-                        .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-            } else if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && isSimpleRefBool(refBook.getId())) {
-                if (resultSearch.length() > 0) {
-                    resultSearch.append(" or ");
-                }
-
-                RefBookAttribute nextAttribute = attribute;
-                String alias = attribute.getAlias();
-                while (nextAttribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                    RefBook rb = refBookFactory.getByAttribute(nextAttribute.getRefBookAttributeId());
-                    nextAttribute = rb.getAttribute(nextAttribute.getRefBookAttributeId());
-                    alias = alias + "." + nextAttribute.getAlias();
-                }
-
-                if (RefBookAttributeType.STRING.equals(nextAttribute.getAttributeType()) || RefBookAttributeType.DATE.equals(nextAttribute.getAttributeType())) {
-                    resultSearch.append("LOWER(").append(alias).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                } else if (RefBookAttributeType.NUMBER.equals(nextAttribute.getAttributeType())) {
-                    resultSearch.append("TO_CHAR(").append(alias).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                }
-            }
-        }
-
-        return resultSearch.toString();
-    }
-
-    /**
-     * Находится ли справочник в стандартной структуре
-     *
-     * @param refBookId
-     * @return
-     */
-    private boolean isSimpleRefBool(Long refBookId){
-        Long[] foreignRefBooks = new Long[]{30L, 50L, 52L, 74L, 93L, 95L, 96L, 94L};
-        for (Long rbId : foreignRefBooks) {
-            if (rbId.equals(refBookId)){
-                return false;
-            }
-        }
-
-        return true;
-    }
 
 	@Override
 	public void undo(GetRefBookTableDataAction getRefBookDataRowAction, GetRefBookTableDataResult getRefBookDataRowResult, ExecutionContext executionContext) throws ActionException {

@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -26,7 +25,10 @@ import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * обработчик для загрузки данных для компонента линейного справочника
@@ -162,47 +164,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         }
 
-        // TODO порефакторить вынести в отдельный метод в refBookFactory
-        StringBuilder resultSearch = new StringBuilder();
-        if (searchPattern != null && !searchPattern.trim().isEmpty()) {
-
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
-                if (RefBookAttributeType.STRING.equals(attribute.getAttributeType()) || RefBookAttributeType.DATE.equals(attribute.getAttributeType())) {
-                    if (resultSearch.length() > 0) {
-                        resultSearch.append(" or ");
-                    }
-                    resultSearch.append("LOWER(").append(attribute.getAlias()).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                } else if (RefBookAttributeType.NUMBER.equals(attribute.getAttributeType())) {
-                    if (resultSearch.length() > 0) {
-                        resultSearch.append(" or ");
-                    }
-                    resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
-                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                } else if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && isSimpleRefBool(refBook.getId())) {
-                    if (resultSearch.length() > 0) {
-                        resultSearch.append(" or ");
-                    }
-
-                    RefBookAttribute nextAttribute = attribute;
-                    String alias = attribute.getAlias();
-                    while (nextAttribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        RefBook rb = refBookFactory.getByAttribute(nextAttribute.getRefBookAttributeId());
-                        nextAttribute = rb.getAttribute(nextAttribute.getRefBookAttributeId());
-                        alias = alias + "." + nextAttribute.getAlias();
-                    }
-
-                    if (RefBookAttributeType.STRING.equals(nextAttribute.getAttributeType()) || RefBookAttributeType.DATE.equals(nextAttribute.getAttributeType())) {
-                        resultSearch.append("LOWER(").append(alias).append(")").append(" like ")
-                                .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                    } else if (RefBookAttributeType.NUMBER.equals(nextAttribute.getAttributeType())) {
-                        resultSearch.append("TO_CHAR(").append(alias).append(")").append(" like ")
-                                .append("'%" + searchPattern.trim().toLowerCase() + "%'");
-                    }
-                }
-            }
-
-        }
+        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
 
         if (resultFilter.length() > 0 && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
@@ -276,23 +238,6 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         }
 
         return new PagingResult<RefBookItem>(items, refBookPage.getTotalCount());
-    }
-
-    /**
-     * Находится ли справочник в стандартной структуре
-     *
-     * @param refBookId
-     * @return
-     */
-    private boolean isSimpleRefBool(Long refBookId){
-        Long[] foreignRefBooks = new Long[]{30L, 50L, 52L, 74L, 93L, 95L, 96L, 94L};
-        for (Long rbId : foreignRefBooks) {
-            if (rbId.equals(refBookId)){
-                return false;
-            }
-        }
-
-        return true;
     }
 
 }
