@@ -258,6 +258,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 					.defaultCallback(new AbstractCallback<GetFormResult>() {
 						@Override
 						public void onSuccess(GetFormResult result) {
+                            LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             formTemplateExt = result.getForm();
 							formTemplate = formTemplateExt.getFormTemplate();
 							getView().setFormId(formTemplate.getId());

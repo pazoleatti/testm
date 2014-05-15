@@ -13,7 +13,7 @@
 		<constructor-arg index="0" ref="dataSource"/>
 	</bean>
 
-	<tx:annotation-driven proxy-target-class="true" mode="aspectj"/>
+    <tx:annotation-driven proxy-target-class="true"/>
 
 
 	<!-- JDBC-based DAOs -->

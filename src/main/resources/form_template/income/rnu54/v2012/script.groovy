@@ -88,6 +88,13 @@ switch (formDataEvent) {
 @Field
 def endDate = null
 
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
 /**
  * Добавить новую строку.
  */
@@ -877,9 +884,10 @@ def getCourse(def currency, def date) {
         if (isRubleCurrency(currency)) {
             return 1
         } else {
-            def res = refBookFactory.getDataProvider(22).getRecords(date, null, 'CODE_NUMBER=' + currency, null);
-            if (res.getRecords() != null && res.getRecords().size() > 0)
-                return res.getRecords().get(0).RATE.getNumberValue()
+            def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$currency",
+                    date?:getReportPeriodEndDate(), -1, null, logger, true)
+
+            return record?.RATE?.numberValue
         }
     return null
 }

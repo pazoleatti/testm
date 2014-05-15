@@ -103,4 +103,31 @@ public class ForignKeyResolverTest {
         assertTrue(preparedStatementData.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 3\nleft join ref_book_value frb1 on frb1.record_id = frb1.city and frb1.attribute_id = 4\n"));
         assertTrue(preparedStatementData.getQuery().toString().equals("frb1.STRING_value"));
     }
+
+    /**
+     * Тестирование двух связей
+     */
+    @Test
+    public void test3(){
+        foreignKeyResolver.enterEAliasNode("user");
+        foreignKeyResolver.enterExternalAliasNode("name");
+        foreignKeyResolver.exitEAliasNode();
+
+        assertTrue(preparedStatementData.getQuery().toString().equals("frb0.STRING_value"));
+        preparedStatementData.setQuery(new StringBuilder());
+
+        foreignKeyResolver.enterEAliasNode("user");
+        foreignKeyResolver.enterExternalAliasNode("city");
+        foreignKeyResolver.enterExternalAliasNode("name");
+        foreignKeyResolver.exitEAliasNode();
+
+        foreignKeyResolver.setSqlPartsOfJoin();
+
+        assertTrue(preparedStatementData.getJoinPartsOfQuery().equals("left join ref_book_value frb0 on frb0.record_id = auser.reference_value and frb0.attribute_id = 2\n" +
+                "\n" +
+                "left join ref_book_value frb1 on frb1.record_id = auser.reference_value and frb1.attribute_id = 3\n" +
+                "left join ref_book_value frb2 on frb2.record_id = frb2.city and frb2.attribute_id = 4\n"));
+
+        assertTrue(preparedStatementData.getQuery().toString().equals("frb2.STRING_value"));
+    }
 }

@@ -11,6 +11,15 @@ import java.util.List;
 public class GetFormResult implements Result {
     private FormTemplateExt form;
     private List<RefBook> refBookList;
+    private String uuid;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public FormTemplateExt getForm() {
         return form;

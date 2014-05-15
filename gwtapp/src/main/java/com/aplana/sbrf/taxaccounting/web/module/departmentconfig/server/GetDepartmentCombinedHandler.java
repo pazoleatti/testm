@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.TAException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -222,13 +223,14 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
      * @param logger          Логгер для передачи клиенту
      */
     private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
-        try {
-            map.put(attributeId, getNumberValue(rbFactory.getDataProvider(refBookId).getValue(recordId, attributeId)));
-        } catch (TAException e) {
+        RefBookValue value = rbFactory.getDataProvider(refBookId).getValue(recordId, attributeId);
+        if (value == null) {
             logger.error(String.format("Ошибка получения значений для формы «%s»: " +
                     "Обнаружена ссылка на несуществующую запись справочника «%s», id = %d",
-                    rbFactory.get(parentRefBookId).getName(), rbFactory.get(refBookId).getName(), recordId), e);
+                    rbFactory.get(parentRefBookId).getName(), rbFactory.get(refBookId).getName(), recordId));
+            throw new ServiceLoggerException("Ошибка при получении настроек подразделения", logEntryService.save(logger.getEntries()));
         }
+        map.put(attributeId, getNumberValue(value));
     }
 
     /**

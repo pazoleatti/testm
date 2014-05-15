@@ -155,9 +155,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void updateTable() {
+        selectionModel.clear();
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
 		refbookDataTable.setVisibleRangeAndClearData(range, true);
-		selectionModel.clear();
 	}
 
 	@Override
@@ -182,7 +182,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@Override
 	public void setSelected(Long recordId) {
-		selectionModel.clear();
+        System.out.println("setSelected: "+recordId);
+        selectionModel.clear();
 		int i = 0;
 		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
 

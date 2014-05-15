@@ -82,9 +82,9 @@ void generateXML() {
     // Код формы отчетности по КНД
     def String KND = '1110025'
 
-    def okato = departmentParam.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue).CODE.stringValue : null
-    def okvedCode = departmentParam.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE?.referenceValue).CODE.stringValue : null
-    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue).CODE.stringValue : null
+    def okato = departmentParam.OKTMO?.referenceValue != null ? getRefBookValue(96, departmentParam.OKTMO?.referenceValue)?.CODE?.stringValue : null
+    def okvedCode = departmentParam.OKVED_CODE?.referenceValue != null ? getRefBookValue(34, departmentParam.OKVED_CODE?.referenceValue)?.CODE?.stringValue : null
+    def taxPlaceTypeCode = departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue != null ? getRefBookValue(2, departmentParam.TAX_PLACE_TYPE_CODE?.referenceValue)?.CODE?.stringValue : null
     def matrixRecords = formDataCollection.getRecords()
 
     // Заполнение кэша
@@ -124,7 +124,7 @@ void generateXML() {
                         КПП: departmentParam.KPP.stringValue
                 ) {
                     def reorgFormCode = departmentParam.REORG_FORM_CODE?.referenceValue
-                    reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode).CODE.stringValue : null
+                    reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode)?.CODE?.stringValue : null
                     def boolean isReorg = reorgFormCode != null && !reorgFormCode.equals('0')
 
                     if (reorgFormCode != null) {
@@ -138,7 +138,7 @@ void generateXML() {
             }
             def prPodp = 1
             if (departmentParam.SIGNATORY_ID?.referenceValue != null)
-                prPodp = getRefBookValue(35, departmentParam.SIGNATORY_ID?.referenceValue).CODE.numberValue
+                prPodp = getRefBookValue(35, departmentParam.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
             Подписант(
                     ПрПодп: prPodp
             ) {
@@ -184,7 +184,7 @@ void generateXML() {
                         СвКонтрСд(
                                 НомПорСд: row.dealNum1
                         ) {
-                            def String interdependenceSing = row.interdependenceSing != null ? getRefBookValue(69, row.interdependenceSing).CODE.numberValue : null
+                            def String interdependenceSing = row.interdependenceSing != null ? getRefBookValue(69, row.interdependenceSing)?.CODE?.numberValue : null
                             ОснКонтрСд(
                                     ВзЗавис: interdependenceSing
                             ) {
@@ -202,11 +202,11 @@ void generateXML() {
                                         Осн135: mapYesNo.get(row.f135)
                                 )
                             }
-                            def String dealNameCode = row.dealNameCode != null ? getRefBookValue(67, row.dealNameCode).CODE.stringValue : null
-                            def String taxpayerSideCode = row.taxpayerSideCode != null ? getRefBookValue(65, row.taxpayerSideCode).CODE.stringValue : ''
+                            def String dealNameCode = row.dealNameCode != null ? getRefBookValue(67, row.dealNameCode)?.CODE?.stringValue : null
+                            def String taxpayerSideCode = row.taxpayerSideCode != null ? getRefBookValue(65, row.taxpayerSideCode)?.CODE?.stringValue : ''
                             while (taxpayerSideCode.length() < 3)
                                 taxpayerSideCode = '0' + taxpayerSideCode
-                            def String dealPriceCode = row.dealPriceCode != null ? getRefBookValue(66, row.dealPriceCode).CODE.numberValue : null
+                            def String dealPriceCode = row.dealPriceCode != null ? getRefBookValue(66, row.dealPriceCode)?.CODE?.numberValue : null
                             КонтрСд(
                                     [ГрупОС: mapYesNo.get(row.similarDealGroup)] +
                                             [КодНаимСд: dealNameCode] +
@@ -221,17 +221,17 @@ void generateXML() {
                                             [СумРасхСд: row.outcome] +
                                             (row.outcomeIncludingRegulation != null ? [СумРасхСдРег: row.outcomeIncludingRegulation] : [:])
                             )
-                            def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType).CODE.numberValue : null
+                            def String dealType = row.dealType != null ? getRefBookValue(64, row.dealType)?.CODE?.numberValue : null
 
                             // Раздел 1Б. Сведения о предмете сделки (группы однородных сделок)
                             СвПредмСд(
                                     ТипПредСд: dealType
                             ) {
-                                def String dealSubjectCode2 = row.dealSubjectCode2 != null ? getRefBookValue(68, row.dealSubjectCode2).CODE.numberValue : null
-                                def String dealSubjectCode3 = row.dealSubjectCode3 != null ? getRefBookValue(34, row.dealSubjectCode3).CODE.stringValue : null
-                                def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode).CODE.stringValue : null
-                                def String deliveryCode = row.deliveryCode != null ? getRefBookValue(63, row.deliveryCode).STRCODE.stringValue : null
-                                def String okeiCode = row.okeiCode != null ? getRefBookValue(12, row.okeiCode).CODE.stringValue : null
+                                def String dealSubjectCode2 = row.dealSubjectCode2 != null ? getRefBookValue(68, row.dealSubjectCode2)?.CODE.numberValue : null
+                                def String dealSubjectCode3 = row.dealSubjectCode3 != null ? getRefBookValue(34, row.dealSubjectCode3)?.CODE.stringValue : null
+                                def String countryCode = row.countryCode != null ? getRefBookValue(10, row.countryCode)?.CODE?.stringValue : null
+                                def String deliveryCode = row.deliveryCode != null ? getRefBookValue(63, row.deliveryCode)?.STRCODE?.stringValue : null
+                                def String okeiCode = row.okeiCode != null ? getRefBookValue(12, row.okeiCode)?.CODE?.stringValue : null
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +
                                                 (dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
@@ -247,8 +247,8 @@ void generateXML() {
                                                 [СтоимИтог: row.total] +
                                                 (row.dealDoneDate != null ? [ДатаСовСд: row.dealDoneDate.format("dd.MM.yyyy")] : [:])
                                 ) {
-                                    def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1).CODE.stringValue : null
-                                    def String region1 = row.region1 != null ? getRefBookValue(4, row.region1).CODE.stringValue : null
+                                    def String countryCode1 = row.countryCode1 != null ? getRefBookValue(10, row.countryCode1)?.CODE?.stringValue : null
+                                    def String region1 = row.region1 != null ? getRefBookValue(4, row.region1)?.CODE?.stringValue : null
 
                                     if (countryCode1 != null || region1 != null || row.city1 != null || row.locality1 != null) {
                                         МестОтпрТов(
@@ -258,8 +258,8 @@ void generateXML() {
                                                         (row.locality1 != null ? [НаселПункт: row.locality1] : [:])
                                         )
                                     }
-                                    def String countryCode2 = row.countryCode2 != null ? getRefBookValue(10, row.countryCode2).CODE.stringValue : null
-                                    def String region2 = row.region2 != null ? getRefBookValue(4, row.region2).CODE.stringValue : null
+                                    def String countryCode2 = row.countryCode2 != null ? getRefBookValue(10, row.countryCode2)?.CODE?.stringValue : null
+                                    def String region2 = row.region2 != null ? getRefBookValue(4, row.region2)?.CODE?.stringValue : null
                                     if (countryCode2 != null || region2 != null || row.city2 != null || row.locality2 != null) {
                                         МестСовСд(
                                                 (countryCode2 != null ? [ОКСМ: countryCode2] : [:]) +
@@ -270,17 +270,17 @@ void generateXML() {
                                     }
                                 }
                             }
-                            def String countryCode3 = row.countryCode3 != null ? getRefBookValue(10, row.countryCode3).CODE.stringValue : null
+                            def String countryCode3 = row.countryCode3 != null ? getRefBookValue(10, row.countryCode3)?.CODE?.stringValue : null
                             def String organInfo, organName, organINN, organKPP, organRegNum, taxpayerCode, address
                             if (row.organName != null) {
                                 def map = getRefBookValue(9, row.organName)
                                 organInfo = getRefBookValue(70, map.ORGANIZATION.referenceValue)?.CODE?.numberValue
-                                organName = map.NAME.stringValue
-                                organINN = map.INN_KIO.stringValue
-                                organKPP = map.KPP.numberValue
-                                organRegNum = map.REG_NUM.stringValue
-                                taxpayerCode = map.TAXPAYER_CODE.stringValue
-                                address = map.ADDRESS.stringValue
+                                organName = map?.NAME?.stringValue
+                                organINN = map?.INN_KIO?.stringValue
+                                organKPP = map?.KPP?.numberValue
+                                organRegNum = map?.REG_NUM?.stringValue
+                                taxpayerCode = map?.TAXPAYER_CODE?.stringValue
+                                address = map?.ADDRESS?.stringValue
                             }
 
                             // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)

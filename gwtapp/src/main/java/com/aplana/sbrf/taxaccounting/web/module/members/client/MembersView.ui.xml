@@ -104,7 +104,7 @@
                     <g:cell width="25%">
                         <g:VerticalPanel>
                             <r:RefBookPickerWidget ui:field="role" attributeIdInt="838" isHierarchical="false" width="100%"
-                                                             multiSelect="true"/>
+                                                             multiSelect="true" versionEnabled="false"/>
                         </g:VerticalPanel>
                     </g:cell>
                     <g:cell horizontalAlignment="right">

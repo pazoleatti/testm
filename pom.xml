@@ -185,11 +185,6 @@
 				<artifactId>spring-security-web</artifactId>
 				<version>${springsecurity.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aspects</artifactId>
-                <version>${springframework.version}</version>
-            </dependency>
 
 			<!-- AspectJ -->
 			<dependency>
@@ -400,15 +395,6 @@
 						<target>${java.version}</target>
 					</configuration>
 				</plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>aspectj-maven-plugin</artifactId>
-                    <version>1.4</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
