@@ -145,7 +145,7 @@
                                        width="100%" addStyleNames="{modal.buttons}">
                         <g:cell horizontalAlignment="left" width="99%">
                             <g:HorizontalPanel ui:field="itemsInfoPanel">
-                                <g:Label ui:field="countItemsLabel" text="Выбрано:"/>
+                                <g:Label ui:field="countItemsLabel" text="Выделено:"/>
                                 <g:Label ui:field="countItems" width="3em" addStyleNames="{modal.forCountSelected}" />
                                 <style:LinkButton ui:field="pickAll" text="Выделить все" disableImage="true"/>
                             </g:HorizontalPanel>

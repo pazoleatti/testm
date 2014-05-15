@@ -171,7 +171,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         //Fill subdivision
-        if (data.getPerformer() != null){
+        if (data.getPerformer() != null) {
             createCellByRange(XlsxReportMetadata.RANGE_SUBDIVISION,  data.getPerformer().getReportDepartmentName(), 0, 0);
         }
         if (notNullColumn != 0) {

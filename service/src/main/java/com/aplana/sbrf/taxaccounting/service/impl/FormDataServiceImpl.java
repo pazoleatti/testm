@@ -249,6 +249,7 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		// Execute scripts for the form event CREATE
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
+        FormDataPerformer performer = null;
         if (prevReportPeriod != null) {
             FormData formDataOld;
             if (periodOrder==null)
@@ -265,9 +266,16 @@ public class FormDataServiceImpl implements FormDataService {
                     signer.add(formDataSigner);
                 }
                 formData.setSigners(signer);
-                formData.setPerformer(formDataOld.getPerformer());
+                performer = formDataOld.getPerformer();
             }
         }
+        if (performer == null) {
+            performer = new FormDataPerformer();
+            performer.setName(" ");
+            performer.setPrintDepartmentId(departmentId);
+            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentId));
+        }
+        formData.setPerformer(performer);
 
         // Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,

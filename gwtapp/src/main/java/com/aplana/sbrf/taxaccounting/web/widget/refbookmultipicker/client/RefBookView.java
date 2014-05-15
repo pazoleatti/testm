@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -74,4 +75,16 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * @param multiSelect true - множественный выбор
      */
     void setMultiSelect(Boolean multiSelect);
+
+    int getLoadedItemsCount();
+
+    /**
+     * Выделить все записи, если мультиселект
+     */
+    void selectAll(DeferredInvokeHandler handler);
+
+    /**
+     * Развыделить все записи, если мультиселект
+     */
+    void unselectAll(DeferredInvokeHandler handler);
 }

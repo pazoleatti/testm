@@ -414,4 +414,28 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             throw new DaoException("Ошибка при поиске подразделений по имени.", e);
         }
     }
+
+    @Override
+    public String getReportDepartmentName(int departmentId) {
+        Department reportDepartment = getDepartment(departmentId);
+        if (reportDepartment != null) {
+            // рекурсивно проходим по родителям пока не упремся в корень, ТБ или никуда
+            Integer parentId = reportDepartment.getParentId();
+            Department parentDepartment = reportDepartment;
+            while (parentDepartment != null && parentDepartment.getType() != DepartmentType.ROOT_BANK && parentDepartment.getType() != DepartmentType.TERR_BANK) {
+                parentDepartment = getDepartment(parentId);
+                if (parentDepartment != null) {
+                    parentId = parentDepartment.getParentId();
+                }
+            }
+            // если уперлись в ТБ, то выводим составное имя
+            if (parentDepartment != null && reportDepartment.getType() != DepartmentType.TERR_BANK && parentDepartment.getType() == DepartmentType.TERR_BANK) {
+                return parentDepartment.getName() + "/" + reportDepartment.getName();
+            } else {
+                // иначе только конец
+                return reportDepartment.getName();
+            }
+        }
+        return null;
+    }
 }

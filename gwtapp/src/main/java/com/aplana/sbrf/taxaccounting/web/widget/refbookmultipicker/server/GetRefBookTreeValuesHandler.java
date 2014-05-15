@@ -61,6 +61,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
         Department userDep = departmentService.getDepartment(securityService.currentUserInfo().getUser().getDepartmentId());
         String filter = buildFilter(action.getFilter(), action.getSearchPattern(), refBook, userDep);
+        String filterWithoutPattern = buildFilter(action.getFilter(), null, refBook, userDep);
 
         if (filter != null && filter.equals(RefBookPickerUtils.NO_REGION_MATCHES_FLAG)) {
             //Среди подразделений пользователя нет относящихся к какому то региону и нет смысла получать записи справочника - ни одна не должна быть ему доступна
@@ -70,7 +71,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         }
 
         PagingResult<Map<String, RefBookValue>> refBookPage;
-
+        List<Long> filterIds = new ArrayList<Long>();
         // Получаем нужные объекты по идентификаторам, что бы потом получить разименнованные значения
         if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
             refBookPage = new PagingResult<Map<String, RefBookValue>>();
@@ -85,13 +86,24 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             }
             refBookPage.setTotalCount(action.getIdsTofind().size());
         } else {
-            RefBookTreeItem parent = action.getParent();
-            refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null);
+            RefBookAttribute sort = null;
+            try {
+                sort = refBook.getAttribute("NAME");
+            } catch (IllegalArgumentException ignored) {
+            }
 
+            // идея такая: если есть пользовательский фильтр то грузим все все равно, потом узнаем
+            // какие попадают и потом при разиминовывании устанавливаем флаг итему что он попадает по фильтр
+            RefBookTreeItem parent = action.getParent();
+            refBookPage = refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filterWithoutPattern, sort);
+            // TODO aivanov заменить на более оптимальный вариант
+            for (Map<String, RefBookValue> record : refBookDataProvider.getChildrenRecords(parent != null ? parent.getId() : null, action.getVersion(), null, filter, null)) {
+                filterIds.add(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            }
         }
 
         result.setUuid(logEntryService.save(logger.getEntries()));
-        result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook));
+        result.setPage(asseblRefBookPage(action, refBookDataProvider, refBookPage, refBook, filterIds));
 
         return result;
     }
@@ -160,7 +172,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
 
     // Преобразуем в гуи модельку
     private PagingResult<RefBookTreeItem> asseblRefBookPage(GetRefBookTreeValuesAction action, RefBookDataProvider provider,
-                                                            PagingResult<Map<String, RefBookValue>> refBookPage, RefBook refBook) {
+                                                            PagingResult<Map<String, RefBookValue>> refBookPage, RefBook refBook, List<Long> filterIds) {
 
         List<RefBookTreeItem> items = new ArrayList<RefBookTreeItem>();
 
@@ -171,6 +183,9 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
             List<RefBookRecordDereferenceValue> refBookDereferenceValues = new LinkedList<RefBookRecordDereferenceValue>();
 
             item.setId(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue());
+            if(filterIds.contains(item.getId())){
+                item.setNeedToOpen(true);
+            }
             List<RefBookAttribute> attributes = refBook.getAttributes();
 
             Map<Long, String> dereferenceRecord =

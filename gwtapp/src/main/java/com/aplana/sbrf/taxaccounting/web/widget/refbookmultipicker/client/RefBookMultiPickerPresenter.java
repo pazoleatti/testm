@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -86,7 +87,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     private void trySelect(PickerState stateWithIds){
         if (stateWithIds.getSetIds()!= null && stateWithIds.getSetIds().size() > 0) {
             if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())){
-                loadingForSelection(stateWithIds.getSetIds());
+                loadingForSelection(stateWithIds.getSetIds(), null);
             }
         } else {
             getView().setSelection(new ArrayList<RefBookItem>());
@@ -123,7 +124,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     }
 
     @Override
-    public void loadingForSelection(Collection<Long> ids) {
+    public void loadingForSelection(Collection<Long> ids, final DeferredInvokeHandler handler) {
         if (ps.getRefBookAttrId() == null) {
             return;
         }
@@ -139,11 +140,20 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                         if (result.getUuid() == null) {
                             getView().setSelection(result.getPage());
                             LogAddEvent.fire(RefBookMultiPickerPresenter.this, result.getUuid());
+                            if (handler != null) {
+                                handler.onInvoke();
+                            }
+                        }
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        super.onFailure(caught);
+                        if (handler != null) {
+                            handler.onInvoke();
                         }
                     }
                 }, this
         ));
-
     }
 
     private GetRefBookMultiValuesAction getRowsLoadAction(PagingParams pagingParams, List<Long> idToFinds) {

@@ -20,6 +20,9 @@ public class WidgetUtils {
     public static String iconUrl = "resources/img/picker-icons/clear-icon.png";
     public static String dummyUrl = "resources/img/picker-icons/clear-icon-dummy.png";
 
+    public static String PICK_ALL = "Выделить все";
+    public static String UNPICK_ALL = "Снять выделение";
+
     /**
      * Проверка невхождения даты в ограничивающий период
      *
@@ -137,6 +140,15 @@ public class WidgetUtils {
                 }
             };
 
+            ClickHandler clickHandler = new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    clearButton.setUrl(dummyUrl);
+                    clearButton.setTitle("");
+                    setPointerCursor(elementToHide, false);
+                }
+            };
+
             input.addMouseOutHandler(mouseOutHandler);
             input.addMouseOverHandler(mouseOverHandler);
             pickButton.addMouseOutHandler(mouseOutHandler);
@@ -154,6 +166,8 @@ public class WidgetUtils {
                     }
                 }
             });
+            clearButton.addClickHandler(clickHandler);
+            pickButton.addClickHandler(clickHandler);
 
         }
     }
