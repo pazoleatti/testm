@@ -12,7 +12,7 @@
 	<script type="text/javascript" src="Main/Main.nocache.js"></script>
     <script type="text/javascript" src="resources/js/browserDetect.js"></script>
 
-    <script>
+    <!--script>
         window.onload = function(){
             var data = browserDetectNav();
             var isIE11 = !!navigator.userAgent.match(/Trident\/7\./);
@@ -28,7 +28,7 @@
                         '</div>');
 
         }
-    </script>
+    </script-->
 
 </head>
 <body>
