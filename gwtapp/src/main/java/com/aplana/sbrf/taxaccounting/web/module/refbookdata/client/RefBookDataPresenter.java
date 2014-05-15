@@ -112,8 +112,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onUpdateForm(UpdateForm event) {
-        if (this.isVisible())
-		    getView().updateTable();
+        if (event.isSuccess() && this.isVisible()) {
+            getView().updateTable();
+            editFormPresenter.clearAndDisableForm();
+        }
 	}
 
 	@Override

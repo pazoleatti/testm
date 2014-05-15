@@ -107,7 +107,10 @@ public class Tooltip extends Composite {
                     int y = tooltip.getPopupTop();
                     int diffWidth = Window.getClientWidth() - tooltip.getOffsetWidth();
                     int diffHeight = Window.getClientHeight() - tooltip.getOffsetHeight();
-                    tooltip.setPopupPosition(diffWidth - x < 0 ? diffWidth : x, diffHeight - y < 0 ? diffHeight : y);
+                    if (diffHeight < 0) {
+                        tooltip.setHeight(String.valueOf(Window.getClientHeight() - 15) + "px");
+                    }
+                    tooltip.setPopupPosition(diffWidth - x < 0 ? diffWidth : x, diffHeight - y < 0 ? diffHeight : (tooltip.getOffsetHeight() + y > Window.getClientHeight()) ? 15 : y);
                 }
             }
         });

@@ -43,7 +43,6 @@ public class DeclarationListView extends
 
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации";
     public static final String DEPARTMENT_TITLE = "Подразделение";
-    public static final String PERIOD_YEAR_TITLE = "Год";
     public static final String STATE_TITLE = "Состояние";
     public static final String PERIOD_TITLE = "Период";
 
@@ -117,6 +116,40 @@ public class DeclarationListView extends
             }
         };
         
+        Column reportPeriodYearColumn = null;
+        if (taxType == TaxType.DEAL) {
+            reportPeriodYearColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
+                    new AbstractCell<DeclarationDataSearchResultItem>() {
+
+                        @Override
+                        public void render(Context context,
+                                           DeclarationDataSearchResultItem declaration,
+                                           SafeHtmlBuilder sb) {
+                            if (declaration == null) {
+                                return;
+                            }
+                            sb.appendHtmlConstant("<a href=\"#"
+                                    + DeclarationDataTokens.declarationData + ";"
+                                    + DeclarationDataTokens.declarationId + "="
+                                    + declaration.getDeclarationDataId() + "\">"
+                                    + declaration.getReportPeriodYear() + ": " + declaration.getReportPeriodName() + "</a>");
+                        }
+                    }) {
+                @Override
+                public DeclarationDataSearchResultItem getValue(
+                        DeclarationDataSearchResultItem object) {
+                    return object;
+                }
+            };
+        } else {
+            reportPeriodYearColumn = new TextColumn<DeclarationDataSearchResultItem>() {
+                @Override
+                public String getValue(DeclarationDataSearchResultItem object) {
+                    return String.valueOf(object.getReportPeriodYear());
+                }
+            };
+        }
+
         reportPeriodColumn = new Column<DeclarationDataSearchResultItem, DeclarationDataSearchResultItem>(
                 new AbstractCell<DeclarationDataSearchResultItem>() {
 
@@ -156,6 +189,7 @@ public class DeclarationListView extends
         };
 
         departmentColumn.setSortable(true);
+        reportPeriodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
         declarationTypeColumn.setSortable(true);
         stateColumn.setSortable(true);
@@ -165,6 +199,7 @@ public class DeclarationListView extends
 
         if (taxType == TaxType.DEAL) {
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
+            declarationTable.addColumn(reportPeriodYearColumn, declarationTable.createResizableHeader(PERIOD_TITLE, reportPeriodYearColumn));
             declarationTable.addColumn(stateColumn, declarationTable.createResizableHeader(STATE_TITLE, stateColumn));
         } else {
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
@@ -284,8 +319,6 @@ public class DeclarationListView extends
 			this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_NAME;
 		} else if(DECLARATION_TYPE_TITLE.equals(sortByColumn)){
 			this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME;
-		} else if(PERIOD_YEAR_TITLE.equals(sortByColumn)){
-            this.sortByColumn = DeclarationDataSearchOrdering.REPORT_PERIOD_YEAR;
         } else if(STATE_TITLE.equals(sortByColumn)){
             this.sortByColumn = DeclarationDataSearchOrdering.DECLARATION_ACCEPTED;
         } else {

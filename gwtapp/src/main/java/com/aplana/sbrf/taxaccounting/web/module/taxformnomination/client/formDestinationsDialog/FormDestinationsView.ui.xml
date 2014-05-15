@@ -62,13 +62,13 @@
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label ui:field="formDataKindLabel" text="Тип налоговой формы" addStyleNames="{style.labels}"/>
                     <r:RefBookPickerWidget labelWordWrap="false" ui:field="formDataKind" attributeIdInt="837"
-                                           searchEnabled="false"
+                                           searchEnabled="false" versionEnabled="false"
                                            isHierarchical="false" multiSelect="false" width="300px" title="Выбор типа налоговой формы"/>
                 </g:HorizontalPanel>
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label ui:field="formTypeLabel" text="Вид налоговой формы" addStyleNames="{style.labels}"/>
-                    <r:RefBookPickerWidget labelWordWrap="false" ui:field="formTypeId" attributeIdInt="835"
+                    <r:RefBookPickerWidget labelWordWrap="false" ui:field="formTypeId" attributeIdInt="835" versionEnabled="false"
                                            isHierarchical="false" multiSelect="true" width="300px" title="Выбор вида налоговой формы"/>
                 </g:HorizontalPanel>
 

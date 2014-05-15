@@ -85,7 +85,7 @@ public interface FormTemplateService {
      * @param formTemplateId - идентификатор налоговой формы
      * @return тело скрипта
      */
-    String getFormTemplateScript(int formTemplateId);
+    String getFormTemplateScript(int formTemplateId, Logger logger);
 
     /**
      * Получить макет налоговой формы.
@@ -93,6 +93,13 @@ public interface FormTemplateService {
      * @return объект, представляющий полное описание налоговой формы
      */
     FormTemplate getFullFormTemplate(int formTemplateId);
+
+    /**
+     * Получить макет налоговой формы. Без выбаасывания ошибки на клиенте, а с выводом в логпанель.
+     * @param formTemplateId идентификатор макета
+     * @return объект, представляющий полное описание налоговой формы
+     */
+    FormTemplate getFullFormTemplate(int formTemplateId, Logger logger);
 
     /**
      * Получить макеты налоговых форм по фильтру

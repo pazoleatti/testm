@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.GetFormAction;
@@ -29,6 +31,8 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
 
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private LogEntryService logEntryService;
 
     public GetFormHandler() {
         super(GetFormAction.class);
@@ -38,12 +42,16 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
     public GetFormResult execute(GetFormAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
 
+        Logger logger = new Logger();
         GetFormResult result = new GetFormResult();
 		formTemplateService.checkLockedByAnotherUser(action.getId(), userInfo);
         FormTemplateExt formTemplateExt = new FormTemplateExt();
-		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId());
+		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
-        formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId()));
+        formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId(), logger));
+        if (!logger.getEntries().isEmpty())
+            result.setUuid(logEntryService.save(logger.getEntries()));
+
 		formTemplateService.lock(action.getId(), userInfo);
         formTemplateExt.setFormTemplate(formTemplate);
 		result.setForm(formTemplateExt);

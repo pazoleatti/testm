@@ -159,7 +159,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
      * @param searchPattern
      * @return
      */
-    private static String buildQuery(RefBook refBook, String searchPattern){
+    private String buildQuery(RefBook refBook, String searchPattern){
         StringBuilder resultSearch = new StringBuilder();
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             if (RefBookAttributeType.STRING.equals(attribute.getAttributeType()) || RefBookAttributeType.DATE.equals(attribute.getAttributeType())) {
@@ -174,10 +174,47 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 }
                 resultSearch.append("TO_CHAR(").append(attribute.getAlias()).append(")").append(" like ")
                         .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+            } else if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType()) && isSimpleRefBool(refBook.getId())) {
+                if (resultSearch.length() > 0) {
+                    resultSearch.append(" or ");
+                }
+
+                RefBookAttribute nextAttribute = attribute;
+                String alias = attribute.getAlias();
+                while (nextAttribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                    RefBook rb = refBookFactory.getByAttribute(nextAttribute.getRefBookAttributeId());
+                    nextAttribute = rb.getAttribute(nextAttribute.getRefBookAttributeId());
+                    alias = alias + "." + nextAttribute.getAlias();
+                }
+
+                if (RefBookAttributeType.STRING.equals(nextAttribute.getAttributeType()) || RefBookAttributeType.DATE.equals(nextAttribute.getAttributeType())) {
+                    resultSearch.append("LOWER(").append(alias).append(")").append(" like ")
+                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                } else if (RefBookAttributeType.NUMBER.equals(nextAttribute.getAttributeType())) {
+                    resultSearch.append("TO_CHAR(").append(alias).append(")").append(" like ")
+                            .append("'%" + searchPattern.trim().toLowerCase() + "%'");
+                }
             }
         }
 
         return resultSearch.toString();
+    }
+
+    /**
+     * Находится ли справочник в стандартной структуре
+     *
+     * @param refBookId
+     * @return
+     */
+    private boolean isSimpleRefBool(Long refBookId){
+        Long[] foreignRefBooks = new Long[]{30L, 50L, 52L, 74L, 93L, 95L, 96L, 94L};
+        for (Long rbId : foreignRefBooks) {
+            if (rbId.equals(refBookId)){
+                return false;
+            }
+        }
+
+        return true;
     }
 
 	@Override

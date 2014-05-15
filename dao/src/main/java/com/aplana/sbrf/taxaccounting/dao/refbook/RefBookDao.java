@@ -253,10 +253,13 @@ public interface RefBookDao {
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
+     *
      * @param uniqueRecordIds список идентификаторов версий записей
-     * @return результаты проверки. Сообщения об ошибках
+     * @param versionFrom
+     *@param versionTo
+     * @param isValuesChanged признак того, что были изменены атрибуты  @return результаты проверки. Сообщения об ошибках
      */
-    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds);
+    List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged);
 
     /**
      * Возвращает данные о версии следующей за указанной

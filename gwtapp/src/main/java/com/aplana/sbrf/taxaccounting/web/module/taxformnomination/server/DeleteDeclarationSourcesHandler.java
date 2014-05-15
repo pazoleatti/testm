@@ -66,7 +66,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 					sb.append(dft.getKind().getName() + "; ");
 				}
 
-				logs.add(new LogEntry(LogLevel.ERROR, sb.toString()));
+				logs.add(new LogEntry(LogLevel.ERROR, sb.delete(sb.length() - 2, sb.length()).toString()));
 			}
 		}
 

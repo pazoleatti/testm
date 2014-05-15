@@ -470,7 +470,7 @@ void logicCheck() {
 
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod)
+        checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
     }
 }
 
@@ -692,11 +692,11 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+        (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        autoFillColumns.each {
+        (getBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 

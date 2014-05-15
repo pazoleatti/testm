@@ -100,10 +100,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		} catch (EmptyResultDataAccessException e) {
             logger.error("Не удалось найти описание налоговой формы с id = " + formId, e);
 			throw new DaoException("Не удалось найти описание налоговой формы с id = " + formId);
-		} catch (Error error) {
-            logger.error("",error);
-            throw new DaoException("", error.getMessage());
-        }
+		}
 	}
 
 	/**
@@ -222,30 +219,46 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId + new String(\"_script\")")
     @Override
     public String getFormTemplateScript(int formTemplateId) {
-        return getJdbcTemplate().queryForObject("select script from form_template where id = ?",
-                new Object[]{formTemplateId},
-                new int[]{Types.INTEGER},
-                String.class);
+        try {
+            return getJdbcTemplate().queryForObject("select script from form_template where id = ?",
+                    new Object[]{formTemplateId},
+                    new int[]{Types.INTEGER},
+                    String.class);
+        } catch (DataAccessException e){
+            throw new DaoException("Не удалось получить текст скрипта.", e);
+        }
     }
 
     @Override
     public List<DataRow<Cell>> getDataCells(FormTemplate formTemplate) {
-        String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
-                new Object[]{formTemplate.getId()},
-                new int[]{Types.INTEGER},
-                String.class);
-        return dataRowXml != null ? xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class):
-                new ArrayList<DataRow<Cell>>();
+        try {
+            String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
+                    new Object[]{formTemplate.getId()},
+                    new int[]{Types.INTEGER},
+                    String.class);
+            return dataRowXml != null ? xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class):
+                    new ArrayList<DataRow<Cell>>();
+        } catch (IllegalArgumentException e){
+            throw new DaoException(e.getLocalizedMessage());
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при получении строк шаблона НФ.", e);
+        }
     }
 
     @Override
     public List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate) {
-        String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
-                new Object[]{formTemplate.getId()},
-                new int[]{Types.INTEGER},
-                String.class);
-        return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
-                new ArrayList<DataRow<HeaderCell>>();
+        try {
+            String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
+                    new Object[]{formTemplate.getId()},
+                    new int[]{Types.INTEGER},
+                    String.class);
+            return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
+                    new ArrayList<DataRow<HeaderCell>>();
+        }  catch (IllegalArgumentException e){
+            throw new DaoException(e.getLocalizedMessage());
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при получении заголовка шаблона НФ.", e);
+        }
     }
 
     @Override
