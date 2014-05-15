@@ -313,7 +313,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
-        newRow.serviceName = getRecordIdImport(13, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.serviceName = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
         // графа 9
