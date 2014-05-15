@@ -24,16 +24,17 @@
         <order>2</order>
         <width>0</width>
         <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>3</order>
         <width>10</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>809</nameAttributeId>
+        <parentAlias>currency</parentAlias>
         <refBookAttributeId>809</refBookAttributeId>
+        <refBookAttributeId2>868</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>shareType</alias>
@@ -52,14 +53,16 @@
         <order>5</order>
         <width>10</width>
         <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currency</alias>
         <checking>false</checking>
         <name>Валюта выпуска ценной бумаги</name>
         <order>6</order>
         <width>7</width>
-        <parentId>19988</parentId>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>810</nameAttributeId>
         <refBookAttributeId>810</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -67,7 +70,7 @@
         <checking>false</checking>
         <name>Размер лота на предыдущую отчетную дату, шт. (по депозитарному учету)</name>
         <order>7</order>
-        <width>6</width>
+        <width>7</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -76,7 +79,7 @@
         <checking>false</checking>
         <name>Размер лота на текущую отчетную дату, шт. (по депозитарному учету)</name>
         <order>8</order>
-        <width>6</width>
+        <width>7</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -98,15 +101,15 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчетную дату</name>
         <order>11</order>
-        <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>622</nameAttributeId>
-        <refBookAttributeId>621</refBookAttributeId>
+        <width>7</width>
+        <parentAlias>currency</parentAlias>
+        <refBookAttributeId>869</refBookAttributeId>
+        <refBookAttributeId2>621</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>
@@ -172,10 +175,10 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
@@ -186,10 +189,10 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

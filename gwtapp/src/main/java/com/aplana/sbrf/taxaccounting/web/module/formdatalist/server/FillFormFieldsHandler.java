@@ -42,6 +42,9 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
 	@Autowired
 	private SourceService departmentFormTypeService;
 
+    @Autowired
+    FormDataAccessService dataAccessService;
+
     @Override
     public FillFormFieldsResult execute(FillFormFieldsAction action, ExecutionContext executionContext) throws ActionException {
         FillFormFieldsResult result = new FillFormFieldsResult();
@@ -68,15 +71,7 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                 List<FormDataKind> kinds = new ArrayList<FormDataKind>();
 	            List<FormTypeKind> formTypeKinds = departmentFormTypeService.getFormAssigned(action.getDepartmentId(), action.getTaxType().getCode());
 	            List<FormType> types = formDataSearchService.getActiveFormTypeInReportPeriod(action.getDepartmentId().intValue(), action.getFieldId(), action.getTaxType(), securityService.currentUserInfo());
-	            for (FormTypeKind ftk : formTypeKinds) {
-		            for (FormType type : types) {
-			            if (ftk.getFormTypeId() == type.getId()) {
-				            kinds.add(ftk.getKind());
-				            break;
-			            }
-		            }
-
-	            }
+                kinds.addAll(dataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
                 result.setDataKinds(kinds);
                 break;
             case FORTH:
