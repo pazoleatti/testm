@@ -91,10 +91,6 @@ public class PrintingServiceImpl implements PrintingService {
         List<DataRow<Cell>> dataRows = dataRowDao.getSavedRows(formData, null, null);
         Logger log = new Logger();
         refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-        if (log.containsLevel(LogLevel.ERROR)) {
-            logger.error(log.toString());
-            throw new ServiceException("Ошибка при создании печатной формы.");
-        }
 
         RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                 getRecordData((long) reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
