@@ -166,11 +166,11 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
 
-        if (resultFilter.length() > 0 && resultSearch.length() > 0) {
+        if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
-        } else if (resultFilter.length() > 0 && resultSearch.length() == 0) {
+        } else if (resultFilter.length() > 0 && (resultSearch != null || resultSearch.length() == 0)) {
             return resultFilter.toString();
-        } else if (resultSearch.length() > 0 && resultFilter.length() == 0) {
+        } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch.toString();
         } else if ("".equals(filter)) {
             return "";
