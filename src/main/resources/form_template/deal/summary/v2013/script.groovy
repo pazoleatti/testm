@@ -598,7 +598,7 @@ def buildRow(def srcRow, def matrixRow) {
             break
         case 398: // 21
         case 399: // 22
-            row.dealSubjectName = getRefBookValue(13, srcRow.serviceName)?.NAME?.stringValue
+            row.dealSubjectName = srcRow.serviceName
             break
         case 402: // 23
             row.dealSubjectName = 'Привлечение средств на межбанковском рынке'
