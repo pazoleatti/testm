@@ -191,7 +191,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     ps.appendQuery("_value ");
                 }
 			} else {
-				ps.appendQuery("id");
+                if(isHierarchical){
+                    ps.appendQuery(RefBook.RECORD_PARENT_ID_ALIAS);
+                } else {
+                    ps.appendQuery("id");
+                }
 			}
 			ps.appendQuery(isSortAscending ? " ASC)" : " DESC)");
 		} else {

@@ -90,7 +90,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					.defaultCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
-                            if (result != null && innerLogUuid!= null) {
+                            if (result != null) {
                                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                                 innerLogUuid = null;
                             }

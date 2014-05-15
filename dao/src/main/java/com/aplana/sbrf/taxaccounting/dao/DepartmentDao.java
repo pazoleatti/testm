@@ -145,4 +145,11 @@ public interface DepartmentDao {
     List<Integer> getDepartmentIdsByExcutors(List<Integer> departments, List<TaxType> taxTypes);
 
     List<Integer> getDepartmentsByName(String departmentName);
+
+    /**
+     * Используемое наименование подразделения для печати
+     * @param departmentId id подразделения
+     * @return строка наименования
+     */
+    String getReportDepartmentName(int departmentId);
 }

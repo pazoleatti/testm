@@ -200,4 +200,11 @@ public class DepartmentDaoTest {
     public void getDepartmentByNameTest() {
         Assert.assertEquals(2, departmentDao.getDepartmentsByName("ТБ").size());
     }
+
+    @Test
+    public void getReportDepartmentNameTest() {
+        Assert.assertEquals("ТБ2/ЦСКО 1", departmentDao.getReportDepartmentName(5));
+        Assert.assertEquals("ТБ1/ЦСКО 1", departmentDao.getReportDepartmentName(6));
+        Assert.assertEquals("ТБ1", departmentDao.getReportDepartmentName(2));
+    }
 }

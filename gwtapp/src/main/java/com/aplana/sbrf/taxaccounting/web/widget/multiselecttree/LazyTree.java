@@ -109,9 +109,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     private void onSelectionChange(){
-        ArrayList<H> hs = new ArrayList<H>();
-        findAllChild(hs, null);
-        for (H h : hs) {
+        for (H h : getLoadedItems(null)) {
             h.setItemState(selectionModel.isSelected(h) ? true : null);
         }
     }
@@ -226,6 +224,18 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     /**
      * Обход по загруженным элементам всего дерева, исключая те элементы которые служат для отображения "Загрузки"
      *
+     * @param parent узел для которого ищутся дочерние, если null что ищется с root'a
+     * @return list список элементов
+     */
+    public List<H> getLoadedItems(H parent){
+        List<H> hs = new LinkedList<H>();
+        findAllChild(hs, parent);
+        return hs;
+    }
+
+    /**
+     * Обход по загруженным элементам всего дерева, исключая те элементы которые служат для отображения "Загрузки"
+     *
      * @param list список элементов
      * @param item узел для которого ищутся дочерние, если null что ищется с root'a
      */
@@ -291,9 +301,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     }
 
     public Set<H> getSelectedItems() {
-        List<H> hs = new ArrayList<H>();
-        findAllChild(hs, null);
-        for (H h : hs) {
+        for (H h : getLoadedItems(null)) {
             ensureSelection(h);
         }
         return Collections.unmodifiableSet(selectionModel.getSelectedSet());

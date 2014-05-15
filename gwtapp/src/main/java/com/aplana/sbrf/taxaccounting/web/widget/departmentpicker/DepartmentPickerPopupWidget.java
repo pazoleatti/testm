@@ -31,8 +31,6 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private static Binder uiBinder = GWT.create(Binder.class);
-    private static String pickAllText = "Выделить все";
-    private static String unpickAllText = "Снять выделение";
 
     @UiField
     HTMLPanel wrappingPanel;
@@ -97,7 +95,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
                 int size = tree.getValue().size();
                 ok.setEnabled(size > 0);
                 if (isMultiSelect()) {
-                    pickAll.setText(size == tree.getItemsWithFilter().size() ? unpickAllText: pickAllText);
+                    pickAll.setText(size == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
                     countItems.setText(String.valueOf(size));
                 }
             }
@@ -111,10 +109,21 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
                 }
             }
         });
+
+        selected.addDoubleClickHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(DoubleClickEvent event) {
+                open();
+            }
+        });
     }
 
     @UiHandler("selectButton")
     void onSelectButtonClicked(ClickEvent event) {
+        open();
+    }
+
+    private void open(){
         tree.setValueById(value, false);
         countItems.setText(String.valueOf(tree.getValue().size()));
         popupPanel.center();
@@ -163,17 +172,17 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     @UiHandler("pickAll")
     void onPickAllClick(ClickEvent clickEvent) {
         if(tree.getValue().size() == tree.getItemsWithFilter().size()){
-            pickAll.setText(pickAllText);
+            pickAll.setText(WidgetUtils.PICK_ALL);
             tree.unselectAll();
         } else {
-            pickAll.setText(unpickAllText);
+            pickAll.setText(WidgetUtils.UNPICK_ALL);
             tree.selectAll();
         }
     }
 
     private void find(){
         tree.filter(filter.getText().trim());
-        pickAll.setText(tree.getValue().size() == tree.getItemsWithFilter().size() ? unpickAllText: pickAllText);
+        pickAll.setText(tree.getValue().size() == tree.getItemsWithFilter().size() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
     }
 
     @Override

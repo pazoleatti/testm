@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
@@ -38,6 +39,7 @@ public class LazyTreeItem extends TreeItem {
         label = new Label(name);
 
         checkBox = new CheckBox(name);
+
         radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
         radioButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.NONE);
 
@@ -127,6 +129,15 @@ public class LazyTreeItem extends TreeItem {
 
     public void setChildLoaded(Boolean isChildLoaded) {
         this.isChildLoaded = isChildLoaded;
+    }
+
+    public void highLightText(String textToHighLight) {
+        if(textToHighLight!= null && !textToHighLight.isEmpty()) {
+            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(), "<span style=\"color: #ff0000;\">$&</span>");
+            label.getElement().setInnerHTML(highLightedString);
+            DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
+            DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
+        }
     }
 
     @Override
