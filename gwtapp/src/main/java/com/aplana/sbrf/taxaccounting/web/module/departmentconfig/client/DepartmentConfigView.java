@@ -327,22 +327,28 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
     @UiHandler("deleteButton")
     public void onDelete(ClickEvent event){
-        getUiHandlers().delete(driver.flush(), currentReportPeriodId, currentDepartmentId);
+        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
+            @Override
+            public void yes() {
+                super.yes();
+                getUiHandlers().delete(driver.flush(), currentReportPeriodId, currentDepartmentId);
 
-        driver.edit(data);
+                driver.edit(data);
 
-        if (dereferenceValues != null) {
-            // Обновление разыменованных значений
-            dereferenceValues.clear();
-            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-            dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-        }
+                if (dereferenceValues != null) {
+                    // Обновление разыменованных значений
+                    dereferenceValues.clear();
+                    dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+                    dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+                    dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+                    dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+                    dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+                    dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
+                    dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+                    dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
+                }
+            }
+        });
     }
 
 	@UiHandler("cancelButton")

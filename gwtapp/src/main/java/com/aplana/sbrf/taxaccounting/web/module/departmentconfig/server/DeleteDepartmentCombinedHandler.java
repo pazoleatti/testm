@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,7 +46,8 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
     @Autowired
     DepartmentService departmentService;
 
-    private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно удалены.";
+    private static final String SUCCESS_INFO = "Настройки подразделения в период %s - %s были удалены";
+    private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s";
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -82,16 +86,24 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
                     break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
+            ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
             Logger logger = new Logger();
+
+            RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
+            //recordVersion.updateRecordVersion();
             List<Long> deleteList = new ArrayList<Long>();
-            deleteList.add(depCombined.getRecordId());
-            provider.deleteAllRecords(logger, deleteList);
+            deleteList.add(recordVersion.getRecordId());
+
+            if (period.getStartDate().equals(recordVersion.getVersionStart()))
+                provider.deleteRecordVersions(logger, deleteList);
+            else
+                provider.updateRecordsVersionEnd(logger, addDayToDate(period.getStartDate(),-1), deleteList);
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
-                String strEndDate = sdf.format(period.getEndDate());
-                String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
-                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), strEndDate));
+                if (recordVersion.getVersionEnd()==null)
+                    logger.info(String.format(SUCCESS_INFO_SHORT, sdf.format(period.getCalendarStartDate())));
+                else
+                    logger.info(String.format(SUCCESS_INFO, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
             }
             result.setUuid(logEntryService.save(logger.getEntries()));
             if (logger.containsLevel(LogLevel.ERROR)) {
@@ -104,5 +116,12 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
     @Override
     public void undo(DeleteDepartmentCombinedAction deleteDepartmentCombinedAction, DeleteDepartmentCombinedResult deleteDepartmentCombinedResult, ExecutionContext executionContext) throws ActionException {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    private Date addDayToDate(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
     }
 }
