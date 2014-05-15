@@ -10,6 +10,8 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
     private RefBookTreeItem parent;
     private boolean hasChild = false;
     private boolean canBeSelected;
+    /* флаг для обозначения что при загрузке элемента его надо открыть для загрузки его чилдов */
+    private boolean needToOpen = false;
 
     public RefBookTreeItem() {
     }
@@ -42,6 +44,14 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
         this.canBeSelected = canBeSelected;
     }
 
+    public boolean isNeedToOpen() {
+        return needToOpen;
+    }
+
+    public void setNeedToOpen(boolean needToOpen) {
+        this.needToOpen = needToOpen;
+    }
+
     @Override
     public int compareTo(RefBookTreeItem o) {
         Long thisId = this.getId();
@@ -56,6 +66,7 @@ public class RefBookTreeItem extends RefBookItem implements Comparable<RefBookTr
         sb.append(", parent=").append(parent);
         sb.append(", hasChild=").append(hasChild);
         sb.append(", canBeSelected=").append(canBeSelected);
+        sb.append(", needToOpen=").append(needToOpen);
         sb.append(", refBookRecordDereferenceValues=").append(getRefBookRecordDereferenceValues());
         sb.append(", dereferenceValue='").append(getDereferenceValue()).append('\'');
         sb.append('}');

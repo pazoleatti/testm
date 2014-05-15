@@ -7,24 +7,26 @@ import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.Tooltip;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -68,6 +70,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     HorizontalPanel filterPanel;
     @UiField
     HorizontalPanel versionPanel;
+    @UiField
+    LinkButton pickAll;
+
+    @UiField
+    FlowPanel modalBodyWrapper;
 
     private Tooltip tooltip;
 
@@ -86,6 +93,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     /* Флаг ручного выставления разименнованного значения виджета */
     private boolean isManualUpdate = false;
 
+    DivElement glass;
+
     @UiConstructor
     public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
         this.isHierarchical = isHierarchical;
@@ -96,6 +105,8 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
 
         widgetWrapper.add(refBookView);
+
+        pickAll.setVisible(multiSelect);
 
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
@@ -108,7 +119,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         refBookView.addValueChangeHandler(new ValueChangeHandler<Set<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Set<Long>> event) {
-                selectionCountLabel.setText("Выбрано: " + event.getValue().size());
+                selectionCountLabel.setText("Выделено: " + event.getValue().size());
+                if (getMultiSelect()) {
+                    pickAll.setText(refBookView.getSelectedIds().size() == refBookView.getLoadedItemsCount() ? WidgetUtils.UNPICK_ALL: WidgetUtils.PICK_ALL);
+                }
                 if (isEnabledFireChangeEvent) {
                     isEnabledFireChangeEvent = false;
                     clearAndSetValues(event.getValue());
@@ -128,6 +142,14 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             }
         });
 
+        textBox.addDoubleClickHandler(new DoubleClickHandler() {
+            @Override
+            public void onDoubleClick(DoubleClickEvent event) {
+                prevState.setValues(state);
+                modalPanel.center();
+            }
+        });
+
         modalPanel.addOpenModalWindowHandler(new OpenModalWindowEvent.OpenHandler() {
             @Override
             public void onOpen(OpenModalWindowEvent event) {
@@ -140,6 +162,19 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         tooltip.addHandlersFor(textBox);
         //установка обработчиков для лейбла который отображается если в режиме прсомотра
         tooltip.addHandlersFor(label);
+
+        glass = Document.get().createDivElement();
+        glass.setAttribute("id", "666");
+
+        Style style = glass.getStyle();
+        style.setProperty("filter", "alpha(opacity=0)");
+        style.setBackgroundColor("#ffffff");
+        style.setPosition(Style.Position.ABSOLUTE);
+        style.setLeft(0, Style.Unit.PX);
+        style.setTop(0, Style.Unit.PX);
+        style.setRight(0, Style.Unit.PX);
+        style.setBottom(0, Style.Unit.PX);
+        style.setZIndex(2147483647); // Maximum z-index
 
         // оставлю для примера
 //        modalPanel.setOnHideHandler(new OnHideHandler<CanHide>() {
@@ -206,6 +241,14 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         save();
     }
 
+    private void save() {
+        clearAndSetValues(refBookView.getSelectedIds());
+        prevState.setValues(state);
+        updateUIState();
+        ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
+        modalPanel.hide();
+    }
+
     @UiHandler("cancelButton")
     void onCancelButtonClicked(ClickEvent event) {
         cancelPick();
@@ -219,13 +262,33 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         modalPanel.hide();
     }
 
-    private void save() {
-        clearAndSetValues(refBookView.getSelectedIds());
-        prevState.setValues(state);
-        updateUIState();
-        ValueChangeEvent.fire(RefBookPickerWidget.this, state.getSetIds());
-        modalPanel.hide();
+    @UiHandler("pickAll")
+    void onPickAllButtonClicked(ClickEvent event) {
+        pickAll.setDisableImage(false);
+
+        modalBodyWrapper.getElement().appendChild(glass);
+
+        if(pickAll.getText().equals(WidgetUtils.UNPICK_ALL)){
+            refBookView.unselectAll(new DeferredInvokeHandler() {
+                @Override
+                public void onInvoke() {
+                    pickAll.setDisableImage(true);
+                    pickAll.setText(WidgetUtils.PICK_ALL);
+                    modalBodyWrapper.getElement().removeChild(glass);
+                }
+            });
+        } else {
+            refBookView.selectAll(new DeferredInvokeHandler() {
+                @Override
+                public void onInvoke() {
+                    pickAll.setDisableImage(true);
+                    pickAll.setText(WidgetUtils.UNPICK_ALL);
+                    modalBodyWrapper.getElement().removeChild(glass);
+                }
+            });
+        }
     }
+
 
     private void clearAndSetValues(Collection<Long> longs) {
         state.setSetIds(new LinkedList<Long>(longs));

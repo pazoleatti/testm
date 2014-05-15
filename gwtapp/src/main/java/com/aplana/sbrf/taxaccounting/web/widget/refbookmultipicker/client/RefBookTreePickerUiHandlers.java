@@ -57,4 +57,6 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
     void reloadForDate(Date version);
 
     void selectFirstItenOnLoad();
+
+    void highLightItem(RefBookUiTreeItem uiTreeItem);
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.LazyTree;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
@@ -96,8 +97,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         tree.clear();
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem uiTreeItem = new RefBookUiTreeItem(value, multiSelect);
+            getUiHandlers().highLightItem(uiTreeItem);
             tree.addTreeItem(uiTreeItem);
-            if (openOnLoad) {
+            if (openOnLoad  && uiTreeItem.getRefBookTreeItem().isNeedToOpen()) {
                 uiTreeItem.setState(true);
             }
         }
@@ -108,9 +110,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
      * Открыть каскадно все дочерние ветки из веток рута
      */
     public void cascadeOpen() {
-        List<RefBookUiTreeItem> refBookUiTreeItems = new ArrayList<RefBookUiTreeItem>();
-        tree.findAllChild(refBookUiTreeItems, null);
-        for (RefBookUiTreeItem uiTreeItem : refBookUiTreeItems) {
+        for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
             uiTreeItem.setState(true);
         }
     }
@@ -119,8 +119,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void insertChildrens(RefBookUiTreeItem uiTreeItem, List<RefBookTreeItem> values, boolean openOnLoad) {
         for (RefBookTreeItem value : values) {
             RefBookUiTreeItem item = new RefBookUiTreeItem(value, multiSelect);
+            getUiHandlers().highLightItem(item);
             tree.addTreeItem(uiTreeItem, item);
-            if (openOnLoad) {
+            if (openOnLoad && item.getRefBookTreeItem().isNeedToOpen()) {
                 item.setState(true);
             }
         }
@@ -207,9 +208,9 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
                 }
             }
         } else {
-            if (isOpeningOperation) {          // Если это операция лейзи-открывания
-                isOpeningOperation = false;    // то отключаем этот участок така
-                // когда открывание закончилось
+            if (isOpeningOperation) {           // Если это операция лейзи-открывания
+                isOpeningOperation = false;     // то отключаем этот участок так как
+                                                // когда открывание закончилось
                 RefBookUiTreeItem selectedItem = getSelectedItem();
                 if (selectedItem != null) {
                     ensureVisible(selectedItem);
@@ -297,10 +298,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     private RefBookUiTreeItem getUiTreeItem(Long id) {
-        List<RefBookUiTreeItem> fi = new LinkedList<RefBookUiTreeItem>();
-        tree.findAllChild(fi, null);
-
-        for (RefBookUiTreeItem item : fi) {
+        for (RefBookUiTreeItem item : tree.getLoadedItems(null)) {
             if (item.getRefBookTreeItem().getId().equals(id)) {
                 return item;
             }
@@ -471,6 +469,37 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         this.multiSelect = multiSelect;
         tree.setMultiSelect(this.multiSelect);
         widgetFireChangeEvent(getSelectedIds());
+    }
+
+    @Override
+    public int getLoadedItemsCount() {
+        return tree.getLoadedItems(null).size();
+    }
+
+    @Override
+    public void selectAll(DeferredInvokeHandler handler) {
+        if (multiSelect) {
+            for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
+                tree.setSelected(uiTreeItem, true);
+            }
+            widgetFireChangeEvent(getSelectedIds());
+            if (handler != null) {
+                handler.onInvoke();
+            }
+        }
+    }
+
+    @Override
+    public void unselectAll(DeferredInvokeHandler handler) {
+        if (multiSelect) {
+            for (RefBookUiTreeItem uiTreeItem : tree.getLoadedItems(null)) {
+                tree.setSelected(uiTreeItem, false);
+            }
+            widgetFireChangeEvent(getSelectedIds());
+            if (handler != null) {
+                handler.onInvoke();
+            }
+        }
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

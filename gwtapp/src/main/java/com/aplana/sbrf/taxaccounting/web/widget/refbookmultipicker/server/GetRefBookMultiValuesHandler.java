@@ -81,18 +81,23 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
         PagingResult<Map<String, RefBookValue>> refBookPage;
 
         // Получаем нужные объекты по идентификаторам, что бы потом получить разименнованные значения
-        if (action.getIdsTofind() != null && !action.getIdsTofind().isEmpty()) {
-            refBookPage = new PagingResult<Map<String, RefBookValue>>();
-            for (Long id : action.getIdsTofind()) {
-                if (id != null) {
-                    try{
-                        refBookPage.add(refBookDataProvider.getRecordData(id));
-                    } catch (TAException e){
-                        logger.error(e.getMessage());
+        if (action.getIdsTofind() != null) {
+            if (!action.getIdsTofind().isEmpty()) {
+                refBookPage = new PagingResult<Map<String, RefBookValue>>();
+                for (Long id : action.getIdsTofind()) {
+                    if (id != null) {
+                        try {
+                            refBookPage.add(refBookDataProvider.getRecordData(id));
+                        } catch (TAException e) {
+                            logger.error(e.getMessage());
+                        }
                     }
-                }                
+                }
+                refBookPage.setTotalCount(action.getIdsTofind().size());
+            } else {
+                refBookPage = refBookDataProvider
+                        .getRecords(action.getVersion(), null, filter, null);
             }
-            refBookPage.setTotalCount(action.getIdsTofind().size());
         } else {
             // TODO сделать так что бы через filter можно было задать сет идентификаторов для выборки (aivanov)
             refBookPage = refBookDataProvider
