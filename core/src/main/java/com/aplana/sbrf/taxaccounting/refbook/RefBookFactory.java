@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+
+import java.util.List;
 
 /**
  * Фабрика для получения адаптеров справочников
@@ -45,4 +44,12 @@ public interface RefBookFactory {
 	 */
 	RefBookDataProvider getDataProvider(Long refBookId);
 
+    /**
+     * Метод возвращает строку для фильтрации справочника по
+     * определенному строковому ключу
+     *
+     * @param query - ключ для поиска
+     * @return строку фильтрации для поиска по справочнику
+     */
+    String getSearchQueryStatement(String query, Long refBookId);
 }

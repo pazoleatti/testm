@@ -53,7 +53,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	@Override
 	public DeclarationTemplate get(int declarationTemplateId) {
-		return declarationTemplateDao.get(declarationTemplateId);
+        try{
+            return declarationTemplateDao.get(declarationTemplateId);
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка получения шаблона декларации.", e);
+        }
 	}
 
 	@Override

@@ -2,7 +2,8 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookFormDataKind;
@@ -90,4 +91,143 @@ public class RefBookFactoryImpl implements RefBookFactory {
         }
     }
 
+    @Override
+    public String getSearchQueryStatement(String query, Long refBookId) {
+        if (query == null || query.isEmpty()){
+            return null;
+        }
+
+        String q = query.trim().toLowerCase();
+        StringBuilder resultSearch = new StringBuilder();
+        RefBook refBook = get(refBookId);
+        for (RefBookAttribute attribute : refBook.getAttributes()) {
+            if (resultSearch.length() > 0){
+                resultSearch.append(" or ");
+            }
+
+            switch (attribute.getAttributeType()) {
+                case STRING:
+                    resultSearch
+                            .append("LOWER(")
+                            .append(attribute.getAlias())
+                            .append(")");
+                    break;
+                case NUMBER:
+                    resultSearch
+                            .append("TO_CHAR(")
+                            .append(attribute.getAlias())
+                            .append(")");
+                    break;
+                case DATE:
+                    resultSearch.append(attribute.getAlias());
+                    break;
+                case REFERENCE:
+                    if (isSimpleRefBool(refBookId)){
+                        String fullAlias = getStackAlias(attribute);
+                        switch (getLastAttribute(attribute).getAttributeType()){
+                            case STRING:
+                                resultSearch
+                                        .append("LOWER(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case NUMBER:
+                                resultSearch
+                                        .append("TO_CHAR(")
+                                        .append(fullAlias)
+                                        .append(")");
+                                break;
+                            case DATE:
+                                resultSearch.append(fullAlias);
+                                break;
+                            default:
+                                throw new RuntimeException("Unknown RefBookAttributeType");
+                        }
+                    } else {
+                        resultSearch
+                                .append("TO_CHAR(")
+                                .append(attribute.getAlias())
+                                .append(")");
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Unknown RefBookAttributeType");
+
+            }
+
+            resultSearch
+                    .append(" like ")
+                    .append("'%")
+                    .append(q)
+                    .append("%'");
+        }
+
+        return resultSearch.toString();
+    }
+
+    /**
+     * Метод возврадет полный алиас для ссылочного атрибута вида
+     * user.city.name
+     *
+     * @param attribute
+     * @return
+     */
+    private String getStackAlias(RefBookAttribute attribute){
+        switch (attribute.getAttributeType()) {
+            case STRING:
+            case DATE:
+            case NUMBER:
+                return attribute.getAlias();
+            case REFERENCE:
+                RefBook rb = get(attribute.getRefBookId());
+                RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
+                return attribute.getAlias()+"."+getStackAlias(nextAttribute);
+            default:
+                throw new RuntimeException("Unknown RefBookAttributeType");
+        }
+    }
+
+    /**
+     * Метод возвращает последний не ссылочный атрибут по цепочке
+     * ссылок
+     *
+     * @param attribute ссылочный атрибут для которого нужно получить последний не ссылочный атрибут
+     * @return
+     */
+    private RefBookAttribute getLastAttribute(RefBookAttribute attribute){
+        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)){
+            RefBook rb = getByAttribute(attribute.getRefBookAttributeId());
+            RefBookAttribute nextAttribute = rb.getAttribute(attribute.getRefBookAttributeId());
+
+            return getLastAttribute(nextAttribute);
+        } else{
+            return attribute;
+        }
+    }
+
+    /**
+     * Находится ли справочник в стандартной структуре
+     *
+     * @param refBookId
+     * @return
+     */
+    private boolean isSimpleRefBool(Long refBookId){
+        Long[] foreignRefBooks = new Long[]{
+                RefBookDepartment.REF_BOOK_ID,
+                RefBookIncome101.REF_BOOK_ID,
+                RefBookIncome102.REF_BOOK_ID,
+                RefBookUser.REF_BOOK_ID,
+                RefBookSimpleReadOnly.FORM_TYPE_REF_BOOK_ID,
+                RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID,
+                RefBookBigDataProvider.OKTMO_REF_BOOK_ID,
+                RefBookFormDataKind.REF_BOOK_ID};
+
+        for (Long rbId : foreignRefBooks) {
+            if (rbId.equals(refBookId)){
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

@@ -242,11 +242,11 @@ void logicCheck() {
         def missContract = []
         def severalContract = []
         prevDataRows.each { prevRow ->
-            if (prevRow.getAlias() != null && prevRow.reserveCalcValue > 0) {
+            if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
                 count = 0
                 dataRows.each { row ->
                     if (row.getAlias() == null && row.tradeNumber == prevRow.tradeNumber) {
-                        count += 1
+                        count++
                     }
                 }
                 if (count == 0) {
