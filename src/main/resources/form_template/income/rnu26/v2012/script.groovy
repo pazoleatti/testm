@@ -2,9 +2,12 @@ package form_template.income.rnu26.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
+
+import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций,
@@ -840,9 +843,10 @@ def isRubleCurrency(def currencyCode) {
  */
 def BigDecimal calc12(def currency, def date) {
     if (currency != null && !isRubleCurrency(currency)) {
-        def refCourseDataProvider = refBookFactory.getDataProvider(22)
-        def res = refCourseDataProvider.getRecords(date, null, 'CODE_NUMBER=' + currency, null);
-        return (!res.getRecords().isEmpty()) ? res.getRecords().get(0).RATE.getNumberValue() : 0//Правильнее null, такой ситуации быть не должно, она должна отлавливаться проверками НСИ
+        def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$currency",
+                date?:getReportPeriodEndDate(), -1, null, logger, true)
+
+        return record?.RATE?.numberValue
     } else {
         return null;
     }

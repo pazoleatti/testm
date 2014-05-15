@@ -380,10 +380,10 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
 
 // Получить курс банка России на указанную дату.
 def getRate(def Date date, def value) {
-    def res = refBookFactory.getDataProvider(22).getRecords(date != null ? date : new Date(), null, 'CODE_NUMBER=' + value, null);
-    if (res.getRecords() != null && res.getRecords().size() > 0)
-        return res.getRecords().get(0).RATE.numberValue
-    return 0
+    def record = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER', "$value",
+            date?:getEndDate(), -1, null, logger, true)
+
+    return record?.RATE?.numberValue
 }
 
 // Получить количество дней в году по указанной дате.

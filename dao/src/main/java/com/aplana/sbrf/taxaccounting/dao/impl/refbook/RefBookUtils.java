@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -326,7 +328,14 @@ public class RefBookUtils extends AbstractDao {
         getJdbcTemplate().update(String.format("update %s set version=? where id=?", tableName), version, uniqueRecordId);
     }
 
-    private final static String CHECK_REFERENCE_VERSIONS = "select count(*) from %s where VERSION < ? and ID in (%s)";
+
+    private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and ID in (%s)";
+
+    private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id from (\n" +
+            "  select r.id, r.version as versionStart, (select min(version) - interval '1' day from %s rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd \n" +
+            "  from %s r\n" +
+            "  where id in (%s)\n" +
+            ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
     /**
      * Проверка ссылочных атрибутов. Их дата начала актуальности должна быть больше либо равна дате актуальности новой версии
@@ -335,27 +344,63 @@ public class RefBookUtils extends AbstractDao {
      * @param records новые значения полей элемента справочника
      * @return ссылочные атрибуты в порядке?
      */
-    public boolean isReferenceValuesCorrect(String tableName, @NotNull Date versionFrom, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    public void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         if (attributes.size() > 0) {
             StringBuilder in = new StringBuilder();
+            Map<Long, String> attributeIds = new HashMap<Long, String>();
             for (RefBookRecord record : records) {
                 Map<String, RefBookValue> values = record.getValues();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
                             values.get(attribute.getAlias()) != null && !values.get(attribute.getAlias()).isEmpty() &&
                             !attribute.getAlias().equals("DEPARTMENT_ID")) {       //Подразделения не версионируются и их нет смысла проверять
-                        in.append(values.get(attribute.getAlias()).getReferenceValue()).append(",");
+                        Long id = values.get(attribute.getAlias()).getReferenceValue();
+                        attributeIds.put(id, attribute.getName());
+                        in.append(id).append(",");
                     }
                 }
             }
 
             if (in.length() != 0) {
                 in.deleteCharAt(in.length()-1);
-                String sql = String.format(CHECK_REFERENCE_VERSIONS, tableName, in);
-                return getJdbcTemplate().queryForInt(sql, versionFrom) == 0;
+                /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
+                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, in);
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("versionFrom", versionFrom);
+                params.put("versionTo", versionTo);
+                List<Long> result = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+                    @Override
+                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getLong("id");
+                    }
+                });
+                if (result != null && !result.isEmpty()) {
+                    if (logger != null) {
+                        for (Long id : result) {
+                            logger.error(attributeIds.get(id) + ": Период актуальности выбранного значения не пересекается с периодом актуальности версии!");
+                        }
+                    }
+                    throw new ServiceException("Обнаружено некорректное значение атрибута");
+                }
+
+                /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
+                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, in);
+                result = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                    @Override
+                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getLong("id");
+                    }
+                }, versionFrom);
+                if (result != null && !result.isEmpty()) {
+                    if (logger != null) {
+                        for (Long id : result) {
+                            logger.info(attributeIds.get(id) + ": Период актуальности выбранного значения меньше периода актуальности версии!");
+                        }
+
+                    }
+                }
             }
         }
-        return true;
     }
 
     /**
@@ -449,7 +494,11 @@ public class RefBookUtils extends AbstractDao {
 		sql.append(" WHERE id = :id");
 		Map<String, Long> params = new HashMap<String, Long>();
 		params.put("id", recordId);
-        return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+        try {
+            return getNamedParameterJdbcTemplate().queryForObject(sql.toString(), params, new RefBookValueMapper(refBook));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
 	}
 
 
