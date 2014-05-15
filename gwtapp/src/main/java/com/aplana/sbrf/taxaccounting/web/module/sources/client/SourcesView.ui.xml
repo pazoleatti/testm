@@ -2,6 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:w="urn:import:com.aplana.gwt.client"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
     <ui:style field="css" type="com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView.LinkStyle">
@@ -106,9 +107,13 @@
             <fm:BodyContainer>
 
                 <g:HorizontalPanel spacing="3" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
-                    <g:Label addStyleNames="{style.searchLabel}" text="Вид налога:"/>
-                    <g:ValueListBox ui:field="taxTypePicker" addStyleNames="{style.marginRight5}"/>
-                    <style:LinkAnchor ui:field="assignButton" text="Назначить" img="resources/img/sources_approve.png"
+                    <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
+                    <g:ValueListBox ui:field="appointmentTypePicker" addStyleNames="{style.marginRight5}"/>
+                    <g:ValueListBox ui:field="periodFrom" width="300" addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="100px" addStyleNames="{style.marginRight5}"/>
+                    <g:ValueListBox ui:field="periodTo" width="300" addStyleNames="{style.marginRight5}"/>
+                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="100px" addStyleNames="{style.marginRight5}"/>
+                    <style:LinkAnchor ui:field="assignButton" text="Создать назначение" img="resources/img/sources_approve.png"
                                       addStyleNames="{style.marginRight5}"/>
                     <style:LinkAnchor ui:field="cancelButton" text="Отменить назначение"
                                       img="resources/img/sources_reject.png"/>

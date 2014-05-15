@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.AppointmentType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -32,7 +34,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	public interface MyView extends View, HasUiHandlers<SourcesUiHandlers> {
 
-		void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId);
+		void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
+                  boolean isForm, Integer selectedReceiverId, Integer selectedSourceId);
 		void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
 
 		/**
@@ -67,7 +70,13 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		 * @param departmentFormTypes
 		 */
 		void setCurrentSources(List<DepartmentFormTypeShared> departmentFormTypes);
-	}
+
+        PeriodInfo getPeriodFrom();
+        PeriodInfo getPeriodTo();
+        int getYearFrom();
+        int getYearTo();
+
+    }
 
 	private final DispatchAsync dispatcher;
 
@@ -90,10 +99,12 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		super.prepareFromRequest(request);
 
 		// При инициализации формы получаем списки департаментов
-		GetDepartmentsAction action = new GetDepartmentsAction();
+		InitSourcesAction action = new InitSourcesAction();
 
         taxType = TaxType.valueOf(request.getParameter("nType", ""));
         isForm = Boolean.valueOf(request.getParameter("isForm", ""));
+
+        action.setTaxType(taxType);
 
         // Выбранные подразделения
         String selectedReceiverStr = request.getParameter("dst", null);
@@ -102,13 +113,14 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         final Integer selectedSourceId = selectedSourceStr == null ? null : Integer.valueOf(selectedSourceStr);
 
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetDepartmentsResult>() {
+                .defaultCallback(new AbstractCallback<InitSourcesResult>() {
                     @Override
-                    public void onSuccess(GetDepartmentsResult result) {
+                    public void onSuccess(InitSourcesResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        getView().init(taxType, isForm, selectedReceiverId, selectedSourceId);
+                        getView().init(taxType, Arrays.asList(AppointmentType.values()), AppointmentType.SOURCES, result.getYear(),
+                                result.getPeriods(), isForm, selectedReceiverId, selectedSourceId);
                     }
-                }, this).addCallback(new ManualRevealCallback<GetDepartmentsResult>(SourcesPresenter.this)));
+                }, this).addCallback(new ManualRevealCallback<InitSourcesResult>(SourcesPresenter.this)));
     }
 
 	@Override
@@ -216,9 +228,21 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
 	@Override
 	public void updateFormSources(final DepartmentFormType departmentFormType, List<Long> sourceDepartmentFormTypeIds) {
+        PeriodInfo periodFrom = getView().getPeriodFrom();
+        PeriodInfo periodTo = getView().getPeriodTo();
+        int yearFrom = getView().getYearFrom();
+        int yearTo= getView().getYearTo();
+        if (yearFrom > yearTo || (yearFrom == yearTo && periodFrom.getStartDate().after(periodTo.getStartDate()))) {
+            Dialog.errorMessage("Создание назначения", "Интервал периода указан неверно!");
+            return;
+        }
 		UpdateFormSourcesAction action = new UpdateFormSourcesAction();
 		action.setDepartmentFormTypeId(departmentFormType.getId());
 		action.setSourceDepartmentFormTypeIds(sourceDepartmentFormTypeIds);
+        action.setPeriodFrom(periodFrom);
+        action.setPeriodTo(periodTo);
+        action.setYearFrom(yearFrom);
+        action.setYearTo(yearTo);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<UpdateSourcesResult>() {
 					@Override

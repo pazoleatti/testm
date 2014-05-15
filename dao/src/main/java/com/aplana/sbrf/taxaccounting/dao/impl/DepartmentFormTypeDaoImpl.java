@@ -410,6 +410,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
+    public boolean existDepartmentFormTypes(List<Long> departmentFormTypeIds) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
         return getJdbcTemplate().query("select fd.kind, d.name from form_data fd\n" +
                 "join department_form_type dft on (dft.department_id = fd.department_id and dft.kind = fd.kind)\n" +

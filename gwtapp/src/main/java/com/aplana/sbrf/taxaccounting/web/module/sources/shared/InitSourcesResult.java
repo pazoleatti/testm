@@ -1,19 +1,39 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 import java.util.Set;
 
-public class GetDepartmentsResult implements Result {
+public class InitSourcesResult implements Result {
 	private static final long serialVersionUID = 6889603073251885676L;
 	
 	private Set<Integer> availableDepartments;
 	
 	private List<Department> departments;
 
-	public List<Department> getDepartments() {
+    private int year;
+    private List<PeriodInfo> periods;
+
+    public List<PeriodInfo> getPeriods() {
+        return periods;
+    }
+
+    public void setPeriods(List<PeriodInfo> periods) {
+        this.periods = periods;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public List<Department> getDepartments() {
 		return departments;
 	}
 

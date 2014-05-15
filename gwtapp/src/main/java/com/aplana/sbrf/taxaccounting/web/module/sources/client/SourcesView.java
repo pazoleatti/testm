@@ -5,13 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.aplana.gwt.client.Spinner;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.AppointmentType;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
@@ -71,8 +74,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private boolean isForm;
 	private boolean canCancel;
 
-	private static final List<TaxType> TAX_TYPES = asList(TaxType.values());
-
 	private Map<Integer, FormType> sourcesFormTypes;
 	private Map<Integer, FormType> receiversFormTypes;
 	private Map<Integer, DeclarationType> receiversDeclarationTypes;
@@ -87,7 +88,16 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	@UiField LinkStyle css;
 
 	@UiField(provided = true)
-	ValueListBox<TaxType> taxTypePicker;
+	ValueListBox<AppointmentType> appointmentTypePicker;
+    @UiField(provided = true)
+    ValueListBox<PeriodInfo> periodFrom;
+    @UiField
+    Spinner yearFrom;
+    @UiField(provided = true)
+    ValueListBox<PeriodInfo> periodTo;
+    @UiField
+    Spinner yearTo;
+
 	@UiField
 	GenericDataGrid<DepartmentFormType> sourcesTable;
 	@UiField
@@ -115,15 +125,33 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
     @Inject
 	@UiConstructor
 	public SourcesView(final Binder uiBinder) {
-		taxTypePicker = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
+        appointmentTypePicker = new ValueListBox<AppointmentType>(new AbstractRenderer<AppointmentType>() {
 			@Override
-			public String render(TaxType object) {
+			public String render(AppointmentType object) {
 				if (object == null) {
 					return "";
 				}
 				return object.getName();
 			}
 		});
+        periodFrom = new ValueListBox<PeriodInfo>(new AbstractRenderer<PeriodInfo>() {
+            @Override
+            public String render(PeriodInfo object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.getName();
+            }
+        });
+        periodTo = new ValueListBox<PeriodInfo>(new AbstractRenderer<PeriodInfo>() {
+            @Override
+            public String render(PeriodInfo object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.getName();
+            }
+        });
 
 		initWidget(uiBinder.createAndBindUi(this));
 
@@ -135,15 +163,20 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void init(TaxType taxType, boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
+	public void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
+                     boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
 		this.isForm = isForm;
 
         formReceiversTable.setVisible(isForm);
 		declarationReceiversTable.setVisible(!isForm);
-		taxTypePicker.setValue(taxType);
-		taxTypePicker.setAcceptableValues(TAX_TYPES);
-        // Стандартного метода изменения доступности у ValueListBox нет
-        DOM.setElementPropertyBoolean(taxTypePicker.getElement(), "disabled", true);
+        appointmentTypePicker.setValue(type);
+        appointmentTypePicker.setAcceptableValues(types);
+        periodFrom.setValue(periods.get(0));
+        periodFrom.setAcceptableValues(periods);
+        periodTo.setValue(periods.get(0));
+        periodTo.setAcceptableValues(periods);
+        yearFrom.setValue(year);
+        yearTo.setValue(year + 12);
         // Тип налога для ссылок
         updateLinks(taxType, selectedReceiverId, selectedSourceId);
 
@@ -243,7 +276,27 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		enableButtonLink(cancelButton, false);
 	}
 
-	@Override
+    @Override
+    public PeriodInfo getPeriodFrom() {
+        return periodFrom.getValue();
+    }
+
+    @Override
+    public PeriodInfo getPeriodTo() {
+        return periodTo.getValue();
+    }
+
+    @Override
+    public int getYearFrom() {
+        return yearFrom.getValue();
+    }
+
+    @Override
+    public int getYearTo() {
+        return yearTo.getValue();
+    }
+
+    @Override
 	public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
 		departmentReceiverPicker.setAvalibleValues(departments, availableDepartments);
 		departmentReceiverPicker.setValue(null);

@@ -98,10 +98,10 @@ public interface SourceService {
     /**
      * Обновляет информацию об источниках формы
      *
-     * @param departmentFormTypeId        идентификатор связки для которой нужно обновить источники
-     * @param sourceDepartmentFormTypeIds идентификаторы форм-источников в виде списка
+     * @param leftDpartmentFormTypeId     идентификатор связки из левой части формы. Т.е тот, для которого назначают множество источников/приемников
+     * @param rightDepartmentFormTypeIds идентификаторы связок из справой части формы. Т.е те, которые являются множеством источников/приемников для связки из левой части
      */
-    void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds);
+    void saveFormSources(Long leftDpartmentFormTypeId, List<Long> rightDepartmentFormTypeIds);
 
  
 

@@ -38,9 +38,10 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveFormSources(Long departmentFormTypeId, List<Long> sourceDepartmentFormTypeIds) {
-    	// TODO Добавить проверки на то что пользователь может сделать это назначение
-        departmentFormTypeDao.saveFormSources(departmentFormTypeId, sourceDepartmentFormTypeIds);
+    public void saveFormSources(Long leftDpartmentFormTypeId, List<Long> rightDepartmentFormTypeIds) {
+    	/** Проверяем, что связки подразделение-вид-тип нф еще существуют */
+        //departmentFormTypeDao.get
+        departmentFormTypeDao.saveFormSources(leftDpartmentFormTypeId, rightDepartmentFormTypeIds);
     }
 
     @Override

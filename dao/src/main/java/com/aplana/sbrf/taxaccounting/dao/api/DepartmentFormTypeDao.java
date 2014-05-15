@@ -179,6 +179,13 @@ public interface DepartmentFormTypeDao {
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
     /**
+     * Проверяет, существует ли список назначенных подразделению форм (с учётом вида и типа)
+     * @param departmentFormTypeIds список идентификаторов назначений
+     * @return назначения существуют?
+     */
+    boolean existDepartmentFormTypes(List<Long> departmentFormTypeIds);
+
+    /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
      * @param sourceDepartmentId идентификатор подразделения формы-источника
      * @param sourceFormTypeId   вид налоговой формы-источника
