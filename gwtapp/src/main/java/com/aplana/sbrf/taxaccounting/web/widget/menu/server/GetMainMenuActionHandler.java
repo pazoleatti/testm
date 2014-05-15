@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTo
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
+import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.MenuItem;
@@ -213,6 +214,13 @@ public class GetMainMenuActionHandler extends
                         + RefBookListTokens.REFBOOK_LIST_ADMIN)));
                 templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
             }
+
+            // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
+            if("god".equals(currentUser.getLogin())){
+                adminMenuItem.getSubMenu().add(new MenuItem("Тестовая страница", NUMBER_SIGN
+                        + TestPageTokens.TEST_PAGE));
+            }
+
             menuItems.add(adminMenuItem);
         }
 

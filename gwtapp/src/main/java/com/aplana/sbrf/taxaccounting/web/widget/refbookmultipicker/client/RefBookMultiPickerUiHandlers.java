@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -14,7 +15,7 @@ public interface RefBookMultiPickerUiHandlers extends UiHandlers {
 
     void rangeChanged(int startIndex, int max);
 
-    void loadingForSelection(Collection<Long> ids);
+    void loadingForSelection(Collection<Long> ids, DeferredInvokeHandler handler);
 
     void onSort(Integer columnIndex, boolean isSortAscending);
 

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
@@ -113,20 +114,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             }
         });
         cellTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-        //        cellTable.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
-//            @Override
-//            public void onLoadingStateChanged(LoadingStateChangeEvent event) {
-//                if (event.getLoadingState() == LoadingStateChangeEvent.LoadingState.LOADED) {
-//                    //заглушка
-//                }
-//            }
-//        });
-
-//        cellTable.addRangeChangeHandler(new RangeChangeEvent.Handler() {
-//            public void onRangeChange(RangeChangeEvent event) {
-//                //заглушка
-//            }
-//        });
 
         cellTable.setPageSize(pager.getPageSize());
         pager.setDisplay(cellTable);
@@ -168,7 +155,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     public void trySelectValues(Set<Long> value) {
         clearSelected(false);
         if (!value.isEmpty()) {
-            getUiHandlers().loadingForSelection(value);
+            getUiHandlers().loadingForSelection(value, null);
         } else {
             widgetFireChangeEvent(longList);
         }
@@ -276,8 +263,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
             i++;
         }
-        System.out.println("" +sortColumns.size() +"");
-        System.out.println("" +cellTable.getColumnSortList().size() +"");
     }
 
     @Override
@@ -375,17 +360,50 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         if (multiSelect) {
             cellTable.setSelectionModel(selectionModel, multiSelectManager);
         } else {
-            DefaultSelectionEventManager<RefBookItem> defaultSelectionEventManager = createDefaultManager();
-            cellTable.setSelectionModel(selectionModel, defaultSelectionEventManager);
+            cellTable.setSelectionModel(selectionModel, DefaultSelectionEventManager.<RefBookItem>createDefaultManager());
         }
         // удаляем регистрацию на уничтоженый менеджер выделений
         selectionHandlerRegistration.removeHandler();
         selectionHandlerRegistration = selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                onSelection();
-            }
+            public void onSelectionChange(SelectionChangeEvent event) { onSelection(); }
         });
+    }
+
+    @Override
+    public int getLoadedItemsCount() {
+        return cellTable.getRowCount();
+    }
+
+    @Override
+    public void selectAll(DeferredInvokeHandler handler) {
+        if (multiSelect) {
+            if(cellTable.getRowCount() == cellTable.getVisibleItemCount()){
+                // если отображены все итемы на одной странице
+                for (RefBookItem refBookItem : cellTable.getVisibleItems()) {
+                    selectionModel.setSelected(refBookItem, true);
+                }
+                widgetFireChangeEvent(getSelectedIds());
+                if (handler != null) {
+                    handler.onInvoke();
+                }
+            } else {
+                // или подгружаем записи с сервера
+                // подгружаем потому что нужны разименованные значения
+                getUiHandlers().loadingForSelection(new ArrayList<Long>(), handler);
+            }
+
+        }
+    }
+
+    @Override
+    public void unselectAll(DeferredInvokeHandler handler) {
+        if (multiSelect) {
+            clearSelected(true);
+            if (handler != null) {
+                handler.onInvoke();
+            }
+        }
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

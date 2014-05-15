@@ -19,6 +19,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 
+/**
+ * Кнопка ввиде ссылки
+ */
 public class LinkButton extends FocusWidget implements HasHorizontalAlignment,
 		HasHTML, HasSafeHtml {
 
