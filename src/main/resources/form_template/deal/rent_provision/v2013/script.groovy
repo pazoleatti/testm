@@ -60,11 +60,11 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['jurName', 'incomeBankSum', 'outcomeBankSum', 'contractNum', 'contractDate', 'country',
-        'region', 'city', 'settlement', 'count', 'transactionDate']
+        'region', 'city', 'settlement', 'count', 'price', 'transactionDate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'price', 'cost']
+def autoFillColumns = ['rowNum', 'innKio', 'countryCode', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -149,7 +149,6 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, false)
 
         def count = row.count
-        def price = row.price
         def cost = row.cost
         def incomeBankSum = row.incomeBankSum
         def outcomeBankSum = row.outcomeBankSum
@@ -166,10 +165,9 @@ void logicCheck() {
             msgBankSum = row.getCell('outcomeBankSum').column.name
         }
 
-        //Наименования колонок
+        // Наименования колонок
         def contractDateName = row.getCell('contractDate').column.name
         def transactionDateName = row.getCell('transactionDate').column.name
-        def priceName = row.getCell('price').column.name
         def countName = row.getCell('count').column.name
         def costName = row.getCell('cost').column.name
 
@@ -184,10 +182,6 @@ void logicCheck() {
 
         if (bankSum != null && count != null && count != 0) {
             res = (bankSum / count).setScale(0, RoundingMode.HALF_UP)
-        }
-
-        if (bankSum == null || count == null || price != res) {
-            logger.warn("Строка $rowNum: «$priceName» не равно отношению «$msgBankSum» и «$countName»!")
         }
 
         // Проверка доходности
@@ -210,11 +204,6 @@ void logicCheck() {
         // Корректность даты совершения сделки
         if (transactionDate < contractDate) {
             logger.warn("Строка $rowNum: «$transactionDateName» не может быть меньше «$contractDateName»!")
-        }
-
-        // Проверка стоимости
-        if (row.price != calc13(row, bankSum)) {
-            logger.warn("Строка $rowNum: «$costName» не равна произведению «$countName» и «$priceName»!")
         }
 
         // Проверка заполненности одного из атрибутов
@@ -257,8 +246,6 @@ void calc() {
         if (row.outcomeBankSum != null && row.incomeBankSum == null)
             bankSum = row.outcomeBankSum
 
-        // Расчет поля "Цена"
-        row.price = calc13(row, bankSum)
         // Расчет поля "Стоимость"
         row.cost = bankSum
         // Расчет полей зависимых от справочников
@@ -422,7 +409,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 13
+        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         xmlIndexCol++
+
         // графа 14
         xmlIndexCol++
 

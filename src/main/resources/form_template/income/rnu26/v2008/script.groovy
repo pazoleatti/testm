@@ -1,4 +1,4 @@
-package form_template.income.rnu26.v2012
+package form_template.income.rnu26.v2008
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-
-import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций,
