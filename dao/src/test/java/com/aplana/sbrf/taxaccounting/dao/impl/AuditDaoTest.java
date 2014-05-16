@@ -184,6 +184,7 @@ public class AuditDaoTest {
         filterDao.setCountOfRecords(5);
         filterDao.setSearchOrdering(HistoryBusinessSearchOrdering.DATE);
         filterDao.setReportPeriodName("2014 первый квартал");
+        filterDao.setUserIds(Arrays.asList(1l));
         PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filterDao);
         assertEquals(0, records.size());
     }

@@ -7,6 +7,7 @@ import java.util.List;
  * User: avanteev
  */
 public class LogSystemFilterDao {
+    private List<Long> userIds;
     List<Long> formDataIds;
     List<Long> declarationDataIds;
     private Date fromSearchDate;
@@ -18,6 +19,15 @@ public class LogSystemFilterDao {
     private boolean ascSorting;
     /*Стартовый индекс списка записей */
     private int startIndex;
+
+
+    public List<Long> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
+    }
 
     public int getStartIndex() {
         return startIndex;

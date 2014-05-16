@@ -184,6 +184,7 @@ public class AuditServiceImpl implements AuditService {
         filterDao.setSearchOrdering(filter.getSearchOrdering());
         filterDao.setAscSorting(filter.isAscSorting());
         filterDao.setStartIndex(filter.getStartIndex());
+        filterDao.setUserIds(filter.getUserIds());
         try {
             return auditDao.getLogsBusiness(filterDao);
         } catch (DaoException e){

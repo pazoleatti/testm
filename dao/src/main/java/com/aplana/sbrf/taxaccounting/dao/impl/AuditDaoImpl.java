@@ -134,6 +134,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         names.put("rpName", "%" + filter.getReportPeriodName() + "%");
         names.put("startIdx", filter.getStartIndex() + 1);
         names.put("endIdx", filter.getStartIndex() + filter.getCountOfRecords());
+        names.put("userIds", filter.getUserIds());
 
         StringBuilder sql = new StringBuilder();
         appendWithClause(sql, filter);
@@ -473,6 +474,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         sql.append(" WHERE (ls.report_period_name = CAST(tp.year AS VARCHAR(4)) || ' ' || rp.name) ");
         sql.append(filterDao.getReportPeriodName() != null && !filterDao.getReportPeriodName().isEmpty() ?
                 "AND ls.report_period_name LIKE :rpName ":"");
+        sql.append(filterDao.getUserIds() != null && !filterDao.getUserIds().isEmpty() ?
+                "AND ls.user_id in (:userIds) ":"");
         sql.append(filterDao.getFromSearchDate() != null && filterDao.getToSearchDate() != null ?
                 " AND ls.log_date between :fromDate AND :endDate + interval '1' day" : "");
     }
