@@ -77,7 +77,7 @@
                         <g:Label  text="Пользователь:" addStyleNames="{style.labelBlockMargin}"/>
                     </g:cell>
 
-                    <r:RefBookPickerWidget ui:field="user" attributeIdInt="652" isHierarchical="false" width="100%"
+                    <r:RefBookPickerWidget ui:field="user" title="Выбор пользователя" attributeIdInt="652" isHierarchical="false" width="100%"
                                            multiSelect="true" versionEnabled="false"/>
                 </g:HorizontalPanel>
                 <g:cell height="25px">
@@ -115,7 +115,7 @@
                         <dw:ListBoxWithTooltip ui:field="declarationTypeId" height="22px" width="100%"
                                                showTooltip="true" visible="false"/>
 
-                        <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" visible="false" width="100%"
+                        <r:RefBookPickerWidget ui:field="formDataKind" title="Выбор типа налоговой формы" attributeIdInt="837" visible="false" width="100%"
                                                isHierarchical="false" multiSelect="true" searchEnabled="false" versionEnabled="false"/>
 
                     </g:HorizontalPanel>
@@ -126,7 +126,7 @@
                         <g:cell horizontalAlignment="right"  width="145px">
                             <g:Label ui:field="formTypeLabel" text="Вид нал. формы:" visible="false" addStyleNames="{style.labelBlockMargin}"/>
                         </g:cell>
-                        <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" visible="false" width="100%" versionEnabled="false"
+                        <r:RefBookPickerWidget ui:field="formTypeId" title="Выбор вида налоговой формы" attributeIdInt="835" visible="false" width="100%" versionEnabled="false"
                                                isHierarchical="false" multiSelect="true"/>
                     </g:HorizontalPanel>
                 </g:cell>
