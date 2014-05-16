@@ -1228,7 +1228,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 result.setVersion(rs.getDate("VERSION"));
                 result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"STATUS")));
                 result.setNextVersion(rs.getDate("NEXTVERSION"));
-                result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                if (SqlUtils.getInteger(rs,"NEXTSTATUS")!=null)
+                    result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                else
+                    result.setNextStatus(null);
                 result.setResult(CrossResult.getResultById(SqlUtils.getInteger(rs,"RESULT")));
                 return result;
             }
