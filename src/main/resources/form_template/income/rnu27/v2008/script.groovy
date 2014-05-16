@@ -1,4 +1,4 @@
-package form_template.income.rnu27.v2012
+package form_template.income.rnu27.v2008
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
