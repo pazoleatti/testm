@@ -230,7 +230,8 @@ create table form_column (
   format number(2),
   filter varchar2(1000),
   parent_column_id number(9),
-  attribute_id2 number(18)
+  attribute_id2 number(18),
+  numeration_row number(9)
 );
 comment on table form_column is 'Описания столбцов налоговых форм';
 comment on column form_column.alias is 'Код столбца, используемый в скриптинге';
@@ -248,6 +249,7 @@ comment on column form_column.filter is 'Условие фильтрации э�
 comment on column form_column.max_length IS 'Максимальная длина строки';
 comment on column form_column.parent_column_id is 'Ссылка на родительскую графу';
 comment on column form_column.attribute_id2 is 'Код отображаемого атрибута для столбцов-ссылок второго уровня';
+comment on column form_column.numeration_row is 'Тип нумерации строк для автонумеруемой графы';
 
 create sequence seq_form_column start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -422,7 +424,8 @@ create table form_data (
   kind number(9) not null,
   report_period_id number(9) not null,
   return_sign number(1) not null,
-  period_order number(2)
+  period_order number(2),
+  number_previous_row number (9)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -433,6 +436,7 @@ comment on column form_data.kind is 'Тип налоговой формы (1 - �
 comment on column form_data.report_period_id is 'Идентификатор отчетного периода';
 comment on column form_data.return_sign is 'Флаг возврата (0 - обычный режим; 1 - форма возвращена из вышестоящего статуса)';
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
+comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
