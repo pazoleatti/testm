@@ -8,6 +8,7 @@ drop index i_form_data_form_template_id;
 drop index i_form_data_report_period_id;
 drop index i_data_row_form_data_id;
 drop index i_department_parent_id;
+drop sequence seq_department_report_period;
 drop sequence seq_task_context;
 drop sequence seq_log_system;
 drop sequence seq_log_business;
