@@ -240,7 +240,7 @@ comment on column form_column.id is 'Первичный ключ';
 comment on column form_column.name is 'Название столбца';
 comment on column form_column.ord is 'Порядковый номер';
 comment on column form_column.precision is 'Количество знаков после запятой (только для числовых столбцов)';
-comment on column form_column.type is 'Тип столбца (S - строка, N – число, D – дата, R - ссылка)';
+comment on column form_column.type is 'Тип столбца (S - строка, N – число, D – дата, R - ссылка, A - автонумеруемая графа)';
 comment on column form_column.width is 'Ширина (в символах)';
 comment on column form_column.checking is 'Признак проверочного столбца';
 comment on column form_column.attribute_id is 'Код отображаемого атрибута для столбцов-ссылок';
