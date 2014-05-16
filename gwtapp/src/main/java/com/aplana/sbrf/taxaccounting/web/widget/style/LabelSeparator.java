@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
-import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesView;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -36,9 +33,8 @@ public class LabelSeparator extends Composite implements HasText {
     Label textBox = new Label("Разделитель", false);
     HTMLPanel htmlPanel = new HTMLPanel("");
 
-    private boolean textRight = false;
-
     public LabelSeparator() {
+        this("Разделитель");
     }
 
     @Inject
