@@ -76,6 +76,11 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         int getYearFrom();
         int getYearTo();
 
+        Map<Integer, FormType> getSourcesFormTypes();
+
+        Map<Integer, FormType> getReceiversFormTypes();
+
+        Map<Integer, DeclarationType> getReceiversDeclarationTypes();
     }
 
 	private final DispatchAsync dispatcher;
