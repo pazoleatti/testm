@@ -1,4 +1,4 @@
-package form_template.income.rnu51.v2012
+package form_template.income.rnu51.v2008
 
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
