@@ -173,7 +173,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
 
         if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch.toString() + ")";
-        } else if (resultFilter.length() > 0 && (resultSearch != null || resultSearch.length() == 0)) {
+        } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.length() == 0)) {
             return resultFilter.toString();
         } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch.toString();
