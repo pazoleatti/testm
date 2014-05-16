@@ -188,7 +188,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
         initWidget(uiBinder.createAndBindUi(this));
         fromSearchDate.setValue(new Date());
         toSearchDate.setValue(new Date());
-        user.setPeriodDates(null, new Date());
+        user.setPeriodDates(new Date(), new Date());
         formDataKind.setPeriodDates(new Date(), new Date());
         /*formTypeId.setEnabled(false);*/
         formTypeId.setPeriodDates(new Date(), new Date());
