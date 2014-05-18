@@ -46,14 +46,19 @@ public class DepartmentDeclarationTypeDaoImplTest {
 	}
 
 	@Test
-	public void testGetDestanations() {
-		List<DepartmentDeclarationType> ddt = departmentDeclarationTypeDao.getDestinations(2, 1, FormDataKind.PRIMARY);
-		assertEquals(1, ddt.size());
-		ddt = departmentDeclarationTypeDao.getDestinations(1, 1, FormDataKind.PRIMARY);
-		assertEquals(2, ddt.size());
-		ddt = departmentDeclarationTypeDao.getDestinations(1, 2, FormDataKind.CONSOLIDATED);
-		assertEquals(2, ddt.size());
-	}
+     public void testGetDestanations() {
+        List<DepartmentDeclarationType> ddt = departmentDeclarationTypeDao.getDestinations(2, 1, FormDataKind.PRIMARY);
+        assertEquals(1, ddt.size());
+        ddt = departmentDeclarationTypeDao.getDestinations(1, 1, FormDataKind.PRIMARY);
+        assertEquals(2, ddt.size());
+        ddt = departmentDeclarationTypeDao.getDestinations(1, 2, FormDataKind.CONSOLIDATED);
+        assertEquals(2, ddt.size());
+    }
+
+    @Test
+    public void testGetByTaxType() {
+        assertEquals(2, departmentDeclarationTypeDao.getByTaxType(1, null).size());
+    }
 
 	@Test
 	public void testGetDepartmentIdsByTaxType() {

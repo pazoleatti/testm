@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -60,9 +61,14 @@ public class DepartmentFormTypeDaoImplTest {
 	}
 	
 	@Test
-	public void getFormDestinations(){
-		assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
-	}
+     public void getFormDestinations(){
+        assertEquals(2, departmentFormTypeDao.getFormDestinations(1, 1, FormDataKind.fromId(3)).size());
+    }
+
+    @Test
+    public void getFormDestinationsForDestDep(){
+        assertEquals(0, departmentFormTypeDao.getFormDestinations(1, 1, Arrays.asList(1)).size());
+    }
 
 	@Test
 	public void getDeclarationDestinations1(){
@@ -70,9 +76,14 @@ public class DepartmentFormTypeDaoImplTest {
 	}
 
 	@Test
-	public void getDeclarationDestinations2(){
-		assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1, FormDataKind.fromId(3)).size());
-	}
+     public void getDeclarationDestinations2(){
+        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1, FormDataKind.fromId(3)).size());
+    }
+
+    @Test
+    public void getDeclarationDestinationsForDestDep(){
+        assertEquals(0, departmentFormTypeDao.getDeclarationDestinations(1, 1,  Arrays.asList(1)).size());
+    }
 	
 	@Test
 	public void testGetAllSources() {

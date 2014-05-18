@@ -57,6 +57,8 @@ public interface DepartmentDao {
 	 */
 	String getParentsHierarchyShortNames(Integer departmentId);
 
+    Integer getParentTBId(int departmentId);
+
     /**
      * Получить список всех подразделений
      * @return список всех подразделений

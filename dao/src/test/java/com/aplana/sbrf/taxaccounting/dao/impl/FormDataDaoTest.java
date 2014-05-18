@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // TODO: (sgoryachkin) Пришлось вычистить тесты, т.к. они тестировали в основном только работу со строками, что теперь не актуально
@@ -180,6 +181,12 @@ public class FormDataDaoTest {
     }
 
     @Test
+    public void testGetFormDataIds(){
+        List<Integer> list = new ArrayList<Integer>() {{ add(1); add(11); add(12); add(13); }};
+        Assert.assertEquals(11, formDataDao.getFormDataIds(Arrays.asList(TaxType.values()), list).size());
+    }
+
+    @Test
     public void findMonth1Test() {
         FormData fdJanuary = formDataDao.findMonth(2, FormDataKind.PRIMARY, 1, 12, 1);
         Assert.assertEquals(fdJanuary.getId().longValue(), 14L);
@@ -244,5 +251,10 @@ public class FormDataDaoTest {
     public void testGetFormDataListInActualPeriodByTemplate() throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
         Assert.assertEquals(4, formDataDao.getFormDataListInActualPeriodByTemplate(1, format.parse("2013.01.01")).size());
+    }
+
+    @Test
+    public void testFindByDepAndReportPeriod() throws ParseException {
+        Assert.assertEquals(1, formDataDao.find(Arrays.asList(1), 1).size());
     }
 }

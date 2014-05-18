@@ -29,8 +29,17 @@ public class Department implements Serializable {
 	private String tbIndex;
 	private String sbrfCode;
     private Long regionId;
+    private boolean isActive;
 
-	/**
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    /**
 	 * Получить идентификатор подразделения
 	 * 
 	 * @return идентификатор подразделения

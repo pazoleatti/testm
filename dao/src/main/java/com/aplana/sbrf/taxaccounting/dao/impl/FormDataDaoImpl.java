@@ -251,7 +251,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
     }
 
-	@Override
+    @Override
+    public List<Long> findFormDataByDepartment(int departmentId) {
+        try {
+            return getJdbcTemplate().queryForList("select id from form_data where department_id = ?",
+                    new Object[]{departmentId},
+                    Long.class);
+        }catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>(0);
+        }
+        catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
 	public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         Map paramMap = new HashMap();
         paramMap.put("rp", reportPeriodId);
@@ -392,6 +406,26 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             String errorMsg = String.format("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s",formTypeId, kind.getId(), departmentId);
             logger.error(errorMsg, e);
             throw new DaoException(errorMsg, e);
+        }
+    }
+
+    @Override
+    public List<Long> getFormDataIds(List<TaxType> taxTypes, final List<Integer> departmentIds) {
+        try {
+            HashMap<String, Object> values = new HashMap<String, Object>(){{put("departmentIds", departmentIds);}};
+            String sql = "select fd.id from FORM_DATA fd left join FORM_TEMPLATE ft on fd.FORM_TEMPLATE_ID = ft.id " +
+                    "left join FORM_TYPE ftype on ft.TYPE_ID = ftype.ID " +
+                    "where ftype.TAX_TYPE in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " and fd.DEPARTMENT_ID in (:departmentIds)";
+            return getNamedParameterJdbcTemplate().queryForList(
+                    sql,
+                    values,
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Long>(0);
+        } catch (DataAccessException e) {
+            logger.error("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", e);
+            throw new DaoException("Ошибка при поиске налоговых форм с заданными параметрами", e);
         }
     }
 

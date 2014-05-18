@@ -74,16 +74,14 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		return departmentIds;
 	}
 
-	private final static String GET_SQL_BY_TAX_TYPE_SQL = "select * from department_declaration_type ddt where department_id = ?" +
-			" and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id and dt.tax_type = ?)";
-
 	@Override
 	public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
 		return getJdbcTemplate().query(
-				GET_SQL_BY_TAX_TYPE_SQL,
+                "select * from department_declaration_type ddt where department_id = ?" +
+                " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id " +
+                        (taxType != null ? "and dt.tax_type in " +SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "") + ")",
 				new Object[] {
-						departmentId,
-						String.valueOf(taxType.getCode())
+						departmentId
 				},
 				DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER
 		);

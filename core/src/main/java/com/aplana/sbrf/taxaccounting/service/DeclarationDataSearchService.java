@@ -35,4 +35,13 @@ public interface DeclarationDataSearchService {
      * @return
      */
     List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
+
+    /**
+     * Получние экземпляров для всех деклараций по фильтру.
+     * @param declarationFilter
+     * @param ordering
+     * @param asc
+     * @return
+     */
+    List<DeclarationData> getDeclarationData(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
 }
