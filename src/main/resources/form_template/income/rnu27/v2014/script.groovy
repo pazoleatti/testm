@@ -507,11 +507,8 @@ void addData(def xml, int headRowCount) {
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
         // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
         xmlIndexCol = 3
-        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         newRow.regNumber = record84?.record_id?.value
-        if (newRow.regNumber == null) {
-            newRow.regNumber = 181182184 as BigDecimal
-        }
 
         // Графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         xmlIndexCol = 2
