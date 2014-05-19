@@ -21,7 +21,7 @@ class Main {
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
     def static DB_USER = 'TAX_0_3_8'
     def static DB_PASSWORD = 'TAX'
-    // Схема для сравнения макетов
+    // Схема для сравнения макетов, null если сравнение не требуется
     def static DB_USER_COMPARE = 'TAX_0_3_7'
 
     // Путь к папке с шаблонами
@@ -342,7 +342,8 @@ class Main {
         def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
             head {
-                title "Сравнение макетов"
+                meta(charset: 'windows-1251')
+                title "Сравнение макетов git и БД $DB_USER"
                 style(type: "text/css", HTML_STYLE)
             }
             body {
@@ -355,7 +356,7 @@ class Main {
                                 td(colspan: 6, class: 'hdr', TAX_FOLDERS[folderName])
                             }
                             tr {
-                                th 'Id'
+                                th 'type_id'
                                 th 'Папка'
                                 th 'Название'
                                 th 'Версия git'
@@ -429,7 +430,7 @@ class Main {
         }
 
         // Графы
-        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, attribute_id2 from form_column where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
+        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
             def form_template_id = it.form_template_id as Integer
             if (!columns1.containsKey(form_template_id)) {
                 columns1.put(form_template_id, [] as Set)
@@ -448,7 +449,7 @@ class Main {
             column.format = it.format
             column.filter = it.filter
             column.parent_column_id = it.parent_column_id
-            column.parent_column_id = it.parent_column_id
+            column.parent_alias = it.parent_alias
             column.attribute_id2 = it.attribute_id2
             columns1[form_template_id].add(column)
         }
@@ -490,7 +491,7 @@ class Main {
         }
 
         // Графы
-        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, attribute_id2 from form_column where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
+        sql.eachRow("select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2 from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord") {
             def form_template_id = it.form_template_id as Integer
             if (!columns2.containsKey(form_template_id)) {
                 columns2.put(form_template_id, [] as Set)
@@ -509,7 +510,7 @@ class Main {
             column.format = it.format
             column.filter = it.filter
             column.parent_column_id = it.parent_column_id
-            column.parent_column_id = it.parent_column_id
+            column.parent_alias = it.parent_alias
             column.attribute_id2 = it.attribute_id2
             columns2[form_template_id].add(column)
         }
@@ -527,6 +528,7 @@ class Main {
         def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
             head {
+                meta(charset: 'windows-1251')
                 title "Сравнение макетов в $prefix1 и $prefix2"
                 style(type: "text/css", HTML_STYLE)
             }
@@ -535,12 +537,14 @@ class Main {
                 table {
                     TAX_FOLDERS.keySet().each { taxName ->
                         tr {
-                            td(colspan: 12, class: 'hdr', TAX_FOLDERS[taxName])
+                            td(colspan: 14, class: 'hdr', TAX_FOLDERS[taxName])
                         }
                         tr {
-                            th(rowspan: 2, 'Id')
+                            th(rowspan: 2, 'type_id')
                             th(rowspan: 2, 'Название')
                             th(rowspan: 2, 'Версия')
+                            th(rowspan: 2, "$prefix1 id")
+                            th(rowspan: 2, "$prefix2 id")
                             th(colspan: 9, 'Результат сравнения')
                         }
                         tr {
@@ -621,8 +625,8 @@ class Main {
                                                 if (col1.filter != col2.filter) {
                                                     columnsChangesList.add("filter")
                                                 }
-                                                if (col1.parent_column_id != col2.parent_column_id) {
-                                                    columnsChangesList.add("parent_column_id")
+                                                if (col1.parent_alias != col2.parent_alias) {
+                                                    columnsChangesList.add("parent_alias")
                                                 }
                                                 if (col1.attribute_id2 != col2.attribute_id2) {
                                                     columnsChangesList.add("attribute_id2")
@@ -638,6 +642,8 @@ class Main {
                                         td type_id
                                         td name
                                         td version
+                                        td tmp1?.id
+                                        td tmp2?.id
                                         if (nameC == '+') {
                                             td(class: 'td_ok', nameC)
                                         } else {
@@ -659,7 +665,11 @@ class Main {
                                         if (datarowsC == '+') {
                                             td(class: 'td_ok', datarowsC)
                                         } else {
-                                            td(class: 'td_error', title: 'См. БД', datarowsC)
+                                            def title = 'См. БД'
+                                            if (tmp1?.data_rows == null && tmp2?.data_rows != null || tmp1?.data_rows != null && tmp2?.data_rows == null) {
+                                                title = "Нет в ${tmp1?.data_rows == null ? prefix1 : prefix2}"
+                                            }
+                                            td(class: 'td_error', title: title, datarowsC)
                                         }
 
                                         if (dataheadersC == '+') {
@@ -710,8 +720,10 @@ class Main {
         }
         // Построение отчета сравнения
         updateScripts(getDBVersions(), true)
-        println("See REPORT_GIT_NAME for details")
+        println("See $REPORT_GIT_NAME for details")
         // Сравнение схем в БД
-        compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+        if (DB_USER_COMPARE != null) {
+            compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+        }
     }
 }
