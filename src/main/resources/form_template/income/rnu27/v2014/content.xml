@@ -24,24 +24,26 @@
         <order>2</order>
         <width>0</width>
         <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>3</order>
         <width>20</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>809</nameAttributeId>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>809</refBookAttributeId>
+        <refBookAttributeId2>868</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
         <name>Государственный регистрационный номер</name>
         <order>4</order>
-        <width>6</width>
-        <parentId>19455</parentId>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>813</nameAttributeId>
         <refBookAttributeId>813</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -51,6 +53,7 @@
         <order>5</order>
         <width>5</width>
         <maxLength>20</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>currency</alias>
@@ -58,15 +61,16 @@
         <name>Валюта выпуска облигации</name>
         <order>6</order>
         <width>5</width>
-        <parentId>19455</parentId>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>prev</alias>
         <checking>false</checking>
         <name>Размер лота на предыдущую отчетную дату, шт. (по депозитарному учету)</name>
         <order>7</order>
-        <width>6</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -75,14 +79,14 @@
         <checking>false</checking>
         <name>Размер лота на текущую отчетную дату, шт. (по депозитарному учету)</name>
         <order>8</order>
-        <width>6</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reserveCalcValuePrev</alias>
         <checking>false</checking>
-        <name>Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)</name>
+        <name>Расчётная величина резерва на предыдущую отчётную дату, руб.коп.</name>
         <order>9</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -91,21 +95,21 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <name>Стоимость по цене приобретения (руб.коп.)</name>
+        <name>Стоимость по цене приобретения, руб.коп.</name>
         <order>10</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчётную дату</name>
         <order>11</order>
-        <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>622</nameAttributeId>
-        <refBookAttributeId>621</refBookAttributeId>
+        <width>7</width>
+        <parentAlias>regNumber</parentAlias>
+        <refBookAttributeId>869</refBookAttributeId>
+        <refBookAttributeId2>621</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>
@@ -137,7 +141,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>costOnMarketQuotation</alias>
         <checking>false</checking>
-        <name>Стоимость по рыночной котировке (руб.коп.)</name>
+        <name>Стоимость по рыночной котировке, руб.коп.</name>
         <order>15</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -146,7 +150,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reserveCalcValue</alias>
         <checking>false</checking>
-        <name>Расчетная величина резерва на текущую отчётную дату (руб.коп.)</name>
+        <name>Расчетная величина резерва на текущую отчётную дату, руб.коп.</name>
         <order>16</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -155,7 +159,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reserveCreation</alias>
         <checking>false</checking>
-        <name>Создание резерва (руб.коп.)</name>
+        <name>Создание резерва, руб.коп.</name>
         <order>17</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -164,19 +168,12 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>recovery</alias>
         <checking>false</checking>
-        <name>Восстановление резерва (руб.коп.)</name>
+        <name>Восстановление резерва, руб.коп.</name>
         <order>18</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <italic>false</italic>
-    </styles>
     <styles>
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
@@ -189,6 +186,13 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

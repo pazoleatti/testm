@@ -4,6 +4,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter;
 import com.aplana.sbrf.taxaccounting.dao.refbook.filter.FilterTreeListener;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -252,10 +253,14 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
             return "id";
         } else {
             StringBuffer sb = new StringBuffer();
+            RefBookAttribute attribute = refBook.getAttribute(alias);
+            if (attribute == null){
+                throw new IllegalArgumentException("Не найден атрибут с алиасом = "+alias);
+            }
             sb.append("a");
             sb.append(alias);
             sb.append(".");
-            sb.append(refBook.getAttribute(alias).getAttributeType().toString());
+            sb.append(attribute.getAttributeType().toString());
             sb.append("_value");
 
             return sb.toString();
