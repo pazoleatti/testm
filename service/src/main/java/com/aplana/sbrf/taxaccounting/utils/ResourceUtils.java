@@ -4,12 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import jcifs.smb.SmbFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.regex.Matcher;
+import java.net.*;
 import java.util.regex.Pattern;
 
 /**
@@ -18,18 +16,30 @@ import java.util.regex.Pattern;
  */
 public class ResourceUtils {
 
-    public static FileWrapper getSharedResource(String uri) {
+    public static FileWrapper getSharedResource(String destinationUri) {
         try {
-            if (uri.startsWith("smb:")) {
-                String checkedUri = Pattern.compile("smb:/*").matcher(uri).replaceFirst("smb://");
+            if (destinationUri.startsWith("smb:")) {
+                String checkedUri = Pattern.compile("smb:/*").matcher(destinationUri).replaceFirst("smb://");
                 return new FileWrapper(new SmbFile(checkedUri));
             } else {
-                if (!uri.startsWith("file:")) {
-                    uri = "file:///" + uri ;
+                if (!destinationUri.startsWith("file:")) {
+                    destinationUri = "file:///" + destinationUri ;
                 }
-                String checkedUri = Pattern.compile("file:/*").matcher(uri).replaceFirst("file:///");
-                URL url = new URL(checkedUri);
-                File file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+                destinationUri = URLDecoder.decode(destinationUri, "UTF-8");
+                URL url = new URL(destinationUri);
+
+                URI uri = null;
+                try {
+                    uri = url.toURI();
+                    if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
+                        // Hack for UNC Path
+                        uri = (new URL("file://" + destinationUri.substring("file:".length()))).toURI();
+                    }
+                } catch (URISyntaxException e) {
+                    throw new ServiceException("Ошибка при попытке доступа к ресурсу.");
+                }
+
+                File file = new File(uri);
                 if (file.exists()) {
                     return new FileWrapper(file);
                 } else {
@@ -43,19 +53,32 @@ public class ResourceUtils {
         }
     }
 
-    public static InputStream getSharedResourceAsStream(String uri) {
+    public static InputStream getSharedResourceAsStream(String destinationUri) {
         try {
-            if (uri.startsWith("smb:")) {
-                String checkedUri = Pattern.compile("smb:/*").matcher(uri).replaceFirst("smb://");
+            if (destinationUri.startsWith("smb:")) {
+                String checkedUri = Pattern.compile("smb:/*").matcher(destinationUri).replaceFirst("smb://");
                 SmbFile file = new SmbFile(checkedUri);
                 return file.getInputStream();
             } else {
-                if (!uri.startsWith("file:")) {
-                    uri = "file:///" + uri ;
+                if (!destinationUri.startsWith("file:")) {
+                    destinationUri = "file:///" + destinationUri ;
                 }
-                String checkedUri = Pattern.compile("file:/*").matcher(uri).replaceFirst("file:///");
-                URL url = new URL(checkedUri);
-                return url.openStream();
+
+                URL url = new URL(destinationUri);
+                URI uri = null;
+                try {
+                    uri = url.toURI();
+                    if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
+                        // Hack for UNC Path
+                        uri = (new URL("file://" + destinationUri.substring("file:".length()))).toURI();
+                    }
+                } catch (URISyntaxException e) {
+                    throw new ServiceException("Ошибка при попытке доступа к ресурсу.");
+                }
+
+                File file = new File(uri);
+
+                return new FileInputStream(file);
             }
         } catch (MalformedURLException e) {
             throw new ServiceException("Неправильный формат URL до ресурса", e);

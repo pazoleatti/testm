@@ -80,57 +80,59 @@ public class RefBookExternalServiceImpl implements RefBookExternalService {
         try {
             // SmbFile folder = new SmbFile(refBookDirectory);
             FileWrapper folder = ResourceUtils.getSharedResource(refBookDirectory);
-            for (String fileName : folder.list()) {
-                FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
-                // Из директории считываем только файлы
-                if (!file.isFile()) {
-                    continue;
-                }
-                for (String key : map.keySet()) {
-                    if (fileName.matches(key)) { // Нашли в мапе соответствие
-                        InputStream is = null;
-                        Long refBookId = map.get(key).getSecond();
-                        try {
-                            is = new BufferedInputStream(file.getStream());
-                            if (!map.get(key).getFirst()) {  // Если это не сам файл, а архив
-                                ZipInputStream zis = new ZipInputStream(is);
-                                ZipEntry zipFileName = zis.getNextEntry();
-                                if (zipFileName != null) { // в архиве есть файл
-                                    // дальше работаем с первым файлом архива вместо самого архива
-                                    is = zis;
-                                } else {
-                                    break;
+            if (folder.list() != null) {
+                for (String fileName : folder.list()) {
+                    FileWrapper file = ResourceUtils.getSharedResource(refBookDirectory + fileName);
+                    // Из директории считываем только файлы
+                    if (!file.isFile()) {
+                        continue;
+                    }
+                    for (String key : map.keySet()) {
+                        if (fileName.matches(key)) { // Нашли в мапе соответствие
+                            InputStream is = null;
+                            Long refBookId = map.get(key).getSecond();
+                            try {
+                                is = new BufferedInputStream(file.getStream());
+                                if (!map.get(key).getFirst()) {  // Если это не сам файл, а архив
+                                    ZipInputStream zis = new ZipInputStream(is);
+                                    ZipEntry zipFileName = zis.getNextEntry();
+                                    if (zipFileName != null) { // в архиве есть файл
+                                        // дальше работаем с первым файлом архива вместо самого архива
+                                        is = zis;
+                                    } else {
+                                        break;
+                                    }
                                 }
+                                logger.info("Импорт данных справочника из файла «" + fileName + "».");
+
+                                // Обращение к скрипту
+                                Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                                additionalParameters.put("inputStream", is);
+                                refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+                                refBookImportCount++;
+                            } catch (Exception e) {
+                                //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
+                                withError = true;
+                                String errorMsg;
+                                if (e != null && e.getLocalizedMessage() != null) {
+                                    errorMsg = e.getLocalizedMessage() + ".";
+                                } else {
+                                    errorMsg = "";
+                                }
+
+                                errorMsg = "Не удалось выполнить импорт данных справочника (id = " + refBookId + ") из файла «"
+                                        + fileName + "». " + errorMsg;
+
+                                // Журнал аудита
+                                auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
+                                        null, null, null, null, errorMsg);
+
+                                logger.error(errorMsg);
+                            } finally {
+                                IOUtils.closeQuietly(is);
                             }
-                            logger.info("Импорт данных справочника из файла «" + fileName + "».");
-
-                            // Обращение к скрипту
-                            Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                            additionalParameters.put("inputStream", is);
-                            refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
-                            refBookImportCount++;
-                        } catch (Exception e) {
-                            //// Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                            withError = true;
-                            String errorMsg;
-                            if (e != null && e.getLocalizedMessage() != null) {
-                                errorMsg = e.getLocalizedMessage()+".";
-                            } else {
-                                errorMsg = "";
-                            }
-
-                            errorMsg = "Не удалось выполнить импорт данных справочника (id = " + refBookId + ") из файла «"
-                                    + fileName + "». " + errorMsg;
-
-                            // Журнал аудита
-                            auditService.add(FormDataEvent.IMPORT, userInfo, userInfo.getUser().getDepartmentId(),
-                                    null, null, null, null, errorMsg);
-
-                            logger.error(errorMsg);
-                        } finally {
-                            IOUtils.closeQuietly(is);
+                            break;
                         }
-                        break;
                     }
                 }
             }
