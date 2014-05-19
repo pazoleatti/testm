@@ -363,7 +363,7 @@ def calc14(def row, def dateStart, def dateEnd, def isA) {
             (!isA && row.shortPositionOpen <= row.maturityDateCurrent && row.maturityDateCurrent <= row.shortPositionClose)) {
         // справочник 15 "Общероссийский классификатор валют", атрибут 64 CODE - "Код валюты. Цифровой"
         def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
-        if (currencyCode == '810') {
+        if (currencyCode in ['810', '643']) {
             tmp = row.amount * row.incomeCurrentCoupon
         } else {
             def t = row.maturityDateCurrent - row.maturityDatePrev

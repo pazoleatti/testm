@@ -350,7 +350,7 @@ void logicCheck() {
 
 // Проверка валюты на рубли
 def isRubleCurrency(def currencyCode) {
-    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE.stringValue == '810') : false
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE.stringValue in ['810', '643']) : false
 }
 
 /**

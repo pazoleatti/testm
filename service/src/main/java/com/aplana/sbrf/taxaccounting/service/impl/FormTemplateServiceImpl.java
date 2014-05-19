@@ -160,10 +160,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public FormTemplate getFullFormTemplate(int formTemplateId) {
         try {
             FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-            formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-            formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
-            FormDataUtils.setValueOners(formTemplate.getHeaders());
-
+            if(formTemplate.getRows().isEmpty()){
+                formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+            }
+            if (formTemplate.getHeaders().isEmpty()){
+                formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+                FormDataUtils.setValueOners(formTemplate.getHeaders());
+            }
             return formTemplate;
         } catch (DaoException e){
             logger.error("Ошибка при получении шаблона НФ.", e);

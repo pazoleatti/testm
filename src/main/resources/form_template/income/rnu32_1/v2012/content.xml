@@ -15,6 +15,7 @@
         <order>1</order>
         <width>0</width>
         <maxLength>150</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>number</alias>
@@ -22,8 +23,9 @@
         <name>Номер территориального банка</name>
         <order>2</order>
         <width>10</width>
-        <parentId>16771</parentId>
+        <parentAlias>name</parentAlias>
         <refBookAttributeId>166</refBookAttributeId>
+        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
@@ -41,26 +43,28 @@
         <name>Код валюты номинала</name>
         <order>4</order>
         <width>5</width>
-        <parentId>16773</parentId>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>5</order>
         <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>809</nameAttributeId>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>809</refBookAttributeId>
+        <refBookAttributeId2>868</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
         <name>Номер государственной регистрации</name>
         <order>6</order>
         <width>8</width>
-        <parentId>16773</parentId>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>813</nameAttributeId>
         <refBookAttributeId>813</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -76,7 +80,7 @@
         <checking>false</checking>
         <name>Номинальная стоимость, ед. вал.</name>
         <order>8</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -138,7 +142,7 @@
         <checking>false</checking>
         <name>Объявленный доход по текущему купону, руб.коп.</name>
         <order>15</order>
-        <width>10</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -147,7 +151,7 @@
         <checking>false</checking>
         <name>Доход с даты погашения предыдущего купона, руб.коп.</name>
         <order>16</order>
-        <width>10</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -156,7 +160,7 @@
         <checking>false</checking>
         <name>Доход с даты открытия короткой позиции, руб.коп.</name>
         <order>17</order>
-        <width>10</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -165,7 +169,7 @@
         <checking>false</checking>
         <name>Процентный доход по дисконтным облигациям, руб.коп.</name>
         <order>18</order>
-        <width>10</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -174,24 +178,10 @@
         <checking>false</checking>
         <name>Всего процентный доход, руб.коп.</name>
         <order>19</order>
-        <width>10</width>
+        <width>6</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <styles>
-        <alias>Автозаполняемая</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Вычисляемая</alias>
-        <backColor>BLUE</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
     <styles>
         <alias>Контрольные суммы</alias>
         <backColor>LIGHT_BROWN</backColor>
@@ -211,6 +201,20 @@
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Вычисляемая</alias>
+        <backColor>BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

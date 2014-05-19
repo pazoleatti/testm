@@ -12,25 +12,25 @@ import groovy.transform.Field
  * @author rtimerbaev
  */
 
-// графа 0  - fix
-// графа 1  - number                - Номер территориального банка          - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
-// графа 2  - name                  - Наименование территориального банка   - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - code                  - Код валюты номинала                   - зависит от графы 4 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
-// графа 4  - issuer                - Эмитент                               - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
-// графа 5  - regNumber             - Номер государственной регистрации     - зависит от графы 4 - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
-// графа 6  - shortPositionData     - Дата открытия короткой позиции
-// графа 7  - faceValue             - Номинальная стоимость (ед. валюты)
-// графа 8  - countsBonds           - Количество облигаций (шт.)
-// графа 9  - averageWeightedPrice  - Средневзвешенная цена одной облигации на дату, когда выпуск признан размещенным (ед. вал.)
-// графа 10 - termBondsIssued       - Срок обращения выпуска (дни)
-// графа 11 - maturityDate          - Дата погашения предыдущего купона
-// графа 12 - currentPeriod         - Текущий купонный период (дни)
-// графа 13 - currentCouponRate     - Ставка текущего купона, (% год.)
-// графа 14 - incomeCurrentCoupon   - Объявленный доход по текущему купону (руб.коп.)
-// графа 15 - incomePrev            - Доход с даты погашения предыдущего купона (руб.коп.)
-// графа 16 - incomeShortPosition   - Доход с даты открытия короткой позиции (руб.коп.)
-// графа 17 - percIncome            - Процентный доход по дисконтным облигациям (руб.коп.)
-// графа 18 - totalPercIncome       - Всего процентный доход (руб.коп.)
+// графа    - fix
+// графа 1  - number                - зависит от графы 2 - атрибут 166 - SBRF_CODE - «Код подразделения в нотации Сбербанка», справочник 30 «Подразделения»
+// графа 2  - name                  - атрибут 161 - NAME - «Наименование подразделения», справочник 30 «Подразделения»
+// графа 3  - code                  - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 4  - issuer                - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+// графа 5  - regNumber             - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+// графа 6  - shortPositionData
+// графа 7  - faceValue
+// графа 8  - countsBonds
+// графа 9  - averageWeightedPrice
+// графа 10 - termBondsIssued
+// графа 11 - maturityDate
+// графа 12 - currentPeriod
+// графа 13 - currentCouponRate
+// графа 14 - incomeCurrentCoupon
+// графа 15 - incomePrev
+// графа 16 - incomeShortPosition
+// графа 17 - percIncome
+// графа 18 - totalPercIncome
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -85,9 +85,9 @@ def allColumns = ['fix', 'number', 'name', 'code', 'issuer', 'regNumber', 'short
         'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate', 'currentPeriod', 'currentCouponRate',
         'incomeCurrentCoupon', 'incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
 
-// Редактируемые атрибуты (графа 2..14)
+// Редактируемые атрибуты (графа 2, 5..14)
 @Field
-def editableColumns = ['name', 'issuer', 'shortPositionData', 'faceValue',
+def editableColumns = ['name', 'regNumber', 'shortPositionData', 'faceValue',
             'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate',
             'currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon']
 
@@ -97,7 +97,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 2..8, 10..14, 17, 18)
 @Field
-def nonEmptyColumns = ['name', 'issuer', 'shortPositionData',
+def nonEmptyColumns = ['name', /*'issuer',*/ 'regNumber', 'shortPositionData',
         'faceValue', 'countsBonds', 'termBondsIssued', 'maturityDate', 'currentPeriod',
         'currentCouponRate', 'incomeCurrentCoupon', 'percIncome', 'totalPercIncome']
 
@@ -405,7 +405,7 @@ def calc15or16(def row, def lastDay, def t, def dataRows) {
         return row.countsBonds * roundValue(row.incomeCurrentCoupon * t / row.currentPeriod, 2)
     } else {
         // Для ценных бумаг, учтенных в подразделах 7 и 8
-        if (row.issuer == null || row.currentCouponRate == null || row.faceValue == null) {
+        if (row.regNumber == null || row.currentCouponRate == null || row.faceValue == null) {
             return null
         }
 
@@ -419,15 +419,16 @@ def calc15or16(def row, def lastDay, def t, def dataRows) {
 
 // Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
 def getRate(def row, def lastDay) {
-    if (row.issuer == null) {
+    if (row.regNumber == null) {
         return null
     }
     // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
-    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
-    // получить id записи из справочника валют (15) по цифровому коду валюты
-    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+    def code = getRefBookValue(84, row.regNumber)?.CODE_CUR?.stringValue
+    if (code in ['810', '643']) {
+        return 1
+    }
     // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
-    def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId?.toString(), lastDay, row.getIndex(), null, true)
+    def record22 = getRefBookRecord(22, 'CODE_NUMBER', code?.toString(), lastDay, row.getIndex(), null, true)
     return record22?.RATE?.value
 }
 
@@ -439,7 +440,7 @@ def getRate(def row, def lastDay) {
  */
 def calc17(def row, def lastDay) {
     if (row.countsBonds == null || row.termBondsIssued == null || row.faceValue == null ||
-            row.averageWeightedPrice == null || row.shortPositionData == null || row.issuer == null ||
+            row.averageWeightedPrice == null || row.shortPositionData == null || row.regNumber == null ||
             row.termBondsIssued == 0 || row.countsBonds == 0) {
         return null
     }
@@ -588,19 +589,29 @@ void addData(def xml, int headRowCount) {
             formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        // графа 4 - атрибут 809 - ISSUER - "Эмитент", справочник 84 "Ценные бумаги"
+        // графа 5 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
+        xmlIndexCol = 5
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.regNumber = record84?.record_id?.value
+
+        // графа 3 - зависит от графы 5 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 3
+        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record15 != null) {
+            def value1 = record15?.record_id?.value?.toString()
+            def value2 = record84?.CODE_CUR?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        // графа 4 - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         xmlIndexCol = 4
-        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        newRow.issuer = record84?.record_id?.value
-
-        if (record84 != null) {
-            // графа 3 - зависит от графы 4 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
-            xmlIndexCol = 3
-            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.CODE_CUR?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            // графа 5 - зависит от графы 4 - атрибут 813 - REG_NUM - "Государственный регистрационный номер", справочник 84 "Ценные бумаги"
-            xmlIndexCol = 5
-            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record100 != null) {
+            def value1 = record100?.record_id?.value?.toString()
+            def value2 = record84?.ISSUER?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
         /* Графа 6 */

@@ -219,7 +219,7 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
     }
     def currency = getCurrency(row.currencyCode)
     def tmp = 0
-    if (row.outcome > 0 && currency == '810') {
+    if (row.outcome > 0 && currency in ['810', '643']) {
         if (inPeriod(reportDate, '01.09.2008', '31.12.2009')) {
             tmp = calc12Value(row, 1.5, reportDate, daysInYear)
         } else if (inPeriod(reportDate, '01.01.2010', '30.06.2010') && row.part1REPODate < someDate) {
@@ -229,7 +229,7 @@ def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def rep
         } else {
             tmp = calc12Value(row, 1.1, reportDate, daysInYear)
         }
-    } else if (row.outcome > 0 && currency != '810') {
+    } else if (row.outcome > 0 && !(currency in ['810', '643'])) {
         if (inPeriod(reportDate, '01.01.2011', '31.12.2012')) {
             tmp = calc12Value(row, 0.8, reportDate, daysInYear) * course
         } else {
@@ -598,12 +598,11 @@ def getDate(def value, format) {
  * @param rateDate
  */
 def calc11Value(DataRow row, def rateDate) {
-    def currency = getCurrency(row.currencyCode)
     def rate = getRate(rateDate)
     // Если «графа 10» = 0, то « графа 11» не заполняется; && Если «графа 3» не заполнена, то « графа 11» не заполняется
     if (!isTotal(row) && row.outcome != 0 && row.currencyCode != null) {
         // Если «графа 3» = 810, то «графа 11» = ставка рефинансирования Банка России из справочника «Ставки рефинансирования ЦБ РФ» на дату «графа 6»,
-        if (currency == '810') {
+        if (isRubleCurrency(row.currencyCode)) {
             return rate
         } else { // Если «графа 3» ≠ 810), то
             // Если «графа 6» принадлежит периоду с 01.09.2008 по 31.12.2009 (включительно), то «графа 11» = 22;
@@ -870,7 +869,7 @@ def getCurrency(def currencyCode) {
  * Проверка валюты на рубли
  */
 def isRubleCurrency(def currencyCode) {
-    return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
+    return refBookService.getStringValue(15, currencyCode, 'CODE') in ['810', '643']
 }
 
 /**
