@@ -13,14 +13,13 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.Appointment
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentFormTypeShared;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.*;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -38,6 +37,11 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import static java.util.Arrays.asList;
 
+
+/**
+ * Представление формы "Указаник источников/приемников"
+ * @author many people
+ */
 public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		implements SourcesPresenter.MyView, ValueChangeHandler<List<Integer>> {
 
@@ -72,59 +76,65 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	private final SingleSelectionModel<DepartmentFormType> receiversFormSM = new SingleSelectionModel<DepartmentFormType>();
 	private final SingleSelectionModel<DepartmentFormType> sourcesSM = new SingleSelectionModel<DepartmentFormType>();
 
-	@UiField(provided = true)
-	ValueListBox<AppointmentType> appointmentTypePicker;
+//	@UiField(provided = true)
+//	ValueListBox<AppointmentType> appointmentTypePicker;
+
     @UiField(provided = true)
-    ValueListBox<PeriodInfo> periodFrom;
+    ValueListBox<PeriodInfo>
+            periodFrom,
+            periodTo;
     @UiField
-    Spinner yearFrom;
-    @UiField(provided = true)
-    ValueListBox<PeriodInfo> periodTo;
-    @UiField
-    Spinner yearTo;
+    Spinner yearFrom,
+            yearTo;
 
 	@UiField
-	GenericDataGrid<DepartmentFormType> sourcesTable;
-	@UiField
-	GenericDataGrid<DepartmentFormType> receiversFormTable;
+	GenericDataGrid<DepartmentFormType>
+            sourcesTable,
+            receiversFormTable;
 	@UiField
 	GenericDataGrid<DepartmentDeclarationType> receiversDecTable;
 	@UiField
-	GenericDataGrid<DepartmentFormTypeShared> currentSourcesTable;
+	GenericDataGrid<DepartmentFormTypeShared> currentAssignTable;
 
 	@UiField
-	DepartmentPickerPopupWidget receiversDepPicker;
-	@UiField
-	DepartmentPickerPopupWidget sourcesDepPicker;
+	DepartmentPickerPopupWidget
+            receiversDepPicker,
+            sourcesDepPicker;
 
 	@UiField
-    LinkButton assignButton;
-	@UiField
-    LinkButton cancelButton;
+    LinkButton
+            assignButton,
+            cancelButton,
+            editButton;
 
     @UiField
     LinkAnchor formDecAnchor;
     @UiField
-    Label titleLabel;
-    @UiField
-    Label taxTypeLabel;
-    @UiField
-    Label formDecLabel;
+    Label titleLabel,
+            taxTypeLabel,
+            formDecLabel;
 
     @UiField
-    ResizeLayoutPanel receiversFormTableWrapper;
+    ResizeLayoutPanel
+            receiversFormTableWrapper,
+            receiversDecTableWrapper;
     @UiField
-    ResizeLayoutPanel receiversDecTableWrapper;
+    LabelSeparator
+            currentDesitionLabel,
+            receiverLabel,
+            sourceLabel;
+    @UiField
+    LeftRightToggleButton appointmentTypeButton;
 
     @Inject
 	@UiConstructor
 	public SourcesView(final Binder uiBinder) {
-        appointmentTypePicker = new ValueListBox<AppointmentType>(new AbstractRenderer<AppointmentType>() {
-			@Override
-			public String render(AppointmentType object) {
-                return object == null ? "" : object.getName();
-            }
-		});
+//        appointmentTypePicker = new ValueListBox<AppointmentType>(new AbstractRenderer<AppointmentType>() {
+//			@Override
+//			public String render(AppointmentType object) {
+//                return object == null ? "" : object.getName();
+//            }
+//		});
         periodFrom = new ValueListBox<PeriodInfo>(new AbstractRenderer<PeriodInfo>() {
             @Override
             public String render(PeriodInfo object) {
@@ -138,7 +148,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
             }
         });
 
-		initWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
 
 		receiversDepPicker.addValueChangeHandler(this);
 		sourcesDepPicker.addValueChangeHandler(this);
@@ -148,26 +158,42 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 	}
 
 	@Override
-	public void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
+	public void init(TaxType taxType, AppointmentType type, int year, List<PeriodInfo> periods,
                      boolean isForm, Integer selectedReceiverId, Integer selectedSourceId) {
 		this.isForm = isForm;
 
         receiversFormTableWrapper.setVisible(isForm);
 		receiversDecTableWrapper.setVisible(!isForm);
-        appointmentTypePicker.setValue(type);
-        appointmentTypePicker.setAcceptableValues(types);
-        WidgetUtils.setupOptionTitle(appointmentTypePicker);
 
-        periodFrom.setValue(periods.get(0));
+//        //настрока листбоксов
+//        appointmentTypePicker.setValue(type);
+//        appointmentTypePicker.setAcceptableValues(types);
+//        WidgetUtils.setupOptionTitle(appointmentTypePicker);
+
         periodFrom.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodFrom);
+        periodFrom.setValue(periods.get(0));
+        setupPeriodTitle(periodFrom);
+        periodFrom.addValueChangeHandler(new ValueChangeHandler<PeriodInfo>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<PeriodInfo> event) {
+                setupPeriodTitle(periodFrom);
+            }
+        });
 
-        periodTo.setValue(periods.get(0));
         periodTo.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodTo);
+        periodTo.setValue(periods.get(periods.size() - 1));
+        setupPeriodTitle(periodTo);
+        periodTo.addValueChangeHandler(new ValueChangeHandler<PeriodInfo>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<PeriodInfo> event) {
+                setupPeriodTitle(periodTo);
+            }
+        });
 
         yearFrom.setValue(year);
-        yearTo.setValue(year + 12);
+        yearTo.setValue(year);
         // Тип налога для ссылок
         updateLinks(taxType, selectedReceiverId, selectedSourceId);
 
@@ -185,27 +211,31 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
         }
         assignButton.setEnabled(false);
         cancelButton.setEnabled(false);
+        editButton.setEnabled(false);
 
 		sourcesTable.setRowCount(0);
 		receiversFormTable.setRowCount(0);
 		receiversDecTable.setRowCount(0);
-		currentSourcesTable.setRowCount(0);
+		currentAssignTable.setRowCount(0);
 
         boolean isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+        String kindColumnTitle = getKindColumnTitle(isTaxTypeDeal);
+        String typeColumnTitle = getTypeColumnTitle(isTaxTypeDeal);
 
-        receiversKindHeader.setTitle(getKindColumnTitle(isTaxTypeDeal));
-        receiversTypeHeader.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+
+        receiversKindHeader.setTitle(kindColumnTitle);
+        receiversTypeHeader.setTitle(typeColumnTitle);
         receiverDecTypeColumnHeader.setTitle(!isTaxTypeDeal ? "Вид декларации" : "Вид уведомления");
 
-        sourcesKindTitle.setTitle(getKindColumnTitle(isTaxTypeDeal));
-        sourcesTypeTitle.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+        sourcesKindTitle.setTitle(kindColumnTitle);
+        sourcesTypeTitle.setTitle(typeColumnTitle);
 
-        receiverSourcesKindTitle.setTitle(getKindColumnTitle(isTaxTypeDeal));
-        receiverSourcesTypeTitle.setTitle(getTypeColumnTitle(isTaxTypeDeal));
+        receiverSourcesKindTitle.setTitle(kindColumnTitle);
+        receiverSourcesTypeTitle.setTitle(typeColumnTitle);
 
         receiversFormTable.redrawHeaders();
         sourcesTable.redrawHeaders();
-        currentSourcesTable.redrawHeaders();
+        currentAssignTable.redrawHeaders();
         receiversDecTable.redrawHeaders();
 
         taxTypeLabel.setText(taxType.getName());
@@ -217,9 +247,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
         formDecLabel.setText((isForm ?
                 (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM) :
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC)));
+    }
 
-        // TODO Установка фокуса на receiversDepPicker после реализации метода в http://jira.aplana.com/browse/SBRFACCTAX-5392
-	}
+    private void setupPeriodTitle(ValueListBox<PeriodInfo> widget) {
+        widget.setTitle(widget.getValue()!=null && widget.getValue()!=null? widget.getValue().getName() : "");
+    }
 
     /**
      * Подготовка ссылок
@@ -255,7 +287,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 
 	@Override
 	public void setCurrentSources(List<DepartmentFormTypeShared> departmentFormTypes) {
-		currentSourcesTable.setRowData(departmentFormTypes);
+		currentAssignTable.setRowData(departmentFormTypes);
         cancelButton.setEnabled(false);
 	}
 
@@ -398,8 +430,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			public void update(int index, DepartmentFormTypeShared object, Boolean value) {
 				canCancel = false;
                 cancelButton.setEnabled(false);
-				currentSourcesTable.getVisibleItem(index).setChecked(value);
-				for(DepartmentFormTypeShared source : currentSourcesTable.getVisibleItems()) {
+				currentAssignTable.getVisibleItem(index).setChecked(value);
+				for(DepartmentFormTypeShared source : currentAssignTable.getVisibleItems()) {
 					if (source.isChecked()) {
                         cancelButton.setEnabled(true);
 						canCancel = true;
@@ -438,17 +470,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			}
 		};
 
-		currentSourcesTable.addColumn(checkBoxColumn);
-		currentSourcesTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
-		currentSourcesTable.addColumn(indexColumn, "№ пп");
-		currentSourcesTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
-		currentSourcesTable.addResizableColumn(departmentColumn, "Подразделение");
-		currentSourcesTable.setColumnWidth(departmentColumn, 250, Style.Unit.PX);
-        receiverSourcesKindTitle = currentSourcesTable.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
-		currentSourcesTable.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
-		currentSourcesTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
-        receiverSourcesTypeTitle = currentSourcesTable.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
-		currentSourcesTable.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
+		currentAssignTable.addColumn(checkBoxColumn);
+		currentAssignTable.setColumnWidth(checkBoxColumn, 40, Style.Unit.PX);
+		currentAssignTable.addColumn(indexColumn, "№ пп");
+		currentAssignTable.setColumnWidth(indexColumn, 40, Style.Unit.PX);
+		currentAssignTable.addResizableColumn(departmentColumn, "Подразделение");
+		currentAssignTable.setColumnWidth(departmentColumn, 250, Style.Unit.PX);
+        receiverSourcesKindTitle = currentAssignTable.createResizableHeader("Тип налоговой формы", receiverSourcesKindColumn);
+		currentAssignTable.addColumn(receiverSourcesKindColumn, receiverSourcesKindTitle);
+		currentAssignTable.setColumnWidth(receiverSourcesKindColumn, 150, Style.Unit.PX);
+        receiverSourcesTypeTitle = currentAssignTable.createResizableHeader("Вид налоговой формы", receiverSourcesTypeColumn);
+		currentAssignTable.addColumn(receiverSourcesTypeColumn, receiverSourcesTypeTitle);
 	}
 
 	@UiHandler("assignButton")
@@ -462,7 +494,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		List<Long> sourceIds = new ArrayList<Long>();
 		Long sourceId = sourcesSM.getSelectedObject().getId();
 
-		for (DepartmentFormTypeShared source : currentSourcesTable.getVisibleItems()) {
+		for (DepartmentFormTypeShared source : currentAssignTable.getVisibleItems()) {
 			if (sourceId.equals(source.getId())) {
 				getUiHandlers().showAssignErrorMessage();
 				return;
@@ -487,7 +519,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		}
 
 		List<Long> sourceIds = new ArrayList<Long>();
-		for (DepartmentFormTypeShared source: currentSourcesTable.getVisibleItems()) {
+		for (DepartmentFormTypeShared source: currentAssignTable.getVisibleItems()) {
 			if (!source.isChecked()) {
 				sourceIds.add(source.getId());
 			}
@@ -500,6 +532,19 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 		}
 
 	}
+
+    @UiHandler("appointmentTypeButton")
+    public void change(ValueChangeEvent<Boolean> event) {
+        if(event.getValue()!=null && event.getValue()){
+            receiverLabel.setText("Приемники");
+            sourceLabel.setText("Источник");
+            currentDesitionLabel.setText("Указанные приемники источника");
+        } else {
+            receiverLabel.setText("Приемник");
+            sourceLabel.setText("Источники");
+            currentDesitionLabel.setText("Указанные источники приемника");
+        }
+    }
 
 	@Override
 	public void onValueChange(ValueChangeEvent<List<Integer>> event) {
@@ -525,7 +570,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers>
 			} else {
 				getUiHandlers().getDeclarationReceivers(selectedReceiverId);
 			}
-			currentSourcesTable.setRowCount(0);
+			currentAssignTable.setRowCount(0);
 		}
 	}
 

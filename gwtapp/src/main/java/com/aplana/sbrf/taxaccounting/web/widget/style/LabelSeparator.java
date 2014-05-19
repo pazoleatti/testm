@@ -63,6 +63,10 @@ public class LabelSeparator extends Composite implements HasText {
         panel.setCellVerticalAlignment(htmlPanel, HasVerticalAlignment.ALIGN_BOTTOM);
     }
 
+    public void setLineHide(boolean hide){
+        htmlPanel.getElement().getStyle().setBorderWidth(hide ? 0 : 1, com.google.gwt.dom.client.Style.Unit.PX);
+    }
+
     public void setText(String text){
         textBox.setText(text);
     }
