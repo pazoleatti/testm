@@ -1,4 +1,4 @@
-package form_template.income.rnu54.v2012
+package form_template.income.rnu54.v2008
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

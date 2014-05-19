@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
@@ -1228,7 +1229,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 result.setVersion(rs.getDate("VERSION"));
                 result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"STATUS")));
                 result.setNextVersion(rs.getDate("NEXTVERSION"));
-                result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                if (SqlUtils.getInteger(rs,"NEXTSTATUS")!=null)
+                    result.setNextStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"NEXTSTATUS")));
+                else
+                    result.setNextStatus(null);
                 result.setResult(CrossResult.getResultById(SqlUtils.getInteger(rs,"RESULT")));
                 return result;
             }
@@ -1382,6 +1386,56 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
             }
             return result;
+        }
+    }
+
+    private final static String CHECK_UNIQUE_MATCHES_FOR_NON_VERSION = "select id record_id from %s t where ";
+    @Override
+    public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributesForNonVersion(Long refBookId, String tableName, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        boolean hasUniqueAttributes = false;
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(CHECK_UNIQUE_MATCHES_FOR_NON_VERSION);
+        for (RefBookAttribute attribute : attributes) {
+            if (attribute.isUnique()) {
+                hasUniqueAttributes = true;
+                for (int i=0; i < records.size(); i++) {
+                    Map<String, RefBookValue> values = records.get(i).getValues();
+                    ps.appendQuery(String.format("t.%s = ?",  attribute.getAlias()));
+
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        ps.addParam(values.get(attribute.getAlias()).getStringValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getReferenceValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        ps.addParam(values.get(attribute.getAlias()).getNumberValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                        ps.addParam(values.get(attribute.getAlias()).getDateValue());
+                    }
+
+                    if (i < records.size() - 1) {
+                        ps.appendQuery(" or ");
+                    }
+                }
+            }
+        }
+
+
+        try {
+            if (hasUniqueAttributes) {
+                return getJdbcTemplate().query(String.format(ps.getQuery().toString(), tableName), ps.getParams().toArray(), new RowMapper<Pair<Long, String>>() {
+                    @Override
+                    public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<Long, String>(SqlUtils.getLong(rs,"ID"), rs.getString("NAME"));
+                    }
+                });
+            } else {
+                return new PagingResult<Pair<Long, String>>(new ArrayList<Pair<Long, String>>(0));
+            }
+        } catch (DataAccessException e){
+            throw new DaoException("Ошибка при поиске уникальных значений в справочнике " + tableName, e);
         }
     }
 

@@ -129,7 +129,19 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 		}
 	}
 
-	@Override
+    @Override
+    public Integer getParentTBId(int departmentId) {
+        try {
+            return getJdbcTemplate().queryForInt("SELECT id FROM department WHERE parent_id = 0 " +
+                    "START WITH id = ? CONNECT BY parent_id = id", departmentId);
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
     public List<Department> listDepartments(){
         try {
             return getJdbcTemplate().query(
@@ -159,6 +171,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             if (rs.wasNull()) {
                 department.setRegionId(null);
             }
+            department.setActive(rs.getBoolean("is_active"));
 			return department;
 		}
 	}

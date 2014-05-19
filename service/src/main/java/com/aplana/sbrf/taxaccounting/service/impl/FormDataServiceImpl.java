@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -20,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -759,5 +762,16 @@ public class FormDataServiceImpl implements FormDataService {
             }
         }
         return !formDataIds.isEmpty();
+    }
+
+
+    @Override
+    public boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds) {
+       try {
+           List<Long> ids = formDataDao.getFormDataIds(taxTypes, departmentIds);
+           return !ids.isEmpty();
+       } catch (DaoException e){
+           throw new ServiceException("", e);
+       }
     }
 }

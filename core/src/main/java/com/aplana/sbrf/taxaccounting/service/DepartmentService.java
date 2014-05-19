@@ -180,6 +180,13 @@ public interface DepartmentService {
 	String getParentsHierarchyShortNames(Integer departmentId);
 
     /**
+     * Получает родительский ТБ для подразделения.
+     * @param departmentId иденетификатор подразделения, для которого надо получить терр. банк.
+     * @return терр. банк
+     */
+    Department getParentTB(int departmentId);
+
+    /**
      * Получить получить подразделение создавшее форму
      * @param formDataId идентификатор формы
      * @return подразделение создавшее форму

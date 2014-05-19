@@ -715,15 +715,14 @@ void addData(def xml, int headRowCount) {
         // графа 5 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
         xmlIndexCol = 5
         def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождение записи,
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
         // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле CODE_CUR
         def record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), xlsIndexRow, xmlIndexCol + colOffset)
         newRow.currency = record84?.record_id?.value
 
         // графа 2 - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         xmlIndexCol = 2
-        def issuerName = row.cell[xmlIndexCol].text()
-        def record100 = getRecordImport(100, 'FULL_NAME', issuerName, xlsIndexRow, xmlIndexCol + colOffset)
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         if (record84 != null && record100 != null) {
             def value1 = record100?.record_id?.value?.toString()
             def value2 = record84?.ISSUER?.value?.toString()
@@ -732,8 +731,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 10 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
         xmlIndexCol = 10
-        def code = row.cell[xmlIndexCol].text()
-        def record62 = getRecordImport(62, 'CODE', code, xlsIndexRow, xmlIndexCol + colOffset)
+        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         if (record84 != null && record62 != null) {
             def value1 = record62?.record_id?.value?.toString()
             def value2 = record84?.SIGN?.value?.toString()

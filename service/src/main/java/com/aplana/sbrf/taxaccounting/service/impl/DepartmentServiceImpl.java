@@ -274,6 +274,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
     @Override
+    public Department getParentTB(int departmentId) {
+        try {
+            return getDepartment(departmentDao.getParentTBId(departmentId));
+        } catch (ServiceException e){
+            throw new ServiceException("", e);
+        }
+    }
+
+    @Override
     public Department getFormDepartment(Long formDataId) {
         return departmentDao.getDepartment(formDataDao.getWithoutRows(formDataId).getDepartmentId());
     }

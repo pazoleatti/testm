@@ -7,9 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.DeclarationTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,5 +66,18 @@ public class DeclarationDataSearchServiceImpl implements DeclarationDataSearchSe
     @Override
     public List<Long> getDeclarationIds(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
         return declarationDao.findIdsByFilter(declarationFilter, ordering, asc);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<DeclarationData> getDeclarationData(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc) {
+        List<Long> ids = declarationDao.findIdsByFilter(declarationFilter, ordering, asc);
+        Collection<DeclarationData> datas = CollectionUtils.collect(ids, new Transformer() {
+            @Override
+            public Object transform(Object input) {
+                return declarationDao.get((Integer) input);
+            }
+        });
+        return (List<DeclarationData>) datas;
     }
 }

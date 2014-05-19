@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -83,6 +85,8 @@ public interface FormDataDao {
 
     List<Long> findFormDataByFormTemplate(int formTemplateId);
 
+    List<Long> findFormDataByDepartment(int departmentId);
+
 	/**
 	 * Поиск налоговой формы
 	 * @param departmentIds подразделения
@@ -138,6 +142,15 @@ public interface FormDataDao {
      * @return список id форм
      */
     List<Long> getFormDataIds(int formTypeId, FormDataKind kind, int departmentId);
+
+    /**
+     * Получить список id форм типа/вида/подразделения без привязки к периоду
+     * @param formTypeId тип формы
+     * @param kind вид формы
+     * @param departmentId подразделение
+     * @return список id форм
+     */
+    List<Long> getFormDataIds(List<TaxType> taxTypes, List<Integer> departmentIds);
 
     /**
      * Удаляет версию ручного ввода

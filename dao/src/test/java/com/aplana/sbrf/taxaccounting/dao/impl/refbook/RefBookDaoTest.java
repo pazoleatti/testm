@@ -425,6 +425,23 @@ public class RefBookDaoTest {
         assertEquals(2, matches.size());
     }
 
+    @Test
+    public void testGetMatchedRecordsByUniqueAttributesForNonVersion() {
+        RefBook refBook = refBookDao.get(1L);
+        PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
+        assertEquals(2, allValues.size());
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> values : allValues) {
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(values);
+            record.setRecordId(null);
+            records.add(record);
+        }
+        List<Pair<Long,String>> matches =
+                refBookDao.getMatchedRecordsByUniqueAttributesForNonVersion(refBook.getId(), "DEPARTMENT", refBook.getAttributes(), records);
+        assertEquals(0, matches.size());
+    }
+
     /*@Test
     public void checkReferenceValuesVersions() {
         RefBook refBook = refBookDao.get(1L);

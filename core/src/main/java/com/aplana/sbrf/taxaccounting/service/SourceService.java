@@ -231,6 +231,9 @@ public interface SourceService {
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
 
+    List<DepartmentFormType> getDestinationsFormWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes);
+    List<DepartmentDeclarationType> getDestinationsDeclarationWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes);
+
     /**
      * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
      * @param sourceDepartmentId идентификатор подразделения формы-источника

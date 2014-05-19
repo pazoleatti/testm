@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -241,4 +242,6 @@ public interface FormDataService {
      * @param logger
      */
     boolean existFormData(int formTypeId, FormDataKind kind, int departmentId, Logger logger);
+
+    boolean existFormDataByTaxAndDepartment(List<TaxType> taxTypes, List<Integer> departmentIds);
 }

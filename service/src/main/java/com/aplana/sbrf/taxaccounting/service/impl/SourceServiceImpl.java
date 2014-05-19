@@ -166,6 +166,22 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public List<DepartmentFormType> getDestinationsFormWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
+        List<Integer> formTypeIds = new ArrayList<Integer>();
+        for (FormType formType : formTypes)
+            formTypeIds.add(formType.getId());
+        return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+    }
+
+    @Override
+    public List<DepartmentDeclarationType> getDestinationsDeclarationWithDestDepartment(int sourceDepartmentId, int destinationDepartmentId, List<FormType> formTypes) {
+        List<Integer> formTypeIds = new ArrayList<Integer>();
+        for (FormType formType : formTypes)
+            formTypeIds.add(formType.getId());
+        return departmentFormTypeDao.getDeclarationDestinations(sourceDepartmentId, destinationDepartmentId, formTypeIds);
+    }
+
+    @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId) {
         return departmentFormTypeDao.existAcceptedDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, reportPeriodId);
     }
