@@ -268,6 +268,26 @@ public class FilterTreeListenerTest {
         assertTrue(result.getQuery().toString().equals("aAlias123.NUMBER_value = 123 AND id = 1"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void incorrectNumTest1(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 = хаха123", universalFilterTreeListener);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void incorrectNumTest2(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("Alias123 = 123ss321", universalFilterTreeListener);
+    }
+
     @Test
     public void toCharTest(){
         UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
@@ -294,6 +314,16 @@ public class FilterTreeListenerTest {
         assertTrue(result.getQuery().toString().equals("adateAlias.DATE_value like ?"));
         assertTrue(result.getParams().size() == 1);
         assertTrue(result.getParams().get(0).equals(new String("123%")));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void nonexistentAliasTest(){
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+
+        PreparedStatementData result = new PreparedStatementData();
+        universalFilterTreeListener.setPs(result);
+        Filter.getFilterQuery("nonexistentAlias like '123%'", universalFilterTreeListener);
     }
 }
 
