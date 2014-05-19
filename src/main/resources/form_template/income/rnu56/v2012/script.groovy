@@ -422,7 +422,7 @@ void logicCheck() {
 // Проверка валюты на рубли
 def isRubleCurrency(def currencyCode) {
     def record = getRefBookValue(15, currencyCode)
-    return record != null && record.CODE?.stringValue == '810'
+    return record != null && record.CODE?.stringValue in ['810', '643']
 }
 
 // Получить курс банка России на указанную дату

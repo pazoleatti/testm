@@ -248,7 +248,7 @@ def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
         }
     } else {
         if (row.sum70606 == null && isRubleCurrency(row.currencyCode)) {
-            // Если «Графа 12» не заполнена и «Графа 5»= 810
+            // Если «Графа 12» не заполнена и «Графа 5»= 810 или 643
             if (row.paymentEnd == null || row.operationDate == null) {
                 return null
             }
@@ -360,7 +360,7 @@ void logicCheck() {
 
 // Проверка валюты на рубли
 def isRubleCurrency(def currencyCode) {
-    return refBookService.getStringValue(15, currencyCode, 'CODE') == '810'
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
 
 // Получить курс банка России на указанную дату.

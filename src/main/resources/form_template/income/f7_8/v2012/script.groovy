@@ -537,7 +537,7 @@ BigDecimal getGraph36(def row) {
     if (row.currencyCode == null) {
         return null
     }
-    if (getRefBookValue(15, row.currencyCode)?.CODE?.stringValue == '810') {
+    if (getRefBookValue(15, row.currencyCode)?.CODE?.stringValue in ['810', '643']) {
         return row.interestIncomeCurrency
     }
     if (!isDiscountBond(row)) {
