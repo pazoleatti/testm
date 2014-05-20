@@ -1,4 +1,4 @@
-package form_template.vat.vat_973_1_13.v2014
+package form_template.vat.vat_937_1_13.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
