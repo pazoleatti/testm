@@ -671,6 +671,10 @@ def buildRow(def srcRow, def matrixRow) {
         case 380: // 5
             val27 = '74.8'
             break
+        case 393: // 18
+        case 394: // 19
+            val27 = '65.12'
+            break
         case 381: // 6
         case 384: // 9
         case 386: // 11
