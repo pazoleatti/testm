@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;

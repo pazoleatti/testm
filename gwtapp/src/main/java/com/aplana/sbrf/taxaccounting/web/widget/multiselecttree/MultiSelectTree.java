@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.*;
  *
  * @author rtimerbaev
  */
-public abstract class MultiSelectTree<H extends List> extends Composite implements HasValue<H>, LeafValueEditor<H> {
+public abstract class MultiSelectTree<H extends List, T extends MultiSelectTreeItem> extends Composite implements HasValue<H>, LeafValueEditor<H> {
 
     interface Binder extends UiBinder<Widget, MultiSelectTree> {
     }
@@ -44,7 +44,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     protected Tree tree;
 
     /** Мапа для получения узлов дерева по чекбоксу. */
-    private HashMap<Widget, MultiSelectTreeItem> treeItemsHash = new HashMap<Widget, MultiSelectTreeItem>();
+    private HashMap<Widget, T> treeItemsHash = new HashMap<Widget, T>();
 
     /** Выбирать ли дочерние элементы при выборе узла. */
     private boolean selectChild;
@@ -133,12 +133,12 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     @Override
     public void setValue(H values, boolean fireEvents) {
         if (values == null || values.isEmpty()) {
-            for (MultiSelectTreeItem item : getItems()) {
+            for (T item : getItems()) {
                 item.setValue(false);
             }
             return;
         }
-        for (MultiSelectTreeItem item : getItems()) {
+        for (T item : getItems()) {
             // выставлять или все значения или только первое
             boolean isContain = (multiSelection ? containInValues(values, item.getId()) : equalsValue(values.get(0), item.getId()));
             if (isContain) {
@@ -162,25 +162,25 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /** Получить все элементы дерева. */
-    public List<MultiSelectTreeItem> getItems() {
+    public List<T> getItems() {
         return getAllItems(false);
     }
 
     /** Получить все элементы дерева. */
-    public List<MultiSelectTreeItem> getItemsWithFilter() {
+    public List<T> getItemsWithFilter() {
         return getAllItems(true);
     }
 
-    private List<MultiSelectTreeItem> getAllItems(boolean withFilter) {
-        List<MultiSelectTreeItem> result = new ArrayList<MultiSelectTreeItem>();
+    private List<T> getAllItems(boolean withFilter) {
+        List<T> result = new ArrayList<T>();
         for (int i = 0; i < tree.getItemCount(); i++) {
             TreeItem item = tree.getItem(i);
             if (withFilter) {
                 if (item.isVisible()) {
-                    findAllChildWithFilter(result, (MultiSelectTreeItem) item);
+                    findAllChildWithFilter(result, (T) item);
                 }
             } else {
-                findAllChild(result, (MultiSelectTreeItem) item);
+                findAllChild(result, (T) item);
             }
         }
         return result;
@@ -198,9 +198,9 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      * Выделить всех чилдов или развыделить
      * @param selectOrUnselect true - выдетиь все, false развыделить
      */
-    private void setSelectOrUnselect(boolean selectOrUnselect){
-        List<MultiSelectTreeItem> items = getItemsWithFilter();
-        for (MultiSelectTreeItem item : items) {
+    protected void setSelectOrUnselect(boolean selectOrUnselect){
+        List<T> items = getItemsWithFilter();
+        for (T item : items) {
             if(item.isVisible()){
                 item.setValue(selectOrUnselect);
             }
@@ -218,20 +218,20 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      *
      * @param items список данных
      */
-    public void setTreeItems(List<MultiSelectTreeItem> items) {
+    public void setTreeItems(List<T> items) {
         clear();
         if (items == null || items.isEmpty()) {
             return;
         }
         // заполнение дерева и для каждого узла создание чекбоксов
-        for (MultiSelectTreeItem item : items) {
+        for (T item : items) {
             item.setState(true);
             addTreeItem(null, item);
         }
     }
 
     /** Добавить элемент в первый уровень дерева. */
-    public void addTreeItem(MultiSelectTreeItem item) {
+    public void addTreeItem(T item) {
         addTreeItem(null, item);
     }
 
@@ -241,16 +241,14 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      * @param parent родительский элемент
      * @param item добавляемый узел
      */
-    public void addTreeItem(MultiSelectTreeItem parent, MultiSelectTreeItem item) {
+    public void addTreeItem(T parent, T item) {
         if (parent != null) {
             parent.addItem(item);
         } else {
             tree.addItem(item);
         }
         // получить все дочерние элементы узла и выделить для них checkBox'ы
-        List<MultiSelectTreeItem> allChild = new ArrayList<MultiSelectTreeItem>();
-        findAllChild(allChild, item);
-        for (MultiSelectTreeItem child : allChild) {
+        for (T child : getAllChild(item)) {
             child.setGroup(GROUP_NAME);
             if (child.isMultiSelection() == null) {
                 continue;
@@ -272,31 +270,65 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /**
+     * Найти все дочерние элементы узла
+     * @param item если null то и включая корненые элементы
+     * @return плоский список веток
+     */
+    public List<T> getAllChild(T item){
+        List<T> result = new ArrayList<T>();
+        findAllChild(result, item);
+        return result;
+    }
+
+    /**
      * Найти все дочерние элементы узла. Поиск рекурсивный.
      *
      * @param list список дочерних элементов
      * @param item узел для которого ищутся дочерние
      */
-    private void findAllChild(List<MultiSelectTreeItem> list, MultiSelectTreeItem item) {
-        list.add(item);
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                findAllChild(list, (MultiSelectTreeItem) item.getChild(i));
+    private void findAllChild(List<T> list, T item) {
+        if (item == null) {
+            if (getItemCount() > 0) {
+                for (int i = 0; i < getItemCount(); i++) {
+                    findAllChild(list, getItem(i));
+                }
+            }
+        } else {
+            list.add(item);
+            if (item.getChildCount() > 0) {
+                for (int i = 0; i < item.getChildCount(); i++) {
+                    findAllChild(list, (T) item.getChild(i));
+                }
             }
         }
     }
 
-    private void findAllChildWithFilter(List<MultiSelectTreeItem> list, MultiSelectTreeItem item) {
-        list.add(item);
-        if (item.getChildCount() > 0) {
-            for (int i = 0; i < item.getChildCount(); i++) {
-                TreeItem child = item.getChild(i);
-                if(!child.isVisible()){
-                    continue;
-                } else {
-                    findAllChildWithFilter(list, (MultiSelectTreeItem) item.getChild(i));
+    /**
+     * Найти все дочерние элементы узла учитывая фильтр. Поиск рекурсивный.
+     *
+     * @param list список дочерних элементов
+     * @param item узел для которого ищутся дочерние
+     */
+    private void findAllChildWithFilter(List<T> list, T item) {
+        if (item == null) {
+            if (getItemCount() > 0) {
+                for (int i = 0; i < getItemCount(); i++) {
+                    T rootItem = getItem(i);
+                    if (rootItem.isVisible()) {
+                        findAllChildWithFilter(list, rootItem);
+                    }
                 }
+            }
+        } else {
+            list.add(item);
+            if (item.getChildCount() > 0) {
+                for (int i = 0; i < item.getChildCount(); i++) {
+                    TreeItem child = item.getChild(i);
+                    if (child.isVisible()) {
+                        findAllChildWithFilter(list, (T) item.getChild(i));
+                    }
 
+                }
             }
         }
     }
@@ -307,11 +339,12 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      * @param item узел для которого ищутся узлы
      * @return список дочерних элеметов
      */
-    private List<MultiSelectTreeItem> getItemChild(MultiSelectTreeItem item) {
-        List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
+    @Deprecated
+    private List<T> getItemChild(T item) {
+        List<T> list = new ArrayList<T>();
         if (item.getChildCount() > 0) {
             for (int i = 0; i < item.getChildCount(); i++) {
-                list.add((MultiSelectTreeItem) item.getChild(i));
+                list.add((T) item.getChild(i));
             }
         }
         return list;
@@ -347,18 +380,18 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /** Получить выделенный узел. */
-    public MultiSelectTreeItem getSelectedItem() {
-        return (MultiSelectTreeItem) tree.getSelectedItem();
+    public T getSelectedItem() {
+        return (T) tree.getSelectedItem();
     }
 
     /** Удалить элемент из дерева. */
-    public void removeItem(MultiSelectTreeItem item) {
+    public void removeItem(T item) {
         item.remove();
     }
 
     /** Удалить элементы из дерева. */
-    public void removeItems(List<MultiSelectTreeItem> items) {
-        for (MultiSelectTreeItem i : items) {
+    public void removeItems(List<T> items) {
+        for (T i : items) {
             tree.removeItem(i);
         }
     }
@@ -369,8 +402,8 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     }
 
     /** Получить элемент дерева по индексу. */
-    public MultiSelectTreeItem getItem(int index) {
-        return (MultiSelectTreeItem) tree.getItem(index);
+    public T getItem(int index) {
+        return (T) tree.getItem(index);
     }
 
     /** Получить признак возможности выбора нескольких узлов дерева. */
@@ -381,7 +414,7 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
     /** Установить признак возможности выбора нескольких узлов дерева. */
     public void setMultiSelection(boolean multiSelection) {
         this.multiSelection = multiSelection;
-        for (MultiSelectTreeItem i : getItems()) {
+        for (T i : getItems()) {
             if (i.isMultiSelection() != null) {
                 i.setMultiSelection(multiSelection);
             }
@@ -413,10 +446,8 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
                 if (selectChild && multiSelection) {
                     // обновить значения у всех дочерних элементов
                     CheckBox widget = (CheckBox) getSelectedItem().getWidget();
-                    MultiSelectTreeItem item = treeItemsHash.get(widget);
-                    List<MultiSelectTreeItem> list = new ArrayList<MultiSelectTreeItem>();
-                    findAllChild(list, item);
-                    for (MultiSelectTreeItem i : list) {
+                    T item = treeItemsHash.get(widget);
+                    for (T i : getAllChild(item)) {
                         if (i.isVisible()) {    // визиблом управляет фильтр
                             i.setValue(widget.getValue());
                         }
@@ -432,22 +463,22 @@ public abstract class MultiSelectTree<H extends List> extends Composite implemen
      * @param filter строка для фильтра
      */
     public void filter(String filter) {
-        List<MultiSelectTreeItem> list = getItems();
+        List<T> list = getItems();
         if (filter == null || "".equals(filter)) {
-            for (MultiSelectTreeItem item : list) {
+            for (T item : list) {
                 item.setVisible(true);
             }
             return;
         }
-        for (MultiSelectTreeItem item : list) {
+        for (T item : list) {
             String itemValue = item.getName().toLowerCase();
             if (itemValue.contains(filter.toLowerCase())) {
                 item.setVisible(true);
-                MultiSelectTreeItem parent = (MultiSelectTreeItem) item.getParentItem();
+                T parent = (T) item.getParentItem();
                 while (parent != null) {
                     parent.setVisible(true);
                     parent.setState(true);
-                    parent = (MultiSelectTreeItem) parent.getParentItem();
+                    parent = (T) parent.getParentItem();
                 }
             } else {
                 item.setValue(false);
