@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.api;
 
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+
 import java.util.Date;
 import java.util.List;
-
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Интерфейс DAO для работы с {@link ReportPeriod отчётными периодами} 
@@ -100,4 +99,11 @@ public interface ReportPeriodDao {
      */
     List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
+    /**
+     * Проверить существование экземпляров НФ данной версии макета, отчетный период которых закрыт.
+     *
+     * @param formTemplateId идентификатор макета НФ
+     * @return список закрытых периодов, где существует экземпляр НФ данной версии
+     */
+    List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId);
 }

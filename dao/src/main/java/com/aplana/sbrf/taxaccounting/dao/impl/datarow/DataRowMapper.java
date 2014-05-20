@@ -94,7 +94,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
             char valuePrefix = 's';
             if (c instanceof StringColumn) {
                 valuePrefix = 's';
-            } else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn) {
+            } else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn || c instanceof AutoNumerationColumn) {
                 valuePrefix = 'n';
             } else if (c instanceof DateColumn) {
                 valuePrefix = 'd';

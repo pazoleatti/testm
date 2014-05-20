@@ -44,14 +44,18 @@ public class DataRowColumnFactory {
 			RefBookColumn refBookColumn = (RefBookColumn) col;
 			columnContext.setColumn(refBookColumn);
 			uiColumn = new RefBookUiColumn(refBookColumn, columnContext);
-        } else if (col instanceof ReferenceColumn){
+        } else if (col instanceof ReferenceColumn) {
             ReferenceColumn referenceColumn = (ReferenceColumn) col;
             columnContext.setColumn(referenceColumn);
             uiColumn = new ReferenceUiColumn(referenceColumn, columnContext);
+        } else if (col instanceof AutoNumerationColumn) {
+            AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) col;
+            columnContext.setColumn(autoNumerationColumn);
+            uiColumn = new AutoNumerationUiColumn(autoNumerationColumn, columnContext);
         } else {
-			throw new IllegalArgumentException();
-		}
-		return uiColumn;
+            throw new IllegalArgumentException();
+        }
+        return uiColumn;
 	}
 
 

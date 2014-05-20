@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.ObjectLockDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
@@ -59,6 +60,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     FormDataDao formDataDao;
     @Autowired
     LogEntryService logEntryService;
+
+    @Autowired
+    ReportPeriodDao reportPeriodDao;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -289,7 +293,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
 			return false;
 		} else {
-			lockDao.lockObject(formTemplateId, FormTemplate.class ,userInfo.getUser().getId());
+			lockDao.lockObject(formTemplateId, FormTemplate.class, userInfo.getUser().getId());
 			return true;
 		}
 	}
@@ -309,30 +313,34 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	public void validateFormTemplate(FormTemplate formTemplate, Logger logger) {
 		//TODO: подумать над обработкой уникальности версии, на данный момент версия не меняется
 
-		validateFormColumns(formTemplate.getColumns(), formTemplate.getType().getId(), logger);
+		validateFormColumns(formTemplate, logger);
 		validateFormStyles(formTemplate.getStyles(), logger);
 		validateFormRows(formTemplate.getRows(), logger);
-	}
+        validateFormAutoNumerationColumn(formTemplate, logger);
+    }
 
-	private void validateFormColumns(List<Column> columns, Integer formTemplateTypeId, Logger logger){
-		checkSet.clear();
+	private void validateFormColumns(FormTemplate formTemplate, Logger logger) {
+        List<Column> columns = formTemplate.getColumns();
+        Integer formTemplateTypeId = formTemplate.getType().getId();
 
-		for (Column column : columns) {
-			if (!checkSet.add(column.getAlias())) {
-				logger.error("найден повторяющийся алиас \" " + column.getAlias() +
-						"\" для столбца " + column.getName());
-			}
+        checkSet.clear();
 
-			if (column.getName() != null && column.getName().getBytes().length > FORM_COLUMN_NAME_MAX_VALUE) {
-				logger.error("значение для имени столбца \"" + column.getName() +
-						"\" слишком велико (фактическое: " + column.getName().getBytes().length +
-						", максимальное: " + FORM_COLUMN_NAME_MAX_VALUE + ")");
-			}
-			if (column.getAlias() != null && column.getAlias().getBytes().length > FORM_COLUMN_ALIAS_MAX_VALUE) {
-				logger.error("значение для алиаса столбца \"" + column.getAlias() +
-						"\" слишком велико (фактическое: " + column.getAlias().getBytes().length
-						+ ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
-			}
+        for (Column column : columns) {
+            if (!checkSet.add(column.getAlias())) {
+                logger.error("найден повторяющийся алиас \" " + column.getAlias() +
+                        "\" для столбца " + column.getName());
+            }
+
+            if (column.getName() != null && column.getName().getBytes().length > FORM_COLUMN_NAME_MAX_VALUE) {
+                logger.error("значение для имени столбца \"" + column.getName() +
+                        "\" слишком велико (фактическое: " + column.getName().getBytes().length +
+                        ", максимальное: " + FORM_COLUMN_NAME_MAX_VALUE + ")");
+            }
+            if (column.getAlias() != null && column.getAlias().getBytes().length > FORM_COLUMN_ALIAS_MAX_VALUE) {
+                logger.error("значение для алиаса столбца \"" + column.getAlias() +
+                        "\" слишком велико (фактическое: " + column.getAlias().getBytes().length
+                        + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
+            }
 
             if (column instanceof StringColumn && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
                 List<String> formDataList = formDataDao.getStringList(column.getId(), formTemplateTypeId);
@@ -344,7 +352,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                 }
             }
         }
-	}
+    }
 
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
 		//TODO: подумать о уникальности порядка строк
@@ -391,5 +399,50 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public boolean isMonthly(int formId) {
         FormTemplate formTemplate = formTemplateDao.get(formId);
         return formTemplate.isMonthly();
+    }
+
+    /**
+     * Валидация сквозной нумерации
+     * @param formTemplate макета НФ
+     */
+    protected void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
+
+        List<Column> columns = formTemplate.getColumns();
+        Integer formTemplateId = formTemplate.getId();
+
+        for (Column column : columns) {
+            if (column instanceof AutoNumerationColumn && ((AutoNumerationColumn) column).getType() == AutoNumerationColumnType.CROSS.getType()) {
+                // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
+                FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
+                List<Column> columnList = fullFormTemplate.getColumns();
+                for (Column col : columnList) {
+                    // Если это автонумеруемая графа и значение != сквозная
+                    if (col instanceof AutoNumerationColumn && ((AutoNumerationColumn) col).getType() != AutoNumerationColumnType.CROSS.getType()) {
+                        List<ReportPeriod> reportPeriodList = reportPeriodDao.getClosedPeriodsForFormTemplate(formTemplateId);
+
+                        if (reportPeriodList.size() != 0) {
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (int i = 0; i < reportPeriodList.size(); i++) {
+                                stringBuilder.append(reportPeriodList.get(i).getName()).append(" ");
+                                stringBuilder.append(reportPeriodList.get(i).getTaxPeriod().getYear());
+                                if (i < reportPeriodList.size() - 1) {
+                                    stringBuilder.append(", ");
+                                }
+                            }
+                            logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
+                                    stringBuilder.toString() + ". " +
+                                    "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
+                        } else {
+
+                    /*
+                     * Здесь обновляем значение атрибута "Номер последней строки предыдущей НФ".
+                     * http://conf.aplana.com/pages/viewpage.action?pageId=11377661 п.7А.1.1.1
+                     */
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
