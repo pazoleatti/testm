@@ -423,12 +423,14 @@ def getRate(def row, def lastDay) {
         return null
     }
     // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
-    def code = getRefBookValue(84, row.regNumber)?.CODE_CUR?.stringValue
+    def record15Id = getRefBookValue(84, row.regNumber)?.CODE_CUR?.value
+
+    def code = getRefBookValue(15, record15Id)?.CODE?.value
     if (code in ['810', '643']) {
         return 1
     }
     // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
-    def record22 = getRefBookRecord(22, 'CODE_NUMBER', code?.toString(), lastDay, row.getIndex(), null, true)
+    def record22 = getRefBookRecord(22, 'CODE_NUMBER', record15Id?.toString(), lastDay, row.getIndex(), null, true)
     return record22?.RATE?.value
 }
 

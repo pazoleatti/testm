@@ -301,8 +301,8 @@ BigDecimal calc14(def dataRows, def row, def period) {
         return roundValue(0)
     }
 
-    def currencyCode = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
-    if (currencyCode == '810') {
+    def currencyCode = getCurrencyCode(row.regNumber)
+    if (currencyCode in ['810', '643']) {
         if (row.amount == null || row.incomeCurrentCoupon == null) {
             return null
         }

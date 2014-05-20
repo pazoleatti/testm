@@ -19,29 +19,29 @@
         <name>Код валюты номинала</name>
         <order>2</order>
         <width>5</width>
-        <parentAlias>issuer</parentAlias>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>0</refBookAttributeId2>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>3</order>
         <width>15</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>809</nameAttributeId>
+        <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>809</refBookAttributeId>
+        <refBookAttributeId2>868</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
         <name>Номер государственной регистрации</name>
         <order>4</order>
-        <width>5</width>
-        <parentAlias>issuer</parentAlias>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>813</nameAttributeId>
         <refBookAttributeId>813</refBookAttributeId>
-        <refBookAttributeId2>0</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>amount</alias>

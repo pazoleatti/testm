@@ -15,15 +15,15 @@ import groovy.transform.Field
 // графа    - fix
 // графа 1  - number                - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
 // графа 2  - name                  - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
-// графа 3  - issuer                - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
-// графа 4  - registrationNumber    - зависит от графы 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
+// графа 3  - issuer                - зависит от графы 4 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
+// графа 4  - registrationNumber    - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
 // графа 5  - buyDate
 // графа 6  - cost
 // графа 7  - bondsCount
 // графа 8  - upCost
 // графа 9  - circulationTerm
 // графа 10 - percent
-// графа 11 - currencyCode          - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочника 84 «Ценные бумаги»
+// графа 11 - currencyCode          - зависит от графы 4 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочника 84 «Ценные бумаги»
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
@@ -77,17 +77,17 @@ def refBookCache = [:]
 def allColumns = ['fix', 'number', 'name', 'issuer', 'registrationNumber', 'buyDate', 'cost',
         'bondsCount', 'upCost', 'circulationTerm', 'percent', 'currencyCode']
 
-// Редактируемые атрибуты (графа 2, 3, 5..9)
+// Редактируемые атрибуты (графа 2, 4..9)
 @Field
-def editableColumns = ['name', 'issuer', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm']
+def editableColumns = ['name', 'registrationNumber', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = allColumns - editableColumns
 
-// Проверяемые на пустые значения атрибуты (графа 2, 3, 5..10)
+// Проверяемые на пустые значения атрибуты (графа 2, 4..10)
 @Field
-def nonEmptyColumns = ['name', 'issuer', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent']
+def nonEmptyColumns = ['name', 'registrationNumber', 'buyDate', 'cost', 'bondsCount', 'upCost', 'circulationTerm', 'percent']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 7, 10)
 @Field
@@ -100,10 +100,6 @@ def sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 // Дата окончания отчетного периода
 @Field
 def endDate = null
-
-// Текущая дата
-@Field
-def currentDate = new Date()
 
 @Field
 def taxPeriod = null
@@ -123,31 +119,6 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
     }
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
-// Поиск записи в справочнике по значению
-def getRecord(def refBookId, def String alias, def String value) {
-    return getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, getReportPeriodEndDate())
-}
-
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    if (value == null) {
-        return null
-    }
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
-
-// Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required) {
-    if (value == null) {
-        return null
-    }
-    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            day, rowIndex, cellName, logger, required)
 }
 
 // Получение числа из строки при импорте
@@ -375,9 +346,7 @@ def calc10(def row, def lastDay) {
     if (rate == null) {
         return null
     }
-
-    tmp = tmp * rate
-    return roundValue(tmp, 2)
+    return roundValue(tmp * rate, 2)
 }
 
 /** Поправить индексы. */
@@ -403,23 +372,23 @@ def getTaxPeriod() {
 
 // Получение импортируемых данных
 void importData() {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    def xml = getXML(ImportInputStream, importService, fileName, 'Номер территориального банка', null)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 11, 2)
 
     def headerMapping = [
-            (xml.row[0].cell[0]) : 'Номер территориального банка ',
-            (xml.row[0].cell[2]) : 'Наименование территориального банка / подразделения Центрального аппарата',
-            (xml.row[0].cell[3]) : 'Эмитент',
-            (xml.row[0].cell[4]) : 'Номер государственной регистрации',
-            (xml.row[0].cell[5]) : 'Дата приобретения',
-            (xml.row[0].cell[6]) : 'Номинальная стоимость, ед. вал.',
-            (xml.row[0].cell[7]) : 'Количество облигаций, шт.',
-            (xml.row[0].cell[8]) : 'Средневзвешенная цена одной бумаги на дату размещения, ед.вал.',
-            (xml.row[0].cell[9]) : 'Срок обращения условиям выпуска, дни',
-            (xml.row[0].cell[10]): 'Процентный доход, руб.коп.',
-            (xml.row[0].cell[11]): 'Код валюты номинала'
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'number'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'name'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'issuer'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'registrationNumber'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'buyDate'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'bondsCount'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'upCost'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'circulationTerm'),
+            (xml.row[0].cell[10]): getColumnName(tmpRow, 'percent'),
+            (xml.row[0].cell[11]): getColumnName(tmpRow, 'currencyCode')
     ]
 
     (1..11).each { index ->
@@ -479,15 +448,29 @@ void addData(def xml, int headRowCount) {
             formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
-        // графа 3 - атрибут 809 - ISSUER - «Эмитент», справочника 84 «Ценные бумаги»
-        xmlIndexCol = 3
-        def record84 = getRecordImport(84, 'ISSUER', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        newRow.issuer = record84?.record_id?.value
+        // графа 4 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
+        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
+        xmlIndexCol = 4
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
+        newRow.registrationNumber = record84?.record_id?.value
 
-        // графа 4 - зависит от графы 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочника 84 «Ценные бумаги»
-        if (record84 != null) {
-            xmlIndexCol = 4
-            formDataService.checkReferenceValue(84, row.cell[xmlIndexCol].text(), record84?.REG_NUM?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 3 - зависит от графы 4 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 3
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record100 != null) {
+            def value1 = record100?.record_id?.value?.toString()
+            def value2 = record84?.ISSUER?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
+
+        // графа 11 - зависит от графы 4 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 11
+        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (record84 != null && record15 != null) {
+            def value1 = record15?.record_id?.value?.toString()
+            def value2 = record84?.CODE_CUR?.value?.toString()
+            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
 
         // графа 5
@@ -545,17 +528,19 @@ void deleteNotFixedRows(def dataRows) {
 
 // Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
 def getRate(def row, def lastDay) {
-    if (row.issuer == null) {
+    if (row.registrationNumber == null) {
         return null
     }
     // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
-    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.stringValue
+    def record15Id = getRefBookValue(84, row.registrationNumber)?.CODE_CUR?.value
+
+    def code = getRefBookValue(15, record15Id)?.CODE?.value
     if (code in ['810', '643']) {
         return 1
     }
-    // получить id записи из справочника валют (15) по цифровому коду валюты
-    def recordId = getRecordId(15, 'CODE', code, row.getIndex(), getColumnName(row, 'issuer'), lastDay)
+
     // получить запись (поле курс валюты) из справочника курс валют (22) по цифровому коду валюты
-    def record22 = getRefBookRecord(22, 'CODE_NUMBER', recordId?.toString(), lastDay, row.getIndex(), null, true)
+    def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache, 'CODE_NUMBER',
+            record15Id?.toString(), lastDay, row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
     return record22?.RATE?.value
 }
