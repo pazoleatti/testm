@@ -48,7 +48,7 @@
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalPeriod">
-        <cell alias="period" colSpan="1" rowSpan="1"/>
+        <cell alias="period" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="bill" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="dealNds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_20" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -63,7 +63,7 @@
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalAnnul">
-        <cell alias="period" colSpan="1" rowSpan="1"/>
+        <cell alias="period" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="bill" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="dealNds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_20" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -78,7 +78,7 @@
         <cell alias="diff" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalFix">
-        <cell alias="period" colSpan="1" rowSpan="1"/>
+        <cell alias="period" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="bill" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="dealNds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="deal_20" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
