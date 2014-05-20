@@ -302,7 +302,7 @@ BigDecimal calc14(def dataRows, def row, def period) {
     }
 
     def currencyCode = getCurrencyCode(row.regNumber)
-    if (currencyCode == '810') {
+    if (currencyCode in ['810', '643']) {
         if (row.amount == null || row.incomeCurrentCoupon == null) {
             return null
         }
