@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
 
@@ -80,6 +81,15 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
                 MultiSelectTreeItem.this.setState(!MultiSelectTreeItem.this.getState());
             }
         });
+    }
+
+    public void highLightText(String textToHighLight) {
+        if(textToHighLight!= null && !textToHighLight.isEmpty()) {
+            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(), "<span style=\"color: #ff0000;\">$&</span>");
+            label.getElement().setInnerHTML(highLightedString);
+            DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
+            DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
+        }
     }
 
     public Integer getId() {

@@ -60,6 +60,7 @@ switch (formDataEvent) {
         if (isBalancePeriod()) {
             columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
         }
+        def autoFillColumns = allColumns - columns
         formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -112,10 +113,6 @@ def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'curren
 // Редактируемые атрибуты (графа 3, 4, 6, 7, 9, 11, 12)
 @Field
 def editableColumns = ['regNumber', 'tradeNumber', 'prev', 'current', 'cost', 'marketQuotation', 'rubCourse']
-
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = allColumns - editableColumns
 
 // Группируемые атрибуты (графа 2, 3, 4)
 @Field

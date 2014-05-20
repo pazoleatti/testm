@@ -243,7 +243,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     private void lineinRefBook() {
         Date date  = new Date();
-        fPicker.setPeriodDates(null, date);
+        fPicker.setPeriodDates(date, date);
         fPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
@@ -305,7 +305,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     private void heirarRefBook() {
         Date date  = new Date();
-        hPicker.setPeriodDates(new Date(date.getTime() - 1000000L), new Date(date.getTime() + 1000000L));
+        hPicker.setPeriodDates(date, date);
         hPicker.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {

@@ -95,7 +95,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         }
 
         if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
-            Dialog.errorMessage("Ошибка", "Неправильно указан диапазон дат!");
+            Dialog.errorMessage("Неправильно указан диапазон дат!");
             versionEnd.setValue(null);
             return;
         }

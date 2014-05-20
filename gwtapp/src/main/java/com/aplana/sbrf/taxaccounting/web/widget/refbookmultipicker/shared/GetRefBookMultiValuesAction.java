@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 

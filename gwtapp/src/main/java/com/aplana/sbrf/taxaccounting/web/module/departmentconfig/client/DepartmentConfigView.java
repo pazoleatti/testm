@@ -14,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.Departme
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerContext;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerContext;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LabelSeparator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;

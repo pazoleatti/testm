@@ -132,7 +132,7 @@
                             <g:CheckBox ui:field="selectChild" wordWrap="false" text="Включая подчиненные"/>
                         </g:cell>
                         <g:cell horizontalAlignment="right" width="50%">
-                            <g:CheckBox wordWrap="false" enabled="false" text="Отображать *недействующие подразделения" />
+                            <g:CheckBox ui:field="showDisabled" wordWrap="false" text="Отображать *недействующие подразделения" />
                         </g:cell>
 
                     </g:HorizontalPanel>
