@@ -293,7 +293,7 @@ void generateXML() {
                                             (organKPP != null ? [КПП: organKPP] : [:]) +
                                             (organRegNum != null ? [РегНомИн: organRegNum] : [:]) +
                                             (taxpayerCode != null ? [КодНПРег: taxpayerCode] : [:]) +
-                                            (address != null ? [АдрИнТекст: address] : [:])
+                                            ((address != null && organInfo != '1') ? [АдрИнТекст: address] : [:])
                             )
                         }
                     }
