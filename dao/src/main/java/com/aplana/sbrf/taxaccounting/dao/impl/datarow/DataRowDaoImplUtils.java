@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
+import com.aplana.sbrf.taxaccounting.model.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.aplana.sbrf.taxaccounting.model.*;
 
 public class DataRowDaoImplUtils {
 
@@ -46,7 +46,7 @@ public class DataRowDaoImplUtils {
 	static <T> T getCellValueComponent(Column c, T[] objects) {
 		if (c instanceof StringColumn) {
 			return objects[1];
-		} else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn) {
+		} else if (c instanceof NumericColumn || c instanceof RefBookColumn || c instanceof ReferenceColumn || c instanceof AutoNumerationColumn) {
 			return objects[0];
 		} else if (c instanceof DateColumn) {
 			return objects[2];
