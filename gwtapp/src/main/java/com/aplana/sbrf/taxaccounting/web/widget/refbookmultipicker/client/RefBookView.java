@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
 

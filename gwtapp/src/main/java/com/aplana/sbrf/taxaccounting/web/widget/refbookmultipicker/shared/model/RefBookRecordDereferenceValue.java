@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
+package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.io.Serializable;

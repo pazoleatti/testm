@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.gwtplatform.dispatch.shared.Result;
 
 

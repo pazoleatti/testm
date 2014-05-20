@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookItem;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.google.gwt.user.cellview.client.TextColumn;
 
 public class RefBookItemTextColumn extends TextColumn<RefBookItem> {

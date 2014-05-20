@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.PickerState;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.RefBookUiTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookUiTreeItem;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 import java.util.Date;
