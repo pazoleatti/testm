@@ -113,7 +113,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess() && this.isVisible()) {
             getView().updateTable();
-            editFormPresenter.clearAndDisableForm();
         }
 	}
 
