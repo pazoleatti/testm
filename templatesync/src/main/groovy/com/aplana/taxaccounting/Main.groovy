@@ -194,9 +194,9 @@ class Main {
                     'vat_724_6': 604,
                     'vat_724_7': 605,
                     'vat_937_1': 606,
-                    'vat_937_2': 608,
+                    'vat_937_1_13': 607,
                     'vat_937_2_13': 609,
-                    'vat_973_1_14': 607
+                    'vat_937_2': 608
             ],
             'transport': [
                     'benefit_vehicles': 202,
@@ -883,7 +883,7 @@ class Main {
                             }
 
                             tr {
-                                td(colspan: 11, class: 'hdr', data.prefix2)
+                                td(colspan: 12, class: 'hdr', data.prefix2)
                             }
                             tr {
                                 th 'ord'
