@@ -37,12 +37,13 @@ class Main {
     def static HTML_STYLE = '''
                         table.rt {
                             font-family: verdana,helvetica,arial,sans-serif;
+                            font-size: 13px;
                             background-color: #FBFEFF;
                             width: 100%;
                             border-collapse: collapse;
                         }
                         .rt td, .rt th {
-                            padding: 2px 5px 2px 5px;
+                            padding: 1px 3px 1px 3px;
                             border: 1px solid #E2E5E6;
                         }
                         .rt tr:hover {
@@ -207,7 +208,7 @@ class Main {
 
     // FORM_TYPE.ID → Версия макета
     def static getDBVersions() {
-        println("DBMS connect: url=$DB_URL user=$DB_USER")
+        println("DBMS connect: $DB_USER")
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
         def map = [:]
 
@@ -290,7 +291,7 @@ class Main {
                                         result.error = true
                                         def updateResult = -1
                                         if (sql == null) {
-                                            result.check = "Скрипт устарел"
+                                            result.check = "Скрипты отличаются"
                                         } else {
                                             def error = "Число измененных строк не равно 1."
                                             try {
@@ -339,7 +340,7 @@ class Main {
 
     // Загрузка из git в БД и отчет в html-файле
     private static void updateScripts(def versionsMap, def checkOnly = true) {
-        println("DBMS connect: url=$DB_URL user=$DB_USER")
+        println("DBMS connect: $DB_USER")
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def writer = new FileWriter(new File(REPORT_GIT_NAME))
@@ -399,7 +400,7 @@ class Main {
     // Сравненение шаблонов в БД
     static void compareDBFormTemplate(def prefix1, def prefix2) {
         // 1
-        println("DBMS connect: url=$DB_URL user=$prefix1")
+        println("DBMS connect: $prefix1")
         def sql = Sql.newInstance(DB_URL, prefix1, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def allVersions = [:]
@@ -462,7 +463,7 @@ class Main {
         println("Load DB form_template1 OK")
 
         // 2
-        println("DBMS connect: url=$DB_URL user=$prefix2")
+        println("DBMS connect: $prefix2")
         sql = Sql.newInstance(DB_URL, prefix2, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def map2 = [:]
@@ -698,6 +699,7 @@ class Main {
                                             def data = new Expando()
                                             data.tmp1 = tmp1
                                             data.tmp2 = tmp2
+                                            data.name = name
                                             data.changesMap = changesMap
                                             data.columnsSet1 = columnsSet1
                                             data.columnsSet2 = columnsSet2
@@ -782,7 +784,7 @@ class Main {
                     }
                 }
                 columnTableData.each() { key, data ->
-                    div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version}") {
+                    div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
                         table(class: 'rt') {
                             tr {
                                 td(colspan: 12, class: 'hdr', data.prefix1)
@@ -979,9 +981,12 @@ class Main {
             }
         }
         writer.close()
+        println("See $REPORT_DB_NAME for details")
     }
 
     static void main(String[] args) {
+        println("RDBMS url=$DB_URL")
+        println("Compare local and $DB_USER scripts...")
         // Удаление старого отчета, если есть
         def report = new File(REPORT_GIT_NAME)
         if (report.exists()) {
@@ -992,6 +997,7 @@ class Main {
         println("See $REPORT_GIT_NAME for details")
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
+            println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
             compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
         }
     }
