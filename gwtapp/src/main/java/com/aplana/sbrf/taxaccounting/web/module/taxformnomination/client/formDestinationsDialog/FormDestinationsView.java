@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.formDe
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
@@ -331,5 +329,16 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             formTypeLabel.setText(FORM_DATA_TYPE_TITLE_D);
             modalWindowTitle.setTitle(MODAL_WINDOW_TITLE_D);
         }
+    }
+
+    @Override
+    public void prepareFormDataKind(List<FormDataKind> dataKinds) {
+
+        StringBuilder filter = new StringBuilder();
+        for (FormDataKind k : dataKinds) {
+            filter.append(k.getId() + ",");
+        }
+        filter.deleteCharAt(filter.length()-1);
+        formDataKind.setFilter(filter.toString());
     }
 }
