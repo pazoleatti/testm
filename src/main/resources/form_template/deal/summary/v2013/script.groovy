@@ -512,7 +512,13 @@ def buildRow(def srcRow, def matrixRow) {
             break
         case 393: // 18
         case 394: // 19
-            val23 = 1
+            sign23 = formTypeId == 393 ? srcRow.signPhis : srcRow.deliverySign
+            def values23 = getRefBookValue(18, sign23)
+            if (values23 != null && values23.SIGN.stringValue.equals("ОМС")) {
+                val23 = 2
+            } else {
+                val23 = 1
+            }
             break
     }
     row.dealType = getRecordId(64, 'CODE', "$val23")
@@ -612,6 +618,14 @@ def buildRow(def srcRow, def matrixRow) {
         case 404: // 26
             row.dealSubjectName = 'Приобретение прав требования'
             break
+    }
+
+    // Графа 25
+    if (formTypeId == 393) {
+        def values25 = getRefBookValue(64, row.dealType)
+        if (values25 != null && values25.CODE.numberValue == 1) {
+            row.dealSubjectCode1 = getRecordId(73, 'CODE', '7108120001')
+        }
     }
 
     // Графа 26
