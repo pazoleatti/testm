@@ -419,8 +419,8 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
     @Override
     public Map<Long, Date> getRecordsVersionStart(String tableName, List<Long> uniqueRecordIds) {
         final Map<Long, Date> result = new HashMap<Long, Date>();
-        getJdbcTemplate().query(String.format("select id, version from %s where id in %s", tableName,
-                SqlUtils.transformToSqlInStatement(uniqueRecordIds)), new RowCallbackHandler() {
+        getJdbcTemplate().query(String.format("select id, version from %s where %s", tableName,
+                SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 result.put(rs.getLong("id"), rs.getDate("version"));
@@ -469,7 +469,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         return matches;
     }
 
-    private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from %s where ID in %s),\n" +
+    private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from %s where %s),\n" +
             "allRecordsInConflictGroup as (select r.* from %s r where exists (select 1 from conflictRecord cr where r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
@@ -487,7 +487,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         }
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
-                tableName, SqlUtils.transformToSqlInStatement(recordIds), tableName);
+                tableName, SqlUtils.transformToSqlInStatement("ID", recordIds), tableName);
         List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
         if (conflictedIds.size() > 0) {
             StringBuilder attrNames = new StringBuilder();
@@ -505,7 +505,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
 
     @Override
     public boolean isVersionsExist(String tableName, List<Long> recordIds, Date version) {
-        String sql = String.format("select count(*) from %s where record_id in %s and version = trunc(?, 'DD')", tableName, SqlUtils.transformToSqlInStatement(recordIds));
+        String sql = String.format("select count(*) from %s where %s and version = trunc(?, 'DD')", tableName, SqlUtils.transformToSqlInStatement("record_id", recordIds));
         return getJdbcTemplate().queryForInt(sql, version) != 0;
     }
 
@@ -562,20 +562,22 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         return getJdbcTemplate().queryForInt(sql, refBookId, versionFrom, uniqueRecordId) != 0;
     }
 
-    private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from %s where id in %s)\n" +
+    private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from %s where %s)\n" +
             "select count(r.id) from ref_book_value v, checkRecords cr, ref_book_record r where v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= cr.version and cr.id=v.reference_value and v.record_id=r.id";
 
     private static final String CHECK_USAGES_IN_FORMS = "select count(*) from numeric_value where column_id in (select id from form_column " +
-            "where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and record_id in %s)) and value in %s";
+            "where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and %s)) and %s";
 
     @Override
     public boolean isVersionUsed(String tableName, Long refBookId, List<Long> uniqueRecordIds) {
         //Проверка использования в справочниках и настройках подразделений
-        String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
-        String sql = String.format(CHECK_USAGES_IN_REFBOOK, tableName, in);
+        String idIn = SqlUtils.transformToSqlInStatement("id", uniqueRecordIds);
+        String sql = String.format(CHECK_USAGES_IN_REFBOOK, tableName, idIn);
         boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         if (!hasReferences) {
-            sql = String.format(CHECK_USAGES_IN_FORMS, in, in);
+            String valIn = SqlUtils.transformToSqlInStatement("value", uniqueRecordIds);
+            String recordIdIn = SqlUtils.transformToSqlInStatement("record_id", uniqueRecordIds);
+            sql = String.format(CHECK_USAGES_IN_FORMS, recordIdIn, valIn);
             return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         } else return true;
     }
@@ -745,7 +747,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
         });
     }
 
-    private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id from %s where id in %s),\n" +
+    private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id from %s where %s),\n" +
             "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.record_id=cr.record_id) \n" +
             "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=?";
 
@@ -753,7 +755,7 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
     public List<Long> getRelatedVersions(String tableName, List<Long> uniqueRecordIds) {
         try {
             String sql = String.format(GET_RELATED_VERSIONS,
-                    tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds), tableName);
+                    tableName, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds), tableName);
             return getJdbcTemplate().queryForList(sql, Long.class, VersionedObjectStatus.FAKE.getId());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
@@ -774,8 +776,8 @@ public class RefBookBigDataDaoImpl extends AbstractDao implements RefBookBigData
 
     @Override
     public List<Date> hasChildren(String tableName, List<Long> uniqueRecordIds) {
-        String sql = String.format("select distinct version from %s where parent_id in %s",
-                tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        String sql = String.format("select distinct version from %s where %s",
+                tableName, SqlUtils.transformToSqlInStatement("parent_id", uniqueRecordIds));
         try {
             return getJdbcTemplate().query(sql, new RowMapper<Date>() {
                 @Override

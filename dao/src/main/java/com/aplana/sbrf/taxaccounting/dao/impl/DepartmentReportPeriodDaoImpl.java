@@ -1,12 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Date;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,9 +13,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
+import java.util.List;
 
 @Repository
 @Transactional(readOnly=true)
@@ -86,8 +85,8 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements
     @Override
     public void updateDeadline(int reportPeriodId, List<Integer> departmentIds, Date deadline) {
         getJdbcTemplate()
-                .update("update DEPARTMENT_REPORT_PERIOD set DEADLINE=? where REPORT_PERIOD_ID=? and DEPARTMENT_ID IN " +
-                        SqlUtils.transformToSqlInStatement(departmentIds),
+                .update("update DEPARTMENT_REPORT_PERIOD set DEADLINE=? where REPORT_PERIOD_ID=? and " +
+                        SqlUtils.transformToSqlInStatement("DEPARTMENT_ID", departmentIds),
                         deadline, reportPeriodId);
     }
 

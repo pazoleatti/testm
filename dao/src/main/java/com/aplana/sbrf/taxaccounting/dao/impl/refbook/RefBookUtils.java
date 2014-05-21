@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -510,14 +509,14 @@ public class RefBookUtils extends AbstractDao {
         getJdbcTemplate().update(String.format("delete from %s where id=?", tableName), uniqueRecordId);
     }
 
-    private static final String DELETE_VERSION = "delete from %s where id in %s";
+    private static final String DELETE_VERSION = "delete from %s where %s";
 
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
     }
 
