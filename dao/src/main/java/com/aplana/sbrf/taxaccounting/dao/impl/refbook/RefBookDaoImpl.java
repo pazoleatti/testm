@@ -1439,7 +1439,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where ID in %s),\n" +
+    private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where %s),\n" +
             "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
@@ -1464,7 +1464,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
-                SqlUtils.transformToSqlInStatement(recordIds));
+                SqlUtils.transformToSqlInStatement("ID", recordIds));
         Map<String, Date> params = new HashMap<String, Date>();
         params.put("versionFrom", versionFrom);
         params.put("versionTo", versionTo);
@@ -1503,7 +1503,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  r.version as versionStart\n" +
             "from ref_book b\n" +
             "join ref_book_record r on r.ref_book_id = b.id \n" +
-            "join ref_book_value v on (v.record_id = r.id and v.reference_value in %s)\n" +
+            "join ref_book_value v on (v.record_id = r.id and %s)\n" +
             "join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)";
 
     private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION = "select refBookName, versionStart from (\n" +
@@ -1511,7 +1511,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  b.name as refBookName\n" +
             "  from ref_book b\n" +
             "  join ref_book_record r on r.ref_book_id = b.id\n" +
-            "  join ref_book_value v on (v.record_id = r.id and v.reference_value in %s)\n" +
+            "  join ref_book_value v on (v.record_id = r.id and %s)\n" +
             "  join ref_book_attribute a on (a.id = v.attribute_id and a.reference_id = :refBookId)\n" +
             ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
@@ -1560,7 +1560,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     public List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, boolean isValuesChanged) {
         Set<String> results = new HashSet<String>();
-        String in = SqlUtils.transformToSqlInStatement(uniqueRecordIds);
+        String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
@@ -1699,15 +1699,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where id in %s)";
+    private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
 
     @Override
     public void deleteAllRecordVersions(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_ALL_VERSIONS, SqlUtils.transformToSqlInStatement(uniqueRecordIds));
+        String sql = String.format(DELETE_ALL_VERSIONS, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql, refBookId);
     }
 
-    private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id, ref_book_id from REF_BOOK_RECORD where id in %s),\n" +
+    private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id, ref_book_id from REF_BOOK_RECORD where %s),\n" +
             "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.ref_book_id=cr.ref_book_id and r.record_id=cr.record_id) \n" +
             "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%d";
 
@@ -1715,7 +1715,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Long> getRelatedVersions(@NotNull List<Long> uniqueRecordIds) {
         try {
             String sql = String.format(GET_RELATED_VERSIONS,
-                    SqlUtils.transformToSqlInStatement(uniqueRecordIds), VersionedObjectStatus.FAKE.getId());
+                    SqlUtils.transformToSqlInStatement("id", uniqueRecordIds), VersionedObjectStatus.FAKE.getId());
             return getJdbcTemplate().queryForList(sql, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();

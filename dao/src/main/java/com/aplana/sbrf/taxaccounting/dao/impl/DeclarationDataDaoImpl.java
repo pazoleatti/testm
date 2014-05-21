@@ -211,11 +211,15 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 		}
 
 		if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-			sql.append(" AND rp.id in ").append(transformToSqlInStatement(filter.getReportPeriodIds()));
+			sql
+                .append(" AND ")
+                .append(transformToSqlInStatement("rp.id", filter.getReportPeriodIds()));
 		}
 
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" AND dec.department_id in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
+			sql
+                .append(" AND ")
+                .append(transformToSqlInStatement("dec.department_id", filter.getDepartmentIds()));
 		}
 
 		if (filter.getDeclarationTypeId() != null) {
