@@ -174,7 +174,7 @@ void logicCheck() {
             def tmpRow = getCalcRowFromRNU_32_1(row.name, row.code, rows32_1)
             for (def alias : allColumns) {
                 def value1 = row.getCell(alias).value
-                def value2 = tmpRow.getCell(alias).value
+                def value2 = tmpRow?.getCell(alias)?.value
                 if (value1 != value2) {
                     logger.error('Значения не соответствуют данным РНУ-32.1')
                     return
@@ -226,7 +226,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    destinationDataRows.addAll(getDataRow(destinationDataRows, fromAlias).getIndex() - 1, copyRows)
+    destinationDataRows.addAll(getDataRow(destinationDataRows, fromAlias).getIndex(), copyRows)
     updateIndexes(destinationDataRows)
 }
 
@@ -393,17 +393,10 @@ def roundValue(def value, int precision) {
  * Получить код валюты номинала по id записи из справочнкиа ценной бумаги (84).
  *
  * @param row строку из рну-32.1
- * @return id записи справочника 15
+ * @return id записи справочника 84
  */
 def getCode(def row) {
-    if (row.issuer == null) {
-        return null
-    }
-    // получить запись (поле Цифровой код валюты выпуска) из справочника ценные бумаги (84) по id записи
-    def code = getRefBookValue(84, row.issuer)?.CODE_CUR?.value
-    // получить id записи из справочника валют (15) по цифровому коду валюты
-    def recordId = getRecordId(15, 'CODE', code?.toString(), row.getIndex(), getColumnName(row, 'issuer'))
-    return recordId
+    return (row.regNumber ?: null)
 }
 
 def getReportPeriodEndDate() {

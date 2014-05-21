@@ -41,7 +41,7 @@
         <checking>false</checking>
         <name>Признак контрагента: 3 - эмитент ценной бумаги, 4 - организатор торговли, 5 - прочие</name>
         <order>4</order>
-        <width>6</width>
+        <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>825</nameAttributeId>
         <refBookAttributeId>825</refBookAttributeId>
@@ -51,66 +51,68 @@
         <checking>false</checking>
         <name>Наименование контрагента</name>
         <order>5</order>
-        <width>6</width>
+        <width>5</width>
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>securityName</alias>
         <checking>false</checking>
         <name>Наименование ценной бумаги (включая наименование эмитента)</name>
         <order>6</order>
-        <width>6</width>
-        <maxLength>255</maxLength>
-        <prevLength>0</prevLength>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>809</nameAttributeId>
+        <refBookAttributeId>809</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>series</alias>
         <checking>false</checking>
         <name>Серия (выпуск)</name>
         <order>7</order>
         <width>5</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
+        <parentAlias>securityName</parentAlias>
+        <refBookAttributeId>812</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>securityKind</alias>
         <checking>false</checking>
         <name>Вид ценной бумаги: 1 - купонная облигация, 2 - дисконтная облигация, 3 - акция</name>
         <order>8</order>
         <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>827</nameAttributeId>
-        <refBookAttributeId>827</refBookAttributeId>
+        <parentAlias>securityName</parentAlias>
+        <refBookAttributeId>815</refBookAttributeId>
+        <refBookAttributeId2>827</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги: «+» - обращающаяся на ОРЦБ; «-» - необращающаяся на ОРЦБ</name>
         <order>9</order>
-        <width>6</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>622</nameAttributeId>
-        <refBookAttributeId>621</refBookAttributeId>
+        <width>5</width>
+        <parentAlias>securityName</parentAlias>
+        <refBookAttributeId>869</refBookAttributeId>
+        <refBookAttributeId2>621</refBookAttributeId2>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>currencyCode</alias>
         <checking>false</checking>
         <name>Код валюты бумаги (номинала)</name>
         <order>10</order>
         <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>66</nameAttributeId>
-        <refBookAttributeId>65</refBookAttributeId>
+        <parentAlias>securityName</parentAlias>
+        <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>64</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>currencyName</alias>
         <checking>false</checking>
         <name>Наименование валюты бумаги (номинала)</name>
         <order>11</order>
-        <width>6</width>
-        <parentAlias>currencyCode</parentAlias>
-        <refBookAttributeId>66</refBookAttributeId>
+        <width>5</width>
+        <parentAlias>securityName</parentAlias>
+        <refBookAttributeId>810</refBookAttributeId>
+        <refBookAttributeId2>66</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>nominal</alias>
@@ -161,7 +163,7 @@
         <checking>false</checking>
         <name>Наименование валюты расчётов по сделке</name>
         <order>17</order>
-        <width>6</width>
+        <width>5</width>
         <parentAlias>currencyCodeTrade</parentAlias>
         <refBookAttributeId>66</refBookAttributeId>
     </columns>
@@ -170,7 +172,7 @@
         <checking>false</checking>
         <name>Стоимость покупки без НКД, рублей (по курсу на дату приобретения)</name>
         <order>18</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -179,7 +181,7 @@
         <checking>false</checking>
         <name>Расходы банка, связанные с приобретением, рублей (по курсу на дату приобретения)</name>
         <order>19</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -197,7 +199,7 @@
         <checking>false</checking>
         <name>Рыночная цена на дату приобретения, рублей по курсу на дату приобретения</name>
         <order>21</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -206,7 +208,7 @@
         <checking>false</checking>
         <name>Стоимость приобретения без НКД в целях налогообложения, рублей (по курсу на дату приобретения)</name>
         <order>22</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -231,7 +233,7 @@
         <checking>false</checking>
         <name>Стоимость погашения без НКД, рублей (по курсу на дату признания дохода)</name>
         <order>25</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -249,7 +251,7 @@
         <checking>false</checking>
         <name>Цена реализации (без НКД), рублей (по курсу на дату признания дохода)</name>
         <order>27</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -267,7 +269,7 @@
         <checking>false</checking>
         <name>Рыночная цена на дату реализации, рублей по курсу на дату признания дохода</name>
         <order>29</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -278,7 +280,7 @@
             дохода)
         </name>
         <order>30</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -287,7 +289,7 @@
         <checking>false</checking>
         <name>Расходы банка, связанные с реализацией, рублей (по курсу на дату признания дохода)</name>
         <order>31</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -296,7 +298,7 @@
         <checking>false</checking>
         <name>Всего расходы по реализации, =гр.21 + гр.18 + гр.30, рублей</name>
         <order>32</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -305,7 +307,7 @@
         <checking>false</checking>
         <name>Средневзвешенная цена 1 бумаги на дату, когда выпуск ценных бумаг признан размещенным, ед. валюты</name>
         <order>33</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>21</maxLength>
         <precision>6</precision>
     </columns>
@@ -314,7 +316,7 @@
         <checking>false</checking>
         <name>Срок обращения согласно условиям выпуска (дни) (для дисконтных облигаций)</name>
         <order>34</order>
-        <width>6</width>
+        <width>5</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -323,7 +325,7 @@
         <checking>false</checking>
         <name>Срок владения ценной бумагой (дни) (для дисконтных облигаций)</name>
         <order>35</order>
-        <width>6</width>
+        <width>5</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -332,7 +334,7 @@
         <checking>false</checking>
         <name>Процентный доход, полученный за время владения дисконтными облигациями, ед.</name>
         <order>36</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -343,7 +345,7 @@
             дохода)
         </name>
         <order>37</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -354,7 +356,7 @@
             облигаций и акций = гр.29-гр.31, рублей
         </name>
         <order>38</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -363,7 +365,7 @@
         <checking>false</checking>
         <name>Превышение цены реализации для целей налогообложения над ценой реализации, рублей</name>
         <order>39</order>
-        <width>10</width>
+        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

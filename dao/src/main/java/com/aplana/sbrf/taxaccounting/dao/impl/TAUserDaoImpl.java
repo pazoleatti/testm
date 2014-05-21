@@ -290,10 +290,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			sql.append(" and lower(name) like " + "\'%").append(filter.getUserName().toLowerCase()).append("%\'");
 		}
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" and department_id in ").append(SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds())));
+			sql.append(" and ").append(SqlUtils.transformToSqlInStatement("department_id", new ArrayList<Integer>(filter.getDepartmentIds())));
 		}
 		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty()) {
-			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id in ").append(SqlUtils.transformToSqlInStatement(filter.getRoleIds())).append(")");
+			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ").append(SqlUtils.transformToSqlInStatement("ur.role_id", filter.getRoleIds())).append(")");
 		}
 		if (filter.getStartIndex() != null && filter.getCountOfRecords() != null) {
 			sql.append(" order by name)) where r between ").append(filter.getStartIndex() + 1).append(" and ").append(filter.getStartIndex() + 1 + filter.getCountOfRecords());
@@ -320,7 +320,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			sql.append(" and name like " + "\'%").append(filter.getUserName()).append("%\'");
 		}
 		if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-			sql.append(" and department_id in ").append(SqlUtils.transformToSqlInStatement(new ArrayList<Integer>(filter.getDepartmentIds())));
+			sql.append(" and ").append(SqlUtils.transformToSqlInStatement("department_id", new ArrayList<Integer>(filter.getDepartmentIds())));
 		}
 		if (filter.getRoleIds() != null && !filter.getRoleIds().isEmpty() && filter.getRoleIds().get(0) != null) {
 			sql.append(" and exists (select 1 from sec_user_role ur where u.id = ur.user_id and ur.role_id = ").append(filter.getRoleIds().get(0)).append(")");

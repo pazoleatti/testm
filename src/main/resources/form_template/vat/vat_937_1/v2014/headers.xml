@@ -12,9 +12,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" value="В том числе (руб.)"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1" value="В том числе (руб.)"/>
         <cell alias="deal" colSpan="1" rowSpan="1" value="В том числе (руб.)"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="4" value="Сумма НДС, отнесенная на расходы Банка (руб.)"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="4"
-              value="Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)"/>
+        <cell alias="nds" colSpan="1" rowSpan="4" value="Сумма НДС, подлежащая вычету (руб.)"/>
         <cell alias="diff" colSpan="1" rowSpan="4" value="Расхождение (руб.)"/>
     </row>
     <row alias="">
@@ -29,9 +27,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" value="покупки, облагаемые налогом по ставке"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1" value="покупки, облагаемые налогом по ставке"/>
         <cell alias="deal" colSpan="1" rowSpan="3" value="покупки, освобождаемые от налога"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1" value="Сумма НДС, отнесенная на расходы Банка (руб.)"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"
-              value="Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)"/>
+        <cell alias="nds" colSpan="1" rowSpan="1" value="Сумма НДС, подлежащая вычету (руб.)"/>
         <cell alias="diff" colSpan="1" rowSpan="1" value="Расхождение (руб.)"/>
     </row>
     <row alias="">
@@ -46,9 +42,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" value="10%"/>
         <cell alias="deal_0" colSpan="1" rowSpan="2" value="0%"/>
         <cell alias="deal" colSpan="1" rowSpan="1" value="покупки, освобождаемые от налога"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1" value="Сумма НДС, отнесенная на расходы Банка (руб.)"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"
-              value="Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)"/>
+        <cell alias="nds" colSpan="1" rowSpan="1" value="Сумма НДС, подлежащая вычету (руб.)"/>
         <cell alias="diff" colSpan="1" rowSpan="1" value="Расхождение (руб.)"/>
     </row>
     <row alias="">
@@ -63,9 +57,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" value="сумма НДС"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1" value="0%"/>
         <cell alias="deal" colSpan="1" rowSpan="1" value="покупки, освобождаемые от налога"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1" value="Сумма НДС, отнесенная на расходы Банка (руб.)"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1"
-              value="Сумма НДС, начисленная с авансов и предоплаты засчитываемая в налоговом периоде при реализации (руб.)"/>
+        <cell alias="nds" colSpan="1" rowSpan="1" value="Сумма НДС, подлежащая вычету (руб.)"/>
         <cell alias="diff" colSpan="1" rowSpan="1" value="Расхождение (руб.)"/>
     </row>
     <row alias="">
@@ -80,8 +72,7 @@
         <cell alias="deal_10_Nds" colSpan="1" rowSpan="1" value="9"/>
         <cell alias="deal_0" colSpan="1" rowSpan="1" value="10"/>
         <cell alias="deal" colSpan="1" rowSpan="1" value="11"/>
-        <cell alias="ndsBank" colSpan="1" rowSpan="1" value="12"/>
-        <cell alias="ndsPre" colSpan="1" rowSpan="1" value="13"/>
-        <cell alias="diff" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="nds" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="diff" colSpan="1" rowSpan="1" value="13"/>
     </row>
 </rows>

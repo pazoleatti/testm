@@ -110,10 +110,10 @@ void calc() {
         def rows40_1 = getRowsBySection(sourceDataRows, section)
         def newRows = []
         for (def row : rows40_1) {
-            if (hasCalcRow(row.name, row.issuer, newRows)) {
+            if (hasCalcRow(row.name, row.registrationNumber, newRows)) {
                 continue
             }
-            def newRow = getCalcRowFromRNU_40_1(row.name, row.issuer, rows40_1)
+            def newRow = getCalcRowFromRNU_40_1(row.name, row.registrationNumber, rows40_1)
             newRows.add(newRow)
         }
         if (!newRows.isEmpty()) {
@@ -341,7 +341,7 @@ def getCalcRowFromRNU_40_1(def name, def code, def rows40_1) {
     }
     def calcRow = null
     for (def row : rows40_1) {
-        if (row.name == name && row.issuer == code) {
+        if (row.name == name && row.registrationNumber == code) {
             if (calcRow == null) {
                 calcRow = formData.createDataRow()
                 calcRow.number = name

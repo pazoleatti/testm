@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.EditForm;
 
-import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
@@ -113,7 +112,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
 		Map<RefBookColumn, HasValue> widgets = new HashMap<RefBookColumn, HasValue>();
-		for (RefBookColumn col : attributes) {
+		for (final RefBookColumn col : attributes) {
 
 			HorizontalPanel oneField = new HorizontalPanel();
 			oneField.setWidth("100%");
@@ -150,12 +149,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					break;
 			}
 
-            HasValue hasValue = (HasValue)widget;
+            final HasValue hasValue = (HasValue)widget;
             hasValue.addValueChangeHandler(new ValueChangeHandler() {
                 @Override
                 public void onValueChange(ValueChangeEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().valueChanged();
+                        getUiHandlers().valueChanged(col.getAlias(), hasValue.getValue());
                     }
                 }
             });

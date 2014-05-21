@@ -37,12 +37,13 @@ class Main {
     def static HTML_STYLE = '''
                         table.rt {
                             font-family: verdana,helvetica,arial,sans-serif;
+                            font-size: 13px;
                             background-color: #FBFEFF;
                             width: 100%;
                             border-collapse: collapse;
                         }
                         .rt td, .rt th {
-                            padding: 2px 5px 2px 5px;
+                            padding: 1px 3px 1px 3px;
                             border: 1px solid #E2E5E6;
                         }
                         .rt tr:hover {
@@ -58,6 +59,7 @@ class Main {
                         }
                         .td_error {
                            color: #FF0000;
+                           cursor: pointer;
                         }
                         .hdr {
                             color: #0C183D;
@@ -192,9 +194,9 @@ class Main {
                     'vat_724_6': 604,
                     'vat_724_7': 605,
                     'vat_937_1': 606,
-                    'vat_937_2': 608,
+                    'vat_937_1_13': 607,
                     'vat_937_2_13': 609,
-                    'vat_973_1_14': 607
+                    'vat_937_2': 608
             ],
             'transport': [
                     'benefit_vehicles': 202,
@@ -206,7 +208,7 @@ class Main {
 
     // FORM_TYPE.ID → Версия макета
     def static getDBVersions() {
-        println("DBMS connect: url=$DB_URL user=$DB_USER")
+        println("DBMS connect: $DB_USER")
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
         def map = [:]
 
@@ -289,7 +291,7 @@ class Main {
                                         result.error = true
                                         def updateResult = -1
                                         if (sql == null) {
-                                            result.check = "Скрипт устарел"
+                                            result.check = "Скрипты отличаются"
                                         } else {
                                             def error = "Число измененных строк не равно 1."
                                             try {
@@ -338,7 +340,7 @@ class Main {
 
     // Загрузка из git в БД и отчет в html-файле
     private static void updateScripts(def versionsMap, def checkOnly = true) {
-        println("DBMS connect: url=$DB_URL user=$DB_USER")
+        println("DBMS connect: $DB_USER")
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def writer = new FileWriter(new File(REPORT_GIT_NAME))
@@ -398,7 +400,7 @@ class Main {
     // Сравненение шаблонов в БД
     static void compareDBFormTemplate(def prefix1, def prefix2) {
         // 1
-        println("DBMS connect: url=$DB_URL user=$prefix1")
+        println("DBMS connect: $prefix1")
         def sql = Sql.newInstance(DB_URL, prefix1, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def allVersions = [:]
@@ -461,7 +463,7 @@ class Main {
         println("Load DB form_template1 OK")
 
         // 2
-        println("DBMS connect: url=$DB_URL user=$prefix2")
+        println("DBMS connect: $prefix2")
         sql = Sql.newInstance(DB_URL, prefix2, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def map2 = [:]
@@ -607,107 +609,105 @@ class Main {
                                     if (columnsSet1 != null && columnsSet2 == null || columnsSet1 == null && columnsSet2 != null) {
                                         colDiff = "Нет в ${columnsSet1 == null ? prefix1 : prefix2}"
                                     } else if (columnsSet1 != null && columnsSet2 != null) {
-                                        if (columnsSet1.size() != columnsSet2.size()) {
-                                            colDiff = "Не совпадает количество граф"
-                                        } else {
-                                            def changesMap = [:]
-                                            for (def i = 0; i < columnsSet1.size(); i++) {
-                                                def col1 = columnsSet1.getAt(i)
-                                                def col2 = columnsSet2.getAt(i)
-                                                if (col1.name != col2.name) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("name")
-                                                }
-                                                if (col1.ord != col2.ord) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("ord")
-                                                }
-                                                if (col1.alias != col2.alias) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("alias")
-                                                }
-                                                if (col1.type != col2.type) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("type")
-                                                }
-                                                if (col1.width != col2.width) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("width")
-                                                }
-                                                if (col1.precision != col2.precision) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("precision")
-                                                }
-                                                if (col1.max_length != col2.max_length) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("max_length")
-                                                }
-                                                if (col1.checking != col2.checking) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("checking")
-                                                }
-                                                if (col1.attribute_id != col2.attribute_id) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("attribute_id")
-                                                }
-                                                if (col1.format != col2.format) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("format")
-                                                }
-                                                if (col1.filter != col2.filter) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("filter")
-                                                }
-                                                if (col1.parent_alias != col2.parent_alias) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("parent_alias")
-                                                }
-                                                if (col1.attribute_id2 != col2.attribute_id2) {
-                                                    if (!changesMap.containsKey(i)) {
-                                                        changesMap.put(i, [])
-                                                    }
-                                                    changesMap[i].add("attribute_id2")
-                                                }
-                                            }
+                                        def changesMap = [:]
 
-                                            if (!changesMap.isEmpty()) {
-                                                colDiff = "Подробнее…"
-                                                def data = new Expando()
-                                                data.tmp1 = tmp1
-                                                data.tmp2 = tmp2
-                                                data.changesMap = changesMap
-                                                data.columnsSet1 = columnsSet1
-                                                data.columnsSet2 = columnsSet2
-                                                data.type_id = type_id
-                                                data.version = version
-                                                data.prefix1 = prefix1
-                                                data.prefix2 = prefix2
-                                                columnTableData.put("_${type_id}_${version}", data)
+                                        for (def i = 0; i < Math.max(columnsSet1.size(), columnsSet2.size()); i++) {
+                                            def col1 = columnsSet1.size() > i ? columnsSet1.getAt(i) : null
+                                            def col2 = columnsSet2.size() > i ? columnsSet2.getAt(i) : null
+                                            if (col1?.name != col2?.name) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("name")
                                             }
+                                            if (col1?.ord != col2?.ord) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("ord")
+                                            }
+                                            if (col1?.alias != col2?.alias) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("alias")
+                                            }
+                                            if (col1?.type != col2?.type) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("type")
+                                            }
+                                            if (col1?.width != col2?.width) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("width")
+                                            }
+                                            if (col1?.precision != col2?.precision) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("precision")
+                                            }
+                                            if (col1?.max_length != col2?.max_length) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("max_length")
+                                            }
+                                            if (col1?.checking != col2?.checking) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("checking")
+                                            }
+                                            if (col1?.attribute_id != col2?.attribute_id) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("attribute_id")
+                                            }
+                                            if (col1?.format != col2?.format) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("format")
+                                            }
+                                            if (col1?.filter != col2?.filter) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("filter")
+                                            }
+                                            if (col1?.parent_alias != col2?.parent_alias) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("parent_alias")
+                                            }
+                                            if (col1?.attribute_id2 != col2?.attribute_id2) {
+                                                if (!changesMap.containsKey(i)) {
+                                                    changesMap.put(i, [])
+                                                }
+                                                changesMap[i].add("attribute_id2")
+                                            }
+                                        }
+
+                                        if (!changesMap.isEmpty()) {
+                                            colDiff = "Подробнее…"
+                                            def data = new Expando()
+                                            data.tmp1 = tmp1
+                                            data.tmp2 = tmp2
+                                            data.name = name
+                                            data.changesMap = changesMap
+                                            data.columnsSet1 = columnsSet1
+                                            data.columnsSet2 = columnsSet2
+                                            data.type_id = type_id
+                                            data.version = version
+                                            data.prefix1 = prefix1
+                                            data.prefix2 = prefix2
+                                            columnTableData.put("_${type_id}_${version}", data)
                                         }
                                     }
 
@@ -784,16 +784,17 @@ class Main {
                     }
                 }
                 columnTableData.each() { key, data ->
-                    div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version}") {
+                    div(class: 'dlg', id: key, title: "Сравнение граф шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
                         table(class: 'rt') {
                             tr {
-                                td(colspan: 11, class: 'hdr', data.prefix1)
+                                td(colspan: 12, class: 'hdr', data.prefix1)
                             }
                             tr {
                                 th 'ord'
                                 th 'alias'
                                 th 'type'
                                 th 'width'
+                                th 'precision'
                                 th 'max_length'
                                 th 'checking'
                                 th 'attribute_id'
@@ -803,7 +804,6 @@ class Main {
                                 th 'attribute_id2'
                             }
 
-                            // сравнение
                             def changesMap = data.changesMap
 
                             data.columnsSet1.eachWithIndex { column, i ->
@@ -830,6 +830,12 @@ class Main {
                                         td column.width
                                     } else {
                                         td(class: 'td_error', column.width)
+                                    }
+
+                                    if (!changesMap[i]?.contains('precision')) {
+                                        td column.precision
+                                    } else {
+                                        td(class: 'td_error', column.precision)
                                     }
 
                                     if (!changesMap[i]?.contains('max_length')) {
@@ -877,13 +883,14 @@ class Main {
                             }
 
                             tr {
-                                td(colspan: 11, class: 'hdr', data.prefix2)
+                                td(colspan: 12, class: 'hdr', data.prefix2)
                             }
                             tr {
                                 th 'ord'
                                 th 'alias'
                                 th 'type'
                                 th 'width'
+                                th 'precision'
                                 th 'max_length'
                                 th 'checking'
                                 th 'attribute_id'
@@ -917,6 +924,12 @@ class Main {
                                         td column.width
                                     } else {
                                         td(class: 'td_error', column.width)
+                                    }
+
+                                    if (!changesMap[i]?.contains('precision')) {
+                                        td column.precision
+                                    } else {
+                                        td(class: 'td_error', column.precision)
                                     }
 
                                     if (!changesMap[i]?.contains('max_length')) {
@@ -968,9 +981,12 @@ class Main {
             }
         }
         writer.close()
+        println("See $REPORT_DB_NAME for details")
     }
 
     static void main(String[] args) {
+        println("RDBMS url=$DB_URL")
+        println("Compare local and $DB_USER scripts...")
         // Удаление старого отчета, если есть
         def report = new File(REPORT_GIT_NAME)
         if (report.exists()) {
@@ -981,6 +997,7 @@ class Main {
         println("See $REPORT_GIT_NAME for details")
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
+            println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
             compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
         }
     }

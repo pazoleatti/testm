@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 /**
  * Вспомогательные методы для работы с SQL в DAO
@@ -28,24 +28,89 @@ public final class SqlUtils {
 	private SqlUtils() {
 	}
 
-	static void checkListSize(List<?> list) {
-		if (list == null) {
+    public static final int IN_CAUSE_LIMIT = 1000;
+
+	static void checkListSize(Collection<?> collection) {
+		if (collection == null) {
 			throw new IllegalArgumentException("List parameter must be defined");
 		}
-		if (list.size() < 1) {
+		if (collection.size() < 1) {
 			throw new IllegalArgumentException("List must not be empty");
 		}
 	}
 
 	/**
-	 * Функция преобразует список (например, содержащий элементы 1,2,3,4) в
-	 * строку вида "(1,2,3,4)", которая бдует использоваться в SQL запросах вида
-	 * "...where param in (1,2,3,4)";
+     * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая
+     * параметры в условии in по size штук.
+     * @param prefix название поля в бд
+     * @param collection коллекция идентификаторо
+     * @param size размер идентификаторов в условии in
 	 */
-	public static String transformToSqlInStatement(List<? extends Number> list) {
-		checkListSize(list);
-		return '(' + StringUtils.join(list.toArray(), ',') + ')';
+    public static String transformToSqlInStatement(String prefix, Collection<? extends Number> collection, int size) {
+        checkListSize(collection);
+
+        List<String> strings = new ArrayList<String>();
+        List<List<? extends Number>> lists = new ArrayList<List<? extends Number>>(splitCollection(collection, size));
+
+        for (List<? extends Number> list : lists) {
+            StringBuffer buffer = new StringBuffer();
+            buffer
+                    .append(prefix)
+                    .append(" in ")
+                    .append("(")
+                    .append(StringUtils.join(list.toArray(), ','))
+                    .append(")");
+
+            strings.add(buffer.toString());
+        }
+
+        StringBuffer buffer = new StringBuffer();
+        buffer
+                .append("(")
+                .append(StringUtils.join(strings.toArray(), " or ", ""))
+                .append(")");
+
+        return buffer.toString();
+    }
+
+    public static String transformToSqlInStatement(String prefix, Collection<? extends Number> collection) {
+        return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
+
+    /**
+     * Метод разбивает коллекцию на коллекции определенного размера
+     * @param data
+     * @param size
+     * @param <T>
+     * @return
+     */
+    public static <T> Collection<List<T>> splitCollection(Collection<T> data, int size){
+        Collection<List<T>> result = new ArrayList<List<T>>();
+        int c = 0;
+        List<T> list =  new ArrayList<T>();;
+        Iterator<T> iterator = data.iterator();
+        while(iterator.hasNext()){
+            if (c == size){
+                c = 0;
+            }
+
+            if (c == 0 && list.size() > 0){
+                result.add(list);
+                list = new ArrayList<T>();
+            }
+
+            list.add(iterator.next());
+            c = c == size ? 0 : c + 1;
+        }
+
+        if (list.size() > 0){
+            result.add(list);
+        }
+
+        return result;
+    }
+
+
 
 	public static String transformFormStatesToSqlInStatement(List<WorkflowState> source) {
 		checkListSize(source);

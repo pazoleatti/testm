@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -178,6 +177,22 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             );
         } catch (EmptyResultDataAccessException e) {
             return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<ReportPeriod> getClosedPeriodsForFormTemplate(Integer formTemplateId) {
+        try {
+            return getJdbcTemplate().query(
+                    "SELECT * FROM form_data fd " +
+                            "LEFT JOIN report_period rp ON fd.report_period_id = rp.id " +
+                            "LEFT JOIN department_report_period drp on fd.department_id = drp.department_id and rp.id = drp.report_period_id " +
+                            "WHERE drp.is_active = 0 AND fd.form_template_id = ?",
+                    new Object[]{formTemplateId},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не существуют закрытые периоды для версии макета с id = " + formTemplateId);
         }
     }
 

@@ -26,10 +26,11 @@ public class ColumnDaoTest {
     private ColumnDao columnDao;
 
     private static final int FORM_ID_FOR_TEST = 1;
-    private static final int NUMBER_OF_COLUMNS = 3;
+    private static final int NUMBER_OF_COLUMNS = 4;
     private static final int FIRST_COLUMN = 0;
     private static final int SECOND_COLUMN = 1;
     private static final int THIRD_COLUMN = 2;
+    private static final int FOURTH_COLUMN = 3;
 
     @Before
     public void init() {
@@ -64,6 +65,15 @@ public class ColumnDaoTest {
         Assert.assertEquals(3, listOfColumnsInDb.get(THIRD_COLUMN).getOrder());
         Assert.assertEquals("dateColumn", listOfColumnsInDb.get(THIRD_COLUMN).getAlias());
         Assert.assertEquals(false, listOfColumnsInDb.get(SECOND_COLUMN).isChecking());
+
+        Assert.assertEquals(Integer.valueOf(4), listOfColumnsInDb.get(FOURTH_COLUMN).getId());
+        Assert.assertEquals("Автонумеруемая графа", listOfColumnsInDb.get(FOURTH_COLUMN).getName());
+        Assert.assertEquals(4, listOfColumnsInDb.get(FOURTH_COLUMN).getOrder());
+        Assert.assertEquals("autoNumerationColumn", listOfColumnsInDb.get(FOURTH_COLUMN).getAlias());
+        Assert.assertEquals(false, listOfColumnsInDb.get(FOURTH_COLUMN).isChecking());
+        if (listOfColumnsInDb.get(FOURTH_COLUMN) instanceof AutoNumerationColumn) {
+            Assert.assertEquals(1, ((AutoNumerationColumn)listOfColumnsInDb.get(FOURTH_COLUMN)).getType());
+        }
     }
 
     @Test
@@ -89,12 +99,12 @@ public class ColumnDaoTest {
         //Then
         columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
-        newColumn = (StringColumn) columnList.get(3);
+        newColumn = (StringColumn) columnList.get(4);
 
-        Assert.assertEquals(4, columnList.size());
+        Assert.assertEquals(5, columnList.size());
         Assert.assertEquals("newColumn", newColumn.getAlias());
         Assert.assertEquals("Новый столбец", newColumn.getName());
-        Assert.assertEquals(4, newColumn.getOrder());
+        Assert.assertEquals(5, newColumn.getOrder());
         Assert.assertEquals(100, newColumn.getMaxLength());
         Assert.assertEquals(false, newColumn.isChecking());
     }
@@ -129,12 +139,12 @@ public class ColumnDaoTest {
 
         columnList = columnDao.getFormColumns(FORM_ID_FOR_TEST);
 
-        referenceColumn = (ReferenceColumn) columnList.get(4);
+        referenceColumn = (ReferenceColumn) columnList.get(5);
 
-        Assert.assertEquals(5, columnList.size());
+        Assert.assertEquals(6, columnList.size());
         Assert.assertEquals("referenceColumn", referenceColumn.getAlias());
         Assert.assertEquals("Зависимая графа", referenceColumn.getName());
-        Assert.assertEquals(5, referenceColumn.getOrder());
+        Assert.assertEquals(6, referenceColumn.getOrder());
         Assert.assertEquals(false, referenceColumn.isChecking());
         Assert.assertEquals((int) BDUtilsMock.getIteratorValue() - 2, referenceColumn.getParentId());
         Assert.assertEquals(5, referenceColumn.getRefBookAttributeId());
