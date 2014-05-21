@@ -520,7 +520,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 .append(" AND dp.id = fd.department_id AND rp.id = fd.report_period_id AND tp.id=rp.tax_period_id");
 
         if (filter.getFormTypeIds() != null && !filter.getFormTypeIds().isEmpty()) {
-            sql.append(" AND ft.id in ").append(transformToSqlInStatement(filter.getFormTypeIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("ft.id in", filter.getFormTypeIds()));
         }
 
         if (filter.getTaxTypes() != null && !filter.getTaxTypes().isEmpty()) {
@@ -528,11 +528,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filter.getReportPeriodIds() != null && !filter.getReportPeriodIds().isEmpty()) {
-            sql.append(" AND rp.id in ").append(transformToSqlInStatement(filter.getReportPeriodIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("rp.id in", filter.getReportPeriodIds()));
         }
 
         if (filter.getDepartmentIds() != null && !filter.getDepartmentIds().isEmpty()) {
-            sql.append(" AND fd.department_id in ").append(transformToSqlInStatement(filter.getDepartmentIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("fd.department_id in", filter.getDepartmentIds()));
         }
 
         if (filter.getFormDataKinds() != null && !filter.getFormDataKinds().isEmpty()) {
@@ -553,11 +553,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
 
         if (filterDao.getReportPeriodIds() != null && !filterDao.getReportPeriodIds().isEmpty()) {
-            sql.append(" AND rp.id in ").append(transformToSqlInStatement(filterDao.getReportPeriodIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("rp.id in", filterDao.getReportPeriodIds()));
         }
 
         if (filterDao.getDepartmentIds() != null && !filterDao.getDepartmentIds().isEmpty()) {
-            sql.append(" AND dec.department_id in ").append(transformToSqlInStatement(filterDao.getDepartmentIds()));
+            sql.append(" AND ").append(transformToSqlInStatement("dec.department_id in", filterDao.getDepartmentIds()));
         }
 
         if (filterDao.getDeclarationTypeId() != null) {
