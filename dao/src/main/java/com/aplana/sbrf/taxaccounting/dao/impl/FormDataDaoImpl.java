@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -254,9 +255,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 	public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         Map paramMap = new HashMap();
         paramMap.put("rp", reportPeriodId);
-        paramMap.put("ids", departmentIds);
         List<Long> formsId = getNamedParameterJdbcTemplate().queryForList(
-            "select id from form_data where department_id in (:ids) and report_period_id = :rp",
+                String.format(
+                        "select id from form_data where %s and report_period_id = :rp",
+                        SqlUtils.transformToSqlInStatement("department_id", departmentIds)),
             paramMap,
             Long.class
         );

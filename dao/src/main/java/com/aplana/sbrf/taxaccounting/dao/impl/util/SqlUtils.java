@@ -5,9 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Вспомогательные методы для работы с SQL в DAO
@@ -46,13 +47,13 @@ public final class SqlUtils {
      * @param collection коллекция идентификаторо
      * @param size размер идентификаторов в условии in
 	 */
-    public static String transformToSqlInStatement(String prefix, Collection<? extends Number> collection, int size) {
+    public static String transformToSqlInStatement(String prefix, Collection<?> collection, int size) {
         checkListSize(collection);
 
         List<String> strings = new ArrayList<String>();
-        List<List<? extends Number>> lists = new ArrayList<List<? extends Number>>(splitCollection(collection, size));
+        List<List<?>> lists = new ArrayList<List<?>>(splitCollection(collection, size));
 
-        for (List<? extends Number> list : lists) {
+        for (List<?> list : lists) {
             StringBuffer buffer = new StringBuffer();
             buffer
                     .append(prefix)
@@ -73,7 +74,7 @@ public final class SqlUtils {
         return buffer.toString();
     }
 
-    public static String transformToSqlInStatement(String prefix, Collection<? extends Number> collection) {
+    public static String transformToSqlInStatement(String prefix, Collection<?> collection) {
         return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}
 

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -80,8 +81,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     public void delete(List<String> uuidStrings) {
         try {
             HashMap<String, Object> valuesMap = new HashMap<String, Object>();
-            valuesMap.put("uuids", uuidStrings);
-            getNamedParameterJdbcTemplate().update("DELETE FROM blob_data WHERE id in (:uuids)",
+            getNamedParameterJdbcTemplate().update(String.format("DELETE FROM blob_data WHERE %s", SqlUtils.transformToSqlInStatement("id", uuidStrings)),
                     valuesMap);
         } catch (DataAccessException e){
             logger.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
