@@ -161,9 +161,7 @@ public class AuditDaoTest {
     public void testGetLogBusiness(){
         Calendar calendar = Calendar.getInstance();
         LogSystemFilterDao filterDao = new LogSystemFilterDao();
-        filterDao.setDepartmentName("ТБ");
-        filterDao.setDeclarationDataIds(Arrays.asList(1l));
-        filterDao.setFormDataIds(Arrays.asList(1l, 11l, 13l));
+        filterDao.setDepartmentName("ТБ");        
         calendar.set(2012, Calendar.JANUARY, 1);
         filterDao.setFromSearchDate(calendar.getTime());
         calendar.set(2014, Calendar.DECEMBER, 31);
@@ -171,6 +169,7 @@ public class AuditDaoTest {
         filterDao.setCountOfRecords(5);
         filterDao.setSearchOrdering(HistoryBusinessSearchOrdering.DATE);
         filterDao.setReportPeriodName("2014 первый квартал");
+        filterDao.setUserIds(Arrays.asList(1l));
         PagingResult<LogSearchResultItem> records = auditDao.getLogsBusiness(filterDao);
         assertEquals(0, records.size());
     }
