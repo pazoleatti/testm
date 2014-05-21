@@ -228,14 +228,12 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
             String recursive = isWithRecursive() ? "recursive" : "";
             return getJdbcTemplate().query(
                     "with " + recursive + " tree (id, parent_id) as " +
-                            "(select id, parent_id from department where id in " +
-                            "(" + SqlUtils.preparePlaceHolders(availableDepartments.size()) + ") " +
+                            "(select id, parent_id from department where " +
+                            SqlUtils.transformToSqlInStatement("id", availableDepartments) +
                             "union all " +
                             "select d.id, d.parent_id from department d inner join tree t on d.id = t.parent_id) " +
                             "select distinct d.* from tree t, department d where d.id = t.id",
-                    new DepartmentJdbcMapper(),
-                    availableDepartments.toArray()
-            );
+                    new DepartmentJdbcMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Department>(0);
         }
