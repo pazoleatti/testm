@@ -67,7 +67,8 @@ def calcColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal
 @Field
 def totalAEditableColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds', 'deal_0', 'deal', 'nds']
 @Field
-def nonEmptyColumns = ['bill', 'dealNds', 'deal_18', 'deal_18_Nds', 'deal_10', 'deal_10_Nds']
+def nonEmptyColumns = ['bill', 'dealNds', 'deal_20', 'deal_20_Nds', 'deal_18', 'deal_18_Nds',
+                       'deal_10', 'deal_10_Nds', 'deal_0', 'deal']
 
 // Дата начала отчетного периода
 @Field
@@ -136,8 +137,8 @@ void logicCheck() {
     def totalB = getDataRow(dataRows, 'totalB') // 7-я строка
 
     // 1. Обязательность заполнения:
-    //	Графы 2-3, 6-9, 12, 13 строки 2;
-    //  Графы 2-3, 6-9 строки 4-7
+    //	Графы 2-13 строки 2
+    //  Графы 2-11 строки 4-7
     checkNonEmptyColumns(totalA, totalA.getIndex(), nonEmptyColumns + ['nds', 'diff'], logger, true)
     [totalPeriod, totalAnnul, totalFix, totalB].each { totalRow ->
         checkNonEmptyColumns(totalRow, totalRow.getIndex(), nonEmptyColumns, logger, true)
@@ -192,7 +193,7 @@ void logicCheck() {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
-    } else {
+    } else if (totalA.diff != 0) {
         logger.warn("Экземпляр налоговой формы 937.2.13 «Расшифровка графы 13» за период %s - %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
     }

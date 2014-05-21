@@ -285,11 +285,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         }
     }
 
-    public void clearAndDisableForm(){
-        getView().fillInputFields(null);
-        setMode(FormMode.READ);
-    }
-
     private RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {
         RecordChanges recordChanges = new RecordChanges();
         recordChanges.setId(recordId);

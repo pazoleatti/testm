@@ -60,8 +60,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			}
 		}
 
-        autoNumerationList.add(new AutoNumerationColumn("Последовательная"));
-        autoNumerationList.add(new AutoNumerationColumn("Сквозная"));
+        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.SERIAL.getName(), AutoNumerationColumnType.SERIAL.getType()));
+        autoNumerationList.add(new AutoNumerationColumn(AutoNumerationColumnType.CROSS.getName(), AutoNumerationColumnType.CROSS.getType()));
     }
 
 	@UiField
@@ -241,7 +241,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         autoNumerationBox = new ValueListBox<AutoNumerationColumn>(new AbstractRenderer<AutoNumerationColumn>() {
             @Override
             public String render(AutoNumerationColumn object) {
-                return object.getName();
+                return object.getTypeName();
             }
         });
     }
@@ -429,6 +429,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         refBookAttrBox.setAcceptableValues(refBookAttributeList);
     }
 
+    @UiHandler("autoNumerationBox")
+    public void onAutoNumerationBox(ValueChangeEvent<AutoNumerationColumn> event) {
+        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setType(event.getValue().getType());
+        ((AutoNumerationColumn) columns.get(columnListBox.getSelectedIndex())).setTypeName(event.getValue().getTypeName());
+    }
+
 	@Override
 	public void setColumnList(List<Column> columnList, boolean isFormChanged) {
 		columns = columnList;
@@ -591,8 +597,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         } else if (AUTONUMERATION_TYPE.equals(typeColumnDropBox.getValue())) {
             autoNumerationPanel.setVisible(true);
             autoNumerationBox.setVisible(true);
+            autoNumerationBox.setValue(autoNumerationList.get(((AutoNumerationColumn) column).getType()), false);
             autoNumerationBox.setAcceptableValues(autoNumerationList);
-//            autoNumerationBox.set
         }
     }
 
@@ -672,6 +678,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
                 copyMainColumnAttributes(column, referenceColumn);
                 newColumn = referenceColumn;
             }
+        } else if (AUTONUMERATION_TYPE.equals(typeColumnDropBox.getValue())) {
+            AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
+            copyMainColumnAttributes(column, autoNumerationColumn);
+            newColumn = autoNumerationColumn;
         }
 
         if (newColumn != null) {

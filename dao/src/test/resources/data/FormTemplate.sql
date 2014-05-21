@@ -14,6 +14,9 @@ insert into form_column (id, name, form_template_id, ord, alias, type, width, pr
 insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, checking)
 	values (3, 'Дата-столбец', 1, 3, 'dateColumn', 'D', 10, null, 0);
 
+insert into form_column (id, name, form_template_id, ord, alias, type, width, precision, checking, numeration_row)
+	values (4, 'Автонумеруемая графа', 1, 4, 'autoNumerationColumn', 'A', 10, null, 0, 1);
+
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (1, 'alias1', 1, 3, 2, 1, 0);
 
 insert into form_style (id, alias, form_template_id, font_color, back_color, italic, bold) values (2, 'alias2', 1, 2, 3, 0, 1);
