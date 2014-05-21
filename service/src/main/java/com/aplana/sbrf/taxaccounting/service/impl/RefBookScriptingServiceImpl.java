@@ -115,7 +115,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         }
 
         // Выполнение импорта скрипта справочника
-        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" +event.name() +"» для справочника «" + refBook.getName() + "»"));
+        scriptLogger.setMessageDecorator(new ScriptMessageDecorator("Событие «" + event.getTitle() + "» для справочника «" + refBook.getName() + "»"));
         executeScript(bindings, script, scriptLogger);
         scriptLogger.setMessageDecorator(null);
 
