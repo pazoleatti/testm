@@ -140,11 +140,11 @@ public class AuditServiceImpl implements AuditService {
 
         // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
         List<Integer> departments;
-        if (logSystemFilter.getDepartmentId() == null) {
+        if (logSystemFilter.getDepartmentName() == null) {
             departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
                     logSystemFilter.getTaxType() != null ? asList(logSystemFilter.getTaxType()) : asList(TaxType.values()));
         } else
-            departments = Arrays.asList(logSystemFilter.getDepartmentId());
+            departments = departmentService.getDepartmentsByName(logSystemFilter.getDepartmentName());
 
         logSystemFilterDao.setDepartmentIds(departments);
         // Отчетные периоды

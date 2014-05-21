@@ -464,16 +464,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         switch (filterDao.getAuditFormTypeId() != null ? filterDao.getAuditFormTypeId() : 0){
             case 1:
-                sql.append(" LEFT JOIN fdSelection fds ON  ls.department_id = fds.department_id AND ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
+                sql.append(" LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
                 sql.append(" LEFT JOIN report_period rp ON rp.id = fds.report_period_id");
                 break;
             case 2:
-                sql.append(" LEFT JOIN ddSelection dds ON ls.department_id  = dds.department_id AND ls.declaration_type_id = dds.declaration_type_id");
+                sql.append(" LEFT JOIN ddSelection dds ON ls.declaration_type_id = dds.declaration_type_id");
                 sql.append(" LEFT JOIN report_period rp ON rp.id = dds.report_period_id");
                 break;
             default:
-                sql.append(" LEFT JOIN fdSelection fds ON  ls.department_id = fds.department_id AND ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
-                sql.append(" LEFT JOIN ddSelection dds ON ls.department_id  = dds.department_id AND ls.declaration_type_id = dds.declaration_type_id");
+                sql.append(" LEFT JOIN fdSelection fds ON ls.form_type_id = fds.form_type_id AND ls.form_kind_id = fds.kind");
+                sql.append(" LEFT JOIN ddSelection dds ON ls.declaration_type_id = dds.declaration_type_id");
                 sql.append(" LEFT JOIN report_period rp ON rp.id = fds.report_period_id OR rp.id = dds.report_period_id");
         }
 
